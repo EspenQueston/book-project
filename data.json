@@ -1,0 +1,3066 @@
+[
+{
+    "model": "auth.user",
+    "fields": {
+        "password": "pbkdf2_sha256$1000000$5AINHB2BzZETpVpwRG47bp$VK4JKMNCqtTU5rbZdd3mTeCCgVq3g8QrUMu9EomxB7E=",
+        "last_login": "2025-05-27T16:02:18.437Z",
+        "is_superuser": true,
+        "username": "cluivert",
+        "first_name": "",
+        "last_name": "",
+        "email": "cluivertmoukendi@gmail.com",
+        "is_staff": true,
+        "is_active": true,
+        "date_joined": "2025-05-27T15:53:05.910Z",
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "sessions.session",
+    "pk": "8bjz0biy3ynu4mi6s1xhia3w4a1gjt4u",
+    "fields": {
+        "session_data": "eyJuYW1lIjoiQWRtaW5pc3RyYXRvciJ9:1vCLPN:WUTpk8RNERaEGbko64jEgqYN4LIsgkB54B9BzsdrhNw",
+        "expire_date": "2025-11-07T17:16:57.650Z"
+    }
+},
+{
+    "model": "sessions.session",
+    "pk": "9ptykn5es4ztbec297lu3e146nd2g25z",
+    "fields": {
+        "session_data": "eyJuYW1lIjoiQWRtaW5pc3RyYXRvciJ9:1uKgsO:6mXw9OrdnY_FIYS2lUSOd9cVEOZVleRTfZyR1z1mxeo",
+        "expire_date": "2025-06-12T17:17:08.772Z"
+    }
+},
+{
+    "model": "sessions.session",
+    "pk": "e6g2uclq263kr88wfbv50ckr4edm4qsy",
+    "fields": {
+        "session_data": "eyJuYW1lIjoiQWRtaW5pc3RyYXRvciJ9:1uK3lZ:pIfh8Nq9706tGjmNG5PP87qICBNoJwUmUpI_x29gv-I",
+        "expire_date": "2025-06-10T23:31:29.296Z"
+    }
+},
+{
+    "model": "sessions.session",
+    "pk": "fp3a99ga7axgvo63z01z0b1d1o89vdkg",
+    "fields": {
+        "session_data": "eyJuYW1lIjoiQWRtaW5pc3RyYXRvciJ9:1uS5lX:GfMcsYze7GU4lizzaXoexZpWt7kErJGGbb24MFoqryU",
+        "expire_date": "2025-07-03T03:16:39.768Z"
+    }
+},
+{
+    "model": "sessions.session",
+    "pk": "rsufyaws4z4r31wyxptb6c3e3hccef2l",
+    "fields": {
+        "session_data": "eyJuYW1lIjoiQWRtaW5pc3RyYXRvciJ9:1uKIXV:5p8og0zBbpe_lAsloaoLITZjfEziuBKk8_Ugv296msg",
+        "expire_date": "2025-06-11T15:17:57.121Z"
+    }
+},
+{
+    "model": "sessions.session",
+    "pk": "trqiy8gvigv9u7gad8b2myvdgitwgwkp",
+    "fields": {
+        "session_data": "eyJuYW1lIjoiQWRtaW5pc3RyYXRvciJ9:1v5dqI:rMneVA6N99FMES9PDnQOM8Sm1LSxNZnmuuxK-j_0v4A",
+        "expire_date": "2025-10-20T05:33:02.818Z"
+    }
+},
+{
+    "model": "sessions.session",
+    "pk": "zdfiagamq781apgtiatx06u3lhm5a3v9",
+    "fields": {
+        "session_data": "eyJuYW1lIjoiQWRtaW5pc3RyYXRvciJ9:1uW2zu:hhH2LgbpLuC8AzqWuX47H2dpcR4AcEUbjDFlmh4bgLo",
+        "expire_date": "2025-07-14T01:07:50.001Z"
+    }
+},
+{
+    "model": "manager.manager",
+    "pk": 1,
+    "fields": {
+        "number": "admin",
+        "password": "admin123",
+        "name": "Administrator"
+    }
+},
+{
+    "model": "manager.publisher",
+    "pk": 1,
+    "fields": {
+        "publisher_name": "机械工业出版社",
+        "publisher_address": "北京市西城区"
+    }
+},
+{
+    "model": "manager.publisher",
+    "pk": 2,
+    "fields": {
+        "publisher_name": "人民邮电出版社",
+        "publisher_address": "北京市丰台区"
+    }
+},
+{
+    "model": "manager.publisher",
+    "pk": 3,
+    "fields": {
+        "publisher_name": "清华大学出版社",
+        "publisher_address": "北京市海淀区"
+    }
+},
+{
+    "model": "manager.publisher",
+    "pk": 4,
+    "fields": {
+        "publisher_name": "机械工业出版社",
+        "publisher_address": "北京市西城区"
+    }
+},
+{
+    "model": "manager.publisher",
+    "pk": 5,
+    "fields": {
+        "publisher_name": "人民邮电出版社",
+        "publisher_address": "北京市丰台区"
+    }
+},
+{
+    "model": "manager.publisher",
+    "pk": 7,
+    "fields": {
+        "publisher_name": "电子工业出版社",
+        "publisher_address": "北京市海淀区万寿路173号"
+    }
+},
+{
+    "model": "manager.publisher",
+    "pk": 8,
+    "fields": {
+        "publisher_name": "中国青年出版社",
+        "publisher_address": "北京市东城区东四十二条21号"
+    }
+},
+{
+    "model": "manager.publisher",
+    "pk": 9,
+    "fields": {
+        "publisher_name": "华中科技大学出版社",
+        "publisher_address": "湖北省武汉市洪山区珞喻路1037号"
+    }
+},
+{
+    "model": "manager.publisher",
+    "pk": 10,
+    "fields": {
+        "publisher_name": "北京理工大学出版社",
+        "publisher_address": "北京市海淀区中关村南大街5号"
+    }
+},
+{
+    "model": "manager.publisher",
+    "pk": 11,
+    "fields": {
+        "publisher_name": "上海交通大学出版社",
+        "publisher_address": "上海市徐汇区华山路1954号"
+    }
+},
+{
+    "model": "manager.publisher",
+    "pk": 12,
+    "fields": {
+        "publisher_name": "gfggfgf",
+        "publisher_address": "gfgfgfgfgfgfgfgfgfgfhnfhn"
+    }
+},
+{
+    "model": "manager.book",
+    "pk": 1,
+    "fields": {
+        "name": "Python编程从入门到实践GFGFGF",
+        "description": "一本优秀的Python编程入门书籍，内容全面，实例丰富，适合初学者。",
+        "cover_image": "",
+        "book_file": "",
+        "download_link": null,
+        "price": "6.99",
+        "inventory": 50,
+        "sale_num": 25,
+        "publisher": 3
+    }
+},
+{
+    "model": "manager.book",
+    "pk": 2,
+    "fields": {
+        "name": "Django Web开发指南",
+        "description": "全面介绍Django框架的权威指南，包含最佳实践和高级技巧。",
+        "cover_image": "",
+        "book_file": "",
+        "download_link": "https://share.feijipan.com/s/RHXtv8PO",
+        "price": "6.99",
+        "inventory": 24,
+        "sale_num": 21,
+        "publisher": 4
+    }
+},
+{
+    "model": "manager.book",
+    "pk": 3,
+    "fields": {
+        "name": "数据库系统概论",
+        "description": "经典的数据库教材，理论与实践相结合，深入浅出。",
+        "cover_image": "",
+        "book_file": "",
+        "download_link": null,
+        "price": "6.99",
+        "inventory": 39,
+        "sale_num": 36,
+        "publisher": 5
+    }
+},
+{
+    "model": "manager.book",
+    "pk": 4,
+    "fields": {
+        "name": "C/C++ 基础",
+        "description": "Let me know if you'd like help checking your current locale settings or migrating an existing database!\r\n\r\n",
+        "cover_image": "book_covers/71D4cYnrIVL._SL1500_.jpg",
+        "book_file": "",
+        "download_link": null,
+        "price": "6.99",
+        "inventory": 41,
+        "sale_num": 60,
+        "publisher": 3
+    }
+},
+{
+    "model": "manager.book",
+    "pk": 7,
+    "fields": {
+        "name": "Python程序设计基础",
+        "description": "本书系统介绍Python编程语言的基础知识，包括语法、数据结构、函数、面向对象编程等核心概念。适合初学者入门学习，内容循序渐进，配有大量实例和练习。",
+        "cover_image": "book_covers/python_basics.jpg",
+        "book_file": "",
+        "download_link": null,
+        "price": "6.99",
+        "inventory": 45,
+        "sale_num": 23,
+        "publisher": 7
+    }
+},
+{
+    "model": "manager.book",
+    "pk": 8,
+    "fields": {
+        "name": "数据结构与算法分析（C++版）",
+        "description": "经典的数据结构与算法教材，以C++语言为实现工具，深入讲解各种数据结构和算法的原理与应用。包含大量的分析和实现代码，是计算机专业学生的必读教材。",
+        "cover_image": "book_covers/data_structures_cpp.jpg",
+        "book_file": "",
+        "download_link": null,
+        "price": "6.99",
+        "inventory": 32,
+        "sale_num": 18,
+        "publisher": 10
+    }
+},
+{
+    "model": "manager.book",
+    "pk": 9,
+    "fields": {
+        "name": "机器学习实战指南",
+        "description": "结合理论与实践的机器学习教程，涵盖监督学习、无监督学习、深度学习等主要领域。提供完整的Python代码实现和真实数据集案例，帮助读者快速掌握机器学习技能。",
+        "cover_image": "book_covers/ml_practice.jpg",
+        "book_file": "",
+        "download_link": null,
+        "price": "6.99",
+        "inventory": 28,
+        "sale_num": 31,
+        "publisher": 1
+    }
+},
+{
+    "model": "manager.book",
+    "pk": 10,
+    "fields": {
+        "name": "深入理解Java虚拟机（第3版）",
+        "description": "JVM领域的经典著作，深入剖析Java虚拟机的内部机制。包括内存管理、垃圾收集、字节码执行、类加载等核心技术，是Java开发者进阶必读的技术书籍。",
+        "cover_image": "book_covers/jvm_deep_dive.jpg",
+        "book_file": "",
+        "download_link": null,
+        "price": "6.99",
+        "inventory": 38,
+        "sale_num": 27,
+        "publisher": 11
+    }
+},
+{
+    "model": "manager.book",
+    "pk": 11,
+    "fields": {
+        "name": "现代操作系统（第4版）",
+        "description": "操作系统领域的权威教材，全面介绍现代操作系统的设计原理和实现技术。涵盖进程管理、内存管理、文件系统、I/O系统等核心内容，理论与实践并重。",
+        "cover_image": "book_covers/modern_os.jpg",
+        "book_file": "",
+        "download_link": null,
+        "price": "6.99",
+        "inventory": 25,
+        "sale_num": 15,
+        "publisher": 2
+    }
+},
+{
+    "model": "manager.book",
+    "pk": 12,
+    "fields": {
+        "name": "Web前端开发技术详解",
+        "description": "全面介绍Web前端开发技术，包括HTML5、CSS3、JavaScript、Vue.js、React等主流技术栈。通过项目实战的方式，帮助读者掌握现代前端开发技能。",
+        "cover_image": "book_covers/frontend_dev.jpg",
+        "book_file": "",
+        "download_link": null,
+        "price": "6.99",
+        "inventory": 42,
+        "sale_num": 35,
+        "publisher": 10
+    }
+},
+{
+    "model": "manager.book",
+    "pk": 13,
+    "fields": {
+        "name": "计算机网络原理与应用",
+        "description": "系统讲解计算机网络的基本原理、协议和应用，涵盖OSI模型、TCP/IP协议族、网络安全、无线网络等内容。配有丰富的实验和案例分析。",
+        "cover_image": "book_covers/computer_networks.jpg",
+        "book_file": "",
+        "download_link": null,
+        "price": "6.99",
+        "inventory": 35,
+        "sale_num": 22,
+        "publisher": 11
+    }
+},
+{
+    "model": "manager.book",
+    "pk": 14,
+    "fields": {
+        "name": "人工智能：一种现代方法（第4版）",
+        "description": "AI领域的经典教材，全面介绍人工智能的理论基础和实践方法。涵盖搜索、知识表示、机器学习、自然语言处理、计算机视觉等核心领域。",
+        "cover_image": "book_covers/ai_modern_approach.jpg",
+        "book_file": "",
+        "download_link": null,
+        "price": "6.99",
+        "inventory": 20,
+        "sale_num": 12,
+        "publisher": 3
+    }
+},
+{
+    "model": "manager.book",
+    "pk": 15,
+    "fields": {
+        "name": "数据库系统设计与实现",
+        "description": "深入讲解数据库系统的设计原理和实现技术，包括存储引擎、查询优化、事务处理、分布式数据库等高级主题。适合数据库相关专业学生和工程师学习。",
+        "cover_image": "book_covers/database_systems.jpg",
+        "book_file": "",
+        "download_link": null,
+        "price": "6.99",
+        "inventory": 30,
+        "sale_num": 19,
+        "publisher": 10
+    }
+},
+{
+    "model": "manager.book",
+    "pk": 16,
+    "fields": {
+        "name": "云计算技术与应用实践",
+        "description": "全面介绍云计算的技术架构、服务模式和应用实践。涵盖虚拟化、容器技术、微服务架构、DevOps等现代云计算技术栈，配有实际项目案例。",
+        "cover_image": "book_covers/cloud_computing.jpg",
+        "book_file": "",
+        "download_link": null,
+        "price": "6.99",
+        "inventory": 33,
+        "sale_num": 26,
+        "publisher": 11
+    }
+},
+{
+    "model": "manager.author",
+    "pk": 1,
+    "fields": {
+        "name": "埃里克·马瑟斯",
+        "book": [
+            8
+        ]
+    }
+},
+{
+    "model": "manager.author",
+    "pk": 2,
+    "fields": {
+        "name": "威廉·文森特",
+        "book": [
+            2
+        ]
+    }
+},
+{
+    "model": "manager.author",
+    "pk": 3,
+    "fields": {
+        "name": "王珊",
+        "book": [
+            3
+        ]
+    }
+},
+{
+    "model": "manager.author",
+    "pk": 6,
+    "fields": {
+        "name": "张伟教授",
+        "book": [
+            7
+        ]
+    }
+},
+{
+    "model": "manager.author",
+    "pk": 7,
+    "fields": {
+        "name": "李明华",
+        "book": [
+            8
+        ]
+    }
+},
+{
+    "model": "manager.author",
+    "pk": 8,
+    "fields": {
+        "name": "王小红",
+        "book": [
+            9
+        ]
+    }
+},
+{
+    "model": "manager.author",
+    "pk": 9,
+    "fields": {
+        "name": "陈建国",
+        "book": [
+            10
+        ]
+    }
+},
+{
+    "model": "manager.author",
+    "pk": 10,
+    "fields": {
+        "name": "刘晓东",
+        "book": [
+            11
+        ]
+    }
+},
+{
+    "model": "manager.author",
+    "pk": 11,
+    "fields": {
+        "name": "杨丽娟",
+        "book": [
+            12
+        ]
+    }
+},
+{
+    "model": "manager.author",
+    "pk": 12,
+    "fields": {
+        "name": "赵国强",
+        "book": [
+            13
+        ]
+    }
+},
+{
+    "model": "manager.author",
+    "pk": 13,
+    "fields": {
+        "name": "孙美玲",
+        "book": [
+            14
+        ]
+    }
+},
+{
+    "model": "manager.author",
+    "pk": 14,
+    "fields": {
+        "name": "周文华",
+        "book": [
+            15
+        ]
+    }
+},
+{
+    "model": "manager.author",
+    "pk": 15,
+    "fields": {
+        "name": "吴志强",
+        "book": [
+            16
+        ]
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 1,
+    "fields": {
+        "order_number": "ORD202505280246540FA23751",
+        "customer_name": "Espoir",
+        "customer_email": "espoirmoukendi@gmail.com",
+        "customer_phone": "13671309752",
+        "country": "China",
+        "payment_method": "wechat",
+        "total_amount": "39.98",
+        "status": "pending",
+        "payment_status": "pending",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "",
+        "admin_notes": "",
+        "created_at": "2025-05-27T18:46:54.205Z",
+        "updated_at": "2025-05-27T18:46:54.205Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 2,
+    "fields": {
+        "order_number": "ORD20250528221414619D87AB",
+        "customer_name": "dfdfdfdf",
+        "customer_email": "cluivertmoukendi@gmail.com",
+        "customer_phone": "13589898552",
+        "country": "China",
+        "payment_method": "mtn_money",
+        "total_amount": "79.99",
+        "status": "pending",
+        "payment_status": "pending",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "",
+        "admin_notes": "",
+        "created_at": "2025-05-28T14:14:14.320Z",
+        "updated_at": "2025-05-28T14:14:14.320Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 3,
+    "fields": {
+        "order_number": "ORD2025052823171405F0812A",
+        "customer_name": "钱七",
+        "customer_email": "qianqi@example.com",
+        "customer_phone": "13800138005",
+        "country": "China",
+        "payment_method": "bank_transfer",
+        "total_amount": "119.99",
+        "status": "delivered",
+        "payment_status": "pending",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 1",
+        "admin_notes": "管理员备注 - 订单 1",
+        "created_at": "2025-05-28T15:17:14.172Z",
+        "updated_at": "2025-05-28T15:17:14.199Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 4,
+    "fields": {
+        "order_number": "ORD20250528231714306CC7F6",
+        "customer_name": "张三",
+        "customer_email": "zhangsan@example.com",
+        "customer_phone": "13800138001",
+        "country": "China",
+        "payment_method": "bank_transfer",
+        "total_amount": "159.97",
+        "status": "pending",
+        "payment_status": "pending",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 2",
+        "admin_notes": "管理员备注 - 订单 2",
+        "created_at": "2025-05-28T15:17:14.201Z",
+        "updated_at": "2025-05-28T15:17:14.203Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 5,
+    "fields": {
+        "order_number": "ORD20250528231714F88D4D91",
+        "customer_name": "李四",
+        "customer_email": "lisi@example.com",
+        "customer_phone": "13800138002",
+        "country": "China",
+        "payment_method": "alipay",
+        "total_amount": "559.93",
+        "status": "pending",
+        "payment_status": "refunded",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 3",
+        "admin_notes": "管理员备注 - 订单 3",
+        "created_at": "2025-05-28T15:17:14.204Z",
+        "updated_at": "2025-05-28T15:17:14.208Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 6,
+    "fields": {
+        "order_number": "ORD202505282317148828DD66",
+        "customer_name": "李四",
+        "customer_email": "lisi@example.com",
+        "customer_phone": "13800138002",
+        "country": "China",
+        "payment_method": "credit_card",
+        "total_amount": "389.96",
+        "status": "cancelled",
+        "payment_status": "failed",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 4",
+        "admin_notes": "管理员备注 - 订单 4",
+        "created_at": "2025-05-28T15:17:14.209Z",
+        "updated_at": "2025-05-28T15:17:14.212Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 7,
+    "fields": {
+        "order_number": "ORD2025052823171450EBDFA4",
+        "customer_name": "李四",
+        "customer_email": "lisi@example.com",
+        "customer_phone": "13800138002",
+        "country": "China",
+        "payment_method": "bank_transfer",
+        "total_amount": "549.92",
+        "status": "shipped",
+        "payment_status": "pending",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 5",
+        "admin_notes": "管理员备注 - 订单 5",
+        "created_at": "2025-05-28T15:17:14.213Z",
+        "updated_at": "2025-05-28T15:17:14.216Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 8,
+    "fields": {
+        "order_number": "ORD20250528231714245BC3E0",
+        "customer_name": "赵六",
+        "customer_email": "zhaoliu@example.com",
+        "customer_phone": "13800138004",
+        "country": "China",
+        "payment_method": "wechat_pay",
+        "total_amount": "759.90",
+        "status": "delivered",
+        "payment_status": "failed",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 6",
+        "admin_notes": "管理员备注 - 订单 6",
+        "created_at": "2025-05-28T15:17:14.217Z",
+        "updated_at": "2025-05-28T15:17:14.220Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 9,
+    "fields": {
+        "order_number": "ORD202505282317144FBB5125",
+        "customer_name": "王五",
+        "customer_email": "wangwu@example.com",
+        "customer_phone": "13800138003",
+        "country": "China",
+        "payment_method": "bank_transfer",
+        "total_amount": "89.99",
+        "status": "cancelled",
+        "payment_status": "failed",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 7",
+        "admin_notes": "管理员备注 - 订单 7",
+        "created_at": "2025-05-28T15:17:14.221Z",
+        "updated_at": "2025-05-28T15:17:14.223Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 10,
+    "fields": {
+        "order_number": "ORD20250528231714843E8264",
+        "customer_name": "赵六",
+        "customer_email": "zhaoliu@example.com",
+        "customer_phone": "13800138004",
+        "country": "China",
+        "payment_method": "credit_card",
+        "total_amount": "139.98",
+        "status": "processing",
+        "payment_status": "refunded",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 8",
+        "admin_notes": "管理员备注 - 订单 8",
+        "created_at": "2025-05-28T15:17:14.224Z",
+        "updated_at": "2025-05-28T15:17:14.226Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 11,
+    "fields": {
+        "order_number": "ORD2025052823171473C6477D",
+        "customer_name": "李四",
+        "customer_email": "lisi@example.com",
+        "customer_phone": "13800138002",
+        "country": "China",
+        "payment_method": "alipay",
+        "total_amount": "759.90",
+        "status": "shipped",
+        "payment_status": "refunded",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 9",
+        "admin_notes": "管理员备注 - 订单 9",
+        "created_at": "2025-05-28T15:17:14.227Z",
+        "updated_at": "2025-05-28T15:17:14.230Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 12,
+    "fields": {
+        "order_number": "ORD20250528231714805B9123",
+        "customer_name": "李四",
+        "customer_email": "lisi@example.com",
+        "customer_phone": "13800138002",
+        "country": "China",
+        "payment_method": "credit_card",
+        "total_amount": "89.99",
+        "status": "processing",
+        "payment_status": "pending",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 10",
+        "admin_notes": "管理员备注 - 订单 10",
+        "created_at": "2025-05-28T15:17:14.231Z",
+        "updated_at": "2025-05-28T15:17:14.233Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 13,
+    "fields": {
+        "order_number": "ORD20250528231714355940D4",
+        "customer_name": "李四",
+        "customer_email": "lisi@example.com",
+        "customer_phone": "13800138002",
+        "country": "China",
+        "payment_method": "bank_transfer",
+        "total_amount": "349.96",
+        "status": "processing",
+        "payment_status": "pending",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 11",
+        "admin_notes": "管理员备注 - 订单 11",
+        "created_at": "2025-05-28T15:17:14.233Z",
+        "updated_at": "2025-05-28T15:17:14.236Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 14,
+    "fields": {
+        "order_number": "ORD2025052823171471EF9857",
+        "customer_name": "王五",
+        "customer_email": "wangwu@example.com",
+        "customer_phone": "13800138003",
+        "country": "China",
+        "payment_method": "bank_transfer",
+        "total_amount": "229.95",
+        "status": "cancelled",
+        "payment_status": "refunded",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 12",
+        "admin_notes": "管理员备注 - 订单 12",
+        "created_at": "2025-05-28T15:17:14.237Z",
+        "updated_at": "2025-05-28T15:17:14.240Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 15,
+    "fields": {
+        "order_number": "ORD20250528231714199F35ED",
+        "customer_name": "张三",
+        "customer_email": "zhangsan@example.com",
+        "customer_phone": "13800138001",
+        "country": "China",
+        "payment_method": "bank_transfer",
+        "total_amount": "439.94",
+        "status": "processing",
+        "payment_status": "refunded",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 13",
+        "admin_notes": "管理员备注 - 订单 13",
+        "created_at": "2025-05-28T15:17:14.241Z",
+        "updated_at": "2025-05-28T15:17:14.243Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 16,
+    "fields": {
+        "order_number": "ORD20250528231714F829E364",
+        "customer_name": "赵六",
+        "customer_email": "zhaoliu@example.com",
+        "customer_phone": "13800138004",
+        "country": "China",
+        "payment_method": "alipay",
+        "total_amount": "329.97",
+        "status": "pending",
+        "payment_status": "failed",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 14",
+        "admin_notes": "管理员备注 - 订单 14",
+        "created_at": "2025-05-28T15:17:14.244Z",
+        "updated_at": "2025-05-28T15:17:14.246Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 17,
+    "fields": {
+        "order_number": "ORD202505282317148348C5B8",
+        "customer_name": "钱七",
+        "customer_email": "qianqi@example.com",
+        "customer_phone": "13800138005",
+        "country": "China",
+        "payment_method": "credit_card",
+        "total_amount": "549.92",
+        "status": "cancelled",
+        "payment_status": "paid",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 15",
+        "admin_notes": "管理员备注 - 订单 15",
+        "created_at": "2025-05-28T15:17:14.247Z",
+        "updated_at": "2025-05-28T15:17:14.250Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 18,
+    "fields": {
+        "order_number": "ORD20250528231714D21E482E",
+        "customer_name": "赵六",
+        "customer_email": "zhaoliu@example.com",
+        "customer_phone": "13800138004",
+        "country": "China",
+        "payment_method": "alipay",
+        "total_amount": "379.95",
+        "status": "cancelled",
+        "payment_status": "paid",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 16",
+        "admin_notes": "管理员备注 - 订单 16",
+        "created_at": "2025-05-28T15:17:14.251Z",
+        "updated_at": "2025-05-28T15:17:14.254Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 19,
+    "fields": {
+        "order_number": "ORD20250528231714EBAFB1CC",
+        "customer_name": "钱七",
+        "customer_email": "qianqi@example.com",
+        "customer_phone": "13800138005",
+        "country": "China",
+        "payment_method": "wechat_pay",
+        "total_amount": "479.94",
+        "status": "delivered",
+        "payment_status": "refunded",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 17",
+        "admin_notes": "管理员备注 - 订单 17",
+        "created_at": "2025-05-28T15:17:14.255Z",
+        "updated_at": "2025-05-28T15:18:55.613Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 20,
+    "fields": {
+        "order_number": "ORD20250528231714307CCDD2",
+        "customer_name": "钱七",
+        "customer_email": "qianqi@example.com",
+        "customer_phone": "13800138005",
+        "country": "China",
+        "payment_method": "bank_transfer",
+        "total_amount": "349.96",
+        "status": "pending",
+        "payment_status": "paid",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 18",
+        "admin_notes": "管理员备注 - 订单 18",
+        "created_at": "2025-05-28T15:17:14.259Z",
+        "updated_at": "2025-05-28T15:17:14.261Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 21,
+    "fields": {
+        "order_number": "ORD202505282317148E0E82AB",
+        "customer_name": "王五",
+        "customer_email": "wangwu@example.com",
+        "customer_phone": "13800138003",
+        "country": "China",
+        "payment_method": "wechat_pay",
+        "total_amount": "369.96",
+        "status": "processing",
+        "payment_status": "refunded",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 19",
+        "admin_notes": "管理员备注 - 订单 19",
+        "created_at": "2025-05-28T15:17:14.262Z",
+        "updated_at": "2025-05-28T15:18:13.942Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 22,
+    "fields": {
+        "order_number": "ORD20250528231714E2914B99",
+        "customer_name": "李四",
+        "customer_email": "lisi@example.com",
+        "customer_phone": "13800138002",
+        "country": "China",
+        "payment_method": "credit_card",
+        "total_amount": "509.92",
+        "status": "delivered",
+        "payment_status": "paid",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 20",
+        "admin_notes": "管理员备注 - 订单 20",
+        "created_at": "2025-05-28T15:17:14.266Z",
+        "updated_at": "2025-05-28T15:17:14.269Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 23,
+    "fields": {
+        "order_number": "ORD20250528232726375F4D46",
+        "customer_name": "klkjkljlihgb;",
+        "customer_email": "cluivertmoukendi@gmail.com",
+        "customer_phone": "326565",
+        "country": "China",
+        "payment_method": "bank_card",
+        "total_amount": "19.99",
+        "status": "pending",
+        "payment_status": "pending",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "",
+        "admin_notes": "",
+        "created_at": "2025-05-28T15:27:26.913Z",
+        "updated_at": "2025-05-28T15:27:26.913Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 24,
+    "fields": {
+        "order_number": "D74753BB",
+        "customer_name": "张三",
+        "customer_email": "zhangsan@example.com",
+        "customer_phone": "13800138000",
+        "country": "China",
+        "payment_method": "",
+        "total_amount": "99.99",
+        "status": "pending",
+        "payment_status": "pending",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "",
+        "admin_notes": "",
+        "created_at": "2025-05-28T16:17:31.248Z",
+        "updated_at": "2025-05-28T16:17:31.248Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 25,
+    "fields": {
+        "order_number": "F364F170",
+        "customer_name": "李四",
+        "customer_email": "lisi@example.com",
+        "customer_phone": "13800138001",
+        "country": "China",
+        "payment_method": "",
+        "total_amount": "156.80",
+        "status": "confirmed",
+        "payment_status": "completed",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "",
+        "admin_notes": "",
+        "created_at": "2025-05-28T16:17:31.255Z",
+        "updated_at": "2025-05-28T16:17:31.255Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 26,
+    "fields": {
+        "order_number": "26594736",
+        "customer_name": "王五",
+        "customer_email": "wangwu@example.com",
+        "customer_phone": "13800138002",
+        "country": "China",
+        "payment_method": "",
+        "total_amount": "238.50",
+        "status": "confirmed",
+        "payment_status": "pending",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "",
+        "admin_notes": "",
+        "created_at": "2025-05-28T16:17:31.256Z",
+        "updated_at": "2025-05-29T17:18:33.625Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 28,
+    "fields": {
+        "order_number": "ORD2025061911091908328736",
+        "customer_name": "EBANDZA EDOUARD",
+        "customer_email": "marcelmoukendi@gmail.com",
+        "customer_phone": "9742914531",
+        "country": "China",
+        "payment_method": "alipay",
+        "total_amount": "119.99",
+        "status": "pending",
+        "payment_status": "pending",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "",
+        "admin_notes": "",
+        "created_at": "2025-06-19T03:09:19.096Z",
+        "updated_at": "2025-06-19T03:09:19.096Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 29,
+    "fields": {
+        "order_number": "ORD20250625141103FEB66D42",
+        "customer_name": "Espoir",
+        "customer_email": "espoirmoukendi@gmail.com",
+        "customer_phone": "1212545454545",
+        "country": "China",
+        "payment_method": "wechat",
+        "total_amount": "19.99",
+        "status": "refunded",
+        "payment_status": "pending",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "",
+        "admin_notes": "",
+        "created_at": "2025-06-25T06:11:03.104Z",
+        "updated_at": "2025-06-26T04:15:33.424Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 30,
+    "fields": {
+        "order_number": "ORD202506261231178D124E83",
+        "customer_name": "张三",
+        "customer_email": "zhangsan@example.com",
+        "customer_phone": "13800138001",
+        "country": "China",
+        "payment_method": "alipay",
+        "total_amount": "772.69",
+        "status": "processing",
+        "payment_status": "refunded",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 1",
+        "admin_notes": "管理员备注 - 订单 1",
+        "created_at": "2025-06-26T04:31:17.114Z",
+        "updated_at": "2025-06-26T04:31:17.136Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 31,
+    "fields": {
+        "order_number": "ORD202506261231176CDE5DEF",
+        "customer_name": "赵六",
+        "customer_email": "zhaoliu@example.com",
+        "customer_phone": "13800138004",
+        "country": "China",
+        "payment_method": "credit_card",
+        "total_amount": "614.20",
+        "status": "pending",
+        "payment_status": "refunded",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 2",
+        "admin_notes": "管理员备注 - 订单 2",
+        "created_at": "2025-06-26T04:31:17.138Z",
+        "updated_at": "2025-06-26T04:31:17.143Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 32,
+    "fields": {
+        "order_number": "ORD20250626123117C335F3E4",
+        "customer_name": "钱七",
+        "customer_email": "qianqi@example.com",
+        "customer_phone": "13800138005",
+        "country": "China",
+        "payment_method": "alipay",
+        "total_amount": "1092.30",
+        "status": "delivered",
+        "payment_status": "paid",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 3",
+        "admin_notes": "管理员备注 - 订单 3",
+        "created_at": "2025-06-26T04:31:17.144Z",
+        "updated_at": "2025-06-26T04:31:17.148Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 33,
+    "fields": {
+        "order_number": "ORD202506261231178CA24E82",
+        "customer_name": "钱七",
+        "customer_email": "qianqi@example.com",
+        "customer_phone": "13800138005",
+        "country": "China",
+        "payment_method": "wechat_pay",
+        "total_amount": "636.97",
+        "status": "pending",
+        "payment_status": "failed",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 4",
+        "admin_notes": "管理员备注 - 订单 4",
+        "created_at": "2025-06-26T04:31:17.149Z",
+        "updated_at": "2025-06-26T04:31:17.154Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 34,
+    "fields": {
+        "order_number": "ORD2025062612311764A69383",
+        "customer_name": "钱七",
+        "customer_email": "qianqi@example.com",
+        "customer_phone": "13800138005",
+        "country": "China",
+        "payment_method": "alipay",
+        "total_amount": "767.75",
+        "status": "cancelled",
+        "payment_status": "refunded",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 5",
+        "admin_notes": "管理员备注 - 订单 5",
+        "created_at": "2025-06-26T04:31:17.155Z",
+        "updated_at": "2025-06-26T04:31:17.159Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 35,
+    "fields": {
+        "order_number": "ORD20250626123117391B6751",
+        "customer_name": "赵六",
+        "customer_email": "zhaoliu@example.com",
+        "customer_phone": "13800138004",
+        "country": "China",
+        "payment_method": "wechat_pay",
+        "total_amount": "239.97",
+        "status": "pending",
+        "payment_status": "pending",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 6",
+        "admin_notes": "管理员备注 - 订单 6",
+        "created_at": "2025-06-26T04:31:17.160Z",
+        "updated_at": "2025-06-26T04:31:17.163Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 36,
+    "fields": {
+        "order_number": "ORD20250626123117EDA22B8B",
+        "customer_name": "钱七",
+        "customer_email": "qianqi@example.com",
+        "customer_phone": "13800138005",
+        "country": "China",
+        "payment_method": "credit_card",
+        "total_amount": "79.99",
+        "status": "shipped",
+        "payment_status": "pending",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 7",
+        "admin_notes": "管理员备注 - 订单 7",
+        "created_at": "2025-06-26T04:31:17.164Z",
+        "updated_at": "2025-06-26T04:31:17.169Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 37,
+    "fields": {
+        "order_number": "ORD202506261231175985F0DF",
+        "customer_name": "王五",
+        "customer_email": "wangwu@example.com",
+        "customer_phone": "13800138003",
+        "country": "China",
+        "payment_method": "bank_transfer",
+        "total_amount": "312.80",
+        "status": "shipped",
+        "payment_status": "refunded",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 8",
+        "admin_notes": "管理员备注 - 订单 8",
+        "created_at": "2025-06-26T04:31:17.170Z",
+        "updated_at": "2025-06-26T04:31:17.173Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 38,
+    "fields": {
+        "order_number": "ORD20250626123117E30F3474",
+        "customer_name": "李四",
+        "customer_email": "lisi@example.com",
+        "customer_phone": "13800138002",
+        "country": "China",
+        "payment_method": "bank_transfer",
+        "total_amount": "958.50",
+        "status": "pending",
+        "payment_status": "pending",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 9",
+        "admin_notes": "管理员备注 - 订单 9",
+        "created_at": "2025-06-26T04:31:17.175Z",
+        "updated_at": "2025-06-26T04:31:17.179Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 39,
+    "fields": {
+        "order_number": "ORD20250626123117AF2164D8",
+        "customer_name": "钱七",
+        "customer_email": "qianqi@example.com",
+        "customer_phone": "13800138005",
+        "country": "China",
+        "payment_method": "bank_transfer",
+        "total_amount": "446.90",
+        "status": "processing",
+        "payment_status": "pending",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 10",
+        "admin_notes": "管理员备注 - 订单 10",
+        "created_at": "2025-06-26T04:31:17.181Z",
+        "updated_at": "2025-06-26T04:31:17.185Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 40,
+    "fields": {
+        "order_number": "ORD2025062612311787E3C9F5",
+        "customer_name": "王五",
+        "customer_email": "wangwu@example.com",
+        "customer_phone": "13800138003",
+        "country": "China",
+        "payment_method": "wechat_pay",
+        "total_amount": "725.40",
+        "status": "processing",
+        "payment_status": "paid",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 11",
+        "admin_notes": "管理员备注 - 订单 11",
+        "created_at": "2025-06-26T04:31:17.186Z",
+        "updated_at": "2025-06-26T04:31:17.191Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 41,
+    "fields": {
+        "order_number": "ORD20250626123117BAF5F24C",
+        "customer_name": "钱七",
+        "customer_email": "qianqi@example.com",
+        "customer_phone": "13800138005",
+        "country": "China",
+        "payment_method": "credit_card",
+        "total_amount": "1185.28",
+        "status": "pending",
+        "payment_status": "pending",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 12",
+        "admin_notes": "管理员备注 - 订单 12",
+        "created_at": "2025-06-26T04:31:17.192Z",
+        "updated_at": "2025-06-26T04:31:17.196Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 42,
+    "fields": {
+        "order_number": "ORD20250626123117AB035894",
+        "customer_name": "赵六",
+        "customer_email": "zhaoliu@example.com",
+        "customer_phone": "13800138004",
+        "country": "China",
+        "payment_method": "wechat_pay",
+        "total_amount": "899.26",
+        "status": "delivered",
+        "payment_status": "failed",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 13",
+        "admin_notes": "管理员备注 - 订单 13",
+        "created_at": "2025-06-26T04:31:17.198Z",
+        "updated_at": "2025-06-26T04:31:17.203Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 43,
+    "fields": {
+        "order_number": "ORD20250626123117FE16BDFF",
+        "customer_name": "王五",
+        "customer_email": "wangwu@example.com",
+        "customer_phone": "13800138003",
+        "country": "China",
+        "payment_method": "alipay",
+        "total_amount": "291.60",
+        "status": "shipped",
+        "payment_status": "failed",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 14",
+        "admin_notes": "管理员备注 - 订单 14",
+        "created_at": "2025-06-26T04:31:17.204Z",
+        "updated_at": "2025-06-26T04:31:17.207Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 44,
+    "fields": {
+        "order_number": "ORD202506261231171C095A3C",
+        "customer_name": "赵六",
+        "customer_email": "zhaoliu@example.com",
+        "customer_phone": "13800138004",
+        "country": "China",
+        "payment_method": "alipay",
+        "total_amount": "898.77",
+        "status": "cancelled",
+        "payment_status": "refunded",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 15",
+        "admin_notes": "管理员备注 - 订单 15",
+        "created_at": "2025-06-26T04:31:17.208Z",
+        "updated_at": "2025-06-26T04:31:17.212Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 45,
+    "fields": {
+        "order_number": "ORD20250626123117018E967D",
+        "customer_name": "李四",
+        "customer_email": "lisi@example.com",
+        "customer_phone": "13800138002",
+        "country": "China",
+        "payment_method": "wechat_pay",
+        "total_amount": "830.97",
+        "status": "delivered",
+        "payment_status": "pending",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 16",
+        "admin_notes": "管理员备注 - 订单 16",
+        "created_at": "2025-06-26T04:31:17.213Z",
+        "updated_at": "2025-06-26T04:31:17.217Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 46,
+    "fields": {
+        "order_number": "ORD20250626123117F676D5B9",
+        "customer_name": "张三",
+        "customer_email": "zhangsan@example.com",
+        "customer_phone": "13800138001",
+        "country": "China",
+        "payment_method": "bank_transfer",
+        "total_amount": "149.47",
+        "status": "processing",
+        "payment_status": "refunded",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 17",
+        "admin_notes": "管理员备注 - 订单 17",
+        "created_at": "2025-06-26T04:31:17.219Z",
+        "updated_at": "2025-06-26T04:31:17.223Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 47,
+    "fields": {
+        "order_number": "ORD2025062612311798445D23",
+        "customer_name": "赵六",
+        "customer_email": "zhaoliu@example.com",
+        "customer_phone": "13800138004",
+        "country": "China",
+        "payment_method": "alipay",
+        "total_amount": "849.60",
+        "status": "delivered",
+        "payment_status": "failed",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 18",
+        "admin_notes": "管理员备注 - 订单 18",
+        "created_at": "2025-06-26T04:31:17.224Z",
+        "updated_at": "2025-06-26T04:31:17.227Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 48,
+    "fields": {
+        "order_number": "ORD2025062612311778890309",
+        "customer_name": "钱七",
+        "customer_email": "qianqi@example.com",
+        "customer_phone": "13800138005",
+        "country": "China",
+        "payment_method": "credit_card",
+        "total_amount": "168.70",
+        "status": "cancelled",
+        "payment_status": "pending",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 19",
+        "admin_notes": "管理员备注 - 订单 19",
+        "created_at": "2025-06-26T04:31:17.229Z",
+        "updated_at": "2025-06-26T04:31:17.231Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 49,
+    "fields": {
+        "order_number": "ORD202506261231172BEB7A2A",
+        "customer_name": "李四",
+        "customer_email": "lisi@example.com",
+        "customer_phone": "13800138002",
+        "country": "China",
+        "payment_method": "wechat_pay",
+        "total_amount": "715.99",
+        "status": "shipped",
+        "payment_status": "failed",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "测试订单备注 20",
+        "admin_notes": "管理员备注 - 订单 20",
+        "created_at": "2025-06-26T04:31:17.232Z",
+        "updated_at": "2025-06-26T04:31:17.237Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 51,
+    "fields": {
+        "order_number": "ORD20250627211325448A19B0",
+        "customer_name": "Espoir",
+        "customer_email": "espoirmoukendi@gmail.com",
+        "customer_phone": "1212545454545",
+        "country": "China",
+        "payment_method": "bank_card",
+        "total_amount": "39.98",
+        "status": "shipped",
+        "payment_status": "pending",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "",
+        "admin_notes": "",
+        "created_at": "2025-06-27T13:13:25.549Z",
+        "updated_at": "2025-06-27T13:18:53.879Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 52,
+    "fields": {
+        "order_number": "ORD2025102119401234B737BB",
+        "customer_name": "MOULOUMBA MOUKENDI CLUIVERT",
+        "customer_email": "espoirmoukendi@gmail.com",
+        "customer_phone": "3671309752",
+        "country": "China",
+        "payment_method": "wechat",
+        "total_amount": "19.99",
+        "status": "pending",
+        "payment_status": "pending",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "",
+        "admin_notes": "",
+        "created_at": "2025-10-21T11:40:12.540Z",
+        "updated_at": "2025-10-21T11:40:12.540Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 53,
+    "fields": {
+        "order_number": "ORD202510212028327B30982A",
+        "customer_name": "MOULOUMBA MOUKENDI CLUIVERT",
+        "customer_email": "espoirmoukendi@gmail.com",
+        "customer_phone": "3671309752",
+        "country": "China",
+        "payment_method": "wechat_pay",
+        "total_amount": "13.98",
+        "status": "payment_pending",
+        "payment_status": "pending",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "",
+        "admin_notes": "",
+        "created_at": "2025-10-21T12:28:32.068Z",
+        "updated_at": "2025-10-21T12:28:32.068Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 54,
+    "fields": {
+        "order_number": "ORD2025102200485046121C36",
+        "customer_name": "MOULOUMBA MOUKENDI CLUIVERT",
+        "customer_email": "espoirmoukendi@gmail.com",
+        "customer_phone": "3671309752",
+        "country": "China",
+        "payment_method": "alipay",
+        "total_amount": "6.99",
+        "status": "processing",
+        "payment_status": "pending",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "",
+        "admin_notes": "",
+        "created_at": "2025-10-21T16:48:50.979Z",
+        "updated_at": "2025-10-21T16:48:50.979Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 55,
+    "fields": {
+        "order_number": "ORD2025102201115092DDE8EB",
+        "customer_name": "Espoir",
+        "customer_email": "espoirmoukendi@gmail.com",
+        "customer_phone": "3671309752",
+        "country": "China",
+        "payment_method": "wechat_pay",
+        "total_amount": "6.99",
+        "status": "processing",
+        "payment_status": "pending",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "",
+        "admin_notes": "",
+        "created_at": "2025-10-21T17:11:50.548Z",
+        "updated_at": "2025-10-21T17:13:50.286Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 56,
+    "fields": {
+        "order_number": "ORD202510220154349E944A8B",
+        "customer_name": "Maria Claire Kanga Moukendi",
+        "customer_email": "mariamoukendi@gmail.com",
+        "customer_phone": "18506959673",
+        "country": "China",
+        "payment_method": "alipay",
+        "total_amount": "6.99",
+        "status": "shipped",
+        "payment_status": "pending",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "",
+        "admin_notes": "",
+        "created_at": "2025-10-21T17:54:34.974Z",
+        "updated_at": "2025-10-21T17:55:25.606Z"
+    }
+},
+{
+    "model": "manager.order",
+    "pk": 57,
+    "fields": {
+        "order_number": "ORD20251022184532811EF9B4",
+        "customer_name": "Zeke Zikey",
+        "customer_email": "contact@bizkeyz.com",
+        "customer_phone": "18506959673",
+        "country": "China",
+        "payment_method": "alipay",
+        "total_amount": "6.99",
+        "status": "shipped",
+        "payment_status": "pending",
+        "payment_transaction_id": null,
+        "payment_completed_at": null,
+        "customer_notes": "",
+        "admin_notes": "",
+        "created_at": "2025-10-22T10:45:32.583Z",
+        "updated_at": "2025-10-22T10:47:04.473Z"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 1,
+    "fields": {
+        "order": 1,
+        "book": 4,
+        "quantity": 2,
+        "unit_price": "19.99",
+        "total_price": "39.98"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 2,
+    "fields": {
+        "order": 2,
+        "book": 3,
+        "quantity": 1,
+        "unit_price": "79.99",
+        "total_price": "79.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 3,
+    "fields": {
+        "order": 3,
+        "book": 2,
+        "quantity": 1,
+        "unit_price": "119.99",
+        "total_price": "119.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 4,
+    "fields": {
+        "order": 4,
+        "book": 4,
+        "quantity": 2,
+        "unit_price": "19.99",
+        "total_price": "39.98"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 5,
+    "fields": {
+        "order": 4,
+        "book": 2,
+        "quantity": 1,
+        "unit_price": "119.99",
+        "total_price": "119.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 6,
+    "fields": {
+        "order": 5,
+        "book": 4,
+        "quantity": 1,
+        "unit_price": "19.99",
+        "total_price": "19.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 7,
+    "fields": {
+        "order": 5,
+        "book": 2,
+        "quantity": 1,
+        "unit_price": "119.99",
+        "total_price": "119.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 8,
+    "fields": {
+        "order": 5,
+        "book": 3,
+        "quantity": 3,
+        "unit_price": "79.99",
+        "total_price": "239.97"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 9,
+    "fields": {
+        "order": 5,
+        "book": 1,
+        "quantity": 2,
+        "unit_price": "89.99",
+        "total_price": "179.98"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 10,
+    "fields": {
+        "order": 6,
+        "book": 1,
+        "quantity": 3,
+        "unit_price": "89.99",
+        "total_price": "269.97"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 11,
+    "fields": {
+        "order": 6,
+        "book": 2,
+        "quantity": 1,
+        "unit_price": "119.99",
+        "total_price": "119.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 12,
+    "fields": {
+        "order": 7,
+        "book": 3,
+        "quantity": 2,
+        "unit_price": "79.99",
+        "total_price": "159.98"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 13,
+    "fields": {
+        "order": 7,
+        "book": 2,
+        "quantity": 2,
+        "unit_price": "119.99",
+        "total_price": "239.98"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 14,
+    "fields": {
+        "order": 7,
+        "book": 4,
+        "quantity": 3,
+        "unit_price": "19.99",
+        "total_price": "59.97"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 15,
+    "fields": {
+        "order": 7,
+        "book": 1,
+        "quantity": 1,
+        "unit_price": "89.99",
+        "total_price": "89.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 16,
+    "fields": {
+        "order": 8,
+        "book": 2,
+        "quantity": 3,
+        "unit_price": "119.99",
+        "total_price": "359.97"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 17,
+    "fields": {
+        "order": 8,
+        "book": 4,
+        "quantity": 3,
+        "unit_price": "19.99",
+        "total_price": "59.97"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 18,
+    "fields": {
+        "order": 8,
+        "book": 1,
+        "quantity": 2,
+        "unit_price": "89.99",
+        "total_price": "179.98"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 19,
+    "fields": {
+        "order": 8,
+        "book": 3,
+        "quantity": 2,
+        "unit_price": "79.99",
+        "total_price": "159.98"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 20,
+    "fields": {
+        "order": 9,
+        "book": 1,
+        "quantity": 1,
+        "unit_price": "89.99",
+        "total_price": "89.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 21,
+    "fields": {
+        "order": 10,
+        "book": 2,
+        "quantity": 1,
+        "unit_price": "119.99",
+        "total_price": "119.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 22,
+    "fields": {
+        "order": 10,
+        "book": 4,
+        "quantity": 1,
+        "unit_price": "19.99",
+        "total_price": "19.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 23,
+    "fields": {
+        "order": 11,
+        "book": 2,
+        "quantity": 3,
+        "unit_price": "119.99",
+        "total_price": "359.97"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 24,
+    "fields": {
+        "order": 11,
+        "book": 1,
+        "quantity": 2,
+        "unit_price": "89.99",
+        "total_price": "179.98"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 25,
+    "fields": {
+        "order": 11,
+        "book": 3,
+        "quantity": 2,
+        "unit_price": "79.99",
+        "total_price": "159.98"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 26,
+    "fields": {
+        "order": 11,
+        "book": 4,
+        "quantity": 3,
+        "unit_price": "19.99",
+        "total_price": "59.97"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 27,
+    "fields": {
+        "order": 12,
+        "book": 1,
+        "quantity": 1,
+        "unit_price": "89.99",
+        "total_price": "89.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 28,
+    "fields": {
+        "order": 13,
+        "book": 1,
+        "quantity": 3,
+        "unit_price": "89.99",
+        "total_price": "269.97"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 29,
+    "fields": {
+        "order": 13,
+        "book": 3,
+        "quantity": 1,
+        "unit_price": "79.99",
+        "total_price": "79.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 30,
+    "fields": {
+        "order": 14,
+        "book": 4,
+        "quantity": 3,
+        "unit_price": "19.99",
+        "total_price": "59.97"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 31,
+    "fields": {
+        "order": 14,
+        "book": 3,
+        "quantity": 1,
+        "unit_price": "79.99",
+        "total_price": "79.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 32,
+    "fields": {
+        "order": 14,
+        "book": 1,
+        "quantity": 1,
+        "unit_price": "89.99",
+        "total_price": "89.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 33,
+    "fields": {
+        "order": 15,
+        "book": 4,
+        "quantity": 2,
+        "unit_price": "19.99",
+        "total_price": "39.98"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 34,
+    "fields": {
+        "order": 15,
+        "book": 3,
+        "quantity": 2,
+        "unit_price": "79.99",
+        "total_price": "159.98"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 35,
+    "fields": {
+        "order": 15,
+        "book": 2,
+        "quantity": 2,
+        "unit_price": "119.99",
+        "total_price": "239.98"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 36,
+    "fields": {
+        "order": 16,
+        "book": 1,
+        "quantity": 1,
+        "unit_price": "89.99",
+        "total_price": "89.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 37,
+    "fields": {
+        "order": 16,
+        "book": 2,
+        "quantity": 2,
+        "unit_price": "119.99",
+        "total_price": "239.98"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 38,
+    "fields": {
+        "order": 17,
+        "book": 1,
+        "quantity": 1,
+        "unit_price": "89.99",
+        "total_price": "89.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 39,
+    "fields": {
+        "order": 17,
+        "book": 3,
+        "quantity": 2,
+        "unit_price": "79.99",
+        "total_price": "159.98"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 40,
+    "fields": {
+        "order": 17,
+        "book": 4,
+        "quantity": 3,
+        "unit_price": "19.99",
+        "total_price": "59.97"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 41,
+    "fields": {
+        "order": 17,
+        "book": 2,
+        "quantity": 2,
+        "unit_price": "119.99",
+        "total_price": "239.98"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 42,
+    "fields": {
+        "order": 18,
+        "book": 2,
+        "quantity": 1,
+        "unit_price": "119.99",
+        "total_price": "119.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 43,
+    "fields": {
+        "order": 18,
+        "book": 4,
+        "quantity": 1,
+        "unit_price": "19.99",
+        "total_price": "19.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 44,
+    "fields": {
+        "order": 18,
+        "book": 3,
+        "quantity": 3,
+        "unit_price": "79.99",
+        "total_price": "239.97"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 45,
+    "fields": {
+        "order": 19,
+        "book": 1,
+        "quantity": 2,
+        "unit_price": "89.99",
+        "total_price": "179.98"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 46,
+    "fields": {
+        "order": 19,
+        "book": 4,
+        "quantity": 1,
+        "unit_price": "19.99",
+        "total_price": "19.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 47,
+    "fields": {
+        "order": 19,
+        "book": 3,
+        "quantity": 2,
+        "unit_price": "79.99",
+        "total_price": "159.98"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 48,
+    "fields": {
+        "order": 19,
+        "book": 2,
+        "quantity": 1,
+        "unit_price": "119.99",
+        "total_price": "119.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 49,
+    "fields": {
+        "order": 20,
+        "book": 1,
+        "quantity": 3,
+        "unit_price": "89.99",
+        "total_price": "269.97"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 50,
+    "fields": {
+        "order": 20,
+        "book": 3,
+        "quantity": 1,
+        "unit_price": "79.99",
+        "total_price": "79.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 51,
+    "fields": {
+        "order": 21,
+        "book": 2,
+        "quantity": 1,
+        "unit_price": "119.99",
+        "total_price": "119.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 52,
+    "fields": {
+        "order": 21,
+        "book": 1,
+        "quantity": 1,
+        "unit_price": "89.99",
+        "total_price": "89.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 53,
+    "fields": {
+        "order": 21,
+        "book": 3,
+        "quantity": 2,
+        "unit_price": "79.99",
+        "total_price": "159.98"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 54,
+    "fields": {
+        "order": 22,
+        "book": 2,
+        "quantity": 1,
+        "unit_price": "119.99",
+        "total_price": "119.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 55,
+    "fields": {
+        "order": 22,
+        "book": 3,
+        "quantity": 3,
+        "unit_price": "79.99",
+        "total_price": "239.97"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 56,
+    "fields": {
+        "order": 22,
+        "book": 1,
+        "quantity": 1,
+        "unit_price": "89.99",
+        "total_price": "89.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 57,
+    "fields": {
+        "order": 22,
+        "book": 4,
+        "quantity": 3,
+        "unit_price": "19.99",
+        "total_price": "59.97"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 58,
+    "fields": {
+        "order": 23,
+        "book": 4,
+        "quantity": 1,
+        "unit_price": "19.99",
+        "total_price": "19.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 60,
+    "fields": {
+        "order": 28,
+        "book": 2,
+        "quantity": 1,
+        "unit_price": "119.99",
+        "total_price": "119.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 61,
+    "fields": {
+        "order": 29,
+        "book": 4,
+        "quantity": 1,
+        "unit_price": "19.99",
+        "total_price": "19.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 62,
+    "fields": {
+        "order": 30,
+        "book": 7,
+        "quantity": 3,
+        "unit_price": "89.50",
+        "total_price": "268.50"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 63,
+    "fields": {
+        "order": 30,
+        "book": 1,
+        "quantity": 1,
+        "unit_price": "89.99",
+        "total_price": "89.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 64,
+    "fields": {
+        "order": 30,
+        "book": 16,
+        "quantity": 1,
+        "unit_price": "145.80",
+        "total_price": "145.80"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 65,
+    "fields": {
+        "order": 30,
+        "book": 13,
+        "quantity": 2,
+        "unit_price": "134.20",
+        "total_price": "268.40"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 66,
+    "fields": {
+        "order": 31,
+        "book": 14,
+        "quantity": 2,
+        "unit_price": "198.50",
+        "total_price": "397.00"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 67,
+    "fields": {
+        "order": 31,
+        "book": 12,
+        "quantity": 2,
+        "unit_price": "108.60",
+        "total_price": "217.20"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 68,
+    "fields": {
+        "order": 32,
+        "book": 13,
+        "quantity": 2,
+        "unit_price": "134.20",
+        "total_price": "268.40"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 69,
+    "fields": {
+        "order": 32,
+        "book": 10,
+        "quantity": 3,
+        "unit_price": "142.30",
+        "total_price": "426.90"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 70,
+    "fields": {
+        "order": 32,
+        "book": 14,
+        "quantity": 2,
+        "unit_price": "198.50",
+        "total_price": "397.00"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 71,
+    "fields": {
+        "order": 33,
+        "book": 3,
+        "quantity": 3,
+        "unit_price": "79.99",
+        "total_price": "239.97"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 72,
+    "fields": {
+        "order": 33,
+        "book": 14,
+        "quantity": 2,
+        "unit_price": "198.50",
+        "total_price": "397.00"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 73,
+    "fields": {
+        "order": 34,
+        "book": 9,
+        "quantity": 2,
+        "unit_price": "158.90",
+        "total_price": "317.80"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 74,
+    "fields": {
+        "order": 34,
+        "book": 2,
+        "quantity": 1,
+        "unit_price": "119.99",
+        "total_price": "119.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 75,
+    "fields": {
+        "order": 34,
+        "book": 1,
+        "quantity": 1,
+        "unit_price": "89.99",
+        "total_price": "89.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 76,
+    "fields": {
+        "order": 34,
+        "book": 3,
+        "quantity": 3,
+        "unit_price": "79.99",
+        "total_price": "239.97"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 77,
+    "fields": {
+        "order": 35,
+        "book": 3,
+        "quantity": 3,
+        "unit_price": "79.99",
+        "total_price": "239.97"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 78,
+    "fields": {
+        "order": 36,
+        "book": 3,
+        "quantity": 1,
+        "unit_price": "79.99",
+        "total_price": "79.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 79,
+    "fields": {
+        "order": 37,
+        "book": 15,
+        "quantity": 2,
+        "unit_price": "156.40",
+        "total_price": "312.80"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 80,
+    "fields": {
+        "order": 38,
+        "book": 16,
+        "quantity": 1,
+        "unit_price": "145.80",
+        "total_price": "145.80"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 81,
+    "fields": {
+        "order": 38,
+        "book": 12,
+        "quantity": 2,
+        "unit_price": "108.60",
+        "total_price": "217.20"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 82,
+    "fields": {
+        "order": 38,
+        "book": 14,
+        "quantity": 3,
+        "unit_price": "198.50",
+        "total_price": "595.50"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 83,
+    "fields": {
+        "order": 39,
+        "book": 7,
+        "quantity": 1,
+        "unit_price": "89.50",
+        "total_price": "89.50"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 84,
+    "fields": {
+        "order": 39,
+        "book": 9,
+        "quantity": 1,
+        "unit_price": "158.90",
+        "total_price": "158.90"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 85,
+    "fields": {
+        "order": 39,
+        "book": 14,
+        "quantity": 1,
+        "unit_price": "198.50",
+        "total_price": "198.50"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 86,
+    "fields": {
+        "order": 40,
+        "book": 7,
+        "quantity": 1,
+        "unit_price": "89.50",
+        "total_price": "89.50"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 87,
+    "fields": {
+        "order": 40,
+        "book": 16,
+        "quantity": 3,
+        "unit_price": "145.80",
+        "total_price": "437.40"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 88,
+    "fields": {
+        "order": 40,
+        "book": 14,
+        "quantity": 1,
+        "unit_price": "198.50",
+        "total_price": "198.50"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 89,
+    "fields": {
+        "order": 41,
+        "book": 2,
+        "quantity": 1,
+        "unit_price": "119.99",
+        "total_price": "119.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 90,
+    "fields": {
+        "order": 41,
+        "book": 15,
+        "quantity": 3,
+        "unit_price": "156.40",
+        "total_price": "469.20"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 91,
+    "fields": {
+        "order": 41,
+        "book": 1,
+        "quantity": 1,
+        "unit_price": "89.99",
+        "total_price": "89.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 92,
+    "fields": {
+        "order": 41,
+        "book": 11,
+        "quantity": 3,
+        "unit_price": "168.70",
+        "total_price": "506.10"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 93,
+    "fields": {
+        "order": 42,
+        "book": 2,
+        "quantity": 1,
+        "unit_price": "119.99",
+        "total_price": "119.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 94,
+    "fields": {
+        "order": 42,
+        "book": 10,
+        "quantity": 1,
+        "unit_price": "142.30",
+        "total_price": "142.30"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 95,
+    "fields": {
+        "order": 42,
+        "book": 3,
+        "quantity": 3,
+        "unit_price": "79.99",
+        "total_price": "239.97"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 96,
+    "fields": {
+        "order": 42,
+        "book": 14,
+        "quantity": 2,
+        "unit_price": "198.50",
+        "total_price": "397.00"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 97,
+    "fields": {
+        "order": 43,
+        "book": 16,
+        "quantity": 2,
+        "unit_price": "145.80",
+        "total_price": "291.60"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 98,
+    "fields": {
+        "order": 44,
+        "book": 7,
+        "quantity": 1,
+        "unit_price": "89.50",
+        "total_price": "89.50"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 99,
+    "fields": {
+        "order": 44,
+        "book": 14,
+        "quantity": 2,
+        "unit_price": "198.50",
+        "total_price": "397.00"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 100,
+    "fields": {
+        "order": 44,
+        "book": 10,
+        "quantity": 1,
+        "unit_price": "142.30",
+        "total_price": "142.30"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 101,
+    "fields": {
+        "order": 44,
+        "book": 1,
+        "quantity": 3,
+        "unit_price": "89.99",
+        "total_price": "269.97"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 102,
+    "fields": {
+        "order": 45,
+        "book": 3,
+        "quantity": 3,
+        "unit_price": "79.99",
+        "total_price": "239.97"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 103,
+    "fields": {
+        "order": 45,
+        "book": 8,
+        "quantity": 2,
+        "unit_price": "126.80",
+        "total_price": "253.60"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 104,
+    "fields": {
+        "order": 45,
+        "book": 11,
+        "quantity": 2,
+        "unit_price": "168.70",
+        "total_price": "337.40"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 105,
+    "fields": {
+        "order": 46,
+        "book": 4,
+        "quantity": 3,
+        "unit_price": "19.99",
+        "total_price": "59.97"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 106,
+    "fields": {
+        "order": 46,
+        "book": 7,
+        "quantity": 1,
+        "unit_price": "89.50",
+        "total_price": "89.50"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 107,
+    "fields": {
+        "order": 47,
+        "book": 15,
+        "quantity": 3,
+        "unit_price": "156.40",
+        "total_price": "469.20"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 108,
+    "fields": {
+        "order": 47,
+        "book": 8,
+        "quantity": 3,
+        "unit_price": "126.80",
+        "total_price": "380.40"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 109,
+    "fields": {
+        "order": 48,
+        "book": 11,
+        "quantity": 1,
+        "unit_price": "168.70",
+        "total_price": "168.70"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 110,
+    "fields": {
+        "order": 49,
+        "book": 2,
+        "quantity": 1,
+        "unit_price": "119.99",
+        "total_price": "119.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 111,
+    "fields": {
+        "order": 49,
+        "book": 15,
+        "quantity": 3,
+        "unit_price": "156.40",
+        "total_price": "469.20"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 112,
+    "fields": {
+        "order": 49,
+        "book": 8,
+        "quantity": 1,
+        "unit_price": "126.80",
+        "total_price": "126.80"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 114,
+    "fields": {
+        "order": 51,
+        "book": 4,
+        "quantity": 2,
+        "unit_price": "19.99",
+        "total_price": "39.98"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 115,
+    "fields": {
+        "order": 52,
+        "book": 4,
+        "quantity": 1,
+        "unit_price": "19.99",
+        "total_price": "19.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 116,
+    "fields": {
+        "order": 53,
+        "book": 4,
+        "quantity": 1,
+        "unit_price": "6.99",
+        "total_price": "6.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 117,
+    "fields": {
+        "order": 53,
+        "book": 2,
+        "quantity": 1,
+        "unit_price": "6.99",
+        "total_price": "6.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 118,
+    "fields": {
+        "order": 54,
+        "book": 2,
+        "quantity": 1,
+        "unit_price": "6.99",
+        "total_price": "6.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 119,
+    "fields": {
+        "order": 55,
+        "book": 4,
+        "quantity": 1,
+        "unit_price": "6.99",
+        "total_price": "6.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 120,
+    "fields": {
+        "order": 56,
+        "book": 4,
+        "quantity": 1,
+        "unit_price": "6.99",
+        "total_price": "6.99"
+    }
+},
+{
+    "model": "manager.orderitem",
+    "pk": 121,
+    "fields": {
+        "order": 57,
+        "book": 2,
+        "quantity": 1,
+        "unit_price": "6.99",
+        "total_price": "6.99"
+    }
+},
+{
+    "model": "manager.cartitem",
+    "pk": 31,
+    "fields": {
+        "session_key": "9ptykn5es4ztbec297lu3e146nd2g25z",
+        "book": 4,
+        "quantity": 5,
+        "created_at": "2025-05-29T18:00:46.933Z",
+        "updated_at": "2025-05-29T18:00:46.933Z"
+    }
+},
+{
+    "model": "manager.cartitem",
+    "pk": 43,
+    "fields": {
+        "session_key": "trqiy8gvigv9u7gad8b2myvdgitwgwkp",
+        "book": 9,
+        "quantity": 1,
+        "created_at": "2025-10-01T17:21:13.158Z",
+        "updated_at": "2025-10-01T17:21:13.158Z"
+    }
+},
+{
+    "model": "manager.cartitem",
+    "pk": 55,
+    "fields": {
+        "session_key": "8bjz0biy3ynu4mi6s1xhia3w4a1gjt4u",
+        "book": 10,
+        "quantity": 1,
+        "created_at": "2025-10-24T17:18:25.778Z",
+        "updated_at": "2025-10-24T17:18:25.778Z"
+    }
+},
+{
+    "model": "manager.ordernotification",
+    "pk": 1,
+    "fields": {
+        "order": 19,
+        "notification_type": "payment_status_change",
+        "message": "订单 ORD20250528231714EBAFB1CC 支付成功",
+        "details": {
+            "timestamp": "2025-05-28T15:18:51.508993+00:00",
+            "new_status": "paid",
+            "old_status": "pending",
+            "order_number": "ORD20250528231714EBAFB1CC",
+            "total_amount": "479.94",
+            "customer_name": "钱七"
+        },
+        "is_read": false,
+        "created_at": "2025-05-28T15:18:51.509Z"
+    }
+},
+{
+    "model": "manager.ordernotification",
+    "pk": 2,
+    "fields": {
+        "order": 19,
+        "notification_type": "payment_status_change",
+        "message": "订单 ORD20250528231714EBAFB1CC 已退款",
+        "details": {
+            "timestamp": "2025-05-28T15:18:55.614005+00:00",
+            "new_status": "refunded",
+            "old_status": "paid",
+            "order_number": "ORD20250528231714EBAFB1CC",
+            "total_amount": "479.94",
+            "customer_name": "钱七"
+        },
+        "is_read": false,
+        "created_at": "2025-05-28T15:18:55.614Z"
+    }
+},
+{
+    "model": "manager.ordernotification",
+    "pk": 3,
+    "fields": {
+        "order": 26,
+        "notification_type": "payment_status_change",
+        "message": "订单 26594736 支付状态从 completed 变更为 pending",
+        "details": {
+            "timestamp": "2025-05-29T02:28:40.997604+00:00",
+            "new_status": "pending",
+            "old_status": "completed",
+            "order_number": "26594736",
+            "total_amount": "238.50",
+            "customer_name": "王五"
+        },
+        "is_read": false,
+        "created_at": "2025-05-29T02:28:40.997Z"
+    }
+}
+]

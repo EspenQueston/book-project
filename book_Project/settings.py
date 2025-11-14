@@ -21,7 +21,7 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 # Allowed hosts for production
 # For production: scholarquest.tech and www.scholarquest.tech
 # For development: localhost and 127.0.0.1
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'scholarquest.tech,www.scholarquest.tech,localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = ['scholarquest.tech','www.scholarquest.tech']
 
 
 # 应用程序定义
@@ -77,14 +77,11 @@ WSGI_APPLICATION = 'book_Project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME', 'db_book'),
-        'USER': os.environ.get('DB_USER', 'bookuser'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', 'BookProject123!'),
-        'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
-        'PORT': os.environ.get('DB_PORT', '5432'),
-        'OPTIONS': {
-            'client_encoding': 'UTF8',
-        },
+        'NAME': 'cp2603370p21_scholarq_db_book',
+        'USER': 'cp2603370p21_scholarq_bookuser',
+        'PASSWORD': 'Dpg4TVEz@44C6Ku',
+        'HOST': 'localhost',
+        'PORT': '5432'
     }
 }
 
