@@ -14,8 +14,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Debug print to confirm signals are loaded
-print("🔔 Order management signals loaded successfully!")
-
+print("Order management signals loaded successfully!")
 
 @receiver(pre_save, sender=Order)
 def track_payment_status_change(sender, instance, **kwargs):

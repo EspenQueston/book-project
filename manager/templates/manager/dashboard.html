@@ -21,12 +21,12 @@
             --danger-color: #ef4444;
             --info-color: #06b6d4;
             --light-bg: #f5f7fa;
-            --sidebar-bg: #667eea;
-            --sidebar-hover: #764ba2;
             --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             --gradient-2: linear-gradient(135deg, #10b981 0%, #059669 100%);
             --gradient-3: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
             --gradient-4: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --gradient-5: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            --gradient-6: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
         }
 
         body {
@@ -40,7 +40,7 @@
             min-height: 100vh;
             box-shadow: 2px 0 15px rgba(102, 126, 234, 0.3);
             position: fixed;
-            width: 250px;
+            width: 220px;
             z-index: 1000;
         }
 
@@ -53,7 +53,7 @@
         }
 
         .sidebar .nav-link:hover {
-            background-color: var(--sidebar-hover);
+            background-color: var(--secondary-color);
             color: #ffffff;
             transform: translateX(5px);
         }
@@ -64,8 +64,8 @@
         }
 
         .main-content {
-            margin-left: 250px;
-            padding: 20px;
+            margin-left: 220px;
+            padding: 15px 18px;
             max-height: 100vh;
             overflow-y: auto;
         }
@@ -79,176 +79,108 @@
             box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
         }
 
+        /* KPI Cards */
         .kpi-card {
             background: var(--gradient-1);
             color: white;
             border-radius: 15px;
-            padding: 20px;
+            padding: 18px;
             margin-bottom: 15px;
             box-shadow: 0 8px 25px rgba(102, 126, 234, 0.25);
-            height: 130px;
             display: flex;
-            flex-direction: column;
-            justify-content: center;
+            align-items: center;
+            gap: 15px;
             transition: transform 0.3s ease;
+            height: 100px;
         }
-        
         .kpi-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 12px 35px rgba(102, 126, 234, 0.35);
         }
-
-        .metric-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .metric-label {
-            font-size: 0.85rem;
-            opacity: 0.9;
-        }
-
-        .chart-container {
-            background: #ffffff;
+        .kpi-icon {
+            width: 50px; height: 50px;
             border-radius: 12px;
+            background: rgba(255,255,255,0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+        .kpi-info {}
+        .kpi-value { font-size: 1.5rem; font-weight: 700; line-height: 1.2; }
+        .kpi-label { font-size: 0.78rem; opacity: 0.85; }
+
+        /* Chart Containers */
+        .chart-card {
+            background: #ffffff;
+            border-radius: 15px;
             padding: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
             margin-bottom: 20px;
-            height: 340px;
             position: relative;
         }
-        
-        .chart-container canvas {
-            max-height: 280px !important;
-            width: 100% !important;
+        .chart-card h6 {
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #1a1a2e;
         }
+        .chart-card canvas { max-height: 260px !important; width: 100% !important; }
 
+        /* Table sections */
         .table-container {
             background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
             overflow: hidden;
-            height: 300px;
             display: flex;
             flex-direction: column;
+            margin-bottom: 20px;
         }
-
         .table-header {
             background: var(--gradient-1);
             color: #ffffff;
-            padding: 15px 20px;
+            padding: 14px 20px;
             margin: 0;
             font-weight: 600;
             font-size: 0.95rem;
         }
-
-        .table-body {
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        .table {
-            margin: 0;
-            font-size: 0.9rem;
-        }
-
+        .table-body { flex: 1; overflow-y: auto; max-height: 280px; }
+        .table { margin: 0; font-size: 0.88rem; }
         .table th {
             background-color: var(--light-bg);
             border: none;
             font-weight: 600;
-            padding: 12px;
+            padding: 10px 12px;
             color: var(--primary-color);
-            font-size: 0.85rem;
+            font-size: 0.82rem;
         }
+        .table td { padding: 10px 12px; border: none; border-bottom: 1px solid #eee; }
 
-        .table td {
-            padding: 12px;
-            border: none;
-            border-bottom: 1px solid #eee;
-        }
+        /* Remove Bootstrap row gutters inside main content */
+        .main-content > .row, .main-content .row { --bs-gutter-x: 12px; }
 
-        /* Compact spacing */
-        .row {
-            margin-bottom: 15px;
-        }
-
-        .row:last-child {
-            margin-bottom: 0;
-        }
-
-        /* Responsive adjustments */
+        /* Responsive */
         @media (max-width: 768px) {
-            .sidebar {
-                position: relative;
-                width: 100%;
-                min-height: auto;
-            }
-            
-            .main-content {
-                margin-left: 0;
-                padding: 15px;
-                max-height: none;
-            }
-            
-            .chart-container {
-                height: 250px;
-                padding: 15px;
-            }
-            
-            .table-container {
-                height: 250px;
-            }
-            
-            .kpi-card {
-                height: 100px;
-                padding: 12px;
-            }
-            
-            .metric-value {
-                font-size: 1.5rem;
-            }
+            .sidebar { position: relative; width: 100%; min-height: auto; }
+            .main-content { margin-left: 0; padding: 15px; max-height: none; }
         }
 
-        /* Scrollbar styling */
-        .main-content::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .main-content::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 6px;
-        }
-
-        .main-content::-webkit-scrollbar-thumb {
-            background: var(--secondary-color);
-            border-radius: 6px;
-        }
-
-        .table-body::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        .table-body::-webkit-scrollbar-track {
-            background: #f8f9fa;
-        }
-
-        .table-body::-webkit-scrollbar-thumb {
-            background: #dee2e6;
-            border-radius: 4px;
-        }
+        /* Scrollbars */
+        .main-content::-webkit-scrollbar { width: 6px; }
+        .main-content::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 6px; }
+        .main-content::-webkit-scrollbar-thumb { background: var(--secondary-color); border-radius: 6px; }
+        .table-body::-webkit-scrollbar { width: 4px; }
+        .table-body::-webkit-scrollbar-track { background: #f8f9fa; }
+        .table-body::-webkit-scrollbar-thumb { background: #dee2e6; border-radius: 4px; }
     </style>
 </head>
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-md-3 col-lg-2 px-0">
-                <div class="sidebar">
-                    <div class="p-3">
-                        <h4 class="text-white mb-0">
-                            <i class="fas fa-user-shield"></i> 管理面板
-                        </h4>
+    <div class="container-fluid p-0">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="p-3">
+                <h4 class="text-white mb-0">
+                    <i class="fas fa-user-shield"></i> 管理面板
+                </h4>
                         <small class="text-muted">欢迎回来，{{ name }}</small>
                     </div>
                     
@@ -268,6 +200,12 @@
                         <a class="nav-link" href="/manager/order_list/">
                             <i class="fas fa-shopping-cart"></i> 订单管理
                         </a>
+                        <a class="nav-link" href="/manager/blog_list/">
+                            <i class="fas fa-blog"></i> 博客管理
+                        </a>
+                        <a class="nav-link" href="/manager/email/">
+                            <i class="fas fa-envelope"></i> 消息管理
+                        </a>
                         <div class="dropdown-divider mx-3 my-2" style="border-color: #34495e;"></div>
                         <a class="nav-link" href="/manager/public/">
                             <i class="fas fa-globe"></i> 查看网站
@@ -277,11 +215,9 @@
                         </a>
                     </nav>
                 </div>
-            </div>
             
             <!-- Main Content -->
-            <div class="col-md-9 col-lg-10">
-                <div class="main-content">
+            <div class="main-content">
                     <!-- Welcome Header -->
                     <div class="welcome-header">
                         <div class="row align-items-center">
@@ -292,62 +228,140 @@
                                 <p class="mb-0 opacity-75">系统概览 · 数据分析 · 业务洞察</p>
                             </div>
                             <div class="col-md-4 text-end">
-                                <div class="metric-value">{{ current_date|slice:":2" }}</div>
-                                <div class="metric-label">{{ current_date|slice:"5:" }}</div>
+                                <div class="kpi-value">{{ current_date }}</div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- KPI Cards - More Compact -->
+                    <!-- KPI Cards Row 1 -->
                     <div class="row">
-                        <div class="col-lg-3 col-md-6">
+                        <div class="col-xl-3 col-md-6">
                             <div class="kpi-card">
-                                <div class="metric-value">{{ total_books }}</div>
-                                <div class="metric-label">图书总数</div>
+                                <div class="kpi-icon"><i class="fas fa-book"></i></div>
+                                <div class="kpi-info">
+                                    <div class="kpi-value">{{ total_books }}</div>
+                                    <div class="kpi-label">图书总数</div>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-lg-3 col-md-6">
+                        <div class="col-xl-3 col-md-6">
                             <div class="kpi-card" style="background: var(--gradient-2);">
-                                <div class="metric-value">¥{{ total_revenue|floatformat:0 }}</div>
-                                <div class="metric-label">总收入</div>
+                                <div class="kpi-icon"><i class="fas fa-yen-sign"></i></div>
+                                <div class="kpi-info">
+                                    <div class="kpi-value">¥{{ total_revenue|floatformat:0 }}</div>
+                                    <div class="kpi-label">总收入</div>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-lg-3 col-md-6">
+                        <div class="col-xl-3 col-md-6">
                             <div class="kpi-card" style="background: var(--gradient-3);">
-                                <div class="metric-value">{{ total_orders }}</div>
-                                <div class="metric-label">订单总数</div>
+                                <div class="kpi-icon"><i class="fas fa-shopping-bag"></i></div>
+                                <div class="kpi-info">
+                                    <div class="kpi-value">{{ total_orders }}</div>
+                                    <div class="kpi-label">订单总数</div>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-lg-3 col-md-6">
+                        <div class="col-xl-3 col-md-6">
                             <div class="kpi-card" style="background: var(--gradient-4);">
-                                <div class="metric-value">{{ low_inventory_books }}</div>
-                                <div class="metric-label">库存预警</div>
+                                <div class="kpi-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                                <div class="kpi-info">
+                                    <div class="kpi-value">{{ low_inventory_books }}</div>
+                                    <div class="kpi-label">库存预警</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KPI Cards Row 2 -->
+                    <div class="row">
+                        <div class="col-xl-3 col-md-6">
+                            <div class="kpi-card" style="background: var(--gradient-6);">
+                                <div class="kpi-icon"><i class="fas fa-building"></i></div>
+                                <div class="kpi-info">
+                                    <div class="kpi-value">{{ total_publishers }}</div>
+                                    <div class="kpi-label">出版社</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6">
+                            <div class="kpi-card" style="background: linear-gradient(135deg, #ec4899, #be185d);">
+                                <div class="kpi-icon"><i class="fas fa-user-edit"></i></div>
+                                <div class="kpi-info">
+                                    <div class="kpi-value">{{ total_authors }}</div>
+                                    <div class="kpi-label">作者总数</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6">
+                            <div class="kpi-card" style="background: linear-gradient(135deg, #14b8a6, #0d9488);">
+                                <div class="kpi-icon"><i class="fas fa-calendar-check"></i></div>
+                                <div class="kpi-info">
+                                    <div class="kpi-value">{{ orders_this_month }}</div>
+                                    <div class="kpi-label">本月订单</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6">
+                            <div class="kpi-card" style="background: linear-gradient(135deg, #f97316, #ea580c);">
+                                <div class="kpi-icon"><i class="fas fa-coins"></i></div>
+                                <div class="kpi-info">
+                                    <div class="kpi-value">¥{{ revenue_this_month|floatformat:0 }}</div>
+                                    <div class="kpi-label">本月收入</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Charts Row - Reduced Height -->
+                    <!-- Charts Row 1: Sales Trend + Order Status -->
                     <div class="row">
                         <div class="col-lg-8">
-                            <div class="chart-container">
-                                <h6 class="mb-3">
-                                    <i class="fas fa-chart-line text-primary"></i> 销售趋势分析
-                                </h6>
+                            <div class="chart-card">
+                                <h6><i class="fas fa-chart-line text-primary"></i> 近7日销售趋势</h6>
                                 <canvas id="salesChart"></canvas>
                             </div>
                         </div>
-                        
                         <div class="col-lg-4">
-                            <div class="chart-container">
-                                <h6 class="mb-3">
-                                    <i class="fas fa-chart-pie text-success"></i> 订单状态分布
-                                </h6>
+                            <div class="chart-card">
+                                <h6><i class="fas fa-chart-pie text-success"></i> 订单状态分布</h6>
                                 <canvas id="orderStatusChart"></canvas>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Charts Row 2: Publisher Distribution + Sales vs Inventory -->
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="chart-card">
+                                <h6><i class="fas fa-building text-info"></i> 出版社图书分布</h6>
+                                <canvas id="publisherChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="chart-card">
+                                <h6><i class="fas fa-exchange-alt text-warning"></i> 热销图书：销量 vs 库存</h6>
+                                <canvas id="salesInventoryChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row 3: Monthly Trend + Price Distribution -->
+                    <div class="row">
+                        <div class="col-lg-7">
+                            <div class="chart-card">
+                                <h6><i class="fas fa-chart-bar text-primary"></i> 近6月订单趋势</h6>
+                                <canvas id="monthlyChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-lg-5">
+                            <div class="chart-card">
+                                <h6><i class="fas fa-tags" style="color: var(--secondary-color);"></i> 图书价格区间分布</h6>
+                                <canvas id="priceChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
                     
-                    <!-- Tables Section - Compact -->
+                    <!-- Tables Section -->
                     <div class="row">
                         <div class="col-lg-6">
                             <div class="table-container">
@@ -367,16 +381,12 @@
                                         <tbody>
                                             {% for book in top_books %}
                                             <tr>
-                                                <td>
-                                                    <span class="badge bg-primary">#{{ forloop.counter }}</span>
-                                                </td>
+                                                <td><span class="badge bg-primary">#{{ forloop.counter }}</span></td>
                                                 <td>
                                                     <strong>{{ book.name|truncatechars:15 }}</strong><br>
                                                     <small class="text-muted">{{ book.publisher.publisher_name|truncatechars:10 }}</small>
                                                 </td>
-                                                <td>
-                                                    <span class="badge bg-success">{{ book.sale_num }}</span>
-                                                </td>
+                                                <td><span class="badge bg-success">{{ book.sale_num }}</span></td>
                                                 <td>
                                                     {% if book.inventory < 10 %}
                                                         <span class="badge bg-danger">{{ book.inventory }}</span>
@@ -388,9 +398,7 @@
                                                 </td>
                                             </tr>
                                             {% empty %}
-                                            <tr>
-                                                <td colspan="4" class="text-center text-muted py-3">暂无数据</td>
-                                            </tr>
+                                            <tr><td colspan="4" class="text-center text-muted py-3">暂无数据</td></tr>
                                             {% endfor %}
                                         </tbody>
                                     </table>
@@ -421,9 +429,7 @@
                                                     <small class="text-muted">{{ order.created_at|date:"m-d H:i" }}</small>
                                                 </td>
                                                 <td>{{ order.customer_name|truncatechars:8 }}</td>
-                                                <td>
-                                                    <span class="text-success fw-bold">¥{{ order.total_amount }}</span>
-                                                </td>
+                                                <td><span class="text-success fw-bold">¥{{ order.total_amount }}</span></td>
                                                 <td>
                                                     {% if order.status == 'pending' %}
                                                         <span class="badge bg-warning">待处理</span>
@@ -435,9 +441,7 @@
                                                 </td>
                                             </tr>
                                             {% empty %}
-                                            <tr>
-                                                <td colspan="4" class="text-center text-muted py-3">暂无订单</td>
-                                            </tr>
+                                            <tr><td colspan="4" class="text-center text-muted py-3">暂无订单</td></tr>
                                             {% endfor %}
                                         </tbody>
                                     </table>
@@ -447,135 +451,176 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
     
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Initialize Charts when DOM is loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeCharts();
-        });
-        
-        // Chart.js Initialization
-        function initializeCharts() {
-            // Sales Chart
-            const salesCtx = document.getElementById('salesChart');
-            if (salesCtx) {
-                const salesChart = new Chart(salesCtx.getContext('2d'), {
-                    type: 'line',
-                    data: {
-                        labels: {{ daily_sales_json|safe }}.map(item => item.date),
-                        datasets: [{
-                            label: '销售额 (¥)',
-                            data: {{ daily_sales_json|safe }}.map(item => item.revenue),
-                            borderColor: '#667eea',
-                            backgroundColor: 'rgba(102, 126, 234, 0.2)',
-                            borderWidth: 3,
-                            fill: true,
-                            tension: 0.4,
-                            pointBackgroundColor: '#667eea',
-                            pointBorderColor: '#fff',
-                            pointBorderWidth: 2,
-                            pointRadius: 4,
-                            pointHoverRadius: 6
-                        }]
+    document.addEventListener('DOMContentLoaded', function() {
+        var chartDefaults = {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: { padding: { top: 5, bottom: 5, left: 5, right: 5 } }
+        };
+
+        // 1. Sales Trend Line Chart
+        var salesCtx = document.getElementById('salesChart');
+        if (salesCtx) {
+            var salesData = {{ daily_sales_json|safe }};
+            new Chart(salesCtx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: salesData.map(function(i){ return i.date; }),
+                    datasets: [{
+                        label: '销售额 (¥)',
+                        data: salesData.map(function(i){ return i.revenue; }),
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.15)',
+                        borderWidth: 3, fill: true, tension: 0.4,
+                        pointBackgroundColor: '#667eea', pointBorderColor: '#fff',
+                        pointBorderWidth: 2, pointRadius: 4, pointHoverRadius: 6
+                    }, {
+                        label: '订单数',
+                        data: salesData.map(function(i){ return i.orders; }),
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderWidth: 2, fill: false, tension: 0.4,
+                        pointBackgroundColor: '#10b981', pointBorderColor: '#fff',
+                        pointBorderWidth: 2, pointRadius: 3, yAxisID: 'y1'
+                    }]
+                },
+                options: Object.assign({}, chartDefaults, {
+                    scales: {
+                        y: { beginAtZero: true, ticks: { maxTicksLimit: 6 } },
+                        y1: { position: 'right', beginAtZero: true, ticks: { maxTicksLimit: 6 }, grid: { drawOnChartArea: false } },
+                        x: { ticks: { maxRotation: 45, minRotation: 0 } }
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        layout: {
-                            padding: {
-                                top: 10,
-                                bottom: 10,
-                                left: 10,
-                                right: 10
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    maxTicksLimit: 6
-                                }
-                            },
-                            x: {
-                                ticks: {
-                                    maxRotation: 45,
-                                    minRotation: 0
-                                }
-                            }
-                        },
-                        plugins: {
-                            legend: {
-                                position: 'top',
-                                labels: {
-                                    usePointStyle: true,
-                                    font: {
-                                        size: 11
-                                    },
-                                    padding: 10
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-            
-            // Order Status Chart
-            const orderStatusCtx = document.getElementById('orderStatusChart');
-            if (orderStatusCtx) {
-                const orderStatusChart = new Chart(orderStatusCtx.getContext('2d'), {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['待付款', '处理中', '已发货', '已取消'],
-                        datasets: [{
-                            data: [
-                                {{ pending_orders }}, 
-                                {{ processing_orders }},
-                                {{ shipped_orders }},
-                                {{ cancelled_orders }}
-                            ],
-                            backgroundColor: [
-                                '#f59e0b',
-                                '#06b6d4',
-                                '#10b981',
-                                '#ef4444'
-                            ],
-                            borderWidth: 2,
-                            borderColor: '#ffffff',
-                            hoverOffset: 10
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        layout: {
-                            padding: {
-                                top: 10,
-                                bottom: 5,
-                                left: 10,
-                                right: 10
-                            }
-                        },
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: {
-                                    usePointStyle: true,
-                                    font: {
-                                        size: 10
-                                    },
-                                    padding: 8,
-                                    boxWidth: 12
-                                }
-                            }
-                        }
-                    }
-                });
-            }
+                    plugins: { legend: { position: 'top', labels: { usePointStyle: true, font: { size: 11 }, padding: 10 } } }
+                })
+            });
         }
+
+        // 2. Order Status Doughnut
+        var statusCtx = document.getElementById('orderStatusChart');
+        if (statusCtx) {
+            new Chart(statusCtx.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['待付款', '处理中', '已发货', '已完成', '已取消'],
+                    datasets: [{
+                        data: [{{ pending_orders }}, {{ processing_orders }}, {{ shipped_orders }}, {{ completed_orders }}, {{ cancelled_orders }}],
+                        backgroundColor: ['#f59e0b', '#06b6d4', '#667eea', '#10b981', '#ef4444'],
+                        borderWidth: 2, borderColor: '#ffffff', hoverOffset: 10
+                    }]
+                },
+                options: Object.assign({}, chartDefaults, {
+                    plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, font: { size: 10 }, padding: 8, boxWidth: 12 } } }
+                })
+            });
+        }
+
+        // 3. Publisher Distribution Bar Chart
+        var pubCtx = document.getElementById('publisherChart');
+        if (pubCtx) {
+            var pubData = {{ publisher_stats_json|safe }};
+            new Chart(pubCtx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: pubData.map(function(i){ return i.name; }),
+                    datasets: [{
+                        label: '图书数量',
+                        data: pubData.map(function(i){ return i.books; }),
+                        backgroundColor: ['rgba(102, 126, 234, 0.8)', 'rgba(118, 75, 162, 0.8)', 'rgba(16, 185, 129, 0.8)', 'rgba(6, 182, 212, 0.8)', 'rgba(245, 158, 11, 0.8)'],
+                        borderRadius: 8, borderSkipped: false, barPercentage: 0.6
+                    }]
+                },
+                options: Object.assign({}, chartDefaults, {
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } }, x: { ticks: { font: { size: 10 } } } },
+                    plugins: { legend: { display: false } }
+                })
+            });
+        }
+
+        // 4. Sales vs Inventory Comparison
+        var siCtx = document.getElementById('salesInventoryChart');
+        if (siCtx) {
+            var siData = {{ top_books_comparison_json|safe }};
+            new Chart(siCtx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: siData.map(function(i){ return i.name; }),
+                    datasets: [{
+                        label: '销量',
+                        data: siData.map(function(i){ return i.sales; }),
+                        backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                        borderRadius: 6, barPercentage: 0.4
+                    }, {
+                        label: '库存',
+                        data: siData.map(function(i){ return i.inventory; }),
+                        backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                        borderRadius: 6, barPercentage: 0.4
+                    }]
+                },
+                options: Object.assign({}, chartDefaults, {
+                    scales: { y: { beginAtZero: true }, x: { ticks: { font: { size: 10 } } } },
+                    plugins: { legend: { position: 'top', labels: { usePointStyle: true, font: { size: 11 } } } }
+                })
+            });
+        }
+
+        // 5. Monthly Order Trend
+        var moCtx = document.getElementById('monthlyChart');
+        if (moCtx) {
+            var moData = {{ monthly_orders_json|safe }};
+            new Chart(moCtx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: moData.map(function(i){ return i.month; }),
+                    datasets: [{
+                        label: '订单数',
+                        data: moData.map(function(i){ return i.orders; }),
+                        backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                        borderRadius: 8, barPercentage: 0.5, yAxisID: 'y'
+                    }, {
+                        label: '收入 (¥)',
+                        data: moData.map(function(i){ return i.revenue; }),
+                        type: 'line',
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        borderWidth: 2, fill: true, tension: 0.4,
+                        pointBackgroundColor: '#ef4444', pointRadius: 4, yAxisID: 'y1'
+                    }]
+                },
+                options: Object.assign({}, chartDefaults, {
+                    scales: {
+                        y: { beginAtZero: true, position: 'left', ticks: { stepSize: 1 } },
+                        y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false } }
+                    },
+                    plugins: { legend: { position: 'top', labels: { usePointStyle: true, font: { size: 11 } } } }
+                })
+            });
+        }
+
+        // 6. Price Distribution Polar Area
+        var prCtx = document.getElementById('priceChart');
+        if (prCtx) {
+            var prData = {{ price_distribution_json|safe }};
+            new Chart(prCtx.getContext('2d'), {
+                type: 'polarArea',
+                data: {
+                    labels: prData.map(function(i){ return '¥' + i.range; }),
+                    datasets: [{
+                        data: prData.map(function(i){ return i.count; }),
+                        backgroundColor: ['rgba(102, 126, 234, 0.7)', 'rgba(118, 75, 162, 0.7)', 'rgba(16, 185, 129, 0.7)', 'rgba(245, 158, 11, 0.7)', 'rgba(239, 68, 68, 0.7)'],
+                        borderWidth: 2, borderColor: '#fff'
+                    }]
+                },
+                options: Object.assign({}, chartDefaults, {
+                    plugins: { legend: { position: 'right', labels: { usePointStyle: true, font: { size: 10 }, padding: 8 } } },
+                    scales: { r: { ticks: { stepSize: 1 } } }
+                })
+            });
+        }
+    });
     </script>
 </body>
 </html>

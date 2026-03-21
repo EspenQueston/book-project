@@ -1,0 +1,531 @@
+{% extends 'public/base.html' %}
+{% load i18n %}
+
+{% block title %}{{ post.title }} - {% trans "博客" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Hero */
+    .post-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 120px 0 60px 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .post-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .breadcrumb-custom a {
+        color: rgba(255,255,255,0.7);
+        text-decoration: none;
+        transition: color 0.3s;
+    }
+
+    .breadcrumb-custom a:hover { color: #fff; }
+    .breadcrumb-custom span { color: rgba(255,255,255,0.5); margin: 0 10px; }
+    .breadcrumb-custom .current { color: #fff; font-weight: 600; }
+
+    .post-hero h1 {
+        font-size: 2.8rem;
+        font-weight: 800;
+        color: #fff;
+        margin: 25px 0 20px;
+        line-height: 1.3;
+    }
+
+    .post-hero-meta {
+        display: flex;
+        align-items: center;
+        gap: 25px;
+        color: rgba(255,255,255,0.85);
+        font-size: 0.95rem;
+        flex-wrap: wrap;
+    }
+
+    .post-hero-meta span {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .post-category-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+        padding: 6px 18px;
+        border-radius: 50px;
+        color: #fff;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    /* Content Area */
+    .post-content-area {
+        padding: 60px 0 80px;
+    }
+
+    /* Cover Image Banner */
+    .post-cover-banner {
+        margin-top: -40px;
+        margin-bottom: 40px;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+
+    .post-cover-banner img {
+        width: 100%;
+        max-height: 450px;
+        object-fit: cover;
+    }
+
+    /* Article Card */
+    .article-card {
+        background: #fff;
+        border-radius: 20px;
+        padding: 50px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.06);
+    }
+
+    .article-content {
+        font-size: 1.05rem;
+        line-height: 2;
+        color: #333;
+    }
+
+    .article-content p {
+        margin-bottom: 1.5rem;
+    }
+
+    .article-content h2, .article-content h3 {
+        color: #1a1a2e;
+        font-weight: 700;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    .article-content h2 { font-size: 1.6rem; }
+    .article-content h3 { font-size: 1.3rem; }
+
+    .article-content blockquote {
+        border-left: 4px solid #667eea;
+        padding: 20px 25px;
+        background: #f8f9ff;
+        border-radius: 0 12px 12px 0;
+        margin: 1.5rem 0;
+        font-style: italic;
+        color: #555;
+    }
+
+    .article-content img {
+        max-width: 100%;
+        border-radius: 12px;
+        margin: 1.5rem 0;
+    }
+
+    .article-content code {
+        background: #f0f0f5;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        color: #667eea;
+    }
+
+    .article-content pre {
+        background: #1a1a2e;
+        color: #e0e0e0;
+        padding: 20px 25px;
+        border-radius: 12px;
+        overflow-x: auto;
+        margin: 1.5rem 0;
+    }
+
+    .article-content pre code {
+        background: transparent;
+        color: inherit;
+        padding: 0;
+    }
+
+    /* Author Box */
+    .author-box {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        background: #f8f9ff;
+        border-radius: 15px;
+        padding: 25px;
+        margin-top: 40px;
+        border: 1px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .author-avatar {
+        width: 65px;
+        height: 65px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .author-avatar i { font-size: 1.5rem; color: #fff; }
+
+    .author-info h5 {
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 5px;
+    }
+
+    .author-info p {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    /* Share Buttons */
+    .share-section {
+        margin-top: 40px;
+        padding-top: 30px;
+        border-top: 1px solid #e8ecf1;
+    }
+
+    .share-section h6 {
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 15px;
+    }
+
+    .share-buttons { display: flex; gap: 10px; }
+
+    .share-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+        text-decoration: none;
+        color: #fff;
+    }
+
+    .share-btn:hover {
+        transform: translateY(-3px);
+        color: #fff;
+    }
+
+    /* Related Posts */
+    .related-section {
+        padding: 60px 0 80px;
+        background: #f8f9ff;
+    }
+
+    .related-card {
+        background: #fff;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.06);
+        transition: all 0.4s;
+        text-decoration: none;
+        display: block;
+        height: 100%;
+    }
+
+    .related-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 40px rgba(102, 126, 234, 0.12);
+    }
+
+    .related-cover {
+        height: 160px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .related-cover img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .related-cover i {
+        font-size: 2.5rem;
+        color: rgba(255,255,255,0.3);
+    }
+
+    .related-body {
+        padding: 20px;
+    }
+
+    .related-body h5 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 8px;
+        line-height: 1.4;
+    }
+
+    .related-body .meta {
+        color: #999;
+        font-size: 0.82rem;
+    }
+
+    /* Sidebar Sticky */
+    .sidebar-sticky {
+        position: sticky;
+        top: 100px;
+    }
+
+    .sidebar-widget {
+        background: #fff;
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: 0 5px 25px rgba(0,0,0,0.06);
+        margin-bottom: 25px;
+    }
+
+    .sidebar-widget h5 {
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 3px solid #667eea;
+        font-size: 1.1rem;
+    }
+
+    .related-sidebar-item {
+        display: flex;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid #f0f0f0;
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+
+    .related-sidebar-item:last-child { border-bottom: none; }
+    .related-sidebar-item:hover { padding-left: 5px; }
+
+    .related-sidebar-item h6 {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #333;
+        margin: 0 0 5px;
+        line-height: 1.4;
+    }
+
+    .related-sidebar-item small { color: #999; font-size: 0.8rem; }
+
+    .related-sidebar-thumb {
+        width: 60px;
+        height: 45px;
+        border-radius: 8px;
+        overflow: hidden;
+        flex-shrink: 0;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .related-sidebar-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .related-sidebar-thumb i { color: rgba(255,255,255,0.5); font-size: 0.8rem; }
+
+    .back-to-blog {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+        transition: gap 0.3s;
+    }
+
+    .back-to-blog:hover { gap: 12px; color: #764ba2; }
+
+    @media (max-width: 768px) {
+        .post-hero h1 { font-size: 1.8rem; }
+        .article-card { padding: 25px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="post-hero">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8" data-aos="fade-right">
+                <div class="breadcrumb-custom mb-2">
+                    <a href="{% url 'manager:public_home' %}">{% trans "首页" %}</a>
+                    <span>/</span>
+                    <a href="{% url 'manager:public_blog' %}">{% trans "博客" %}</a>
+                    <span>/</span>
+                    <span class="current">{{ post.title|truncatechars:30 }}</span>
+                </div>
+
+                {% if post.category %}
+                <span class="post-category-tag">
+                    <i class="{{ post.category.icon }}"></i>
+                    {{ post.category.name }}
+                </span>
+                {% endif %}
+
+                <h1>{{ post.title }}</h1>
+
+                <div class="post-hero-meta">
+                    <span><i class="fas fa-user"></i>{{ post.author_name }}</span>
+                    <span><i class="fas fa-calendar-alt"></i>{{ post.published_at|date:"Y-m-d" }}</span>
+                    <span><i class="fas fa-eye"></i>{{ post.views_count }} {% trans "次浏览" %}</span>
+                    <span><i class="fas fa-clock"></i>{{ post.get_reading_time }} {% trans "分钟阅读" %}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Content -->
+<section class="post-content-area">
+    <div class="container">
+        {% if post.cover_image %}
+        <div class="post-cover-banner" data-aos="fade-up">
+            <img src="{{ post.cover_image.url }}" alt="{{ post.title }}">
+        </div>
+        {% endif %}
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="article-card" data-aos="fade-up">
+                    <div class="article-content">
+                        {{ post.content|safe }}
+                    </div>
+
+                    <!-- Author Box -->
+                    <div class="author-box">
+                        <div class="author-avatar">
+                            <i class="fas fa-user-pen"></i>
+                        </div>
+                        <div class="author-info">
+                            <h5>{{ post.author_name }}</h5>
+                            <p>{% trans "文章作者" %}</p>
+                        </div>
+                    </div>
+
+                    <!-- Share -->
+                    <div class="share-section">
+                        <h6><i class="fas fa-share-alt me-2"></i>{% trans "分享文章" %}</h6>
+                        <div class="share-buttons">
+                            <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" target="_blank" rel="noopener noreferrer" class="share-btn" style="background: #1877f2;" title="Facebook">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="https://wa.me/?text={{ post.title }} {{ request.build_absolute_uri }}" target="_blank" rel="noopener noreferrer" class="share-btn" style="background: #25d366;" title="WhatsApp">
+                                <i class="fab fa-whatsapp"></i>
+                            </a>
+                            <a href="mailto:?subject={{ post.title }}&body={{ request.build_absolute_uri }}" class="share-btn" style="background: linear-gradient(135deg, #667eea, #764ba2);" title="Email">
+                                <i class="fas fa-envelope"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Back to blog -->
+                <div class="mt-4" data-aos="fade-up">
+                    <a href="{% url 'manager:public_blog' %}" class="back-to-blog">
+                        <i class="fas fa-arrow-left"></i>
+                        {% trans "返回博客列表" %}
+                    </a>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <div class="sidebar-sticky">
+                    {% if related_posts %}
+                    <div class="sidebar-widget" data-aos="fade-left">
+                        <h5><i class="fas fa-bookmark me-2"></i>{% trans "相关文章" %}</h5>
+                        {% for rp in related_posts %}
+                        <a href="{% url 'manager:public_blog_detail' rp.slug %}" class="related-sidebar-item">
+                            <div class="related-sidebar-thumb">
+                                {% if rp.cover_image %}
+                                <img src="{{ rp.cover_image.url }}" alt="{{ rp.title }}">
+                                {% else %}
+                                <i class="fas fa-newspaper"></i>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <h6>{{ rp.title|truncatechars:40 }}</h6>
+                                <small><i class="fas fa-calendar me-1"></i>{{ rp.published_at|date:"Y-m-d" }}</small>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="sidebar-widget" data-aos="fade-left" data-aos-delay="100">
+                        <h5><i class="fas fa-book me-2"></i>{% trans "浏览图书" %}</h5>
+                        <p style="color: #6c757d; font-size: 0.92rem; line-height: 1.7;">
+                            {% trans "探索我们的图书目录，找到您的下一本好书。" %}
+                        </p>
+                        <a href="{% url 'manager:public_books' %}" class="btn w-100" style="background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border-radius: 12px; font-weight: 600;">
+                            <i class="fas fa-book-open me-1"></i>{% trans "图书目录" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Related Posts Full-width Section -->
+{% if related_posts %}
+<section class="related-section">
+    <div class="container">
+        <div class="text-center mb-4" data-aos="fade-up">
+            <h3 style="font-weight: 700; color: #1a1a2e;">{% trans "您可能还感兴趣" %}</h3>
+        </div>
+        <div class="row g-4">
+            {% for rp in related_posts %}
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:1 }}00">
+                <a href="{% url 'manager:public_blog_detail' rp.slug %}" class="related-card">
+                    <div class="related-cover">
+                        {% if rp.cover_image %}
+                        <img src="{{ rp.cover_image.url }}" alt="{{ rp.title }}">
+                        {% else %}
+                        <i class="fas fa-newspaper"></i>
+                        {% endif %}
+                    </div>
+                    <div class="related-body">
+                        <h5>{{ rp.title }}</h5>
+                        <div class="meta">
+                            <i class="fas fa-calendar me-1"></i>{{ rp.published_at|date:"Y-m-d" }}
+                            <span class="ms-3"><i class="fas fa-eye me-1"></i>{{ rp.views_count }}</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

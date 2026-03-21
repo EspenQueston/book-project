@@ -1,9 +1,94 @@
-# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION BEGIN
-PassengerAppRoot "/home/cp2603370p21/public_html/book_Project"
-PassengerBaseURI "/"
-PassengerPython "/home/cp2603370p21/virtualenv/public_html/book_Project/3.12/bin/python"
-# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION END
-# DO NOT REMOVE OR MODIFY. CLOUDLINUX ENV VARS CONFIGURATION BEGIN
-<IfModule Litespeed>
+# .htaccess for Django Book Management System
+# LWS cPanel Deployment - scholarquest.tech
+
+# Enable Rewrite Engine
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    
+    # ========================================
+    # STATIC AND MEDIA FILES
+    # ========================================
+    # Serve static files directly without going through Django
+    RewriteCond %{REQUEST_URI} ^/static/
+    RewriteRule ^(.*)$ - [L]
+    
+    # Serve media files (uploaded images, books) directly
+    RewriteCond %{REQUEST_URI} ^/media/
+    RewriteRule ^(.*)$ - [L]
+    
+    # ========================================
+    # DJANGO APPLICATION
+    # ========================================
+    # Pass all other requests to Django via Passenger
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ passenger_wsgi.py [QSA,L]
 </IfModule>
-# DO NOT REMOVE OR MODIFY. CLOUDLINUX ENV VARS CONFIGURATION END
+
+# ========================================
+# SECURITY SETTINGS
+# ========================================
+
+# Protect sensitive files
+<FilesMatch "^(settings\.py|\.env|\.env\.production|passenger_wsgi\.py|manage\.py)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Prevent directory listing
+Options -Indexes
+
+# Protect .git directory if it exists
+<DirectoryMatch "\.git">
+    Order allow,deny
+    Deny from all
+</DirectoryMatch>
+
+# Protect Python cache files
+<FilesMatch "\.pyc$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# ========================================
+# COMPRESSION (Optional - improves performance)
+# ========================================
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>
+
+# ========================================
+# CACHING (Optional - improves performance)
+# ========================================
+<IfModule mod_expires.c>
+    ExpiresActive On
+    
+    # Images
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    
+    # CSS and JavaScript
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    
+    # Fonts
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
+</IfModule>
+
+# ========================================
+# FORCE HTTPS
+# ========================================
+<IfModule mod_rewrite.c>
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# ========================================
+# ERROR PAGES (Optional)
+# ========================================
+# ErrorDocument 404 /404.html
+# ErrorDocument 500 /500.html

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>消息详情 - {{ msg.name }}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh; font-family: 'Segoe UI', sans-serif; padding-top: 76px;
+        }
+        .top-navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1030;
+            height: 76px; display: flex; align-items: center; padding: 0 24px;
+            box-shadow: 0 4px 20px rgba(102,126,234,0.4);
+        }
+        .nav-brand { color: white; font-size: 1.3rem; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .nav-brand:hover { color: rgba(255,255,255,0.9); }
+        .nav-links { display: flex; gap: 6px; margin-left: auto; align-items: center; flex-wrap: wrap; }
+        .nav-link-btn {
+            color: rgba(255,255,255,0.85); text-decoration: none; padding: 8px 14px;
+            border-radius: 8px; font-size: 0.88rem; font-weight: 500; display: flex; align-items: center; gap: 6px;
+            transition: all 0.2s; border: 1px solid transparent;
+        }
+        .nav-link-btn:hover, .nav-link-btn.active { background: rgba(255,255,255,0.15); color: white; border-color: rgba(255,255,255,0.2); }
+        .nav-badge { background: #ef4444; color: white; font-size: 0.7rem; padding: 1px 6px; border-radius: 10px; font-weight: 700; min-width: 18px; text-align: center; }
+        .main-container { max-width: 800px; margin: 0 auto; padding: 28px 20px 60px; }
+        .header-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px; padding: 24px 28px; margin-bottom: 20px; color: white;
+            box-shadow: 0 8px 30px rgba(102,126,234,0.35);
+        }
+        .msg-card {
+            background: white; border-radius: 16px; padding: 32px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 20px;
+        }
+        .sender-avatar {
+            width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 1.6rem; font-weight: 800; color: white; flex-shrink: 0;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+        .info-pill { background: #f1f5f9; border-radius: 8px; padding: 8px 14px; display: inline-flex; align-items: center; gap: 8px; font-size: 0.88rem; }
+        .info-pill .lbl { color: #94a3b8; font-size: 0.82rem; }
+        .info-pill .val { font-weight: 600; color: #334155; }
+        .message-body {
+            background: #f8faff; border-radius: 12px; padding: 24px; border-left: 4px solid #667eea;
+            line-height: 1.9; color: #334155; white-space: pre-wrap; word-break: break-word;
+        }
+        .badge-read { background: #d1fae5; color: #065f46; padding: 4px 12px; border-radius: 12px; font-size: 0.82rem; font-weight: 600; }
+        .badge-unread { background: #e0e7ff; color: #4338ca; padding: 4px 12px; border-radius: 12px; font-size: 0.82rem; font-weight: 600; }
+        .badge-replied { background: #dbeafe; color: #1d4ed8; padding: 4px 12px; border-radius: 12px; font-size: 0.82rem; font-weight: 600; }
+        .btn-action {
+            border-radius: 10px; padding: 10px 22px; font-weight: 600; font-size: 0.9rem;
+            border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; text-decoration: none;
+        }
+        .btn-back { background: #f1f5f9; color: #475569; }
+        .btn-back:hover { background: #e2e8f0; color: #334155; }
+        .btn-toggle { background: linear-gradient(135deg,#667eea,#764ba2); color: white; }
+        .btn-toggle:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.35); color: white; }
+        .btn-delete { background: linear-gradient(135deg,#ef4444,#dc2626); color: white; }
+        .btn-delete:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(239,68,68,0.35); color: white; }
+        .btn-reply { background: linear-gradient(135deg,#10b981,#059669); color: white; }
+        .btn-reply:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(16,185,129,0.35); color: white; }
+        .reply-section {
+            background: white; border-radius: 16px; padding: 28px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 20px;
+        }
+        .reply-section h5 { font-weight: 700; color: #334155; margin-bottom: 16px; }
+        .reply-section textarea {
+            width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; padding: 16px;
+            font-size: 0.92rem; line-height: 1.7; resize: vertical; min-height: 140px; outline: none;
+            transition: border-color 0.2s;
+        }
+        .reply-section textarea:focus { border-color: #667eea; }
+        .reply-section select {
+            border: 2px solid #e2e8f0; border-radius: 10px; padding: 8px 14px;
+            font-size: 0.88rem; outline: none; width: 100%;
+        }
+        .reply-section select:focus { border-color: #667eea; }
+        .label-tag { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 10px; font-size: 0.78rem; font-weight: 600; color: white; margin-right: 4px; margin-bottom: 4px; }
+        .label-tag .remove-label { cursor: pointer; opacity: 0.7; }
+        .label-tag .remove-label:hover { opacity: 1; }
+        .labels-section { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .labels-section h6 { font-weight: 700; color: #334155; margin-bottom: 12px; }
+        .label-option { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 10px; cursor: pointer; font-size: 0.82rem; font-weight: 600; border: 2px solid #e2e8f0; transition: all 0.2s; margin: 3px; }
+        .label-option:hover { border-color: #667eea; background: rgba(102,126,234,0.04); }
+        .label-option.active { border-color: #667eea; background: rgba(102,126,234,0.08); }
+        .label-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .toast-container { position: fixed; top: 90px; right: 20px; z-index: 9999; }
+        .toast-item { padding: 14px 20px; border-radius: 12px; color: white; font-weight: 600; font-size: 0.9rem; box-shadow: 0 6px 20px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 10px; margin-bottom: 10px; animation: toastIn 0.3s ease; }
+        .toast-success { background: linear-gradient(135deg,#10b981,#059669); }
+        .toast-error { background: linear-gradient(135deg,#ef4444,#dc2626); }
+        @keyframes toastIn { from { opacity:0; transform:translateX(30px); } to { opacity:1; transform:translateX(0); } }
+    </style>
+</head>
+<body>
+<nav class="top-navbar">
+    <a href="/manager/dashboard/" class="nav-brand">
+        <i class="fas fa-book-open"></i><span>图书管理系统</span>
+    </a>
+    <div class="nav-links">
+        <a href="/manager/dashboard/" class="nav-link-btn"><i class="fas fa-tachometer-alt"></i>仪表盘</a>
+        <a href="/manager/email/" class="nav-link-btn active">
+            <i class="fas fa-envelope"></i>消息
+            {% if unread_count > 0 %}<span class="nav-badge">{{ unread_count }}</span>{% endif %}
+        </a>
+        <a href="/manager/logout/" class="nav-link-btn" style="background:rgba(239,68,68,0.2);border-color:rgba(239,68,68,0.3);"><i class="fas fa-sign-out-alt"></i>退出</a>
+    </div>
+</nav>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="main-container">
+    <!-- Header -->
+    <div class="header-card">
+        <nav aria-label="breadcrumb" class="mb-2">
+            <ol class="breadcrumb mb-0" style="--bs-breadcrumb-divider-color:rgba(255,255,255,0.5);">
+                <li class="breadcrumb-item"><a href="/manager/dashboard/" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;">仪表盘</a></li>
+                <li class="breadcrumb-item"><a href="/manager/email/?folder=contact" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;">消息管理</a></li>
+                <li class="breadcrumb-item active" style="color:white;font-size:0.85rem;">消息详情</li>
+            </ol>
+        </nav>
+        <div class="d-flex align-items-center gap-3">
+            <div class="sender-avatar">{{ msg.name|first|upper }}</div>
+            <div>
+                <h2 class="fw-bold mb-1" style="font-size:1.4rem;">{{ msg.subject|default:"（无主题）" }}</h2>
+                <p class="mb-0 opacity-80 small">来自 <strong>{{ msg.name }}</strong> &lt;{{ msg.email }}&gt;</p>
+            </div>
+            <div class="ms-auto d-flex flex-column gap-1 align-items-end">
+                {% if msg.is_read %}
+                <span class="badge-read"><i class="fas fa-check me-1"></i>已读</span>
+                {% else %}
+                <span class="badge-unread"><i class="fas fa-circle me-1" style="font-size:0.5rem;"></i>未读</span>
+                {% endif %}
+                {% if msg.replied %}
+                <span class="badge-replied"><i class="fas fa-reply me-1"></i>已回复</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Labels Section -->
+    <div class="labels-section">
+        <h6><i class="fas fa-tags me-2" style="color:#667eea;"></i>分类标签</h6>
+        <div id="currentLabels" class="mb-3">
+            {% for label in msg.labels.all %}
+            <span class="label-tag" style="background:{{ label.color }};">
+                {{ label.name }}
+                <span class="remove-label" onclick="removeLabel({{ msg.id }}, {{ label.id }})" title="移除标签">&times;</span>
+            </span>
+            {% empty %}
+            <span class="text-muted" style="font-size:0.85rem;" id="noLabelsText">暂无标签</span>
+            {% endfor %}
+        </div>
+        {% if labels %}
+        <div>
+            <span style="font-size:0.78rem;color:#94a3b8;font-weight:600;">添加标签：</span>
+            {% for label in labels %}
+            <span class="label-option" onclick="addLabel({{ msg.id }}, {{ label.id }}, this)" data-label-id="{{ label.id }}">
+                <span class="label-dot" style="background:{{ label.color }};"></span> {{ label.name }}
+            </span>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Message Detail Card -->
+    <div class="msg-card">
+        <!-- Meta info -->
+        <div class="d-flex flex-wrap gap-3 mb-4 pb-4 border-bottom">
+            <div class="info-pill">
+                <i class="fas fa-user" style="color:#667eea;"></i>
+                <div><div class="lbl">发件人</div><div class="val">{{ msg.name }}</div></div>
+            </div>
+            <div class="info-pill">
+                <i class="fas fa-envelope" style="color:#10b981;"></i>
+                <div><div class="lbl">邮箱</div><div class="val">{{ msg.email }}</div></div>
+            </div>
+            <div class="info-pill">
+                <i class="fas fa-clock" style="color:#f59e0b;"></i>
+                <div><div class="lbl">发送时间</div><div class="val">{{ msg.created_at|date:"Y年m月d日 H:i" }}</div></div>
+            </div>
+            <div class="info-pill">
+                <i class="fas fa-paper-plane" style="color:{% if msg.email_sent %}#10b981{% else %}#94a3b8{% endif %};"></i>
+                <div><div class="lbl">邮件通知</div><div class="val">{% if msg.email_sent %}已发送{% else %}未发送{% endif %}</div></div>
+            </div>
+        </div>
+
+        <!-- Message Body -->
+        <h6 class="fw-bold mb-3" style="color:#334155;"><i class="fas fa-comment-alt me-2" style="color:#667eea;"></i>消息内容</h6>
+        <div class="message-body">{{ msg.message }}</div>
+
+        <!-- Actions -->
+        <div class="d-flex flex-wrap gap-3 mt-4 pt-4 border-top">
+            <a href="/manager/email/?folder=contact" class="btn-action btn-back">
+                <i class="fas fa-arrow-left"></i>返回列表
+            </a>
+            <button class="btn-action btn-reply" onclick="document.getElementById('replySection').scrollIntoView({behavior:'smooth'})">
+                <i class="fas fa-reply"></i>回复邮件
+            </button>
+            <button class="btn-action btn-toggle" id="toggleReadBtn" onclick="toggleRead({{ msg.id }})">
+                <i class="fas fa-{% if msg.is_read %}envelope{% else %}envelope-open{% endif %}"></i>
+                {% if msg.is_read %}标为未读{% else %}标为已读{% endif %}
+            </button>
+            <button class="btn-action btn-delete ms-auto" onclick="deleteMsg({{ msg.id }})">
+                <i class="fas fa-trash"></i>删除消息
+            </button>
+        </div>
+    </div>
+
+    <!-- Reply Section -->
+    <div class="reply-section" id="replySection">
+        <h5><i class="fas fa-reply me-2" style="color:#10b981;"></i>回复此消息</h5>
+        <p class="text-muted small mb-3">收件人: <strong>{{ msg.name }}</strong> &lt;{{ msg.email }}&gt;</p>
+
+        {% if accounts %}
+        <div class="mb-3">
+            <label class="form-label" style="font-size:0.82rem;font-weight:600;color:#64748b;">发送账户</label>
+            <select id="replyAccount" class="form-control">
+                {% for acc in accounts %}
+                <option value="{{ acc.id }}" {% if acc.is_default %}selected{% endif %}>{{ acc.name }} &lt;{{ acc.email_address }}&gt;</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label" style="font-size:0.82rem;font-weight:600;color:#64748b;">回复内容</label>
+            <textarea id="replyBody" placeholder="输入回复内容..."></textarea>
+        </div>
+        <div class="d-flex gap-3">
+            <button class="btn-action btn-reply" onclick="sendReply()" id="sendReplyBtn">
+                <i class="fas fa-paper-plane"></i>发送回复
+            </button>
+            <span class="text-muted small align-self-center" id="replyStatus"></span>
+        </div>
+        {% else %}
+        <div class="alert alert-warning" style="border-radius:12px;font-size:0.9rem;">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            尚未配置邮箱账户。请先到 <a href="/manager/email/accounts/">邮箱账户设置</a> 添加发送账户。
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+const CSRF = '{{ csrf_token }}';
+const MSG_ID = {{ msg.id }};
+
+function showToast(msg, type) {
+    type = type || 'success';
+    var c = document.getElementById('toastContainer');
+    var d = document.createElement('div');
+    d.className = 'toast-item toast-' + type;
+    d.innerHTML = '<i class="fas fa-' + (type==='success'?'check-circle':'times-circle') + '"></i>' + msg;
+    c.appendChild(d);
+    setTimeout(function(){ d.remove(); }, 3500);
+}
+
+function toggleRead(id) {
+    fetch('/manager/admin_messages/toggle_read/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': CSRF},
+        body: 'id=' + id
+    }).then(function(r){ return r.json(); }).then(function(data) {
+        if (data.success) {
+            showToast(data.is_read ? '已标为已读' : '已标为未读');
+            setTimeout(function(){ location.reload(); }, 800);
+        }
+    });
+}
+
+function deleteMsg(id) {
+    if (!confirm('确定要删除这条消息吗？')) return;
+    fetch('/manager/admin_messages/delete/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': CSRF},
+        body: 'id=' + id
+    }).then(function(r){ return r.json(); }).then(function(data) {
+        if (data.success) {
+            showToast('消息已删除');
+            setTimeout(function(){ window.location.href = '/manager/email/?folder=contact'; }, 800);
+        }
+    });
+}
+
+function sendReply() {
+    var body = document.getElementById('replyBody').value.trim();
+    var accountId = document.getElementById('replyAccount').value;
+    if (!body) { showToast('请输入回复内容', 'error'); return; }
+
+    var btn = document.getElementById('sendReplyBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>发送中...';
+
+    fetch('/manager/admin_messages/' + MSG_ID + '/reply/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': CSRF},
+        body: 'account_id=' + accountId + '&body=' + encodeURIComponent(body)
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i>发送回复';
+        if (data.success) {
+            showToast(data.message);
+            document.getElementById('replyBody').value = '';
+            setTimeout(function(){ location.reload(); }, 1200);
+        } else {
+            showToast(data.error || '发送失败', 'error');
+        }
+    })
+    .catch(function() {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i>发送回复';
+        showToast('网络错误', 'error');
+    });
+}
+
+function addLabel(msgId, labelId, el) {
+    fetch('/manager/admin_messages/label_action/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': CSRF},
+        body: 'action=add_label&ids=' + msgId + '&label_id=' + labelId
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+        if (data.success) { showToast('标签已添加'); setTimeout(function(){ location.reload(); }, 600); }
+        else showToast(data.error || '操作失败', 'error');
+    });
+}
+
+function removeLabel(msgId, labelId) {
+    fetch('/manager/admin_messages/label_action/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': CSRF},
+        body: 'action=remove_label&ids=' + msgId + '&label_id=' + labelId
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+        if (data.success) { showToast('标签已移除'); setTimeout(function(){ location.reload(); }, 600); }
+        else showToast(data.error || '操作失败', 'error');
+    });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,532 @@
+{% extends 'public/base.html' %}
+{% load i18n %}
+
+{% block title %}{{ book.name }} - {% trans "图书详情" %}{% endblock %}
+
+{% block content %}
+<!-- Page Header with gradient background -->
+<section class="hero-section text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px 0; margin-bottom: 20px;">
+    <div class="container">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-2">
+            <ol class="breadcrumb bg-transparent mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'manager:public_home' %}" class="text-white small">{% trans "首页" %}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'manager:public_books' %}" class="text-white small">{% trans "图书目录" %}</a></li>
+                <li class="breadcrumb-item active text-white small" aria-current="page">{{ book.name }}</li>
+            </ol>
+        </nav>
+        <h1 class="h4 fw-bold mb-0"><i class="fas fa-book-open me-2"></i>{{ book.name }}</h1>
+    </div>
+</section>
+
+<!-- Book Detail Section -->
+<section class="py-3">
+    <div class="container">
+        <div class="row g-3">
+            <!-- Book Cover & Quick Info -->
+            <div class="col-lg-4">
+                <!-- Book Cover Card -->
+                <div class="card border-0 shadow-sm mb-3" style="border-radius: 10px; overflow: hidden;">
+                    <div class="card-body p-0">
+                        <div class="position-relative" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 20px;">
+                            <img src="{{ book.get_cover_url }}" 
+                                 alt="{{ book.name }}" 
+                                 class="img-fluid mx-auto d-block" 
+                                 style="max-height: 280px; width: auto; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.15);">
+                        </div>
+                        <div class="p-3 text-center" style="background: white;">
+                            <h5 class="fw-bold mb-2" style="color: #333;">{{ book.name }}</h5>
+                            <div class="d-flex justify-content-center align-items-center gap-2 mb-2">
+                                <div class="price-display" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 8px 20px; border-radius: 30px; font-size: 1.3rem; font-weight: 700;">
+                                    ¥{{ book.price }}
+                                </div>
+                            </div>
+                            
+                            <!-- Stock Status Badge -->
+                            <div class="mb-2">
+                                {% if book.inventory > 10 %}
+                                    <span class="badge bg-success px-3 py-1" style="font-size: 0.8rem;">
+                                        <i class="fas fa-check-circle me-1"></i>{% trans "库存" %} {{ book.inventory }}
+                                    </span>
+                                {% elif book.inventory > 0 %}
+                                    <span class="badge bg-warning px-3 py-1" style="font-size: 0.8rem;">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>{% trans "库存" %} {{ book.inventory }}
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-danger px-3 py-1" style="font-size: 0.8rem;">
+                                        <i class="fas fa-times-circle me-1"></i>{% trans "缺货" %}
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <div class="card border-0 shadow-sm text-center" style="border-radius: 8px; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                            <div class="card-body p-2">
+                                <i class="fas fa-boxes text-white mb-1" style="font-size: 1.2rem;"></i>
+                                <h6 class="text-white fw-bold mb-0">{{ book.inventory }}</h6>
+                                <small class="text-white" style="font-size: 0.75rem;">{% trans "库存" %}</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="card border-0 shadow-sm text-center" style="border-radius: 8px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                            <div class="card-body p-2">
+                                <i class="fas fa-chart-line text-white mb-1" style="font-size: 1.2rem;"></i>
+                                <h6 class="text-white fw-bold mb-0">{{ book.sale_num }}</h6>
+                                <small class="text-white" style="font-size: 0.75rem;">{% trans "销量" %}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Book Information & Purchase -->
+            <div class="col-lg-7" data-aos="fade-left">
+                <!-- Book Details Card -->
+                <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
+                    <div class="card-header text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px 15px 0 0; padding: 20px;">
+                        <h4 class="mb-0 fw-bold"><i class="fas fa-info-circle me-2"></i>{% trans "图书信息" %}</h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- Description -->
+                        {% if book.description %}
+                        <div class="mb-4 pb-4 border-bottom">
+                            <h5 class="fw-bold mb-3" style="color: #667eea;">
+                                <i class="fas fa-align-left me-2"></i>{% trans "图书简介" %}
+                            </h5>
+                            <p class="text-muted" style="line-height: 1.8; font-size: 1.05rem;">
+                                {{ book.description }}
+                            </p>
+                        </div>
+                        {% endif %}
+
+                        <!-- Publisher Info -->
+                        <div class="mb-4 pb-4 border-bottom">
+                            <h5 class="fw-bold mb-3" style="color: #667eea;">
+                                <i class="fas fa-building me-2"></i>{% trans "出版社信息" %}
+                            </h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-start">
+                                        <div class="icon-box me-3" style="width: 40px; height: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-building text-white"></i>
+                                        </div>
+                                        <div>
+                                            <small class="text-muted d-block">{% trans "出版社名称" %}</small>
+                                            <strong style="color: #333;">{{ book.publisher.publisher_name }}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-start">
+                                        <div class="icon-box me-3" style="width: 40px; height: 40px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-map-marker-alt text-white"></i>
+                                        </div>
+                                        <div>
+                                            <small class="text-muted d-block">{% trans "出版社地址" %}</small>
+                                            <strong style="color: #333;">{{ book.publisher.publisher_address }}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Authors Section -->
+                        {% if authors %}
+                        <div class="mb-4 pb-4 border-bottom">
+                            <h5 class="fw-bold mb-3" style="color: #667eea;">
+                                <i class="fas fa-user-pen me-2"></i>{% trans "作者信息" %}
+                            </h5>
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for author in authors %}
+                                <a href="{% url 'manager:public_author_detail' author.id %}" 
+                                   class="btn btn-sm" 
+                                   style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 20px; padding: 8px 20px; transition: all 0.3s;">
+                                    <i class="fas fa-user me-1"></i>{{ author.name }}
+                                </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Purchase Card -->
+                <div class="card border-0 shadow-sm" style="border-radius: 15px;">
+                    <div class="card-header text-white" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 15px 15px 0 0; padding: 20px;">
+                        <h4 class="mb-0 fw-bold"><i class="fas fa-shopping-cart me-2"></i>{% trans "购买选项" %}</h4>
+                    </div>
+                    <div class="card-body p-4">
+                        {% if book.inventory > 0 %}
+                            <!-- Quantity Selector -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold mb-3" style="color: #333; font-size: 1.1rem;">
+                                    <i class="fas fa-boxes me-2" style="color: #667eea;"></i>{% trans "选择数量" %}
+                                </label>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="input-group" style="width: 180px;">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="changeQuantity(-1)" id="decrease-btn" style="border-radius: 10px 0 0 10px; padding: 12px 20px;">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <input type="number" class="form-control text-center fw-bold" 
+                                               id="quantity" value="1" min="1" max="{{ book.inventory }}"
+                                               onchange="validateAndUpdateQuantity()"
+                                               style="font-size: 1.2rem; border-left: none; border-right: none;">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="changeQuantity(1)" id="increase-btn" style="border-radius: 0 10px 10px 0; padding: 12px 20px;">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                    <small class="text-muted">{% blocktrans with inv=book.inventory %}最多 {{ inv }} 本{% endblocktrans %}</small>
+                                </div>
+                            </div>
+
+                            <!-- Price Summary -->
+                            <div class="price-summary p-4 mb-4" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 15px; border: 2px solid #667eea;">
+                                <div class="row g-3 mb-3">
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">{% trans "单价" %}</small>
+                                        <h5 class="mb-0 fw-bold" style="color: #667eea;">¥{{ book.price }}</h5>
+                                    </div>
+                                    <div class="col-6 text-end">
+                                        <small class="text-muted d-block">{% trans "数量" %}</small>
+                                        <h5 class="mb-0 fw-bold" id="display-quantity" style="color: #667eea;">1</h5>
+                                    </div>
+                                </div>
+                                <hr style="border-top: 2px dashed #667eea;">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="fw-bold" style="font-size: 1.3rem; color: #333;">{% trans "总计" %}:</span>
+                                    <span class="fw-bold" id="total-price" style="font-size: 2rem; color: #10b981;">¥{{ book.price }}</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Purchase Buttons -->
+                            <div class="d-grid gap-3">
+                                <form method="post" action="{% url 'manager:buy_now' book.id %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="quantity" value="1" id="buy-quantity">
+                                    <button type="submit" class="btn btn-lg w-100" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border-radius: 12px; padding: 15px; font-size: 1.1rem; font-weight: 600; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);">
+                                        <i class="fas fa-bolt me-2"></i>{% trans "立即购买" %}
+                                    </button>
+                                </form>
+                                <button onclick="addToCartWithQuantity({{ book.id }})" 
+                                        class="btn btn-lg w-100" 
+                                        id="add-to-cart-btn"
+                                        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 12px; padding: 15px; font-size: 1.1rem; font-weight: 600; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
+                                    <i class="fas fa-shopping-cart me-2"></i>{% trans "加入购物车" %}
+                                </button>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-danger d-flex align-items-center" style="border-radius: 12px;">
+                                <i class="fas fa-exclamation-circle fa-2x me-3"></i>
+                                <div>
+                                    <h6 class="mb-1 fw-bold">{% trans "抱歉，商品已售罄" %}</h6>
+                                    <small>{% trans "该商品暂时缺货，无法购买" %}</small>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <!-- Quick Actions -->
+                        <div class="mt-4 pt-4 border-top">
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'manager:public_publisher_detail' book.publisher.id %}" 
+                                   class="btn btn-outline-secondary">
+                                    <i class="fas fa-building me-2"></i>{% trans "查看出版社详情" %}
+                                </a>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <a href="{% url 'manager:public_books' %}" class="btn btn-outline-secondary w-100">
+                                            <i class="fas fa-arrow-left me-1"></i>{% trans "返回列表" %}
+                                        </a>
+                                    </div>
+                                    <div class="col-6">
+                                        <a href="{% url 'manager:view_cart' %}" class="btn btn-outline-info w-100">
+                                            <i class="fas fa-shopping-cart me-1"></i>{% trans "购物车" %}
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Related Books -->
+{% if related_books %}
+<section class="py-5" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <h3 class="fw-bold mb-2" style="color: #333;">
+                <i class="fas fa-book-open me-2" style="color: #667eea;"></i>{% trans "相关推荐" %}
+            </h3>
+            <p class="text-muted">{% trans "来自同一出版社的优质图书" %}</p>
+        </div>
+        <div class="row g-4">
+            {% for related_book in related_books %}
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:100 }}">
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 15px; transition: all 0.3s ease; overflow: hidden;">
+                    <div class="card-body p-4 d-flex flex-column">
+                        <div class="text-center mb-3">
+                            <div class="book-icon-wrapper mx-auto mb-3" style="width: 80px; height: 80px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
+                                <i class="fas fa-book text-white" style="font-size: 2rem;"></i>
+                            </div>
+                        </div>
+                        <h6 class="fw-bold text-center mb-2" style="color: #333; min-height: 48px; display: flex; align-items: center; justify-content: center;">
+                            {{ related_book.name }}
+                        </h6>
+                        <p class="text-muted small text-center mb-3">
+                            <i class="fas fa-building me-1" style="color: #667eea;"></i>
+                            {{ related_book.publisher.publisher_name }}
+                        </p>
+                        <div class="mt-auto">
+                            <div class="text-center mb-3">
+                                <span class="badge px-3 py-2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-size: 1.1rem; border-radius: 20px;">
+                                    ¥{{ related_book.price }}
+                                </span>
+                            </div>
+                            <a href="{% url 'manager:public_book_detail' related_book.id %}" 
+                               class="btn btn-sm w-100" 
+                               style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 10px; padding: 10px;">
+                                <i class="fas fa-info-circle me-1"></i>{% trans "查看详情" %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<style>
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+    
+    .input-group .btn:hover {
+        transform: none;
+    }
+    
+    .breadcrumb-item a:hover {
+        text-decoration: underline !important;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Book detail specific JavaScript
+const unitPrice = {{ book.price }};
+const maxInventory = {{ book.inventory }};
+
+// Quantity management functions
+function changeQuantity(change) {
+    const quantityInput = document.getElementById('quantity');
+    const currentValue = parseInt(quantityInput.value) || 1;
+    const newValue = currentValue + change;
+    
+    if (newValue >= 1 && newValue <= maxInventory) {
+        quantityInput.value = newValue;
+        updateAllPriceDisplays();
+        updateButtonStates();
+    }
+}
+
+function validateAndUpdateQuantity() {
+    const quantityInput = document.getElementById('quantity');
+    let value = parseInt(quantityInput.value) || 1;
+    
+    // Validate bounds
+    if (value < 1) {
+        value = 1;
+        showToast('{% trans "数量不能少于1本" %}', 'error');
+    } else if (value > maxInventory) {
+        value = maxInventory;
+        showToast(`{% trans "库存不足！最大可购买" %}${maxInventory}{% trans "本" %}`, 'error');
+    }
+    
+    quantityInput.value = value;
+    updateAllPriceDisplays();
+    updateButtonStates();
+}
+
+function updateAllPriceDisplays() {
+    const quantity = parseInt(document.getElementById('quantity').value) || 1;
+    const totalPrice = (quantity * unitPrice).toFixed(2);
+    
+    // Update all price displays
+    document.getElementById('total-price').textContent = `¥${totalPrice}`;
+    document.getElementById('display-quantity').textContent = quantity;
+    document.getElementById('buy-quantity').value = quantity;
+}
+
+function updateButtonStates() {
+    const quantity = parseInt(document.getElementById('quantity').value) || 1;
+    const decreaseBtn = document.getElementById('decrease-btn');
+    const increaseBtn = document.getElementById('increase-btn');
+    
+    // Update button states
+    decreaseBtn.disabled = quantity <= 1;
+    increaseBtn.disabled = quantity >= maxInventory;
+    
+    // Add visual feedback
+    if (quantity <= 1) {
+        decreaseBtn.classList.add('disabled');
+    } else {
+        decreaseBtn.classList.remove('disabled');
+    }
+    
+    if (quantity >= maxInventory) {
+        increaseBtn.classList.add('disabled');
+    } else {
+        increaseBtn.classList.remove('disabled');
+    }
+}
+
+// Get CSRF token
+function getCsrfToken() {
+    const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    return csrfInput ? csrfInput.value : '{{ csrf_token }}';
+}
+
+// Show toast notification
+function showToast(message, type) {
+    // Remove existing toasts
+    const existingToasts = document.querySelectorAll('.toast-notification');
+    existingToasts.forEach(toast => toast.remove());
+    
+    const toast = document.createElement('div');
+    toast.className = `toast-notification alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed`;
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px; max-width: 400px;';
+    toast.innerHTML = `
+        <div class="d-flex align-items-center">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+            <span>${message}</span>
+            <button type="button" class="btn-close ms-auto" onclick="this.parentElement.parentElement.remove()"></button>
+        </div>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.remove();
+        }
+    }, 5000);
+}
+
+// Update cart badge
+function updateCartBadge(count) {
+    const badge = document.querySelector('.cart-badge, #cart-badge');
+    if (badge) {
+        badge.textContent = count;
+        badge.style.display = count > 0 ? 'inline-block' : 'none';
+    }
+}
+
+// Add to cart with quantity
+function addToCartWithQuantity(bookId) {
+    const quantity = parseInt(document.getElementById('quantity').value) || 1;
+    const button = document.getElementById('add-to-cart-btn');
+    const originalText = button.innerHTML;
+    
+    // Validate quantity
+    if (quantity > maxInventory) {
+        showToast(`{% trans "库存不足！最大可购买" %}${maxInventory}{% trans "本" %}`, 'error');
+        return;
+    }
+    
+    // Show loading state
+    button.innerHTML = '<span class="loading-spinner"></span> {% trans "添加中..." %}';
+    button.disabled = true;
+    
+    // Ensure CSRF token
+    if (!document.querySelector('[name=csrfmiddlewaretoken]')) {
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = getCsrfToken();
+        document.body.appendChild(csrfInput);
+    }
+    
+    const csrfToken = getCsrfToken();
+    
+    fetch(`/manager/cart/add/${bookId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrfToken
+        },
+        body: `quantity=${quantity}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast(data.message, 'success');
+            updateCartBadge(data.cart_count);
+            
+            // Success feedback
+            button.innerHTML = '<i class="fas fa-check"></i> {% trans "已添加到购物车" %}';
+            button.classList.add('btn-success');
+            button.classList.remove('btn-primary');
+            
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.classList.remove('btn-success');
+                button.classList.add('btn-primary');
+                button.disabled = false;
+            }, 2000);
+        } else {
+            showToast(data.message, 'error');
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
+    })
+    .catch(error => {
+        showToast('{% trans "添加到购物车失败，请重试" %}', 'error');
+        button.innerHTML = originalText;
+        button.disabled = false;
+    });
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize price displays
+    updateAllPriceDisplays();
+    updateButtonStates();
+    
+    // Add event listener for quantity input
+    const quantityInput = document.getElementById('quantity');
+    quantityInput.addEventListener('input', validateAndUpdateQuantity);
+    quantityInput.addEventListener('change', validateAndUpdateQuantity);
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        if (e.target.id === 'quantity') {
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                changeQuantity(1);
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                changeQuantity(-1);
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

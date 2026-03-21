@@ -1,1311 +1,246 @@
-<!DOCTYPE html>
-<html lang="zh-hans">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>出版社详情 - {{ publisher.publisher_name }} | 图书管理系统</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: #667eea;
-            --secondary-color: #764ba2;
-            --success-color: #10b981;
-            --warning-color: #f59e0b;
-            --danger-color: #ef4444;
-            --info-color: #06b6d4;
-            --footer-bg: #1a1a2e;
-            --footer-secondary: #16213e;
-            --footer-accent: #0f3460;
-        }
-        
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            padding-top: 76px;
-        }
-        
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 60px 0;
-            margin-bottom: 40px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
-        
-        .publisher-logo {
-            width: 150px;
-            height: 150px;
-            border-radius: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 4rem;
-            color: white;
-            margin: 0 auto 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
-        
-        .publisher-name {
-            font-size: 2.5rem;
-            font-weight: 600;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-        
-        .publisher-info {
-            text-align: center;
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
-        
-        .content-section {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-        }
-        
-        .section-title {
-            color: #333;
-            font-weight: 600;
-            margin-bottom: 25px;
-            padding-bottom: 10px;
-            border-bottom: 3px solid var(--primary-color);
-            display: flex;
-            align-items: center;
-        }
-        
-        .section-title i {
-            margin-right: 10px;
-            color: var(--primary-color);
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        .book-card {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
-        }
-        
-        .book-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            border-color: var(--primary-color);
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-        }
-        
-        .book-title {
-            font-size: 1.3rem;
-            font-weight: 500;
-            color: #333;
-            margin-bottom: 10px;
-        }
-        
-        .book-meta {
-            color: #6c757d;
-            font-size: 0.9rem;
-            margin-bottom: 8px;
-        }
-        
-        .book-meta i {
-            width: 20px;
-            text-align: center;
-            margin-right: 8px;
-        }
-        
-        .price-tag {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-weight: 500;
-            display: inline-block;
-            margin-top: 10px;
-        }
-        
-        .stats-card {
-            text-align: center;
-            padding: 25px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-            transition: all 0.3s ease;
-        }
-        
-        .stats-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
-        }
-        
-        .stats-number {
-            font-size: 2.5rem;
-            font-weight: 700;
-            display: block;
-        }
-        
-        .stats-label {
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
-        
-        .back-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            color: white;
-            padding: 12px 25px;
-            border-radius: 25px;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
-        }
-        
-        .back-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-            color: white;
-            text-decoration: none;
-        }
-        
-        .back-btn i {
-            margin-right: 8px;
-        }
-        
-        .no-books {
-            text-align: center;
-            color: #6c757d;
-            padding: 40px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border: 2px dashed #dee2e6;
-        }
-        
-        .no-books i {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            color: #adb5bd;
-        }
-        
-        .authors-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        
-        .author-tag {
-            background: #e9ecef;
-            color: #495057;
-            padding: 4px 12px;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-        
-        .address-card {
-            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        
-        .address-card i {
-            font-size: 2rem;
-            color: #e74c3c;
-            margin-bottom: 10px;
-        }
-        
-        .address-text {
-            font-size: 1.1rem;
-            color: #2c3e50;
-            font-weight: 500;
-        }
-        
-        .book-cover {
-            text-align: center;
-            margin-bottom: 15px;
-        }
-        
-        .book-cover-img {
-            max-width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s ease;
-        }
-        
-        .book-cover-img:hover {
-            transform: scale(1.05);
-        }
-        
-        .book-description {
-            color: #555;
-            font-style: italic;
-            margin-bottom: 15px;
-            padding: 12px;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
-            border-left: 4px solid var(--primary-color);
-            border-radius: 8px;
-        }
-        
-        .book-description i {
-            color: var(--primary-color);
-            margin-right: 8px;
-        }
-        
-        .card-modern {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            transition: all 0.3s ease;
-            overflow: hidden;
-        }
-        
-        .card-modern:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
-        }
-        
-        .btn-primary-modern {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            color: white;
-            padding: 12px 30px;
-            border-radius: 25px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary-modern:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-            color: white;
-        }
-        
-        .btn-outline-primary-modern {
-            background: transparent;
-            border: 2px solid var(--primary-color);
-            color: var(--primary-color);
-            padding: 12px 30px;
-            border-radius: 25px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-outline-primary-modern:hover {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-color: var(--primary-color);
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-        }
-        
-        /* Statistics Cards */
-        .stat-card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            text-align: center;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-            transition: all 0.3s ease;
-            height: 100%;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
-        }
-        
-        .stat-icon {
-            width: 70px;
-            height: 70px;
-            margin: 0 auto 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 2rem;
-        }
-        
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 5px;
-        }
-        
-        .stat-label {
-            color: #6c757d;
-            font-size: 0.95rem;
-            font-weight: 500;
-        }
-        
-        /* Information Groups */
-        .info-group {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 20px;
-        }
-        
-        .info-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        .info-item:last-child {
-            border-bottom: none;
-        }
-        
-        .info-label {
-            color: #6c757d;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .info-label i {
-            color: var(--primary-color);
-            width: 20px;
-        }
-        
-        .info-value {
-            color: #2c3e50;
-            font-weight: 600;
-        }
-        
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-        }
-        
-        .stats-item {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-            border: 2px solid transparent;
-            transition: all 0.3s ease;
-        }
-        
-        .stats-item:hover {
-            border-color: var(--primary-color);
-            transform: scale(1.05);
-        }
-        
-        .stats-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-        
-        .stats-desc {
-            color: #6c757d;
-            font-size: 0.9rem;
-        }
-        
-        /* Books Section */
-        .books-section {
-            background: #f8f9fa;
-            padding: 60px 0;
-        }
-        
-        .section-header {
-            text-align: center;
-        }
-        
-        .section-header h3 {
-            font-size: 2.2rem;
-            font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-        
-        .section-header h3 i {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-right: 10px;
-        }
-        
-        .book-card {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-            transition: all 0.3s ease;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .book-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
-        }
-        
-        .book-cover-wrapper {
-            height: 280px;
-            overflow: hidden;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .book-cover-wrapper img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
-        }
-        
-        .book-card:hover .book-cover-wrapper img {
-            transform: scale(1.1);
-        }
-        
-        .book-info {
-            padding: 20px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .book-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 12px;
-            line-height: 1.4;
-        }
-        
-        .book-description {
-            color: #6c757d;
-            font-size: 0.9rem;
-            font-style: italic;
-            margin-bottom: 15px;
-            padding: 10px;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-            border-left: 3px solid var(--primary-color);
-            border-radius: 5px;
-            line-height: 1.5;
-        }
-        
-        .book-description i {
-            color: var(--primary-color);
-            margin-right: 5px;
-            font-size: 0.8rem;
-        }
-        
-        .book-meta {
-            margin-bottom: 15px;
-        }
-        
-        .meta-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 8px;
-            color: #6c757d;
-            font-size: 0.9rem;
-        }
-        
-        .meta-item i {
-            width: 20px;
-            color: var(--primary-color);
-            margin-right: 8px;
-        }
-        
-        /* Main Content Wrapper */
-        .page-wrapper {
-            min-height: calc(100vh - 76px);
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .content-wrapper {
-            flex: 1;
-        }
-        
-        /* Footer Styles - Full Width */
-        .footer {
-            background: linear-gradient(135deg, var(--footer-bg) 0%, var(--footer-secondary) 50%, var(--footer-accent) 100%);
-            color: #ffffff;
-            padding: 60px 0 20px 0;
-            margin: 0;
-            width: 100%;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .footer::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary-color), var(--danger-color), var(--success-color), var(--warning-color));
-        }
-        
-        .footer-section {
-            margin-bottom: 30px;
-        }
-        
-        .footer-logo {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .footer-logo i {
-            font-size: 2.5rem;
-            color: var(--primary-color);
-            margin-right: 15px;
-        }
-        
-        .footer-logo h4 {
-            margin: 0;
-            font-weight: 700;
-            color: #ffffff;
-            font-size: 1.5rem;
-        }
-        
-        .footer-description {
-            color: #b8c6db;
-            line-height: 1.7;
-            margin-bottom: 25px;
-            font-size: 0.95rem;
-        }
-        
-        .footer-title {
-            color: #ffffff;
-            font-weight: 600;
-            margin-bottom: 20px;
-            font-size: 1.1rem;
-            position: relative;
-            padding-bottom: 10px;
-        }
-        
-        .footer-title::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 50px;
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-            border-radius: 2px;
-        }
-        
-        .footer-links {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        
-        .footer-links li {
-            margin-bottom: 12px;
-        }
-        
-        .footer-links a {
-            color: #b8c6db;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            transition: all 0.3s ease;
-            font-size: 0.95rem;
-        }
-        
-        .footer-links a:hover {
-            color: var(--primary-color);
-            padding-left: 8px;
-        }
-        
-        .footer-links a i {
-            font-size: 0.8rem;
-            margin-right: 8px;
-            opacity: 0.7;
-        }
-        
-        .contact-item {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: 20px;
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            transition: all 0.3s ease;
-        }
-        
-        .contact-item:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateX(5px);
-        }
-        
-        .contact-item i {
-            font-size: 1.2rem;
-            color: var(--primary-color);
-            margin-right: 15px;
-            margin-top: 2px;
-            min-width: 20px;
-        }
-        
-        .contact-details strong {
-            display: block;
-            color: #ffffff;
-            font-weight: 600;
-            margin-bottom: 4px;
-            font-size: 0.9rem;
-        }
-        
-        .contact-details span {
-            color: #b8c6db;
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }
-        
-        .social-links {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        
-        .social-link {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #ffffff;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-        
-        .social-link:hover {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-        }
-        
-        .footer-divider {
-            border: none;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            margin: 40px 0 30px 0;
-        }
-        
-        .footer-bottom {
-            padding-top: 20px;
-        }
-        
-        .copyright p {
-            color: #8892b0;
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-        }
-        
-        .legal-links {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            font-size: 0.85rem;
-            margin-top: 10px;
-        }
-        
-        .legal-links a {
-            color: #8892b0;
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-        
-        .legal-links a:hover {
-            color: var(--primary-color);
-        }
-        
-        .back-to-top {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-            z-index: 1000;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-        }
-        
-        .back-to-top.visible {
-            opacity: 1;
-            visibility: visible;
-        }
-        
-        .back-to-top:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-        }
-        
-        @media (max-width: 768px) {
-            body {
-                padding-top: 70px;
-            }
-            
-            .header {
-                padding: 40px 0;
-            }
-            
-            .publisher-logo {
-                width: 100px;
-                height: 100px;
-                font-size: 3rem;
-                margin-bottom: 20px;
-            }
-            
-            .publisher-name {
-                font-size: 1.8rem;
-            }
-            
-            .stat-card {
-                margin-bottom: 15px;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .book-cover-wrapper {
-                height: 220px;
-            }
-            
-            .footer {
-                padding: 40px 0 20px 0;
-            }
-            
-            .section-header h3 {
-                font-size: 1.8rem;
-            }
-        }
-        
-        @media (max-width: 576px) {
-            .stat-number {
-                font-size: 2rem;
-            }
-            
-            .stat-icon {
-                width: 60px;
-                height: 60px;
-                font-size: 1.5rem;
-            }
-            
-            .book-title {
-                font-size: 1.1rem;
-            }
-            
-            .btn-primary-modern, .btn-outline-primary-modern {
-                padding: 10px 20px;
-                font-size: 0.9rem;
-            }
-        }
-    </style>
-</head>
-<body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="{% url 'manager:public_home' %}" style="font-weight: 700; font-size: 1.4rem;">
-                <i class="fas fa-book-open" style="margin-right: 10px; font-size: 1.5rem; color: #fff;"></i>
-                <span style="color: white;" data-zh="图书管理系统" data-en="Book Management System">图书管理系统</span>
-            </a>
-            
-            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" style="padding: 8px 12px;">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto ms-lg-4">
-                    <li class="nav-item">
-                        <a class="nav-link px-3 py-2" href="{% url 'manager:public_home' %}" style="font-weight: 500; transition: all 0.3s ease; border-radius: 8px;">
-                            <i class="fas fa-home me-1"></i> <span data-zh="首页" data-en="Home">首页</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link px-3 py-2" href="{% url 'manager:public_books' %}" style="font-weight: 500; transition: all 0.3s ease; border-radius: 8px;">
-                            <i class="fas fa-book me-1"></i> <span data-zh="图书目录" data-en="Books">图书目录</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link px-3 py-2" href="{% url 'manager:public_authors' %}" style="font-weight: 500; transition: all 0.3s ease; border-radius: 8px;">
-                            <i class="fas fa-user-edit me-1"></i> <span data-zh="作者" data-en="Authors">作者</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link px-3 py-2 active" href="{% url 'manager:public_publishers' %}" style="font-weight: 500; transition: all 0.3s ease; border-radius: 8px; background: rgba(255,255,255,0.2);">
-                            <i class="fas fa-building me-1"></i> <span data-zh="出版社" data-en="Publishers">出版社</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link px-3 py-2" href="{% url 'manager:track_order' %}" style="font-weight: 500; transition: all 0.3s ease; border-radius: 8px;">
-                            <i class="fas fa-search-location me-1"></i> <span data-zh="跟踪订单" data-en="Track Order">跟踪订单</span>
-                        </a>
-                    </li>
-                </ul>
-                
-                <div class="d-flex align-items-center gap-3">
-                    <!-- Language Switcher -->
-                    <button id="languageSwitcher" onclick="toggleLanguage()" class="btn btn-sm d-flex align-items-center" style="background: rgba(255,255,255,0.15); color: #fff; padding: 8px 15px; border-radius: 25px; font-weight: 600; border: 2px solid rgba(255,255,255,0.3); transition: all 0.3s ease; backdrop-filter: blur(10px);">
-                        <i class="fas fa-globe me-2"></i> 
-                        <span id="langText">EN</span>
-                    </button>
-                    
-                    <a href="{% url 'manager:view_cart' %}" class="position-relative" style="text-decoration: none; transition: transform 0.3s ease;">
-                        <div class="d-flex align-items-center justify-content-center" style="width: 45px; height: 45px; background: rgba(255,255,255,0.15); border-radius: 50%; backdrop-filter: blur(10px); transition: all 0.3s ease;">
-                            <i class="fas fa-shopping-cart" style="font-size: 1.2rem; color: #fff;"></i>
-                        </div>
-                        <span id="cart-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill" style="font-size: 0.7rem; background: linear-gradient(135deg, #e74c3c, #c0392b); padding: 4px 7px; box-shadow: 0 2px 8px rgba(231, 76, 60, 0.4);">
-                            0
-                        </span>
-                    </a>
-                    <a href="/manager/login/" class="btn btn-sm d-flex align-items-center" style="background: rgba(255,255,255,0.95); color: #764ba2; padding: 10px 20px; border-radius: 25px; font-weight: 600; text-decoration: none; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-                        <i class="fas fa-user-shield me-2"></i> <span data-zh="管理员登录" data-en="Admin Login">管理员登录</span>
-                    </a>
+{% extends 'public/base.html' %}
+{% load i18n %}
+
+{% block title %}{{ publisher.publisher_name }} - {% trans "出版社详情" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+:root { --primary-color: #667eea; --secondary-color: #764ba2; }
+.publisher-hero {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 50px 0 70px; color: white; position: relative; overflow: hidden;
+}
+.publisher-hero::before { content:''; position:absolute; top:-80px; right:-80px; width:400px; height:400px; background:rgba(255,255,255,0.06); border-radius:50%; }
+.publisher-hero::after { content:''; position:absolute; bottom:-60px; left:-50px; width:300px; height:300px; background:rgba(255,255,255,0.04); border-radius:50%; }
+.pub-logo { width:110px; height:110px; background:rgba(255,255,255,0.2); border-radius:22px; display:flex; align-items:center; justify-content:center; border:3px solid rgba(255,255,255,0.35); backdrop-filter:blur(10px); box-shadow:0 8px 30px rgba(0,0,0,0.2); flex-shrink:0; }
+.stat-card { background:white; border-radius:14px; padding:22px 18px; text-align:center; box-shadow:0 4px 20px rgba(102,126,234,0.1); border:1px solid rgba(102,126,234,0.1); transition:all 0.3s; }
+.stat-card:hover { transform:translateY(-5px); box-shadow:0 12px 35px rgba(102,126,234,0.2); }
+.stat-icon { width:52px; height:52px; border-radius:13px; display:flex; align-items:center; justify-content:center; margin:0 auto 13px; }
+.stat-value { font-size:1.7rem; font-weight:800; color:#1e293b; line-height:1; margin-bottom:5px; }
+.stat-label { font-size:0.82rem; color:#9ca3af; font-weight:500; }
+.section-card { background:white; border-radius:16px; padding:28px; box-shadow:0 4px 20px rgba(102,126,234,0.08); border:1px solid rgba(102,126,234,0.08); margin-bottom:20px; }
+.section-heading { font-size:1rem; font-weight:700; color:#667eea; margin-bottom:18px; padding-bottom:12px; border-bottom:2px solid rgba(102,126,234,0.12); display:flex; align-items:center; gap:8px; }
+.info-row { display:flex; padding:11px 0; border-bottom:1px solid #f3f4f6; align-items:flex-start; }
+.info-row:last-child { border-bottom:none; }
+.info-lbl { width:100px; font-size:0.85rem; color:#9ca3af; display:flex; align-items:center; gap:6px; flex-shrink:0; }
+.info-val { font-weight:600; color:#1e293b; font-size:0.93rem; }
+.book-card { background:white; border-radius:14px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.07); transition:all 0.3s; border:1px solid rgba(102,126,234,0.08); }
+.book-card:hover { transform:translateY(-6px); box-shadow:0 15px 40px rgba(102,126,234,0.18); }
+.book-cover { height:200px; overflow:hidden; background:linear-gradient(135deg,#f0f0ff,#e8e0ff); display:flex; align-items:center; justify-content:center; }
+.book-cover img { width:100%; height:100%; object-fit:cover; transition:transform 0.3s; }
+.book-card:hover .book-cover img { transform:scale(1.07); }
+.book-badge { font-size:0.75rem; padding:3px 10px; border-radius:20px; font-weight:600; display:inline-flex; align-items:center; gap:4px; }
+.badge-stock-ok { background:#d1fae5; color:#065f46; }
+.badge-stock-low { background:#fef3c7; color:#92400e; }
+.badge-stock-out { background:#fee2e2; color:#991b1b; }
+.btn-primary-grad { background:linear-gradient(135deg,#667eea,#764ba2); color:white; border:none; border-radius:8px; padding:7px 16px; font-size:0.85rem; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:all 0.2s; }
+.btn-primary-grad:hover { transform:translateY(-2px); box-shadow:0 5px 15px rgba(102,126,234,0.35); color:white; }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<div class="publisher-hero">
+    <div class="container position-relative" style="z-index:1;">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'manager:public_home' %}" class="text-white opacity-75 small">{% trans "首页" %}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'manager:public_publishers' %}" class="text-white opacity-75 small">{% trans "出版社" %}</a></li>
+                <li class="breadcrumb-item active text-white small">{{ publisher.publisher_name }}</li>
+            </ol>
+        </nav>
+        <div class="d-flex align-items-center gap-4 flex-wrap">
+            <div class="pub-logo">
+                <i class="fas fa-building" style="font-size:2.8rem;color:rgba(255,255,255,0.85);"></i>
+            </div>
+            <div>
+                <h1 class="fw-bold mb-2" style="font-size:clamp(1.5rem,3vw,2.3rem);text-shadow:0 2px 8px rgba(0,0,0,0.2);">{{ publisher.publisher_name }}</h1>
+                <div class="d-flex flex-wrap gap-2 mb-2">
+                    <span style="background:rgba(255,255,255,0.15);padding:5px 14px;border-radius:20px;font-size:0.85rem;backdrop-filter:blur(10px);">
+                        <i class="fas fa-map-marker-alt me-1"></i>{{ publisher.publisher_address }}
+                    </span>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <span style="background:rgba(255,255,255,0.15);padding:5px 14px;border-radius:20px;font-size:0.85rem;backdrop-filter:blur(10px);">
+                        <i class="fas fa-book me-1"></i>{{ books|length }} {% trans "本图书" %}
+                    </span>
+                    <span style="background:rgba(255,255,255,0.15);padding:5px 14px;border-radius:20px;font-size:0.85rem;backdrop-filter:blur(10px);">
+                        <i class="fas fa-chart-line me-1"></i>{% trans "总销量" %} {{ total_sales }}
+                    </span>
                 </div>
             </div>
         </div>
-    </nav>
-    
-    <!-- Hero Header Section -->
-    <div class="header">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-3 text-center">
-                    <div class="publisher-logo">
-                        <i class="fas fa-building"></i>
+    </div>
+</div>
+
+<!-- Stats -->
+<div style="background:#f8f9ff; margin-top:-30px; position:relative; z-index:5; padding:0 0 0;">
+    <div class="container">
+        <div class="row g-3 pb-4">
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background:linear-gradient(135deg,rgba(102,126,234,0.15),rgba(118,75,162,0.15));">
+                        <i class="fas fa-book-open" style="color:#667eea;font-size:1.3rem;"></i>
+                    </div>
+                    <div class="stat-value">{{ books|length }}</div>
+                    <div class="stat-label">{% trans "出版图书" %}</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background:linear-gradient(135deg,rgba(16,185,129,0.15),rgba(5,150,105,0.15));">
+                        <i class="fas fa-chart-line" style="color:#10b981;font-size:1.3rem;"></i>
+                    </div>
+                    <div class="stat-value">{{ total_sales }}</div>
+                    <div class="stat-label">{% trans "总销量" %}</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background:linear-gradient(135deg,rgba(245,158,11,0.15),rgba(217,119,6,0.15));">
+                        <i class="fas fa-users" style="color:#f59e0b;font-size:1.3rem;"></i>
+                    </div>
+                    <div class="stat-value">{{ author_count }}</div>
+                    <div class="stat-label">{% trans "合作作者" %}</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background:linear-gradient(135deg,rgba(239,68,68,0.15),rgba(220,38,38,0.15));">
+                        <i class="fas fa-tag" style="color:#ef4444;font-size:1.3rem;"></i>
+                    </div>
+                    <div class="stat-value">{% if avg_price %}¥{{ avg_price|floatformat:0 }}{% else %}—{% endif %}</div>
+                    <div class="stat-label">{% trans "平均售价" %}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Content -->
+<div style="background:#f8f9ff; padding:0 0 60px;">
+    <div class="container">
+        <div class="row g-4 mb-4">
+            <!-- Publisher Info -->
+            <div class="col-lg-6">
+                <div class="section-card">
+                    <div class="section-heading"><i class="fas fa-info-circle"></i>{% trans "出版社信息" %}</div>
+                    <div class="info-row">
+                        <span class="info-lbl"><i class="fas fa-id-badge text-primary"></i>{% trans "编号" %}</span>
+                        <span class="info-val">#{{ publisher.id }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-lbl"><i class="fas fa-building text-primary"></i>{% trans "名称" %}</span>
+                        <span class="info-val">{{ publisher.publisher_name }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-lbl"><i class="fas fa-map-marker-alt text-danger"></i>{% trans "地址" %}</span>
+                        <span class="info-val">{{ publisher.publisher_address }}</span>
                     </div>
                 </div>
-                <div class="col-md-9">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <h1 class="publisher-name mb-2">{{ publisher.publisher_name }}</h1>
-                            <div class="publisher-info mb-3">
-                                <i class="fas fa-map-marker-alt me-2"></i> {{ publisher.publisher_address }}
+            </div>
+            <!-- Publisher Stats -->
+            <div class="col-lg-6">
+                <div class="section-card h-100">
+                    <div class="section-heading"><i class="fas fa-chart-bar"></i>{% trans "经营数据" %}</div>
+                    <div class="row g-3 text-center">
+                        <div class="col-6">
+                            <div style="padding:16px;background:rgba(102,126,234,0.06);border-radius:12px;">
+                                <div style="font-size:1.6rem;font-weight:800;color:#667eea;">{{ books|length }}</div>
+                                <div class="small text-muted">{% trans "图书总数" %}</div>
                             </div>
-                            <a href="{% url 'manager:public_publishers' %}" class="back-btn">
-                                <i class="fas fa-arrow-left"></i> <span data-zh="返回出版社列表" data-en="Back to Publishers">返回出版社列表</span>
-                            </a>
+                        </div>
+                        <div class="col-6">
+                            <div style="padding:16px;background:rgba(16,185,129,0.06);border-radius:12px;">
+                                <div style="font-size:1.6rem;font-weight:800;color:#10b981;">{{ total_sales }}</div>
+                                <div class="small text-muted">{% trans "总销量" %}</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div style="padding:16px;background:rgba(245,158,11,0.06);border-radius:12px;">
+                                <div style="font-size:1.6rem;font-weight:800;color:#f59e0b;">{{ total_inventory }}</div>
+                                <div class="small text-muted">{% trans "总库存" %}</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div style="padding:16px;background:rgba(239,68,68,0.06);border-radius:12px;">
+                                <div style="font-size:1.6rem;font-weight:800;color:#ef4444;">{% if total_revenue %}¥{{ total_revenue|floatformat:0 }}{% else %}—{% endif %}</div>
+                                <div class="small text-muted">{% trans "预计营收" %}</div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Statistics Cards Section -->
-    <div class="container mt-4 mb-4">
-        <div class="row g-3">
-            <div class="col-md-3 col-sm-6">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-book"></i>
-                    </div>
-                    <div class="stat-number">{{ books.count }}</div>
-                    <div class="stat-label" data-zh="出版图书" data-en="Published Books">出版图书</div>
-                </div>
+        <!-- Books Grid -->
+        <div class="section-card">
+            <div class="section-heading">
+                <i class="fas fa-book"></i>{% trans "出版图书" %}
+                <span class="ms-auto px-3 py-0 rounded-pill text-white small fw-bold" style="background:linear-gradient(135deg,#667eea,#764ba2);">{{ books|length }}</span>
             </div>
-            <div class="col-md-3 col-sm-6">
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, var(--success-color), #059669);">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <div class="stat-number">{{ total_sales }}</div>
-                    <div class="stat-label" data-zh="总销量" data-en="Total Sales">总销量</div>
-                </div>
-            </div>
-            <div class="col-md-3 col-sm-6">
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, var(--info-color), #0891b2);">
-                        <i class="fas fa-warehouse"></i>
-                    </div>
-                    <div class="stat-number">{{ total_inventory }}</div>
-                    <div class="stat-label" data-zh="总库存" data-en="Total Inventory">总库存</div>
-                </div>
-            </div>
-            <div class="col-md-3 col-sm-6">
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, var(--warning-color), #d97706);">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="stat-number">{{ author_count }}</div>
-                    <div class="stat-label" data-zh="合作作者" data-en="Authors">合作作者</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Publisher Information Card -->
-    <div class="container mb-5">
-        <div class="content-section">
-            <div class="row">
-                <div class="col-md-6 mb-4">
-                    <h5 class="section-title">
-                        <i class="fas fa-info-circle"></i> <span data-zh="基本信息" data-en="Basic Information">基本信息</span>
-                    </h5>
-                    <div class="info-group">
-                        <div class="info-item">
-                            <span class="info-label"><i class="fas fa-id-badge"></i> <span data-zh="出版社ID" data-en="Publisher ID">出版社ID</span></span>
-                            <span class="info-value">#{{ publisher.id }}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label"><i class="fas fa-building"></i> <span data-zh="名称" data-en="Name">名称</span></span>
-                            <span class="info-value">{{ publisher.publisher_name }}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label"><i class="fas fa-map-marker-alt"></i> <span data-zh="地址" data-en="Address">地址</span></span>
-                            <span class="info-value">{{ publisher.publisher_address }}</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-md-6 mb-4">
-                    <h5 class="section-title">
-                        <i class="fas fa-chart-bar"></i> <span data-zh="出版统计" data-en="Publishing Statistics">出版统计</span>
-                    </h5>
-                    <div class="stats-grid">
-                        <div class="stats-item">
-                            <div class="stats-value" style="color: var(--info-color);">¥{{ avg_price|floatformat:2 }}</div>
-                            <div class="stats-desc" data-zh="平均价格" data-en="Average Price">平均价格</div>
-                        </div>
-                        <div class="stats-item">
-                            <div class="stats-value" style="color: var(--success-color);">¥{{ total_revenue|floatformat:2 }}</div>
-                            <div class="stats-desc" data-zh="总收入" data-en="Total Revenue">总收入</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Action Buttons -->
-            <div class="d-flex gap-3 flex-wrap mt-4">
-                <a href="{% url 'manager:public_publishers' %}" class="btn btn-primary-modern">
-                    <i class="fas fa-arrow-left"></i> <span data-zh="返回列表" data-en="Back to List">返回列表</span>
-                </a>
-                <a href="{% url 'manager:public_books' %}?publisher={{ publisher.id }}" class="btn btn-outline-primary-modern">
-                    <i class="fas fa-book"></i> <span data-zh="查看该出版社图书" data-en="View Books">查看该出版社图书</span>
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Published Books Section -->
-    {% if books %}
-    <section class="books-section">
-        <div class="container">
-            <div class="section-header mb-5" data-aos="fade-up">
-                <h3><i class="fas fa-book-reader"></i> <span data-zh="出版图书" data-en="Published Books">出版图书</span></h3>
-                <p class="text-muted" data-zh="该出版社出版的所有图书" data-en="All books published by this publisher">该出版社出版的所有图书</p>
-            </div>
-            
+            {% if books %}
             <div class="row g-4">
                 {% for book in books %}
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:50 }}">
+                <div class="col-lg-4 col-md-6">
                     <div class="book-card">
-                        <div class="book-cover-wrapper">
-                            <img src="{{ book.get_cover_url }}" alt="{{ book.name }}" class="book-cover-img">
-                        </div>
-                        <div class="book-info">
-                            <h5 class="book-title">{{ book.name }}</h5>
-                            
-                            {% if book.description %}
-                            <p class="book-description">
-                                <i class="fas fa-quote-left"></i>
-                                {{ book.get_medium_description }}
-                            </p>
+                        <div class="book-cover">
+                            {% if book.cover_image %}
+                            <img src="{{ book.cover_image.url }}" alt="{{ book.name }}">
+                            {% else %}
+                            <i class="fas fa-book" style="font-size:3rem;color:#a78bfa;"></i>
                             {% endif %}
-                            
-                            <div class="book-meta">
-                                <div class="meta-item">
-                                    <i class="fas fa-users"></i>
-                                    <span>
-                                        {% if book.author_set.all %}
-                                            {% for author in book.author_set.all %}
-                                                {{ author.name }}{% if not forloop.last %}, {% endif %}
-                                            {% endfor %}
-                                        {% else %}
-                                            <span data-zh="未知作者" data-en="Unknown Author">未知作者</span>
-                                        {% endif %}
-                                    </span>
-                                </div>
-                                <div class="meta-item">
-                                    <i class="fas fa-warehouse"></i>
-                                    <span data-zh="库存: {{ book.inventory }} 本" data-en="Stock: {{ book.inventory }}">库存: {{ book.inventory }} 本</span>
-                                </div>
-                                <div class="meta-item">
-                                    <i class="fas fa-chart-line"></i>
-                                    <span data-zh="销量: {{ book.sale_num }} 本" data-en="Sold: {{ book.sale_num }}">销量: {{ book.sale_num }} 本</span>
-                                </div>
+                        </div>
+                        <div class="p-3">
+                            <h6 class="fw-bold mb-1" style="color:#1e293b;min-height:44px;">
+                                <a href="{% url 'manager:public_book_detail' book.id %}" style="color:inherit;text-decoration:none;">{{ book.name|truncatechars:40 }}</a>
+                            </h6>
+                            <p class="small text-muted mb-2" style="min-height:40px;line-height:1.6;">{{ book.get_short_description }}</p>
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <span class="fw-bold" style="font-size:1.2rem;color:#667eea;">¥{{ book.price }}</span>
+                                {% if book.inventory > 10 %}<span class="book-badge badge-stock-ok"><i class="fas fa-check-circle"></i>{% trans "有货" %}</span>
+                                {% elif book.inventory > 0 %}<span class="book-badge badge-stock-low"><i class="fas fa-exclamation-triangle"></i>{{ book.inventory }}{% trans "本" %}</span>
+                                {% else %}<span class="book-badge badge-stock-out"><i class="fas fa-times-circle"></i>{% trans "缺货" %}</span>{% endif %}
                             </div>
-                            
-                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                <span class="price-tag">
-                                    <i class="fas fa-tag"></i> ¥{{ book.price }}
-                                </span>
-                                <a href="/manager/public/books/{{ book.id }}/" class="btn btn-sm btn-outline-primary-modern">
-                                    <i class="fas fa-eye"></i> <span data-zh="查看详情" data-en="View Details">查看详情</span>
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'manager:public_book_detail' book.id %}" class="btn-primary-grad flex-grow-1 justify-content-center">
+                                    <i class="fas fa-eye"></i>{% trans "查看详情" %}
                                 </a>
+                                {% if book.inventory > 0 %}
+                                <form method="post" action="{% url 'manager:buy_now' book.id %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="quantity" value="1">
+                                    <button type="submit" class="btn btn-sm btn-success fw-bold" style="border-radius:8px;padding:7px 14px;">
+                                        <i class="fas fa-bolt"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
                 </div>
                 {% endfor %}
             </div>
-            
-            {% if books.count > 6 %}
-            <div class="text-center mt-5">
-                <a href="{% url 'manager:public_books' %}?publisher={{ publisher.id }}" class="btn btn-primary-modern btn-lg">
-                    <span data-zh="查看更多图书" data-en="View More Books">查看更多图书</span> <i class="fas fa-arrow-right"></i>
-                </a>
+            {% else %}
+            <div class="text-center py-5">
+                <div style="width:80px;height:80px;background:rgba(102,126,234,0.1);border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;">
+                    <i class="fas fa-book-open" style="font-size:2rem;color:#667eea;"></i>
+                </div>
+                <p class="text-muted">{% trans "该出版社暂无图书" %}</p>
+                <a href="{% url 'manager:public_books' %}" class="btn-primary-grad" style="display:inline-flex;">{% trans "浏览所有图书" %}</a>
             </div>
             {% endif %}
         </div>
-    </section>
-    {% else %}
-    <!-- No Books Section -->
-    <section class="books-section">
-        <div class="container">
-            <div class="text-center py-5" data-aos="fade-up">
-                <div class="mb-4">
-                    <i class="fas fa-book-open text-muted" style="font-size: 6rem; opacity: 0.3;"></i>
-                </div>
-                <h4 class="text-muted mb-3" data-zh="暂无出版图书" data-en="No Published Books">暂无出版图书</h4>
-                <p class="text-muted mb-4" data-zh="该出版社目前还没有出版任何图书" data-en="This publisher hasn't published any books yet">该出版社目前还没有出版任何图书</p>
-                <a href="{% url 'manager:public_books' %}" class="btn btn-primary-modern">
-                    <i class="fas fa-book"></i> <span data-zh="浏览其他图书" data-en="Browse Other Books">浏览其他图书</span>
-                </a>
-            </div>
-        </div>
-    </section>
-    {% endif %}
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <!-- Main Footer Content -->
-            <div class="row g-4">
-                <!-- Company Information -->
-                <div class="col-lg-4 col-md-6">
-                    <div class="footer-section">
-                        <div class="footer-logo">
-                            <i class="fas fa-book-reader"></i>
-                            <h4 data-zh="图书管理系统" data-en="Book Management System">图书管理系统</h4>
-                        </div>
-                        <p class="footer-description" data-zh="现代化的智能图书管理平台，为读者和管理员提供便捷、高效的图书查询、浏览和管理服务。致力于推广阅读文化，建设知识型社会。" data-en="A modern intelligent book management platform providing convenient and efficient book search, browsing and management services for readers and administrators. Dedicated to promoting reading culture and building a knowledge-based society.">
-                            现代化的智能图书管理平台，为读者和管理员提供便捷、高效的图书查询、浏览和管理服务。致力于推广阅读文化，建设知识型社会。
-                        </p>
-                        <div class="social-links">
-                            <a href="#" class="social-link" title="微博">
-                                <i class="fab fa-weibo"></i>
-                            </a>
-                            <a href="#" class="social-link" title="微信公众号">
-                                <i class="fab fa-weixin"></i>
-                            </a>
-                            <a href="#" class="social-link" title="GitHub">
-                                <i class="fab fa-github"></i>
-                            </a>
-                            <a href="#" class="social-link" title="邮箱">
-                                <i class="fas fa-envelope"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Quick Navigation -->
-                <div class="col-lg-2 col-md-6">
-                    <div class="footer-section">
-                        <h5 class="footer-title" data-zh="快速导航" data-en="Quick Links">快速导航</h5>
-                        <ul class="footer-links">
-                            <li><a href="{% url 'manager:public_home' %}"><i class="fas fa-chevron-right"></i><span data-zh="首页" data-en="Home">首页</span></a></li>
-                            <li><a href="{% url 'manager:public_books' %}"><i class="fas fa-chevron-right"></i><span data-zh="图书目录" data-en="Books">图书目录</span></a></li>
-                            <li><a href="{% url 'manager:public_authors' %}"><i class="fas fa-chevron-right"></i><span data-zh="作者列表" data-en="Authors">作者列表</span></a></li>
-                            <li><a href="{% url 'manager:public_publishers' %}"><i class="fas fa-chevron-right"></i><span data-zh="出版社" data-en="Publishers">出版社</span></a></li>
-                            <li><a href="{% url 'manager:track_order' %}"><i class="fas fa-chevron-right"></i><span data-zh="订单跟踪" data-en="Track Order">订单跟踪</span></a></li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <!-- Services -->
-                <div class="col-lg-2 col-md-6">
-                    <div class="footer-section">
-                        <h5 class="footer-title" data-zh="系统功能" data-en="Features">系统功能</h5>
-                        <ul class="footer-links">
-                            <li><a href="{% url 'manager:public_books' %}"><i class="fas fa-chevron-right"></i><span data-zh="图书查询" data-en="Book Search">图书查询</span></a></li>
-                            <li><a href="{% url 'manager:view_cart' %}"><i class="fas fa-chevron-right"></i><span data-zh="购物车" data-en="Shopping Cart">购物车</span></a></li>
-                            <li><a href="{% url 'manager:track_order' %}"><i class="fas fa-chevron-right"></i><span data-zh="订单跟踪" data-en="Order Tracking">订单跟踪</span></a></li>
-                            <li><a href="/manager/login/"><i class="fas fa-chevron-right"></i><span data-zh="管理后台" data-en="Admin Panel">管理后台</span></a></li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <!-- Contact Information -->
-                <div class="col-lg-4 col-md-6">
-                    <div class="footer-section">
-                        <h5 class="footer-title" data-zh="联系我们" data-en="Contact Us">联系我们</h5>
-                        <div class="contact-info">
-                            <div class="contact-item">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <div class="contact-details">
-                                    <strong data-zh="地址" data-en="Address">地址</strong>
-                                    <span data-zh="北京市海淀区中关村科技园区" data-en="Zhongguancun Science Park, Haidian District, Beijing">北京市海淀区中关村科技园区</span>
-                                </div>
-                            </div>
-                            <div class="contact-item">
-                                <i class="fas fa-phone"></i>
-                                <div class="contact-details">
-                                    <strong data-zh="电话" data-en="Phone">电话</strong>
-                                    <span>+86 136 7130 9752</span>
-                                </div>
-                            </div>
-                            <div class="contact-item">
-                                <i class="fas fa-envelope"></i>
-                                <div class="contact-details">
-                                    <strong data-zh="邮箱" data-en="Email">邮箱</strong>
-                                    <span>espoirmoukendi@gmail.com</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Footer Bottom -->
-            <hr class="footer-divider">
-            <div class="footer-bottom">
-                <div class="row align-items-center">
-                    <div class="col-md-6">
-                        <div class="copyright">
-                            <p>&copy; 2024 <span data-zh="图书管理系统" data-en="Book Management System">图书管理系统</span>. <span data-zh="保留所有权利" data-en="All rights reserved">保留所有权利</span>.</p>
-                            <div class="legal-links">
-                                <a href="#" data-zh="隐私政策" data-en="Privacy Policy">隐私政策</a>
-                                <span>|</span>
-                                <a href="#" data-zh="使用条款" data-en="Terms of Use">使用条款</a>
-                                <span>|</span>
-                                <a href="#" data-zh="网站地图" data-en="Sitemap">网站地图</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 text-md-end">
-                        <p class="mb-0" style="color: #8892b0; font-size: 0.9rem;">
-                            <i class="fab fa-python"></i> Powered by <strong>Django</strong>
-                        </p>
-                    </div>
-                </div>
-            </div>
+        <!-- Back Navigation -->
+        <div class="text-center mt-4">
+            <a href="{% url 'manager:public_publishers' %}" class="btn btn-outline-secondary me-3" style="border-radius:10px;padding:10px 28px;font-weight:600;">
+                <i class="fas fa-arrow-left me-2"></i>{% trans "返回出版社列表" %}
+            </a>
+            <a href="{% url 'manager:public_books' %}?publisher={{ publisher.id }}" class="btn-primary-grad" style="padding:10px 28px;font-size:0.95rem;display:inline-flex;">
+                <i class="fas fa-filter me-2"></i>{% trans "筛选该出版社图书" %}
+            </a>
         </div>
-        
-        <!-- Back to Top Button -->
-        <div class="back-to-top" id="backToTop">
-            <i class="fas fa-chevron-up"></i>
-        </div>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script>
-        // Initialize AOS animations
-        AOS.init({
-            duration: 800,
-            once: true
-        });
-        
-        // Back to top functionality
-        const backToTopButton = document.getElementById('backToTop');
-        
-        window.addEventListener('scroll', function() {
-            if (window.pageYOffset > 300) {
-                backToTopButton.classList.add('visible');
-            } else {
-                backToTopButton.classList.remove('visible');
-            }
-        });
-        
-        backToTopButton.addEventListener('click', function() {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        });
-        
-        // Language Switcher System
-        let currentLanguage = localStorage.getItem('language') || 'zh';
-        
-        function toggleLanguage() {
-            currentLanguage = currentLanguage === 'zh' ? 'en' : 'zh';
-            localStorage.setItem('language', currentLanguage);
-            applyLanguage();
-        }
-        
-        function applyLanguage() {
-            // Update language button text
-            const langText = document.getElementById('langText');
-            if (langText) {
-                langText.textContent = currentLanguage === 'zh' ? 'EN' : '中文';
-            }
-            
-            // Update all elements with data-zh and data-en attributes
-            document.querySelectorAll('[data-zh][data-en]').forEach(element => {
-                element.textContent = element.getAttribute('data-' + currentLanguage);
-            });
-            
-            // Update HTML lang attribute
-            document.documentElement.lang = currentLanguage === 'zh' ? 'zh-Hans' : 'en';
-        }
-        
-        // Apply saved language on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            applyLanguage();
-        });
-        
-        // Cart badge update (placeholder - integrate with actual cart system)
-        function updateCartBadge() {
-            // This should be connected to your actual cart system
-            const cartBadge = document.getElementById('cart-badge');
-            // Get cart count from localStorage or server
-            const cartCount = localStorage.getItem('cartCount') || 0;
-            if (cartBadge) {
-                cartBadge.textContent = cartCount;
-            }
-        }
-        
-        updateCartBadge();
-    </script>
-</body>
-</html>
+    </div>
+</div>
+{% endblock %}

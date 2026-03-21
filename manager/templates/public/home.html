@@ -1,6 +1,7 @@
 {% extends 'public/base.html' %}
+{% load i18n %}
 
-{% block title %}智能图书管理系统 - 首页{% endblock %}
+{% block title %}{% trans "智能图书管理系统" %} - {% trans "首页" %}{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -630,17 +631,17 @@
         <div class="hero-content">
             <div class="row align-items-center">
                 <div class="col-lg-7" data-aos="fade-right">
-                    <h1 class="hero-title">智能图书管理系统</h1>
+                    <h1 class="hero-title">{% trans "智能图书管理系统" %}</h1>
                     <p class="hero-subtitle">
-                        现代化的图书管理平台，为读者和管理员提供高效、便捷的图书查询、浏览和管理服务。探索知识的海洋，发现阅读的乐趣。
+                        {% trans "现代化的图书管理平台，为读者和管理员提供高效、便捷的图书查询、浏览和管理服务。探索知识的海洋，发现阅读的乐趣。" %}
                     </p>
                     
                     <div class="cta-buttons" data-aos="fade-up" data-aos-delay="300">
                         <a href="{% url 'manager:public_books' %}" class="btn btn-hero btn-hero-primary">
-                            <i class="fas fa-search me-2"></i>浏览图书
+                            <i class="fas fa-search me-2"></i>{% trans "浏览图书" %}
                         </a>
                         <a href="/manager/login/" class="btn btn-hero btn-hero-secondary">
-                            <i class="fas fa-user-shield me-2"></i>管理员登录
+                            <i class="fas fa-user-shield me-2"></i>{% trans "管理员登录" %}
                         </a>
                     </div>
                 </div>
@@ -649,15 +650,15 @@
                     <div class="hero-stats">
                         <div class="hero-stat" data-aos="zoom-in" data-aos-delay="400">
                             <span class="hero-stat-number">{{ book_count|default:0 }}</span>
-                            <span class="hero-stat-label">精选图书</span>
+                            <span class="hero-stat-label">{% trans "精选图书" %}</span>
                         </div>
                         <div class="hero-stat" data-aos="zoom-in" data-aos-delay="500">
                             <span class="hero-stat-number">{{ publisher_count|default:0 }}</span>
-                            <span class="hero-stat-label">合作出版社</span>
+                            <span class="hero-stat-label">{% trans "合作出版社" %}</span>
                         </div>
                         <div class="hero-stat" data-aos="zoom-in" data-aos-delay="600">
                             <span class="hero-stat-number">{{ author_count|default:0 }}</span>
-                            <span class="hero-stat-label">知名作者</span>
+                            <span class="hero-stat-label">{% trans "知名作者" %}</span>
                         </div>
                     </div>
                 </div>
@@ -670,9 +671,9 @@
 <section class="features-section">
     <div class="container">
         <div class="section-header" data-aos="fade-up">
-            <h2 class="section-title">为什么选择我们的图书馆</h2>
+            <h2 class="section-title">{% trans "为什么选择我们的图书馆" %}</h2>
             <p class="section-subtitle">
-                精心策划的阅读体验，优质的服务保障，让每一次购买都物超所值，开启您的精彩阅读之旅
+                {% trans "精心策划的阅读体验，优质的服务保障，让每一次购买都物超所值，开启您的精彩阅读之旅" %}
             </p>
         </div>
         
@@ -682,9 +683,9 @@
                     <div class="feature-icon">
                         <i class="fas fa-gem"></i>
                     </div>
-                    <h4>精选优质图书</h4>
+                    <h4>{% trans "精选优质图书" %}</h4>
                     <p>
-                        每本图书都经过专业团队精心挑选，涵盖文学、科技、艺术等各个领域，确保您购买的每一本书都具有极高的阅读价值和收藏意义。
+                        {% trans "每本图书都经过专业团队精心挑选，涵盖文学、科技、艺术等各个领域，确保您购买的每一本书都具有极高的阅读价值和收藏意义。" %}
                     </p>
                 </div>
             </div>
@@ -694,9 +695,9 @@
                     <div class="feature-icon">
                         <i class="fas fa-tags"></i>
                     </div>
-                    <h4>超值优惠价格</h4>
+                    <h4>{% trans "超值优惠价格" %}</h4>
                     <p>
-                        直接与出版社合作，省去中间环节，为您提供市场最优价格。定期推出限时折扣、会员专享等优惠活动，让知识更加亲民。
+                        {% trans "直接与出版社合作，省去中间环节，为您提供市场最优价格。定期推出限时折扣、会员专享等优惠活动，让知识更加亲民。" %}
                     </p>
                 </div>
             </div>
@@ -706,9 +707,9 @@
                     <div class="feature-icon">
                         <i class="fas fa-shipping-fast"></i>
                     </div>
-                    <h4>快速便捷配送</h4>
+                    <h4>{% trans "快速便捷配送" %}</h4>
                     <p>
-                        专业物流团队，24小时内发货，全国包邮服务。精美包装保护图书品质，让您尽快拿到心爱的图书，立即开始阅读。
+                        {% trans "专业物流团队，24小时内发货，全国包邮服务。精美包装保护图书品质，让您尽快拿到心爱的图书，立即开始阅读。" %}
                     </p>
                 </div>
             </div>
@@ -718,9 +719,9 @@
                     <div class="feature-icon">
                         <i class="fas fa-award"></i>
                     </div>
-                    <h4>正版品质保证</h4>
+                    <h4>{% trans "正版品质保证" %}</h4>
                     <p>
-                        所有图书均为正版授权，印刷清晰，装帧精美。提供品质保证，支持7天无理由退换，让您购买无忧，阅读放心。
+                        {% trans "所有图书均为正版授权，印刷清晰，装帧精美。提供品质保证，支持7天无理由退换，让您购买无忧，阅读放心。" %}
                     </p>
                 </div>
             </div>
@@ -730,9 +731,9 @@
                     <div class="feature-icon">
                         <i class="fas fa-user-friends"></i>
                     </div>
-                    <h4>专业推荐服务</h4>
+                    <h4>{% trans "专业推荐服务" %}</h4>
                     <p>
-                        资深阅读顾问为您量身推荐适合的图书，根据您的兴趣偏好和阅读水平，打造个性化的阅读清单，发现更多精彩内容。
+                        {% trans "资深阅读顾问为您量身推荐适合的图书，根据您的兴趣偏好和阅读水平，打造个性化的阅读清单，发现更多精彩内容。" %}
                     </p>
                 </div>
             </div>
@@ -742,9 +743,9 @@
                     <div class="feature-icon">
                         <i class="fas fa-heart"></i>
                     </div>
-                    <h4>贴心售后服务</h4>
+                    <h4>{% trans "贴心售后服务" %}</h4>
                     <p>
-                        专业客服团队7×24小时在线服务，解答您的任何疑问。建立读者社群，分享阅读心得，让购书不仅是消费，更是加入知识社区。
+                        {% trans "专业客服团队7×24小时在线服务，解答您的任何疑问。建立读者社群，分享阅读心得，让购书不仅是消费，更是加入知识社区。" %}
                     </p>
                 </div>
             </div>
@@ -756,14 +757,14 @@
 <section class="search-section">
     <div class="container">
         <div class="text-center" data-aos="fade-up">
-            <h2 class="mb-4" style="font-size: 2.5rem; font-weight: 800;">快速搜索图书</h2>
-            <p class="mb-5" style="font-size: 1.2rem; opacity: 0.9;">输入书名关键词，快速找到您感兴趣的图书</p>
+            <h2 class="mb-4" style="font-size: 2.5rem; font-weight: 800;">{% trans "快速搜索图书" %}</h2>
+            <p class="mb-5" style="font-size: 1.2rem; opacity: 0.9;">{% trans "输入书名关键词，快速找到您感兴趣的图书" %}</p>
             <div class="search-form">
                 <form action="{% url 'manager:public_books' %}" method="get">
                     <input type="search" name="search" class="search-input" 
-                           placeholder="输入书名进行搜索..." value="{{ request.GET.search }}">
+                           placeholder="{% trans '输入书名进行搜索...' %}" value="{{ request.GET.search }}">
                     <button type="submit" class="search-btn">
-                        <i class="fas fa-search me-2"></i>开始搜索
+                        <i class="fas fa-search me-2"></i>{% trans "开始搜索" %}
                     </button>
                 </form>
             </div>
@@ -776,9 +777,9 @@
 <section class="featured-books-section">
     <div class="container">
         <div class="section-header" data-aos="fade-up">
-            <h2 class="section-title">热门图书推荐</h2>
+            <h2 class="section-title">{% trans "热门图书推荐" %}</h2>
             <p class="section-subtitle">
-                精选优质图书，为您推荐最受欢迎的阅读选择，开启您的知识之旅
+                {% trans "精选优质图书，为您推荐最受欢迎的阅读选择，开启您的知识之旅" %}
             </p>
         </div>
         
@@ -797,12 +798,12 @@
                         <div class="book-stats">
                             <span class="book-price">¥{{ book.price }}</span>
                             <span class="book-sales">
-                                <i class="fas fa-fire"></i>销量 {{ book.sale_num }}
+                                <i class="fas fa-fire"></i>{% trans "销量" %} {{ book.sale_num }}
                             </span>
                         </div>
                         <div class="book-actions">
                             <a href="{% url 'manager:public_book_detail' book.id %}" class="btn btn-book-detail">
-                                查看详情
+                                {% trans "查看详情" %}
                             </a>
                             {% if book.inventory > 0 %}
                                 <button onclick="addToCartQuick({{ book.id }})" class="btn btn-add-cart">
@@ -818,7 +819,7 @@
         
         <div class="text-center mt-5" data-aos="fade-up">
             <a href="{% url 'manager:public_books' %}" class="btn btn-cta">
-                <i class="fas fa-books me-2"></i>查看更多图书
+                <i class="fas fa-books me-2"></i>{% trans "查看更多图书" %}
             </a>
         </div>
     </div>
@@ -831,12 +832,12 @@
         <div class="text-center cta-content">
             <div class="row align-items-center">
                 <div class="col-lg-8 mx-auto" data-aos="fade-up">
-                    <h3 class="cta-title">开始探索知识的海洋</h3>
+                    <h3 class="cta-title">{% trans "开始探索知识的海洋" %}</h3>
                     <p class="cta-subtitle">
-                        立即浏览我们丰富的图书收藏，发现您感兴趣的内容，开启精彩的阅读之旅
+                        {% trans "立即浏览我们丰富的图书收藏，发现您感兴趣的内容，开启精彩的阅读之旅" %}
                     </p>
                     <a href="{% url 'manager:public_books' %}" class="btn btn-cta">
-                        <i class="fas fa-rocket me-2"></i>立即开始探索
+                        <i class="fas fa-rocket me-2"></i>{% trans "立即开始探索" %}
                     </a>
                 </div>
             </div>
@@ -863,7 +864,7 @@ function addToCartQuick(bookId) {
     const originalHtml = button.innerHTML;
     
     // Show loading state
-    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 添加中...';
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {% trans "添加中..." %}';
     button.disabled = true;
     
     // Send AJAX request to add to cart
@@ -884,7 +885,7 @@ function addToCartQuick(bookId) {
     .then(data => {
         if (data.success) {
             // Success feedback
-            button.innerHTML = '<i class="fas fa-check"></i> 已添加';
+            button.innerHTML = '<i class="fas fa-check"></i> {% trans "已添加" %}';
             button.classList.add('btn-success');
             button.classList.remove('btn-add-cart');
             
@@ -909,7 +910,7 @@ function addToCartQuick(bookId) {
         console.error('Error:', error);
         button.innerHTML = originalHtml;
         button.disabled = false;
-        showToast('添加到购物车失败，请重试', 'error');
+        showToast('{% trans "添加到购物车失败，请重试" %}', 'error');
     });
 }
 

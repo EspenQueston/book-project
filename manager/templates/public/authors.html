@@ -1,6 +1,7 @@
 {% extends 'public/base.html' %}
+{% load i18n %}
 
-{% block title %}作者目录 - 图书管理系统{% endblock %}
+{% block title %}{% trans "作者目录" %} - {% trans "图书管理系统" %}{% endblock %}
 
 {% block content %}
     <!-- Page Header with gradient background -->
@@ -8,8 +9,8 @@
         <div class="container">
             <div class="row">
                 <div class="col-12 text-center">
-                    <h1 class="display-5 fw-bold mb-3">作者目录</h1>
-                    <p class="lead">探索我们平台的优秀作者</p>
+                    <h1 class="display-5 fw-bold mb-3">{% trans "作者目录" %}</h1>
+                    <p class="lead">{% trans "探索我们平台的优秀作者" %}</p>
                 </div>
             </div>
         </div>
@@ -22,14 +23,14 @@
                 <div class="col-lg-8">
                     <form method="get" class="d-flex gap-3">
                         <input type="search" name="search" class="form-control search-box" 
-                               placeholder="搜索作者名称..." value="{{ search_query }}">
+                               placeholder="{% trans '搜索作者名称...' %}" value="{{ search_query }}">
                         <button type="submit" class="btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                            <i class="fas fa-search"></i> 搜索
+                            <i class="fas fa-search"></i> {% trans "搜索" %}
                         </button>
                     </form>
                 </div>
                 <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-                    <span class="text-muted">共找到 {{ authors.count }} 位作者</span>
+                    <span class="text-muted">{% blocktrans with count=authors.count %}共找到 {{ count }} 位作者{% endblocktrans %}</span>
                 </div>
             </div>
         </div>
@@ -46,22 +47,22 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-start mb-3">
                                 <h5 class="card-title fw-bold mb-0">{{ author.name }}</h5>
-                                <span class="badge" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">{{ author.book.count }} 本著作</span>
+                                <span class="badge" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">{% blocktrans with count=author.book.count %}{{ count }} 本著作{% endblocktrans %}</span>
                             </div>
                             
                             <div class="mb-3">
                                 <p class="text-muted mb-1">
                                     <i class="fas fa-book text-primary"></i> 
-                                    <strong>代表作:</strong> 
+                                    <strong>{% trans "代表作" %}:</strong> 
                                     {% with first_book=author.book.first %}
-                                        {{ first_book.name|default:"暂无" }}
+                                        {{ first_book.name|default:"N/A" }}
                                     {% endwith %}
                                 </p>
                             </div>
                             
                             <div class="mt-auto">
                                 <a href="{% url 'manager:public_author_detail' author.id %}" class="btn btn-sm w-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                                    <i class="fas fa-info-circle"></i> 查看详情
+                                    <i class="fas fa-info-circle"></i> {% trans "查看详情" %}
                                 </a>
                             </div>
                         </div>
@@ -75,10 +76,10 @@
                 <div class="mb-4">
                     <i class="fas fa-search text-muted" style="font-size: 5rem; opacity: 0.3;"></i>
                 </div>
-                <h4 class="text-muted mb-3">未找到相关作者</h4>
-                <p class="text-muted mb-4">请尝试其他搜索关键词或浏览所有作者</p>
+                <h4 class="text-muted mb-3">{% trans "未找到相关作者" %}</h4>
+                <p class="text-muted mb-4">{% trans "请尝试其他搜索关键词或浏览所有作者" %}</p>
                 <a href="{% url 'manager:public_authors' %}" class="btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                    <i class="fas fa-users"></i> 浏览所有作者
+                    <i class="fas fa-users"></i> {% trans "浏览所有作者" %}
                 </a>
             </div>
             {% endif %}
@@ -92,22 +93,22 @@
                 <div class="col-md-4 mb-3" data-aos="fade-up" data-aos-delay="100">
                     <a href="{% url 'manager:public_books' %}" class="text-white text-decoration-none">
                         <i class="fas fa-book fa-3x mb-3"></i>
-                        <h5>浏览图书</h5>
-                        <p class="mb-0">查看所有图书信息</p>
+                        <h5>{% trans "浏览图书" %}</h5>
+                        <p class="mb-0">{% trans "查看所有图书信息" %}</p>
                     </a>
                 </div>
                 <div class="col-md-4 mb-3" data-aos="fade-up" data-aos-delay="200">
                     <a href="{% url 'manager:public_publishers' %}" class="text-white text-decoration-none">
                         <i class="fas fa-building fa-3x mb-3"></i>
-                        <h5>浏览出版社</h5>
-                        <p class="mb-0">查看所有出版社</p>
+                        <h5>{% trans "浏览出版社" %}</h5>
+                        <p class="mb-0">{% trans "查看所有出版社" %}</p>
                     </a>
                 </div>
                 <div class="col-md-4 mb-3" data-aos="fade-up" data-aos-delay="300">
                     <a href="{% url 'manager:public_home' %}" class="text-white text-decoration-none">
                         <i class="fas fa-home fa-3x mb-3"></i>
-                        <h5>返回首页</h5>
-                        <p class="mb-0">回到主页面</p>
+                        <h5>{% trans "返回首页" %}</h5>
+                        <p class="mb-0">{% trans "回到主页面" %}</p>
                     </a>
                 </div>
             </div>

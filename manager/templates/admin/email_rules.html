@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>邮件自动规则</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh; font-family: 'Segoe UI', sans-serif; padding-top: 76px; }
+        .top-navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1030;
+            height: 76px; display: flex; align-items: center; padding: 0 24px;
+            box-shadow: 0 4px 20px rgba(102,126,234,0.4);
+        }
+        .nav-brand { color: white; font-size: 1.3rem; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .nav-brand:hover { color: rgba(255,255,255,0.9); }
+        .nav-links { display: flex; gap: 6px; margin-left: auto; }
+        .nav-link-btn { color: rgba(255,255,255,0.85); text-decoration: none; padding: 8px 14px; border-radius: 8px; font-size: 0.88rem; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
+        .nav-link-btn:hover { background: rgba(255,255,255,0.15); color: white; }
+
+        .main-container { max-width: 900px; margin: 0 auto; padding: 28px 20px 60px; }
+        .page-card { background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 28px 32px; }
+        .page-title { font-size: 1.3rem; font-weight: 700; color: #1e293b; margin-bottom: 24px; display: flex; align-items: center; gap: 10px; }
+
+        .rule-card {
+            border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 20px; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 14px; transition: all 0.2s;
+        }
+        .rule-card:hover { border-color: #667eea; }
+        .rule-card.inactive { opacity: 0.5; }
+        .rule-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+        .rule-info { flex: 1; }
+        .rule-name { font-weight: 600; color: #1e293b; font-size: 0.95rem; }
+        .rule-desc { font-size: 0.8rem; color: #64748b; margin-top: 2px; }
+        .rule-actions { display: flex; gap: 6px; align-items: center; }
+        .toggle-btn { width: 42px; height: 24px; border-radius: 12px; border: none; cursor: pointer; position: relative; transition: all 0.3s; }
+        .toggle-btn.active { background: #10b981; }
+        .toggle-btn.inactive-toggle { background: #cbd5e1; }
+        .toggle-btn::after { content: ''; position: absolute; width: 18px; height: 18px; border-radius: 50%; background: white; top: 3px; transition: all 0.3s; }
+        .toggle-btn.active::after { left: 21px; }
+        .toggle-btn.inactive-toggle::after { left: 3px; }
+
+        .btn-sm-action { padding: 6px 12px; border-radius: 6px; border: 1px solid #e2e8f0; background: white; color: #475569; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
+        .btn-sm-action:hover { background: #f1f5f9; }
+        .btn-sm-action.danger { color: #ef4444; border-color: #fecaca; }
+        .btn-primary-grad { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 0.9rem; cursor: pointer; }
+
+        .add-form { border: 2px dashed #e2e8f0; border-radius: 12px; padding: 24px; margin-top: 20px; display: none; }
+        .add-form.show { display: block; }
+
+        .action-icons { label: #667eea; star: #f59e0b; archive: #06b6d4; delete: #ef4444; auto_reply: #10b981; forward: #8b5cf6; mark_read: #64748b; }
+
+        .toast-container { position: fixed; top: 90px; right: 20px; z-index: 99999; }
+        .toast-item { padding: 12px 20px; border-radius: 8px; color: white; font-size: 0.88rem; margin-bottom: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); animation: slideIn 0.3s ease; }
+        .toast-success { background: linear-gradient(135deg, #10b981, #059669); }
+        .toast-error { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+<nav class="top-navbar">
+    <a href="/manager/email/" class="nav-brand"><i class="fas fa-envelope-open-text"></i> 邮件管理</a>
+    <div class="nav-links">
+        <a href="/manager/dashboard/" class="nav-link-btn"><i class="fas fa-tachometer-alt"></i> 仪表板</a>
+        <a href="/manager/email/" class="nav-link-btn"><i class="fas fa-envelope"></i> 邮件</a>
+        <a href="/manager/public/" class="nav-link-btn"><i class="fas fa-globe"></i> 网站</a>
+        <a href="/manager/logout/" class="nav-link-btn"><i class="fas fa-sign-out-alt"></i></a>
+    </div>
+</nav>
+
+<div class="main-container">
+    <div style="margin-bottom:20px;">
+        <a href="/manager/email/" style="color:#667eea;text-decoration:none;font-size:0.9rem;display:inline-flex;align-items:center;gap:6px;">
+            <i class="fas fa-arrow-left"></i> 返回邮箱
+        </a>
+    </div>
+
+    <div class="page-card">
+        <div class="page-title"><i class="fas fa-robot"></i> 自动邮件规则</div>
+
+        {% for rule in rules %}
+        <div class="rule-card {% if not rule.is_active %}inactive{% endif %}">
+            <div class="rule-icon" style="background:{% if rule.action == 'label' %}#eef2ff{% elif rule.action == 'star' %}#fef3c7{% elif rule.action == 'archive' %}#ecfdf5{% elif rule.action == 'delete' %}#fef2f2{% elif rule.action == 'auto_reply' %}#f0fdf4{% elif rule.action == 'forward' %}#f5f3ff{% else %}#f1f5f9{% endif %};color:{% if rule.action == 'label' %}#667eea{% elif rule.action == 'star' %}#f59e0b{% elif rule.action == 'archive' %}#06b6d4{% elif rule.action == 'delete' %}#ef4444{% elif rule.action == 'auto_reply' %}#10b981{% elif rule.action == 'forward' %}#8b5cf6{% else %}#64748b{% endif %};">
+                <i class="fas {% if rule.action == 'label' %}fa-tag{% elif rule.action == 'star' %}fa-star{% elif rule.action == 'archive' %}fa-archive{% elif rule.action == 'delete' %}fa-trash{% elif rule.action == 'auto_reply' %}fa-reply{% elif rule.action == 'forward' %}fa-share{% else %}fa-envelope-open{% endif %}"></i>
+            </div>
+            <div class="rule-info">
+                <div class="rule-name">{{ rule.name }}</div>
+                <div class="rule-desc">
+                    当 <strong>{{ rule.get_match_field_display }}</strong> 匹配 "<em>{{ rule.match_pattern }}</em>" →
+                    {{ rule.get_action_display }}
+                    {% if rule.action_label %} [{{ rule.action_label.name }}]{% endif %}
+                    {% if rule.action_forward_to %} → {{ rule.action_forward_to }}{% endif %}
+                    {% if rule.apply_to_account %} (仅 {{ rule.apply_to_account.email_address }}){% endif %}
+                </div>
+            </div>
+            <div class="rule-actions">
+                <button class="toggle-btn {% if rule.is_active %}active{% else %}inactive-toggle{% endif %}" onclick="toggleRule({{ rule.id }}, this)" title="启用/禁用"></button>
+                <button class="btn-sm-action danger" onclick="deleteRule({{ rule.id }}, '{{ rule.name|escapejs }}')"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>
+        {% empty %}
+        <div style="text-align:center;color:#94a3b8;padding:40px;">
+            <i class="fas fa-robot" style="font-size:2rem;margin-bottom:10px;display:block;"></i>
+            暂无自动规则
+        </div>
+        {% endfor %}
+
+        <button class="btn-primary-grad" onclick="document.getElementById('addForm').classList.toggle('show')" style="margin-top:16px;">
+            <i class="fas fa-plus"></i> 添加规则
+        </button>
+
+        <div class="add-form" id="addForm">
+            <h6 style="font-weight:600;margin-bottom:16px;">添加新规则</h6>
+            <form id="ruleForm">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label" style="font-size:0.82rem;">规则名称</label>
+                        <input type="text" name="name" class="form-control form-control-sm" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" style="font-size:0.82rem;">匹配字段</label>
+                        <select name="match_field" class="form-control form-control-sm">
+                            <option value="any">任意字段</option>
+                            <option value="from">发件人</option>
+                            <option value="to">收件人</option>
+                            <option value="subject">主题</option>
+                            <option value="body">正文</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" style="font-size:0.82rem;">优先级</label>
+                        <input type="number" name="priority" class="form-control form-control-sm" value="0">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" style="font-size:0.82rem;">匹配模式 (正则表达式)</label>
+                        <input type="text" name="match_pattern" class="form-control form-control-sm" placeholder="例如: .*@spam\.com" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" style="font-size:0.82rem;">执行动作</label>
+                        <select name="rule_action" class="form-control form-control-sm" onchange="toggleActionFields(this.value)">
+                            <option value="label">添加标签</option>
+                            <option value="star">加星标</option>
+                            <option value="archive">归档</option>
+                            <option value="delete">删除</option>
+                            <option value="mark_read">标为已读</option>
+                            <option value="auto_reply">自动回复</option>
+                            <option value="forward">转发</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 action-field" id="labelField" style="display:none;">
+                        <label class="form-label" style="font-size:0.82rem;">选择标签</label>
+                        <select name="action_label" class="form-control form-control-sm">
+                            <option value="">-- 选择 --</option>
+                            {% for label in labels %}
+                            <option value="{{ label.id }}">{{ label.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6 action-field" id="forwardField" style="display:none;">
+                        <label class="form-label" style="font-size:0.82rem;">转发至</label>
+                        <input type="email" name="action_forward_to" class="form-control form-control-sm">
+                    </div>
+                    <div class="col-12 action-field" id="replyFields" style="display:none;">
+                        <div class="row g-2">
+                            <div class="col-12">
+                                <label class="form-label" style="font-size:0.82rem;">自动回复主题</label>
+                                <input type="text" name="auto_reply_subject" class="form-control form-control-sm">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label" style="font-size:0.82rem;">自动回复内容</label>
+                                <textarea name="auto_reply_body" class="form-control form-control-sm" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" style="font-size:0.82rem;">应用于账户 (可选)</label>
+                        <select name="apply_to_account" class="form-control form-control-sm">
+                            <option value="">所有账户</option>
+                            {% for acc in accounts %}
+                            <option value="{{ acc.id }}">{{ acc.email_address }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div style="margin-top:16px;display:flex;gap:10px;">
+                    <button type="submit" class="btn-primary-grad"><i class="fas fa-save"></i> 保存</button>
+                    <button type="button" class="btn-sm-action" onclick="document.getElementById('addForm').classList.remove('show')">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+function getCsrf() {
+    var cookies = document.cookie.split(';');
+    for (var i = 0; i < cookies.length; i++) {
+        var c = cookies[i].trim();
+        if (c.startsWith('csrftoken=')) return c.substring(10);
+    }
+    return '';
+}
+
+function showToast(msg, type) {
+    var el = document.createElement('div');
+    el.className = 'toast-item toast-' + (type || 'success');
+    el.textContent = msg;
+    document.getElementById('toastContainer').appendChild(el);
+    setTimeout(function(){ el.remove(); }, 3500);
+}
+
+function toggleActionFields(action) {
+    document.querySelectorAll('.action-field').forEach(function(el){ el.style.display = 'none'; });
+    if (action === 'label') document.getElementById('labelField').style.display = 'block';
+    if (action === 'forward') document.getElementById('forwardField').style.display = 'block';
+    if (action === 'auto_reply') document.getElementById('replyFields').style.display = 'block';
+}
+// Initialize
+toggleActionFields('label');
+
+document.getElementById('ruleForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var fd = new FormData(this);
+    fd.append('action', 'add');
+
+    fetch('/manager/email/rules/', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'X-CSRFToken': getCsrf() },
+        body: fd
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+        if (d.success) { showToast(d.message); setTimeout(function(){ location.reload(); }, 800); }
+        else showToast(d.error || '操作失败', 'error');
+    })
+    .catch(function(){ showToast('请求失败', 'error'); });
+});
+
+function toggleRule(id, btn) {
+    var fd = new FormData();
+    fd.append('action', 'toggle');
+    fd.append('id', id);
+
+    fetch('/manager/email/rules/', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'X-CSRFToken': getCsrf() },
+        body: fd
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+        if (d.success) {
+            if (d.is_active) {
+                btn.classList.remove('inactive-toggle');
+                btn.classList.add('active');
+                btn.closest('.rule-card').classList.remove('inactive');
+            } else {
+                btn.classList.remove('active');
+                btn.classList.add('inactive-toggle');
+                btn.closest('.rule-card').classList.add('inactive');
+            }
+        }
+    });
+}
+
+function deleteRule(id, name) {
+    if (!confirm('确定删除规则 "' + name + '"？')) return;
+    var fd = new FormData();
+    fd.append('action', 'delete');
+    fd.append('id', id);
+
+    fetch('/manager/email/rules/', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'X-CSRFToken': getCsrf() },
+        body: fd
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+        if (d.success) { showToast(d.message); setTimeout(function(){ location.reload(); }, 800); }
+        else showToast(d.error || '删除失败', 'error');
+    });
+}
+</script>
+</body>
+</html>

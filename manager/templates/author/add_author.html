@@ -3,726 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>图书管理系统 - 添加作者</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>添加作者 - 图书管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
             --primary-color: #667eea;
             --secondary-color: #764ba2;
-            --success-color: #4CAF50;
-            --danger-color: #f44336;
-            --warning-color: #ff9800;
-            --dark-color: #2c3e50;
-            --light-gray: #f8f9fa;
-            --border-color: #e0e0e0;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
-        .dashboard-container {
-            display: flex;
-            min-height: 100vh;
+        .main-container { min-height: 100vh; padding: 20px 0; }
+        .header-card {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white; border-radius: 15px; padding: 20px; margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
         }
-
-        /* Sidebar Styles */
-        .sidebar {
-            width: 280px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
+        .form-card {
+            background: white; border-radius: 15px; padding: 30px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1); border: none;
         }
-
-        .sidebar-header {
-            padding: 2rem 1.5rem;
-            border-bottom: 1px solid var(--border-color);
-            text-align: center;
-        }
-
-        .sidebar-header h2 {
-            color: var(--primary-color);
-            font-weight: 700;
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .admin-info {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .nav-menu {
-            padding: 1rem 0;
-        }
-
-        .nav-item {
-            margin: 0.2rem 1rem;
-        }
-
-        .nav-link {
-            display: flex;
-            align-items: center;
-            padding: 0.75rem 1rem;
-            color: #555;
-            text-decoration: none;
-            border-radius: 10px;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
-
-        .nav-link:hover, .nav-link.active {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            transform: translateX(5px);
-        }
-
-        .nav-link i {
-            width: 20px;
-            margin-right: 10px;
-            text-align: center;
-        }
-
-        /* Main Content */
-        .main-content {
-            flex: 1;
-            padding: 2rem;
-            overflow-y: auto;
-        }
-
-        .content-header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .page-title {
-            color: var(--dark-color);
-            font-weight: 700;
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .page-subtitle {
-            color: #666;
-            font-size: 1.1rem;
-        }
-
-        .breadcrumb-nav {
-            margin-top: 1rem;
-        }
-
-        .breadcrumb {
-            background: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .breadcrumb-item a {
-            color: var(--primary-color);
-            text-decoration: none;
-        }
-
-        /* Form Styles */
-        .form-container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 2.5rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .form-header {
-            text-align: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 2px solid var(--border-color);
-        }
-
-        .form-title {
-            color: var(--dark-color);
-            font-weight: 600;
-            font-size: 1.8rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .form-subtitle {
-            color: #666;
-            font-size: 1rem;
-        }
-
-        .form-group {
-            margin-bottom: 2rem;
-        }
-
-        .form-label {
-            display: block;
-            font-weight: 600;
-            color: var(--dark-color);
-            margin-bottom: 0.5rem;
-            font-size: 1rem;
-        }
-
-        .form-label.required::after {
-            content: ' *';
-            color: var(--danger-color);
-        }
-
+        .form-label { font-weight: 600; color: #374151; margin-bottom: 8px; }
         .form-control {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            background: #f8f9fa;
+            border: 2px solid #e5e7eb; border-radius: 10px; padding: 12px 16px;
+            transition: all 0.3s ease; font-size: 1rem;
         }
-
-        .form-control:focus {
-            outline: none;
+        .form-control:focus { border-color: var(--primary-color); box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25); }
+        .btn-primary-modern {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white; border-radius: 10px; padding: 12px 30px; font-weight: 600;
+            transition: all 0.3s ease; border: none;
+        }
+        .btn-primary-modern:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3); color: white; }
+        .btn-secondary-modern {
+            background: #6b7280; color: white; border-radius: 10px; padding: 12px 30px;
+            font-weight: 600; transition: all 0.3s ease; border: none;
+        }
+        .btn-secondary-modern:hover { background: #4b5563; transform: translateY(-2px); color: white; }
+        .sidebar {
+            background: white; border-radius: 15px; padding: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1); height: fit-content;
+        }
+        .sidebar-link {
+            display: block; padding: 12px 16px; color: #6b7280; text-decoration: none;
+            border-radius: 8px; margin-bottom: 8px; transition: all 0.3s ease;
+        }
+        .sidebar-link:hover { background: var(--primary-color); color: white; transform: translateX(5px); }
+        .sidebar-link i { margin-right: 10px; width: 20px; }
+        .form-group { margin-bottom: 20px; }
+        .required { color: var(--danger-color); }
+        .breadcrumb-modern { background: none; padding: 0; margin-bottom: 20px; }
+        .breadcrumb-modern .breadcrumb-item a { color: white; text-decoration: none; }
+        .breadcrumb-modern .breadcrumb-item.active { color: rgba(255,255,255,0.8); }
+        .book-checkbox-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 10px; max-height: 400px; overflow-y: auto; padding: 5px;
+        }
+        .book-checkbox-item {
+            display: flex; align-items: center; padding: 10px 14px;
+            border: 2px solid #e5e7eb; border-radius: 10px; cursor: pointer;
+            transition: all 0.2s ease; background: #fafafa;
+        }
+        .book-checkbox-item:hover { border-color: var(--primary-color); background: #f0f0ff; }
+        .book-checkbox-item.selected {
             border-color: var(--primary-color);
-            background: white;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.08));
         }
-
-        .form-select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 1rem;
-            background: #f8f9fa;
-            transition: all 0.3s ease;
-            cursor: pointer;
+        .book-checkbox-item input[type="checkbox"] {
+            width: 18px; height: 18px; margin-right: 10px;
+            accent-color: var(--primary-color); flex-shrink: 0;
         }
-
-        .form-select:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            background: white;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .form-help {
-            font-size: 0.9rem;
-            color: #666;
-            margin-top: 0.5rem;
-        }
-
-        /* Multi-select Books */
-        .books-selection {
-            max-height: 200px;
-            overflow-y: auto;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            padding: 1rem;
-            background: #f8f9fa;
-            transition: all 0.3s ease;
-        }
-
-        .books-selection:focus-within {
-            border-color: var(--primary-color);
-            background: white;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .book-option {
-            display: flex;
-            align-items: center;
-            padding: 0.5rem;
-            margin-bottom: 0.5rem;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .book-option:hover {
-            background: rgba(102, 126, 234, 0.1);
-        }
-
-        .book-option input[type="checkbox"] {
-            margin-right: 10px;
-            transform: scale(1.2);
-        }
-
-        .book-info {
-            flex: 1;
-        }
-
-        .book-name {
-            font-weight: 500;
-            color: var(--dark-color);
-        }
-
-        .book-details {
-            font-size: 0.9rem;
-            color: #666;
-            margin-top: 2px;
-        }
-
+        .book-label { font-size: 0.9rem; color: #374151; line-height: 1.3; }
+        .book-publisher { font-size: 0.75rem; color: #9ca3af; }
         .selected-count {
-            background: var(--primary-color);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 15px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-top: 0.5rem;
-            display: inline-block;
+            display: inline-block; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white; padding: 3px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;
         }
-
-        /* Action Buttons */
-        .form-actions {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            margin-top: 2rem;
-            padding-top: 1.5rem;
-            border-top: 2px solid var(--border-color);
+        .search-books {
+            border: 2px solid #e5e7eb; border-radius: 10px; padding: 10px 16px;
+            width: 100%; margin-bottom: 12px; font-size: 0.9rem;
         }
-
-        .btn-submit {
-            background: linear-gradient(135deg, var(--success-color), #45a049);
-            border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
-            color: white;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            min-width: 140px;
-            justify-content: center;
-        }
-
-        .btn-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
-        }
-
-        .btn-submit:active {
-            transform: translateY(0);
-        }
-
-        .btn-cancel {
-            background: linear-gradient(135deg, #6c757d, #5a6268);
-            border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
-            color: white;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            min-width: 140px;
-            justify-content: center;
-        }
-
-        .btn-cancel:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
-            color: white;
-        }
-
-        .btn-reset {
-            background: linear-gradient(135deg, var(--warning-color), #f57c00);
-            border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
-            color: white;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            min-width: 140px;
-            justify-content: center;
-        }
-
-        .btn-reset:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .dashboard-container {
-                flex-direction: column;
-            }
-            
-            .sidebar {
-                width: 100%;
-                position: static;
-            }
-            
-            .main-content {
-                padding: 1rem;
-            }
-            
-            .form-container {
-                padding: 1.5rem;
-            }
-            
-            .form-actions {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .page-title {
-                font-size: 1.5rem;
-            }
-        }
-
-        /* Animations */
-        .fade-in {
-            animation: fadeIn 0.6s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .logout-btn {
-            background: linear-gradient(135deg, var(--danger-color), #d32f2f);
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            color: white;
-            font-weight: 500;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
-        }
-
-        .logout-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(244, 67, 54, 0.3);
-            color: white;
-        }
-
-        /* Custom Scrollbar */
-        .books-selection::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .books-selection::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-
-        .books-selection::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            border-radius: 10px;
-        }
+        .search-books:focus { outline: none; border-color: var(--primary-color); }
+        .book-checkbox-grid::-webkit-scrollbar { width: 6px; }
+        .book-checkbox-grid::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        .book-checkbox-grid::-webkit-scrollbar-thumb { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); border-radius: 10px; }
+        /* Modal System */
+        .g-modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:10000;justify-content:center;align-items:center}
+        .g-modal-card{background:#fff;border-radius:20px;padding:40px;max-width:420px;width:90%;text-align:center;box-shadow:0 25px 60px rgba(0,0,0,0.3);animation:gModalIn .3s ease}
+        @keyframes gModalIn{from{opacity:0;transform:scale(.8) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+        .g-modal-icon{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:28px}
+        .g-modal-icon.confirm{background:#fef3c7;color:#f59e0b}.g-modal-icon.warning{background:#fee2e2;color:#ef4444}
+        .g-modal-title{font-size:1.25rem;font-weight:700;margin-bottom:10px;color:#1e293b}
+        .g-modal-message{color:#64748b;margin-bottom:25px;line-height:1.6}
+        .g-modal-actions{display:flex;gap:12px;justify-content:center}
+        .g-modal-btn{padding:10px 28px;border-radius:12px;border:none;font-weight:600;cursor:pointer;transition:all .2s;font-size:.95rem}
+        .g-modal-btn.cancel{background:#f1f5f9;color:#64748b}.g-modal-btn.primary{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff}
     </style>
 </head>
 <body>
-    <div class="dashboard-container">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <h2><i class="fas fa-book-open"></i> 图书管理系统</h2>
-                <div class="admin-info">
-                    <i class="fas fa-user-circle"></i> {{ name }} 管理员
-                </div>
-            </div>
-            
-            <nav class="nav-menu">
-                <div class="nav-item">
-                    <a href="/manager/publisher_list/" class="nav-link">
-                        <i class="fas fa-building"></i> 出版社管理
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="/manager/book_list/" class="nav-link">
-                        <i class="fas fa-book"></i> 图书管理
-                    </a>
-                </div>                <div class="nav-item">
-                    <a href="/manager/author_list/" class="nav-link">
-                        <i class="fas fa-users"></i> 作者管理
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="/manager/order_list/" class="nav-link">
-                        <i class="fas fa-shopping-cart"></i> 订单管理
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="/manager/add_publisher/" class="nav-link">
-                        <i class="fas fa-plus-circle"></i> 添加出版社
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="/manager/add_book/" class="nav-link">
-                        <i class="fas fa-plus-circle"></i> 添加图书
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="/manager/add_author/" class="nav-link active">
-                        <i class="fas fa-plus-circle"></i> 添加作者
-                    </a>
-                </div>
-                <div class="nav-item mt-3">
-                    <a href="/manager/logout/" class="logout-btn">
-                        <i class="fas fa-sign-out-alt"></i> 退出系统
-                    </a>
-                </div>
-            </nav>
-        </div>
-
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Header -->
-            <div class="content-header fade-in">
-                <h1 class="page-title">
-                    <i class="fas fa-user-plus"></i> 添加作者
-                </h1>
-                <p class="page-subtitle">向系统中添加新的作者信息</p>
-                <nav class="breadcrumb-nav">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="/manager/">首页</a></li>
-                        <li class="breadcrumb-item"><a href="/manager/author_list/">作者管理</a></li>
-                        <li class="breadcrumb-item active">添加作者</li>
-                    </ol>
-                </nav>
-            </div>
-
-            <!-- Form Container -->
-            <div class="form-container fade-in">
-                <div class="form-header">
-                    <h2 class="form-title">
-                        <i class="fas fa-user-edit"></i> 作者信息
-                    </h2>
-                    <p class="form-subtitle">请填写完整的作者信息，并选择相关图书</p>
-                </div>
-
-                <form action="/manager/add_author/" method="post" id="authorForm">
-                    {% csrf_token %}
-                    
-                    <!-- Author Name -->
-                    <div class="form-group">
-                        <label for="authorName" class="form-label required">作者姓名</label>
-                        <input type="text" 
-                               id="authorName" 
-                               name="name" 
-                               class="form-control" 
-                               placeholder="请输入作者的完整姓名"
-                               required
-                               maxlength="32">
-                        <div class="form-help">
-                            <i class="fas fa-info-circle"></i> 
-                            请输入作者的真实姓名，支持中文和英文
-                        </div>
+    <div class="main-container">
+        <div class="container-fluid">
+            <div class="header-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <nav class="breadcrumb-modern">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/manager/dashboard/"><i class="fas fa-home"></i> 首页</a></li>
+                                <li class="breadcrumb-item"><a href="/manager/author_list/">作者管理</a></li>
+                                <li class="breadcrumb-item active">添加作者</li>
+                            </ol>
+                        </nav>
+                        <h2 class="mb-0"><i class="fas fa-user-plus"></i> 添加新作者</h2>
+                        <p class="mb-0 mt-2 opacity-75">为系统添加新的作者信息</p>
                     </div>
-
-                    <!-- Associated Books -->
-                    <div class="form-group">
-                        <label class="form-label">关联图书</label>
-                        <div class="books-selection" id="booksSelection">
-                            {% if book_obj_list %}
+                    <div class="text-end">
+                        <p class="mb-0">欢迎回来，<strong>{{ name }}</strong> 管理员</p>
+                        <small class="opacity-75">今天是 <span id="currentDate"></span></small>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="sidebar">
+                        <h6 class="text-muted mb-3 fw-bold">快速导航</h6>
+                        <a href="/manager/author_list/" class="sidebar-link"><i class="fas fa-list"></i> 作者列表</a>
+                        <a href="/manager/add_author/" class="sidebar-link"><i class="fas fa-user-plus"></i> 添加作者</a>
+                        <a href="/manager/book_list/" class="sidebar-link"><i class="fas fa-book"></i> 图书管理</a>
+                        <a href="/manager/publisher_list/" class="sidebar-link"><i class="fas fa-building"></i> 出版社管理</a>
+                        <a href="/manager/order_list/" class="sidebar-link"><i class="fas fa-shopping-cart"></i> 订单管理</a>
+                        <hr>
+                        <a href="/manager/logout/" class="sidebar-link text-danger"><i class="fas fa-sign-out-alt"></i> 退出系统</a>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="form-card">
+                        <form action="/manager/add_author/" method="post" id="authorForm">
+                            {% csrf_token %}
+                            <h5 class="mb-4 text-primary"><i class="fas fa-info-circle"></i> 作者信息</h5>
+                            <div class="form-group">
+                                <label class="form-label">作者姓名 <span class="required">*</span></label>
+                                <input type="text" name="name" id="authorName" class="form-control" placeholder="请输入作者姓名" required minlength="2">
+                                <small class="text-muted">作者姓名至少需要2个字符</small>
+                            </div>
+                            <hr class="my-4">
+                            <h5 class="mb-3 text-primary">
+                                <i class="fas fa-book"></i> 关联图书
+                                <span class="selected-count ms-2" id="selectedCount" style="display:none;">已选 <span id="countNumber">0</span> 本</span>
+                            </h5>
+                            <p class="text-muted small mb-3">选择该作者的相关图书（可选，可稍后添加）</p>
+                            <input type="text" class="search-books" id="searchBooks" placeholder="搜索图书名称...">
+                            <div class="book-checkbox-grid" id="bookGrid">
                                 {% for book_obj in book_obj_list %}
-                                <div class="book-option">
-                                    <input type="checkbox" 
-                                           name="books" 
-                                           value="{{ book_obj.id }}" 
-                                           id="book_{{ book_obj.id }}"
-                                           onchange="updateSelectedCount()">
-                                    <label for="book_{{ book_obj.id }}" class="book-info">
-                                        <div class="book-name">{{ book_obj.name }}</div>
-                                        <div class="book-details">
-                                            <i class="fas fa-building"></i> {{ book_obj.publisher.publisher_name }}
-                                            <span class="ms-3">
-                                                <i class="fas fa-tag"></i> ¥{{ book_obj.price }}
-                                            </span>
-                                            <span class="ms-3">
-                                                <i class="fas fa-boxes"></i> 库存 {{ book_obj.inventory }}
-                                            </span>
-                                        </div>
-                                    </label>
+                                <label class="book-checkbox-item" data-name="{{ book_obj.name|lower }}">
+                                    <input type="checkbox" name="books" value="{{ book_obj.id }}">
+                                    <div>
+                                        <div class="book-label">{{ book_obj.name }}</div>
+                                        <div class="book-publisher"><i class="fas fa-building me-1"></i>{{ book_obj.publisher.publisher_name }}</div>
+                                    </div>
+                                </label>
+                                {% empty %}
+                                <div class="text-center text-muted py-4">
+                                    <i class="fas fa-inbox fa-2x mb-2 d-block"></i>暂无图书可供选择
                                 </div>
                                 {% endfor %}
-                            {% else %}
-                                <div class="text-center py-4">
-                                    <i class="fas fa-exclamation-triangle text-warning fs-2"></i>
-                                    <h5 class="mt-2">暂无可关联的图书</h5>
-                                    <p class="text-muted">请先添加图书后再创建作者</p>
-                                    <a href="/manager/add_book/" class="btn btn-primary">
-                                        <i class="fas fa-plus"></i> 添加图书
-                                    </a>
-                                </div>
-                            {% endif %}
-                        </div>
-                        <div class="selected-count" id="selectedCount" style="display: none;">
-                            已选择 <span id="countNumber">0</span> 本图书
-                        </div>
-                        <div class="form-help">
-                            <i class="fas fa-info-circle"></i> 
-                            可以选择多本图书关联到该作者，也可以暂时不选择任何图书
-                        </div>
+                            </div>
+                            <div class="d-flex justify-content-end gap-3 mt-4 pt-3 border-top">
+                                <a href="/manager/author_list/" class="btn btn-secondary-modern"><i class="fas fa-times"></i> 取消</a>
+                                <button type="submit" class="btn btn-primary-modern"><i class="fas fa-save"></i> 保存作者</button>
+                            </div>
+                        </form>
                     </div>
-
-                    <!-- Form Actions -->
-                    <div class="form-actions">
-                        <button type="submit" class="btn-submit" {% if not book_obj_list %}disabled{% endif %}>
-                            <i class="fas fa-save"></i> 保存作者
-                        </button>
-                        <button type="button" class="btn-reset" onclick="resetForm()">
-                            <i class="fas fa-undo"></i> 重置表单
-                        </button>
-                        <a href="/manager/author_list/" class="btn-cancel">
-                            <i class="fas fa-times"></i> 取消
-                        </a>
-                    </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Update selected books count
-        function updateSelectedCount() {
-            const checkboxes = document.querySelectorAll('input[name="books"]:checked');
-            const count = checkboxes.length;
-            const countElement = document.getElementById('selectedCount');
-            const countNumber = document.getElementById('countNumber');
-            
-            if (count > 0) {
-                countNumber.textContent = count;
-                countElement.style.display = 'inline-block';
-            } else {
-                countElement.style.display = 'none';
-            }
+        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('zh-CN');
+        document.getElementById('searchBooks').addEventListener('input', function() {
+            var q = this.value.toLowerCase();
+            document.querySelectorAll('.book-checkbox-item').forEach(function(el) {
+                el.style.display = el.dataset.name.indexOf(q) > -1 ? '' : 'none';
+            });
+        });
+        document.querySelectorAll('.book-checkbox-item input[type="checkbox"]').forEach(function(cb) {
+            cb.addEventListener('change', function() {
+                this.closest('.book-checkbox-item').classList.toggle('selected', this.checked);
+                updateCount();
+            });
+        });
+        function updateCount() {
+            var n = document.querySelectorAll('.book-checkbox-item input:checked').length;
+            document.getElementById('countNumber').textContent = n;
+            document.getElementById('selectedCount').style.display = n > 0 ? 'inline-block' : 'none';
         }
-
-        // Reset form function
-        function resetForm() {
-            if (confirm('确定要重置表单吗？所有已填写的信息将被清空。')) {
-                document.getElementById('authorForm').reset();
-                updateSelectedCount();
-            }
-        }
-
-        // Form validation
         document.getElementById('authorForm').addEventListener('submit', function(e) {
-            const authorName = document.getElementById('authorName').value.trim();
-            
-            if (!authorName) {
+            var name = document.getElementById('authorName').value.trim();
+            if (!name) { e.preventDefault(); gAlert('请输入作者姓名！', {title:'验证失败',icon:'fa-exclamation-circle'}); return false; }
+            if (name.length < 2) { e.preventDefault(); gAlert('作者姓名至少需要2个字符！', {title:'验证失败',icon:'fa-exclamation-circle'}); return false; }
+            var sel = document.querySelectorAll('input[name="books"]:checked');
+            if (sel.length === 0) {
                 e.preventDefault();
-                alert('请输入作者姓名！');
-                document.getElementById('authorName').focus();
+                var form = this;
+                gConfirm('您没有选择任何图书关联到该作者，确定继续吗？<br><small>您可以稍后编辑作者信息来添加图书关联。</small>', function(){ form.submit(); }, {title:'未选择图书',icon:'fa-book'});
                 return false;
             }
-            
-            if (authorName.length < 2) {
-                e.preventDefault();
-                alert('作者姓名至少需要2个字符！');
-                document.getElementById('authorName').focus();
-                return false;
-            }
-            
-            // Optional: Ask for confirmation if no books selected
-            const selectedBooks = document.querySelectorAll('input[name="books"]:checked');
-            if (selectedBooks.length === 0) {
-                if (!confirm('您没有选择任何图书关联到该作者，确定继续吗？\n\n您可以稍后编辑作者信息来添加图书关联。')) {
-                    e.preventDefault();
-                    return false;
-                }
-            }
-            
-            return true;
         });
-
-        // Real-time validation for author name
-        document.getElementById('authorName').addEventListener('input', function() {
-            const value = this.value.trim();
-            const submitBtn = document.querySelector('.btn-submit');
-            
-            if (value.length < 2) {
-                this.style.borderColor = '#f44336';
-                submitBtn.disabled = true;
-            } else {
-                this.style.borderColor = '#4CAF50';
-                submitBtn.disabled = false;
-            }
-        });
-
-        // Add smooth animations
-        document.addEventListener('DOMContentLoaded', function() {
-            // Animate form elements
-            const formElements = document.querySelectorAll('.form-group');
-            formElements.forEach((element, index) => {
-                element.style.opacity = '0';
-                element.style.transform = 'translateY(20px)';
-                element.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-                
-                setTimeout(() => {
-                    element.style.opacity = '1';
-                    element.style.transform = 'translateY(0)';
-                }, index * 150);
-            });
-            
-            // Focus on author name input
-            document.getElementById('authorName').focus();
-        });
-
-        // Add click handlers for book options
-        document.querySelectorAll('.book-option').forEach(option => {
-            option.addEventListener('click', function(e) {
-                if (e.target.type !== 'checkbox') {
-                    const checkbox = this.querySelector('input[type="checkbox"]');
-                    checkbox.checked = !checkbox.checked;
-                    updateSelectedCount();
-                }
-            });
-        });
-
-        // Enhanced visual feedback
-        document.querySelectorAll('input[name="books"]').forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                const bookOption = this.closest('.book-option');
-                if (this.checked) {
-                    bookOption.style.background = 'rgba(102, 126, 234, 0.1)';
-                    bookOption.style.borderLeft = '4px solid var(--primary-color)';
-                } else {
-                    bookOption.style.background = '';
-                    bookOption.style.borderLeft = '';
-                }
-            });
-        });
+    </script>
+    <script>
+    function gAlert(msg,opts){opts=opts||{};var o=document.createElement('div');o.className='g-modal-overlay';o.style.display='flex';o.innerHTML='<div class="g-modal-card"><div class="g-modal-icon '+(opts.type||'warning')+'"><i class="fas '+(opts.icon||'fa-exclamation-triangle')+'"></i></div><div class="g-modal-title">'+(opts.title||'提示')+'</div><div class="g-modal-message">'+msg+'</div><div class="g-modal-actions"><button class="g-modal-btn primary" onclick="this.closest(\'.g-modal-overlay\').remove()">确定</button></div></div>';document.body.appendChild(o);}
+    function gConfirm(msg,cb,opts){opts=opts||{};var o=document.createElement('div');o.className='g-modal-overlay';o.style.display='flex';var t=opts.danger?'warning':'confirm';var b=opts.danger?'danger':'primary';o.innerHTML='<div class="g-modal-card"><div class="g-modal-icon '+t+'"><i class="fas '+(opts.icon||'fa-question-circle')+'"></i></div><div class="g-modal-title">'+(opts.title||'确认操作')+'</div><div class="g-modal-message">'+msg+'</div><div class="g-modal-actions"><button class="g-modal-btn cancel" id="gCc">取消</button><button class="g-modal-btn '+b+'" id="gCo">'+(opts.confirmText||'确定')+'</button></div></div>';document.body.appendChild(o);o.querySelector('#gCc').onclick=function(){o.remove()};o.querySelector('#gCo').onclick=function(){o.remove();if(cb)cb()};}
     </script>
 </body>
 </html>

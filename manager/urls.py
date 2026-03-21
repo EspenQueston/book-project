@@ -42,11 +42,29 @@ urlpatterns = [
     path('public/authors/<int:author_id>/', views.public_author_detail, name='public_author_detail'),
     path('public/publishers/', views.public_publishers, name='public_publishers'),
     path('public/publishers/<int:publisher_id>/', views.public_publisher_detail, name='public_publisher_detail'),    
+    
+    # =========================Public Static Pages========================
+    path('public/about/', views.public_about, name='public_about'),
+    path('public/services/', views.public_services, name='public_services'),
+    path('public/contact/', views.public_contact, name='public_contact'),
+
+    # =========================Public Blog========================
+    path('public/blog/', views.public_blog, name='public_blog'),
+    path('public/blog/<slug:slug>/', views.public_blog_detail, name='public_blog_detail'),
+
+    # =========================Admin Blog Management========================
+    path('blog_list/', views.blog_list, name='blog_list'),
+    path('add_blog/', views.add_blog_post, name='add_blog'),
+    path('edit_blog/', views.edit_blog_post, name='edit_blog'),
+    path('delete_blog/', views.delete_blog_post, name='delete_blog'),
+    path('blog_categories/', views.manage_blog_categories, name='blog_categories'),
+
     # =========================E-commerce URLs========================
     path('cart/add/<int:book_id>/', views.add_to_cart, name='add_to_cart'),
     path('cart/', views.view_cart, name='view_cart'),
     path('cart/update/', views.update_cart, name='update_cart'),
     path('cart/remove/<int:item_id>/', views.remove_from_cart, name='remove_from_cart'),
+    path('cart/clear/', views.clear_cart, name='clear_cart'),
     path('cart/count/', views.get_cart_count, name='get_cart_count'),
     path('buy-now/<int:book_id>/', views.buy_now, name='buy_now'),
     path('checkout/', views.checkout, name='checkout'),
@@ -57,6 +75,25 @@ urlpatterns = [
     # =========================API Endpoints for Order Actions========================
     path('api/cancel-order/', views.api_cancel_order, name='api_cancel_order'),
     path('api/confirm-payment/', views.api_confirm_payment, name='api_confirm_payment'),
+
+    # =========================Contact Messages Admin========================
+    path("admin_messages/", views.admin_messages, name='admin_messages'),
+    path("admin_messages/<int:msg_id>/", views.admin_message_detail, name='admin_message_detail'),
+    path("admin_messages/<int:msg_id>/reply/", views.reply_to_contact, name='reply_to_contact'),
+    path("admin_messages/toggle_read/", views.admin_message_toggle_read, name='admin_message_toggle_read'),
+    path("admin_messages/delete/", views.admin_message_delete, name='admin_message_delete'),
+    path("admin_messages/bulk/", views.admin_message_bulk_action, name='admin_message_bulk_action'),
+    path("admin_messages/label_action/", views.contact_label_action, name='contact_label_action'),
+
+    # =========================Email Management URLs========================
+    path("email/", views.email_dashboard, name='email_dashboard'),
+    path("email/detail/<int:email_id>/", views.email_detail, name='email_detail'),
+    path("email/compose/", views.email_compose, name='email_compose'),
+    path("email/sync/", views.email_sync, name='email_sync'),
+    path("email/action/", views.email_action, name='email_action'),
+    path("email/accounts/", views.email_accounts, name='email_accounts'),
+    path("email/labels/", views.email_labels, name='email_labels'),
+    path("email/rules/", views.email_rules, name='email_rules'),
 
     # =========================Order Management URLs========================
     path("order_list/", views.order_list, name='order_list'),

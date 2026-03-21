@@ -1,0 +1,67 @@
+{% load i18n %}
+<!-- Global Toast + Confirm Modal System -->
+<style>
+.g-toast-container{position:fixed;top:24px;right:24px;z-index:100000;display:flex;flex-direction:column;gap:12px;pointer-events:none}
+.g-toast{pointer-events:all;display:flex;align-items:center;gap:12px;min-width:320px;max-width:480px;padding:16px 20px;border-radius:14px;background:#fff;box-shadow:0 8px 32px rgba(0,0,0,.12),0 2px 8px rgba(0,0,0,.06);animation:g-toast-in .35s cubic-bezier(.21,1.02,.73,1) forwards;position:relative;overflow:hidden;border-left:4px solid #667eea}
+.g-toast i{font-size:1.3rem;flex-shrink:0}.g-toast span{flex:1;font-size:.92rem;color:#1a1a2e;font-weight:500;line-height:1.4}
+.g-toast-close{background:none;border:none;font-size:1.3rem;color:#adb5bd;cursor:pointer;padding:0 0 0 8px;line-height:1;transition:color .2s}.g-toast-close:hover{color:#1a1a2e}
+.g-toast-success{border-left-color:#10b981}.g-toast-success i{color:#10b981}
+.g-toast-error{border-left-color:#ef4444}.g-toast-error i{color:#ef4444}
+.g-toast-warning{border-left-color:#f59e0b}.g-toast-warning i{color:#f59e0b}
+.g-toast-info{border-left-color:#667eea}.g-toast-info i{color:#667eea}
+.g-toast::after{content:'';position:absolute;bottom:0;left:0;height:3px;background:currentColor;opacity:.15;animation:g-toast-timer var(--toast-dur,4000ms) linear forwards}
+.g-toast-out{animation:g-toast-out .3s ease forwards}
+@keyframes g-toast-in{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+@keyframes g-toast-out{to{opacity:0;transform:translateX(40px) scale(.95)}}
+@keyframes g-toast-timer{from{width:100%}to{width:0}}
+.g-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);z-index:100001;display:none;align-items:center;justify-content:center;opacity:0;transition:opacity .25s}
+.g-modal-overlay.show{display:flex;opacity:1}
+.g-modal-card{background:#fff;border-radius:20px;padding:40px 36px 32px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.15);transform:scale(.9);transition:transform .3s cubic-bezier(.21,1.02,.73,1)}
+.g-modal-overlay.show .g-modal-card{transform:scale(1)}
+.g-modal-icon{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:1.6rem}
+.g-modal-icon.confirm-icon{background:linear-gradient(135deg,rgba(102,126,234,.12),rgba(118,75,162,.12));color:#667eea}
+.g-modal-icon.danger-icon{background:rgba(239,68,68,.1);color:#ef4444}
+.g-modal-icon.info-icon{background:rgba(102,126,234,.1);color:#667eea}
+.g-modal-icon.success-icon{background:rgba(16,185,129,.1);color:#10b981}
+.g-modal-title{font-size:1.2rem;font-weight:700;color:#1a1a2e;margin-bottom:8px}
+.g-modal-text{color:#6b7280;font-size:.95rem;line-height:1.6;margin-bottom:28px}
+.g-modal-actions{display:flex;gap:12px;justify-content:center}
+.g-modal-btn{padding:10px 28px;border:none;border-radius:10px;font-weight:600;font-size:.92rem;cursor:pointer;transition:all .2s}
+.g-modal-btn-cancel{background:#f3f4f6;color:#4b5563}.g-modal-btn-cancel:hover{background:#e5e7eb}
+.g-modal-btn-confirm{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff}.g-modal-btn-confirm:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(102,126,234,.4)}
+.g-modal-btn-danger{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff}.g-modal-btn-danger:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(239,68,68,.4)}
+</style>
+
+<div id="gToastContainer" class="g-toast-container"></div>
+
+<div id="gConfirmModal" class="g-modal-overlay" onclick="if(event.target===this)gModalClose()">
+    <div class="g-modal-card">
+        <div id="gConfirmIcon" class="g-modal-icon confirm-icon"><i class="fas fa-question"></i></div>
+        <h5 id="gConfirmTitle" class="g-modal-title"></h5>
+        <p id="gConfirmText" class="g-modal-text"></p>
+        <div class="g-modal-actions">
+            <button class="g-modal-btn g-modal-btn-cancel" onclick="gModalClose()">{% trans "取消" %}</button>
+            <button id="gConfirmOk" class="g-modal-btn g-modal-btn-confirm">{% trans "确认" %}</button>
+        </div>
+    </div>
+</div>
+
+<div id="gInfoModal" class="g-modal-overlay" onclick="if(event.target===this)document.getElementById('gInfoModal').classList.remove('show')">
+    <div class="g-modal-card">
+        <div id="gInfoIcon" class="g-modal-icon info-icon"><i class="fas fa-info-circle"></i></div>
+        <h5 id="gInfoTitle" class="g-modal-title"></h5>
+        <p id="gInfoText" class="g-modal-text"></p>
+        <div class="g-modal-actions">
+            <button class="g-modal-btn g-modal-btn-confirm" onclick="document.getElementById('gInfoModal').classList.remove('show')">{% trans "知道了" %}</button>
+        </div>
+    </div>
+</div>
+
+<script>
+function gToast(msg,type,duration){type=type||'info';duration=duration||4000;var icons={success:'fa-check-circle',error:'fa-times-circle',warning:'fa-exclamation-triangle',info:'fa-info-circle'};var c=document.getElementById('gToastContainer');var t=document.createElement('div');t.className='g-toast g-toast-'+type;t.style.setProperty('--toast-dur',duration+'ms');t.innerHTML='<i class="fas '+(icons[type]||icons.info)+'"></i><span>'+msg+'</span><button class="g-toast-close" onclick="gToastRemove(this.parentElement)">&times;</button>';c.appendChild(t);setTimeout(function(){gToastRemove(t)},duration)}
+function gToastRemove(el){if(!el||el.classList.contains('g-toast-out'))return;el.classList.add('g-toast-out');setTimeout(function(){if(el.parentElement)el.parentElement.removeChild(el)},350)}
+var _gConfirmCb=null;
+function gConfirm(msg,callback,opts){opts=opts||{};var m=document.getElementById('gConfirmModal');var ic=document.getElementById('gConfirmIcon');var ok=document.getElementById('gConfirmOk');document.getElementById('gConfirmTitle').textContent=opts.title||'{% trans "确认操作" %}';document.getElementById('gConfirmText').textContent=msg;ic.className='g-modal-icon '+(opts.danger?'danger-icon':'confirm-icon');ic.innerHTML='<i class="fas '+(opts.danger?'fa-exclamation-triangle':'fa-question')+'"></i>';ok.className='g-modal-btn '+(opts.danger?'g-modal-btn-danger':'g-modal-btn-confirm');ok.textContent=opts.okText||'{% trans "确认" %}';_gConfirmCb=callback;ok.onclick=function(){gModalClose();if(_gConfirmCb)_gConfirmCb()};m.classList.add('show')}
+function gModalClose(){document.getElementById('gConfirmModal').classList.remove('show');_gConfirmCb=null}
+function gAlert(msg,opts){opts=opts||{};var m=document.getElementById('gInfoModal');var ic=document.getElementById('gInfoIcon');document.getElementById('gInfoTitle').textContent=opts.title||'{% trans "提示" %}';document.getElementById('gInfoText').textContent=msg;var t=opts.type||'info';var cls={info:'info-icon',success:'success-icon',error:'danger-icon',warning:'confirm-icon'};var ico={info:'fa-info-circle',success:'fa-check-circle',error:'fa-times-circle',warning:'fa-exclamation-triangle'};ic.className='g-modal-icon '+(cls[t]||'info-icon');ic.innerHTML='<i class="fas '+(ico[t]||'fa-info-circle')+'"></i>';m.classList.add('show')}
+</script>

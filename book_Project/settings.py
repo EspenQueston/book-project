@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from django.utils.translation import gettext_lazy as _
 
 # Build paths inside the project
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -21,7 +22,7 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 # Allowed hosts for production
 # For production: scholarquest.tech and www.scholarquest.tech
 # For development: localhost and 127.0.0.1
-ALLOWED_HOSTS = ['scholarquest.tech','www.scholarquest.tech']
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'scholarquest.tech,www.scholarquest.tech,localhost,127.0.0.1').split(',')
 
 
 # 应用程序定义
@@ -32,6 +33,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rosetta',
     'manager.apps.ManagerConfig'
     # 新加入的程序模块放这里
 ]
@@ -40,6 +42,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -63,6 +66,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.i18n',
             ],
         },
     },
@@ -77,11 +81,14 @@ WSGI_APPLICATION = 'book_Project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'cp2603370p21_scholarq_db_book',
-        'USER': 'cp2603370p21_scholarq_bookuser',
-        'PASSWORD': 'Dpg4TVEz@44C6Ku',
-        'HOST': 'localhost',
-        'PORT': '5432'
+        'NAME': os.environ.get('DB_NAME', 'db_book'),
+        'USER': os.environ.get('DB_USER', 'bookuser'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'BookProject123!'),
+        'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
+        'OPTIONS': {
+            'client_encoding': 'UTF8',
+        },
     }
 }
 
@@ -103,8 +110,19 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# 国际化配置
-LANGUAGE_CODE = 'en-us'
+# 国际化配置 / Internationalization
+LANGUAGE_CODE = 'zh-hans'
+
+LANGUAGES = [
+    ('zh-hans', _('中文')),
+    ('en', _('English')),
+    ('fr', _('Français')),
+]
+
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'locale'),
+]
+
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_L10N = True
@@ -114,10 +132,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # For collectstatic
-# STATICFILES_DIRS = [
-#     os.path.join(BASE_DIR, 'static'),
-# ] if os.path.exists(os.path.join(BASE_DIR, 'static')) else []
-STATICFILES_DIRS = []
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+] if os.path.exists(os.path.join(BASE_DIR, 'static')) else []
 
 # Media files configuration for file uploads (图片上传配置)
 MEDIA_URL = '/media/'
@@ -130,6 +147,16 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
 # Image upload validation
 ALLOWED_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp']
 MAX_IMAGE_SIZE = 5 * 1024 * 1024  # 5MB
+
+# Email configuration (Gmail SMTP with App Password)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'bizkey2024@gmail.com')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = 'Book Management System <bizkey2024@gmail.com>'
+CONTACT_EMAIL = 'bizkey2024@gmail.com'
 
 # Security settings for production
 if not DEBUG:
@@ -148,3 +175,9 @@ if not DEBUG:
     
     # Additional security
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# CSRF trusted origins (required for Django 4.x with HTTPS)
+CSRF_TRUSTED_ORIGINS = os.environ.get(
+    'CSRF_TRUSTED_ORIGINS',
+    'https://scholarquest.tech,https://www.scholarquest.tech'
+).split(',')

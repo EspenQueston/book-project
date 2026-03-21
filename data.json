@@ -1,3 +1,4 @@
+Order management signals loaded successfully!
 [
 {
     "model": "auth.user",

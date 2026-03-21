@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>消息管理</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh; font-family: 'Segoe UI', sans-serif; padding-top: 76px;
+        }
+        /* ===== Navbar ===== */
+        .top-navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1030;
+            height: 76px; display: flex; align-items: center; padding: 0 24px;
+            box-shadow: 0 4px 20px rgba(102,126,234,0.4);
+        }
+        .nav-brand { color: white; font-size: 1.3rem; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .nav-brand:hover { color: rgba(255,255,255,0.9); }
+        .nav-links { display: flex; gap: 6px; margin-left: auto; align-items: center; flex-wrap: wrap; }
+        .nav-link-btn {
+            color: rgba(255,255,255,0.85); text-decoration: none; padding: 8px 14px;
+            border-radius: 8px; font-size: 0.88rem; font-weight: 500; display: flex; align-items: center; gap: 6px;
+            transition: all 0.2s; border: 1px solid transparent;
+        }
+        .nav-link-btn:hover, .nav-link-btn.active { background: rgba(255,255,255,0.15); color: white; border-color: rgba(255,255,255,0.2); }
+        .nav-badge { background: #ef4444; color: white; font-size: 0.7rem; padding: 1px 6px; border-radius: 10px; font-weight: 700; min-width: 18px; text-align: center; }
+
+        /* ===== Layout ===== */
+        .main-container { max-width: 1200px; margin: 0 auto; padding: 28px 20px 60px; }
+        .header-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px; padding: 28px 32px; margin-bottom: 24px; color: white;
+            box-shadow: 0 8px 30px rgba(102,126,234,0.35); position: relative; overflow: hidden;
+        }
+        .header-card::before { content:''; position:absolute; top:-40px; right:-40px; width:200px; height:200px; background:rgba(255,255,255,0.06); border-radius:50%; }
+        .header-card::after { content:''; position:absolute; bottom:-30px; left:-20px; width:150px; height:150px; background:rgba(255,255,255,0.04); border-radius:50%; }
+        .header-content { position: relative; z-index: 1; }
+        .header-title { font-size: 1.6rem; font-weight: 800; margin: 0 0 4px; }
+        .header-sub { opacity: 0.82; font-size: 0.9rem; }
+        .stat-chip { background: rgba(255,255,255,0.18); padding: 8px 18px; border-radius: 20px; font-size: 0.88rem; font-weight: 600; backdrop-filter: blur(10px); display: inline-flex; align-items: center; gap: 6px; }
+
+        /* ===== Content Area ===== */
+        .content-grid { display: flex; gap: 20px; }
+
+        /* ===== Sidebar ===== */
+        .sidebar-card {
+            width: 220px; flex-shrink: 0; background: white; border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.07); padding: 20px 0; align-self: flex-start; position: sticky; top: 104px;
+        }
+        .compose-btn {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            width: calc(100% - 32px); margin: 0 16px 16px; padding: 12px 16px;
+            background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 12px;
+            font-weight: 700; font-size: 0.92rem; cursor: pointer; transition: all 0.2s;
+        }
+        .compose-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4); }
+        .sidebar-section { padding: 0 8px; margin-bottom: 12px; }
+        .sidebar-label { font-size: 0.72rem; font-weight: 700; color: #94a3b8; padding: 0 12px 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .folder-item {
+            display: flex; align-items: center; gap: 10px; padding: 9px 16px; border-radius: 10px;
+            color: #475569; font-size: 0.88rem; font-weight: 500; cursor: pointer;
+            text-decoration: none; transition: all 0.15s; margin: 1px 4px;
+        }
+        .folder-item:hover { background: rgba(102,126,234,0.06); color: #667eea; }
+        .folder-item.active { background: rgba(102,126,234,0.1); color: #667eea; font-weight: 700; }
+        .folder-item .fi-icon { width: 18px; text-align: center; font-size: 0.85rem; }
+        .folder-item .fi-count { margin-left: auto; background: #f1f5f9; padding: 1px 8px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; color: #64748b; }
+        .folder-item.active .fi-count { background: rgba(102,126,234,0.15); color: #667eea; }
+        .sidebar-divider { height: 1px; background: #f1f5f9; margin: 10px 16px; }
+        .label-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+        /* ===== Toolbar ===== */
+        .toolbar { background: white; border-radius: 14px; padding: 14px 18px; margin-bottom: 16px; box-shadow: 0 3px 12px rgba(0,0,0,0.06); display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+        .filter-tabs { display: flex; gap: 4px; background: #f1f5f9; border-radius: 10px; padding: 4px; }
+        .filter-tab {
+            padding: 7px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+            text-decoration: none; color: #64748b; transition: all 0.2s; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 6px;
+        }
+        .filter-tab.active, .filter-tab:hover { background: white; color: #667eea; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .filter-tab .badge { background: #ef4444; color: white; font-size: 0.7rem; padding: 1px 6px; border-radius: 10px; min-width: 18px; text-align: center; }
+        .search-bar { display: flex; gap: 8px; flex: 1; min-width: 180px; }
+        .search-bar input {
+            flex: 1; border: 2px solid #e2e8f0; border-radius: 10px; padding: 8px 14px; font-size: 0.88rem;
+            outline: none; transition: border-color 0.2s;
+        }
+        .search-bar input:focus { border-color: #667eea; }
+        .search-bar button { background: linear-gradient(135deg,#667eea,#764ba2); color: white; border: none; border-radius: 10px; padding: 8px 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 0.85rem; }
+        .btn-bulk { background: #f1f5f9; border: none; border-radius: 8px; padding: 7px 13px; font-size: 0.82rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px; color: #64748b; transition: all 0.2s; }
+        .btn-bulk:hover { background: #e2e8f0; }
+        .btn-bulk.danger:hover { background: #fee2e2; color: #dc2626; }
+        .btn-bulk.sync { background: linear-gradient(135deg,#10b981,#059669); color: white; }
+        .btn-bulk.sync:hover { box-shadow: 0 3px 10px rgba(16,185,129,0.3); }
+
+        /* ===== Message List ===== */
+        .messages-container { background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.07); overflow: hidden; flex: 1; min-width: 0; }
+        .msg-row {
+            display: flex; align-items: flex-start; gap: 12px; padding: 16px 18px;
+            border-bottom: 1px solid #f3f4f6; transition: background 0.15s; cursor: pointer; position: relative;
+        }
+        .msg-row:last-child { border-bottom: none; }
+        .msg-row:hover { background: rgba(102,126,234,0.03); }
+        .msg-row.unread { background: rgba(102,126,234,0.04); }
+        .msg-row.unread::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:linear-gradient(135deg,#667eea,#764ba2); border-radius:2px 0 0 2px; }
+        .msg-checkbox { width: 18px; height: 18px; accent-color: #667eea; cursor: pointer; flex-shrink: 0; margin-top: 4px; }
+        .msg-star { background: none; border: none; cursor: pointer; font-size: 0.95rem; flex-shrink: 0; margin-top: 3px; padding: 0; }
+        .msg-star.starred { color: #f59e0b; }
+        .msg-star.unstarred { color: #cbd5e1; }
+        .msg-avatar {
+            width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 0.95rem; font-weight: 700; color: white; flex-shrink: 0;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+        .msg-content { flex: 1; min-width: 0; }
+        .msg-header { display: flex; align-items: baseline; gap: 8px; margin-bottom: 3px; flex-wrap: wrap; }
+        .msg-name { font-weight: 700; color: #1e293b; font-size: 0.92rem; }
+        .msg-email-addr { color: #94a3b8; font-size: 0.78rem; }
+        .msg-subject { font-weight: 600; color: #334155; font-size: 0.88rem; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .msg-preview { color: #94a3b8; font-size: 0.82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .msg-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; min-width: 100px; }
+        .msg-time { font-size: 0.78rem; color: #94a3b8; }
+        .tag-badge { font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; font-weight: 600; display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; }
+        .tag-order { background: #dbeafe; color: #1d4ed8; }
+        .tag-refund { background: #fee2e2; color: #991b1b; }
+        .tag-support { background: #d1fae5; color: #065f46; }
+        .tag-general { background: #f3f4f6; color: #64748b; }
+        .tag-payment { background: #fef3c7; color: #92400e; }
+        .tag-feedback { background: #ede9fe; color: #6d28d9; }
+        .tag-contact { background: #fce7f3; color: #9d174d; }
+        .label-tag { font-size: 0.68rem; padding: 1px 7px; border-radius: 8px; color: white; font-weight: 600; }
+        .badge-unread { background: #e0e7ff; color: #4338ca; font-size: 0.7rem; padding: 2px 7px; border-radius: 8px; font-weight: 600; }
+        .msg-actions { display: flex; gap: 4px; }
+        .action-btn {
+            width: 28px; height: 28px; border-radius: 7px; border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 0.78rem; transition: all 0.2s;
+        }
+        .action-btn.view { background: #e0e7ff; color: #4338ca; }
+        .action-btn.view:hover { background: #c7d2fe; }
+        .action-btn.del { background: #fee2e2; color: #dc2626; }
+        .action-btn.del:hover { background: #fecaca; }
+
+        /* ===== Empty State ===== */
+        .empty-state { text-align: center; padding: 64px 20px; }
+        .empty-icon { width: 80px; height: 80px; background: linear-gradient(135deg,rgba(102,126,234,0.1),rgba(118,75,162,0.1)); border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; }
+
+        /* ===== Compose Overlay ===== */
+        .compose-overlay {
+            display: none; position: fixed; bottom: 20px; right: 30px; width: 520px; max-height: 85vh;
+            background: white; border-radius: 16px; box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+            z-index: 1050; overflow: hidden; flex-direction: column;
+        }
+        .compose-overlay.show { display: flex; }
+        .compose-header {
+            background: linear-gradient(135deg, #667eea, #764ba2); color: white;
+            padding: 14px 20px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .compose-header h6 { margin: 0; font-weight: 700; }
+        .compose-close { background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; }
+        .compose-body { padding: 16px 20px; overflow-y: auto; flex: 1; }
+        .compose-body .form-control { font-size: 0.88rem; border-radius: 8px; }
+        .compose-body label { font-size: 0.78rem; font-weight: 600; color: #64748b; margin-bottom: 4px; }
+        .compose-footer { padding: 12px 20px; border-top: 1px solid #f1f5f9; display: flex; gap: 10px; }
+        .compose-footer .btn-send { background: linear-gradient(135deg,#667eea,#764ba2); color: white; border: none; border-radius: 10px; padding: 9px 22px; font-weight: 600; cursor: pointer; }
+        .compose-footer .btn-draft { background: #f1f5f9; color: #475569; border: none; border-radius: 10px; padding: 9px 18px; font-weight: 600; cursor: pointer; }
+
+        /* ===== Toast ===== */
+        .toast-container { position: fixed; top: 90px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast-item { padding: 14px 20px; border-radius: 12px; color: white; font-weight: 600; font-size: 0.9rem; box-shadow: 0 6px 20px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 10px; min-width: 260px; animation: toastIn 0.3s ease; }
+        .toast-success { background: linear-gradient(135deg,#10b981,#059669); }
+        .toast-error { background: linear-gradient(135deg,#ef4444,#dc2626); }
+        @keyframes toastIn { from { opacity:0; transform:translateX(30px); } to { opacity:1; transform:translateX(0); } }
+
+        .spin { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
+
+        @media (max-width: 768px) {
+            .sidebar-card { display: none; }
+            .content-grid { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<!-- Navbar -->
+<nav class="top-navbar">
+    <a href="/manager/dashboard/" class="nav-brand">
+        <i class="fas fa-book-open"></i>
+        <span>图书管理系统</span>
+    </a>
+    <div class="nav-links">
+        <a href="/manager/dashboard/" class="nav-link-btn"><i class="fas fa-tachometer-alt"></i>仪表盘</a>
+        <a href="/manager/book_list/" class="nav-link-btn"><i class="fas fa-book"></i>图书</a>
+        <a href="/manager/author_list/" class="nav-link-btn"><i class="fas fa-user-pen"></i>作者</a>
+        <a href="/manager/publisher_list/" class="nav-link-btn"><i class="fas fa-building"></i>出版社</a>
+        <a href="/manager/order_list/" class="nav-link-btn"><i class="fas fa-shopping-bag"></i>订单</a>
+        <a href="/manager/blog_list/" class="nav-link-btn"><i class="fas fa-blog"></i>博客</a>
+        <a href="/manager/email/" class="nav-link-btn active">
+            <i class="fas fa-envelope"></i>消息
+            {% if unread_count > 0 %}<span class="nav-badge">{{ unread_count }}</span>{% endif %}
+        </a>
+        <a href="/manager/logout/" class="nav-link-btn" style="background:rgba(239,68,68,0.2);border-color:rgba(239,68,68,0.3);"><i class="fas fa-sign-out-alt"></i>退出</a>
+    </div>
+</nav>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Main -->
+<div class="main-container">
+    <!-- Header -->
+    <div class="header-card">
+        <div class="header-content">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                <div>
+                    <nav aria-label="breadcrumb" class="mb-2">
+                        <ol class="breadcrumb mb-0" style="--bs-breadcrumb-divider-color:rgba(255,255,255,0.5);">
+                            <li class="breadcrumb-item"><a href="/manager/dashboard/" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;">仪表盘</a></li>
+                            <li class="breadcrumb-item active" style="color:white;font-size:0.85rem;">消息管理</li>
+                        </ol>
+                    </nav>
+                    <h1 class="header-title"><i class="fas fa-envelope me-2"></i>消息管理</h1>
+                    <p class="header-sub">管理邮件收发、联系消息、自动规则与账户设置</p>
+                </div>
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <span class="stat-chip"><i class="fas fa-inbox"></i>{{ folder_counts.inbox }} 收件</span>
+                    {% if unread_count > 0 %}
+                    <span class="stat-chip" style="background:rgba(239,68,68,0.25);">
+                        <i class="fas fa-circle" style="font-size:0.5rem;"></i>{{ unread_count }} 未读
+                    </span>
+                    {% endif %}
+                    <span class="stat-chip"><i class="fas fa-paper-plane"></i>{{ folder_counts.sent }} 已发</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Grid: Sidebar + Main -->
+    <div class="content-grid">
+        <!-- Sidebar -->
+        <div class="sidebar-card">
+            <button class="compose-btn" onclick="openCompose()">
+                <i class="fas fa-pen"></i> 写邮件
+            </button>
+
+            <div class="sidebar-section">
+                <div class="sidebar-label">文件夹</div>
+                <a href="?folder=inbox" class="folder-item {% if current_folder == 'inbox' %}active{% endif %}">
+                    <span class="fi-icon"><i class="fas fa-inbox"></i></span> 收件箱
+                    {% if folder_counts.inbox %}<span class="fi-count">{{ folder_counts.inbox }}</span>{% endif %}
+                </a>
+                <a href="?folder=sent" class="folder-item {% if current_folder == 'sent' %}active{% endif %}">
+                    <span class="fi-icon"><i class="fas fa-paper-plane"></i></span> 已发送
+                    {% if folder_counts.sent %}<span class="fi-count">{{ folder_counts.sent }}</span>{% endif %}
+                </a>
+                <a href="?folder=draft" class="folder-item {% if current_folder == 'draft' %}active{% endif %}">
+                    <span class="fi-icon"><i class="fas fa-file-alt"></i></span> 草稿
+                    {% if folder_counts.draft %}<span class="fi-count">{{ folder_counts.draft }}</span>{% endif %}
+                </a>
+                <a href="?starred=1" class="folder-item {% if starred_only %}active{% endif %}">
+                    <span class="fi-icon"><i class="fas fa-star"></i></span> 星标
+                    {% if folder_counts.starred %}<span class="fi-count">{{ folder_counts.starred }}</span>{% endif %}
+                </a>
+                <a href="?folder=archive" class="folder-item {% if current_folder == 'archive' %}active{% endif %}">
+                    <span class="fi-icon"><i class="fas fa-archive"></i></span> 归档
+                    {% if folder_counts.archive %}<span class="fi-count">{{ folder_counts.archive }}</span>{% endif %}
+                </a>
+                <a href="?folder=trash" class="folder-item {% if current_folder == 'trash' %}active{% endif %}">
+                    <span class="fi-icon"><i class="fas fa-trash"></i></span> 已删除
+                    {% if folder_counts.trash %}<span class="fi-count">{{ folder_counts.trash }}</span>{% endif %}
+                </a>
+                <div class="sidebar-divider"></div>
+                <a href="?folder=contact" class="folder-item {% if current_folder == 'contact' %}active{% endif %}">
+                    <span class="fi-icon"><i class="fas fa-comment-dots"></i></span> 联系消息
+                    {% if folder_counts.contact %}<span class="fi-count">{{ folder_counts.contact }}</span>{% endif %}
+                </a>
+            </div>
+
+            {% if labels %}
+            <div class="sidebar-section">
+                <div class="sidebar-label">标签</div>
+                {% for label in labels %}
+                <a href="?label={{ label.id }}" class="folder-item {% if current_label == label.id|stringformat:'d' %}active{% endif %}">
+                    <span class="label-dot" style="background:{{ label.color }};"></span> {{ label.name }}
+                </a>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="sidebar-divider"></div>
+            <div class="sidebar-section">
+                <div class="sidebar-label">设置</div>
+                <a href="/manager/email/accounts/" class="folder-item"><span class="fi-icon"><i class="fas fa-at"></i></span> 邮箱账户</a>
+                <a href="/manager/email/rules/" class="folder-item"><span class="fi-icon"><i class="fas fa-robot"></i></span> 自动规则</a>
+            </div>
+        </div>
+
+        <!-- Right: Toolbar + Messages -->
+        <div style="flex:1;min-width:0;">
+            <!-- Toolbar -->
+            <div class="toolbar">
+                {% if accounts %}
+                <select id="accountFilter" onchange="filterByAccount(this.value)" style="border:2px solid #e2e8f0;border-radius:8px;padding:6px 10px;font-size:0.82rem;color:#475569;outline:none;">
+                    <option value="">所有账户</option>
+                    {% for acc in accounts %}
+                    <option value="{{ acc.id }}" {% if current_account == acc.id|stringformat:'d' %}selected{% endif %}>{{ acc.email_address }}</option>
+                    {% endfor %}
+                </select>
+                {% endif %}
+
+                <!-- Search -->
+                <form class="search-bar" method="get">
+                    <input type="hidden" name="folder" value="{{ current_folder }}">
+                    <input type="text" name="search" placeholder="搜索消息..." value="{{ search }}">
+                    <button type="submit"><i class="fas fa-search"></i></button>
+                </form>
+
+                <!-- Sync -->
+                <button class="btn-bulk sync" onclick="syncEmails()" id="syncBtn" title="同步邮件">
+                    <i class="fas fa-sync-alt" id="syncIcon"></i>同步
+                </button>
+
+                <!-- Bulk Actions -->
+                <div id="bulkActions" style="display:none;gap:6px;">
+                    <button class="btn-bulk" onclick="bulkAction('mark_read')"><i class="fas fa-check-double"></i>已读</button>
+                    <button class="btn-bulk" onclick="bulkAction('mark_unread')"><i class="fas fa-circle"></i>未读</button>
+                    <button class="btn-bulk" onclick="bulkAction('archive')"><i class="fas fa-archive"></i>归档</button>
+                    {% if labels %}
+                    <div class="dropdown d-inline-block">
+                        <button class="btn-bulk dropdown-toggle" data-bs-toggle="dropdown"><i class="fas fa-tag"></i>标签</button>
+                        <ul class="dropdown-menu" style="font-size:0.85rem;">
+                            {% for label in labels %}
+                            <li><a class="dropdown-item" href="#" onclick="bulkLabelAction('add_label',{{ label.id }})"><span class="label-dot d-inline-block me-1" style="background:{{ label.color }};width:8px;height:8px;border-radius:50%;"></span>{{ label.name }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    <button class="btn-bulk danger" onclick="bulkAction('delete')"><i class="fas fa-trash"></i>删除</button>
+                </div>
+                <button class="btn-bulk ms-auto" id="selectAllBtn" onclick="toggleSelectMode()">
+                    <i class="fas fa-check-square"></i>选择
+                </button>
+            </div>
+
+            <!-- Message List -->
+            <div class="messages-container" id="messagesList">
+                {% if current_folder == 'contact' and contact_messages %}
+                    <!-- Contact Messages -->
+                    {% for msg in contact_messages %}
+                    <div class="msg-row {% if not msg.is_read %}unread{% endif %}" id="contactRow{{ msg.id }}">
+                        <input type="checkbox" class="msg-checkbox contact-select" style="display:none;" data-id="{{ msg.id }}" data-type="contact" onchange="updateBulkUI()">
+                        <div class="msg-avatar">{{ msg.name|first|upper }}</div>
+                        <div class="msg-content" onclick="window.location='/manager/admin_messages/{{ msg.id }}/';">
+                            <div class="msg-header">
+                                <span class="msg-name">{{ msg.name }}</span>
+                                <span class="msg-email-addr">&lt;{{ msg.email }}&gt;</span>
+                                {% if not msg.is_read %}<span class="badge-unread"><i class="fas fa-circle" style="font-size:0.4rem;"></i>未读</span>{% endif %}
+                                {% if msg.replied %}<span style="background:#dbeafe;color:#1d4ed8;font-size:0.7rem;padding:2px 7px;border-radius:8px;font-weight:600;"><i class="fas fa-reply" style="font-size:0.6rem;"></i> 已回复</span>{% endif %}
+                            </div>
+                            <div class="msg-subject">
+                                {{ msg.subject|default:"（无主题）" }}
+                                {% for lbl in msg.labels.all %}
+                                <span class="label-tag" style="background:{{ lbl.color }};">{{ lbl.name }}</span>
+                                {% endfor %}
+                            </div>
+                            <div class="msg-preview">{{ msg.message|truncatechars:100 }}</div>
+                        </div>
+                        <div class="msg-meta">
+                            <span class="msg-time"><i class="fas fa-clock me-1"></i>{{ msg.created_at|date:"m-d H:i" }}</span>
+                            <span class="tag-badge tag-contact"><i class="fas fa-comment-dots"></i>联系</span>
+                            <div class="msg-actions">
+                                <a class="action-btn view" href="/manager/admin_messages/{{ msg.id }}/" title="查看"><i class="fas fa-eye"></i></a>
+                                <button class="action-btn del" onclick="event.stopPropagation();deleteContactMsg({{ msg.id }})" title="删除"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                {% elif emails %}
+                    <!-- Email Messages -->
+                    {% for email in emails %}
+                    <div class="msg-row {% if not email.is_read %}unread{% endif %}" id="emailRow{{ email.id }}">
+                        <input type="checkbox" class="msg-checkbox email-select" style="display:none;" data-id="{{ email.id }}" data-type="email" onchange="updateBulkUI()">
+                        <button class="msg-star {% if email.is_starred %}starred{% else %}unstarred{% endif %}" onclick="event.stopPropagation();toggleStar({{ email.id }},this)" title="星标">
+                            <i class="fas fa-star"></i>
+                        </button>
+                        <div class="msg-avatar">{{ email.sender_name|first|upper|default:"?" }}</div>
+                        <div class="msg-content" onclick="window.location='/manager/email/detail/{{ email.id }}/';">
+                            <div class="msg-header">
+                                <span class="msg-name">{{ email.sender_name|default:email.sender_email }}</span>
+                                <span class="msg-email-addr">&lt;{{ email.sender_email }}&gt;</span>
+                                {% if not email.is_read %}<span class="badge-unread"><i class="fas fa-circle" style="font-size:0.4rem;"></i>未读</span>{% endif %}
+                            </div>
+                            <div class="msg-subject">
+                                {{ email.subject }}
+                                {% for lbl in email.labels.all %}
+                                <span class="label-tag" style="background:{{ lbl.color }};">{{ lbl.name }}</span>
+                                {% endfor %}
+                            </div>
+                            <div class="msg-preview">{{ email.body_text|truncatechars:100 }}</div>
+                        </div>
+                        <div class="msg-meta">
+                            <span class="msg-time"><i class="fas fa-clock me-1"></i>{% if email.received_at %}{{ email.received_at|date:"m-d H:i" }}{% elif email.sent_at %}{{ email.sent_at|date:"m-d H:i" }}{% else %}{{ email.created_at|date:"m-d H:i" }}{% endif %}</span>
+                            {% if email.attachments.exists %}<span style="font-size:0.75rem;color:#94a3b8;"><i class="fas fa-paperclip"></i></span>{% endif %}
+                            <div class="msg-actions">
+                                <a class="action-btn view" href="/manager/email/detail/{{ email.id }}/" title="查看"><i class="fas fa-eye"></i></a>
+                                <button class="action-btn del" onclick="event.stopPropagation();deleteEmail({{ email.id }})" title="删除"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon"><i class="fas fa-inbox" style="font-size:2rem;color:#667eea;"></i></div>
+                    <h5 class="fw-bold mb-2" style="color:#334155;">
+                        {% if search %}没有找到相关消息{% elif current_folder == 'contact' %}暂无联系消息{% else %}此文件夹为空{% endif %}
+                    </h5>
+                    <p class="text-muted small">
+                        {% if search %}尝试其他关键词{% elif current_folder == 'inbox' %}点击"同步"获取新邮件，或通过"写邮件"发送一封{% else %}相关消息将显示在这里{% endif %}
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Compose Overlay -->
+<div class="compose-overlay" id="composeOverlay">
+    <div class="compose-header">
+        <h6><i class="fas fa-pen me-2"></i>写邮件</h6>
+        <button class="compose-close" onclick="closeCompose()">&times;</button>
+    </div>
+    <div class="compose-body">
+        <form id="composeForm" enctype="multipart/form-data">
+            <div class="mb-2">
+                <label>发送账户</label>
+                <select name="account_id" class="form-control form-control-sm" required>
+                    {% for acc in accounts %}
+                    <option value="{{ acc.id }}" {% if acc.is_default %}selected{% endif %}>{{ acc.name }} &lt;{{ acc.email_address }}&gt;</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-2">
+                <label>收件人</label>
+                <input type="text" name="to" class="form-control form-control-sm" required>
+            </div>
+            <div class="mb-2">
+                <label>抄送 (CC)</label>
+                <input type="text" name="cc" class="form-control form-control-sm">
+            </div>
+            <div class="mb-2">
+                <label>主题</label>
+                <input type="text" name="subject" class="form-control form-control-sm">
+            </div>
+            <div class="mb-2">
+                <label>正文</label>
+                <textarea name="body" class="form-control" rows="8" style="font-size:0.88rem;"></textarea>
+            </div>
+            <div class="mb-2">
+                <label>附件</label>
+                <input type="file" name="attachments" class="form-control form-control-sm" multiple>
+            </div>
+        </form>
+    </div>
+    <div class="compose-footer">
+        <button class="btn-send" onclick="sendEmail(false)"><i class="fas fa-paper-plane me-1"></i>发送</button>
+        <button class="btn-draft" onclick="sendEmail(true)"><i class="fas fa-save me-1"></i>草稿</button>
+        <button class="btn-draft" onclick="closeCompose()">取消</button>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function getCsrf() {
+    var cookies = document.cookie.split(';');
+    for (var i = 0; i < cookies.length; i++) {
+        var c = cookies[i].trim();
+        if (c.startsWith('csrftoken=')) return c.substring(10);
+    }
+    return '{{ csrf_token }}';
+}
+
+let selectMode = false;
+
+function showToast(msg, type) {
+    type = type || 'success';
+    var c = document.getElementById('toastContainer');
+    var d = document.createElement('div');
+    d.className = 'toast-item toast-' + type;
+    d.innerHTML = '<i class="fas fa-' + (type==='success'?'check-circle':'times-circle') + '"></i>' + msg;
+    c.appendChild(d);
+    setTimeout(function() { d.style.opacity='0'; d.style.transform='translateX(30px)'; d.style.transition='all 0.3s'; setTimeout(function(){ d.remove(); }, 300); }, 3000);
+}
+
+/* ===== Compose ===== */
+function openCompose() { document.getElementById('composeOverlay').classList.add('show'); }
+function closeCompose() { document.getElementById('composeOverlay').classList.remove('show'); }
+
+function sendEmail(isDraft) {
+    var form = document.getElementById('composeForm');
+    var fd = new FormData(form);
+    if (isDraft) fd.append('save_draft', '1');
+
+    fetch('/manager/email/compose/', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'X-CSRFToken': getCsrf() },
+        body: fd
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+        if (d.success) { showToast(d.message); closeCompose(); form.reset(); setTimeout(function(){ location.reload(); }, 800); }
+        else showToast(d.error || '操作失败', 'error');
+    })
+    .catch(function(){ showToast('发送失败', 'error'); });
+}
+
+/* ===== Sync ===== */
+function syncEmails() {
+    var icon = document.getElementById('syncIcon');
+    icon.classList.add('spin');
+    document.getElementById('syncBtn').disabled = true;
+
+    fetch('/manager/email/sync/', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCsrf() },
+        body: 'account_id=' + (document.getElementById('accountFilter') ? document.getElementById('accountFilter').value : '')
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+        icon.classList.remove('spin');
+        document.getElementById('syncBtn').disabled = false;
+        if (d.success) {
+            showToast(d.message);
+            if (d.new_emails > 0) setTimeout(function(){ location.reload(); }, 1000);
+        } else {
+            showToast(d.error || '同步失败', 'error');
+        }
+    })
+    .catch(function(){ icon.classList.remove('spin'); document.getElementById('syncBtn').disabled = false; showToast('同步失败', 'error'); });
+}
+
+/* ===== Star Toggle ===== */
+function toggleStar(id, btn) {
+    fetch('/manager/email/action/', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCsrf() },
+        body: 'action=toggle_star&ids=' + id
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+        if (d.success) {
+            btn.classList.toggle('starred');
+            btn.classList.toggle('unstarred');
+        }
+    });
+}
+
+/* ===== Select Mode & Bulk ===== */
+function toggleSelectMode() {
+    selectMode = !selectMode;
+    var checkboxes = document.querySelectorAll('.msg-checkbox');
+    var bulk = document.getElementById('bulkActions');
+    var btn = document.getElementById('selectAllBtn');
+    checkboxes.forEach(function(cb){ cb.style.display = selectMode ? 'inline-block' : 'none'; });
+    bulk.style.display = selectMode ? 'flex' : 'none';
+    btn.innerHTML = selectMode ? '<i class="fas fa-times"></i>取消' : '<i class="fas fa-check-square"></i>选择';
+    if (!selectMode) { checkboxes.forEach(function(cb){ cb.checked = false; }); }
+}
+
+function updateBulkUI() {
+    var checked = document.querySelectorAll('.msg-checkbox:checked').length;
+    var bulk = document.getElementById('bulkActions');
+    if (selectMode && checked > 0) bulk.style.display = 'flex';
+    else if (selectMode) bulk.style.display = 'flex';
+}
+
+function bulkAction(action) {
+    var folder = '{{ current_folder }}';
+
+    if (folder === 'contact') {
+        // Bulk action on contact messages
+        var ids = Array.from(document.querySelectorAll('.contact-select:checked')).map(function(cb){ return cb.dataset.id; });
+        if (!ids.length) return;
+        if (action === 'delete' && !confirm('确定删除选中的 ' + ids.length + ' 条消息？')) return;
+        fetch('/manager/admin_messages/bulk/', {
+            method: 'POST', credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCsrf() },
+            body: 'action=' + action + '&ids=' + ids.join(',')
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(d){ if (d.success) { showToast('操作成功'); setTimeout(function(){ location.reload(); }, 600); } });
+    } else {
+        // Bulk action on emails
+        var ids = Array.from(document.querySelectorAll('.email-select:checked')).map(function(cb){ return cb.dataset.id; });
+        if (!ids.length) return;
+        if (action === 'delete' && !confirm('确定删除选中的 ' + ids.length + ' 封邮件？')) return;
+        fetch('/manager/email/action/', {
+            method: 'POST', credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCsrf() },
+            body: 'action=' + action + '&ids=' + ids.join(',')
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(d){ if (d.success) { showToast('操作成功'); setTimeout(function(){ location.reload(); }, 600); } });
+    }
+}
+
+/* ===== Delete Single ===== */
+function deleteEmail(id) {
+    if (!confirm('确定删除此邮件？')) return;
+    fetch('/manager/email/action/', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCsrf() },
+        body: 'action=trash&ids=' + id
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+        if (d.success) {
+            var row = document.getElementById('emailRow' + id);
+            row.style.transition = 'all 0.3s'; row.style.opacity = '0'; row.style.height = row.offsetHeight + 'px';
+            setTimeout(function(){ row.style.height = '0'; row.style.padding = '0'; }, 50);
+            setTimeout(function(){ row.remove(); }, 350);
+            showToast('已移至回收站');
+        }
+    });
+}
+
+function deleteContactMsg(id) {
+    if (!confirm('确定删除此消息？')) return;
+    fetch('/manager/admin_messages/delete/', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCsrf() },
+        body: 'id=' + id
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+        if (d.success) {
+            var row = document.getElementById('contactRow' + id);
+            row.style.transition = 'all 0.3s'; row.style.opacity = '0'; row.style.height = row.offsetHeight + 'px';
+            setTimeout(function(){ row.style.height = '0'; row.style.padding = '0'; }, 50);
+            setTimeout(function(){ row.remove(); }, 350);
+            showToast('消息已删除');
+        }
+    });
+}
+
+/* ===== Account Filter ===== */
+function filterByAccount(val) {
+    var url = new URL(window.location);
+    if (val) url.searchParams.set('account', val);
+    else url.searchParams.delete('account');
+    window.location = url;
+}
+
+/* ===== Label Actions for Contact Messages ===== */
+function bulkLabelAction(action, labelId) {
+    var folder = '{{ current_folder }}';
+    if (folder === 'contact') {
+        var ids = Array.from(document.querySelectorAll('.contact-select:checked')).map(function(cb){ return cb.dataset.id; });
+        if (!ids.length) { showToast('请先选择消息', 'error'); return; }
+        fetch('/manager/admin_messages/label_action/', {
+            method: 'POST', credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCsrf() },
+            body: 'action=' + action + '&ids=' + ids.join(',') + '&label_id=' + labelId
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(d){ if (d.success) { showToast('标签已更新'); setTimeout(function(){ location.reload(); }, 600); } });
+    } else {
+        var ids = Array.from(document.querySelectorAll('.email-select:checked')).map(function(cb){ return cb.dataset.id; });
+        if (!ids.length) { showToast('请先选择邮件', 'error'); return; }
+        fetch('/manager/email/action/', {
+            method: 'POST', credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCsrf() },
+            body: 'action=' + action + '&ids=' + ids.join(',') + '&label_id=' + labelId
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(d){ if (d.success) { showToast('标签已更新'); setTimeout(function(){ location.reload(); }, 600); } });
+    }
+}
+</script>
+</body>
+</html>

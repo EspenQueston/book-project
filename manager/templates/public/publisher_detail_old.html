@@ -1,0 +1,360 @@
+{% extends 'public/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "出版社详情" %} - {{ publisher.publisher_name }} | {% trans "图书管理系统" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 60px 0;
+        margin-bottom: 40px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    .publisher-logo {
+        width: 150px; height: 150px; border-radius: 15px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 4rem; color: white; margin: 0 auto 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    .publisher-name { font-size: 2.5rem; font-weight: 600; text-align: center; margin-bottom: 10px; }
+    .publisher-info { text-align: center; font-size: 1.1rem; opacity: 0.9; }
+    .content-section {
+        background: white; border-radius: 15px; padding: 30px;
+        margin-bottom: 30px; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    }
+    .section-title {
+        color: #333; font-weight: 600; margin-bottom: 25px; padding-bottom: 10px;
+        border-bottom: 3px solid var(--primary-color); display: flex; align-items: center;
+    }
+    .section-title i {
+        margin-right: 10px; color: var(--primary-color);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .back-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none; color: white; padding: 12px 25px; border-radius: 25px;
+        text-decoration: none; display: inline-flex; align-items: center;
+        margin-bottom: 20px; transition: all 0.3s ease;
+    }
+    .back-btn:hover {
+        transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        color: white; text-decoration: none;
+    }
+    .back-btn i { margin-right: 8px; }
+    .stat-card {
+        background: white; border-radius: 15px; padding: 25px; text-align: center;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08); transition: all 0.3s ease; height: 100%;
+    }
+    .stat-card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,0.15); }
+    .stat-icon {
+        width: 70px; height: 70px; margin: 0 auto 15px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 15px; display: flex; align-items: center; justify-content: center;
+        color: white; font-size: 2rem;
+    }
+    .stat-number { font-size: 2.5rem; font-weight: 700; color: #2c3e50; margin-bottom: 5px; }
+    .stat-label { color: #6c757d; font-size: 0.95rem; font-weight: 500; }
+    .info-group { background: #f8f9fa; border-radius: 12px; padding: 20px; }
+    .info-item {
+        display: flex; justify-content: space-between; padding: 12px 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+    .info-item:last-child { border-bottom: none; }
+    .info-label {
+        color: #6c757d; font-weight: 500; display: flex; align-items: center; gap: 8px;
+    }
+    .info-label i { color: var(--primary-color); width: 20px; }
+    .info-value { color: #2c3e50; font-weight: 600; }
+    .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+    .stats-item {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+        padding: 20px; border-radius: 12px; text-align: center;
+        border: 2px solid transparent; transition: all 0.3s ease;
+    }
+    .stats-item:hover { border-color: var(--primary-color); transform: scale(1.05); }
+    .stats-value { font-size: 1.8rem; font-weight: 700; margin-bottom: 5px; }
+    .stats-desc { color: #6c757d; font-size: 0.9rem; }
+    .books-section { background: #f8f9fa; padding: 60px 0; }
+    .section-header { text-align: center; }
+    .section-header h3 { font-size: 2.2rem; font-weight: 700; color: #2c3e50; margin-bottom: 10px; }
+    .section-header h3 i {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        background-clip: text; margin-right: 10px;
+    }
+    .book-card {
+        background: white; border-radius: 15px; overflow: hidden;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08); transition: all 0.3s ease;
+        height: 100%; display: flex; flex-direction: column;
+    }
+    .book-card:hover { transform: translateY(-8px); box-shadow: 0 15px 40px rgba(0,0,0,0.15); }
+    .book-cover-wrapper {
+        height: 280px; overflow: hidden;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        display: flex; align-items: center; justify-content: center;
+    }
+    .book-cover-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+    .book-card:hover .book-cover-wrapper img { transform: scale(1.1); }
+    .book-info { padding: 20px; flex: 1; display: flex; flex-direction: column; }
+    .book-title { font-size: 1.2rem; font-weight: 600; color: #2c3e50; margin-bottom: 12px; line-height: 1.4; }
+    .book-description {
+        color: #6c757d; font-size: 0.9rem; font-style: italic; margin-bottom: 15px; padding: 10px;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        border-left: 3px solid var(--primary-color); border-radius: 5px; line-height: 1.5;
+    }
+    .book-description i { color: var(--primary-color); margin-right: 5px; font-size: 0.8rem; }
+    .book-meta { margin-bottom: 15px; }
+    .meta-item { display: flex; align-items: center; margin-bottom: 8px; color: #6c757d; font-size: 0.9rem; }
+    .meta-item i { width: 20px; color: var(--primary-color); margin-right: 8px; }
+    .price-tag {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white; padding: 5px 15px; border-radius: 20px; font-weight: 500; display: inline-block;
+    }
+    .btn-primary-modern {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none; color: white; padding: 12px 30px; border-radius: 25px;
+        font-weight: 600; transition: all 0.3s ease;
+    }
+    .btn-primary-modern:hover {
+        transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4); color: white;
+    }
+    .btn-outline-primary-modern {
+        background: transparent; border: 2px solid var(--primary-color); color: var(--primary-color);
+        padding: 12px 30px; border-radius: 25px; font-weight: 600; transition: all 0.3s ease;
+    }
+    .btn-outline-primary-modern:hover {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-color: var(--primary-color); color: white;
+        transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+    @media (max-width: 768px) {
+        .header { padding: 40px 0; }
+        .publisher-logo { width: 100px; height: 100px; font-size: 3rem; }
+        .publisher-name { font-size: 1.8rem; }
+        .stats-grid { grid-template-columns: 1fr; }
+        .book-cover-wrapper { height: 220px; }
+        .section-header h3 { font-size: 1.8rem; }
+    }
+    @media (max-width: 576px) {
+        .stat-number { font-size: 2rem; }
+        .stat-icon { width: 60px; height: 60px; font-size: 1.5rem; }
+        .book-title { font-size: 1.1rem; }
+        .btn-primary-modern, .btn-outline-primary-modern { padding: 10px 20px; font-size: 0.9rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Header Section -->
+<div class="header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-3 text-center">
+                <div class="publisher-logo">
+                    <i class="fas fa-building"></i>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h1 class="publisher-name mb-2">{{ publisher.publisher_name }}</h1>
+                        <div class="publisher-info mb-3">
+                            <i class="fas fa-map-marker-alt me-2"></i> {{ publisher.publisher_address }}
+                        </div>
+                        <a href="{% url 'manager:public_publishers' %}" class="back-btn">
+                            <i class="fas fa-arrow-left"></i> {% trans "返回出版社列表" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards Section -->
+<div class="container mt-4 mb-4">
+    <div class="row g-3">
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-book"></i></div>
+                <div class="stat-number">{{ books.count }}</div>
+                <div class="stat-label">{% trans "出版图书" %}</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, var(--success-color), #059669);">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-number">{{ total_sales }}</div>
+                <div class="stat-label">{% trans "总销量" %}</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, var(--info-color), #0891b2);">
+                    <i class="fas fa-warehouse"></i>
+                </div>
+                <div class="stat-number">{{ total_inventory }}</div>
+                <div class="stat-label">{% trans "总库存" %}</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, var(--warning-color), #d97706);">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-number">{{ author_count }}</div>
+                <div class="stat-label">{% trans "合作作者" %}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Publisher Information Card -->
+<div class="container mb-5">
+    <div class="content-section">
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <h5 class="section-title">
+                    <i class="fas fa-info-circle"></i> {% trans "基本信息" %}
+                </h5>
+                <div class="info-group">
+                    <div class="info-item">
+                        <span class="info-label"><i class="fas fa-id-badge"></i> {% trans "出版社ID" %}</span>
+                        <span class="info-value">#{{ publisher.id }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label"><i class="fas fa-building"></i> {% trans "名称" %}</span>
+                        <span class="info-value">{{ publisher.publisher_name }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label"><i class="fas fa-map-marker-alt"></i> {% trans "地址" %}</span>
+                        <span class="info-value">{{ publisher.publisher_address }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 mb-4">
+                <h5 class="section-title">
+                    <i class="fas fa-chart-bar"></i> {% trans "出版统计" %}
+                </h5>
+                <div class="stats-grid">
+                    <div class="stats-item">
+                        <div class="stats-value" style="color: var(--info-color);">¥{{ avg_price|floatformat:2 }}</div>
+                        <div class="stats-desc">{% trans "平均价格" %}</div>
+                    </div>
+                    <div class="stats-item">
+                        <div class="stats-value" style="color: var(--success-color);">¥{{ total_revenue|floatformat:2 }}</div>
+                        <div class="stats-desc">{% trans "总收入" %}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="d-flex gap-3 flex-wrap mt-4">
+            <a href="{% url 'manager:public_publishers' %}" class="btn btn-primary-modern">
+                <i class="fas fa-arrow-left"></i> {% trans "返回列表" %}
+            </a>
+            <a href="{% url 'manager:public_books' %}?publisher={{ publisher.id }}" class="btn btn-outline-primary-modern">
+                <i class="fas fa-book"></i> {% trans "查看该出版社图书" %}
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Published Books Section -->
+{% if books %}
+<section class="books-section">
+    <div class="container">
+        <div class="section-header mb-5" data-aos="fade-up">
+            <h3><i class="fas fa-book-reader"></i> {% trans "出版图书" %}</h3>
+            <p class="text-muted">{% trans "该出版社出版的所有图书" %}</p>
+        </div>
+        
+        <div class="row g-4">
+            {% for book in books %}
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:50 }}">
+                <div class="book-card">
+                    <div class="book-cover-wrapper">
+                        <img src="{{ book.get_cover_url }}" alt="{{ book.name }}" class="book-cover-img">
+                    </div>
+                    <div class="book-info">
+                        <h5 class="book-title">{{ book.name }}</h5>
+                        
+                        {% if book.description %}
+                        <p class="book-description">
+                            <i class="fas fa-quote-left"></i>
+                            {{ book.get_medium_description }}
+                        </p>
+                        {% endif %}
+                        
+                        <div class="book-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-users"></i>
+                                <span>
+                                    {% if book.author_set.all %}
+                                        {% for author in book.author_set.all %}
+                                            {{ author.name }}{% if not forloop.last %}, {% endif %}
+                                        {% endfor %}
+                                    {% else %}
+                                        {% trans "未知作者" %}
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-warehouse"></i>
+                                <span>{% trans "库存" %}: {{ book.inventory }} {% trans "本" %}</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-chart-line"></i>
+                                <span>{% trans "销量" %}: {{ book.sale_num }} {% trans "本" %}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <span class="price-tag">
+                                <i class="fas fa-tag"></i> ¥{{ book.price }}
+                            </span>
+                            <a href="/manager/public/books/{{ book.id }}/" class="btn btn-sm btn-outline-primary-modern">
+                                <i class="fas fa-eye"></i> {% trans "查看详情" %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        {% if books.count > 6 %}
+        <div class="text-center mt-5">
+            <a href="{% url 'manager:public_books' %}?publisher={{ publisher.id }}" class="btn btn-primary-modern btn-lg">
+                {% trans "查看更多图书" %} <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% else %}
+<!-- No Books Section -->
+<section class="books-section">
+    <div class="container">
+        <div class="text-center py-5" data-aos="fade-up">
+            <div class="mb-4">
+                <i class="fas fa-book-open text-muted" style="font-size: 6rem; opacity: 0.3;"></i>
+            </div>
+            <h4 class="text-muted mb-3">{% trans "暂无出版图书" %}</h4>
+            <p class="text-muted mb-4">{% trans "该出版社目前还没有出版任何图书" %}</p>
+            <a href="{% url 'manager:public_books' %}" class="btn btn-primary-modern">
+                <i class="fas fa-book"></i> {% trans "浏览其他图书" %}
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="zh-Hans">
 <head>
@@ -672,12 +673,12 @@
                 if (data.success) {
                     location.reload();
                 } else {
-                    alert('更新订单状态失败：' + data.message);
+                gToast('更新订单状态失败：' + data.message, 'error');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('更新订单状态时发生错误');
+                gToast('更新订单状态时发生错误', 'error');
             });
         }
 
@@ -700,12 +701,12 @@
                 if (data.success) {
                     location.reload();
                 } else {
-                    alert('更新支付状态失败：' + data.message);
+                    gToast('更新支付状态失败：' + data.message, 'error');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('更新支付状态时发生错误');
+                gToast('更新支付状态时发生错误', 'error');
             });
         }
 
@@ -715,7 +716,7 @@
             const paymentStatus = '{{ order.payment_status }}';
             
             if (orderStatus === 'delivered' || paymentStatus === 'completed') {
-                alert('已完成或已送达的订单不能删除！');
+                gToast('已完成或已送达的订单不能删除！', 'warning');
                 return;
             }
             
@@ -744,10 +745,10 @@
             .then(data => {
                 if (data.success) {
                     // Show success message and redirect
-                    alert('订单删除成功！');
+                    gToast('订单删除成功！', 'success');
                     window.location.href = '{% url "manager:order_list" %}';
                 } else {
-                    alert('删除订单失败：' + data.message);
+                    gToast('删除订单失败：' + data.message, 'error');
                     // Restore button state
                     deleteBtn.innerHTML = originalText;
                     deleteBtn.disabled = false;
@@ -755,12 +756,13 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('删除订单时发生错误');
+                gToast('删除订单时发生错误', 'error');
                 // Restore button state
                 deleteBtn.innerHTML = originalText;
                 deleteBtn.disabled = false;
             });
         }
     </script>
+{% include 'includes/global_popups.html' %}
 </body>
 </html>

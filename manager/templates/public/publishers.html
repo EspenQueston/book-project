@@ -1,6 +1,7 @@
 {% extends 'public/base.html' %}
+{% load i18n %}
 
-{% block title %}出版社目录 - 图书管理系统{% endblock %}
+{% block title %}{% trans "出版社目录" %} - {% trans "图书管理系统" %}{% endblock %}
 
 {% block content %}
     <!-- Page Header with gradient background -->
@@ -8,8 +9,8 @@
         <div class="container">
             <div class="row">
                 <div class="col-12 text-center">
-                    <h1 class="display-5 fw-bold mb-3">出版社目录</h1>
-                    <p class="lead">浏览我们合作的优质出版社</p>
+                    <h1 class="display-5 fw-bold mb-3">{% trans "出版社目录" %}</h1>
+                    <p class="lead">{% trans "浏览我们合作的优质出版社" %}</p>
                 </div>
             </div>
         </div>
@@ -22,14 +23,14 @@
                 <div class="col-lg-8">
                     <form method="get" class="d-flex gap-3">
                         <input type="search" name="search" class="form-control search-box" 
-                               placeholder="搜索出版社名称..." value="{{ search_query }}">
+                               placeholder="{% trans '搜索出版社名称...' %}" value="{{ search_query }}">
                         <button type="submit" class="btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                            <i class="fas fa-search"></i> 搜索
+                            <i class="fas fa-search"></i> {% trans "搜索" %}
                         </button>
                     </form>
                 </div>
                 <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-                    <span class="text-muted">共找到 {{ publishers.count }} 家出版社</span>
+                    <span class="text-muted">{% blocktrans with count=publishers.count %}共找到 {{ count }} 家出版社{% endblocktrans %}</span>
                 </div>
             </div>
         </div>
@@ -51,17 +52,17 @@
                             <div class="mb-3">
                                 <p class="text-muted mb-1">
                                     <i class="fas fa-map-marker-alt text-primary"></i> 
-                                    <strong>地址:</strong> {{ publisher.publisher_address }}
+                                    <strong>{% trans "地址" %}:</strong> {{ publisher.publisher_address }}
                                 </p>
                                 <p class="text-muted mb-1">
                                     <i class="fas fa-book text-primary"></i> 
-                                    <strong>图书数:</strong> {{ publisher.book_set.count }}
+                                    <strong>{% trans "图书数" %}:</strong> {{ publisher.book_set.count }}
                                 </p>
                             </div>
                             
                             <div class="mt-auto">
                                 <a href="{% url 'manager:public_publisher_detail' publisher.id %}" class="btn btn-sm w-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                                    <i class="fas fa-info-circle"></i> 查看详情
+                                    <i class="fas fa-info-circle"></i> {% trans "查看详情" %}
                                 </a>
                             </div>
                         </div>
@@ -75,10 +76,10 @@
                 <div class="mb-4">
                     <i class="fas fa-search text-muted" style="font-size: 5rem; opacity: 0.3;"></i>
                 </div>
-                <h4 class="text-muted mb-3">未找到相关出版社</h4>
-                <p class="text-muted mb-4">请尝试其他搜索关键词或浏览所有出版社</p>
+                <h4 class="text-muted mb-3">{% trans "未找到相关出版社" %}</h4>
+                <p class="text-muted mb-4">{% trans "请尝试其他搜索关键词或浏览所有出版社" %}</p>
                 <a href="{% url 'manager:public_publishers' %}" class="btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                    <i class="fas fa-building"></i> 浏览所有出版社
+                    <i class="fas fa-building"></i> {% trans "浏览所有出版社" %}
                 </a>
             </div>
             {% endif %}
@@ -92,22 +93,22 @@
                 <div class="col-md-4 mb-3" data-aos="fade-up" data-aos-delay="100">
                     <a href="{% url 'manager:public_books' %}" class="text-white text-decoration-none">
                         <i class="fas fa-book fa-3x mb-3"></i>
-                        <h5>浏览图书</h5>
-                        <p class="mb-0">查看所有图书信息</p>
+                        <h5>{% trans "浏览图书" %}</h5>
+                        <p class="mb-0">{% trans "查看所有图书信息" %}</p>
                     </a>
                 </div>
                 <div class="col-md-4 mb-3" data-aos="fade-up" data-aos-delay="200">
                     <a href="{% url 'manager:public_authors' %}" class="text-white text-decoration-none">
                         <i class="fas fa-user-edit fa-3x mb-3"></i>
-                        <h5>浏览作者</h5>
-                        <p class="mb-0">查看所有作者信息</p>
+                        <h5>{% trans "浏览作者" %}</h5>
+                        <p class="mb-0">{% trans "查看所有作者信息" %}</p>
                     </a>
                 </div>
                 <div class="col-md-4 mb-3" data-aos="fade-up" data-aos-delay="300">
                     <a href="{% url 'manager:public_home' %}" class="text-white text-decoration-none">
                         <i class="fas fa-home fa-3x mb-3"></i>
-                        <h5>返回首页</h5>
-                        <p class="mb-0">回到主页面</p>
+                        <h5>{% trans "返回首页" %}</h5>
+                        <p class="mb-0">{% trans "回到主页面" %}</p>
                     </a>
                 </div>
             </div>

@@ -1,0 +1,555 @@
+{% extends 'public/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "图书管理系统" %} - {% trans "博客" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Hero */
+    .blog-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 120px 0 80px 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .blog-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+        padding: 8px 20px;
+        border-radius: 50px;
+        color: #fff;
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin-bottom: 25px;
+    }
+
+    .blog-hero h1 {
+        font-size: 3.5rem;
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 20px;
+    }
+
+    .blog-hero p {
+        font-size: 1.2rem;
+        color: rgba(255,255,255,0.9);
+        max-width: 600px;
+        line-height: 1.8;
+    }
+
+    /* Search Bar */
+    .blog-search {
+        margin-top: 30px;
+        max-width: 500px;
+    }
+
+    .blog-search .input-group {
+        background: rgba(255,255,255,0.15);
+        border-radius: 50px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+        overflow: hidden;
+    }
+
+    .blog-search input {
+        background: transparent;
+        border: none;
+        color: #fff;
+        padding: 14px 25px;
+        font-size: 1rem;
+    }
+
+    .blog-search input::placeholder { color: rgba(255,255,255,0.7); }
+    .blog-search input:focus { box-shadow: none; color: #fff; background: transparent; }
+
+    .blog-search button {
+        background: #fff;
+        border: none;
+        color: #667eea;
+        padding: 10px 25px;
+        font-weight: 700;
+        border-radius: 0 50px 50px 0 !important;
+    }
+
+    /* Featured Posts */
+    .featured-section {
+        padding: 80px 0 40px;
+        background: #f8f9ff;
+    }
+
+    .section-subtitle {
+        color: #667eea;
+        font-weight: 600;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .section-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #1a1a2e;
+    }
+
+    .featured-card {
+        background: #fff;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.06);
+        transition: all 0.4s ease;
+        text-decoration: none;
+        display: block;
+        height: 100%;
+    }
+
+    .featured-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 25px 60px rgba(102, 126, 234, 0.15);
+    }
+
+    .featured-cover {
+        height: 220px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .featured-cover img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .featured-cover .no-cover-icon {
+        font-size: 4rem;
+        color: rgba(255,255,255,0.3);
+    }
+
+    .featured-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: rgba(255,255,255,0.9);
+        color: #667eea;
+        padding: 5px 15px;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        backdrop-filter: blur(10px);
+    }
+
+    .featured-body {
+        padding: 25px;
+    }
+
+    .featured-category {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        padding: 4px 12px;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 12px;
+    }
+
+    .featured-body h3 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 10px;
+        line-height: 1.4;
+    }
+
+    .featured-body p {
+        color: #6c757d;
+        font-size: 0.92rem;
+        line-height: 1.7;
+        margin-bottom: 15px;
+    }
+
+    .post-meta {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        color: #999;
+        font-size: 0.85rem;
+    }
+
+    .post-meta span {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    /* Blog Posts Grid */
+    .blog-grid {
+        padding: 60px 0 80px;
+    }
+
+    .blog-card {
+        background: #fff;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 5px 25px rgba(0,0,0,0.06);
+        transition: all 0.4s ease;
+        text-decoration: none;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .blog-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 50px rgba(102, 126, 234, 0.12);
+    }
+
+    .blog-cover {
+        height: 200px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .blog-cover img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+    }
+
+    .blog-card:hover .blog-cover img {
+        transform: scale(1.05);
+    }
+
+    .blog-cover .no-cover-icon {
+        font-size: 3rem;
+        color: rgba(255,255,255,0.3);
+    }
+
+    .blog-body {
+        padding: 25px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .blog-category {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        padding: 4px 12px;
+        border-radius: 50px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        margin-bottom: 12px;
+        width: fit-content;
+    }
+
+    .blog-body h4 {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 10px;
+        line-height: 1.4;
+    }
+
+    .blog-body p {
+        color: #6c757d;
+        font-size: 0.9rem;
+        line-height: 1.7;
+        margin-bottom: 15px;
+        flex: 1;
+    }
+
+    .read-more {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #667eea;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: gap 0.3s;
+    }
+
+    .blog-card:hover .read-more { gap: 12px; }
+
+    /* Sidebar */
+    .sidebar-widget {
+        background: #fff;
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: 0 5px 25px rgba(0,0,0,0.06);
+        margin-bottom: 25px;
+    }
+
+    .sidebar-widget h5 {
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 3px solid #667eea;
+        font-size: 1.1rem;
+    }
+
+    .category-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .category-list li { margin-bottom: 5px; }
+
+    .category-list a {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 15px;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #555;
+        transition: all 0.3s;
+        font-size: 0.92rem;
+    }
+
+    .category-list a:hover,
+    .category-list a.active {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+    }
+
+    .category-count {
+        background: #f0f0f0;
+        color: #999;
+        padding: 2px 10px;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .category-list a:hover .category-count,
+    .category-list a.active .category-count {
+        background: #667eea;
+        color: #fff;
+    }
+
+    /* Empty State */
+    .empty-blog {
+        text-align: center;
+        padding: 80px 20px;
+    }
+
+    .empty-blog i {
+        font-size: 5rem;
+        color: #ddd;
+        margin-bottom: 20px;
+    }
+
+    .empty-blog h4 {
+        color: #999;
+        font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+        .blog-hero h1 { font-size: 2.2rem; }
+        .section-title { font-size: 1.8rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="blog-hero">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-7" data-aos="fade-right">
+                <div class="hero-badge">
+                    <i class="fas fa-blog"></i>
+                    {% trans "博客" %}
+                </div>
+                <h1>{% trans "最新文章与资讯" %}</h1>
+                <p>{% trans "探索我们的博客，获取图书推荐、阅读技巧、行业动态等精彩内容。" %}</p>
+
+                <div class="blog-search">
+                    <form method="get">
+                        <div class="input-group">
+                            <input type="text" name="search" value="{{ search_query }}" class="form-control" placeholder="{% trans '搜索文章...' %}">
+                            <button type="submit"><i class="fas fa-search me-1"></i>{% trans "搜索" %}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="col-lg-5 text-center d-none d-lg-block" data-aos="fade-left">
+                <i class="fas fa-newspaper" style="font-size: 12rem; color: rgba(255,255,255,0.15);"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Posts -->
+{% if featured_posts and not search_query and not current_category %}
+<section class="featured-section">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <p class="section-subtitle">{% trans "精选推荐" %}</p>
+            <h2 class="section-title">{% trans "精选文章" %}</h2>
+        </div>
+        <div class="row g-4">
+            {% for post in featured_posts %}
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:1 }}00">
+                <a href="{% url 'manager:public_blog_detail' post.slug %}" class="featured-card">
+                    <div class="featured-cover">
+                        {% if post.cover_image %}
+                        <img src="{{ post.cover_image.url }}" alt="{{ post.title }}">
+                        {% else %}
+                        <i class="fas fa-newspaper no-cover-icon"></i>
+                        {% endif %}
+                        <span class="featured-badge"><i class="fas fa-star me-1"></i>{% trans "精选" %}</span>
+                    </div>
+                    <div class="featured-body">
+                        {% if post.category %}
+                        <span class="featured-category"><i class="{{ post.category.icon }}"></i>{{ post.category.name }}</span>
+                        {% endif %}
+                        <h3>{{ post.title }}</h3>
+                        <p>{{ post.get_excerpt }}</p>
+                        <div class="post-meta">
+                            <span><i class="fas fa-user"></i>{{ post.author_name }}</span>
+                            <span><i class="fas fa-calendar"></i>{{ post.published_at|date:"Y-m-d" }}</span>
+                            <span><i class="fas fa-eye"></i>{{ post.views_count }}</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Blog Posts Grid -->
+<section class="blog-grid">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                {% if search_query %}
+                <div class="mb-4">
+                    <h5 style="color: #1a1a2e; font-weight: 600;">
+                        {% trans "搜索结果" %}: "{{ search_query }}"
+                        <small class="text-muted">({{ posts|length }} {% trans "篇文章" %})</small>
+                    </h5>
+                </div>
+                {% endif %}
+
+                {% if posts %}
+                <div class="row g-4">
+                    {% for post in posts %}
+                    <div class="col-md-6" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:1 }}00">
+                        <a href="{% url 'manager:public_blog_detail' post.slug %}" class="blog-card">
+                            <div class="blog-cover">
+                                {% if post.cover_image %}
+                                <img src="{{ post.cover_image.url }}" alt="{{ post.title }}">
+                                {% else %}
+                                <i class="fas fa-newspaper no-cover-icon"></i>
+                                {% endif %}
+                            </div>
+                            <div class="blog-body">
+                                {% if post.category %}
+                                <span class="blog-category"><i class="{{ post.category.icon }}"></i>{{ post.category.name }}</span>
+                                {% endif %}
+                                <h4>{{ post.title }}</h4>
+                                <p>{{ post.get_excerpt }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="post-meta">
+                                        <span><i class="fas fa-calendar"></i>{{ post.published_at|date:"Y-m-d" }}</span>
+                                        <span><i class="fas fa-eye"></i>{{ post.views_count }}</span>
+                                    </div>
+                                    <span class="read-more">{% trans "阅读更多" %} <i class="fas fa-arrow-right"></i></span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-blog">
+                    <i class="fas fa-newspaper d-block"></i>
+                    <h4>{% trans "暂无文章" %}</h4>
+                    <p class="text-muted">{% trans "敬请期待更多精彩内容" %}</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Categories -->
+                <div class="sidebar-widget" data-aos="fade-left">
+                    <h5><i class="fas fa-tags me-2"></i>{% trans "文章分类" %}</h5>
+                    <ul class="category-list">
+                        <li>
+                            <a href="{% url 'manager:public_blog' %}" {% if not current_category %}class="active"{% endif %}>
+                                <span><i class="fas fa-th-large me-2"></i>{% trans "全部文章" %}</span>
+                                <span class="category-count">{{ posts|length }}</span>
+                            </a>
+                        </li>
+                        {% for cat in categories %}
+                        <li>
+                            <a href="?category={{ cat.slug }}" {% if current_category == cat.slug %}class="active"{% endif %}>
+                                <span><i class="{{ cat.icon }} me-2"></i>{{ cat.name }}</span>
+                                <span class="category-count">{{ cat.post_count }}</span>
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- About Blog -->
+                <div class="sidebar-widget" data-aos="fade-left" data-aos-delay="100">
+                    <h5><i class="fas fa-info-circle me-2"></i>{% trans "关于博客" %}</h5>
+                    <p style="color: #6c757d; line-height: 1.7; font-size: 0.92rem;">
+                        {% trans "在这里，我们分享关于图书、阅读和技术的最新资讯。关注我们，获取更多精彩内容。" %}
+                    </p>
+                    <div class="d-flex gap-2 mt-3">
+                        <a href="https://github.com/EspenQueston" target="_blank" rel="noopener noreferrer" class="btn btn-sm" style="background: #333; color: #fff; border-radius: 8px;">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        <a href="https://www.facebook.com/poires.gomai" target="_blank" rel="noopener noreferrer" class="btn btn-sm" style="background: #1877f2; color: #fff; border-radius: 8px;">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="https://wa.me/8613520646854" target="_blank" rel="noopener noreferrer" class="btn btn-sm" style="background: #25d366; color: #fff; border-radius: 8px;">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

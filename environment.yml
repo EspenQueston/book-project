@@ -1,0 +1,14 @@
+name: book_project_pg
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - django=4.1
+  - postgresql
+  - psycopg2
+  - pillow
+  - pip
+  - pip:
+    - python-decouple
+    - psycopg2-binary

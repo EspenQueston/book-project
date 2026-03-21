@@ -384,6 +384,264 @@ class OrderNotification(models.Model):
     def __str__(self):
         return f"{self.order.order_number} - {self.get_notification_type_display()}"
 
+
+class BlogCategory(models.Model):
+    """Blog category model"""
+    name = models.CharField(max_length=100, verbose_name="分类名称")
+    slug = models.SlugField(max_length=100, unique=True, verbose_name="URL标识")
+    description = models.TextField(blank=True, verbose_name="分类描述")
+    icon = models.CharField(max_length=50, default='fas fa-folder', verbose_name="图标CSS类")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
+
+    class Meta:
+        db_table = "blog_category"
+        ordering = ['name']
+        verbose_name = "博客分类"
+        verbose_name_plural = "博客分类"
+
+    def __str__(self):
+        return self.name
+
+
+class BlogPost(models.Model):
+    """Blog post model"""
+    STATUS_CHOICES = [
+        ('draft', '草稿'),
+        ('published', '已发布'),
+        ('archived', '已归档'),
+    ]
+
+    title = models.CharField(max_length=200, verbose_name="标题")
+    slug = models.SlugField(max_length=200, unique=True, verbose_name="URL标识")
+    category = models.ForeignKey(
+        BlogCategory, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='posts',
+        verbose_name="分类"
+    )
+    cover_image = models.ImageField(
+        upload_to='blog_covers/', verbose_name="封面图片",
+        blank=True, null=True
+    )
+    excerpt = models.TextField(max_length=500, blank=True, verbose_name="摘要")
+    content = models.TextField(verbose_name="内容")
+    author_name = models.CharField(max_length=100, default='Admin', verbose_name="作者")
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES,
+        default='draft', verbose_name="状态"
+    )
+    is_featured = models.BooleanField(default=False, verbose_name="精选文章")
+    views_count = models.PositiveIntegerField(default=0, verbose_name="浏览次数")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="更新时间")
+    published_at = models.DateTimeField(null=True, blank=True, verbose_name="发布时间")
+
+    class Meta:
+        db_table = "blog_post"
+        ordering = ['-published_at', '-created_at']
+        verbose_name = "博客文章"
+        verbose_name_plural = "博客文章"
+
+    def __str__(self):
+        return self.title
+
+    def get_cover_url(self):
+        if self.cover_image:
+            return self.cover_image.url
+        return None
+
+    def get_excerpt(self, length=150):
+        if self.excerpt:
+            return self.excerpt[:length] + '...' if len(self.excerpt) > length else self.excerpt
+        return self.content[:length] + '...' if len(self.content) > length else self.content
+
+    def get_reading_time(self):
+        word_count = len(self.content)
+        return max(1, word_count // 500)
+
+
+class ContactMessage(models.Model):
+    name = models.CharField(max_length=100, verbose_name='姓名')
+    email = models.EmailField(verbose_name='邮箱')
+    subject = models.CharField(max_length=200, blank=True, default='', verbose_name='主题')
+    message = models.TextField(verbose_name='留言内容')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='提交时间')
+    is_read = models.BooleanField(default=False, verbose_name='已读')
+    email_sent = models.BooleanField(default=False, verbose_name='邮件已发送')
+    labels = models.ManyToManyField('EmailLabel', blank=True, related_name='contact_messages', verbose_name='标签')
+    replied = models.BooleanField(default=False, verbose_name='已回复')
+    replied_at = models.DateTimeField(null=True, blank=True, verbose_name='回复时间')
+
+    class Meta:
+        db_table = 'contact_message'
+        ordering = ['-created_at']
+        verbose_name = '联系留言'
+        verbose_name_plural = '联系留言'
+
+    def __str__(self):
+        return f'{self.name} - {self.subject or "No Subject"} ({self.created_at.strftime("%Y-%m-%d")})'
+
+
+# ==========================================
+# Email Management System Models
+# ==========================================
+
+class EmailAccount(models.Model):
+    """Email account configuration for sending/receiving"""
+    name = models.CharField(max_length=100, verbose_name='账户名称')
+    email_address = models.EmailField(unique=True, verbose_name='邮箱地址')
+
+    # IMAP settings
+    imap_host = models.CharField(max_length=200, default='imap.gmail.com', verbose_name='IMAP服务器')
+    imap_port = models.IntegerField(default=993, verbose_name='IMAP端口')
+    imap_use_ssl = models.BooleanField(default=True, verbose_name='IMAP SSL')
+
+    # SMTP settings
+    smtp_host = models.CharField(max_length=200, default='smtp.gmail.com', verbose_name='SMTP服务器')
+    smtp_port = models.IntegerField(default=587, verbose_name='SMTP端口')
+    smtp_use_tls = models.BooleanField(default=True, verbose_name='SMTP TLS')
+
+    # Auth
+    username = models.CharField(max_length=200, verbose_name='用户名')
+    password = models.CharField(max_length=500, verbose_name='密码/应用密码')
+
+    is_active = models.BooleanField(default=True, verbose_name='启用')
+    is_default = models.BooleanField(default=False, verbose_name='默认账户')
+
+    last_sync = models.DateTimeField(null=True, blank=True, verbose_name='最后同步')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+
+    class Meta:
+        db_table = 'email_account'
+        verbose_name = '邮箱账户'
+        verbose_name_plural = '邮箱账户'
+
+    def __str__(self):
+        return f'{self.name} <{self.email_address}>'
+
+
+class EmailLabel(models.Model):
+    """Email labels for classification"""
+    name = models.CharField(max_length=100, verbose_name='标签名称')
+    color = models.CharField(max_length=7, default='#667eea', verbose_name='颜色')
+    icon = models.CharField(max_length=50, default='fa-tag', verbose_name='图标')
+
+    class Meta:
+        db_table = 'email_label'
+        verbose_name = '邮件标签'
+        verbose_name_plural = '邮件标签'
+
+    def __str__(self):
+        return self.name
+
+
+class EmailMessage(models.Model):
+    """Email message storage"""
+    FOLDER_CHOICES = [
+        ('inbox', '收件箱'),
+        ('sent', '已发送'),
+        ('draft', '草稿'),
+        ('trash', '已删除'),
+        ('archive', '归档'),
+    ]
+
+    account = models.ForeignKey(EmailAccount, on_delete=models.CASCADE, related_name='emails', verbose_name='邮箱账户')
+    message_uid = models.CharField(max_length=500, blank=True, default='', verbose_name='邮件UID')
+
+    sender_name = models.CharField(max_length=300, blank=True, default='', verbose_name='发件人名称')
+    sender_email = models.EmailField(blank=True, default='', verbose_name='发件人邮箱')
+    recipients = models.TextField(default='', verbose_name='收件人')
+    cc = models.TextField(default='', blank=True, verbose_name='抄送')
+    bcc = models.TextField(default='', blank=True, verbose_name='密送')
+
+    subject = models.CharField(max_length=1000, default='(无主题)', verbose_name='主题')
+    body_text = models.TextField(default='', blank=True, verbose_name='纯文本内容')
+    body_html = models.TextField(default='', blank=True, verbose_name='HTML内容')
+
+    folder = models.CharField(max_length=20, choices=FOLDER_CHOICES, default='inbox', verbose_name='文件夹')
+    is_read = models.BooleanField(default=False, verbose_name='已读')
+    is_starred = models.BooleanField(default=False, verbose_name='星标')
+
+    labels = models.ManyToManyField(EmailLabel, blank=True, related_name='emails', verbose_name='标签')
+
+    received_at = models.DateTimeField(null=True, blank=True, verbose_name='接收时间')
+    sent_at = models.DateTimeField(null=True, blank=True, verbose_name='发送时间')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+
+    in_reply_to = models.CharField(max_length=500, blank=True, default='', verbose_name='回复ID')
+
+    class Meta:
+        db_table = 'email_message'
+        ordering = ['-received_at', '-created_at']
+        verbose_name = '邮件'
+        verbose_name_plural = '邮件'
+
+    def __str__(self):
+        return f'{self.subject} - {self.sender_email}'
+
+
+class EmailAttachment(models.Model):
+    """Email attachment storage"""
+    email = models.ForeignKey(EmailMessage, on_delete=models.CASCADE, related_name='attachments', verbose_name='邮件')
+    filename = models.CharField(max_length=500, verbose_name='文件名')
+    content_type = models.CharField(max_length=200, blank=True, default='', verbose_name='文件类型')
+    file = models.FileField(upload_to='email_attachments/%Y/%m/', verbose_name='文件')
+    size = models.IntegerField(default=0, verbose_name='文件大小')
+
+    class Meta:
+        db_table = 'email_attachment'
+        verbose_name = '邮件附件'
+        verbose_name_plural = '邮件附件'
+
+    def __str__(self):
+        return self.filename
+
+
+class EmailAutoRule(models.Model):
+    """Automatic email processing rules"""
+    ACTION_CHOICES = [
+        ('label', '添加标签'),
+        ('star', '添加星标'),
+        ('archive', '归档'),
+        ('delete', '删除'),
+        ('auto_reply', '自动回复'),
+        ('forward', '转发'),
+        ('mark_read', '标记已读'),
+    ]
+
+    MATCH_FIELD_CHOICES = [
+        ('from', '发件人'),
+        ('to', '收件人'),
+        ('subject', '主题'),
+        ('body', '正文'),
+        ('any', '任意字段'),
+    ]
+
+    name = models.CharField(max_length=200, verbose_name='规则名称')
+    is_active = models.BooleanField(default=True, verbose_name='启用')
+
+    match_field = models.CharField(max_length=20, choices=MATCH_FIELD_CHOICES, default='any', verbose_name='匹配字段')
+    match_pattern = models.CharField(max_length=500, verbose_name='匹配关键词')
+
+    action = models.CharField(max_length=20, choices=ACTION_CHOICES, default='label', verbose_name='执行操作')
+    action_label = models.ForeignKey(EmailLabel, null=True, blank=True, on_delete=models.SET_NULL, verbose_name='目标标签')
+    action_forward_to = models.EmailField(blank=True, default='', verbose_name='转发地址')
+    auto_reply_subject = models.CharField(max_length=500, blank=True, default='', verbose_name='自动回复主题')
+    auto_reply_body = models.TextField(blank=True, default='', verbose_name='自动回复内容')
+
+    apply_to_account = models.ForeignKey(EmailAccount, null=True, blank=True, on_delete=models.SET_NULL, verbose_name='应用到账户')
+    priority = models.IntegerField(default=0, verbose_name='优先级')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+
+    class Meta:
+        db_table = 'email_auto_rule'
+        ordering = ['-priority', 'name']
+        verbose_name = '邮件规则'
+        verbose_name_plural = '邮件规则'
+
+    def __str__(self):
+        return f'{self.name} ({self.get_action_display()})'
+
+
 # 创建(同步)数据表命令
 # 创建数据库db_book
 # python manage.py makemigrations

@@ -1,0 +1,1370 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: book_project 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-01-01 00:00+0800\n"
+"PO-Revision-Date: 2025-01-01 00:00+0800\n"
+"Last-Translator: Auto\n"
+"Language-Team: French\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: settings.py
+msgid "中文"
+msgstr "Chinois"
+
+msgid "Français"
+msgstr "Français"
+
+# ============================================================
+# base.html
+# ============================================================
+
+msgid "图书管理系统"
+msgstr "Système de Gestion de Livres"
+
+msgid "首页"
+msgstr "Accueil"
+
+msgid "图书目录"
+msgstr "Catalogue"
+
+msgid "作者"
+msgstr "Auteurs"
+
+msgid "出版社"
+msgstr "Éditeurs"
+
+msgid "跟踪订单"
+msgstr "Suivi de Commande"
+
+msgid "管理员登录"
+msgstr "Connexion Admin"
+
+msgid "现代化的智能图书管理平台，为读者和管理员提供便捷、高效的图书查询、浏览和管理服务。致力于推广阅读文化，建设知识型社会。"
+msgstr "Une plateforme moderne et intelligente de gestion de livres offrant des services pratiques et efficaces de recherche, de consultation et de gestion pour les lecteurs et les administrateurs. Dédiée à la promotion de la culture de la lecture et à la construction d'une société du savoir."
+
+msgid "快速导航"
+msgstr "Navigation Rapide"
+
+msgid "作者列表"
+msgstr "Liste des Auteurs"
+
+msgid "订单跟踪"
+msgstr "Suivi des Commandes"
+
+msgid "系统功能"
+msgstr "Fonctionnalités"
+
+msgid "图书查询"
+msgstr "Recherche de Livres"
+
+msgid "购物车"
+msgstr "Panier"
+
+msgid "管理后台"
+msgstr "Panneau d'Administration"
+
+msgid "联系我们"
+msgstr "Nous Contacter"
+
+msgid "地址"
+msgstr "Adresse"
+
+msgid "北京市海淀区中关村科技园区"
+msgstr "Parc Scientifique de Zhongguancun, District de Haidian, Pékin"
+
+msgid "电话"
+msgstr "Téléphone"
+
+msgid "邮箱"
+msgstr "E-mail"
+
+msgid "服务时间"
+msgstr "Heures de Service"
+
+msgid "周一至周五 9:00-18:00"
+msgstr "Lundi au Vendredi 9h00-18h00"
+
+msgid "管理员入口"
+msgstr "Accès Administrateur"
+
+msgid "保留所有权利"
+msgstr "Tous Droits Réservés"
+
+msgid "隐私政策"
+msgstr "Politique de Confidentialité"
+
+msgid "使用条款"
+msgstr "Conditions d'Utilisation"
+
+msgid "网站地图"
+msgstr "Plan du Site"
+
+msgid "最后更新: 2024年12月"
+msgstr "Dernière mise à jour : Décembre 2024"
+
+# ============================================================
+# home.html
+# ============================================================
+
+msgid "智能图书管理系统"
+msgstr "Système Intelligent de Gestion de Livres"
+
+msgid "现代化的图书管理平台，为读者和管理员提供高效、便捷的图书查询、浏览和管理服务。探索知识的海洋，发现阅读的乐趣。"
+msgstr "Une plateforme moderne de gestion de livres offrant des services efficaces et pratiques de recherche, de consultation et de gestion. Explorez l'océan du savoir et découvrez le plaisir de la lecture."
+
+msgid "浏览图书"
+msgstr "Parcourir les Livres"
+
+msgid "精选图书"
+msgstr "Livres Sélectionnés"
+
+msgid "合作出版社"
+msgstr "Éditeurs Partenaires"
+
+msgid "知名作者"
+msgstr "Auteurs Célèbres"
+
+msgid "为什么选择我们的图书馆"
+msgstr "Pourquoi Choisir Notre Librairie"
+
+msgid "精心策划的阅读体验，优质的服务保障，让每一次购买都物超所值，开启您的精彩阅读之旅"
+msgstr "Une expérience de lecture soigneusement conçue avec un service de qualité garantie, rendant chaque achat rentable. Commencez votre merveilleux voyage de lecture."
+
+msgid "精选优质图书"
+msgstr "Livres de Qualité Sélectionnés"
+
+msgid "每本图书都经过专业团队精心挑选，涵盖文学、科技、艺术等各个领域，确保您购买的每一本书都具有极高的阅读价值和收藏意义。"
+msgstr "Chaque livre est soigneusement sélectionné par notre équipe professionnelle, couvrant la littérature, la technologie, l'art et bien d'autres domaines, garantissant une excellente valeur de lecture et de collection."
+
+msgid "超值优惠价格"
+msgstr "Prix Exceptionnels"
+
+msgid "直接与出版社合作，省去中间环节，为您提供市场最优价格。定期推出限时折扣、会员专享等优惠活动，让知识更加亲民。"
+msgstr "Des partenariats directs avec les éditeurs éliminent les intermédiaires, offrant les meilleurs prix du marché. Des réductions régulières et des offres exclusives rendent le savoir plus accessible."
+
+msgid "快速便捷配送"
+msgstr "Livraison Rapide et Pratique"
+
+msgid "专业物流团队，24小时内发货，全国包邮服务。精美包装保护图书品质，让您尽快拿到心爱的图书，立即开始阅读。"
+msgstr "Équipe logistique professionnelle, expédition sous 24 heures, livraison gratuite. Un emballage soigné protège la qualité des livres pour que vous puissiez commencer à lire rapidement."
+
+msgid "正版品质保证"
+msgstr "Garantie d'Authenticité"
+
+msgid "所有图书均为正版授权，印刷清晰，装帧精美。提供品质保证，支持7天无理由退换，让您购买无忧，阅读放心。"
+msgstr "Tous les livres sont officiellement autorisés avec une impression nette et une belle reliure. Garantie de qualité avec retour sans condition sous 7 jours pour un achat sans souci."
+
+msgid "专业推荐服务"
+msgstr "Service de Recommandation Professionnel"
+
+msgid "资深阅读顾问为您量身推荐适合的图书，根据您的兴趣偏好和阅读水平，打造个性化的阅读清单，发现更多精彩内容。"
+msgstr "Des conseillers en lecture expérimentés vous recommandent des livres personnalisés selon vos intérêts et votre niveau de lecture, créant des listes de lecture sur mesure pour découvrir plus de contenu passionnant."
+
+msgid "贴心售后服务"
+msgstr "Service Après-Vente Attentionné"
+
+msgid "专业客服团队7×24小时在线服务，解答您的任何疑问。建立读者社群，分享阅读心得，让购书不仅是消费，更是加入知识社区。"
+msgstr "Équipe de service client professionnelle disponible 24h/24, 7j/7 pour répondre à toutes vos questions. Créez des communautés de lecteurs, partagez vos expériences — acheter des livres, c'est aussi rejoindre une communauté du savoir."
+
+msgid "快速搜索图书"
+msgstr "Recherche Rapide de Livres"
+
+msgid "输入书名关键词，快速找到您感兴趣的图书"
+msgstr "Entrez des mots-clés pour trouver rapidement les livres qui vous intéressent"
+
+msgid "输入书名进行搜索..."
+msgstr "Entrez un titre de livre pour rechercher..."
+
+msgid "开始搜索"
+msgstr "Lancer la Recherche"
+
+msgid "热门图书推荐"
+msgstr "Recommandations de Livres Populaires"
+
+msgid "精选优质图书，为您推荐最受欢迎的阅读选择，开启您的知识之旅"
+msgstr "Livres de qualité sélectionnés, les choix de lecture les plus populaires pour commencer votre voyage du savoir"
+
+msgid "销量"
+msgstr "Ventes"
+
+msgid "查看详情"
+msgstr "Voir les Détails"
+
+msgid "查看更多图书"
+msgstr "Voir Plus de Livres"
+
+msgid "开始探索知识的海洋"
+msgstr "Explorez l'Océan du Savoir"
+
+msgid "立即浏览我们丰富的图书收藏，发现您感兴趣的内容，开启精彩的阅读之旅"
+msgstr "Parcourez dès maintenant notre riche collection de livres, découvrez du contenu qui vous intéresse et commencez un voyage de lecture passionnant"
+
+msgid "立即开始探索"
+msgstr "Commencer l'Exploration"
+
+msgid "添加中..."
+msgstr "Ajout en cours..."
+
+msgid "已添加"
+msgstr "Ajouté"
+
+# ============================================================
+# books.html
+# ============================================================
+
+msgid "浏览我们丰富的图书收藏"
+msgstr "Parcourez notre riche collection de livres"
+
+msgid "搜索图书名称..."
+msgstr "Rechercher un titre de livre..."
+
+msgid "按名称排序"
+msgstr "Trier par Nom"
+
+msgid "价格从低到高"
+msgstr "Prix : Croissant"
+
+msgid "价格从高到低"
+msgstr "Prix : Décroissant"
+
+msgid "按销量排序"
+msgstr "Trier par Ventes"
+
+msgid "搜索"
+msgstr "Rechercher"
+
+msgid "暂无封面"
+msgstr "Pas de Couverture"
+
+msgid "缺货"
+msgstr "Rupture de Stock"
+
+msgid "库存"
+msgstr "Stock"
+
+msgid "立即购买"
+msgstr "Acheter Maintenant"
+
+msgid "加入购物车"
+msgstr "Ajouter au Panier"
+
+msgid "未找到相关图书"
+msgstr "Aucun Livre Trouvé"
+
+msgid "请尝试其他搜索关键词或浏览所有图书"
+msgstr "Essayez d'autres mots-clés ou parcourez tous les livres"
+
+msgid "浏览所有图书"
+msgstr "Parcourir Tous les Livres"
+
+msgid "浏览作者"
+msgstr "Parcourir les Auteurs"
+
+msgid "查看所有作者信息"
+msgstr "Voir Toutes les Informations sur les Auteurs"
+
+msgid "浏览出版社"
+msgstr "Parcourir les Éditeurs"
+
+msgid "查看所有出版社"
+msgstr "Voir Tous les Éditeurs"
+
+msgid "返回首页"
+msgstr "Retour à l'Accueil"
+
+msgid "回到主页面"
+msgstr "Retour à la Page Principale"
+
+#, python-format
+msgid "共找到 %(count)s 本图书"
+msgstr "%(count)s livres trouvés"
+
+#, python-format
+msgid "仅剩%(inv)s本"
+msgstr "Plus que %(inv)s en stock"
+
+# ============================================================
+# authors.html
+# ============================================================
+
+msgid "作者目录"
+msgstr "Répertoire des Auteurs"
+
+msgid "探索我们平台的优秀作者"
+msgstr "Explorez les excellents auteurs de notre plateforme"
+
+msgid "搜索作者名称..."
+msgstr "Rechercher un nom d'auteur..."
+
+msgid "代表作"
+msgstr "Œuvre Principale"
+
+msgid "未找到相关作者"
+msgstr "Aucun Auteur Trouvé"
+
+msgid "请尝试其他搜索关键词或浏览所有作者"
+msgstr "Essayez d'autres mots-clés ou parcourez tous les auteurs"
+
+msgid "浏览所有作者"
+msgstr "Parcourir Tous les Auteurs"
+
+msgid "查看所有图书信息"
+msgstr "Voir Toutes les Informations sur les Livres"
+
+#, python-format
+msgid "共找到 %(count)s 位作者"
+msgstr "%(count)s auteurs trouvés"
+
+#, python-format
+msgid "%(count)s 本著作"
+msgstr "%(count)s ouvrages"
+
+# ============================================================
+# publishers.html
+# ============================================================
+
+msgid "出版社目录"
+msgstr "Répertoire des Éditeurs"
+
+msgid "浏览我们合作的优质出版社"
+msgstr "Parcourez nos éditeurs partenaires de qualité"
+
+msgid "搜索出版社名称..."
+msgstr "Rechercher un nom d'éditeur..."
+
+msgid "图书数"
+msgstr "Nombre de Livres"
+
+msgid "未找到相关出版社"
+msgstr "Aucun Éditeur Trouvé"
+
+msgid "请尝试其他搜索关键词或浏览所有出版社"
+msgstr "Essayez d'autres mots-clés ou parcourez tous les éditeurs"
+
+msgid "浏览所有出版社"
+msgstr "Parcourir Tous les Éditeurs"
+
+#, python-format
+msgid "共找到 %(count)s 家出版社"
+msgstr "%(count)s éditeurs trouvés"
+
+# ============================================================
+# cart.html
+# ============================================================
+
+msgid "管理您选择的图书"
+msgstr "Gérez vos livres sélectionnés"
+
+msgid "件商品"
+msgstr "articles"
+
+msgid "购物车商品"
+msgstr "Articles du Panier"
+
+msgid "本"
+msgstr "exemplaire(s)"
+
+msgid "数量"
+msgstr "Quantité"
+
+msgid "单价"
+msgstr "Prix Unitaire"
+
+msgid "移除商品"
+msgstr "Supprimer l'Article"
+
+msgid "继续购物"
+msgstr "Continuer les Achats"
+
+msgid "订单摘要"
+msgstr "Résumé de la Commande"
+
+msgid "商品数量"
+msgstr "Nombre d'Articles"
+
+msgid "件"
+msgstr "articles"
+
+msgid "商品总额"
+msgstr "Sous-total"
+
+msgid "总计"
+msgstr "Total"
+
+msgid "立即结算"
+msgstr "Passer à la Caisse"
+
+msgid "安全购物"
+msgstr "Achat Sécurisé"
+
+msgid "您的购物信息和支付数据受到安全保护"
+msgstr "Vos informations d'achat et de paiement sont protégées en toute sécurité"
+
+msgid "购物车为空"
+msgstr "Votre Panier est Vide"
+
+msgid "还没有添加任何商品到购物车"
+msgstr "Aucun article n'a encore été ajouté au panier"
+
+msgid "去选购图书"
+msgstr "Aller Acheter des Livres"
+
+msgid "确定要移除这个商品吗？"
+msgstr "Êtes-vous sûr de vouloir supprimer cet article ?"
+
+msgid "更新失败，请重试"
+msgstr "Échec de la mise à jour, veuillez réessayer"
+
+msgid "移除失败，请重试"
+msgstr "Échec de la suppression, veuillez réessayer"
+
+# ============================================================
+# checkout.html
+# ============================================================
+
+msgid "结账"
+msgstr "Paiement"
+
+msgid "选择商品"
+msgstr "Sélectionner les Articles"
+
+msgid "填写信息"
+msgstr "Remplir les Informations"
+
+msgid "完成订单"
+msgstr "Finaliser la Commande"
+
+msgid "客户信息"
+msgstr "Informations Client"
+
+msgid "我们销售的是数字产品，无需填写收货地址"
+msgstr "Nous vendons des produits numériques, aucune adresse de livraison n'est requise"
+
+msgid "姓名"
+msgstr "Nom"
+
+msgid "请输入您的姓名"
+msgstr "Veuillez entrer votre nom"
+
+msgid "请输入您的邮箱地址"
+msgstr "Veuillez entrer votre adresse e-mail"
+
+msgid "用于接收订单和电子书"
+msgstr "Pour recevoir les commandes et les e-books"
+
+msgid "微信/电话号码"
+msgstr "WeChat / Numéro de Téléphone"
+
+msgid "微信号或电话号码"
+msgstr "Identifiant WeChat ou numéro de téléphone"
+
+msgid "国家"
+msgstr "Pays"
+
+msgid "请选择国家"
+msgstr "Veuillez sélectionner un pays"
+
+msgid "支付方式"
+msgstr "Mode de Paiement"
+
+msgid "固定价格"
+msgstr "Prix Fixe"
+
+msgid "请先选择国家以显示可用的支付方式"
+msgstr "Veuillez d'abord sélectionner un pays pour afficher les modes de paiement disponibles"
+
+msgid "备注信息"
+msgstr "Notes"
+
+msgid "订单备注"
+msgstr "Notes de Commande"
+
+msgid "如有特殊要求，请在此说明（可选）"
+msgstr "Si vous avez des exigences particulières, veuillez les préciser ici (facultatif)"
+
+msgid "商品总计"
+msgstr "Sous-total des Articles"
+
+msgid "运费"
+msgstr "Frais de Livraison"
+
+msgid "免费"
+msgstr "Gratuit"
+
+msgid "订单总额"
+msgstr "Total de la Commande"
+
+msgid "确认订单并支付"
+msgstr "Confirmer la Commande et Payer"
+
+msgid "您的支付信息经过安全加密保护"
+msgstr "Vos informations de paiement sont protégées par un cryptage sécurisé"
+
+msgid "微信支付"
+msgstr "Paiement WeChat"
+
+msgid "支付宝"
+msgstr "Alipay"
+
+msgid "信用卡"
+msgstr "Carte de Crédit"
+
+msgid "银行转账"
+msgstr "Virement Bancaire"
+
+msgid "点击选择"
+msgstr "Cliquez pour Sélectionner"
+
+msgid "请选择支付方式"
+msgstr "Veuillez sélectionner un mode de paiement"
+
+msgid "请使用手机扫描二维码完成支付"
+msgstr "Veuillez scanner le code QR avec votre téléphone pour effectuer le paiement"
+
+msgid "金额"
+msgstr "Montant"
+
+msgid "请确认您的支付状态"
+msgstr "Veuillez confirmer votre statut de paiement"
+
+msgid "已完成支付"
+msgstr "Paiement Effectué"
+
+msgid "尚未支付"
+msgstr "Pas Encore Payé"
+
+# ============================================================
+# book_detail.html
+# ============================================================
+
+msgid "图书详情"
+msgstr "Détails du Livre"
+
+msgid "图书信息"
+msgstr "Informations du Livre"
+
+msgid "图书简介"
+msgstr "Description du Livre"
+
+msgid "出版社信息"
+msgstr "Informations de l'Éditeur"
+
+msgid "出版社名称"
+msgstr "Nom de l'Éditeur"
+
+msgid "出版社地址"
+msgstr "Adresse de l'Éditeur"
+
+msgid "作者信息"
+msgstr "Informations sur l'Auteur"
+
+msgid "购买选项"
+msgstr "Options d'Achat"
+
+msgid "选择数量"
+msgstr "Sélectionner la Quantité"
+
+msgid "抱歉，商品已售罄"
+msgstr "Désolé, cet article est en rupture de stock"
+
+msgid "该商品暂时缺货，无法购买"
+msgstr "Cet article est temporairement indisponible et ne peut être acheté"
+
+msgid "查看出版社详情"
+msgstr "Voir les Détails de l'Éditeur"
+
+msgid "返回列表"
+msgstr "Retour à la Liste"
+
+msgid "相关推荐"
+msgstr "Recommandations Similaires"
+
+msgid "来自同一出版社的优质图书"
+msgstr "Livres de qualité du même éditeur"
+
+msgid "数量不能少于1本"
+msgstr "La quantité ne peut pas être inférieure à 1"
+
+msgid "库存不足！最大可购买"
+msgstr "Stock insuffisant ! Maximum disponible"
+
+#, python-format
+msgid "最多 %(inv)s 本"
+msgstr "Maximum %(inv)s"
+
+# ============================================================
+# author_detail.html
+# ============================================================
+
+msgid "作者详情"
+msgstr "Détails de l'Auteur"
+
+msgid "作品"
+msgstr "Œuvres"
+
+msgid "均价"
+msgstr "Prix Moyen"
+
+msgid "注册时间"
+msgstr "Date d'Inscription"
+
+msgid "未知"
+msgstr "Inconnu"
+
+msgid "作品列表"
+msgstr "Liste des Œuvres"
+
+msgid "详情"
+msgstr "Détails"
+
+msgid "购买"
+msgstr "Acheter"
+
+msgid "暂无作品"
+msgstr "Aucune Œuvre"
+
+msgid "该作者目前还没有任何已发布的作品。"
+msgstr "Cet auteur n'a actuellement aucune œuvre publiée."
+
+# ============================================================
+# track_order.html
+# ============================================================
+
+msgid "订单跟踪"
+msgstr "Suivi de Commande"
+
+msgid "输入您的订单号或邮箱来查看订单状态和物流信息"
+msgstr "Entrez votre numéro de commande ou votre e-mail pour consulter le statut de la commande et les informations logistiques"
+
+msgid "订单号查询"
+msgstr "Recherche par Numéro de Commande"
+
+msgid "邮箱查询"
+msgstr "Recherche par E-mail"
+
+msgid "订单号"
+msgstr "Numéro de Commande"
+
+msgid "请输入您的订单号"
+msgstr "Veuillez entrer votre numéro de commande"
+
+msgid "查询订单"
+msgstr "Rechercher la Commande"
+
+msgid "客户邮箱"
+msgstr "E-mail du Client"
+
+msgid "将显示与此邮箱相关的所有订单"
+msgstr "Toutes les commandes associées à cet e-mail seront affichées"
+
+msgid "订单金额"
+msgstr "Montant de la Commande"
+
+msgid "支付状态"
+msgstr "Statut de Paiement"
+
+msgid "立即支付"
+msgstr "Payer Maintenant"
+
+msgid "取消订单"
+msgstr "Annuler la Commande"
+
+msgid "订单"
+msgstr "Commande"
+
+msgid "客户姓名"
+msgstr "Nom du Client"
+
+msgid "联系电话"
+msgstr "Téléphone de Contact"
+
+msgid "下单时间"
+msgstr "Date de Commande"
+
+msgid "订单进度"
+msgstr "Progression de la Commande"
+
+msgid "订单已创建"
+msgstr "Commande Créée"
+
+msgid "支付完成"
+msgstr "Paiement Effectué"
+
+msgid "等待支付"
+msgstr "En Attente de Paiement"
+
+msgid "请尽快完成支付"
+msgstr "Veuillez effectuer le paiement dès que possible"
+
+msgid "订单已确认"
+msgstr "Commande Confirmée"
+
+msgid "商家已确认您的订单"
+msgstr "Le commerçant a confirmé votre commande"
+
+msgid "等待确认"
+msgstr "En Attente de Confirmation"
+
+msgid "商家正在处理您的订单"
+msgstr "Le commerçant traite votre commande"
+
+msgid "订单已发货"
+msgstr "Commande Expédiée"
+
+msgid "您的订单正在配送中"
+msgstr "Votre commande est en cours de livraison"
+
+msgid "等待发货"
+msgstr "En Attente d'Expédition"
+
+msgid "商品准备中"
+msgstr "Articles en cours de préparation"
+
+msgid "订单已送达"
+msgstr "Commande Livrée"
+
+msgid "等待签收"
+msgstr "En Attente de Réception"
+
+msgid "商品将尽快送达"
+msgstr "Les articles seront livrés dès que possible"
+
+msgid "订单已取消"
+msgstr "Commande Annulée"
+
+msgid "商品清单"
+msgstr "Liste des Articles"
+
+msgid "商品名称"
+msgstr "Nom de l'Article"
+
+msgid "小计"
+msgstr "Sous-total"
+
+msgid "图书下载"
+msgstr "Téléchargement de Livres"
+
+msgid "文件下载"
+msgstr "Téléchargement de Fichier"
+
+msgid "外部链接"
+msgstr "Lien Externe"
+
+msgid "下载图书"
+msgstr "Télécharger le Livre"
+
+msgid "您购买的图书暂无电子版下载，如需纸质版请等待配送。"
+msgstr "Les livres que vous avez achetés n'ont pas de téléchargement numérique disponible. Pour les copies papier, veuillez attendre la livraison."
+
+msgid "需要帮助？"
+msgstr "Besoin d'Aide ?"
+
+msgid "如果您对订单有任何疑问，请联系我们的客服"
+msgstr "Si vous avez des questions concernant votre commande, veuillez contacter notre service client"
+
+msgid "未找到订单"
+msgstr "Aucune Commande Trouvée"
+
+msgid "请检查您输入的订单号是否正确，或联系客服获取帮助。"
+msgstr "Veuillez vérifier que le numéro de commande saisi est correct, ou contactez le service client pour obtenir de l'aide."
+
+msgid "确定要取消此订单吗？"
+msgstr "Êtes-vous sûr de vouloir annuler cette commande ?"
+
+#, python-format
+msgid "找到 %(count)s 个订单"
+msgstr "%(count)s commandes trouvées"
+
+# ============================================================
+# order_confirmation.html
+# ============================================================
+
+msgid "订单确认"
+msgstr "Confirmation de Commande"
+
+msgid "订单创建成功！"
+msgstr "Commande Créée avec Succès !"
+
+msgid "感谢您的购买，我们将尽快为您处理订单"
+msgstr "Merci pour votre achat, nous traiterons votre commande dans les plus brefs délais"
+
+msgid "订单详情"
+msgstr "Détails de la Commande"
+
+msgid "联系邮箱"
+msgstr "E-mail de Contact"
+
+msgid "订单商品"
+msgstr "Articles de la Commande"
+
+msgid "支付信息"
+msgstr "Informations de Paiement"
+
+msgid "应付金额"
+msgstr "Montant à Payer"
+
+msgid "订单创建"
+msgstr "Commande Créée"
+
+msgid "等待付款"
+msgstr "En Attente de Paiement"
+
+msgid "验证处理"
+msgstr "Vérification"
+
+msgid "可下载"
+msgstr "Téléchargeable"
+
+msgid "支付步骤"
+msgstr "Étapes de Paiement"
+
+msgid "扫描二维码"
+msgstr "Scanner le Code QR"
+
+msgid "点击下方按钮，用手机扫描付款码"
+msgstr "Cliquez sur le bouton ci-dessous et scannez le code de paiement avec votre téléphone"
+
+msgid "完成付款"
+msgstr "Finaliser le Paiement"
+
+msgid "点击"我已支付""
+msgstr "Cliquez sur « J'ai payé »"
+
+msgid "确认后系统将在5-10分钟内验证"
+msgstr "Le système vérifiera dans les 5 à 10 minutes après confirmation"
+
+msgid "扫码支付"
+msgstr "Scanner pour Payer"
+
+msgid "支付时间已过期，订单已自动取消"
+msgstr "Le délai de paiement a expiré, la commande a été automatiquement annulée"
+
+msgid "下一步"
+msgstr "Étape Suivante"
+
+msgid "已付款"
+msgstr "Payé"
+
+msgid "验证中"
+msgstr "En cours de Vérification"
+
+msgid "验证处理中..."
+msgstr "Vérification en cours..."
+
+msgid "我们正在验证您的付款"
+msgstr "Nous vérifions votre paiement"
+
+msgid "预计"
+msgstr "Estimé"
+
+msgid "分钟"
+msgstr "minutes"
+
+msgid "内完成确认。"
+msgstr "pour finaliser la confirmation."
+
+msgid "确认完成后，您将可以直接下载电子书。无需刷新页面，系统会自动更新状态。"
+msgstr "Une fois confirmé, vous pourrez télécharger directement l'e-book. Pas besoin de rafraîchir la page, le système mettra automatiquement à jour le statut."
+
+msgid "需要加快确认？添加客服微信"
+msgstr "Besoin d'une confirmation plus rapide ? Ajoutez le service client sur WeChat"
+
+msgid "扫描二维码或搜索微信ID添加好友"
+msgstr "Scannez le code QR ou recherchez l'identifiant WeChat pour ajouter comme ami"
+
+msgid "请等待5-10分钟，系统正在验证付款。确认后即可下载电子书。"
+msgstr "Veuillez patienter 5 à 10 minutes, le système vérifie le paiement. Vous pourrez télécharger l'e-book après confirmation."
+
+msgid "已确认"
+msgstr "Confirmé"
+
+msgid "已发货"
+msgstr "Expédié"
+
+msgid "您的电子书已准备好下载！"
+msgstr "Vos e-books sont prêts à être téléchargés !"
+
+msgid "下载您的电子书"
+msgstr "Téléchargez Vos E-books"
+
+msgid "感谢您的购买！您现在可以下载已购买的电子书。"
+msgstr "Merci pour votre achat ! Vous pouvez maintenant télécharger vos e-books achetés."
+
+msgid "下载"
+msgstr "Télécharger"
+
+msgid "下载文件准备中，请联系客服"
+msgstr "Fichier en cours de préparation, veuillez contacter le service client"
+
+msgid "客户备注"
+msgstr "Notes du Client"
+
+msgid "跟踪订单"
+msgstr "Suivre la Commande"
+
+msgid "继续购书"
+msgstr "Continuer les Achats"
+
+msgid "重要提醒"
+msgstr "Rappel Important"
+
+msgid "请保存好您的订单号"
+msgstr "Veuillez conserver votre numéro de commande"
+
+msgid "订单确认邮件已发送至"
+msgstr "L'e-mail de confirmation de commande a été envoyé à"
+
+msgid "如有疑问，请联系客服并提供订单号"
+msgstr "En cas de question, veuillez contacter le service client avec votre numéro de commande"
+
+msgid "您可以随时使用订单号和邮箱查询订单状态"
+msgstr "Vous pouvez vérifier le statut de votre commande à tout moment avec votre numéro de commande et votre e-mail"
+
+msgid "正在验证支付..."
+msgstr "Vérification du paiement en cours..."
+
+msgid "请稍候，系统正在确认您的付款"
+msgstr "Veuillez patienter, le système confirme votre paiement"
+
+msgid "点击复制订单号"
+msgstr "Cliquez pour copier le numéro de commande"
+
+msgid "我已完成支付"
+msgstr "J'ai Effectué le Paiement"
+
+msgid "请按照订单信息中的支付方式完成付款"
+msgstr "Veuillez effectuer le paiement selon le mode de paiement indiqué dans les informations de la commande"
+
+msgid "支付确认成功!"
+msgstr "Confirmation de paiement réussie !"
+
+msgid "系统正在验证，预计 5-10 分钟内完成确认"
+msgstr "Le système vérifie, confirmation estimée dans les 5 à 10 minutes"
+
+msgid "确认失败，请重试"
+msgstr "Échec de la confirmation, veuillez réessayer"
+
+msgid "网络错误，请重试"
+msgstr "Erreur réseau, veuillez réessayer"
+
+msgid "确定要取消此订单吗？取消后无法恢复。"
+msgstr "Êtes-vous sûr de vouloir annuler cette commande ? Cette action est irréversible."
+
+msgid "取消中..."
+msgstr "Annulation en cours..."
+
+msgid "已取消"
+msgstr "Annulé"
+
+msgid "取消失败，请重试"
+msgstr "Échec de l'annulation, veuillez réessayer"
+
+#, python-format
+msgid "点击上方"扫码支付"按钮，使用 %(method)s 完成付款"
+msgstr "Cliquez sur le bouton « Scanner pour Payer » ci-dessus et utilisez %(method)s pour effectuer le paiement"
+
+# ============================================================
+# publisher_detail.html
+# ============================================================
+
+msgid "出版社详情"
+msgstr "Détails de l'Éditeur"
+
+msgid "返回出版社列表"
+msgstr "Retour aux Éditeurs"
+
+msgid "出版图书"
+msgstr "Livres Publiés"
+
+msgid "总销量"
+msgstr "Ventes Totales"
+
+msgid "总库存"
+msgstr "Stock Total"
+
+msgid "合作作者"
+msgstr "Auteurs Associés"
+
+msgid "基本信息"
+msgstr "Informations Générales"
+
+msgid "出版社ID"
+msgstr "ID de l'Éditeur"
+
+msgid "名称"
+msgstr "Nom"
+
+msgid "出版统计"
+msgstr "Statistiques de Publication"
+
+msgid "平均价格"
+msgstr "Prix Moyen"
+
+msgid "总收入"
+msgstr "Revenu Total"
+
+msgid "查看该出版社图书"
+msgstr "Voir les Livres de cet Éditeur"
+
+msgid "该出版社出版的所有图书"
+msgstr "Tous les livres publiés par cet éditeur"
+
+msgid "未知作者"
+msgstr "Auteur Inconnu"
+
+msgid "暂无出版图书"
+msgstr "Aucun Livre Publié"
+
+msgid "该出版社目前还没有出版任何图书"
+msgstr "Cet éditeur n'a actuellement publié aucun livre"
+
+msgid "浏览其他图书"
+msgstr "Parcourir d'Autres Livres"
+
+# ============================================================
+# Shared across templates
+# ============================================================
+
+msgid "订单状态"
+msgstr "Statut de la Commande"
+
+
+# ============================================================
+# New pages: About, Services, Contact, Blog
+# ============================================================
+msgid "博客"
+msgstr "Blog"
+
+msgid "更多"
+msgstr "Plus"
+
+msgid "关于我们"
+msgstr "À Propos"
+
+msgid "我们的服务"
+msgstr "Nos Services"
+
+msgid "微信"
+msgstr "WeChat"
+
+msgid "致力于推广阅读文化"
+msgstr "Dédiés à la Promotion de la Culture de Lecture"
+
+msgid "我们是一个充满激情的团队，致力于通过技术创新让每个人都能享受到阅读的乐趣。我们的使命是建设一个智能、便捷的图书管理平台。"
+msgstr "Nous sommes une équipe passionnée dédiée à rendre la lecture accessible à tous grâce à l'innovation technologique. Notre mission est de construire une plateforme de gestion de livres intelligente et pratique."
+
+msgid "成立年份"
+msgstr "Année de Fondation"
+
+msgid "我们的故事"
+msgstr "Notre Histoire"
+
+msgid "从一个想法到一个平台"
+msgstr "D'une Idée à une Plateforme"
+
+msgid "我们的图书管理系统诞生于对知识传播的热爱。从最初的构想到如今功能完善的平台，我们始终坚持以用户为中心，不断优化产品体验。"
+msgstr "Notre système de gestion de livres est né d'un amour du partage des connaissances. Du concept initial à la plateforme complète d'aujourd'hui, nous restons centrés sur l'utilisateur, optimisant continuellement l'expérience."
+
+msgid "我们相信，每一本书都承载着智慧与力量。通过我们的平台，读者可以轻松发现、购买和管理他们喜爱的书籍。"
+msgstr "Nous croyons que chaque livre porte sagesse et puissance. Grâce à notre plateforme, les lecteurs peuvent facilement découvrir, acheter et gérer leurs livres préférés."
+
+msgid "我们的价值观"
+msgstr "Nos Valeurs"
+
+msgid "驱动我们前行的核心理念"
+msgstr "Principes Fondamentaux Qui Nous Font Avancer"
+
+msgid "创新"
+msgstr "Innovation"
+
+msgid "我们不断探索新技术和新方法，为用户提供最前沿的图书管理体验。"
+msgstr "Nous explorons constamment de nouvelles technologies et méthodes pour offrir aux utilisateurs des expériences de gestion de livres à la pointe."
+
+msgid "热情"
+msgstr "Passion"
+
+msgid "对阅读的热爱驱动着我们，我们希望将这份热情传递给每一位用户。"
+msgstr "Notre amour de la lecture nous motive, et nous espérons transmettre cette passion à chaque utilisateur."
+
+msgid "可靠"
+msgstr "Fiable"
+
+msgid "我们承诺提供稳定、安全的服务，让用户可以放心地使用我们的平台。"
+msgstr "Nous promettons de fournir des services stables et sécurisés pour que les utilisateurs puissent utiliser notre plateforme en toute confiance."
+
+msgid "以用户为中心"
+msgstr "Centré sur l'Utilisateur"
+
+msgid "用户的需求和体验始终是我们决策的核心，我们倾听每一个声音。"
+msgstr "Les besoins et l'expérience des utilisateurs sont toujours au cœur de nos décisions. Nous écoutons chaque voix."
+
+msgid "图书数量"
+msgstr "Nombre de Livres"
+
+msgid "作者数量"
+msgstr "Nombre d'Auteurs"
+
+msgid "我们的团队"
+msgstr "Notre Équipe"
+
+msgid "专业的团队，卓越的服务"
+msgstr "Équipe Professionnelle, Service Excellent"
+
+msgid "创始人"
+msgstr "Fondateur"
+
+msgid "产品设计"
+msgstr "Conception Produit"
+
+msgid "技术团队"
+msgstr "Équipe Technique"
+
+msgid "全栈开发"
+msgstr "Développement Full-Stack"
+
+msgid "客服团队"
+msgstr "Équipe Support"
+
+msgid "客户支持"
+msgstr "Support Client"
+
+msgid "准备好开始了吗？"
+msgstr "Prêt à Commencer ?"
+
+msgid "浏览我们的图书目录，发现您的下一本好书。"
+msgstr "Parcourez notre catalogue de livres et découvrez votre prochaine lecture."
+
+msgid "全方位的图书服务"
+msgstr "Services Complets de Livres"
+
+msgid "从图书搜索到订单管理，我们提供一站式的智能图书服务，让您的阅读体验更加便捷和愉悦。"
+msgstr "De la recherche de livres à la gestion des commandes, nous offrons des services intelligents tout-en-un pour rendre votre expérience de lecture plus pratique et agréable."
+
+msgid "核心服务"
+msgstr "Services Principaux"
+
+msgid "我们为您提供什么"
+msgstr "Ce Que Nous Offrons"
+
+msgid "智能图书搜索"
+msgstr "Recherche Intelligente de Livres"
+
+msgid "通过关键字、作者或出版社快速搜索您需要的图书，智能排序让您更快找到心仪的书籍。"
+msgstr "Recherchez rapidement des livres par mot-clé, auteur ou éditeur. Le tri intelligent vous aide à trouver vos livres plus rapidement."
+
+msgid "多维度搜索"
+msgstr "Recherche Multi-Dimensionnelle"
+
+msgid "智能排序"
+msgstr "Tri Intelligent"
+
+msgid "实时结果"
+msgstr "Résultats en Temps Réel"
+
+msgid "在线购书"
+msgstr "Achat de Livres en Ligne"
+
+msgid "便捷的购物车系统，支持多种支付方式，让您轻松完成图书购买。"
+msgstr "Système de panier pratique supportant plusieurs méthodes de paiement pour des achats de livres faciles."
+
+msgid "安全支付"
+msgstr "Paiement Sécurisé"
+
+msgid "购物车管理"
+msgstr "Gestion du Panier"
+
+msgid "电子书下载"
+msgstr "Téléchargement d'E-Books"
+
+msgid "购买后即可下载电子版本，随时随地享受阅读的乐趣。"
+msgstr "Téléchargez les versions numériques après l'achat et profitez de la lecture partout et à tout moment."
+
+msgid "即时下载"
+msgstr "Téléchargement Instantané"
+
+msgid "多格式支持"
+msgstr "Support Multi-Format"
+
+msgid "永久访问"
+msgstr "Accès Permanent"
+
+msgid "图书管理"
+msgstr "Gestion des Livres"
+
+msgid "强大的后台管理系统，帮助管理员高效管理图书、作者和出版社信息。"
+msgstr "Système de gestion backend puissant aidant les administrateurs à gérer efficacement les livres, auteurs et éditeurs."
+
+msgid "库存管理"
+msgstr "Gestion des Stocks"
+
+msgid "数据分析"
+msgstr "Analyse de Données"
+
+msgid "报表导出"
+msgstr "Export de Rapports"
+
+msgid "多语言支持"
+msgstr "Support Multilingue"
+
+msgid "支持中文、英文和法文，为全球用户提供无障碍的浏览体验。"
+msgstr "Prise en charge du chinois, de l'anglais et du français pour une expérience de navigation sans obstacle pour les utilisateurs du monde entier."
+
+msgid "三语切换"
+msgstr "Commutation Trilingue"
+
+msgid "实时翻译"
+msgstr "Traduction en Temps Réel"
+
+msgid "本地化体验"
+msgstr "Expérience Localisée"
+
+msgid "专业的客服团队随时为您解答问题，确保您获得最佳的服务体验。"
+msgstr "Équipe de service client professionnelle prête à répondre à vos questions et assurer la meilleure expérience de service."
+
+msgid "在线客服"
+msgstr "Service en Ligne"
+
+msgid "邮件支持"
+msgstr "Support par Email"
+
+msgid "常见问题"
+msgstr "FAQ"
+
+msgid "购书流程"
+msgstr "Processus d'Achat"
+
+msgid "简单四步，轻松购书"
+msgstr "Quatre Étapes Simples pour Acheter des Livres"
+
+msgid "在我们的图书目录中搜索和浏览您感兴趣的书籍。"
+msgstr "Recherchez et parcourez les livres qui vous intéressent dans notre catalogue."
+
+msgid "将喜欢的图书加入购物车，随时调整数量。"
+msgstr "Ajoutez vos livres préférés au panier et ajustez les quantités à tout moment."
+
+msgid "安全结算"
+msgstr "Paiement Sécurisé"
+
+msgid "选择支付方式，完成安全的在线结算。"
+msgstr "Choisissez votre méthode de paiement et effectuez un paiement en ligne sécurisé."
+
+msgid "享受阅读"
+msgstr "Profitez de la Lecture"
+
+msgid "收到图书后，开始您的阅读之旅！"
+msgstr "Après avoir reçu vos livres, commencez votre voyage de lecture !"
+
+msgid "立即开始您的阅读之旅"
+msgstr "Commencez Votre Voyage de Lecture Maintenant"
+
+msgid "探索我们的图书目录，找到您的下一本好书。"
+msgstr "Explorez notre catalogue de livres et trouvez votre prochaine lecture."
+
+msgid "与我们取得联系"
+msgstr "Contactez-Nous"
+
+msgid "如果您有任何问题、建议或合作意向，请随时与我们联系。我们的团队将尽快回复您。"
+msgstr "Si vous avez des questions, des suggestions ou des intérêts de collaboration, n'hésitez pas à nous contacter. Notre équipe vous répondra dans les plus brefs délais."
+
+msgid "发送消息"
+msgstr "Envoyer le Message"
+
+msgid "给我们留言"
+msgstr "Laissez-Nous un Message"
+
+msgid "感谢您的留言！我们会尽快回复您。"
+msgstr "Merci pour votre message ! Nous vous répondrons dans les plus brefs délais."
+
+msgid "您的姓名"
+msgstr "Votre Nom"
+
+msgid "您的邮箱"
+msgstr "Votre Email"
+
+msgid "主题"
+msgstr "Sujet"
+
+msgid "您的留言"
+msgstr "Votre Message"
+
+msgid "其他联系方式"
+msgstr "Autres Moyens de Contact"
+
+msgid "关注我们"
+msgstr "Suivez-Nous"
+
+msgid "最新文章与资讯"
+msgstr "Derniers Articles et Actualités"
+
+msgid "探索我们的博客，获取图书推荐、阅读技巧、行业动态等精彩内容。"
+msgstr "Explorez notre blog pour des recommandations de livres, des astuces de lecture, des actualités du secteur, et plus encore."
+
+msgid "搜索文章..."
+msgstr "Rechercher des articles..."
+
+msgid "精选推荐"
+msgstr "Sélection"
+
+msgid "精选文章"
+msgstr "Articles en Vedette"
+
+msgid "精选"
+msgstr "En Vedette"
+
+msgid "搜索结果"
+msgstr "Résultats de Recherche"
+
+msgid "篇文章"
+msgstr "articles"
+
+msgid "阅读更多"
+msgstr "Lire la Suite"
+
+msgid "暂无文章"
+msgstr "Aucun Article"
+
+msgid "敬请期待更多精彩内容"
+msgstr "Restez à l'écoute pour plus de contenu passionnant"
+
+msgid "文章分类"
+msgstr "Catégories"
+
+msgid "全部文章"
+msgstr "Tous les Articles"
+
+msgid "关于博客"
+msgstr "À Propos du Blog"
+
+msgid "在这里，我们分享关于图书、阅读和技术的最新资讯。关注我们，获取更多精彩内容。"
+msgstr "Ici, nous partageons les dernières informations sur les livres, la lecture et la technologie. Suivez-nous pour plus de contenu passionnant."
+
+msgid "次浏览"
+msgstr "vues"
+
+msgid "分钟阅读"
+msgstr "min de lecture"
+
+msgid "文章作者"
+msgstr "Auteur de l'Article"
+
+msgid "分享文章"
+msgstr "Partager l'Article"
+
+msgid "返回博客列表"
+msgstr "Retour au Blog"
+
+msgid "相关文章"
+msgstr "Articles Associés"
+
+msgid "您可能还感兴趣"
+msgstr "Vous Pourriez Aussi Être Intéressé Par"

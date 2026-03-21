@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ email.subject }} - 邮件管理</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh; font-family: 'Segoe UI', sans-serif; padding-top: 76px;
+        }
+        .top-navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1030;
+            height: 76px; display: flex; align-items: center; padding: 0 24px;
+            box-shadow: 0 4px 20px rgba(102,126,234,0.4);
+        }
+        .nav-brand { color: white; font-size: 1.3rem; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .nav-brand:hover { color: rgba(255,255,255,0.9); }
+        .nav-links { display: flex; gap: 6px; margin-left: auto; align-items: center; }
+        .nav-link-btn {
+            color: rgba(255,255,255,0.85); text-decoration: none; padding: 8px 14px;
+            border-radius: 8px; font-size: 0.88rem; font-weight: 500; display: flex; align-items: center; gap: 6px;
+            transition: all 0.2s; border: 1px solid transparent;
+        }
+        .nav-link-btn:hover { background: rgba(255,255,255,0.15); color: white; }
+
+        .main-container { max-width: 900px; margin: 0 auto; padding: 28px 20px 60px; }
+
+        .back-bar { margin-bottom: 20px; }
+        .back-bar a {
+            color: #667eea; text-decoration: none; font-size: 0.9rem; font-weight: 500;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .back-bar a:hover { text-decoration: underline; }
+
+        .email-card {
+            background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .email-header {
+            padding: 28px 32px; border-bottom: 1px solid #f1f5f9;
+        }
+        .email-subject { font-size: 1.4rem; font-weight: 700; color: #1e293b; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
+        .email-subject .star-btn {
+            background: none; border: none; cursor: pointer; font-size: 1.2rem;
+            color: {% if email.is_starred %}#f59e0b{% else %}#cbd5e1{% endif %};
+        }
+        .email-labels-bar { display: flex; gap: 6px; margin-bottom: 16px; }
+        .label-badge { font-size: 0.75rem; padding: 3px 10px; border-radius: 10px; color: white; font-weight: 600; }
+
+        .sender-row { display: flex; align-items: center; gap: 14px; }
+        .sender-avatar {
+            width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #667eea, #764ba2); color: white; font-size: 1.2rem; font-weight: 700; flex-shrink: 0;
+        }
+        .sender-info { flex: 1; }
+        .sender-name { font-weight: 600; color: #1e293b; font-size: 1rem; }
+        .sender-email-addr { font-size: 0.82rem; color: #64748b; }
+        .email-to { font-size: 0.82rem; color: #94a3b8; margin-top: 2px; }
+        .email-date { font-size: 0.82rem; color: #94a3b8; text-align: right; white-space: nowrap; }
+
+        .email-body { padding: 28px 32px; font-size: 0.95rem; line-height: 1.8; color: #334155; }
+        .email-body pre { white-space: pre-wrap; word-wrap: break-word; font-family: inherit; }
+        .email-body-html { border: none; width: 100%; min-height: 400px; }
+
+        .email-attachments {
+            padding: 16px 32px; border-top: 1px solid #f1f5f9; background: #f8fafc;
+        }
+        .attachment-item {
+            display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px;
+            background: white; border: 1px solid #e2e8f0; border-radius: 8px; margin-right: 8px; margin-bottom: 8px;
+            font-size: 0.82rem; color: #475569; text-decoration: none;
+        }
+        .attachment-item:hover { border-color: #667eea; color: #667eea; }
+
+        .email-actions {
+            padding: 20px 32px; border-top: 1px solid #f1f5f9; display: flex; gap: 10px; flex-wrap: wrap;
+        }
+        .action-btn {
+            display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px;
+            border: 1px solid #e2e8f0; border-radius: 8px; background: white;
+            color: #475569; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; text-decoration: none;
+        }
+        .action-btn:hover { background: #f1f5f9; }
+        .action-btn.primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-color: transparent; }
+        .action-btn.danger { color: #ef4444; border-color: #fecaca; }
+
+        /* Thread */
+        .thread-section { padding: 0 32px 28px; }
+        .thread-title { font-size: 0.9rem; font-weight: 600; color: #64748b; margin-bottom: 12px; }
+        .thread-item {
+            border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 18px; margin-bottom: 10px;
+            background: #f8fafc; cursor: pointer; transition: all 0.2s;
+        }
+        .thread-item:hover { border-color: #667eea; background: #f0f4ff; }
+        .thread-meta { display: flex; justify-content: space-between; margin-bottom: 6px; }
+        .thread-sender { font-weight: 600; font-size: 0.85rem; color: #1e293b; }
+        .thread-date { font-size: 0.78rem; color: #94a3b8; }
+        .thread-preview { font-size: 0.82rem; color: #64748b; }
+
+        /* Compose reply (inline) */
+        .reply-box {
+            display: none; margin: 20px 32px; padding: 20px; border: 1px solid #e2e8f0;
+            border-radius: 12px; background: #f8fafc;
+        }
+        .reply-box.show { display: block; }
+        .reply-box textarea { width: 100%; min-height: 120px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; font-family: inherit; font-size: 0.9rem; resize: vertical; }
+        .reply-actions { display: flex; gap: 10px; margin-top: 12px; }
+
+        /* Toast */
+        .toast-container { position: fixed; top: 90px; right: 20px; z-index: 99999; }
+        .toast-item { padding: 12px 20px; border-radius: 8px; color: white; font-size: 0.88rem; margin-bottom: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); animation: slideIn 0.3s ease; }
+        .toast-success { background: linear-gradient(135deg, #10b981, #059669); }
+        .toast-error { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+<nav class="top-navbar">
+    <a href="/manager/email/" class="nav-brand"><i class="fas fa-envelope-open-text"></i> 邮件管理</a>
+    <div class="nav-links">
+        <a href="/manager/dashboard/" class="nav-link-btn"><i class="fas fa-tachometer-alt"></i> 仪表板</a>
+        <a href="/manager/email/" class="nav-link-btn active"><i class="fas fa-envelope"></i> 邮件</a>
+        <a href="/manager/public/" class="nav-link-btn"><i class="fas fa-globe"></i> 网站</a>
+        <a href="/manager/logout/" class="nav-link-btn"><i class="fas fa-sign-out-alt"></i></a>
+    </div>
+</nav>
+
+<div class="main-container">
+    <div class="back-bar">
+        <a href="/manager/email/?folder={{ email.folder }}"><i class="fas fa-arrow-left"></i> 返回邮箱</a>
+    </div>
+
+    <div class="email-card">
+        <!-- Header -->
+        <div class="email-header">
+            <div class="email-subject">
+                <button class="star-btn" onclick="toggleStar()" title="星标">
+                    <i class="fas fa-star"></i>
+                </button>
+                {{ email.subject }}
+            </div>
+
+            {% if email.labels.exists %}
+            <div class="email-labels-bar">
+                {% for label in email.labels.all %}
+                <span class="label-badge" style="background: {{ label.color }}">{{ label.name }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="sender-row">
+                <div class="sender-avatar">{{ email.sender_name|first|upper|default:"?" }}</div>
+                <div class="sender-info">
+                    <div class="sender-name">{{ email.sender_name|default:email.sender_email }}</div>
+                    <div class="sender-email-addr">&lt;{{ email.sender_email }}&gt;</div>
+                    <div class="email-to">收件人: {{ email.recipients }}{% if email.cc %} | 抄送: {{ email.cc }}{% endif %}</div>
+                </div>
+                <div class="email-date">
+                    {% if email.received_at %}{{ email.received_at|date:"Y-m-d H:i" }}{% elif email.sent_at %}{{ email.sent_at|date:"Y-m-d H:i" }}{% else %}{{ email.created_at|date:"Y-m-d H:i" }}{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Body -->
+        <div class="email-body">
+            {% if email.body_html %}
+            <iframe class="email-body-html" id="emailBodyFrame" sandbox="allow-same-origin" srcdoc="{{ email.body_html|escape }}"></iframe>
+            {% else %}
+            <pre>{{ email.body_text }}</pre>
+            {% endif %}
+        </div>
+
+        <!-- Attachments -->
+        {% if email.attachments.exists %}
+        <div class="email-attachments">
+            <div style="font-size:0.8rem;font-weight:600;color:#64748b;margin-bottom:8px;">
+                <i class="fas fa-paperclip"></i> 附件 ({{ email.attachments.count }})
+            </div>
+            {% for att in email.attachments.all %}
+            <a href="{{ att.file.url }}" class="attachment-item" download>
+                <i class="fas fa-file"></i> {{ att.filename }} <span style="color:#94a3b8;">({{ att.size|filesizeformat }})</span>
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Thread -->
+        {% if thread %}
+        <div class="thread-section">
+            <div class="thread-title"><i class="fas fa-comments"></i> 对话线程 ({{ thread|length }})</div>
+            {% for t in thread %}
+            <div class="thread-item" onclick="window.location.href='/manager/email/detail/{{ t.id }}/'">
+                <div class="thread-meta">
+                    <span class="thread-sender">{{ t.sender_name|default:t.sender_email }}</span>
+                    <span class="thread-date">{% if t.received_at %}{{ t.received_at|date:"m/d H:i" }}{% else %}{{ t.created_at|date:"m/d H:i" }}{% endif %}</span>
+                </div>
+                <div class="thread-preview">{{ t.body_text|truncatechars:120 }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Actions -->
+        <div class="email-actions">
+            <button class="action-btn primary" onclick="showReply()"><i class="fas fa-reply"></i> 回复</button>
+            <button class="action-btn" onclick="forwardEmail()"><i class="fas fa-share"></i> 转发</button>
+            <button class="action-btn" onclick="doAction('archive')"><i class="fas fa-archive"></i> 归档</button>
+            <button class="action-btn" onclick="doAction('mark_unread')"><i class="fas fa-envelope"></i> 标为未读</button>
+            <button class="action-btn danger" onclick="doAction('trash')"><i class="fas fa-trash"></i> 删除</button>
+        </div>
+
+        <!-- Inline reply -->
+        <div class="reply-box" id="replyBox">
+            <div style="font-size:0.85rem;color:#64748b;margin-bottom:10px;">
+                回复给: <strong>{{ email.sender_email }}</strong>
+            </div>
+            <select id="replyAccount" class="form-control form-control-sm mb-2" style="max-width:300px;">
+                {% for acc in accounts %}
+                <option value="{{ acc.id }}" {% if acc.is_default %}selected{% endif %}>{{ acc.email_address }}</option>
+                {% endfor %}
+            </select>
+            <textarea id="replyBody" placeholder="输入回复内容..."></textarea>
+            <div class="reply-actions">
+                <button class="action-btn primary" onclick="sendReply()"><i class="fas fa-paper-plane"></i> 发送</button>
+                <button class="action-btn" onclick="document.getElementById('replyBox').classList.remove('show')">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+function getCsrf() {
+    var cookies = document.cookie.split(';');
+    for (var i = 0; i < cookies.length; i++) {
+        var c = cookies[i].trim();
+        if (c.startsWith('csrftoken=')) return c.substring(10);
+    }
+    return '';
+}
+
+function showToast(msg, type) {
+    var el = document.createElement('div');
+    el.className = 'toast-item toast-' + (type || 'success');
+    el.textContent = msg;
+    document.getElementById('toastContainer').appendChild(el);
+    setTimeout(function(){ el.remove(); }, 3500);
+}
+
+function toggleStar() {
+    fetch('/manager/email/action/', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCsrf() },
+        body: 'action=toggle_star&ids={{ email.id }}'
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+        if (d.success) {
+            var btn = document.querySelector('.star-btn');
+            var starred = btn.style.color === 'rgb(245, 158, 11)';
+            btn.style.color = starred ? '#cbd5e1' : '#f59e0b';
+        }
+    });
+}
+
+function doAction(action) {
+    fetch('/manager/email/action/', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCsrf() },
+        body: 'action=' + action + '&ids={{ email.id }}'
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+        if (d.success) { showToast('操作成功'); setTimeout(function(){ window.location.href = '/manager/email/'; }, 600); }
+    });
+}
+
+function showReply() {
+    document.getElementById('replyBox').classList.add('show');
+    document.getElementById('replyBody').focus();
+}
+
+function sendReply() {
+    var fd = new FormData();
+    fd.append('account_id', document.getElementById('replyAccount').value);
+    fd.append('to', '{{ email.sender_email }}');
+    fd.append('subject', 'Re: {{ email.subject|escapejs }}');
+    fd.append('body', document.getElementById('replyBody').value);
+    fd.append('in_reply_to', '{{ email.message_uid|escapejs }}');
+
+    fetch('/manager/email/compose/', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'X-CSRFToken': getCsrf() },
+        body: fd
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+        if (d.success) { showToast(d.message); document.getElementById('replyBox').classList.remove('show'); document.getElementById('replyBody').value = ''; }
+        else showToast(d.error || '发送失败', 'error');
+    })
+    .catch(function(){ showToast('发送失败', 'error'); });
+}
+
+function forwardEmail() {
+    var body = '---------- Forwarded message ----------\n' +
+        'From: {{ email.sender_name|escapejs }} <{{ email.sender_email|escapejs }}>\n' +
+        'Date: {% if email.received_at %}{{ email.received_at|date:"Y-m-d H:i" }}{% endif %}\n' +
+        'Subject: {{ email.subject|escapejs }}\n\n' +
+        '{{ email.body_text|escapejs }}';
+    // Open compose with forward data
+    var url = '/manager/email/?compose=1&fwd_subject=Fwd: {{ email.subject|urlencode }}&fwd_body=' + encodeURIComponent(body);
+    window.location.href = '/manager/email/';
+    // Simple approach: just redirect with a quick compose trigger
+    setTimeout(function(){ alert('请在邮件列表页面使用"写邮件"功能转发'); }, 200);
+}
+
+// Auto-resize iframe for HTML emails
+document.addEventListener('DOMContentLoaded', function(){
+    var frame = document.getElementById('emailBodyFrame');
+    if (frame) {
+        frame.onload = function(){
+            try { frame.style.height = frame.contentWindow.document.body.scrollHeight + 40 + 'px'; } catch(e){}
+        };
+    }
+});
+</script>
+</body>
+</html>

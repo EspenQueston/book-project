@@ -1,45 +1,95 @@
+# Django Book Management System - Git Ignore File
+
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
 # Django
 *.log
+local_settings.py
 db.sqlite3
 db.sqlite3-journal
-/staticfiles/
-/media/
+media/
+staticfiles/
 
-# Environment
+# Environment variables (CRITICAL - Never commit!)
 .env
 .env.local
 .env.production
 *.env
-
-# Virtual Environment
-venv/
+!.env.example
+.venv
 env/
+venv/
 ENV/
+env.bak/
+venv.bak/
 
 # IDE
 .vscode/
 .idea/
+_idea/
 *.swp
 *.swo
+*~
 
 # OS
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 
-# cPanel specific
-tmp/
-logs/
-error_log
-access_log
+# Embedded repos
+book-project/
 
-# Sensitive
-*.pem
-*.key
-*.cert
+# Database
+*.sql.bak
+*.dump
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Compiled static files
+/static/
+/staticfiles/
+
+# Secret files
+secrets.py
+
+# Documentation (allow deployment files)
+*.md
+*.txt
+!README.md
+!README.txt
+!requirements.txt
+!.env.example
+

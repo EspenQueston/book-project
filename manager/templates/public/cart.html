@@ -1,6 +1,7 @@
 {% extends 'public/base.html' %}
+{% load i18n %}
 
-{% block title %}购物车 - 图书管理系统{% endblock %}
+{% block title %}{% trans "购物车" %} - {% trans "图书管理系统" %}{% endblock %}
 
 {% block content %}
 <!-- Cart Header -->
@@ -8,12 +9,12 @@
     <div class="container">
         <div class="row align-items-center">
             <div class="col-md-8">
-                <h2 class="mb-0"><i class="fas fa-shopping-cart"></i> 购物车</h2>
-                <p class="mb-0 mt-2">管理您选择的图书</p>
+                <h2 class="mb-0"><i class="fas fa-shopping-cart"></i> {% trans "购物车" %}</h2>
+                <p class="mb-0 mt-2">{% trans "管理您选择的图书" %}</p>
             </div>
             <div class="col-md-4 text-md-end">
                 <span class="badge bg-light text-dark fs-6">
-                    共 <span id="total-items">{{ total_items }}</span> 件商品
+                    共 <span id="total-items">{{ total_items }}</span> {% trans "件商品" %}
                 </span>
             </div>
         </div>
@@ -29,7 +30,7 @@
             <div class="col-lg-8">
                 <div class="card card-modern">
                     <div class="card-header bg-light">
-                        <h5 class="mb-0">购物车商品</h5>
+                        <h5 class="mb-0">{% trans "购物车商品" %}</h5>
                     </div>
                     <div class="card-body p-0">
                         {% for item in cart_items %}
@@ -54,7 +55,7 @@
                                         <div>
                                             <h6 class="mb-1">{{ item.book.name }}</h6>
                                             <p class="text-muted mb-1 small">{{ item.book.publisher.publisher_name }}</p>
-                                            <p class="text-success mb-0">库存：{{ item.book.inventory }}本</p>
+                                            <p class="text-success mb-0">{% trans "库存" %}：{{ item.book.inventory }}{% trans "本" %}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -62,11 +63,11 @@
                                 <!-- Quantity Controls -->
                                 <div class="col-md-3">
                                     <div class="quantity-controls">
-                                        <label class="form-label small">数量:</label>
+                                        <label class="form-label small">{% trans "数量" %}:</label>
                                         <div class="input-group input-group-sm">
                                             <button class="btn btn-outline-secondary quantity-btn" 
                                                     type="button" 
-                                                    onclick="updateQuantity({{ item.id }}, {{ item.quantity }} - 1)">
+                                                    onclick="stepQuantity({{ item.id }}, -1)">
                                                 <i class="fas fa-minus"></i>
                                             </button>
                                             <input type="number" 
@@ -74,11 +75,11 @@
                                                    value="{{ item.quantity }}" 
                                                    min="1" 
                                                    max="{{ item.book.inventory }}"
-                                                   onchange="updateQuantity({{ item.id }}, this.value)"
+                                                   onchange="updateQuantity({{ item.id }}, parseInt(this.value))"
                                                    id="quantity-{{ item.id }}">
                                             <button class="btn btn-outline-secondary quantity-btn" 
                                                     type="button" 
-                                                    onclick="updateQuantity({{ item.id }}, {{ item.quantity }} + 1)">
+                                                    onclick="stepQuantity({{ item.id }}, 1)">
                                                 <i class="fas fa-plus"></i>
                                             </button>
                                         </div>
@@ -88,7 +89,7 @@
                                 <!-- Price -->
                                 <div class="col-md-2 text-center">
                                     <div class="price-info">
-                                        <p class="mb-1 small text-muted">单价: ¥{{ item.book.price }}</p>
+                                        <p class="mb-1 small text-muted">{% trans "单价" %}: ¥{{ item.book.price }}</p>
                                         <p class="mb-0 fw-bold text-success h6" id="item-total-{{ item.id }}">
                                             ¥{{ item.get_total_price }}
                                         </p>
@@ -99,7 +100,7 @@
                                 <div class="col-md-1 text-center">
                                     <button class="btn btn-outline-danger btn-sm" 
                                             onclick="removeItem({{ item.id }})"
-                                            title="移除商品">
+                                            title="{% trans '移除商品' %}">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
@@ -110,10 +111,13 @@
                 </div>
                 
                 <!-- Continue Shopping -->
-                <div class="mt-4">
+                <div class="mt-4 d-flex gap-3 flex-wrap">
                     <a href="{% url 'manager:public_books' %}" class="btn btn-outline-primary">
-                        <i class="fas fa-arrow-left"></i> 继续购物
+                        <i class="fas fa-arrow-left"></i> {% trans "继续购物" %}
                     </a>
+                    <button onclick="clearCart()" class="btn btn-outline-danger">
+                        <i class="fas fa-trash-alt"></i> {% trans "清空购物车" %}
+                    </button>
                 </div>
             </div>
             
@@ -121,26 +125,26 @@
             <div class="col-lg-4">
                 <div class="card card-modern">
                     <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">订单摘要</h5>
+                        <h5 class="mb-0">{% trans "订单摘要" %}</h5>
                     </div>
                     <div class="card-body">
                         <div class="summary-row d-flex justify-content-between mb-3">
-                            <span>商品数量:</span>
-                            <span id="summary-items">{{ total_items }} 件</span>
+                            <span>{% trans "商品数量" %}:</span>
+                            <span id="summary-items">{{ total_items }} {% trans "件" %}</span>
                         </div>
                         <div class="summary-row d-flex justify-content-between mb-3">
-                            <span>商品总额:</span>
+                            <span>{% trans "商品总额" %}:</span>
                             <span id="summary-subtotal">¥{{ total_amount }}</span>
                         </div>
                         <hr>
                         <div class="summary-row d-flex justify-content-between mb-4">
-                            <strong>总计:</strong>
+                            <strong>{% trans "总计" %}:</strong>
                             <strong class="text-success h5" id="summary-total">¥{{ total_amount }}</strong>
                         </div>
                         
                         <div class="d-grid">
                             <a href="{% url 'manager:checkout' %}" class="btn btn-success btn-lg">
-                                <i class="fas fa-credit-card"></i> 立即结算
+                                <i class="fas fa-credit-card"></i> {% trans "立即结算" %}
                             </a>
                         </div>
                     </div>
@@ -150,9 +154,9 @@
                 <div class="card card-modern mt-4">
                     <div class="card-body text-center">
                         <i class="fas fa-shield-alt text-success fa-2x mb-3"></i>
-                        <h6>安全购物</h6>
+                        <h6>{% trans "安全购物" %}</h6>
                         <p class="text-muted small mb-0">
-                            您的购物信息和支付数据受到安全保护
+                            {% trans "您的购物信息和支付数据受到安全保护" %}
                         </p>
                     </div>
                 </div>
@@ -163,137 +167,169 @@
         <!-- Empty Cart -->
         <div class="text-center py-5">
             <i class="fas fa-shopping-cart text-muted" style="font-size: 5rem; opacity: 0.3;"></i>
-            <h4 class="mt-4 text-muted">购物车为空</h4>
-            <p class="text-muted mb-4">还没有添加任何商品到购物车</p>
+            <h4 class="mt-4 text-muted">{% trans "购物车为空" %}</h4>
+            <p class="text-muted mb-4">{% trans "还没有添加任何商品到购物车" %}</p>
             <a href="{% url 'manager:public_books' %}" class="btn btn-primary btn-lg">
-                <i class="fas fa-book"></i> 去选购图书
+                <i class="fas fa-book"></i> {% trans "去选购图书" %}
             </a>
         </div>
         {% endif %}
     </div>
 </section>
+{% endblock content %}
 
-<!-- Toast Notifications -->
-<div class="position-fixed top-0 end-0 p-3" style="z-index: 9999;">
-    <div id="toast-notification" class="toast" role="alert">
-        <div class="toast-header">
-            <strong class="me-auto">购物车</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
-        </div>
-        <div class="toast-body" id="toast-message"></div>
-    </div>
-</div>
-
+{% block extra_js %}
 <script>
-// Quantity update function
+function getCsrfToken() {
+    var cookieValue = null;
+    var cookies = document.cookie.split(';');
+    for (var i = 0; i < cookies.length; i++) {
+        var cookie = cookies[i].trim();
+        if (cookie.substring(0, 'csrftoken='.length) === 'csrftoken=') {
+            cookieValue = cookie.substring('csrftoken='.length);
+            break;
+        }
+    }
+    return cookieValue || '{{ csrf_token }}';
+}
+const CSRF_TOKEN = getCsrfToken();
+
+// Step quantity by +1 or -1 based on current input value
+function stepQuantity(itemId, delta) {
+    var input = document.getElementById('quantity-' + itemId);
+    var current = parseInt(input.value) || 1;
+    var newVal = current + delta;
+    if (newVal < 1) {
+        gConfirm('{% trans "确定要移除这个商品吗？" %}', function() {
+            doRemoveItem(itemId);
+        }, {danger: true, title: '{% trans "移除商品" %}'});
+        return;
+    }
+    updateQuantity(itemId, newVal);
+}
+
+// Update quantity function
 function updateQuantity(itemId, newQuantity) {
     newQuantity = parseInt(newQuantity);
-    
-    if (newQuantity < 1) {
-        if (confirm('确定要移除这个商品吗？')) {
-            removeItem(itemId);
-        }
+    if (isNaN(newQuantity) || newQuantity < 1) {
+        gConfirm('{% trans "确定要移除这个商品吗？" %}', function() {
+            doRemoveItem(itemId);
+        }, {danger: true, title: '{% trans "移除商品" %}'});
         return;
     }
-    
-    const quantityInput = document.getElementById(`quantity-${itemId}`);
-    const maxQuantity = parseInt(quantityInput.getAttribute('max'));
-    
+
+    var quantityInput = document.getElementById('quantity-' + itemId);
+    var maxQuantity = parseInt(quantityInput.getAttribute('max'));
+
     if (newQuantity > maxQuantity) {
-        showToast(`库存不足！最大可购买：${maxQuantity}本`, 'error');
-        return;
+        gToast('库存不足！最大可购买：' + maxQuantity + '本', 'warning');
+        quantityInput.value = maxQuantity;
+        newQuantity = maxQuantity;
     }
-    
-    // Update quantity input
+
     quantityInput.value = newQuantity;
-    
-    // Send AJAX request
+
     fetch('/manager/cart/update/', {
         method: 'POST',
+        credentials: 'same-origin',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': getCsrfToken()
+            'X-CSRFToken': CSRF_TOKEN
         },
-        body: JSON.stringify({
-            'item_id': itemId,
-            'quantity': newQuantity
-        })
+        body: JSON.stringify({ item_id: itemId, quantity: newQuantity })
     })
-    .then(response => response.json())
-    .then(data => {
+    .then(function(r) { if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    .then(function(data) {
         if (data.success) {
-            // Update item total
-            document.getElementById(`item-total-${itemId}`).textContent = `¥${data.item_total.toFixed(2)}`;
-            
-            // Update cart summary
+            var itemTotal = document.getElementById('item-total-' + itemId);
+            if (itemTotal) itemTotal.textContent = '¥' + parseFloat(data.item_total).toFixed(2);
             updateCartSummary(data.cart_total, data.total_items);
-            
-            showToast(data.message, 'success');
+            gToast(data.message, 'success');
         } else {
-            // Revert quantity input
-            quantityInput.value = quantityInput.defaultValue;
-            showToast(data.message, 'error');
+            gToast(data.message || '更新失败', 'error');
         }
     })
-    .catch(error => {
-        showToast('更新失败，请重试', 'error');
-    });
+    .catch(function() { gToast('{% trans "更新失败，请重试" %}', 'error'); });
 }
 
-// Remove item function
+// Remove item with confirm
 function removeItem(itemId) {
-    if (!confirm('确定要移除这个商品吗？')) {
-        return;
-    }
-    
-    fetch(`/manager/cart/remove/${itemId}/`, {
+    gConfirm('{% trans "确定要移除这个商品吗？" %}', function() {
+        doRemoveItem(itemId);
+    }, {danger: true, title: '{% trans "移除商品" %}'});
+}
+
+// Actually delete the item via AJAX
+function doRemoveItem(itemId) {
+    fetch('/manager/cart/remove/' + itemId + '/', {
         method: 'POST',
-        headers: {
-            'X-CSRFToken': getCsrfToken()
+        credentials: 'same-origin',
+        headers: { 'X-CSRFToken': CSRF_TOKEN, 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(function(r) { if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    .then(function(data) {
+        if (data.success) {
+            var row = document.querySelector('.cart-item[data-item-id="' + itemId + '"]');
+            if (row) {
+                row.style.transition = 'opacity 0.3s, max-height 0.3s';
+                row.style.opacity = '0';
+                setTimeout(function() { row.remove(); }, 300);
+            }
+            updateCartSummary(data.cart_total, data.total_items);
+            updateNavBadge(data.cart_count);
+            gToast(data.message, 'success');
+            if (data.total_items === 0) {
+                setTimeout(function() { location.reload(); }, 600);
+            }
+        } else {
+            gToast('移除失败，请重试', 'error');
         }
     })
-    .then(() => {
-        location.reload();
-    })
-    .catch(error => {
-        showToast('移除失败，请重试', 'error');
-    });
+    .catch(function() { gToast('移除失败，请重试', 'error'); });
 }
 
-// Update cart summary
+// Clear entire cart
+function clearCart() {
+    gConfirm('{% trans "确定要清空整个购物车吗？" %}', function() {
+        fetch('/manager/cart/clear/', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'X-CSRFToken': CSRF_TOKEN, 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(function(r) { if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                gToast(data.message, 'success');
+                setTimeout(function() { location.reload(); }, 600);
+            }
+        })
+        .catch(function() { gToast('清空失败，请重试', 'error'); });
+    }, {danger: true, title: '{% trans "清空购物车" %}'});
+}
+
+// Update cart summary display
 function updateCartSummary(totalAmount, totalItems) {
-    document.getElementById('summary-items').textContent = `${totalItems} 件`;
-    document.getElementById('summary-subtotal').textContent = `¥${totalAmount.toFixed(2)}`;
-    document.getElementById('summary-total').textContent = `¥${totalAmount.toFixed(2)}`;
-    document.getElementById('total-items').textContent = totalItems;
+    var si = document.getElementById('summary-items');
+    var ss = document.getElementById('summary-subtotal');
+    var st = document.getElementById('summary-total');
+    var ti = document.getElementById('total-items');
+    if (si) si.textContent = totalItems + ' 件';
+    if (ss) ss.textContent = '¥' + parseFloat(totalAmount).toFixed(2);
+    if (st) st.textContent = '¥' + parseFloat(totalAmount).toFixed(2);
+    if (ti) ti.textContent = totalItems;
 }
 
-// Show toast notification
-function showToast(message, type) {
-    const toast = document.getElementById('toast-notification');
-    const toastMessage = document.getElementById('toast-message');
-    
-    toastMessage.textContent = message;
-    toast.className = `toast ${type === 'success' ? 'bg-success text-white' : 'bg-danger text-white'}`;
-    
-    const bsToast = new bootstrap.Toast(toast);
-    bsToast.show();
+// Update nav cart badge
+function updateNavBadge(count) {
+    var badge = document.getElementById('cart-badge');
+    if (badge) badge.textContent = count;
 }
 
-// Get CSRF token
-function getCsrfToken() {
-    return document.querySelector('[name=csrfmiddlewaretoken]').value;
-}
-
-// Add CSRF token to page
+// Fetch and update cart badge on page load
 document.addEventListener('DOMContentLoaded', function() {
-    if (!document.querySelector('[name=csrfmiddlewaretoken]')) {
-        const csrfInput = document.createElement('input');
-        csrfInput.type = 'hidden';
-        csrfInput.name = 'csrfmiddlewaretoken';
-        csrfInput.value = '{{ csrf_token }}';
-        document.body.appendChild(csrfInput);
-    }
+    fetch('/manager/cart/count/')
+        .then(function(r) { return r.json(); })
+        .then(function(data) { updateNavBadge(data.cart_count); });
 });
 </script>
-{% endblock %}
+{% endblock extra_js %}

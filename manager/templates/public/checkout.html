@@ -1,7 +1,7 @@
 {% extends 'public/base.html' %}
-{% load static %}
+{% load i18n static %}
 
-{% block title %}结账 - 图书管理系统{% endblock %}
+{% block title %}{% trans "结账" %} - {% trans "图书管理系统" %}{% endblock %}
 
 {% block content %}
 <style>
@@ -161,15 +161,15 @@
     <div class="step-indicator">
         <div class="step completed">
             <div class="step-number">1</div>
-            <span>选择商品</span>
+            <span>{% trans "选择商品" %}</span>
         </div>
         <div class="step active">
             <div class="step-number">2</div>
-            <span>填写信息</span>
+            <span>{% trans "填写信息" %}</span>
         </div>
         <div class="step">
             <div class="step-number">3</div>
-            <span>完成订单</span>
+            <span>{% trans "完成订单" %}</span>
         </div>
     </div>
 
@@ -180,39 +180,39 @@
             <div class="col-lg-8">
                 <!-- Customer Information -->
                 <div class="form-section">
-                    <h4 class="mb-3"><i class="fas fa-user"></i> 客户信息 (Digital Product)</h4>
+                    <h4 class="mb-3"><i class="fas fa-user"></i> {% trans "客户信息" %} (Digital Product)</h4>
                     <p class="text-muted mb-3">
-                        <i class="fas fa-info-circle"></i> 我们销售的是数字产品，无需填写收货地址
+                        <i class="fas fa-info-circle"></i> {% trans "我们销售的是数字产品，无需填写收货地址" %}
                     </p>
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label class="form-label">姓名 *</label>
+                                <label class="form-label">{% trans "姓名" %} *</label>
                                 <input type="text" name="customer_name" class="form-control" required 
-                                       placeholder="请输入您的姓名">
+                                       placeholder="{% trans "请输入您的姓名" %}">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label class="form-label">邮箱 *</label>
+                                <label class="form-label">{% trans "邮箱" %} *</label>
                                 <input type="email" name="customer_email" class="form-control" required
-                                       placeholder="用于接收订单和电子书">
+                                       placeholder="{% trans "用于接收订单和电子书" %}">
                             </div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label class="form-label">微信/电话号码 *</label>
+                                <label class="form-label">{% trans "微信/电话号码" %} *</label>
                                 <input type="tel" name="customer_phone" class="form-control" required
-                                       placeholder="微信号或电话号码">
+                                       placeholder="{% trans "微信号或电话号码" %}">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label class="form-label">国家 *</label>
+                                <label class="form-label">{% trans "国家" %} *</label>
                                 <select name="country" class="form-control" required>
-                                    <option value="">请选择国家 / Select Country</option>
+                                    <option value="">{% trans "请选择国家" %} / Select Country</option>
                                     
                                     <!-- West Africa Countries -->
                                     <optgroup label="West Africa / 西非">
@@ -261,27 +261,27 @@
 
                 <!-- Payment Methods -->
                 <div class="form-section">
-                    <h4 class="mb-3"><i class="fas fa-credit-card"></i> 支付方式</h4>
+                    <h4 class="mb-3"><i class="fas fa-credit-card"></i> {% trans "支付方式" %}</h4>
                     <input type="hidden" name="payment_method" id="selectedPaymentMethod" required>
                     <input type="hidden" name="payment_confirmed" id="paymentConfirmed" value="no">
                     
                     <div class="alert alert-info mb-3">
-                        <i class="fas fa-info-circle"></i> 固定价格：<strong>¥{{ fixed_price }}</strong> / 本
+                        <i class="fas fa-info-circle"></i> {% trans "固定价格" %}：<strong>¥{{ fixed_price }}</strong> / {% trans "本" %}
                     </div>
                     
                     <div class="payment-methods" id="paymentMethodsContainer">
                         <!-- Payment methods will be dynamically loaded based on country -->
-                        <p class="text-muted text-center">请先选择国家以显示可用的支付方式</p>
+                        <p class="text-muted text-center">{% trans "请先选择国家以显示可用的支付方式" %}</p>
                     </div>
                 </div>
 
                 <!-- Customer Notes -->
                 <div class="form-section">
-                    <h4 class="mb-3"><i class="fas fa-comment"></i> 备注信息</h4>
+                    <h4 class="mb-3"><i class="fas fa-comment"></i> {% trans "备注信息" %}</h4>
                     <div class="form-group">
-                        <label class="form-label">订单备注</label>
+                        <label class="form-label">{% trans "订单备注" %}</label>
                         <textarea name="customer_notes" class="form-control" rows="3" 
-                                  placeholder="如有特殊要求，请在此说明（可选）"></textarea>
+                                  placeholder="{% trans "如有特殊要求，请在此说明（可选）" %}"></textarea>
                     </div>
                 </div>
             </div>
@@ -289,7 +289,7 @@
             <!-- Right Column - Order Summary -->
             <div class="col-lg-4">
                 <div class="order-summary">
-                    <h4 class="mb-3"><i class="fas fa-receipt"></i> 订单摘要</h4>
+                    <h4 class="mb-3"><i class="fas fa-receipt"></i> {% trans "订单摘要" %}</h4>
                     
                     <!-- Cart Items -->
                     <div class="cart-items mb-3">
@@ -310,8 +310,8 @@
                                 <h6 class="mb-1">{{ item.book.name }}</h6>
                                 <p class="text-muted mb-1">{{ item.book.publisher.publisher_name }}</p>
                                 <div class="d-flex justify-content-between">
-                                    <span>¥{{ item.book.price }} × {{ item.quantity }}</span>
-                                    <strong>¥{{ item.get_total_price }}</strong>
+                                    <span>¥{{ fixed_price }} × {{ item.quantity }}</span>
+                                    <strong>¥{{ fixed_price }}</strong>
                                 </div>
                             </div>
                         </div>
@@ -321,29 +321,29 @@
                     <!-- Summary -->
                     <div class="summary-details">
                         <div class="summary-item">
-                            <span>商品总计:</span>
+                            <span>{% trans "商品总计" %}:</span>
                             <span>¥{{ total_amount }}</span>
                         </div>
                         <div class="summary-item">
-                            <span>运费:</span>
-                            <span class="text-success">免费</span>
+                            <span>{% trans "运费" %}:</span>
+                            <span class="text-success">{% trans "免费" %}</span>
                         </div>
                         <div class="summary-item">
-                            <span>订单总额:</span>
+                            <span>{% trans "订单总额" %}:</span>
                             <span class="text-primary">¥{{ total_amount }}</span>
                         </div>
                     </div>
                     
                     <!-- Checkout Button -->
                     <button type="submit" class="btn btn-success btn-checkout mt-3">
-                        <i class="fas fa-lock"></i> 确认订单并支付
+                        <i class="fas fa-lock"></i> {% trans "确认订单并支付" %}
                     </button>
                     
                     <!-- Security Notice -->
                     <div class="text-center mt-3">
                         <small class="text-muted">
                             <i class="fas fa-shield-alt"></i> 
-                            您的支付信息经过安全加密保护
+                            {% trans "您的支付信息经过安全加密保护" %}
                         </small>
                     </div>
                 </div>
@@ -369,13 +369,13 @@ const paymentMethodsByRegion = {
         { method: 'airtel_money', name: 'Airtel Money', icon: 'fas fa-mobile-alt', color: '#ed1c24' }
     ],
     china: [
-        { method: 'wechat_pay', name: '微信支付', icon: 'fab fa-weixin', color: '#07c160' },
-        { method: 'alipay', name: '支付宝', icon: 'fab fa-alipay', color: '#1677ff' }
+        { method: 'wechat_pay', name: '{% trans "微信支付" %}', icon: 'fab fa-weixin', color: '#07c160' },
+        { method: 'alipay', name: '{% trans "支付宝" %}', icon: 'fab fa-alipay', color: '#1677ff' }
     ],
     others: [
         { method: 'paypal', name: 'PayPal', icon: 'fab fa-paypal', color: '#0070ba' },
-        { method: 'credit_card', name: '信用卡', icon: 'fas fa-credit-card', color: '#6c757d' },
-        { method: 'bank_transfer', name: '银行转账', icon: 'fas fa-university', color: '#28a745' }
+        { method: 'credit_card', name: '{% trans "信用卡" %}', icon: 'fas fa-credit-card', color: '#6c757d' },
+        { method: 'bank_transfer', name: '{% trans "银行转账" %}', icon: 'fas fa-university', color: '#28a745' }
     ]
 };
 
@@ -385,7 +385,7 @@ function updatePaymentMethods(country) {
     let methods = [];
     
     if (!country) {
-        container.innerHTML = '<p class="text-muted text-center">请先选择国家以显示可用的支付方式</p>';
+        container.innerHTML = '<p class="text-muted text-center">{% trans "请先选择国家以显示可用的支付方式" %}</p>';
         return;
     }
     
@@ -408,7 +408,7 @@ function updatePaymentMethods(country) {
                         <i class="${pm.icon}" style="color: ${pm.color};"></i>
                     </div>
                     <div class="payment-name">${pm.name}</div>
-                    <small class="text-muted">点击选择</small>
+                    <small class="text-muted">{% trans "点击选择" %}</small>
                 </div>
             </div>
         `;
@@ -455,7 +455,7 @@ document.getElementById('checkoutForm').addEventListener('submit', function(e) {
     
     const paymentMethod = document.getElementById('selectedPaymentMethod').value;
     if (!paymentMethod) {
-        alert('请选择支付方式');
+        gToast('{% trans "请选择支付方式" %}', 'warning');
         return false;
     }
     
@@ -480,10 +480,10 @@ function showQRCodeModal(method) {
     // Set QR code image and title
     if (method === 'wechat_pay') {
         qrImage.src = '{% static "payment_qr/wechat_qr.jpg" %}';
-        paymentTitle.textContent = '微信支付';
+        paymentTitle.textContent = '{% trans "微信支付" %}';
     } else if (method === 'alipay') {
         qrImage.src = '{% static "payment_qr/alipay_qr.jpg" %}';
-        paymentTitle.textContent = '支付宝';
+        paymentTitle.textContent = '{% trans "支付宝" %}';
     }
     
     // Show modal
@@ -532,15 +532,15 @@ function closeQRModal() {
         <button onclick="closeQRModal()" style="position: absolute; right: 15px; top: 15px; border: none; background: transparent; font-size: 24px; cursor: pointer; color: #999;">&times;</button>
         
         <div style="text-align: center;">
-            <h3 id="paymentMethodTitle" style="margin-bottom: 15px; color: #333; font-size: 24px;">微信支付</h3>
+            <h3 id="paymentMethodTitle" style="margin-bottom: 15px; color: #333; font-size: 24px;">{% trans "微信支付" %}</h3>
             
             <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
                 <img id="qrCodeImage" src="" alt="Payment QR Code" style="width: 100%; max-width: 380px; height: auto; border-radius: 10px;">
             </div>
             
             <p style="color: #666; margin-bottom: 15px;">
-                <i class="fas fa-mobile-alt"></i> 请使用手机扫描二维码完成支付<br>
-                <strong style="color: #e74c3c;">金额：¥{{ total_amount }}</strong>
+                <i class="fas fa-mobile-alt"></i> {% trans "请使用手机扫描二维码完成支付" %}<br>
+                <strong style="color: #e74c3c;">{% trans "金额" %}：¥{{ total_amount }}</strong>
             </p>
             
             <div id="qrTimer" style="color: #007bff; font-weight: bold; margin-bottom: 20px;">
@@ -548,13 +548,13 @@ function closeQRModal() {
             </div>
             
             <div id="confirmButtons" style="display: none;">
-                <p style="margin-bottom: 15px; color: #333;">请确认您的支付状态：</p>
+                <p style="margin-bottom: 15px; color: #333;">{% trans "请确认您的支付状态" %}：</p>
                 <div style="display: flex; gap: 10px; justify-content: center;">
                     <button onclick="handleAlreadyPaid()" style="flex: 1; background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: transform 0.2s;">
-                        <i class="fas fa-check-circle"></i> 已完成支付
+                        <i class="fas fa-check-circle"></i> {% trans "已完成支付" %}
                     </button>
                     <button onclick="handleNotPaid()" style="flex: 1; background: linear-gradient(135deg, #dc3545, #c82333); color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: transform 0.2s;">
-                        <i class="fas fa-times-circle"></i> 尚未支付
+                        <i class="fas fa-times-circle"></i> {% trans "尚未支付" %}
                     </button>
                 </div>
             </div>

@@ -1,0 +1,73 @@
+<div class="email-detail-panel">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+        <button class="star-btn" onclick="toggleStar()" data-id="{{ email.id }}" style="background:none;border:none;cursor:pointer;font-size:1.1rem;color:{% if email.is_starred %}#f59e0b{% else %}#cbd5e1{% endif %};">
+            <i class="fas fa-star"></i>
+        </button>
+        <h4 style="margin:0;font-weight:700;color:#1e293b;">{{ email.subject }}</h4>
+    </div>
+
+    {% if email.labels.exists %}
+    <div style="display:flex;gap:6px;margin-bottom:14px;">
+        {% for label in email.labels.all %}
+        <span style="font-size:0.72rem;padding:2px 8px;border-radius:8px;color:white;background:{{ label.color }};font-weight:600;">{{ label.name }}</span>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;padding:14px;background:#f8fafc;border-radius:10px;">
+        <div style="width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#667eea,#764ba2);color:white;font-weight:700;">
+            {{ email.sender_name|first|upper|default:"?" }}
+        </div>
+        <div style="flex:1;">
+            <div style="font-weight:600;color:#1e293b;">{{ email.sender_name|default:email.sender_email }}</div>
+            <div style="font-size:0.8rem;color:#64748b;">&lt;{{ email.sender_email }}&gt;</div>
+            <div style="font-size:0.78rem;color:#94a3b8;">收件人: {{ email.recipients }}{% if email.cc %} | 抄送: {{ email.cc }}{% endif %}</div>
+        </div>
+        <div style="font-size:0.8rem;color:#94a3b8;">
+            {% if email.received_at %}{{ email.received_at|date:"Y-m-d H:i" }}{% elif email.sent_at %}{{ email.sent_at|date:"Y-m-d H:i" }}{% else %}{{ email.created_at|date:"Y-m-d H:i" }}{% endif %}
+        </div>
+    </div>
+
+    <div style="padding:16px 0;font-size:0.92rem;line-height:1.8;color:#334155;border-bottom:1px solid #f1f5f9;">
+        {% if email.body_html %}
+        <iframe style="border:none;width:100%;min-height:300px;" sandbox="allow-same-origin" srcdoc="{{ email.body_html|escape }}" onload="this.style.height=this.contentWindow.document.body.scrollHeight+20+'px'"></iframe>
+        {% else %}
+        <pre style="white-space:pre-wrap;word-wrap:break-word;font-family:inherit;">{{ email.body_text }}</pre>
+        {% endif %}
+    </div>
+
+    {% if email.attachments.exists %}
+    <div style="padding:14px 0;border-bottom:1px solid #f1f5f9;">
+        <div style="font-size:0.78rem;font-weight:600;color:#64748b;margin-bottom:8px;"><i class="fas fa-paperclip"></i> 附件 ({{ email.attachments.count }})</div>
+        {% for att in email.attachments.all %}
+        <a href="{{ att.file.url }}" download style="display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:#f1f5f9;border-radius:6px;margin-right:6px;font-size:0.8rem;color:#475569;text-decoration:none;">
+            <i class="fas fa-file"></i> {{ att.filename }}
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if thread %}
+    <div style="padding:14px 0;border-bottom:1px solid #f1f5f9;">
+        <div style="font-size:0.82rem;font-weight:600;color:#64748b;margin-bottom:8px;"><i class="fas fa-comments"></i> 对话线程</div>
+        {% for t in thread %}
+        <div style="padding:8px 12px;background:#f8fafc;border-radius:8px;margin-bottom:6px;cursor:pointer;" onclick="loadEmailDetail({{ t.id }})">
+            <div style="display:flex;justify-content:space-between;">
+                <span style="font-weight:600;font-size:0.82rem;">{{ t.sender_name|default:t.sender_email }}</span>
+                <span style="font-size:0.75rem;color:#94a3b8;">{% if t.received_at %}{{ t.received_at|date:"m/d H:i" }}{% endif %}</span>
+            </div>
+            <div style="font-size:0.8rem;color:#64748b;">{{ t.body_text|truncatechars:100 }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div style="display:flex;gap:8px;padding:16px 0;">
+        <button class="action-btn primary" onclick="showReplyInline({{ email.id }}, '{{ email.sender_email|escapejs }}', '{{ email.subject|escapejs }}', '{{ email.message_uid|escapejs }}')">
+            <i class="fas fa-reply"></i> 回复
+        </button>
+        <button class="action-btn" onclick="doAction('archive', [{{ email.id }}])"><i class="fas fa-archive"></i> 归档</button>
+        <button class="action-btn danger" onclick="doAction('trash', [{{ email.id }}])"><i class="fas fa-trash"></i> 删除</button>
+        <a href="/manager/email/detail/{{ email.id }}/" class="action-btn" style="margin-left:auto;"><i class="fas fa-expand"></i> 全屏</a>
+    </div>
+</div>

@@ -1,0 +1,366 @@
+{% extends 'public/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "图书管理系统" %} - {% trans "我们的服务" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .srv-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 140px 0 100px;
+        position: relative;
+        overflow: hidden;
+    }
+    .srv-hero::before {
+        content: '';
+        position: absolute;
+        top: -40%;
+        right: -15%;
+        width: 700px;
+        height: 700px;
+        background: radial-gradient(circle, rgba(255,255,255,0.07) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: srv-float 8s ease-in-out infinite;
+    }
+    .srv-hero::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: -10%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: srv-float 10s ease-in-out infinite reverse;
+    }
+    @keyframes srv-float {
+        0%, 100% { transform: translate(0,0); }
+        50% { transform: translate(30px,-25px); }
+    }
+    .srv-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255,255,255,0.12);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255,255,255,0.18);
+        padding: 8px 22px;
+        border-radius: 50px;
+        color: #fff;
+        font-size: 0.85rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 25px;
+    }
+    .srv-hero h1 { font-size: 3.2rem; font-weight: 800; color: #fff; margin-bottom: 20px; line-height: 1.15; }
+    .srv-hero .lead { font-size: 1.15rem; color: rgba(255,255,255,0.88); max-width: 550px; line-height: 1.8; }
+    .hero-orbit {
+        position: relative;
+        width: 280px;
+        height: 280px;
+        margin: 0 auto;
+    }
+    .hero-orbit-ring {
+        position: absolute;
+        inset: 0;
+        border: 2px dashed rgba(255,255,255,0.12);
+        border-radius: 50%;
+        animation: spin 20s linear infinite;
+    }
+    .hero-orbit-ring:nth-child(2) { inset: 30px; animation-duration: 15s; animation-direction: reverse; }
+    .hero-orbit-center {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%,-50%);
+        width: 100px;
+        height: 100px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .hero-orbit-center i { font-size: 2.8rem; color: rgba(255,255,255,0.35); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    /* Shared */
+    .sec { padding: 100px 0; }
+    .sec-alt { background: #f8f9ff; }
+    .sec-label { color: #667eea; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 12px; }
+    .sec-heading { font-size: 2.3rem; font-weight: 800; color: #1a1a2e; margin-bottom: 18px; }
+    /* Service cards */
+    .srv-card {
+        background: #fff;
+        border-radius: 24px;
+        padding: 40px 28px 35px;
+        box-shadow: 0 4px 25px rgba(0,0,0,0.04);
+        transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border: 1px solid rgba(102,126,234,0.06);
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+    .srv-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--card-accent, #667eea), #764ba2);
+        opacity: 0;
+        transition: opacity 0.4s;
+    }
+    .srv-card:hover { transform: translateY(-12px); box-shadow: 0 25px 60px rgba(102,126,234,0.12); }
+    .srv-card:hover::after { opacity: 1; }
+    .srv-ico {
+        width: 72px;
+        height: 72px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 22px;
+        transition: transform 0.4s;
+    }
+    .srv-card:hover .srv-ico { transform: scale(1.1) rotate(5deg); }
+    .srv-ico i { font-size: 1.7rem; color: #fff; }
+    .srv-card h4 { font-size: 1.2rem; font-weight: 700; color: #1a1a2e; margin-bottom: 12px; }
+    .srv-card > p { color: #6b7280; line-height: 1.7; font-size: 0.92rem; }
+    .srv-feats { list-style: none; padding: 0; margin-top: 18px; }
+    .srv-feats li {
+        padding: 7px 0;
+        color: #6b7280;
+        font-size: 0.88rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .srv-feats li i { color: #10b981; font-size: 0.75rem; }
+    /* Process */
+    .proc-timeline { position: relative; }
+    .proc-line {
+        position: absolute;
+        top: 40px;
+        left: 12.5%;
+        right: 12.5%;
+        height: 3px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        opacity: 0.15;
+        z-index: 0;
+    }
+    .proc-step { text-align: center; position: relative; z-index: 1; }
+    .proc-num {
+        width: 72px;
+        height: 72px;
+        background: #fff;
+        border: 3px solid #667eea;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 22px;
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #667eea;
+        transition: all 0.4s;
+        box-shadow: 0 6px 20px rgba(102,126,234,0.15);
+    }
+    .proc-step:hover .proc-num {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: #fff;
+        border-color: transparent;
+        transform: scale(1.12);
+    }
+    .proc-step h5 { font-weight: 700; color: #1a1a2e; margin-bottom: 10px; font-size: 1.05rem; }
+    .proc-step p { color: #6b7280; font-size: 0.9rem; line-height: 1.6; }
+    /* CTA */
+    .cta-sec { background: #f8f9ff; padding: 80px 0; }
+    .cta-box {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 28px;
+        padding: 65px 50px;
+        text-align: center;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+    }
+    .cta-box::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+    .cta-box h2 { font-size: 2.4rem; font-weight: 800; margin-bottom: 18px; position: relative; }
+    .cta-box p { font-size: 1.1rem; opacity: 0.9; max-width: 480px; margin: 0 auto 35px; position: relative; }
+    .cta-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: #fff;
+        color: #667eea;
+        padding: 16px 42px;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 1.05rem;
+        text-decoration: none;
+        transition: all 0.4s;
+        position: relative;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+    .cta-btn:hover { transform: translateY(-4px); box-shadow: 0 18px 40px rgba(0,0,0,0.2); color: #764ba2; }
+    @media (max-width: 768px) {
+        .srv-hero h1 { font-size: 2rem; }
+        .sec-heading { font-size: 1.7rem; }
+        .proc-line { display: none; }
+        .cta-box { padding: 40px 25px; }
+        .cta-box h2 { font-size: 1.7rem; }
+        .hero-orbit { width: 200px; height: 200px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="srv-hero">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-7" data-aos="fade-right">
+                <div class="srv-pill"><i class="fas fa-concierge-bell"></i>{% trans "我们的服务" %}</div>
+                <h1>{% trans "全方位的图书服务" %}</h1>
+                <p class="lead">{% trans "从图书搜索到订单管理，我们提供一站式的智能图书服务，让您的阅读体验更加便捷和愉悦。" %}</p>
+            </div>
+            <div class="col-lg-5 d-none d-lg-block" data-aos="fade-left" data-aos-delay="200">
+                <div class="hero-orbit">
+                    <div class="hero-orbit-ring"></div>
+                    <div class="hero-orbit-ring"></div>
+                    <div class="hero-orbit-center"><i class="fas fa-cogs"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="sec">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <p class="sec-label">{% trans "核心服务" %}</p>
+            <h2 class="sec-heading">{% trans "我们为您提供什么" %}</h2>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="srv-card" style="--card-accent:#667eea">
+                    <div class="srv-ico" style="background:linear-gradient(135deg,#667eea,#764ba2)"><i class="fas fa-search"></i></div>
+                    <h4>{% trans "智能图书搜索" %}</h4>
+                    <p>{% trans "通过关键字、作者或出版社快速搜索您需要的图书，智能排序让您更快找到心仪的书籍。" %}</p>
+                    <ul class="srv-feats">
+                        <li><i class="fas fa-check-circle"></i> {% trans "多维度搜索" %}</li>
+                        <li><i class="fas fa-check-circle"></i> {% trans "智能排序" %}</li>
+                        <li><i class="fas fa-check-circle"></i> {% trans "实时结果" %}</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="srv-card" style="--card-accent:#f5576c">
+                    <div class="srv-ico" style="background:linear-gradient(135deg,#f093fb,#f5576c)"><i class="fas fa-shopping-cart"></i></div>
+                    <h4>{% trans "在线购书" %}</h4>
+                    <p>{% trans "便捷的购物车系统，支持多种支付方式，让您轻松完成图书购买。" %}</p>
+                    <ul class="srv-feats">
+                        <li><i class="fas fa-check-circle"></i> {% trans "安全支付" %}</li>
+                        <li><i class="fas fa-check-circle"></i> {% trans "购物车管理" %}</li>
+                        <li><i class="fas fa-check-circle"></i> {% trans "订单跟踪" %}</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="srv-card" style="--card-accent:#00f2fe">
+                    <div class="srv-ico" style="background:linear-gradient(135deg,#4facfe,#00f2fe)"><i class="fas fa-download"></i></div>
+                    <h4>{% trans "电子书下载" %}</h4>
+                    <p>{% trans "购买后即可下载电子版本，随时随地享受阅读的乐趣。" %}</p>
+                    <ul class="srv-feats">
+                        <li><i class="fas fa-check-circle"></i> {% trans "即时下载" %}</li>
+                        <li><i class="fas fa-check-circle"></i> {% trans "多格式支持" %}</li>
+                        <li><i class="fas fa-check-circle"></i> {% trans "永久访问" %}</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="srv-card" style="--card-accent:#38f9d7">
+                    <div class="srv-ico" style="background:linear-gradient(135deg,#43e97b,#38f9d7)"><i class="fas fa-chart-line"></i></div>
+                    <h4>{% trans "图书管理" %}</h4>
+                    <p>{% trans "强大的后台管理系统，帮助管理员高效管理图书、作者和出版社信息。" %}</p>
+                    <ul class="srv-feats">
+                        <li><i class="fas fa-check-circle"></i> {% trans "库存管理" %}</li>
+                        <li><i class="fas fa-check-circle"></i> {% trans "数据分析" %}</li>
+                        <li><i class="fas fa-check-circle"></i> {% trans "报表导出" %}</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="srv-card" style="--card-accent:#fee140">
+                    <div class="srv-ico" style="background:linear-gradient(135deg,#fa709a,#fee140)"><i class="fas fa-globe"></i></div>
+                    <h4>{% trans "多语言支持" %}</h4>
+                    <p>{% trans "支持中文、英文和法文，为全球用户提供无障碍的浏览体验。" %}</p>
+                    <ul class="srv-feats">
+                        <li><i class="fas fa-check-circle"></i> {% trans "三语切换" %}</li>
+                        <li><i class="fas fa-check-circle"></i> {% trans "实时翻译" %}</li>
+                        <li><i class="fas fa-check-circle"></i> {% trans "本地化体验" %}</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="srv-card" style="--card-accent:#fbc2eb">
+                    <div class="srv-ico" style="background:linear-gradient(135deg,#a18cd1,#fbc2eb)"><i class="fas fa-headset"></i></div>
+                    <h4>{% trans "客户支持" %}</h4>
+                    <p>{% trans "专业的客服团队随时为您解答问题，确保您获得最佳的服务体验。" %}</p>
+                    <ul class="srv-feats">
+                        <li><i class="fas fa-check-circle"></i> {% trans "在线客服" %}</li>
+                        <li><i class="fas fa-check-circle"></i> {% trans "邮件支持" %}</li>
+                        <li><i class="fas fa-check-circle"></i> {% trans "常见问题" %}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="sec sec-alt">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <p class="sec-label">{% trans "购书流程" %}</p>
+            <h2 class="sec-heading">{% trans "简单四步，轻松购书" %}</h2>
+        </div>
+        <div class="proc-timeline">
+            <div class="proc-line d-none d-lg-block"></div>
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="proc-step"><div class="proc-num">1</div><h5>{% trans "浏览图书" %}</h5><p>{% trans "在我们的图书目录中搜索和浏览您感兴趣的书籍。" %}</p></div>
+                </div>
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="proc-step"><div class="proc-num">2</div><h5>{% trans "加入购物车" %}</h5><p>{% trans "将喜欢的图书加入购物车，随时调整数量。" %}</p></div>
+                </div>
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="proc-step"><div class="proc-num">3</div><h5>{% trans "安全结算" %}</h5><p>{% trans "选择支付方式，完成安全的在线结算。" %}</p></div>
+                </div>
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                    <div class="proc-step"><div class="proc-num">4</div><h5>{% trans "享受阅读" %}</h5><p>{% trans "收到图书后，开始您的阅读之旅！" %}</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta-sec">
+    <div class="container">
+        <div class="cta-box" data-aos="zoom-in">
+            <h2>{% trans "立即开始您的阅读之旅" %}</h2>
+            <p>{% trans "探索我们的图书目录，找到您的下一本好书。" %}</p>
+            <a href="{% url 'manager:public_books' %}" class="cta-btn"><i class="fas fa-book-open"></i>{% trans "浏览图书" %}</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,44 @@
+<div class="compose-partial">
+    <div style="font-size:1rem;font-weight:600;color:#1e293b;margin-bottom:16px;">
+        {% if reply_email %}回复: {{ reply_email.subject }}{% else %}写邮件{% endif %}
+    </div>
+    <form id="composePartialForm" enctype="multipart/form-data">
+        <div class="mb-2">
+            <label style="font-size:0.8rem;color:#64748b;">发送账户</label>
+            <select name="account_id" class="form-control form-control-sm">
+                {% for acc in accounts %}
+                <option value="{{ acc.id }}" {% if acc.is_default %}selected{% endif %}>{{ acc.name }} &lt;{{ acc.email_address }}&gt;</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-2">
+            <label style="font-size:0.8rem;color:#64748b;">收件人</label>
+            <input type="text" name="to" class="form-control form-control-sm" value="{% if reply_email %}{{ reply_email.sender_email }}{% endif %}" required>
+        </div>
+        <div class="mb-2">
+            <label style="font-size:0.8rem;color:#64748b;">抄送 (CC)</label>
+            <input type="text" name="cc" class="form-control form-control-sm">
+        </div>
+        <div class="mb-2">
+            <label style="font-size:0.8rem;color:#64748b;">主题</label>
+            <input type="text" name="subject" class="form-control form-control-sm" value="{% if reply_email %}Re: {{ reply_email.subject }}{% endif %}">
+        </div>
+        <div class="mb-2">
+            <label style="font-size:0.8rem;color:#64748b;">正文</label>
+            <textarea name="body" class="form-control" rows="8" style="font-size:0.9rem;">{% if reply_email %}
+
+---------- 原始邮件 ----------
+发件人: {{ reply_email.sender_name }} <{{ reply_email.sender_email }}>
+日期: {{ reply_email.received_at|date:"Y-m-d H:i" }}
+
+{{ reply_email.body_text }}{% endif %}</textarea>
+        </div>
+        <div class="mb-2">
+            <label style="font-size:0.8rem;color:#64748b;">附件</label>
+            <input type="file" name="attachments" class="form-control form-control-sm" multiple>
+        </div>
+        {% if reply_email %}
+        <input type="hidden" name="in_reply_to" value="{{ reply_email.message_uid }}">
+        {% endif %}
+    </form>
+</div>

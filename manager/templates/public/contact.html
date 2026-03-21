@@ -1,0 +1,385 @@
+{% extends 'public/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "图书管理系统" %} - {% trans "联系我们" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .ct-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 140px 0 100px;
+        position: relative;
+        overflow: hidden;
+    }
+    .ct-hero::before {
+        content: '';
+        position: absolute;
+        top: -40%;
+        right: -15%;
+        width: 700px;
+        height: 700px;
+        background: radial-gradient(circle, rgba(255,255,255,0.07) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: ct-float 8s ease-in-out infinite;
+    }
+    .ct-hero::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: -10%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: ct-float 10s ease-in-out infinite reverse;
+    }
+    @keyframes ct-float {
+        0%, 100% { transform: translate(0,0); }
+        50% { transform: translate(30px,-25px); }
+    }
+    .ct-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255,255,255,0.12);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255,255,255,0.18);
+        padding: 8px 22px;
+        border-radius: 50px;
+        color: #fff;
+        font-size: 0.85rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 25px;
+    }
+    .ct-hero h1 { font-size: 3.2rem; font-weight: 800; color: #fff; margin-bottom: 20px; line-height: 1.15; }
+    .ct-hero .lead { font-size: 1.15rem; color: rgba(255,255,255,0.88); max-width: 550px; line-height: 1.8; }
+    .hero-mail {
+        width: 280px;
+        height: 280px;
+        margin: 0 auto;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .hero-mail-ring {
+        position: absolute;
+        inset: 0;
+        border: 2px solid rgba(255,255,255,0.08);
+        border-radius: 50%;
+        animation: ct-pulse 4s ease-in-out infinite;
+    }
+    .hero-mail-ring:nth-child(2) { inset: 30px; animation-delay: 0.5s; }
+    .hero-mail-ring:nth-child(3) { inset: 60px; animation-delay: 1s; }
+    .hero-mail-icon { font-size: 4rem; color: rgba(255,255,255,0.25); position: relative; z-index: 1; }
+    @keyframes ct-pulse {
+        0%, 100% { transform: scale(1); opacity: 0.5; }
+        50% { transform: scale(1.06); opacity: 1; }
+    }
+    .sec { padding: 100px 0; }
+    .sec-alt { background: #f8f9ff; }
+    .sec-label { color: #667eea; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 12px; }
+    .sec-heading { font-size: 2.3rem; font-weight: 800; color: #1a1a2e; margin-bottom: 18px; }
+    /* Info cards */
+    .info-card {
+        background: #fff;
+        border-radius: 24px;
+        padding: 38px 25px;
+        text-align: center;
+        box-shadow: 0 4px 25px rgba(0,0,0,0.04);
+        transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border: 1px solid rgba(102,126,234,0.06);
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+    .info-card::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        opacity: 0;
+        transition: opacity 0.4s;
+    }
+    .info-card:hover { transform: translateY(-12px); box-shadow: 0 25px 60px rgba(102,126,234,0.12); }
+    .info-card:hover::before { opacity: 1; }
+    .info-ico {
+        width: 72px;
+        height: 72px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        transition: transform 0.4s;
+    }
+    .info-card:hover .info-ico { transform: scale(1.1) rotate(5deg); }
+    .info-ico i { font-size: 1.6rem; color: #fff; }
+    .info-card h5 { font-weight: 700; color: #1a1a2e; margin-bottom: 10px; font-size: 1.05rem; }
+    .info-card p { color: #6b7280; font-size: 0.92rem; line-height: 1.6; margin: 0; }
+    .info-card a { color: #667eea; text-decoration: none; font-weight: 600; transition: color 0.3s; }
+    .info-card a:hover { color: #764ba2; }
+    /* Form */
+    .form-card {
+        background: #fff;
+        border-radius: 28px;
+        padding: 50px 40px;
+        box-shadow: 0 15px 50px rgba(0,0,0,0.06);
+        border: 1px solid rgba(102,126,234,0.06);
+    }
+    .form-card .form-floating { margin-bottom: 18px; }
+    .form-card .form-control {
+        border: 2px solid #e8ecf1;
+        border-radius: 14px;
+        padding: 16px 20px;
+        font-size: 0.95rem;
+        transition: all 0.3s;
+        background: #fafbff;
+    }
+    .form-card .form-control:focus { border-color: #667eea; box-shadow: 0 0 0 4px rgba(102,126,234,0.08); background: #fff; }
+    .form-card label { color: #6b7280; padding: 16px 20px; }
+    .form-card textarea.form-control { min-height: 140px; }
+    .btn-send {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: #fff;
+        padding: 16px 45px;
+        border-radius: 50px;
+        border: none;
+        font-weight: 700;
+        font-size: 1.05rem;
+        cursor: pointer;
+        transition: all 0.4s;
+        box-shadow: 0 8px 25px rgba(102,126,234,0.3);
+    }
+    .btn-send:hover { transform: translateY(-3px); box-shadow: 0 14px 35px rgba(102,126,234,0.4); }
+    .alert-ok {
+        background: linear-gradient(135deg, #d4edda, #c3e6cb);
+        border: none;
+        border-radius: 16px;
+        padding: 20px;
+        color: #155724;
+        display: none;
+        font-weight: 600;
+    }
+    /* Social */
+    .soc-card {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        background: #fff;
+        border-radius: 18px;
+        padding: 20px 22px;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.04);
+        transition: all 0.4s;
+        text-decoration: none;
+        margin-bottom: 14px;
+        border: 1px solid rgba(102,126,234,0.06);
+    }
+    .soc-card:hover { transform: translateX(8px); box-shadow: 0 12px 30px rgba(102,126,234,0.1); }
+    .soc-ico {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .soc-ico i { font-size: 1.3rem; color: #fff; }
+    .soc-card h6 { font-weight: 700; color: #1a1a2e; margin-bottom: 2px; font-size: 0.95rem; }
+    .soc-card p { color: #6b7280; font-size: 0.88rem; margin: 0; }
+    .map-box {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 22px;
+        height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 12px;
+        color: #fff;
+        margin-top: 14px;
+    }
+    .map-box i { font-size: 3rem; opacity: 0.35; }
+    .map-box p { opacity: 0.8; font-size: 0.92rem; margin: 0; }
+    @media (max-width: 768px) {
+        .ct-hero h1 { font-size: 2rem; }
+        .sec-heading { font-size: 1.7rem; }
+        .form-card { padding: 30px 20px; }
+        .hero-mail { width: 200px; height: 200px; }
+        .hero-mail-icon { font-size: 3rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="ct-hero">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-7" data-aos="fade-right">
+                <div class="ct-pill"><i class="fas fa-envelope"></i>{% trans "联系我们" %}</div>
+                <h1>{% trans "与我们取得联系" %}</h1>
+                <p class="lead">{% trans "如果您有任何问题、建议或合作意向，请随时与我们联系。我们的团队将尽快回复您。" %}</p>
+            </div>
+            <div class="col-lg-5 d-none d-lg-block" data-aos="fade-left" data-aos-delay="200">
+                <div class="hero-mail">
+                    <div class="hero-mail-ring"></div>
+                    <div class="hero-mail-ring"></div>
+                    <div class="hero-mail-ring"></div>
+                    <i class="fas fa-paper-plane hero-mail-icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="sec">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="info-card">
+                    <div class="info-ico" style="background:linear-gradient(135deg,#667eea,#764ba2)"><i class="fas fa-map-marker-alt"></i></div>
+                    <h5>{% trans "地址" %}</h5>
+                    <p>{% trans "北京市海淀区中关村科技园区" %}</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="info-card">
+                    <div class="info-ico" style="background:linear-gradient(135deg,#f093fb,#f5576c)"><i class="fas fa-phone-alt"></i></div>
+                    <h5>{% trans "电话" %}</h5>
+                    <p><a href="tel:+8613520646854">+86 135 2064 6854</a></p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="info-card">
+                    <div class="info-ico" style="background:linear-gradient(135deg,#4facfe,#00f2fe)"><i class="fas fa-envelope"></i></div>
+                    <h5>{% trans "邮箱" %}</h5>
+                    <p><a href="mailto:bizkey2024@gmail.com">bizkey2024@gmail.com</a></p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                <div class="info-card">
+                    <div class="info-ico" style="background:linear-gradient(135deg,#43e97b,#38f9d7)"><i class="fas fa-clock"></i></div>
+                    <h5>{% trans "服务时间" %}</h5>
+                    <p>{% trans "周一至周五 9:00-18:00" %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="sec sec-alt">
+    <div class="container">
+        <div class="row g-5">
+            <div class="col-lg-7" data-aos="fade-right">
+                <p class="sec-label">{% trans "发送消息" %}</p>
+                <h2 class="sec-heading mb-4">{% trans "给我们留言" %}</h2>
+                <div id="contact-success" class="alert-ok mb-4"><i class="fas fa-check-circle me-2"></i>{% trans "感谢您的留言！我们会尽快回复您。" %}</div>
+                <div class="form-card">
+                    <form id="contactForm">
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="contactName" name="name" placeholder="{% trans '您的姓名' %}" required>
+                                    <label for="contactName"><i class="fas fa-user me-2"></i>{% trans "您的姓名" %}</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="email" class="form-control" id="contactEmail" name="email" placeholder="{% trans '您的邮箱' %}" required>
+                                    <label for="contactEmail"><i class="fas fa-envelope me-2"></i>{% trans "您的邮箱" %}</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="contactSubject" name="subject" placeholder="{% trans '主题' %}">
+                            <label for="contactSubject"><i class="fas fa-tag me-2"></i>{% trans "主题" %}</label>
+                        </div>
+                        <div class="form-floating">
+                            <textarea class="form-control" id="contactMessage" name="message" placeholder="{% trans '您的留言' %}" required></textarea>
+                            <label for="contactMessage"><i class="fas fa-comment-dots me-2"></i>{% trans "您的留言" %}</label>
+                        </div>
+                        <button type="submit" class="btn-send mt-2" id="sendBtn"><i class="fas fa-paper-plane"></i>{% trans "发送消息" %}</button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-lg-5" data-aos="fade-left">
+                <p class="sec-label">{% trans "其他联系方式" %}</p>
+                <h2 class="sec-heading mb-4">{% trans "关注我们" %}</h2>
+                <a href="https://github.com/EspenQueston" target="_blank" rel="noopener noreferrer" class="soc-card">
+                    <div class="soc-ico" style="background:#333"><i class="fab fa-github"></i></div>
+                    <div><h6>GitHub</h6><p>EspenQueston</p></div>
+                </a>
+                <a href="https://www.facebook.com/poires.gomai" target="_blank" rel="noopener noreferrer" class="soc-card">
+                    <div class="soc-ico" style="background:#1877f2"><i class="fab fa-facebook-f"></i></div>
+                    <div><h6>Facebook</h6><p>poires.gomai</p></div>
+                </a>
+                <div class="soc-card" style="cursor:default">
+                    <div class="soc-ico" style="background:#07c160"><i class="fab fa-weixin"></i></div>
+                    <div><h6>WeChat</h6><p>ID: bizkey2025</p></div>
+                </div>
+                <a href="https://wa.me/8613520646854" target="_blank" rel="noopener noreferrer" class="soc-card">
+                    <div class="soc-ico" style="background:#25d366"><i class="fab fa-whatsapp"></i></div>
+                    <div><h6>WhatsApp</h6><p>+86 135 2064 6854</p></div>
+                </a>
+                <a href="mailto:bizkey2024@gmail.com" class="soc-card">
+                    <div class="soc-ico" style="background:linear-gradient(135deg,#667eea,#764ba2)"><i class="fas fa-envelope"></i></div>
+                    <div><h6>{% trans "邮箱" %}</h6><p>bizkey2024@gmail.com</p></div>
+                </a>
+                <div class="map-box">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <p>{% trans "北京市海淀区中关村科技园区" %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('contactForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var form = this;
+    var btn = document.getElementById('sendBtn');
+    var success = document.getElementById('contact-success');
+    var origHTML = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {% trans "发送中..." %}';
+
+    var formData = new FormData(form);
+    fetch('{% url "manager:public_contact" %}', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value },
+        body: formData
+    })
+    .then(function(resp) { return resp.json().then(function(data) { return {ok: resp.ok, data: data}; }); })
+    .then(function(result) {
+        btn.disabled = false;
+        btn.innerHTML = origHTML;
+        if (result.ok && result.data.success) {
+            success.style.display = 'block';
+            form.reset();
+            success.scrollIntoView({behavior: 'smooth', block: 'center'});
+            setTimeout(function() { success.style.display = 'none'; }, 6000);
+        } else {
+            gToast(result.data.error || '{% trans "发送失败，请稍后重试。" %}', 'error');
+        }
+    })
+    .catch(function() {
+        btn.disabled = false;
+        btn.innerHTML = origHTML;
+        gToast('{% trans "网络错误，请稍后重试。" %}', 'error');
+    });
+});
+</script>
+{% endblock %}

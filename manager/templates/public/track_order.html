@@ -1,6 +1,7 @@
 {% extends 'public/base.html' %}
+{% load i18n %}
 
-{% block title %}订单跟踪 - 图书管理系统{% endblock %}
+{% block title %}{% trans "订单跟踪" %} - {% trans "图书管理系统" %}{% endblock %}
 
 {% block content %}
 <style>
@@ -210,9 +211,9 @@
     <!-- Header -->
     <div class="track-header">
         <h1 class="mb-3">
-            <i class="fas fa-search me-3"></i>订单跟踪
+            <i class="fas fa-search me-3"></i>{% trans "订单跟踪" %}
         </h1>
-        <p class="mb-0">输入您的订单号或邮箱来查看订单状态和物流信息</p>
+        <p class="mb-0">{% trans "输入您的订单号或邮箱来查看订单状态和物流信息" %}</p>
     </div>
 
     <!-- Search Form -->
@@ -220,12 +221,12 @@
         <ul class="nav nav-tabs mb-4" id="searchTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="order-tab" data-bs-toggle="tab" data-bs-target="#order-search" type="button" role="tab">
-                    <i class="fas fa-hashtag"></i> 订单号查询
+                    <i class="fas fa-hashtag"></i> {% trans "订单号查询" %}
                 </button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="email-tab" data-bs-toggle="tab" data-bs-target="#email-search" type="button" role="tab">
-                    <i class="fas fa-envelope"></i> 邮箱查询
+                    <i class="fas fa-envelope"></i> {% trans "邮箱查询" %}
                 </button>
             </li>
         </ul>
@@ -238,17 +239,17 @@
                     <input type="hidden" name="search_type" value="order_number">
                     <div class="row align-items-end">
                         <div class="col-md-8">
-                            <label for="order_number" class="form-label">订单号</label>
+                            <label for="order_number" class="form-label">{% trans "订单号" %}</label>
                             <input type="text" 
                                    class="form-control order-input" 
                                    id="order_number" 
                                    name="order_number" 
-                                   placeholder="请输入您的订单号，例如：ORD20250128120000ABCD1234"
+                                   placeholder="{% trans "请输入您的订单号" %}"
                                    required>
                         </div>
                         <div class="col-md-4">
                             <button type="submit" class="btn track-btn w-100">
-                                <i class="fas fa-search me-2"></i>查询订单
+                                <i class="fas fa-search me-2"></i>{% trans "查询订单" %}
                             </button>
                         </div>
                     </div>
@@ -262,22 +263,22 @@
                     <input type="hidden" name="search_type" value="email">
                     <div class="row align-items-end">
                         <div class="col-md-8">
-                            <label for="customer_email" class="form-label">客户邮箱</label>
+                            <label for="customer_email" class="form-label">{% trans "客户邮箱" %}</label>
                             <input type="email" 
                                    class="form-control order-input" 
                                    id="customer_email" 
                                    name="customer_email" 
-                                   placeholder="请输入您的邮箱地址"
+                                   placeholder="{% trans "请输入您的邮箱地址" %}"
                                    required>
                         </div>
                         <div class="col-md-4">
                             <button type="submit" class="btn track-btn w-100">
-                                <i class="fas fa-search me-2"></i>查询订单
+                                <i class="fas fa-search me-2"></i>{% trans "查询订单" %}
                             </button>
                         </div>
                     </div>
                     <small class="text-muted mt-2 d-block">
-                        <i class="fas fa-info-circle"></i> 将显示与此邮箱相关的所有订单
+                        <i class="fas fa-info-circle"></i> {% trans "将显示与此邮箱相关的所有订单" %}
                     </small>
                 </form>
             </div>
@@ -298,7 +299,7 @@
     {% if orders %}
     <div class="order-result">
         <h4 class="mb-4">
-            <i class="fas fa-list"></i> 找到 {{ orders|length }} 个订单
+            <i class="fas fa-list"></i> {% blocktrans with count=orders|length %}找到 {{ count }} 个订单{% endblocktrans %}
         </h4>
         {% for order in orders %}
         <div class="card mb-3" style="border-left: 4px solid #667eea;">
@@ -320,15 +321,15 @@
                 </div>
                 <div class="row">
                     <div class="col-md-4">
-                        <small class="text-muted">订单金额</small>
+                        <small class="text-muted">{% trans "订单金额" %}</small>
                         <p class="mb-0 fw-bold text-success">¥{{ order.total_amount }}</p>
                     </div>
                     <div class="col-md-4">
-                        <small class="text-muted">支付方式</small>
+                        <small class="text-muted">{% trans "支付方式" %}</small>
                         <p class="mb-0">{{ order.get_payment_method_display }}</p>
                     </div>
                     <div class="col-md-4">
-                        <small class="text-muted">支付状态</small>
+                        <small class="text-muted">{% trans "支付状态" %}</small>
                         <p class="mb-0">
                             <span class="badge {% if order.payment_status == 'completed' %}bg-success{% elif order.payment_status == 'pending' %}bg-warning{% else %}bg-secondary{% endif %}">
                                 {{ order.get_payment_status_display }}
@@ -338,14 +339,14 @@
                 </div>
                 <div class="mt-3">
                     <a href="{% url 'manager:order_confirmation' order.order_number %}" class="btn btn-sm btn-primary">
-                        <i class="fas fa-eye"></i> 查看详情
+                        <i class="fas fa-eye"></i> {% trans "查看详情" %}
                     </a>
                     {% if order.status == 'payment_pending' %}
                     <button onclick="quickPayment('{{ order.order_number }}')" class="btn btn-sm btn-success">
-                        <i class="fas fa-credit-card"></i> 立即支付
+                        <i class="fas fa-credit-card"></i> {% trans "立即支付" %}
                     </button>
                     <button onclick="quickCancel('{{ order.order_number }}')" class="btn btn-sm btn-outline-danger">
-                        <i class="fas fa-times"></i> 取消订单
+                        <i class="fas fa-times"></i> {% trans "取消订单" %}
                     </button>
                     {% endif %}
                 </div>
@@ -357,7 +358,7 @@
     <div class="order-result">
         <!-- Order Basic Info -->
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="mb-0">订单 #{{ order.order_number }}</h3>
+            <h3 class="mb-0">{% trans "订单" %} #{{ order.order_number }}</h3>
             <div>
                 <span class="order-status status-{{ order.status }}">
                     {{ order.get_status_display }}
@@ -371,37 +372,37 @@
         <!-- Order Information Grid -->
         <div class="order-info">
             <div class="info-card">
-                <div class="info-label">客户姓名</div>
+                <div class="info-label">{% trans "客户姓名" %}</div>
                 <div class="info-value">{{ order.customer_name }}</div>
             </div>
             <div class="info-card">
-                <div class="info-label">联系电话</div>
+                <div class="info-label">{% trans "联系电话" %}</div>
                 <div class="info-value">{{ order.customer_phone }}</div>
             </div>
             <div class="info-card">
-                <div class="info-label">订单金额</div>
+                <div class="info-label">{% trans "订单金额" %}</div>
                 <div class="info-value">¥{{ order.total_amount }}</div>
             </div>
             <div class="info-card">
-                <div class="info-label">下单时间</div>
+                <div class="info-label">{% trans "下单时间" %}</div>
                 <div class="info-value">{{ order.created_at|date:"Y-m-d H:i" }}</div>
             </div>
             {% if order.country %}
             <div class="info-card">
-                <div class="info-label">国家</div>
+                <div class="info-label">{% trans "国家" %}</div>
                 <div class="info-value">{{ order.country }}</div>
             </div>
             {% endif %}
             {% if order.payment_method %}
             <div class="info-card">
-                <div class="info-label">支付方式</div>
+                <div class="info-label">{% trans "支付方式" %}</div>
                 <div class="info-value">{{ order.get_payment_method_display }}</div>
             </div>
             {% endif %}
         </div>
 
         <!-- Order Timeline -->
-        <h5 class="mb-3"><i class="fas fa-clock me-2"></i>订单进度</h5>
+        <h5 class="mb-3"><i class="fas fa-clock me-2"></i>{% trans "订单进度" %}</h5>
         <div class="timeline">
             <!-- Order Placed -->
             <div class="timeline-item active">
@@ -409,7 +410,7 @@
                     <i class="fas fa-shopping-cart"></i>
                 </div>
                 <div>
-                    <strong>订单已创建</strong>
+                    <strong>{% trans "订单已创建" %}</strong>
                     <p class="text-muted mb-0">{{ order.created_at|date:"m月d日 H:i" }}</p>
                 </div>
             </div>
@@ -421,7 +422,7 @@
                     <i class="fas fa-credit-card"></i>
                 </div>
                 <div>
-                    <strong>支付完成</strong>
+                    <strong>{% trans "支付完成" %}</strong>
                     <p class="text-muted mb-0">
                         {% if order.payment_completed_at %}
                             {{ order.payment_completed_at|date:"m月d日 H:i" }}
@@ -437,8 +438,8 @@
                     <i class="fas fa-credit-card"></i>
                 </div>
                 <div>
-                    <strong>等待支付</strong>
-                    <p class="text-muted mb-0">请尽快完成支付</p>
+                    <strong>{% trans "等待支付" %}</strong>
+                    <p class="text-muted mb-0">{% trans "请尽快完成支付" %}</p>
                 </div>
             </div>
             {% endif %}
@@ -450,8 +451,8 @@
                     <i class="fas fa-check"></i>
                 </div>
                 <div>
-                    <strong>订单已确认</strong>
-                    <p class="text-muted mb-0">商家已确认您的订单</p>
+                    <strong>{% trans "订单已确认" %}</strong>
+                    <p class="text-muted mb-0">{% trans "商家已确认您的订单" %}</p>
                 </div>
             </div>
             {% else %}
@@ -460,8 +461,8 @@
                     <i class="fas fa-check"></i>
                 </div>
                 <div>
-                    <strong>等待确认</strong>
-                    <p class="text-muted mb-0">商家正在处理您的订单</p>
+                    <strong>{% trans "等待确认" %}</strong>
+                    <p class="text-muted mb-0">{% trans "商家正在处理您的订单" %}</p>
                 </div>
             </div>
             {% endif %}
@@ -473,8 +474,8 @@
                     <i class="fas fa-truck"></i>
                 </div>
                 <div>
-                    <strong>订单已发货</strong>
-                    <p class="text-muted mb-0">您的订单正在配送中</p>
+                    <strong>{% trans "订单已发货" %}</strong>
+                    <p class="text-muted mb-0">{% trans "您的订单正在配送中" %}</p>
                 </div>
             </div>
             {% else %}
@@ -483,8 +484,8 @@
                     <i class="fas fa-truck"></i>
                 </div>
                 <div>
-                    <strong>等待发货</strong>
-                    <p class="text-muted mb-0">商品准备中</p>
+                    <strong>{% trans "等待发货" %}</strong>
+                    <p class="text-muted mb-0">{% trans "商品准备中" %}</p>
                 </div>
             </div>
             {% endif %}
@@ -496,7 +497,7 @@
                     <i class="fas fa-home"></i>
                 </div>
                 <div>
-                    <strong>订单已送达</strong>
+                    <strong>{% trans "订单已送达" %}</strong>
                     <p class="text-muted mb-0">{{ order.updated_at|date:"m月d日 H:i" }}</p>
                 </div>
             </div>
@@ -506,8 +507,8 @@
                     <i class="fas fa-home"></i>
                 </div>
                 <div>
-                    <strong>等待签收</strong>
-                    <p class="text-muted mb-0">商品将尽快送达</p>
+                    <strong>{% trans "等待签收" %}</strong>
+                    <p class="text-muted mb-0">{% trans "商品将尽快送达" %}</p>
                 </div>
             </div>
             {% endif %}
@@ -519,7 +520,7 @@
                     <i class="fas fa-times"></i>
                 </div>
                 <div>
-                    <strong>订单已取消</strong>
+                    <strong>{% trans "订单已取消" %}</strong>
                     <p class="text-muted mb-0">{{ order.updated_at|date:"m月d日 H:i" }}</p>
                 </div>
             </div>
@@ -528,15 +529,15 @@
 
         <!-- Order Items -->
         {% if order.orderitem_set.all %}
-        <h5 class="mb-3 mt-4"><i class="fas fa-box me-2"></i>商品清单</h5>
+        <h5 class="mb-3 mt-4"><i class="fas fa-box me-2"></i>{% trans "商品清单" %}</h5>
         <div class="table-responsive">
             <table class="table table-hover">
                 <thead>
                     <tr>
-                        <th>商品名称</th>
-                        <th>数量</th>
-                        <th>单价</th>
-                        <th>小计</th>
+                        <th>{% trans "商品名称" %}</th>
+                        <th>{% trans "数量" %}</th>
+                        <th>{% trans "单价" %}</th>
+                        <th>{% trans "小计" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -553,7 +554,7 @@
                                     <strong>{{ item.book.name }}</strong>
                                     {% if item.book.author_set.all %}
                                     <br><small class="text-muted">
-                                        作者：{% for author in item.book.author_set.all %}{{ author.name }}{% if not forloop.last %}、{% endif %}{% endfor %}
+                                        {% trans "作者" %}：{% for author in item.book.author_set.all %}{{ author.name }}{% if not forloop.last %}、{% endif %}{% endfor %}
                                     </small>
                                     {% endif %}
                                 </div>
@@ -567,7 +568,7 @@
                 </tbody>
                 <tfoot>
                     <tr>
-                        <th colspan="3" class="text-end">总计：</th>
+                        <th colspan="3" class="text-end">{% trans "总计" %}：</th>
                         <th>¥{{ order.total_amount }}</th>
                     </tr>
                 </tfoot>
@@ -578,7 +579,7 @@
         <!-- Download Section (Only for Shipped Orders) -->
         {% if order.status == 'shipped' or order.status == 'delivered' %}
         <div class="mt-4">
-            <h5 class="mb-3"><i class="fas fa-download me-2"></i>图书下载</h5>
+            <h5 class="mb-3"><i class="fas fa-download me-2"></i>{% trans "图书下载" %}</h5>
             {% for item in order.orderitem_set.all %}
                 {% if item.book.has_download %}
                 <div class="card mb-3 shadow-sm">
@@ -609,9 +610,9 @@
                                 {% endif %}
                                 <small class="text-muted">
                                     {% if item.book.get_download_type == 'file' %}
-                                        <i class="fas fa-file-pdf me-1"></i>文件下载
+                                        <i class="fas fa-file-pdf me-1"></i>{% trans "文件下载" %}
                                     {% else %}
-                                        <i class="fas fa-cloud me-1"></i>外部链接
+                                        <i class="fas fa-cloud me-1"></i>{% trans "外部链接" %}
                                     {% endif %}
                                 </small>
                             </div>
@@ -619,7 +620,7 @@
                                 <a href="{% url 'manager:download_book' order.id item.book.id %}" 
                                    class="btn btn-primary"
                                    {% if item.book.get_download_type == 'link' %}target="_blank"{% endif %}>
-                                    <i class="fas fa-download me-1"></i>下载图书
+                                    <i class="fas fa-download me-1"></i>{% trans "下载图书" %}
                                 </a>
                             </div>
                         </div>
@@ -627,10 +628,12 @@
                 </div>
                 {% endif %}
             {% endfor %}
-            {% if not order.orderitem_set.all|selectattr:"book.has_download" %}
-            <div class="alert alert-info">
+            
+            {# Show info message if no books have downloads #}
+            {% if order and not has_downloadable_books %}
+            <div class="alert alert-info mt-3">
                 <i class="fas fa-info-circle me-2"></i>
-                您购买的图书暂无电子版下载，如需纸质版请等待配送。
+                {% trans "您购买的图书暂无电子版下载，如需纸质版请等待配送。" %}
             </div>
             {% endif %}
         </div>
@@ -638,8 +641,8 @@
 
         <!-- Contact Info -->
         <div class="mt-4 p-3 bg-light rounded">
-            <h6><i class="fas fa-phone me-2"></i>需要帮助？</h6>
-            <p class="mb-0">如果您对订单有任何疑问，请联系我们的客服：</p>
+            <h6><i class="fas fa-phone me-2"></i>{% trans "需要帮助？" %}</h6>
+            <p class="mb-0">{% trans "如果您对订单有任何疑问，请联系我们的客服" %}：</p>
             <p class="mb-0">电话：400-123-4567 | 邮箱：service@bookstore.com</p>
         </div>
     </div>
@@ -649,8 +652,8 @@
     <div class="order-result">
         <div class="no-order-found">
             <i class="fas fa-search"></i>
-            <h5>未找到订单</h5>
-            <p>请检查您输入的订单号是否正确，或联系客服获取帮助。</p>
+            <h5>{% trans "未找到订单" %}</h5>
+            <p>{% trans "请检查您输入的订单号是否正确，或联系客服获取帮助。" %}</p>
         </div>
     </div>
     {% endif %}
@@ -681,7 +684,7 @@ function quickPayment(orderNumber) {
 
 // Quick cancel function
 function quickCancel(orderNumber) {
-    if (confirm('确定要取消此订单吗？')) {
+    gConfirm('{% trans "确定要取消此订单吗？" %}', function() {
         fetch('/manager/api/cancel-order/', {
             method: 'POST',
             headers: {
@@ -694,11 +697,11 @@ function quickCancel(orderNumber) {
         }).then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('订单已取消');
+                gToast('{% trans "订单已取消" %}', 'success');
                 location.reload();
             }
         });
-    }
+    }, {danger: true, title: '{% trans "取消订单" %}'});
 }
 
 function getCookie(name) {

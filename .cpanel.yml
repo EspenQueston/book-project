@@ -1,0 +1,8 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/cp2603370p21/public_html/book_Project
+    - /bin/cp -R . $DEPLOYPATH/
+    - cd $DEPLOYPATH && pip install -r requirements.txt 2>&1 || true
+    - cd $DEPLOYPATH && python manage.py migrate --noinput 2>&1 || true
+    - cd $DEPLOYPATH && python manage.py collectstatic --noinput 2>&1 || true

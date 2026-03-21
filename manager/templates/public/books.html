@@ -1,6 +1,77 @@
 {% extends 'public/base.html' %}
+{% load i18n %}
 
-{% block title %}图书目录 - 图书管理系统{% endblock %}
+{% block title %}{% trans "图书目录" %} - {% trans "图书管理系统" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .book-cover-container {
+        position: relative;
+        width: 100%;
+        height: 280px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+    .book-cover-frame {
+        position: relative;
+        width: 140px;
+        height: 200px;
+        background: rgba(255,255,255,0.15);
+        border-radius: 8px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.1);
+        overflow: hidden;
+        transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+    .book-cover-frame img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        transition: transform 0.4s ease;
+    }
+    .book-cover-no-image {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        color: rgba(255,255,255,0.7);
+        background: rgba(255,255,255,0.08);
+    }
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 35px rgba(0,0,0,0.15) !important;
+    }
+    .card:hover .book-cover-frame {
+        transform: scale(1.05) translateY(-4px);
+        box-shadow: 0 16px 48px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.2);
+    }
+    /* Decorative dots on gradient background */
+    .book-cover-container::before {
+        content: '';
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        width: 40px;
+        height: 40px;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 2px, transparent 2px);
+        background-size: 8px 8px;
+    }
+    .book-cover-container::after {
+        content: '';
+        position: absolute;
+        bottom: 15px;
+        right: 15px;
+        width: 40px;
+        height: 40px;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 2px, transparent 2px);
+        background-size: 8px 8px;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <!-- Page Header with gradient background -->
@@ -8,8 +79,8 @@
     <div class="container">
         <div class="row">
             <div class="col-12 text-center">
-                <h1 class="display-5 fw-bold mb-3">图书目录</h1>
-                <p class="lead">浏览我们丰富的图书收藏</p>
+                <h1 class="display-5 fw-bold mb-3">{% trans "图书目录" %}</h1>
+                <p class="lead">{% trans "浏览我们丰富的图书收藏" %}</p>
             </div>
         </div>
     </div>
@@ -22,20 +93,20 @@
             <div class="col-lg-8">
                 <form method="get" class="d-flex gap-3">
                     <input type="search" name="search" class="form-control search-box" 
-                           placeholder="搜索图书名称..." value="{{ search_query }}">
+                           placeholder="{% trans '搜索图书名称...' %}" value="{{ search_query }}">
                     <select name="sort" class="form-select" style="width: auto;">
-                        <option value="name" {% if sort_by == 'name' %}selected{% endif %}>按名称排序</option>
-                        <option value="price_low" {% if sort_by == 'price_low' %}selected{% endif %}>价格从低到高</option>
-                        <option value="price_high" {% if sort_by == 'price_high' %}selected{% endif %}>价格从高到低</option>
-                        <option value="popular" {% if sort_by == 'popular' %}selected{% endif %}>按销量排序</option>
+                        <option value="name" {% if sort_by == 'name' %}selected{% endif %}>{% trans "按名称排序" %}</option>
+                        <option value="price_low" {% if sort_by == 'price_low' %}selected{% endif %}>{% trans "价格从低到高" %}</option>
+                        <option value="price_high" {% if sort_by == 'price_high' %}selected{% endif %}>{% trans "价格从高到低" %}</option>
+                        <option value="popular" {% if sort_by == 'popular' %}selected{% endif %}>{% trans "按销量排序" %}</option>
                     </select>
                     <button type="submit" class="btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                        <i class="fas fa-search"></i> 搜索
+                        <i class="fas fa-search"></i> {% trans "搜索" %}
                     </button>
                 </form>
             </div>
             <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-                <span class="text-muted">共找到 {{ books.count }} 本图书</span>
+                <span class="text-muted">{% blocktrans with count=books.count %}共找到 {{ count }} 本图书{% endblocktrans %}</span>
             </div>
         </div>
     </div>
@@ -48,37 +119,40 @@
         <div class="row">
             {% for book in books %}
             <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:100 }}">
-                <div class="card h-100" style="border-radius: 15px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: none;">
-                    <div class="card-body d-flex flex-column">
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <h5 class="card-title fw-bold mb-0">{{ book.name }}</h5>
-                            <span class="badge" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">¥{{ book.price }}</span>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <p class="text-muted mb-1">
-                                <i class="fas fa-building text-primary"></i> 
-                                <strong>出版社:</strong> {{ book.publisher.publisher_name }}
-                            </p>
-                            <p class="text-muted mb-1">
-                                <i class="fas fa-map-marker-alt text-success"></i> 
-                                <strong>地址:</strong> {{ book.publisher.publisher_address }}
-                            </p>
-                        </div>
-                        
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <div class="text-center p-2 bg-light rounded">
-                                    <div class="fw-bold text-success">{{ book.inventory }}</div>
-                                    <small class="text-muted">库存</small>
-                                </div>
+                <div class="card h-100" style="border-radius: 15px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: none; transition: all 0.3s ease;">
+                    <!-- Book Cover Image -->
+                    <a href="{% url 'manager:public_book_detail' book.id %}" style="text-decoration: none;">
+                        <div class="book-cover-container">
+                            <div class="book-cover-frame">
+                                {% if book.cover_image %}
+                                    <img src="{{ book.cover_image.url }}" alt="{{ book.name }}">
+                                {% else %}
+                                    <div class="book-cover-no-image">
+                                        <i class="fas fa-book" style="font-size: 2.5rem; margin-bottom: 6px;"></i>
+                                        <small>{% trans "暂无封面" %}</small>
+                                    </div>
+                                {% endif %}
                             </div>
-                            <div class="col-6">
-                                <div class="text-center p-2 bg-light rounded">
-                                    <div class="fw-bold text-warning">{{ book.sale_num }}</div>
-                                    <small class="text-muted">销量</small>
-                                </div>
-                            </div>
+                            <!-- Price badge overlay -->
+                            <span style="position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; padding: 5px 14px; border-radius: 20px; font-weight: 700; font-size: 0.95rem; border: 1px solid rgba(255,255,255,0.3);">¥{{ book.price }}</span>
+                            {% if book.inventory == 0 %}
+                            <span style="position: absolute; top: 12px; left: 12px; background: #ef4444; color: white; padding: 4px 10px; border-radius: 15px; font-size: 0.75rem; font-weight: 600;">{% trans "缺货" %}</span>
+                            {% elif book.inventory <= 5 %}
+                            <span style="position: absolute; top: 12px; left: 12px; background: #f59e0b; color: white; padding: 4px 10px; border-radius: 15px; font-size: 0.75rem; font-weight: 600;">{% blocktrans with inv=book.inventory %}仅剩{{ inv }}本{% endblocktrans %}</span>
+                            {% endif %}
+                        </div>
+                    </a>
+
+                    <div class="card-body d-flex flex-column" style="padding: 18px;">
+                        <h5 class="card-title fw-bold mb-2" style="font-size: 1.05rem; line-height: 1.4; min-height: 42px;">{{ book.name }}</h5>
+                        
+                        <p class="text-muted mb-2" style="font-size: 0.88rem;">
+                            <i class="fas fa-building" style="color: #667eea;"></i> {{ book.publisher.publisher_name }}
+                        </p>
+                        
+                        <div class="d-flex gap-2 mb-3">
+                            <span class="badge bg-light text-success" style="font-size: 0.8rem;"><i class="fas fa-boxes me-1"></i>{% trans "库存" %} {{ book.inventory }}</span>
+                            <span class="badge bg-light text-warning" style="font-size: 0.8rem;"><i class="fas fa-fire me-1"></i>{% trans "销量" %} {{ book.sale_num }}</span>
                         </div>
                         
                         <div class="mt-auto">
@@ -86,21 +160,21 @@
                                 {% if book.inventory > 0 %}
                                     <form method="post" action="{% url 'manager:buy_now' book.id %}" class="flex-fill">
                                         {% csrf_token %}
-                                        <button type="submit" class="btn btn-success btn-sm w-100">
-                                            <i class="fas fa-shopping-cart"></i> 立即购买
+                                        <button type="submit" class="btn btn-success btn-sm w-100" style="border-radius: 8px;">
+                                            <i class="fas fa-bolt me-1"></i> {% trans "立即购买" %}
                                         </button>
                                     </form>
-                                    <button onclick="addToCartQuick({{ book.id }})" class="btn btn-primary btn-sm">
-                                        <i class="fas fa-plus"></i>
+                                    <button onclick="addToCartQuick({{ book.id }})" class="btn btn-primary btn-sm" style="border-radius: 8px;" title="{% trans '加入购物车' %}">
+                                        <i class="fas fa-cart-plus"></i>
                                     </button>
                                 {% else %}
-                                    <button class="btn btn-secondary btn-sm w-100" disabled>
-                                        <i class="fas fa-times"></i> 缺货
+                                    <button class="btn btn-secondary btn-sm w-100" disabled style="border-radius: 8px;">
+                                        <i class="fas fa-times"></i> {% trans "缺货" %}
                                     </button>
                                 {% endif %}
                             </div>
-                            <a href="{% url 'manager:public_book_detail' book.id %}" class="btn btn-sm w-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                                <i class="fas fa-info-circle"></i> 查看详情
+                            <a href="{% url 'manager:public_book_detail' book.id %}" class="btn btn-sm w-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px;">
+                                <i class="fas fa-info-circle"></i> {% trans "查看详情" %}
                             </a>
                         </div>
                     </div>
@@ -114,10 +188,10 @@
             <div class="mb-4">
                 <i class="fas fa-search text-muted" style="font-size: 5rem; opacity: 0.3;"></i>
             </div>
-            <h4 class="text-muted mb-3">未找到相关图书</h4>
-            <p class="text-muted mb-4">请尝试其他搜索关键词或浏览所有图书</p>
+            <h4 class="text-muted mb-3">{% trans "未找到相关图书" %}</h4>
+            <p class="text-muted mb-4">{% trans "请尝试其他搜索关键词或浏览所有图书" %}</p>
             <a href="{% url 'manager:public_books' %}" class="btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                <i class="fas fa-book"></i> 浏览所有图书
+                <i class="fas fa-book"></i> {% trans "浏览所有图书" %}
             </a>
         </div>
         {% endif %}
@@ -131,22 +205,22 @@
             <div class="col-md-4 mb-3" data-aos="fade-up" data-aos-delay="100">
                 <a href="{% url 'manager:public_authors' %}" class="text-white text-decoration-none">
                     <i class="fas fa-user-edit fa-3x mb-3"></i>
-                    <h5>浏览作者</h5>
-                    <p class="mb-0">查看所有作者信息</p>
+                    <h5>{% trans "浏览作者" %}</h5>
+                    <p class="mb-0">{% trans "查看所有作者信息" %}</p>
                 </a>
             </div>
             <div class="col-md-4 mb-3" data-aos="fade-up" data-aos-delay="200">
                 <a href="{% url 'manager:public_publishers' %}" class="text-white text-decoration-none">
                     <i class="fas fa-building fa-3x mb-3"></i>
-                    <h5>浏览出版社</h5>
-                    <p class="mb-0">查看所有出版社</p>
+                    <h5>{% trans "浏览出版社" %}</h5>
+                    <p class="mb-0">{% trans "查看所有出版社" %}</p>
                 </a>
             </div>
             <div class="col-md-4 mb-3" data-aos="fade-up" data-aos-delay="300">
                 <a href="{% url 'manager:public_home' %}" class="text-white text-decoration-none">
                     <i class="fas fa-home fa-3x mb-3"></i>
-                    <h5>返回首页</h5>
-                    <p class="mb-0">回到主页面</p>
+                    <h5>{% trans "返回首页" %}</h5>
+                    <p class="mb-0">{% trans "回到主页面" %}</p>
                 </a>
             </div>
         </div>
@@ -214,7 +288,7 @@ function addToCartQuick(bookId) {
         console.error('Error:', error);
         button.innerHTML = originalHtml;
         button.disabled = false;
-        showQuickMessage('添加失败，请重试', 'error');
+        showQuickMessage('{% trans "添加失败，请重试" %}', 'error');
     });
 }
 

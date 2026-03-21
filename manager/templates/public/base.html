@@ -1,10 +1,11 @@
+{% load i18n static %}
 <!DOCTYPE html>
-<html lang="zh-Hans">
+<html lang="{{ LANGUAGE_CODE }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>{% block title %}图书管理系统{% endblock %}</title>
+    <title>{% block title %}{% trans "图书管理系统" %}{% endblock %}</title>
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -489,6 +490,50 @@
                 font-size: 0.85rem;
             }
         }
+    /* Global Toast Notifications */
+    .g-toast-container{position:fixed;top:90px;right:20px;z-index:99999;display:flex;flex-direction:column;gap:10px;pointer-events:none;}
+    .g-toast{pointer-events:auto;min-width:320px;max-width:420px;padding:16px 22px 16px 18px;border-radius:14px;color:#fff;font-size:.92rem;font-weight:500;display:flex;align-items:center;gap:12px;box-shadow:0 10px 40px rgba(0,0,0,.18);backdrop-filter:blur(12px);animation:g-toast-in .4s cubic-bezier(.175,.885,.32,1.275);position:relative;overflow:hidden;}
+    .g-toast::before{content:'';position:absolute;bottom:0;left:0;height:3px;background:rgba(255,255,255,.4);animation:g-toast-timer var(--toast-dur,4s) linear forwards;width:100%;}
+    .g-toast.g-toast-out{animation:g-toast-out .35s ease forwards;}
+    .g-toast-success{background:linear-gradient(135deg,#10b981,#059669);}
+    .g-toast-error{background:linear-gradient(135deg,#ef4444,#dc2626);}
+    .g-toast-warning{background:linear-gradient(135deg,#f59e0b,#d97706);}
+    .g-toast-info{background:linear-gradient(135deg,#667eea,#764ba2);}
+    .g-toast i{font-size:1.2rem;flex-shrink:0;}
+    .g-toast-close{position:absolute;top:8px;right:10px;background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;font-size:.85rem;padding:4px;}
+    .g-toast-close:hover{color:#fff;}
+    @keyframes g-toast-in{from{opacity:0;transform:translateX(80px) scale(.9);}to{opacity:1;transform:translateX(0) scale(1);}}
+    @keyframes g-toast-out{to{opacity:0;transform:translateX(80px) scale(.9);}}
+    @keyframes g-toast-timer{from{width:100%;}to{width:0%;}}
+    /* Global Confirm Modal */
+    .g-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);z-index:100000;display:none;align-items:center;justify-content:center;animation:g-modal-fade-in .25s ease;}
+    .g-modal-overlay.show{display:flex;}
+    .g-modal-card{background:#fff;border-radius:22px;padding:40px 36px 32px;max-width:420px;width:90%;box-shadow:0 25px 80px rgba(0,0,0,.2);animation:g-modal-pop .35s cubic-bezier(.175,.885,.32,1.275);text-align:center;}
+    .g-modal-icon{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:1.6rem;color:#fff;}
+    .g-modal-icon.confirm-icon{background:linear-gradient(135deg,#f59e0b,#d97706);}
+    .g-modal-icon.info-icon{background:linear-gradient(135deg,#667eea,#764ba2);}
+    .g-modal-icon.danger-icon{background:linear-gradient(135deg,#ef4444,#dc2626);}
+    .g-modal-icon.success-icon{background:linear-gradient(135deg,#10b981,#059669);}
+    .g-modal-title{font-size:1.25rem;font-weight:700;color:#1a1a2e;margin-bottom:10px;}
+    .g-modal-text{color:#6b7280;font-size:.95rem;line-height:1.6;margin-bottom:28px;}
+    .g-modal-actions{display:flex;gap:12px;justify-content:center;}
+    .g-modal-btn{padding:11px 28px;border-radius:12px;border:none;font-weight:600;font-size:.92rem;cursor:pointer;transition:all .3s;}
+    .g-modal-btn:hover{transform:translateY(-2px);}
+    .g-modal-btn-cancel{background:#f3f4f6;color:#6b7280;}
+    .g-modal-btn-cancel:hover{background:#e5e7eb;}
+    .g-modal-btn-confirm{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;box-shadow:0 6px 20px rgba(102,126,234,.3);}
+    .g-modal-btn-confirm:hover{box-shadow:0 10px 30px rgba(102,126,234,.4);}
+    .g-modal-btn-danger{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;box-shadow:0 6px 20px rgba(239,68,68,.3);}
+    .g-modal-btn-danger:hover{box-shadow:0 10px 30px rgba(239,68,68,.4);}
+    @keyframes g-modal-fade-in{from{opacity:0;}to{opacity:1;}}
+    @keyframes g-modal-pop{from{opacity:0;transform:scale(.85) translateY(20px);}to{opacity:1;transform:scale(1) translateY(0);}}
+    /* WeChat Modal */
+    .wechat-modal-card{background:#fff;border-radius:22px;padding:40px 36px 32px;max-width:380px;width:90%;box-shadow:0 25px 80px rgba(0,0,0,.2);animation:g-modal-pop .35s cubic-bezier(.175,.885,.32,1.275);text-align:center;}
+    .wechat-brand{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#07c160,#06ad56);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;box-shadow:0 8px 25px rgba(7,193,96,.3);}
+    .wechat-brand i{font-size:2rem;color:#fff;}
+    .wechat-id-box{background:#f0fdf4;border:2px dashed #07c160;border-radius:14px;padding:16px 24px;margin:18px 0 8px;font-size:1.3rem;font-weight:700;color:#065f46;letter-spacing:1px;user-select:all;}
+    .wechat-copy-btn{background:linear-gradient(135deg,#07c160,#06ad56);color:#fff;border:none;padding:10px 28px;border-radius:12px;font-weight:600;cursor:pointer;font-size:.9rem;transition:all .3s;margin-top:14px;}
+    .wechat-copy-btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(7,193,96,.3);}
     </style>
     
     {% block extra_css %}{% endblock %}
@@ -497,9 +542,9 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="{% url 'manager:public_home' %}" style="font-weight: 700; font-size: 1.4rem;">
-                <i class="fas fa-book-open" style="margin-right: 10px; font-size: 1.5rem; color: #fff;"></i>
-                <span style="background: linear-gradient(90deg, #fff, #e0f2ff); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: transparent;" data-zh="图书管理系统" data-en="Book Management System">图书管理系统</span>
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'manager:public_home' %}" style="font-weight: 700; font-size: 1.2rem;">
+                <i class="fas fa-book-open" style="margin-right: 8px; font-size: 1.3rem; color: #fff;"></i>
+                <span style="background: linear-gradient(90deg, #fff, #e0f2ff); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: transparent;">{% trans "图书管理系统" %}</span>
             </a>
             
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" style="padding: 8px 12px;">
@@ -507,51 +552,72 @@
             </button>
             
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto ms-lg-4">
+                <ul class="navbar-nav me-auto ms-lg-3">
                     <li class="nav-item">
-                        <a class="nav-link px-3 py-2" href="{% url 'manager:public_home' %}" style="font-weight: 500; transition: all 0.3s ease; border-radius: 8px;">
-                            <i class="fas fa-home me-1"></i> <span data-zh="首页" data-en="Home">首页</span>
+                        <a class="nav-link px-2 py-2" href="{% url 'manager:public_home' %}" style="font-weight: 500; font-size: 0.9rem; transition: all 0.3s ease; border-radius: 8px;">
+                            <i class="fas fa-home me-1"></i><span>{% trans "首页" %}</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link px-3 py-2" href="{% url 'manager:public_books' %}" style="font-weight: 500; transition: all 0.3s ease; border-radius: 8px;">
-                            <i class="fas fa-book me-1"></i> <span data-zh="图书目录" data-en="Books">图书目录</span>
+                        <a class="nav-link px-2 py-2" href="{% url 'manager:public_books' %}" style="font-weight: 500; font-size: 0.9rem; transition: all 0.3s ease; border-radius: 8px;">
+                            <i class="fas fa-book me-1"></i><span>{% trans "图书目录" %}</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link px-3 py-2" href="{% url 'manager:public_authors' %}" style="font-weight: 500; transition: all 0.3s ease; border-radius: 8px;">
-                            <i class="fas fa-user-edit me-1"></i> <span data-zh="作者" data-en="Authors">作者</span>
+                        <a class="nav-link px-2 py-2" href="{% url 'manager:public_authors' %}" style="font-weight: 500; font-size: 0.9rem; transition: all 0.3s ease; border-radius: 8px;">
+                            <i class="fas fa-user-edit me-1"></i><span>{% trans "作者" %}</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link px-3 py-2" href="{% url 'manager:public_publishers' %}" style="font-weight: 500; transition: all 0.3s ease; border-radius: 8px;">
-                            <i class="fas fa-building me-1"></i> <span data-zh="出版社" data-en="Publishers">出版社</span>
+                        <a class="nav-link px-2 py-2" href="{% url 'manager:public_publishers' %}" style="font-weight: 500; font-size: 0.9rem; transition: all 0.3s ease; border-radius: 8px;">
+                            <i class="fas fa-building me-1"></i><span>{% trans "出版社" %}</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link px-3 py-2" href="{% url 'manager:track_order' %}" style="font-weight: 500; transition: all 0.3s ease; border-radius: 8px;">
-                            <i class="fas fa-search-location me-1"></i> <span data-zh="跟踪订单" data-en="Track Order">跟踪订单</span>
+                        <a class="nav-link px-2 py-2" href="{% url 'manager:track_order' %}" style="font-weight: 500; font-size: 0.9rem; transition: all 0.3s ease; border-radius: 8px;">
+                            <i class="fas fa-search-location me-1"></i><span>{% trans "跟踪订单" %}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-2 py-2" href="{% url 'manager:public_blog' %}" style="font-weight: 500; font-size: 0.9rem; transition: all 0.3s ease; border-radius: 8px;">
+                            <i class="fas fa-blog me-1"></i><span>{% trans "博客" %}</span>
                         </a>
                     </li>
                 </ul>
                 
-                <div class="d-flex align-items-center gap-3">
-                    <!-- Language Switcher -->
-                    <button id="languageSwitcher" onclick="toggleLanguage()" class="btn btn-sm d-flex align-items-center" style="background: rgba(255,255,255,0.15); color: #fff; padding: 8px 15px; border-radius: 25px; font-weight: 600; border: 2px solid rgba(255,255,255,0.3); transition: all 0.3s ease; backdrop-filter: blur(10px);">
-                        <i class="fas fa-globe me-2"></i> 
-                        <span id="langText">EN</span>
-                    </button>
+                <div class="d-flex align-items-center gap-2">
+                    <!-- Language Switcher Dropdown -->
+                    <div class="dropdown">
+                        <button class="btn btn-sm d-flex align-items-center dropdown-toggle" data-bs-toggle="dropdown" style="background: rgba(255,255,255,0.15); color: #fff; padding: 6px 12px; border-radius: 25px; font-weight: 600; font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.25); transition: all 0.3s ease; backdrop-filter: blur(10px);" id="languageDropdown">
+                            <i class="fas fa-globe me-2"></i>
+                            {% get_current_language as CURRENT_LANG %}
+                            {% if CURRENT_LANG == 'zh-hans' %}中文{% elif CURRENT_LANG == 'en' %}EN{% else %}FR{% endif %}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" style="min-width: 140px; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.15);">
+                            {% get_available_languages as LANGUAGES %}
+                            {% for lang_code, lang_name in LANGUAGES %}
+                            <li>
+                                <form action="{% url 'set_language' %}" method="post" class="m-0">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="language" value="{{ lang_code }}">
+                                    <input type="hidden" name="next" value="{{ request.path }}">
+                                    <button type="submit" class="dropdown-item d-flex align-items-center gap-2 {% if lang_code == CURRENT_LANG %}active{% endif %}" style="padding: 8px 16px; border-radius: 8px;">
+                                        {% if lang_code == 'zh-hans' %}🇨🇳{% elif lang_code == 'en' %}🇬🇧{% else %}🇫🇷{% endif %}
+                                        {{ lang_name }}
+                                    </button>
+                                </form>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                     
                     <a href="{% url 'manager:view_cart' %}" class="position-relative" style="text-decoration: none; transition: transform 0.3s ease;">
-                        <div class="d-flex align-items-center justify-content-center" style="width: 45px; height: 45px; background: rgba(255,255,255,0.15); border-radius: 50%; backdrop-filter: blur(10px); transition: all 0.3s ease;">
+                        <div class="d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background: rgba(255,255,255,0.15); border-radius: 50%; backdrop-filter: blur(10px); transition: all 0.3s ease;">
                             <i class="fas fa-shopping-cart" style="font-size: 1.2rem; color: #fff;"></i>
                         </div>
                         <span id="cart-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill" style="font-size: 0.7rem; background: linear-gradient(135deg, #e74c3c, #c0392b); padding: 4px 7px; box-shadow: 0 2px 8px rgba(231, 76, 60, 0.4);">
                             0
                         </span>
-                    </a>
-                    <a href="/manager/login/" class="btn btn-sm d-flex align-items-center" style="background: rgba(255,255,255,0.95); color: #4880ca; padding: 10px 20px; border-radius: 25px; font-weight: 600; text-decoration: none; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-                        <i class="fas fa-user-shield me-2"></i> <span data-zh="管理员登录" data-en="Admin Login">管理员登录</span>
                     </a>
                 </div>
             </div>
@@ -620,23 +686,26 @@
                     <div class="footer-section">
                         <div class="footer-logo">
                             <i class="fas fa-book-reader"></i>
-                            <h4 data-zh="图书管理系统" data-en="Book Management System">图书管理系统</h4>
+                            <h4>{% trans "图书管理系统" %}</h4>
                         </div>
-                        <p class="footer-description" data-zh="现代化的智能图书管理平台，为读者和管理员提供便捷、高效的图书查询、浏览和管理服务。致力于推广阅读文化，建设知识型社会。" data-en="A modern intelligent book management platform providing convenient and efficient book search, browsing and management services for readers and administrators. Dedicated to promoting reading culture and building a knowledge-based society.">
-                            现代化的智能图书管理平台，为读者和管理员提供便捷、高效的图书查询、浏览和管理服务。致力于推广阅读文化，建设知识型社会。
+                        <p class="footer-description">
+                            {% trans "现代化的智能图书管理平台，为读者和管理员提供便捷、高效的图书查询、浏览和管理服务。致力于推广阅读文化，建设知识型社会。" %}
                         </p>
                         <div class="social-links">
-                            <a href="#" class="social-link" title="微博">
-                                <i class="fab fa-weibo"></i>
+                            <a href="https://www.facebook.com/poires.gomai" class="social-link" title="Facebook" target="_blank" rel="noopener noreferrer">
+                                <i class="fab fa-facebook-f"></i>
                             </a>
-                            <a href="#" class="social-link" title="微信公众号">
+                            <a href="#" class="social-link" title="{% trans '微信' %}: bizkey2025" onclick="document.getElementById('wechatModal').style.display='flex'; return false;">
                                 <i class="fab fa-weixin"></i>
                             </a>
-                            <a href="#" class="social-link" title="GitHub">
+                            <a href="https://github.com/EspenQueston" class="social-link" title="GitHub" target="_blank" rel="noopener noreferrer">
                                 <i class="fab fa-github"></i>
                             </a>
-                            <a href="#" class="social-link" title="邮箱">
+                            <a href="mailto:bizkey2024@gmail.com" class="social-link" title="{% trans '邮箱' %}">
                                 <i class="fas fa-envelope"></i>
+                            </a>
+                            <a href="https://wa.me/8613520646854" class="social-link" title="WhatsApp" target="_blank" rel="noopener noreferrer">
+                                <i class="fab fa-whatsapp"></i>
                             </a>
                         </div>
                     </div>
@@ -645,14 +714,14 @@
                 <!-- Quick Navigation -->
                 <div class="col-lg-2 col-md-6">
                     <div class="footer-section">
-                        <h5 class="footer-title" data-zh="快速导航" data-en="Quick Links">快速导航</h5>
+                        <h5 class="footer-title">{% trans "快速导航" %}</h5>
                         <ul class="footer-links">
-                            <li><a href="{% url 'manager:public_home' %}"><i class="fas fa-chevron-right"></i><span data-zh="首页" data-en="Home">首页</span></a></li>
-                            <li><a href="{% url 'manager:public_books' %}"><i class="fas fa-chevron-right"></i><span data-zh="图书目录" data-en="Books">图书目录</span></a></li>
-                            <li><a href="{% url 'manager:public_authors' %}"><i class="fas fa-chevron-right"></i><span data-zh="作者列表" data-en="Authors">作者列表</span></a></li>
-                            <li><a href="{% url 'manager:public_publishers' %}"><i class="fas fa-chevron-right"></i><span data-zh="出版社" data-en="Publishers">出版社</span></a></li>
-                            <li><a href="{% url 'manager:track_order' %}"><i class="fas fa-chevron-right"></i><span data-zh="订单跟踪" data-en="Track Order">订单跟踪</span></a></li>
-
+                            <li><a href="{% url 'manager:public_home' %}"><i class="fas fa-chevron-right"></i><span>{% trans "首页" %}</span></a></li>
+                            <li><a href="{% url 'manager:public_books' %}"><i class="fas fa-chevron-right"></i><span>{% trans "图书目录" %}</span></a></li>
+                            <li><a href="{% url 'manager:public_authors' %}"><i class="fas fa-chevron-right"></i><span>{% trans "作者列表" %}</span></a></li>
+                            <li><a href="{% url 'manager:public_publishers' %}"><i class="fas fa-chevron-right"></i><span>{% trans "出版社" %}</span></a></li>
+                            <li><a href="{% url 'manager:track_order' %}"><i class="fas fa-chevron-right"></i><span>{% trans "订单跟踪" %}</span></a></li>
+                            <li><a href="{% url 'manager:public_blog' %}"><i class="fas fa-chevron-right"></i><span>{% trans "博客" %}</span></a></li>
                         </ul>
                     </div>
                 </div>
@@ -660,12 +729,12 @@
                 <!-- Services -->
                 <div class="col-lg-2 col-md-6">
                     <div class="footer-section">
-                        <h5 class="footer-title" data-zh="系统功能" data-en="Features">系统功能</h5>
+                        <h5 class="footer-title">{% trans "更多" %}</h5>
                         <ul class="footer-links">
-                            <li><a href="{% url 'manager:public_books' %}"><i class="fas fa-chevron-right"></i><span data-zh="图书查询" data-en="Book Search">图书查询</span></a></li>
-                            <li><a href="{% url 'manager:view_cart' %}"><i class="fas fa-chevron-right"></i><span data-zh="购物车" data-en="Shopping Cart">购物车</span></a></li>
-                            <li><a href="{% url 'manager:track_order' %}"><i class="fas fa-chevron-right"></i><span data-zh="订单跟踪" data-en="Order Tracking">订单跟踪</span></a></li>
-                            <li><a href="/manager/login/"><i class="fas fa-chevron-right"></i><span data-zh="管理后台" data-en="Admin Panel">管理后台</span></a></li>
+                            <li><a href="{% url 'manager:public_about' %}"><i class="fas fa-chevron-right"></i><span>{% trans "关于我们" %}</span></a></li>
+                            <li><a href="{% url 'manager:public_services' %}"><i class="fas fa-chevron-right"></i><span>{% trans "我们的服务" %}</span></a></li>
+                            <li><a href="{% url 'manager:public_contact' %}"><i class="fas fa-chevron-right"></i><span>{% trans "联系我们" %}</span></a></li>
+                            <li><a href="{% url 'manager:public_blog' %}"><i class="fas fa-chevron-right"></i><span>{% trans "博客" %}</span></a></li>
                         </ul>
                     </div>
                 </div>
@@ -673,34 +742,34 @@
                 <!-- Contact Information -->
                 <div class="col-lg-4 col-md-6">
                     <div class="footer-section">
-                        <h5 class="footer-title" data-zh="联系我们" data-en="Contact Us">联系我们</h5>
+                        <h5 class="footer-title">{% trans "联系我们" %}</h5>
                         <div class="contact-info">
                             <div class="contact-item">
                                 <i class="fas fa-map-marker-alt"></i>
                                 <div class="contact-details">
-                                    <strong data-zh="地址" data-en="Address">地址</strong>
-                                    <span data-zh="北京市海淀区中关村科技园区" data-en="Zhongguancun Science Park, Haidian District, Beijing">北京市海淀区中关村科技园区</span>
+                                    <strong>{% trans "地址" %}</strong>
+                                    <span>{% trans "北京市海淀区中关村科技园区" %}</span>
                                 </div>
                             </div>
                             <div class="contact-item">
                                 <i class="fas fa-phone"></i>
                                 <div class="contact-details">
-                                    <strong data-zh="电话" data-en="Phone">电话</strong>
-                                    <span>+86 136 7130 9752</span>
+                                    <strong>{% trans "电话" %}</strong>
+                                    <span>+86 135 2064 6854</span>
                                 </div>
                             </div>
                             <div class="contact-item">
                                 <i class="fas fa-envelope"></i>
                                 <div class="contact-details">
-                                    <strong data-zh="邮箱" data-en="Email">邮箱</strong>
-                                    <span> espoirmoukendi@gmail.com</span>
+                                    <strong>{% trans "邮箱" %}</strong>
+                                    <span>bizkey2024@gmail.com</span>
                                 </div>
                             </div>
                             <div class="contact-item">
                                 <i class="fas fa-clock"></i>
                                 <div class="contact-details">
-                                    <strong data-zh="服务时间" data-en="Service Hours">服务时间</strong>
-                                    <span data-zh="周一至周五 9:00-18:00" data-en="Monday - Friday 9:00-18:00">周一至周五 9:00-18:00</span>
+                                    <strong>{% trans "服务时间" %}</strong>
+                                    <span>{% trans "周一至周五 9:00-18:00" %}</span>
                                 </div>
                             </div>
                         </div>
@@ -708,7 +777,7 @@
                         <!-- Management Access -->
                         <div class="admin-access">
                             <a href="/manager/login/" class="btn btn-outline-light btn-sm">
-                                <i class="fas fa-user-shield"></i> <span data-zh="管理员入口" data-en="Admin Portal">管理员入口</span>
+                                <i class="fas fa-user-shield"></i> <span>{% trans "管理员入口" %}</span>
                             </a>
                         </div>
                     </div>
@@ -721,13 +790,13 @@
                 <div class="row align-items-center">
                     <div class="col-md-6">
                         <div class="copyright">
-                            <p>&copy; 2024 <span data-zh="图书管理系统" data-en="Book Management System">图书管理系统</span>. <span data-zh="保留所有权利" data-en="All rights reserved">保留所有权利</span>.</p>
+                            <p>&copy; 2024 <span>{% trans "图书管理系统" %}</span>. <span>{% trans "保留所有权利" %}</span>.</p>
                             <div class="legal-links">
-                                <a href="#" data-zh="隐私政策" data-en="Privacy Policy">隐私政策</a>
+                                <a href="#">{% trans "隐私政策" %}</a>
                                 <span>|</span>
-                                <a href="#" data-zh="使用条款" data-en="Terms of Use">使用条款</a>
+                                <a href="#">{% trans "使用条款" %}</a>
                                 <span>|</span>
-                                <a href="#" data-zh="网站地图" data-en="Sitemap">网站地图</a>
+                                <a href="#">{% trans "网站地图" %}</a>
                             </div>
                         </div>
                     </div>
@@ -738,7 +807,7 @@
                                 <strong>Django</strong> & <strong>PostgreSQL</strong>
                             </p>
                             <p class="version-info">
-                                <small>Version 2.0 | <span data-zh="最后更新: 2024年12月" data-en="Last Updated: December 2024">最后更新: 2024年12月</span></small>
+                                <small>Version 2.0 | <span>{% trans "最后更新: 2024年12月" %}</span></small>
                             </p>
                         </div>
                     </div>
@@ -812,47 +881,121 @@
             observer.observe(section);
         });
         
-        // Language Switcher System
-        let currentLanguage = localStorage.getItem('language') || 'zh';
-        
-        // Language translations for common elements
-        const translations = {
-            zh: {
-                // Navigation will use data attributes
-            },
-            en: {
-                // Navigation will use data attributes
-            }
-        };
-        
-        function toggleLanguage() {
-            currentLanguage = currentLanguage === 'zh' ? 'en' : 'zh';
-            localStorage.setItem('language', currentLanguage);
-            applyLanguage();
-        }
-        
-        function applyLanguage() {
-            // Update language button text
-            const langText = document.getElementById('langText');
-            if (langText) {
-                langText.textContent = currentLanguage === 'zh' ? 'EN' : '中文';
-            }
-            
-            // Update all elements with data-zh and data-en attributes
-            document.querySelectorAll('[data-zh][data-en]').forEach(element => {
-                element.textContent = element.getAttribute('data-' + currentLanguage);
-            });
-            
-            // Update HTML lang attribute
-            document.documentElement.lang = currentLanguage === 'zh' ? 'zh-Hans' : 'en';
-        }
-        
-        // Apply saved language on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            applyLanguage();
-        });
+        // Language Switcher - handled by Django i18n (server-side)
     </script>
-    
+
+    <!-- Global Toast Container -->
+    <div id="gToastContainer" class="g-toast-container"></div>
+
+    <!-- Global Confirm Modal -->
+    <div id="gConfirmModal" class="g-modal-overlay" onclick="if(event.target===this)gModalClose()">
+        <div class="g-modal-card">
+            <div id="gConfirmIcon" class="g-modal-icon confirm-icon"><i class="fas fa-question"></i></div>
+            <h5 id="gConfirmTitle" class="g-modal-title"></h5>
+            <p id="gConfirmText" class="g-modal-text"></p>
+            <div class="g-modal-actions">
+                <button class="g-modal-btn g-modal-btn-cancel" onclick="gModalClose()">{% trans "取消" %}</button>
+                <button id="gConfirmOk" class="g-modal-btn g-modal-btn-confirm">{% trans "确认" %}</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Info Modal -->
+    <div id="gInfoModal" class="g-modal-overlay" onclick="if(event.target===this)document.getElementById('gInfoModal').classList.remove('show')">
+        <div class="g-modal-card">
+            <div id="gInfoIcon" class="g-modal-icon info-icon"><i class="fas fa-info-circle"></i></div>
+            <h5 id="gInfoTitle" class="g-modal-title"></h5>
+            <p id="gInfoText" class="g-modal-text"></p>
+            <div class="g-modal-actions">
+                <button class="g-modal-btn g-modal-btn-confirm" onclick="document.getElementById('gInfoModal').classList.remove('show')">{% trans "知道了" %}</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- WeChat Modal -->
+    <div id="wechatModal" class="g-modal-overlay" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+        <div class="wechat-modal-card">
+            <div class="wechat-brand"><i class="fab fa-weixin"></i></div>
+            <h5 style="font-weight:700;color:#1a1a2e;margin-bottom:4px;">{% trans "微信" %} WeChat</h5>
+            <p style="color:#6b7280;font-size:.9rem;margin-bottom:0;">{% trans "扫描或复制ID添加好友" %}</p>
+            <div class="wechat-id-box" id="wechatIdText">bizkey2025</div>
+            <button class="wechat-copy-btn" onclick="navigator.clipboard.writeText('bizkey2025').then(function(){gToast(document.getElementById('wechatCopyMsg').textContent,'success')})">
+                <i class="fas fa-copy me-2"></i>{% trans "复制微信ID" %}
+            </button>
+            <span id="wechatCopyMsg" style="display:none">{% trans "微信ID已复制到剪贴板" %}</span>
+            <div style="margin-top:16px">
+                <button class="g-modal-btn g-modal-btn-cancel" onclick="document.getElementById('wechatModal').style.display='none'">{% trans "关闭" %}</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    /* ===== Global Toast System ===== */
+    function gToast(msg, type, duration) {
+        type = type || 'info';
+        duration = duration || 4000;
+        var icons = {success:'fa-check-circle',error:'fa-times-circle',warning:'fa-exclamation-triangle',info:'fa-info-circle'};
+        var container = document.getElementById('gToastContainer');
+        var toast = document.createElement('div');
+        toast.className = 'g-toast g-toast-' + type;
+        toast.style.setProperty('--toast-dur', duration + 'ms');
+        toast.innerHTML = '<i class="fas ' + (icons[type]||icons.info) + '"></i><span>' + msg + '</span><button class="g-toast-close" onclick="gToastRemove(this.parentElement)">&times;</button>';
+        container.appendChild(toast);
+        setTimeout(function(){ gToastRemove(toast); }, duration);
+    }
+    function gToastRemove(el) {
+        if (!el || el.classList.contains('g-toast-out')) return;
+        el.classList.add('g-toast-out');
+        setTimeout(function(){ if(el.parentElement) el.parentElement.removeChild(el); }, 350);
+    }
+
+    /* ===== Global Confirm Modal ===== */
+    var _gConfirmCb = null;
+    function gConfirm(msg, callback, opts) {
+        opts = opts || {};
+        var modal = document.getElementById('gConfirmModal');
+        var iconEl = document.getElementById('gConfirmIcon');
+        var okBtn = document.getElementById('gConfirmOk');
+        document.getElementById('gConfirmTitle').textContent = opts.title || '{% trans "确认操作" %}';
+        document.getElementById('gConfirmText').textContent = msg;
+        iconEl.className = 'g-modal-icon ' + (opts.danger ? 'danger-icon' : 'confirm-icon');
+        iconEl.innerHTML = '<i class="fas ' + (opts.danger ? 'fa-exclamation-triangle' : 'fa-question') + '"></i>';
+        okBtn.className = 'g-modal-btn ' + (opts.danger ? 'g-modal-btn-danger' : 'g-modal-btn-confirm');
+        okBtn.textContent = opts.okText || '{% trans "确认" %}';
+        _gConfirmCb = callback;
+        okBtn.onclick = function(){ var cb = _gConfirmCb; gModalClose(); if(cb) cb(); };
+        modal.classList.add('show');
+    }
+    function gModalClose() { document.getElementById('gConfirmModal').classList.remove('show'); _gConfirmCb = null; }
+
+    /* ===== Global Info Modal (replaces alert) ===== */
+    function gAlert(msg, opts) {
+        opts = opts || {};
+        var modal = document.getElementById('gInfoModal');
+        var iconEl = document.getElementById('gInfoIcon');
+        document.getElementById('gInfoTitle').textContent = opts.title || '{% trans "提示" %}';
+        document.getElementById('gInfoText').textContent = msg;
+        var iconType = opts.type || 'info';
+        var iconClasses = {info:'info-icon',success:'success-icon',error:'danger-icon',warning:'confirm-icon'};
+        var iconNames = {info:'fa-info-circle',success:'fa-check-circle',error:'fa-times-circle',warning:'fa-exclamation-triangle'};
+        iconEl.className = 'g-modal-icon ' + (iconClasses[iconType]||'info-icon');
+        iconEl.innerHTML = '<i class="fas ' + (iconNames[iconType]||'fa-info-circle') + '"></i>';
+        modal.classList.add('show');
+    }
+    </script>
+
+    <!-- Update cart badge on every page -->
+    <script>
+    (function() {
+        fetch('/manager/cart/count/')
+            .then(function(r){ return r.json(); })
+            .then(function(d){
+                var b = document.getElementById('cart-badge');
+                if (b) b.textContent = d.cart_count || 0;
+            }).catch(function(){});
+    })();
+    </script>
+
     {% block extra_js %}{% endblock %}
 </body>
 </html>

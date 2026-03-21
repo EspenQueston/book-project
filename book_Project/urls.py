@@ -6,11 +6,13 @@ from django.conf.urls.static import static
 
 def home_redirect(request):
     """Redirect root URL to manager app"""
-    return redirect('manager/')
+    return redirect('manager/public')
 
 # Main URL patterns
 urlpatterns = [
     path('admin/', admin.site.urls),  # Django admin
+    path('i18n/', include('django.conf.urls.i18n')),  # Language switching
+    path('rosetta/', include('rosetta.urls')),  # Translation interface
     path('manager/', include('manager.urls')),  # Public interface at /manager/
     path('', home_redirect, name='home'),  # Add this line for root URL
 ]
