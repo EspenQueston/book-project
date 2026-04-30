@@ -1,7 +1,7 @@
 {% extends 'public/base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans "订单跟踪" %} - {% trans "图书管理系统" %}{% endblock %}
+{% block title %}{% trans "订单跟踪" %} - {% trans "DUNO 360" %}{% endblock %}
 
 {% block content %}
 <style>
@@ -205,7 +205,317 @@
         margin-bottom: 20px;
         color: #dee2e6;
     }
+
+/* ===========================
+   MOBILE PWA STYLES (@max-width:768px)
+   =========================== */
+@media (max-width: 768px) {
+    /* Hide desktop track container on mobile */
+    .track-container {
+        display: none !important;
+    }
+
+    /* === Mobile Orders Page === */
+    .orders-mobile-page {
+        display: block !important;
+        background: #F5F5F5;
+        min-height: 100vh;
+        padding-bottom: 130px;
+    }
+
+    /* Sticky filter tabs */
+    .orders-filter-bar {
+        display: flex !important;
+        overflow-x: auto;
+        background: #fff;
+        border-bottom: 1px solid #f0f0f0;
+        position: sticky;
+        top: 56px;
+        z-index: 600;
+        scrollbar-width: none;
+        gap: 0;
+    }
+    .orders-filter-bar::-webkit-scrollbar { display: none; }
+    .orders-filter-tab {
+        flex-shrink: 0;
+        padding: 12px 14px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #666;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: all .15s;
+    }
+    .orders-filter-tab.active {
+        color: #667eea;
+        border-bottom-color: #667eea;
+    }
+
+    /* Search bar (mobile orders) */
+    .orders-mobile-search {
+        display: flex !important;
+        align-items: center;
+        gap: 8px;
+        background: #fff;
+        padding: 8px 12px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .orders-mobile-search input {
+        flex: 1;
+        border: 1px solid #eee;
+        border-radius: 20px;
+        padding: 8px 14px;
+        font-size: 13px;
+        background: #F5F5F5;
+        outline: none;
+    }
+    .orders-mobile-search input:focus { border-color: #667eea; }
+    .orders-mobile-search button {
+        width: 34px; height: 34px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border: none;
+        color: #fff;
+        font-size: 14px;
+        display: flex; align-items: center; justify-content: center;
+    }
+
+    /* Empty state */
+    .orders-empty {
+        text-align: center;
+        padding: 60px 24px;
+        color: #bbb;
+    }
+    .orders-empty i { font-size: 3.5rem; margin-bottom: 14px; }
+
+    /* Order card */
+    .order-mobile-card {
+        background: #fff;
+        border-radius: 12px;
+        margin: 8px 10px;
+        overflow: hidden;
+        box-shadow: 0 1px 6px rgba(0,0,0,.07);
+    }
+    .order-mobile-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 12px 8px;
+        border-bottom: 1px solid #f5f5f5;
+    }
+    .order-card-vendor {
+        font-size: 13px; font-weight: 700; color: #333;
+        display: flex; align-items: center; gap: 6px;
+    }
+    .order-card-vendor i { color: #667eea; }
+    .order-card-status {
+        font-size: 11px; font-weight: 700;
+        padding: 3px 10px; border-radius: 20px;
+    }
+    .order-card-status.pending   { background: #fff7e0; color: #f59e0b; }
+    .order-card-status.processing{ background: #e0f0ff; color: #667eea; }
+    .order-card-status.shipped   { background: #e8f5e9; color: #10b981; }
+    .order-card-status.delivered { background: #d1fae5; color: #059669; }
+    .order-card-status.cancelled { background: #fdecea; color: #E4393C; }
+
+    .order-mobile-items { padding: 8px 12px; }
+    .order-item-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        padding: 6px 0;
+        border-bottom: 1px solid #fafafa;
+    }
+    .order-item-row:last-child { border-bottom: none; }
+    .order-item-img {
+        width: 50px; height: 50px;
+        border-radius: 8px; object-fit: cover;
+        background: #f5f5f5; flex-shrink: 0;
+    }
+    .order-item-info { flex: 1; min-width: 0; }
+    .order-item-name { font-size: 13px; font-weight: 600; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .order-item-qty  { font-size: 11px; color: #999; margin-top: 2px; }
+    .order-item-price{ font-size: 13px; font-weight: 700; color: #E4393C; flex-shrink: 0; }
+
+    .order-mobile-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 12px;
+        border-top: 1px solid #f0f0f0;
+        background: #fafbff;
+    }
+    .order-footer-num { font-size: 11px; color: #bbb; }
+    .order-footer-total { font-size: 13px; font-weight: 700; color: #333; }
+    .order-footer-total span { color: #E4393C; }
+    .order-footer-actions { display: flex; gap: 6px; }
+    .order-btn-sm {
+        padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: 600;
+        border: none; cursor: pointer; text-decoration: none;
+        display: inline-flex; align-items: center; gap: 4px;
+    }
+    .order-btn-primary { background: linear-gradient(135deg,#667eea,#764ba2); color: #fff; }
+    .order-btn-outline { background: #fff; color: #667eea; border: 1px solid #667eea; }
+    .order-btn-pay { background: linear-gradient(135deg,#10b981,#059669); color: #fff; }
+    .order-btn-cancel { background: #fff; color: #E4393C; border: 1px solid #E4393C; }
+}
+
+@media (min-width: 769px) {
+    .orders-mobile-page { display: none !important; }
+    .orders-filter-bar { display: none !important; }
+    .orders-mobile-search { display: none !important; }
+}
 </style>
+
+<!-- ===== MOBILE-ONLY: PWA Orders Page ===== -->
+<div class="orders-mobile-page" style="display:none;">
+
+    <!-- Filter Tabs -->
+    <div class="orders-filter-bar">
+        <div class="orders-filter-tab active" data-filter="all" onclick="filterOrders('all', this)" data-zh="全部" data-en="All" data-fr="Tout">全部</div>
+        <div class="orders-filter-tab" data-filter="payment_pending" onclick="filterOrders('payment_pending', this)" data-zh="待付款" data-en="Pending" data-fr="En attente">待付款</div>
+        <div class="orders-filter-tab" data-filter="processing" onclick="filterOrders('processing', this)" data-zh="处理中" data-en="Processing" data-fr="En cours">处理中</div>
+        <div class="orders-filter-tab" data-filter="shipped" onclick="filterOrders('shipped', this)" data-zh="已发货" data-en="Shipped" data-fr="Livré">已发货</div>
+        <div class="orders-filter-tab" data-filter="delivered" onclick="filterOrders('delivered', this)" data-zh="已完成" data-en="Delivered" data-fr="Terminé">已完成</div>
+        <div class="orders-filter-tab" data-filter="cancelled" onclick="filterOrders('cancelled', this)" data-zh="已取消" data-en="Cancelled" data-fr="Annulé">已取消</div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="orders-mobile-search">
+        <input type="text" id="mobileOrderSearch" placeholder="搜索订单号..." oninput="searchOrders(this.value)">
+        <button onclick="searchOrders(document.getElementById('mobileOrderSearch').value)"><i class="fas fa-search"></i></button>
+    </div>
+
+    <!-- Orders List -->
+    <div id="ordersListMobile">
+
+    {% if orders %}
+    {% for order in orders %}
+    <div class="order-mobile-card" data-status="{{ order.status }}" data-num="{{ order.order_number|lower }}">
+        <!-- Card header -->
+        <div class="order-mobile-card-header">
+            <span class="order-card-vendor">
+                <i class="fas fa-book"></i>
+                <span data-zh="DUNO 图书" data-en="DUNO Books" data-fr="DUNO Livres">DUNO 图书</span>
+            </span>
+            <span class="order-card-status {% if order.status == 'payment_pending' or order.status == 'pending' %}pending{% elif order.status == 'processing' %}processing{% elif order.status == 'shipped' %}shipped{% elif order.status == 'delivered' %}delivered{% else %}cancelled{% endif %}">
+                {{ order.get_status_display }}
+            </span>
+        </div>
+        <!-- Items -->
+        <div class="order-mobile-items">
+            {% for item in order.items.all|slice:":2" %}
+            <div class="order-item-row">
+                {% if item.book and item.book.cover_image %}
+                <img class="order-item-img" src="{{ item.book.get_cover_url }}" alt="{{ item.book.name }}">
+                {% else %}
+                <div class="order-item-img d-flex align-items-center justify-content-center" style="background:#f0eaff;"><i class="fas fa-book" style="color:#667eea;font-size:20px;"></i></div>
+                {% endif %}
+                <div class="order-item-info">
+                    <div class="order-item-name">{% if item.book %}{{ item.book.name }}{% else %}{{ item.product_name|default:"商品" }}{% endif %}</div>
+                    <div class="order-item-qty">x{{ item.quantity }}</div>
+                </div>
+                <span class="order-item-price">¥{{ item.unit_price }}</span>
+            </div>
+            {% endfor %}
+            {% if order.items.count > 2 %}
+            <div style="font-size:12px;color:#999;text-align:center;padding:4px 0;">...还有 {{ order.items.count|add:"-2" }} 件商品</div>
+            {% endif %}
+        </div>
+        <!-- Footer -->
+        <div class="order-mobile-footer">
+            <span class="order-footer-num">{{ order.order_number }}</span>
+            <span class="order-footer-total">共 {{ order.items.count }} 件 合计 <span>¥{{ order.total_amount }}</span></span>
+            <div class="order-footer-actions">
+                <a href="{% url 'manager:order_confirmation' order.order_number %}" class="order-btn-sm order-btn-outline">
+                    <i class="fas fa-eye"></i> 详情
+                </a>
+                {% if order.status == 'payment_pending' %}
+                <button onclick="quickPayment('{{ order.order_number }}')" class="order-btn-sm order-btn-pay">
+                    <i class="fas fa-credit-card"></i> 付款
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    {% if mkt_orders %}
+    {% for morder in mkt_orders %}
+    <div class="order-mobile-card" data-status="{{ morder.status }}" data-num="{{ morder.order_number|lower }}">
+        <div class="order-mobile-card-header">
+            <span class="order-card-vendor">
+                <i class="fas fa-store"></i>
+                {% if morder.vendor %}<span>{{ morder.vendor.shop_name }}</span>{% else %}<span data-zh="市场" data-en="Marketplace" data-fr="Marché">市场</span>{% endif %}
+            </span>
+            <span class="order-card-status {% if morder.status == 'payment_pending' or morder.status == 'pending' %}pending{% elif morder.status == 'processing' or morder.status == 'paid' %}processing{% elif morder.status == 'shipped' %}shipped{% elif morder.status == 'delivered' %}delivered{% else %}cancelled{% endif %}">
+                {{ morder.get_status_display }}
+            </span>
+        </div>
+        <div class="order-mobile-items">
+            {% for item in morder.items.all|slice:":2" %}
+            <div class="order-item-row">
+                {% if item.product and item.product.image %}
+                <img class="order-item-img" src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                {% else %}
+                <div class="order-item-img d-flex align-items-center justify-content-center" style="background:#f3f0ff;"><i class="fas fa-store" style="color:#764ba2;font-size:20px;"></i></div>
+                {% endif %}
+                <div class="order-item-info">
+                    <div class="order-item-name">{% if item.product %}{{ item.product.name }}{% else %}商品{% endif %}</div>
+                    <div class="order-item-qty">x{{ item.quantity }}</div>
+                </div>
+                <span class="order-item-price">¥{{ item.unit_price }}</span>
+            </div>
+            {% endfor %}
+            {% if morder.items.count > 2 %}
+            <div style="font-size:12px;color:#999;text-align:center;padding:4px 0;">...还有 {{ morder.items.count|add:"-2" }} 件商品</div>
+            {% endif %}
+        </div>
+        <div class="order-mobile-footer">
+            <span class="order-footer-num">{{ morder.order_number }}</span>
+            <span class="order-footer-total">共 {{ morder.items.count }} 件 合计 <span>¥{{ morder.total_amount }}</span></span>
+            <div class="order-footer-actions">
+                <button class="order-btn-sm order-btn-outline" onclick="alert('{{ morder.order_number }}')">
+                    <i class="fas fa-eye"></i> 详情
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    {% if not orders and not mkt_orders %}
+    <div class="orders-empty">
+        <i class="fas fa-box-open"></i>
+        <p style="font-size:14px;" data-zh="暂无订单记录" data-en="No orders found" data-fr="Aucune commande">暂无订单记录</p>
+        <a href="{% url 'manager:public_books' %}" class="btn" style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-radius:20px;padding:10px 24px;font-size:13px;font-weight:600;text-decoration:none;">
+            <i class="fas fa-book me-2"></i><span data-zh="去购书" data-en="Browse Books" data-fr="Parcourir les livres">去购书</span>
+        </a>
+    </div>
+    {% endif %}
+
+    </div><!-- #ordersListMobile -->
+
+    <!-- If no login, show search form on mobile too -->
+    {% if not orders and not mkt_orders %}
+    <div style="padding:16px;">
+        <div style="background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 6px rgba(0,0,0,.07);">
+            <h6 style="font-weight:700;color:#333;margin-bottom:12px;" data-zh="查询订单" data-en="Track Order" data-fr="Suivre commande">查询订单</h6>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="search_type" value="order_number">
+                <div style="display:flex;gap:8px;">
+                    <input type="text" name="order_number" placeholder="输入订单号..." style="flex:1;border:1px solid #eee;border-radius:20px;padding:9px 14px;font-size:13px;background:#F5F5F5;outline:none;">
+                    <button type="submit" style="padding:9px 16px;background:linear-gradient(135deg,#667eea,#764ba2);border:none;border-radius:20px;color:#fff;font-size:13px;font-weight:600;">查询</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+</div><!-- .orders-mobile-page -->
 
 <div class="track-container">
     <!-- Header -->
@@ -296,11 +606,14 @@
     {% endif %}
 
     <!-- Multiple Orders Result (Email Search) -->
-    {% if orders %}
+    {% if orders or mkt_orders %}
     <div class="order-result">
         <h4 class="mb-4">
-            <i class="fas fa-list"></i> {% blocktrans with count=orders|length %}找到 {{ count }} 个订单{% endblocktrans %}
+            <i class="fas fa-list"></i> {% trans "查找到的订单" %}
         </h4>
+
+        {% if orders %}
+        <h5 class="mb-3"><i class="fas fa-book me-2"></i>{% trans "图书订单" %}</h5>
         {% for order in orders %}
         <div class="card mb-3" style="border-left: 4px solid #667eea;">
             <div class="card-body">
@@ -353,6 +666,65 @@
             </div>
         </div>
         {% endfor %}
+        {% endif %}
+
+        {% if mkt_orders %}
+        <h5 class="mb-3 {% if orders %}mt-4{% endif %}"><i class="fas fa-store me-2"></i>{% trans "市场订单" %}</h5>
+        {% for morder in mkt_orders %}
+        <div class="card mb-3" style="border-left: 4px solid #764ba2;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <h5 class="mb-1">
+                            <i class="fas fa-store"></i> {{ morder.order_number }}
+                        </h5>
+                        <small class="text-muted">
+                            {{ morder.created_at|date:"Y年m月d日 H:i" }}
+                        </small>
+                    </div>
+                    <div>
+                        <span class="order-status {% if morder.status == 'pending' or morder.status == 'payment_pending' %}status-pending{% elif morder.status == 'processing' or morder.status == 'paid' %}status-confirmed{% elif morder.status == 'shipped' %}status-shipped{% elif morder.status == 'delivered' %}status-delivered{% else %}status-cancelled{% endif %}">
+                            {{ morder.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <small class="text-muted">{% trans "订单金额" %}</small>
+                        <p class="mb-0 fw-bold text-success">¥{{ morder.total_amount }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted">{% trans "支付方式" %}</small>
+                        <p class="mb-0">{{ morder.get_payment_method_display }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted">{% trans "支付状态" %}</small>
+                        <p class="mb-0">
+                            <span class="badge {% if morder.payment_status == 'completed' %}bg-success{% elif morder.payment_status == 'pending' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                {{ morder.get_payment_status_display }}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                {% if morder.items.all %}
+                <div class="mt-2">
+                    {% for item in morder.items.all %}
+                    <small class="d-block text-muted">
+                        <span class="badge {% if item.item_type == 'course' %}bg-info{% elif item.item_type == 'supermarket' %}bg-warning text-dark{% else %}bg-success{% endif %}" style="font-size:0.6rem;">{{ item.get_item_type_display }}</span>
+                        {{ item.item_name }} x{{ item.quantity }}
+                    </small>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <div class="mt-3">
+                    <a href="{% url 'manager:order_confirmation' morder.order_number %}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-eye"></i> {% trans "查看详情" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
     </div>
     {% elif order %}
     <div class="order-result">
@@ -647,13 +1019,163 @@
         </div>
     </div>
     
-    {% elif request.method == 'POST' %}
+    {% elif request.method == 'POST' and not mkt_order %}
     <!-- No Order Found -->
     <div class="order-result">
         <div class="no-order-found">
             <i class="fas fa-search"></i>
             <h5>{% trans "未找到订单" %}</h5>
             <p>{% trans "请检查您输入的订单号是否正确，或联系客服获取帮助。" %}</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Single Marketplace Order Result -->
+    {% if mkt_order %}
+    <div class="order-result">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="mb-0"><i class="fas fa-store me-2"></i>{% trans "市场订单" %} #{{ mkt_order.order_number }}</h3>
+            <div>
+                <span class="order-status status-{{ mkt_order.status }}">
+                    {{ mkt_order.get_status_display }}
+                </span>
+                <span class="order-status payment-{{ mkt_order.payment_status }} ms-2">
+                    {{ mkt_order.get_payment_status_display }}
+                </span>
+            </div>
+        </div>
+
+        <div class="order-info">
+            <div class="info-card">
+                <div class="info-label">{% trans "客户姓名" %}</div>
+                <div class="info-value">{{ mkt_order.user_name|default:"未知" }}</div>
+            </div>
+            <div class="info-card">
+                <div class="info-label">{% trans "联系电话" %}</div>
+                <div class="info-value">{{ mkt_order.customer_phone|default:"未提供" }}</div>
+            </div>
+            <div class="info-card">
+                <div class="info-label">{% trans "订单金额" %}</div>
+                <div class="info-value">¥{{ mkt_order.total_amount }}</div>
+            </div>
+            <div class="info-card">
+                <div class="info-label">{% trans "下单时间" %}</div>
+                <div class="info-value">{{ mkt_order.created_at|date:"Y-m-d H:i" }}</div>
+            </div>
+            <div class="info-card">
+                <div class="info-label">{% trans "国家" %}</div>
+                <div class="info-value">{{ mkt_order.country }}</div>
+            </div>
+            <div class="info-card">
+                <div class="info-label">{% trans "支付方式" %}</div>
+                <div class="info-value">{{ mkt_order.get_payment_method_display }}</div>
+            </div>
+        </div>
+
+        <!-- Timeline -->
+        <h5 class="mb-3"><i class="fas fa-clock me-2"></i>{% trans "订单进度" %}</h5>
+        <div class="timeline">
+            <div class="timeline-item active">
+                <div class="timeline-icon"><i class="fas fa-shopping-cart"></i></div>
+                <div>
+                    <strong>{% trans "订单已创建" %}</strong>
+                    <p class="text-muted mb-0">{{ mkt_order.created_at|date:"m月d日 H:i" }}</p>
+                </div>
+            </div>
+            {% if mkt_order.payment_status == 'completed' %}
+            <div class="timeline-item active">
+                <div class="timeline-icon"><i class="fas fa-credit-card"></i></div>
+                <div>
+                    <strong>{% trans "支付完成" %}</strong>
+                    <p class="text-muted mb-0">{% if mkt_order.payment_completed_at %}{{ mkt_order.payment_completed_at|date:"m月d日 H:i" }}{% else %}{{ mkt_order.updated_at|date:"m月d日 H:i" }}{% endif %}</p>
+                </div>
+            </div>
+            {% else %}
+            <div class="timeline-item">
+                <div class="timeline-icon"><i class="fas fa-credit-card"></i></div>
+                <div>
+                    <strong>{% trans "等待支付" %}</strong>
+                    <p class="text-muted mb-0">{% trans "请尽快完成支付" %}</p>
+                </div>
+            </div>
+            {% endif %}
+            {% if mkt_order.status == 'processing' or mkt_order.status == 'shipped' or mkt_order.status == 'delivered' %}
+            <div class="timeline-item active">
+                <div class="timeline-icon"><i class="fas fa-cog"></i></div>
+                <div><strong>{% trans "处理中" %}</strong></div>
+            </div>
+            {% endif %}
+            {% if mkt_order.status == 'shipped' or mkt_order.status == 'delivered' %}
+            <div class="timeline-item active">
+                <div class="timeline-icon"><i class="fas fa-truck"></i></div>
+                <div><strong>{% trans "已发货" %}</strong></div>
+            </div>
+            {% endif %}
+            {% if mkt_order.status == 'delivered' %}
+            <div class="timeline-item active">
+                <div class="timeline-icon"><i class="fas fa-check-circle"></i></div>
+                <div><strong>{% trans "已送达" %}</strong><p class="text-muted mb-0">{{ mkt_order.updated_at|date:"m月d日 H:i" }}</p></div>
+            </div>
+            {% endif %}
+            {% if mkt_order.status == 'cancelled' %}
+            <div class="timeline-item active">
+                <div class="timeline-icon"><i class="fas fa-times"></i></div>
+                <div><strong>{% trans "订单已取消" %}</strong><p class="text-muted mb-0">{{ mkt_order.updated_at|date:"m月d日 H:i" }}</p></div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Order Items -->
+        {% if mkt_order.items.all %}
+        <h5 class="mb-3 mt-4"><i class="fas fa-box me-2"></i>{% trans "商品清单" %}</h5>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>{% trans "商品名称" %}</th>
+                        <th>{% trans "类型" %}</th>
+                        <th>{% trans "数量" %}</th>
+                        <th>{% trans "单价" %}</th>
+                        <th>{% trans "小计" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in mkt_order.items.all %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                {% if item.item_image %}
+                                <img src="{{ item.item_image }}" alt="{{ item.item_name }}" style="width: 40px; height: 40px; object-fit: contain; border-radius: 5px; margin-right: 10px;">
+                                {% endif %}
+                                <strong>{{ item.item_name }}</strong>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge {% if item.item_type == 'course' %}bg-info{% elif item.item_type == 'supermarket' %}bg-warning text-dark{% else %}bg-success{% endif %}">
+                                {{ item.get_item_type_display }}
+                            </span>
+                        </td>
+                        <td>{{ item.quantity }}</td>
+                        <td>¥{{ item.unit_price }}</td>
+                        <td><strong>¥{{ item.subtotal }}</strong></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="4" class="text-end">{% trans "总计" %}：</th>
+                        <th>¥{{ mkt_order.total_amount }}</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        {% endif %}
+
+        <!-- Contact Info -->
+        <div class="mt-4 p-3 bg-light rounded">
+            <h6><i class="fas fa-phone me-2"></i>{% trans "需要帮助？" %}</h6>
+            <p class="mb-0">{% trans "如果您对订单有任何疑问，请联系我们的客服" %}：</p>
+            <p class="mb-0">电话：400-123-4567 | 邮箱：service@bookstore.com</p>
         </div>
     </div>
     {% endif %}
@@ -717,6 +1239,45 @@ function getCookie(name) {
         }
     }
     return cookieValue;
+}
+
+// ===== Mobile Orders: filter + search =====
+(function() {
+    // Show mobile page only on mobile
+    function checkMobile() {
+        var mPage = document.querySelector('.orders-mobile-page');
+        if (!mPage) return;
+        if (window.innerWidth <= 768) {
+            mPage.style.display = 'block';
+        } else {
+            mPage.style.display = 'none';
+        }
+    }
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+})();
+
+function filterOrders(filter, tabEl) {
+    // Update active tab
+    document.querySelectorAll('.orders-filter-tab').forEach(function(t) { t.classList.remove('active'); });
+    if (tabEl) tabEl.classList.add('active');
+    // Filter cards
+    document.querySelectorAll('.order-mobile-card').forEach(function(card) {
+        var status = card.getAttribute('data-status') || '';
+        if (filter === 'all' || status === filter) {
+            card.style.display = '';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+function searchOrders(val) {
+    val = (val || '').toLowerCase().trim();
+    document.querySelectorAll('.order-mobile-card').forEach(function(card) {
+        var num = card.getAttribute('data-num') || '';
+        card.style.display = (!val || num.includes(val)) ? '' : 'none';
+    });
 }
 </script>
 {% endblock %}

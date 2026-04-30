@@ -100,7 +100,7 @@
 <body>
 <nav class="top-navbar">
     <a href="/manager/dashboard/" class="nav-brand">
-        <i class="fas fa-book-open"></i><span>图书管理系统</span>
+        <i class="fas fa-book-open"></i><span>DUNO 360</span>
     </a>
     <div class="nav-links">
         <a href="/manager/dashboard/" class="nav-link-btn"><i class="fas fa-tachometer-alt"></i>仪表盘</a>
@@ -243,6 +243,27 @@
         </div>
         {% endif %}
     </div>
+
+    {% if msg.session_key %}
+    <!-- Quick Reply (for chatbot customer service messages) -->
+    <div class="reply-section" style="margin-top: 20px; border-left: 4px solid #667eea;">
+        <h5><i class="fas fa-headset me-2" style="color:#667eea;"></i>快速回复（聊天客服）</h5>
+        <p class="text-muted small mb-3">此消息来自聊天窗口，回复将直接显示在用户的聊天界面中。</p>
+        {% if msg.admin_reply %}
+        <div class="alert alert-success" style="border-radius:12px;font-size:0.9rem;">
+            <strong>已回复：</strong>{{ msg.admin_reply }}
+            <br><small class="text-muted">回复时间：{{ msg.replied_at|date:"Y-m-d H:i" }}</small>
+        </div>
+        {% endif %}
+        <div class="mb-3">
+            <label class="form-label" style="font-size:0.82rem;font-weight:600;color:#64748b;">回复内容</label>
+            <textarea id="quickReplyBody" placeholder="输入回复内容..." style="width:100%;border:2px solid #e8ecf1;border-radius:14px;padding:14px 20px;font-size:1rem;min-height:100px;resize:vertical;"></textarea>
+        </div>
+        <button class="btn-action btn-reply" onclick="sendQuickReply()" id="quickReplyBtn" style="background:linear-gradient(135deg,#667eea,#764ba2);">
+            <i class="fas fa-paper-plane"></i>发送快速回复
+        </button>
+    </div>
+    {% endif %}
 </div>
 
 <script>
@@ -319,6 +340,38 @@ function sendReply() {
     });
 }
 
+function sendQuickReply() {
+    var body = document.getElementById('quickReplyBody').value.trim();
+    if (!body) { showToast('请输入回复内容', 'error'); return; }
+
+    var btn = document.getElementById('quickReplyBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>发送中...';
+
+    fetch('/manager/admin/contact-reply/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': CSRF},
+        body: 'id=' + MSG_ID + '&reply=' + encodeURIComponent(body)
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i>发送快速回复';
+        if (data.success) {
+            showToast('快速回复已发送');
+            document.getElementById('quickReplyBody').value = '';
+            setTimeout(function(){ location.reload(); }, 1200);
+        } else {
+            showToast(data.error || '发送失败', 'error');
+        }
+    })
+    .catch(function() {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i>发送快速回复';
+        showToast('网络错误', 'error');
+    });
+}
+
 function addLabel(msgId, labelId, el) {
     fetch('/manager/admin_messages/label_action/', {
         method: 'POST',
@@ -345,5 +398,6 @@ function removeLabel(msgId, labelId) {
     });
 }
 </script>
+<script src="/static/js/admin_i18n.js" defer></script>
 </body>
 </html>

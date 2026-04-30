@@ -1,0 +1,286 @@
+{% extends "marketplace/vendor/base.html" %}
+
+{% block title %}仪表板 - {{ vendor.company_name }}{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+
+{% block extra_vendor_css %}
+<style>
+    .stat-card { background: #fff; border-radius: 15px; padding: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); transition: all 0.3s; height: 100%; }
+    .stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+    .stat-icon { width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #fff; }
+    .stat-value { font-size: 1.8rem; font-weight: 800; color: #1e293b; }
+    .stat-label { font-size: 0.82rem; color: #64748b; font-weight: 500; }
+    .chart-card { background: #fff; border-radius: 15px; padding: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); margin-bottom: 24px; }
+    .chart-card h6 { font-weight: 700; color: #1e293b; margin-bottom: 16px; }
+    .chart-wrapper { position: relative; width: 100%; max-height: 280px; }
+    .order-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.88rem; }
+    .order-row:last-child { border-bottom: none; }
+    .quick-action { background: #fff; border-radius: 15px; padding: 22px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); text-align: center; transition: all 0.3s; text-decoration: none; color: inherit; display: block; }
+    .quick-action:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(102,126,234,0.15); color: inherit; }
+    .quick-action i { font-size: 1.8rem; margin-bottom: 8px; }
+</style>
+{% endblock %}
+
+{% block vendor_content %}
+<div class="page-header-card">
+    <div class="d-flex align-items-center justify-content-between">
+        <div>
+            <h4><i class="fas fa-chart-line me-2"></i>卖家仪表板</h4>
+            <p class="mb-0 opacity-75" style="font-size:0.9rem;">{{ vendor.company_name }} · 数据概览</p>
+        </div>
+        <span class="badge bg-light text-dark" style="font-size:0.8rem;"><i class="fas fa-clock me-1"></i>{% now "Y-m-d" %}</span>
+    </div>
+</div>
+
+<!-- Stats Row -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon me-3" style="background:linear-gradient(135deg,#667eea,#764ba2);"><i class="fas fa-shopping-bag"></i></div>
+                <div>
+                    <div class="stat-value">{{ product_count }}</div>
+                    <div class="stat-label">商品</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon me-3" style="background:linear-gradient(135deg,#f093fb,#f5576c);"><i class="fas fa-graduation-cap"></i></div>
+                <div>
+                    <div class="stat-value">{{ course_count }}</div>
+                    <div class="stat-label">课程</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon me-3" style="background:linear-gradient(135deg,#10b981,#34d399);"><i class="fas fa-yen-sign"></i></div>
+                <div>
+                    <div class="stat-value">¥{{ total_revenue|floatformat:0 }}</div>
+                    <div class="stat-label">总收入</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon me-3" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);"><i class="fas fa-fire"></i></div>
+                <div>
+                    <div class="stat-value">{{ total_product_sales }}</div>
+                    <div class="stat-label">总销量</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <a href="{% url 'marketplace:vendor_product_add' %}" class="quick-action">
+            <i class="fas fa-plus-circle d-block" style="color:#667eea;"></i>
+            <h6 class="fw-bold mb-0" style="font-size:0.88rem;">添加商品</h6>
+        </a>
+    </div>
+    <div class="col-6 col-md-3">
+        <a href="{% url 'marketplace:vendor_course_add' %}" class="quick-action">
+            <i class="fas fa-chalkboard-teacher d-block" style="color:#f093fb;"></i>
+            <h6 class="fw-bold mb-0" style="font-size:0.88rem;">添加课程</h6>
+        </a>
+    </div>
+    <div class="col-6 col-md-3">
+        <a href="{% url 'marketplace:vendor_products' %}" class="quick-action">
+            <i class="fas fa-list d-block" style="color:#10b981;"></i>
+            <h6 class="fw-bold mb-0" style="font-size:0.88rem;">管理商品</h6>
+        </a>
+    </div>
+    <div class="col-6 col-md-3">
+        <a href="{% url 'marketplace:vendor_courses' %}" class="quick-action">
+            <i class="fas fa-book-open d-block" style="color:#f59e0b;"></i>
+            <h6 class="fw-bold mb-0" style="font-size:0.88rem;">管理课程</h6>
+        </a>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="chart-card">
+            <h6><i class="fas fa-chart-area me-2" style="color:var(--primary-color);"></i>近7天收入趋势</h6>
+            <div class="chart-wrapper"><canvas id="revenueChart"></canvas></div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="chart-card">
+            <h6><i class="fas fa-chart-pie me-2" style="color:var(--primary-color);"></i>商品分类分布</h6>
+            <div class="chart-wrapper"><canvas id="categoryChart"></canvas></div>
+        </div>
+        <div class="chart-card">
+            <h6><i class="fas fa-balance-scale me-2" style="color:var(--primary-color);"></i>收入构成</h6>
+            <div class="d-flex gap-3">
+                <div class="flex-fill text-center p-3" style="background:rgba(102,126,234,0.06);border-radius:12px;">
+                    <div style="font-size:1.3rem;font-weight:800;color:#667eea;">¥{{ product_revenue|floatformat:0 }}</div>
+                    <small class="text-muted">商品收入</small>
+                </div>
+                <div class="flex-fill text-center p-3" style="background:rgba(240,147,251,0.06);border-radius:12px;">
+                    <div style="font-size:1.3rem;font-weight:800;color:#f093fb;">¥{{ course_revenue|floatformat:0 }}</div>
+                    <small class="text-muted">课程收入</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sub-stats -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card text-center" style="background:linear-gradient(135deg,rgba(16,185,129,0.06),rgba(5,150,105,0.03));">
+            <div style="font-size:1.6rem;font-weight:800;color:#10b981;">{{ active_products }}</div>
+            <small class="text-muted">上架商品</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card text-center" style="background:linear-gradient(135deg,rgba(239,68,68,0.06),rgba(220,38,38,0.03));">
+            <div style="font-size:1.6rem;font-weight:800;color:#ef4444;">{{ product_count|add:"-"|add:active_products|default:0 }}</div>
+            <small class="text-muted">下架商品</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card text-center" style="background:linear-gradient(135deg,rgba(102,126,234,0.06),rgba(118,75,162,0.03));">
+            <div style="font-size:1.6rem;font-weight:800;color:#667eea;">{{ active_courses }}</div>
+            <small class="text-muted">发布课程</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card text-center" style="background:linear-gradient(135deg,rgba(245,158,11,0.06),rgba(217,119,6,0.03));">
+            <div style="font-size:1.6rem;font-weight:800;color:#f59e0b;">{{ total_enrollments }}</div>
+            <small class="text-muted">课程注册</small>
+        </div>
+    </div>
+</div>
+
+<!-- Top Products + Recent Orders -->
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="chart-card">
+            <h6><i class="fas fa-trophy me-2" style="color:#f59e0b;"></i>热销商品 TOP 5</h6>
+            {% if top_products %}
+            {% for p in top_products %}
+            <div class="order-row">
+                <span class="badge bg-light text-dark" style="width:24px;">{{ forloop.counter }}</span>
+                <img src="{{ p.get_image_url }}" style="width:40px;height:40px;border-radius:8px;object-fit:cover;">
+                <div class="flex-grow-1" style="min-width:0;">
+                    <div class="fw-bold text-truncate" style="font-size:0.85rem;">{{ p.name }}</div>
+                    <small class="text-muted">¥{{ p.price }}</small>
+                </div>
+                <span class="badge" style="background:rgba(16,185,129,0.12);color:#10b981;">{{ p.sales_count }} 已售</span>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p class="text-center text-muted py-3">暂无销量数据</p>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="chart-card">
+            <h6><i class="fas fa-receipt me-2" style="color:#667eea;"></i>最近订单</h6>
+            {% if recent_orders %}
+            {% for order in recent_orders %}
+            <div class="order-row">
+                <span class="badge" style="background:rgba(102,126,234,0.1);color:#667eea;font-size:0.72rem;">{{ order.order_number|truncatechars:12 }}</span>
+                <div class="flex-grow-1">
+                    <div class="fw-bold" style="font-size:0.85rem;">{{ order.user_name|default:"匿名" }}</div>
+                    <small class="text-muted">{{ order.created_at|date:"m/d H:i" }}</small>
+                </div>
+                <span class="fw-bold" style="color:#ef4444;">¥{{ order.total_amount }}</span>
+                <span class="badge bg-{{ order.get_status_color }}">{{ order.get_status_display }}</span>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p class="text-center text-muted py-3">暂无订单</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_vendor_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+// Revenue Trend Chart
+const revCtx = document.getElementById('revenueChart').getContext('2d');
+new Chart(revCtx, {
+    type: 'line',
+    data: {
+        labels: {{ daily_labels|safe }},
+        datasets: [
+            {
+                label: '商品收入',
+                data: {{ daily_product_data|safe }},
+                borderColor: '#667eea',
+                backgroundColor: 'rgba(102,126,234,0.1)',
+                fill: true,
+                tension: 0.4,
+                borderWidth: 2,
+                pointRadius: 4,
+                pointBackgroundColor: '#667eea',
+            },
+            {
+                label: '课程收入',
+                data: {{ daily_course_data|safe }},
+                borderColor: '#f093fb',
+                backgroundColor: 'rgba(240,147,251,0.1)',
+                fill: true,
+                tension: 0.4,
+                borderWidth: 2,
+                pointRadius: 4,
+                pointBackgroundColor: '#f093fb',
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { font: { size: 12 } } } },
+        scales: {
+            y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' } },
+            x: { grid: { display: false } }
+        }
+    }
+});
+
+// Category Doughnut Chart
+const catLabels = {{ cat_labels|safe }};
+const catCounts = {{ cat_counts|safe }};
+if (catLabels.length > 0) {
+    const catCtx = document.getElementById('categoryChart').getContext('2d');
+    new Chart(catCtx, {
+        type: 'doughnut',
+        data: {
+            labels: catLabels,
+            datasets: [{
+                data: catCounts,
+                backgroundColor: ['#667eea','#f093fb','#10b981','#f59e0b','#ef4444','#06b6d4'],
+                borderWidth: 0,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%',
+            plugins: {
+                legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 10 } }
+            }
+        }
+    });
+} else {
+    document.getElementById('categoryChart').parentNode.innerHTML += '<p class="text-center text-muted mt-3">暂无分类数据</p>';
+}
+</script>
+{% endblock %}

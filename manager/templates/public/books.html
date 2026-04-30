@@ -1,7 +1,7 @@
 {% extends 'public/base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans "图书目录" %} - {% trans "图书管理系统" %}{% endblock %}
+{% block title %}{% trans "图书目录" %} - {% trans "DUNO 360" %}{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -70,12 +70,231 @@
         background: radial-gradient(circle, rgba(255,255,255,0.15) 2px, transparent 2px);
         background-size: 8px 8px;
     }
+    .wish-btn {
+        position: absolute; top: 12px; left: 12px; z-index: 5;
+        width: 36px; height: 36px; border-radius: 50%;
+        background: rgba(255,255,255,0.2); backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.3);
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; transition: all 0.3s; color: #fff; font-size: 0.95rem;
+    }
+    .wish-btn:hover { background: rgba(255,255,255,0.35); transform: scale(1.15); }
+    .wish-btn.active { background: #ef4444; border-color: #ef4444; }
+    @keyframes heart-pop { 0%{transform:scale(1);} 50%{transform:scale(1.3);} 100%{transform:scale(1);} }
+    .wish-btn.pop i { animation: heart-pop 0.35s ease; }
+
+    /* ===== MOBILE BOOKS PAGE ===== */
+    @media (max-width: 768px) {
+        /* Hide desktop hero and search section */
+        .books-desktop-hero, .books-desktop-search { display: none !important; }
+
+        /* Mobile search bar - orange style */
+        .books-mobile-search {
+            display: flex !important;
+            align-items: center;
+            gap: 8px;
+            background: #FF6000;
+            padding: 10px 12px;
+            position: sticky;
+            top: 56px;
+            z-index: 800;
+        }
+        .books-search-inner {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            background: #fff;
+            border-radius: 20px;
+            padding: 0 12px;
+            height: 38px;
+            gap: 6px;
+        }
+        .books-search-inner i { color: #999; font-size: 14px; }
+        .books-search-inner input {
+            flex: 1; border: none; background: transparent;
+            font-size: 13px; outline: none; color: #333; padding: 0;
+        }
+        .books-search-btn {
+            background: #fff; color: #FF6000;
+            border: none; border-radius: 18px;
+            padding: 6px 14px; font-size: 12px; font-weight: 700;
+            white-space: nowrap;
+        }
+
+        /* Filter tabs */
+        .books-filter-tabs {
+            display: flex !important;
+            gap: 0;
+            overflow-x: auto;
+            background: #fff;
+            border-bottom: 1px solid #f0f0f0;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            padding: 0 4px;
+        }
+        html[data-theme="dark"] .books-filter-tabs { background: #1e293b; border-bottom-color: #334155; }
+        .books-filter-tabs::-webkit-scrollbar { display: none; }
+        .bft-item {
+            flex: 0 0 auto;
+            padding: 10px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+            white-space: nowrap;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            text-decoration: none;
+        }
+        html[data-theme="dark"] .bft-item { color: #94a3b8; }
+        .bft-item.active { color: #FF6000; border-bottom-color: #FF6000; }
+
+        /* Books King Kong zone */
+        .books-king-kong {
+            display: grid !important;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0;
+            background: #fff;
+            padding: 10px 6px;
+            margin-bottom: 6px;
+        }
+        html[data-theme="dark"] .books-king-kong { background: #1e293b; }
+        .bkk-item {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 4px; padding: 6px 4px; text-decoration: none; color: #333;
+        }
+        html[data-theme="dark"] .bkk-item { color: #e2e8f0; }
+        .bkk-icon {
+            width: 48px; height: 48px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; color: #fff;
+        }
+        .bkk-item span { font-size: 10px; font-weight: 600; text-align: center; }
+
+        /* Mobile Books Feed (2-col waterfall) */
+        .books-mobile-feed {
+            display: grid !important;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            padding: 0 8px 8px;
+            background: #F5F5F5;
+        }
+        .bmf-card {
+            background: #fff; border-radius: 10px;
+            overflow: hidden; text-decoration: none; color: inherit;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            display: block;
+        }
+        html[data-theme="dark"] .bmf-card { background: #1e293b; }
+        .bmf-cover {
+            width: 100%; aspect-ratio: 2/3; object-fit: cover;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+        .bmf-cover-placeholder {
+            width: 100%; aspect-ratio: 2/3;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex; align-items: center; justify-content: center;
+            color: rgba(255,255,255,.6); font-size: 2rem;
+        }
+        .bmf-body { padding: 8px; }
+        .bmf-title { font-size: 12px; font-weight: 600; color: #333; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        html[data-theme="dark"] .bmf-title { color: #e2e8f0; }
+        .bmf-author { font-size: 11px; color: #999; margin-top: 2px; }
+        .bmf-price { font-size: 14px; font-weight: 800; color: #E4393C; margin-top: 4px; }
+        .bmf-free { font-size: 12px; font-weight: 800; color: #00A650; background: #e6f7ed; border-radius: 6px; padding: 1px 6px; display: inline-block; margin-top: 4px; }
+        .bmf-badge-type {
+            display: inline-block; font-size: 10px; font-weight: 700;
+            padding: 1px 6px; border-radius: 6px; margin-top: 3px;
+        }
+        /* Hide desktop grid on mobile */
+        .books-desktop-grid { display: none !important; }
+        /* Hide desktop quick links on mobile */
+        .books-desktop-quicklinks { display: none !important; }
+        /* Show mobile feed */
+        .books-mobile-search, .books-filter-tabs, .books-king-kong, .books-mobile-feed { display: block; }
+    }
+    @media (min-width: 769px) {
+        /* Hide mobile-only elements on desktop */
+        .books-mobile-search, .books-filter-tabs, .books-king-kong, .books-mobile-feed { display: none !important; }
+        .books-desktop-hero, .books-desktop-search, .books-desktop-grid, .books-desktop-quicklinks { display: block !important; }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Page Header with gradient background -->
-<section class="hero-section text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 0; margin-bottom: 30px;">
+
+<!-- ===== MOBILE ONLY: Books PWA Search Bar (orange) ===== -->
+<div class="books-mobile-search" style="display:none;">
+    <form class="books-search-inner" action="{% url 'manager:public_books' %}" method="get" id="booksMobileForm">
+        <i class="fas fa-search"></i>
+        <input type="text" name="search" placeholder="{% trans '搜索图书、课程...' %}" value="{{ search_query }}">
+        <i class="fas fa-qrcode" style="cursor:pointer;color:#FF6000;"></i>
+    </form>
+    <button class="books-search-btn" onclick="document.getElementById('booksMobileForm').submit()">{% trans "搜索" %}</button>
+</div>
+
+<!-- ===== MOBILE ONLY: Filter tabs ===== -->
+<div class="books-filter-tabs" style="display:none;">
+    <a href="{% url 'manager:public_books' %}" class="bft-item {% if not current_category %}active{% endif %}" data-zh="推荐" data-en="Featured" data-fr="Recommandés">推荐</a>
+    {% for cat in categories %}
+    <a href="{% url 'manager:public_books' %}?category={{ cat.slug }}" class="bft-item {% if current_category == cat.slug %}active{% endif %}" data-zh="{{ cat.name }}" data-en="{{ cat.name }}" data-fr="{{ cat.name }}">{{ cat.name }}</a>
+    {% endfor %}
+    <a href="/marketplace/courses/" class="bft-item" data-zh="课程" data-en="Courses" data-fr="Cours">课程</a>
+</div>
+
+<!-- ===== MOBILE ONLY: Books King Kong Zone (2×4) ===== -->
+<div class="books-king-kong" style="display:none;">
+    <a href="{% url 'manager:public_books' %}?sort=newest" class="bkk-item">
+        <div class="bkk-icon" style="background:linear-gradient(135deg,#667eea,#764ba2)"><i class="fas fa-certificate"></i></div>
+        <span data-zh="新书" data-en="New" data-fr="Nouveautés">新书</span>
+    </a>
+    <a href="{% url 'manager:public_books' %}?sort=popular" class="bkk-item">
+        <div class="bkk-icon" style="background:linear-gradient(135deg,#ef4444,#dc2626)"><i class="fas fa-fire"></i></div>
+        <span data-zh="畅销" data-en="Best" data-fr="Meilleures">畅销</span>
+    </a>
+    <a href="/marketplace/courses/" class="bkk-item">
+        <div class="bkk-icon" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed)"><i class="fas fa-video"></i></div>
+        <span data-zh="视频" data-en="Vidéo" data-fr="Vidéo">视频</span>
+    </a>
+    <a href="#flash-sales" class="bkk-item">
+        <div class="bkk-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706)"><i class="fas fa-bolt"></i></div>
+        <span data-zh="特价" data-en="Deals" data-fr="Offres">特价</span>
+    </a>
+    {% for cat in categories|slice:":4" %}
+    <a href="{% url 'manager:public_books' %}?category={{ cat.slug }}" class="bkk-item">
+        <div class="bkk-icon" style="background:{{ cat.color|default:'#667eea' }}"><i class="{{ cat.icon|default:'fas fa-book' }}"></i></div>
+        <span data-zh="{{ cat.name }}" data-en="{{ cat.name }}" data-fr="{{ cat.name }}">{{ cat.name }}</span>
+    </a>
+    {% endfor %}
+</div>
+
+<!-- ===== MOBILE ONLY: 2-column waterfall feed ===== -->
+<div class="books-mobile-feed" style="display:none;" id="booksMobileFeed">
+    {% for book in books %}
+    <a href="{% url 'manager:public_book_detail' book.id %}" class="bmf-card">
+        {% if book.cover_image %}
+        <img class="bmf-cover" src="{{ book.cover_image.url }}" alt="{{ book.name }}" loading="lazy">
+        {% else %}
+        <div class="bmf-cover-placeholder"><i class="fas fa-book"></i></div>
+        {% endif %}
+        <div class="bmf-body">
+            <div class="bmf-title">{{ book.name }}</div>
+            {% with authors=book.author_set.all %}
+            {% if authors %}<div class="bmf-author">{{ authors.0.name|default:"" }}</div>{% endif %}
+            {% endwith %}
+            {% if book.price == 0 %}
+            <div class="bmf-free" data-zh="免费" data-en="FREE" data-fr="GRATUIT">免费</div>
+            {% else %}
+            <div class="bmf-price">¥{{ book.price }}</div>
+            {% endif %}
+            <span class="bmf-badge-type" style="background:#ede9fe;color:#7c3aed;" data-zh="图书" data-en="Book" data-fr="Livre">图书</span>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+<div id="booksFeedLoader" style="display:none;text-align:center;padding:12px;color:#999;font-size:.85rem;"><i class="fas fa-spinner fa-spin"></i> <span data-zh="加载中..." data-en="Loading..." data-fr="Chargement...">加载中...</span></div>
+
+<!-- ===== DESKTOP: Page Header ===== -->
+<section class="books-desktop-hero hero-section text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 0; margin-bottom: 30px;">
     <div class="container">
         <div class="row">
             <div class="col-12 text-center">
@@ -87,15 +306,22 @@
 </section>
 
 <!-- Search and Filter Section -->
-<section class="py-4 bg-light mb-4">
+<section class="books-desktop-search py-4 bg-light mb-4">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-8">
-                <form method="get" class="d-flex gap-3">
+                <form method="get" class="d-flex gap-3 flex-wrap">
                     <input type="search" name="search" class="form-control search-box" 
-                           placeholder="{% trans '搜索图书名称...' %}" value="{{ search_query }}">
+                           placeholder="{% trans '搜索图书名称...' %}" value="{{ search_query }}" style="min-width:220px;flex:1;">
+                    <select name="category" class="form-select" style="width: auto;">
+                        <option value="" {% if not current_category %}selected{% endif %}>{% trans "所有分类" %}</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.slug }}" {% if current_category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
                     <select name="sort" class="form-select" style="width: auto;">
                         <option value="name" {% if sort_by == 'name' %}selected{% endif %}>{% trans "按名称排序" %}</option>
+                        <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>{% trans "最新上架" %}</option>
                         <option value="price_low" {% if sort_by == 'price_low' %}selected{% endif %}>{% trans "价格从低到高" %}</option>
                         <option value="price_high" {% if sort_by == 'price_high' %}selected{% endif %}>{% trans "价格从高到低" %}</option>
                         <option value="popular" {% if sort_by == 'popular' %}selected{% endif %}>{% trans "按销量排序" %}</option>
@@ -113,7 +339,7 @@
 </section>
 
 <!-- Books Grid -->
-<section class="py-5">
+<section class="books-desktop-grid py-5">
     <div class="container">
         {% if books %}
         <div class="row">
@@ -123,6 +349,9 @@
                     <!-- Book Cover Image -->
                     <a href="{% url 'manager:public_book_detail' book.id %}" style="text-decoration: none;">
                         <div class="book-cover-container">
+                            <button class="wish-btn" data-book-id="{{ book.id }}" onclick="event.preventDefault();event.stopPropagation();toggleWish(this,{{ book.id }})" title="{% trans '收藏' %}">
+                                <i class="far fa-heart"></i>
+                            </button>
                             <div class="book-cover-frame">
                                 {% if book.cover_image %}
                                     <img src="{{ book.cover_image.url }}" alt="{{ book.name }}">
@@ -136,9 +365,9 @@
                             <!-- Price badge overlay -->
                             <span style="position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; padding: 5px 14px; border-radius: 20px; font-weight: 700; font-size: 0.95rem; border: 1px solid rgba(255,255,255,0.3);">¥{{ book.price }}</span>
                             {% if book.inventory == 0 %}
-                            <span style="position: absolute; top: 12px; left: 12px; background: #ef4444; color: white; padding: 4px 10px; border-radius: 15px; font-size: 0.75rem; font-weight: 600;">{% trans "缺货" %}</span>
+                            <span style="position: absolute; bottom: 12px; left: 12px; background: #ef4444; color: white; padding: 4px 10px; border-radius: 15px; font-size: 0.75rem; font-weight: 600;">{% trans "缺货" %}</span>
                             {% elif book.inventory <= 5 %}
-                            <span style="position: absolute; top: 12px; left: 12px; background: #f59e0b; color: white; padding: 4px 10px; border-radius: 15px; font-size: 0.75rem; font-weight: 600;">{% blocktrans with inv=book.inventory %}仅剩{{ inv }}本{% endblocktrans %}</span>
+                            <span style="position: absolute; bottom: 12px; left: 12px; background: #f59e0b; color: white; padding: 4px 10px; border-radius: 15px; font-size: 0.75rem; font-weight: 600;">{% blocktrans with inv=book.inventory %}仅剩{{ inv }}本{% endblocktrans %}</span>
                             {% endif %}
                         </div>
                     </a>
@@ -199,7 +428,7 @@
 </section>
 
 <!-- Quick Links -->
-<section class="py-5 text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+<section class="py-5 text-white books-desktop-quicklinks" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)">
     <div class="container">
         <div class="row text-center">
             <div class="col-md-4 mb-3" data-aos="fade-up" data-aos-delay="100">
@@ -317,5 +546,81 @@ function showQuickMessage(message, type) {
 function getCsrfToken() {
     return '{{ csrf_token }}';
 }
+
+// Wishlist toggle for book cards
+function toggleWish(btn, bookId) {
+    var fd = new FormData();
+    fd.append('book_id', bookId);
+    fd.append('csrfmiddlewaretoken', getCsrfToken());
+    fetch('{% url "manager:user_toggle_wishlist" %}', { method: 'POST', body: fd })
+    .then(r => r.json()).then(d => {
+        if (d.login_required) { window.location.href = '{% url "manager:user_login" %}'; return; }
+        if (d.success) {
+            var icon = btn.querySelector('i');
+            btn.classList.toggle('active', d.wishlisted);
+            icon.className = d.wishlisted ? 'fas fa-heart' : 'far fa-heart';
+            btn.classList.add('pop');
+            setTimeout(() => btn.classList.remove('pop'), 400);
+            if (typeof gToast === 'function') gToast(d.message, 'success');
+            else showQuickMessage(d.message, 'success');
+        }
+    });
+}
+
+// Check wishlist state for all books on page load
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.wish-btn').forEach(function(btn) {
+        var bookId = btn.getAttribute('data-book-id');
+        fetch('/manager/public/user/wishlist/check/?book_id=' + bookId)
+        .then(r => r.json()).then(d => {
+            if (d.wishlisted) {
+                btn.classList.add('active');
+                btn.querySelector('i').className = 'fas fa-heart';
+            }
+        });
+    });
+});
+
+// ===== Mobile Books infinite scroll (2-col waterfall, loops) =====
+(function() {
+    if (window.innerWidth > 768) return;
+    var feedDiv = document.getElementById('booksMobileFeed');
+    var loader = document.getElementById('booksFeedLoader');
+    if (!feedDiv) return;
+    var page = 2;
+    var loading = false;
+    var sentinel = document.createElement('div');
+    feedDiv.parentElement.insertBefore(sentinel, feedDiv.nextSibling);
+    var observer = new IntersectionObserver(function(entries) {
+        if (entries[0].isIntersecting && !loading) loadBooks();
+    }, { rootMargin: '200px' });
+    observer.observe(sentinel);
+
+    function tagStyle(t) {
+        return t === 'book' ? 'background:#ede9fe;color:#7c3aed;' : t === 'course' ? 'background:#e0e7ff;color:#3730a3;' : 'background:#fef3c7;color:#d97706;';
+    }
+
+    function loadBooks() {
+        loading = true;
+        if (loader) loader.style.display = 'block';
+        fetch('/manager/api/feed/?feed=books&page=' + page)
+            .then(r => r.json())
+            .then(data => {
+                var items = data.items || [];
+                if (!items.length || items.length === 0) { page = 1; loading = false; if (loader) loader.style.display='none'; return; }
+                items.forEach(function(item) {
+                    var card = document.createElement('a');
+                    card.href = item.url;
+                    card.className = 'bmf-card';
+                    card.innerHTML = '<img class="bmf-cover" src="'+item.image+'" alt="'+item.name+'" loading="lazy" onerror="this.src=\'/static/img/default_cover.png\'"><div class="bmf-body"><div class="bmf-title">'+item.name+'</div><div class="bmf-price">¥'+item.price+'</div><span class="bmf-badge-type" style="'+tagStyle(item.type)+'">'+item.type_label+'</span></div>';
+                    feedDiv.appendChild(card);
+                });
+                page = data.has_more ? page + 1 : 1;
+                loading = false;
+                if (loader) loader.style.display = 'none';
+            })
+            .catch(function() { loading = false; if (loader) loader.style.display = 'none'; });
+    }
+})();
 </script>
 {% endblock %}

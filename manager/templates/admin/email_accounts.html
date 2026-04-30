@@ -92,6 +92,7 @@
                 </div>
             </div>
             <div class="account-actions">
+                <button class="btn-sm-action" onclick="editAccount({{ acc.id }}, '{{ acc.name|escapejs }}', '{{ acc.email_address|escapejs }}', '{{ acc.imap_host|escapejs }}', {{ acc.imap_port }}, {{ acc.imap_use_ssl|yesno:'true,false' }}, '{{ acc.smtp_host|escapejs }}', {{ acc.smtp_port }}, {{ acc.smtp_use_tls|yesno:'true,false' }}, '{{ acc.username|escapejs }}', {{ acc.is_default|yesno:'true,false' }}, {{ acc.is_active|yesno:'true,false' }})"><i class="fas fa-edit"></i> 编辑</button>
                 <button class="btn-sm-action" onclick="testAccount({{ acc.id }})"><i class="fas fa-plug"></i> 测试</button>
                 <button class="btn-sm-action danger" onclick="deleteAccount({{ acc.id }}, '{{ acc.email_address|escapejs }}')"><i class="fas fa-trash"></i></button>
             </div>
@@ -108,51 +109,71 @@
         </button>
 
         <div class="add-form" id="addForm">
-            <h6 style="font-weight:600;margin-bottom:16px;">添加新邮箱账户</h6>
+            <h6 style="font-weight:600;margin-bottom:16px;" id="formTitle">添加新邮箱账户</h6>
             <form id="accountForm">
+                <input type="hidden" name="action" id="formAction" value="add">
+                <input type="hidden" name="id" id="formId" value="">
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label" style="font-size:0.82rem;">名称</label>
-                        <input type="text" name="name" class="form-control form-control-sm" placeholder="例如: Business Email" required>
+                        <input type="text" name="name" id="fName" class="form-control form-control-sm" placeholder="例如: Business Email" required>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label" style="font-size:0.82rem;">邮箱地址</label>
-                        <input type="email" name="email_address" class="form-control form-control-sm" required>
+                        <input type="email" name="email_address" id="fEmail" class="form-control form-control-sm" required>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label" style="font-size:0.82rem;">IMAP 服务器</label>
-                        <input type="text" name="imap_host" class="form-control form-control-sm" value="imap.gmail.com">
+                        <input type="text" name="imap_host" id="fImapHost" class="form-control form-control-sm" value="imap.gmail.com">
                     </div>
                     <div class="col-md-2">
                         <label class="form-label" style="font-size:0.82rem;">IMAP 端口</label>
-                        <input type="number" name="imap_port" class="form-control form-control-sm" value="993">
+                        <input type="number" name="imap_port" id="fImapPort" class="form-control form-control-sm" value="993">
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-check mt-4">
+                            <input type="checkbox" name="imap_use_ssl" class="form-check-input" id="fImapSsl" checked>
+                            <label class="form-check-label" for="fImapSsl" style="font-size:0.82rem;">SSL</label>
+                        </div>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label" style="font-size:0.82rem;">SMTP 服务器</label>
-                        <input type="text" name="smtp_host" class="form-control form-control-sm" value="smtp.gmail.com">
+                        <input type="text" name="smtp_host" id="fSmtpHost" class="form-control form-control-sm" value="smtp.gmail.com">
                     </div>
                     <div class="col-md-2">
                         <label class="form-label" style="font-size:0.82rem;">SMTP 端口</label>
-                        <input type="number" name="smtp_port" class="form-control form-control-sm" value="587">
+                        <input type="number" name="smtp_port" id="fSmtpPort" class="form-control form-control-sm" value="587">
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-check mt-4">
+                            <input type="checkbox" name="smtp_use_tls" class="form-check-input" id="fSmtpTls" checked>
+                            <label class="form-check-label" for="fSmtpTls" style="font-size:0.82rem;">TLS</label>
+                        </div>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label" style="font-size:0.82rem;">用户名</label>
-                        <input type="text" name="username" class="form-control form-control-sm" placeholder="通常是邮箱地址">
+                        <input type="text" name="username" id="fUsername" class="form-control form-control-sm" placeholder="通常是邮箱地址">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label" style="font-size:0.82rem;">密码 / 应用密码</label>
-                        <input type="password" name="password" class="form-control form-control-sm">
+                        <input type="password" name="password" id="fPassword" class="form-control form-control-sm">
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-check">
-                            <input type="checkbox" name="is_default" class="form-check-input" id="isDefault">
-                            <label class="form-check-label" for="isDefault" style="font-size:0.82rem;">设为默认账户</label>
+                            <input type="checkbox" name="is_default" class="form-check-input" id="fIsDefault">
+                            <label class="form-check-label" for="fIsDefault" style="font-size:0.82rem;">设为默认账户</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <input type="checkbox" name="is_active" class="form-check-input" id="fIsActive" checked>
+                            <label class="form-check-label" for="fIsActive" style="font-size:0.82rem;">启用</label>
                         </div>
                     </div>
                 </div>
                 <div style="margin-top:16px;display:flex;gap:10px;">
                     <button type="submit" class="btn-primary-grad"><i class="fas fa-save"></i> 保存</button>
-                    <button type="button" class="btn-sm-action" onclick="document.getElementById('addForm').classList.remove('show')">取消</button>
+                    <button type="button" class="btn-sm-action" onclick="resetForm()">取消</button>
                 </div>
             </form>
         </div>
@@ -179,11 +200,44 @@ function showToast(msg, type) {
     setTimeout(function(){ el.remove(); }, 3500);
 }
 
+function resetForm() {
+    document.getElementById('addForm').classList.remove('show');
+    document.getElementById('formTitle').textContent = '添加新邮箱账户';
+    document.getElementById('formAction').value = 'add';
+    document.getElementById('formId').value = '';
+    document.getElementById('accountForm').reset();
+    document.getElementById('fImapSsl').checked = true;
+    document.getElementById('fSmtpTls').checked = true;
+    document.getElementById('fIsActive').checked = true;
+    document.getElementById('fImapHost').value = 'imap.gmail.com';
+    document.getElementById('fImapPort').value = '993';
+    document.getElementById('fSmtpHost').value = 'smtp.gmail.com';
+    document.getElementById('fSmtpPort').value = '587';
+}
+
+function editAccount(id, name, email, imapHost, imapPort, imapSsl, smtpHost, smtpPort, smtpTls, username, isDefault, isActive) {
+    document.getElementById('formTitle').textContent = '编辑邮箱账户';
+    document.getElementById('formAction').value = 'edit';
+    document.getElementById('formId').value = id;
+    document.getElementById('fName').value = name;
+    document.getElementById('fEmail').value = email;
+    document.getElementById('fImapHost').value = imapHost;
+    document.getElementById('fImapPort').value = imapPort;
+    document.getElementById('fImapSsl').checked = imapSsl;
+    document.getElementById('fSmtpHost').value = smtpHost;
+    document.getElementById('fSmtpPort').value = smtpPort;
+    document.getElementById('fSmtpTls').checked = smtpTls;
+    document.getElementById('fUsername').value = username;
+    document.getElementById('fPassword').value = '';
+    document.getElementById('fIsDefault').checked = isDefault;
+    document.getElementById('fIsActive').checked = isActive;
+    document.getElementById('addForm').classList.add('show');
+    document.getElementById('addForm').scrollIntoView({behavior: 'smooth', block: 'center'});
+}
+
 document.getElementById('accountForm').addEventListener('submit', function(e) {
     e.preventDefault();
     var fd = new FormData(this);
-    fd.append('action', 'add');
-    fd.append('is_default', document.getElementById('isDefault').checked ? 'on' : '');
 
     fetch('/manager/email/accounts/', {
         method: 'POST', credentials: 'same-origin',
@@ -199,6 +253,9 @@ document.getElementById('accountForm').addEventListener('submit', function(e) {
 });
 
 function testAccount(id) {
+    var btn = event.currentTarget;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 测试中...';
     var fd = new FormData();
     fd.append('action', 'test');
     fd.append('id', id);
@@ -210,13 +267,20 @@ function testAccount(id) {
     })
     .then(function(r){ return r.json(); })
     .then(function(d){
-        if (d.success) showToast(d.message);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-plug"></i> 测试';
+        if (d.success) showToast('✓ IMAP + SMTP 连接成功');
         else showToast(d.error || '连接失败', 'error');
+    })
+    .catch(function(){
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-plug"></i> 测试';
+        showToast('请求失败', 'error');
     });
 }
 
 function deleteAccount(id, email) {
-    if (!confirm('确定删除账户 ' + email + '？')) return;
+    if (!confirm('确定删除账户 ' + email + '？\n该账户的所有邮件也将被删除。')) return;
     var fd = new FormData();
     fd.append('action', 'delete');
     fd.append('id', id);
@@ -233,5 +297,6 @@ function deleteAccount(id, email) {
     });
 }
 </script>
+<script src="/static/js/admin_i18n.js" defer></script>
 </body>
 </html>

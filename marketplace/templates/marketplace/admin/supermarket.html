@@ -1,0 +1,84 @@
+{% extends "marketplace/admin/base.html" %}
+{% block title %}超市管理 - 市场管理{% endblock %}
+{% block nav_supermarket %}active{% endblock %}
+
+{% block admin_content %}
+<div class="page-header-card">
+    <div class="d-flex justify-content-between align-items-center">
+        <h4><i class="fas fa-apple-alt me-2"></i>超市管理</h4>
+        <a href="{% url 'marketplace:admin_supermarket_add' %}" class="btn btn-light rounded-pill px-4"><i class="fas fa-plus me-2"></i>添加商品</a>
+    </div>
+</div>
+
+<div class="toolbar d-flex justify-content-between align-items-center">
+    <form method="get" class="d-flex gap-2">
+        <input type="text" name="q" class="form-control" placeholder="搜索商品..." value="{{ query }}" style="max-width:300px; border-radius:10px;">
+        <button type="submit" class="btn btn-primary-gradient"><i class="fas fa-search"></i></button>
+    </form>
+    <span class="text-muted">共 {{ items.paginator.count }} 件商品</span>
+</div>
+
+<div class="content-card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th class="ps-4">商品</th>
+                    <th>价格</th>
+                    <th>单位</th>
+                    <th>库存</th>
+                    <th>销量</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td class="ps-4">
+                        <div class="d-flex align-items-center">
+                            <img src="{{ item.get_image_url }}" style="width:45px; height:45px; object-fit:cover; border-radius:8px; margin-right:12px;">
+                            <div>
+                                <div class="fw-bold">{{ item.name }}</div>
+                                <small class="text-muted">{{ item.brand|default:"" }} {{ item.origin|default:"" }}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="fw-bold text-danger">¥{{ item.price }}</span></td>
+                    <td>{{ item.get_unit_display }}</td>
+                    <td>
+                        {% if item.stock > 0 %}<span class="badge bg-success">{{ item.stock }}</span>{% else %}<span class="badge bg-danger">缺货</span>{% endif %}
+                    </td>
+                    <td>{{ item.sales_count }}</td>
+                    <td>
+                        {% if item.is_active %}<span class="badge bg-success">上架</span>{% else %}<span class="badge bg-secondary">下架</span>{% endif %}
+                        {% if item.is_organic %}<span class="badge bg-success"><i class="fas fa-leaf"></i></span>{% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'marketplace:admin_supermarket_edit' item.pk %}" class="btn btn-sm btn-outline-primary rounded-pill"><i class="fas fa-edit"></i></a>
+                        <form method="post" action="{% url 'marketplace:admin_supermarket_delete' item.pk %}" style="display:inline;" onsubmit="return confirm('确定删除？')">
+                            {% csrf_token %}
+                            <button class="btn btn-sm btn-outline-danger rounded-pill"><i class="fas fa-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center py-5 text-muted"><i class="fas fa-apple-alt d-block mb-2" style="font-size:2rem;"></i>暂无超市商品</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if items.has_other_pages %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if items.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ items.previous_page_number }}&q={{ query }}">&laquo;</a></li>{% endif %}
+        {% for num in items.paginator.page_range %}
+        <li class="page-item {% if items.number == num %}active{% endif %}"><a class="page-link" href="?page={{ num }}&q={{ query }}">{{ num }}</a></li>
+        {% endfor %}
+        {% if items.has_next %}<li class="page-item"><a class="page-link" href="?page={{ items.next_page_number }}&q={{ query }}">&raquo;</a></li>{% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "marketplace/admin/base.html" %}
+{% block title %}{% if category %}编辑分类{% else %}添加分类{% endif %} - 市场管理{% endblock %}
+{% block nav_categories %}active{% endblock %}
+
+{% block admin_content %}
+<div class="page-header-card">
+    <div class="d-flex justify-content-between align-items-center">
+        <h4><i class="fas fa-{% if category %}edit{% else %}folder-plus{% endif %} me-2"></i>{% if category %}编辑分类{% else %}添加分类{% endif %}</h4>
+        <a href="{% url 'marketplace:admin_categories' %}" class="btn btn-light rounded-pill px-4"><i class="fas fa-arrow-left me-2"></i>返回列表</a>
+    </div>
+</div>
+
+<div class="content-card p-4">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">分类名称 <span class="text-danger">*</span></label>
+                    <input type="text" name="name" class="form-control" value="{{ category.name|default:'' }}" required style="border-radius:10px;">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">English Name</label>
+                    <input type="text" name="name_en" class="form-control" value="{{ category.name_en|default:'' }}" style="border-radius:10px;">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">描述</label>
+                    <textarea name="description" class="form-control" rows="3" style="border-radius:10px;">{{ category.description|default:'' }}</textarea>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">所属版块 <span class="text-danger">*</span></label>
+                    <select name="section" class="form-select" required style="border-radius:10px;">
+                        <option value="products" {% if category.section == 'products' %}selected{% endif %}>商品</option>
+                        <option value="courses" {% if category.section == 'courses' %}selected{% endif %}>课程</option>
+                        <option value="supermarket" {% if category.section == 'supermarket' %}selected{% endif %}>超市</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">上级分类</label>
+                    <select name="parent" class="form-select" style="border-radius:10px;">
+                        <option value="">-- 无 (顶级分类) --</option>
+                        {% for p in parent_categories %}
+                        <option value="{{ p.id }}" {% if category.parent_id == p.id %}selected{% endif %}>{{ p.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">排序</label>
+                    <input type="number" name="display_order" class="form-control" value="{{ category.display_order|default:'0' }}" style="border-radius:10px;">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">分类图片</label>
+                    <input type="file" name="image" class="form-control" accept="image/*" style="border-radius:10px;">
+                    {% if category.image %}<small class="text-muted">当前: {{ category.image.name }}</small>{% endif %}
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input type="checkbox" name="is_active" class="form-check-input" id="isActive" {% if category.is_active or not category %}checked{% endif %}>
+                    <label class="form-check-label" for="isActive">启用</label>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary-gradient px-4"><i class="fas fa-save me-2"></i>{% if category %}保存修改{% else %}添加分类{% endif %}</button>
+            <a href="{% url 'marketplace:admin_categories' %}" class="btn btn-outline-secondary rounded-pill px-4">取消</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

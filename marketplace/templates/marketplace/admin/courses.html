@@ -1,0 +1,95 @@
+{% extends "marketplace/admin/base.html" %}
+{% block title %}课程管理 - 市场管理{% endblock %}
+{% block nav_courses %}active{% endblock %}
+
+{% block admin_content %}
+<style>
+    .course-thumb { width:48px !important; height:48px !important; min-width:48px !important; max-width:48px !important; object-fit:cover; border-radius:10px; flex-shrink:0; display:block; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
+    .course-thumb-placeholder { width:48px !important; height:48px !important; min-width:48px; border-radius:10px; background:linear-gradient(135deg,#8b5cf6,#a78bfa); display:flex; align-items:center; justify-content:center; flex-shrink:0; color:rgba(255,255,255,0.8); font-size:1.1rem; }
+</style>
+
+<div class="page-header-card">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h4 class="mb-1"><i class="fas fa-graduation-cap me-2"></i>课程管理</h4>
+            <small style="opacity:0.85;">管理平台所有课程</small>
+        </div>
+        <a href="{% url 'marketplace:admin_course_add' %}" class="btn btn-light rounded-pill px-4"><i class="fas fa-plus me-2"></i>添加课程</a>
+    </div>
+</div>
+
+<div class="toolbar d-flex justify-content-between align-items-center">
+    <form method="get" class="d-flex gap-2">
+        <input type="text" name="q" class="form-control" placeholder="搜索课程..." value="{{ query }}" style="max-width:280px; border-radius:10px;">
+        <button type="submit" class="btn btn-primary-gradient"><i class="fas fa-search"></i></button>
+    </form>
+    <span class="text-muted" style="font-size:0.88rem;">共 <strong>{{ courses.paginator.count }}</strong> 门课程</span>
+</div>
+
+<div class="content-card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0" style="table-layout:fixed;">
+            <thead>
+                <tr>
+                    <th class="ps-4" style="width:32%;">课程</th>
+                    <th style="width:12%;">讲师</th>
+                    <th style="width:10%;">价格</th>
+                    <th style="width:10%;">级别</th>
+                    <th style="width:10%;">注册人数</th>
+                    <th style="width:10%;">状态</th>
+                    <th style="width:16%;">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for course in courses %}
+                <tr>
+                    <td class="ps-4">
+                        <div class="d-flex align-items-center gap-3">
+                            {% if course.image %}
+                            <img src="{{ course.get_image_url }}" class="course-thumb" alt="{{ course.title }}">
+                            {% else %}
+                            <div class="course-thumb-placeholder"><i class="fas fa-play"></i></div>
+                            {% endif %}
+                            <div style="min-width:0; flex:1;">
+                                <div class="fw-bold" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ course.title }}</div>
+                                <small class="text-muted">{{ course.duration_hours }}h · {{ course.lessons_count }} 课时</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span style="font-size:0.88rem;">{{ course.instructor }}</span></td>
+                    <td><span class="fw-bold text-danger">¥{{ course.price }}</span></td>
+                    <td><span class="badge bg-info">{{ course.get_level_display }}</span></td>
+                    <td>{{ course.enrollment_count }}</td>
+                    <td>
+                        {% if course.is_active %}<span class="badge bg-success">发布</span>{% else %}<span class="badge bg-secondary">草稿</span>{% endif %}
+                        {% if course.is_featured %}<span class="badge bg-warning text-dark">推荐</span>{% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'marketplace:admin_course_content' course.pk %}" class="btn btn-sm btn-outline-success rounded-pill" title="管理内容"><i class="fas fa-video"></i></a>
+                        <a href="{% url 'marketplace:admin_course_edit' course.pk %}" class="btn btn-sm btn-outline-primary rounded-pill" title="编辑"><i class="fas fa-edit"></i></a>
+                        <form method="post" action="{% url 'marketplace:admin_course_delete' course.pk %}" style="display:inline;" onsubmit="return confirm('确定删除？')">
+                            {% csrf_token %}
+                            <button class="btn btn-sm btn-outline-danger rounded-pill" title="删除"><i class="fas fa-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center py-5 text-muted"><i class="fas fa-graduation-cap d-block mb-2" style="font-size:2rem;"></i>暂无课程</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if courses.has_other_pages %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if courses.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ courses.previous_page_number }}&q={{ query }}">&laquo;</a></li>{% endif %}
+        {% for num in courses.paginator.page_range %}
+        <li class="page-item {% if courses.number == num %}active{% endif %}"><a class="page-link" href="?page={{ num }}&q={{ query }}">{{ num }}</a></li>
+        {% endfor %}
+        {% if courses.has_next %}<li class="page-item"><a class="page-link" href="?page={{ courses.next_page_number }}&q={{ query }}">&raquo;</a></li>{% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

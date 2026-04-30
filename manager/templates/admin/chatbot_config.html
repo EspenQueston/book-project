@@ -1,0 +1,828 @@
+﻿{% load i18n %}
+<!DOCTYPE html>
+<html lang="zh-hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 聊天配置 - DUNO 360</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #06b6d4;
+        }
+        * { box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            padding-top: 76px;
+            color: #111827;
+        }
+
+        /* ===== Top Navbar (matches email_management) ===== */
+        .top-navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1050;
+            height: 76px; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 28px; box-shadow: 0 4px 20px rgba(102,126,234,0.3);
+        }
+        .nav-brand {
+            display: flex; align-items: center; gap: 10px;
+            color: white; text-decoration: none; font-weight: 800; font-size: 1.2rem;
+        }
+        .nav-brand i { font-size: 1.4rem; }
+        .nav-links { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+        .nav-link-btn {
+            color: rgba(255,255,255,0.85); text-decoration: none; padding: 8px 14px;
+            border-radius: 8px; font-size: 0.88rem; font-weight: 600;
+            display: flex; align-items: center; gap: 6px;
+            transition: all 0.2s; border: 1px solid transparent;
+        }
+        .nav-link-btn:hover { background: rgba(255,255,255,0.15); color: white; }
+        .nav-link-btn.active { background: rgba(255,255,255,0.22); color: white; border-color: rgba(255,255,255,0.25); }
+        .nav-badge { background: #ef4444; color: white; font-size: 0.65rem; padding: 2px 6px; border-radius: 10px; margin-left: 2px; font-weight: 700; }
+
+        /* ===== Main Container ===== */
+        .main-container { max-width: 1200px; margin: 0 auto; padding: 28px 20px 60px; }
+
+        /* ===== Header Card ===== */
+        .header-card {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white; border-radius: 16px; padding: 28px 32px; margin-bottom: 24px;
+            box-shadow: 0 8px 25px rgba(102,126,234,0.25); position: relative; overflow: hidden;
+        }
+        .header-card::before {
+            content: ''; position: absolute; top: -30px; right: -30px;
+            width: 120px; height: 120px; border-radius: 50%;
+            background: rgba(255,255,255,0.08);
+        }
+        .header-card::after {
+            content: ''; position: absolute; bottom: -40px; left: 30%;
+            width: 160px; height: 160px; border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+        }
+        .header-title { font-size: 1.5rem; font-weight: 800; margin: 0; }
+        .header-sub { font-size: 0.88rem; opacity: 0.85; margin-top: 6px; }
+        .stat-chip {
+            background: rgba(255,255,255,0.18); color: white;
+            padding: 6px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+            display: inline-flex; align-items: center; gap: 6px; backdrop-filter: blur(4px);
+        }
+
+        /* ===== Stats Row ===== */
+        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 14px; margin-bottom: 24px; }
+        .stat-card {
+            background: white; border-radius: 14px; padding: 18px;
+            border: 1px solid #e5e7eb; box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            display: flex; align-items: center; gap: 14px; transition: transform 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
+        .stat-icon { width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; flex-shrink: 0; }
+        .stat-body .stat-value { font-size: 1.55rem; font-weight: 800; line-height: 1.1; }
+        .stat-body .stat-label { font-size: 0.73rem; color: #6b7280; margin-top: 3px; font-weight: 500; }
+        .purple .stat-icon { background: #ede9fe; color: #7c3aed; }
+        .green  .stat-icon { background: #d1fae5; color: #059669; }
+        .orange .stat-icon { background: #fef3c7; color: #d97706; }
+        .blue   .stat-icon { background: #dbeafe; color: #2563eb; }
+        .teal   .stat-icon { background: #cffafe; color: #0891b2; }
+        .red    .stat-icon { background: #fee2e2; color: #dc2626; }
+
+        /* ===== Tabs ===== */
+        .tab-nav {
+            display: flex; gap: 4px; background: white; border-radius: 12px; padding: 5px;
+            border: 1px solid #e5e7eb; margin-bottom: 24px; width: fit-content;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); flex-wrap: wrap;
+        }
+        .tab-btn {
+            padding: 8px 16px; border: none; border-radius: 8px; background: transparent;
+            color: #6b7280; font-weight: 600; font-size: 0.83rem; cursor: pointer;
+            transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+        }
+        .tab-btn:hover { color: var(--primary-color); background: #eef0ff; }
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: #fff; box-shadow: 0 4px 12px rgba(102,126,234,0.3);
+        }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* ===== Content Cards ===== */
+        .card {
+            background: white; border-radius: 14px; border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 20px; overflow: hidden;
+        }
+        .card-header {
+            padding: 16px 22px; border-bottom: 1px solid #e5e7eb;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .card-header-title { display: flex; align-items: center; gap: 10px; font-size: 0.93rem; font-weight: 700; }
+        .icon-circle {
+            width: 30px; height: 30px; border-radius: 8px; background: #eef0ff;
+            color: var(--primary-color); display: flex; align-items: center; justify-content: center; font-size: 0.83rem;
+        }
+        .card-body { padding: 22px; }
+
+        /* ===== Provider Grid ===== */
+        .provider-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 10px; }
+        .provider-item {
+            border: 2px solid #e5e7eb; border-radius: 12px; padding: 12px 8px; cursor: pointer;
+            text-align: center; background: #fafbff; transition: all 0.2s;
+        }
+        .provider-item:hover { border-color: var(--primary-color); background: #eef0ff; transform: translateY(-2px); }
+        .provider-item.active {
+            border-color: var(--primary-color); background: linear-gradient(135deg,#eef0ff,#e8ebff);
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.15);
+        }
+        .provider-emoji { font-size: 1.6rem; margin-bottom: 5px; display: block; }
+        .provider-name { font-size: 0.72rem; font-weight: 700; }
+        .provider-badge { font-size: 0.58rem; font-weight: 700; padding: 2px 5px; border-radius: 4px; margin-top: 3px; display: inline-block; }
+        .badge-free { background: #d1fae5; color: #065f46; }
+        .badge-popular { background: #fef3c7; color: #92400e; }
+
+        /* ===== Forms ===== */
+        .form-group { margin-bottom: 16px; }
+        .form-group label { font-size: 0.84rem; font-weight: 600; margin-bottom: 6px; display: block; }
+        .label-hint { font-size: 0.74rem; color: #6b7280; font-weight: 400; margin-left: 4px; }
+        .form-control, .form-select, .form-textarea {
+            width: 100%; border: 1.5px solid #e5e7eb; border-radius: 10px; padding: 10px 14px;
+            font-size: 0.87rem; background: #fff; transition: border-color 0.2s, box-shadow 0.2s;
+            font-family: inherit; color: #111827;
+        }
+        .form-control:focus, .form-select:focus, .form-textarea:focus {
+            border-color: var(--primary-color); outline: none; box-shadow: 0 0 0 3px rgba(102,126,234,0.12);
+        }
+        .form-textarea { resize: vertical; min-height: 85px; line-height: 1.55; }
+        .input-group { display: flex; }
+        .input-group .form-control { border-radius: 10px 0 0 10px; }
+        .input-addon {
+            border: 1.5px solid #e5e7eb; border-left: none; background: #f9fafb;
+            border-radius: 0 10px 10px 0; padding: 0 14px; display: flex; align-items: center;
+            color: #6b7280; cursor: pointer; transition: background 0.2s;
+        }
+        .input-addon:hover { background: #f3f4f6; color: #111827; }
+        .form-hint { font-size: 0.73rem; color: #6b7280; margin-top: 4px; }
+
+        /* ===== Toggles ===== */
+        .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #f3f4f6; }
+        .toggle-row:last-child { border-bottom: none; padding-bottom: 0; }
+        .toggle-name { font-size: 0.87rem; font-weight: 600; }
+        .toggle-desc { font-size: 0.74rem; color: #6b7280; margin-top: 2px; }
+        .switch-wrap { position: relative; flex-shrink: 0; }
+        .switch-wrap input[type=checkbox] { position: absolute; opacity: 0; width: 0; height: 0; }
+        .switch-label { display: block; width: 44px; height: 24px; background: #d1d5db; border-radius: 12px; cursor: pointer; transition: background 0.25s; position: relative; }
+        .switch-label::after { content: ''; position: absolute; width: 18px; height: 18px; background: #fff; border-radius: 50%; top: 3px; left: 3px; transition: left 0.25s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .switch-wrap input:checked + .switch-label { background: var(--primary-color); }
+        .switch-wrap input:checked + .switch-label::after { left: 23px; }
+
+        /* ===== Slider ===== */
+        .slider-row { display: flex; align-items: center; gap: 12px; }
+        .slider-row input[type=range] { flex: 1; accent-color: var(--primary-color); }
+        .slider-val { min-width: 42px; text-align: center; font-weight: 800; background: linear-gradient(135deg,var(--primary-color),var(--secondary-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        /* ===== Test Panel ===== */
+        .test-box { background: #f8faff; border-radius: 12px; border: 1.5px dashed #c7d2fe; padding: 20px; }
+        .test-response { background: #fff; border-radius: 10px; border: 1.5px solid #e5e7eb; padding: 16px 20px; margin-top: 16px; font-size: 0.88rem; line-height: 1.65; white-space: pre-wrap; display: none; animation: fadeIn 0.3s; }
+        .test-response.error { border-color: #fca5a5; background: #fff5f5; color: var(--danger-color); }
+        .test-meta { font-size: 0.75rem; color: #6b7280; margin-top: 10px; padding-top: 10px; border-top: 1px solid #e5e7eb; display: flex; gap: 16px; flex-wrap: wrap; }
+
+        /* ===== Context Preview ===== */
+        .context-code { background: #0f172a; border-radius: 12px; padding: 20px; color: #e2e8f0; font-family: 'Courier New', monospace; font-size: 0.77rem; line-height: 1.7; max-height: 360px; overflow-y: auto; }
+        .context-code::-webkit-scrollbar { width: 4px; }
+        .context-code::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+
+        /* ===== Tables ===== */
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th { font-size: 0.73rem; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid #e5e7eb; padding: 10px 14px; text-align: left; background: #f9fafb; }
+        .data-table td { padding: 12px 14px; border-bottom: 1px solid #f3f4f6; font-size: 0.84rem; vertical-align: middle; }
+        .data-table tr:hover td { background: #fafbff; }
+        .data-table a { color: var(--primary-color); text-decoration: none; font-weight: 600; }
+        .data-table a:hover { text-decoration: underline; }
+
+        /* ===== Buttons ===== */
+        .btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; border-radius: 10px; font-size: 0.86rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; font-family: inherit; }
+        .btn-primary { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: #fff; box-shadow: 0 4px 14px rgba(102,126,234,0.3); }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(102,126,234,0.4); }
+        .btn-outline { background: transparent; color: var(--primary-color); border: 1.5px solid var(--primary-color); }
+        .btn-outline:hover { background: #eef0ff; }
+        .btn-ghost { background: #f1f5f9; color: #64748b; }
+        .btn-ghost:hover { background: #e2e8f0; }
+        .btn-danger { background: #fff1f2; color: var(--danger-color); border: 1.5px solid #fca5a5; }
+        .btn-danger:hover { background: #fee2e2; }
+        .btn-sm { padding: 6px 13px; font-size: 0.79rem; }
+        .btn-lg { padding: 12px 26px; font-size: 0.93rem; }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
+
+        /* ===== Badges ===== */
+        .badge-pill { padding: 3px 10px; border-radius: 20px; font-size: 0.71rem; font-weight: 700; white-space: nowrap; }
+        .badge-active   { background: #d1fae5; color: #065f46; }
+        .badge-inactive { background: #f3f4f6; color: #6b7280; }
+        .badge-user   { background: #ede9fe; color: #6d28d9; }
+        .badge-anon   { background: #f3f4f6; color: #6b7280; }
+        .session-key { font-family: monospace; font-size: 0.76rem; color: #4b5563; background: #f3f4f6; padding: 2px 8px; border-radius: 5px; }
+
+        /* ===== Context Indicator ===== */
+        .ctx-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.2); color: #fff; padding: 5px 12px; border-radius: 20px; font-size: 0.77rem; font-weight: 600; }
+        .ctx-dot { width: 7px; height: 7px; background: #10b981; border-radius: 50%; animation: blink 2s infinite; }
+
+        /* ===== Toasts ===== */
+        .toast-stack { position: fixed; top: 90px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+        .toast-item { display: flex; align-items: center; gap: 10px; padding: 13px 18px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); color: #fff; min-width: 270px; font-size: 0.87rem; font-weight: 500; animation: tIn 0.3s ease; }
+        .toast-item.success { background: linear-gradient(135deg, #10b981, #059669); }
+        .toast-item.error   { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .toast-item.info    { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); }
+
+        /* ===== Misc ===== */
+        .preset-btn { background: #fff; border: 1.5px solid #e5e7eb; border-radius: 20px; padding: 4px 12px; font-size: 0.77rem; cursor: pointer; color: #6b7280; transition: all 0.2s; font-family: inherit; }
+        .preset-btn:hover { border-color: var(--primary-color); color: var(--primary-color); background: #eef0ff; }
+        .model-card { border: 1.5px solid #e5e7eb; border-radius: 10px; padding: 13px; cursor: pointer; transition: all 0.2s; background: white; }
+        .model-card:hover { border-color: var(--primary-color); background: #eef0ff; transform: translateY(-1px); }
+        .model-id { font-size: 0.76rem; font-family: monospace; color: var(--primary-color); margin-bottom: 4px; word-break: break-all; }
+        .model-name { font-size: 0.82rem; font-weight: 600; }
+        .model-note { font-size: 0.73rem; color: #6b7280; margin-top: 3px; }
+        .hint-box { border-radius: 10px; padding: 12px 16px; font-size: 0.82rem; line-height: 1.6; }
+        .hint-blue { background: #f0f9ff; border: 1px solid #bae6fd; color: #0369a1; }
+
+        @keyframes tIn { from{opacity:0;transform:translateX(40px)} to{opacity:1;transform:translateX(0)} }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .main-container { padding: 16px 12px 40px; }
+            .stats-row { grid-template-columns: repeat(2,1fr); }
+            .header-card { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- TOP NAVBAR -->
+<nav class="top-navbar">
+    <a href="/manager/dashboard/" class="nav-brand">
+        <i class="fas fa-book-open"></i>
+        <span>DUNO 360</span>
+    </a>
+    <div class="nav-links">
+        <a href="/manager/dashboard/" class="nav-link-btn"><i class="fas fa-tachometer-alt"></i>图书仪表板</a>
+        <a href="/manager/book_list/" class="nav-link-btn"><i class="fas fa-book"></i>图书</a>
+        <a href="/manager/author_list/" class="nav-link-btn"><i class="fas fa-user-pen"></i>作者</a>
+        <a href="/manager/publisher_list/" class="nav-link-btn"><i class="fas fa-building"></i>出版社</a>
+        <a href="/manager/order_list/" class="nav-link-btn"><i class="fas fa-shopping-bag"></i>订单</a>
+        <a href="/marketplace/admin/dashboard/" class="nav-link-btn"><i class="fas fa-store"></i>市场</a>
+        <a href="/manager/blog_list/" class="nav-link-btn"><i class="fas fa-blog"></i>博客</a>
+        <a href="/manager/email/" class="nav-link-btn"><i class="fas fa-envelope"></i>消息</a>
+        <a href="/manager/admin/chatbot/" class="nav-link-btn active"><i class="fas fa-robot"></i>AI 聊天</a>
+                    <div class="nav-link-btn" style="color:rgba(255,255,255,0.85);padding:8px 14px;"><b>{{ name }}</b></div>
+        <a href="/manager/logout/" class="nav-link-btn" style="background:rgba(239,68,68,0.2);border-color:rgba(239,68,68,0.3);"><i class="fas fa-sign-out-alt"></i>退出</a>
+    </div>
+</nav>
+
+<!-- Toast Container -->
+<div class="toast-stack" id="toastStack"></div>
+
+<!-- MAIN CONTENT -->
+<div class="main-container">
+    <!-- Header Card -->
+    <div class="header-card">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3" style="position:relative;z-index:1;">
+            <div>
+                <nav aria-label="breadcrumb" class="mb-2">
+                    <ol class="breadcrumb mb-0" style="--bs-breadcrumb-divider-color:rgba(255,255,255,0.5);">
+                        <li class="breadcrumb-item"><a href="/manager/dashboard/" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;">图书仪表板</a></li>
+                        <li class="breadcrumb-item active" style="color:white;font-size:0.85rem;">AI 聊天配置</li>
+                    </ol>
+                </nav>
+                <h1 class="header-title"><i class="fas fa-cog me-2"></i>AI 聊天配置</h1>
+                <p class="header-sub">配置 AI 助手 · 管理 API 密钥 · 监控对话 · 实时平台数据</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <span class="ctx-badge"><span class="ctx-dot"></span>实时数据</span>
+                <span class="stat-chip"><i class="fas fa-book"></i>{{ total_books }} 本书</span>
+                <span class="stat-chip"><i class="fas fa-user-pen"></i>{{ total_authors }} 位作者</span>
+                <span class="stat-chip"><i class="fas fa-store"></i>{{ total_products }} 件商品</span>
+                <span class="stat-chip"><i class="fas fa-graduation-cap"></i>{{ total_courses }} 门课程</span>
+                <span class="stat-chip"><i class="fas fa-shopping-basket"></i>{{ total_supermarket }} 超市商品</span>
+                <span class="stat-chip">
+                    <i class="fas fa-circle" style="font-size:0.45rem;color:{% if config.is_active %}#10b981{% else %}#ef4444{% endif %}"></i>
+                    {% if config.is_active %}运行中{% else %}已禁用{% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="stats-row">
+        <div class="stat-card purple">
+            <div class="stat-icon"><i class="fas fa-comments"></i></div>
+            <div class="stat-body"><div class="stat-value">{{ total_sessions }}</div><div class="stat-label">总对话数</div></div>
+        </div>
+        <div class="stat-card green">
+            <div class="stat-icon"><i class="fas fa-comment-dots"></i></div>
+            <div class="stat-body"><div class="stat-value">{{ total_messages }}</div><div class="stat-label">总消息数</div></div>
+        </div>
+        <div class="stat-card orange">
+            <div class="stat-icon"><i class="fas fa-plug"></i></div>
+            <div class="stat-body"><div class="stat-value" style="font-size:0.95rem;margin-top:6px;">{{ config.get_provider_display|default:"—" }}</div><div class="stat-label">当前供应商</div></div>
+        </div>
+        <div class="stat-card {% if config.is_active %}green{% else %}red{% endif %}">
+            <div class="stat-icon"><i class="fas fa-toggle-{% if config.is_active %}on{% else %}off{% endif %}"></i></div>
+            <div class="stat-body"><div class="stat-value" style="font-size:0.95rem;margin-top:6px;">{% if config.is_active %}运行中{% else %}已禁用{% endif %}</div><div class="stat-label">小部件状态</div></div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tab-nav">
+        <button class="tab-btn active" id="tbtn-settings" onclick="switchTab('settings',this)"><i class="fas fa-cog"></i> 配置</button>
+        <button class="tab-btn" id="tbtn-context" onclick="switchTab('context',this)"><i class="fas fa-database"></i> 平台上下文</button>
+        <button class="tab-btn" id="tbtn-test" onclick="switchTab('test',this)"><i class="fas fa-flask"></i> 测试</button>
+        <button class="tab-btn" id="tbtn-sessions" onclick="switchTab('sessions',this)"><i class="fas fa-history"></i> 对话记录</button>
+        <button class="tab-btn" id="tbtn-guide" onclick="switchTab('guide',this)"><i class="fas fa-key"></i> 免费 API 指南</button>
+    </div>
+
+    <!--  SETTINGS TAB  -->
+    <div id="tab-settings" class="tab-panel active">
+        <form id="configForm">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="save">
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-header-title"><span class="icon-circle"><i class="fas fa-brain"></i></span>AI 供应商选择</div>
+                </div>
+                <div class="card-body">
+                    <div class="provider-grid" id="providerGrid">
+                        {% for val, label in ai_providers %}
+                        <div class="provider-item {% if config.provider == val %}active{% endif %}" onclick="selectProvider('{{ val }}',this)" data-val="{{ val }}">
+                            <span class="provider-emoji">{% if val == 'openai' %}{% elif val == 'anthropic' %}{% elif val == 'google' %}{% elif val == 'qwen' %}{% elif val == 'deepseek' %}{% elif val == 'openrouter' %}{% else %}{% endif %}</span>
+                            <div class="provider-name">{{ label }}</div>
+                            {% if val == 'openrouter' %}<span class="provider-badge badge-free">FREE</span>{% endif %}
+                            {% if val == 'openai' %}<span class="provider-badge badge-popular">Popular</span>{% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="provider" id="providerInput" value="{{ config.provider|default:'openrouter' }}">
+                    <div class="hint-box hint-blue mt-3" id="providerHint"><i class="fas fa-info-circle me-2"></i><span id="providerHintText"></span></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><div class="card-header-title"><span class="icon-circle"><i class="fas fa-key"></i></span>API 凭证 &amp; 模型</div></div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-lg-7">
+                            <div class="form-group mb-0">
+                                <label>API 密钥 <span class="label-hint"> 含 * 的值不会被覆盖</span></label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" name="api_key" id="apiKeyInput" value="{{ config.get_masked_api_key }}" placeholder="sk-or-v1-...">
+                                    <div class="input-addon" onclick="toggleApiKey()"><i class="fas fa-eye" id="eyeIcon"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-5">
+                            <div class="form-group mb-0">
+                                <label>模型 ID <span class="label-hint"> 留空用默认</span></label>
+                                <input type="text" class="form-control" name="model_name" id="modelInput" value="{{ config.model_name|default:'' }}" placeholder="nvidia/nemotron-3-super-120b-a12b:free">
+                            </div>
+                        </div>
+                        <div class="col-12" id="customEndpointRow" style="{% if config.provider != 'custom' %}display:none{% endif %}">
+                            <div class="form-group mb-0">
+                                <label>自定义 API 端点</label>
+                                <input type="url" class="form-control" name="api_endpoint" value="{{ config.api_endpoint|default:'' }}" placeholder="https://your-server.com/v1/chat/completions">
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;" id="quickModels"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><div class="card-header-title"><span class="icon-circle"><i class="fas fa-window-restore"></i></span>小部件外观</div></div>
+                <div class="card-body">
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <div class="form-group mb-0"><label>标题</label>
+                                <input type="text" class="form-control" name="widget_title" value="{{ config.widget_title|default:'AI 助手' }}"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-0"><label>副标题</label>
+                                <input type="text" class="form-control" name="widget_subtitle" value="{{ config.widget_subtitle|default:'在线' }}"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-0"><label>欢迎语</label>
+                                <input type="text" class="form-control" name="welcome_message" value="{{ config.welcome_message|default:'你好！有什么可以帮助你的吗？' }}"></div>
+                        </div>
+                    </div>
+                    <div class="toggle-row">
+                        <div><div class="toggle-name"><i class="fas fa-globe me-2" style="color:var(--primary-color)"></i>在公开页面显示</div><div class="toggle-desc">访客和注册用户可以使用聊天功能</div></div>
+                        <div class="switch-wrap"><input type="checkbox" id="showPublic" name="show_on_public" {% if config.show_on_public %}checked{% endif %}><label class="switch-label" for="showPublic"></label></div>
+                    </div>
+                    <div class="toggle-row">
+                        <div><div class="toggle-name"><i class="fas fa-shield-alt me-2" style="color:var(--primary-color)"></i>在管理后台显示</div><div class="toggle-desc">管理员可以在后台使用 AI 助手</div></div>
+                        <div class="switch-wrap"><input type="checkbox" id="showAdmin" name="show_on_admin" {% if config.show_on_admin %}checked{% endif %}><label class="switch-label" for="showAdmin"></label></div>
+                    </div>
+                    <div class="toggle-row">
+                        <div><div class="toggle-name"><i class="fas fa-power-off me-2" style="color:var(--success-color)"></i>启用聊天机器人</div><div class="toggle-desc">关闭后聊天窗口将不再显示</div></div>
+                        <div class="switch-wrap"><input type="checkbox" id="isActive" name="is_active" {% if config.is_active %}checked{% endif %}><label class="switch-label" for="isActive"></label></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><div class="card-header-title"><span class="icon-circle"><i class="fas fa-sliders-h"></i></span>AI 参数调优</div></div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>系统提示词 <span class="label-hint"> 留空则使用默认提示词（含平台数据自动注入）</span></label>
+                        <textarea class="form-textarea" name="system_prompt" rows="4" placeholder="你是一个专业的图书推荐助手，熟悉本平台所有图书、作者和出版社信息...">{{ config.system_prompt|default:'' }}</textarea>
+                        <p class="form-hint"><i class="fas fa-magic me-1" style="color:var(--primary-color)"></i>平台实时数据（图书列表、作者、出版社、市场商品、在线课程、超市商品、订单等）会自动注入，无需手动填写。</p>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="form-group mb-0"><label>最大 Token 数</label>
+                                <input type="number" class="form-control" name="max_tokens" min="100" max="8000" value="{{ config.max_tokens|default:1024 }}">
+                                <p class="form-hint">建议 5122048</p></div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-0">
+                                <label>温度（随机性）&nbsp;<span id="tempVal" class="slider-val">{{ config.temperature|default:'0.7' }}</span></label>
+                                <div class="slider-row">
+                                    <small style="color:#6b7280">精准</small>
+                                    <input type="range" name="temperature" id="tempRange" min="0" max="2" step="0.05" value="{{ config.temperature|default:'0.7' }}" oninput="document.getElementById('tempVal').textContent=parseFloat(this.value).toFixed(2)">
+                                    <small style="color:#6b7280">创意</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-0"><label>每会话最大消息数</label>
+                                <input type="number" class="form-control" name="max_messages_per_session" min="5" max="500" value="{{ config.max_messages_per_session|default:100 }}">
+                                <p class="form-hint">建议 50200</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;gap:12px;padding-bottom:32px;">
+                <button type="button" class="btn btn-ghost" onclick="switchTab('test',document.getElementById('tbtn-test'))"><i class="fas fa-flask"></i>先测试</button>
+                <button type="submit" class="btn btn-primary btn-lg" id="saveBtn"><i class="fas fa-save"></i>保存配置</button>
+            </div>
+        </form>
+    </div>
+
+    <!--  CONTEXT TAB  -->
+    <div id="tab-context" class="tab-panel">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-header-title"><span class="icon-circle"><i class="fas fa-database"></i></span>实时平台上下文</div>
+                <span class="ctx-badge"><span class="ctx-dot"></span>每次请求自动刷新</span>
+            </div>
+            <div class="card-body">
+                <p style="font-size:0.84rem;color:#6b7280;margin-bottom:20px;">
+                    以下数据会在每次 AI 对话时实时注入到系统提示词中，让 AI 拥有平台的最新完整知识。数据库变化后下一次对话即生效，无需任何手动操作。
+                </p>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4 col-lg-2">
+                        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px;text-align:center;">
+                            <div style="font-size:2rem;font-weight:800;color:#059669;">{{ total_books }}</div>
+                            <div style="font-size:0.78rem;color:#065f46;font-weight:600;">📚 图书（实时）</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-lg-2">
+                        <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:16px;text-align:center;">
+                            <div style="font-size:2rem;font-weight:800;color:#2563eb;">{{ total_authors }}</div>
+                            <div style="font-size:0.78rem;color:#1e40af;font-weight:600;">✍️ 作者（实时）</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-lg-2">
+                        <div style="background:#fdf4ff;border:1px solid #e9d5ff;border-radius:10px;padding:16px;text-align:center;">
+                            <div style="font-size:2rem;font-weight:800;color:#7c3aed;">{{ total_publishers }}</div>
+                            <div style="font-size:0.78rem;color:#6d28d9;font-weight:600;">🏢 出版社（实时）</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-lg-2">
+                        <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:16px;text-align:center;">
+                            <div style="font-size:2rem;font-weight:800;color:#c2410c;">{{ total_products }}</div>
+                            <div style="font-size:0.78rem;color:#9a3412;font-weight:600;">🛍️ 市场商品（实时）</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-lg-2">
+                        <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:16px;text-align:center;">
+                            <div style="font-size:2rem;font-weight:800;color:#0369a1;">{{ total_courses }}</div>
+                            <div style="font-size:0.78rem;color:#075985;font-weight:600;">🎓 在线课程（实时）</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-lg-2">
+                        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px;text-align:center;">
+                            <div style="font-size:2rem;font-weight:800;color:#15803d;">{{ total_supermarket }}</div>
+                            <div style="font-size:0.78rem;color:#14532d;font-weight:600;">🛒 超市商品（实时）</div>
+                        </div>
+                    </div>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                    <label style="font-size:0.84rem;font-weight:700;"><i class="fas fa-code me-2" style="color:var(--primary-color)"></i>上下文预览（发送给 AI 的真实内容）</label>
+                    <button class="btn btn-outline btn-sm" onclick="loadContextPreview()"><i class="fas fa-sync-alt"></i>刷新预览</button>
+                </div>
+                <div class="context-code" id="contextPreview">点击"刷新预览"查看将发送给 AI 的实时平台数据...</div>
+            </div>
+        </div>
+    </div>
+
+    <!--  TEST TAB  -->
+    <div id="tab-test" class="tab-panel">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-header-title"><span class="icon-circle"><i class="fas fa-flask"></i></span>实时 API 测试</div>
+                <span style="font-size:0.79rem;color:#6b7280;">使用已保存配置 + 平台实时数据测试</span>
+            </div>
+            <div class="card-body">
+                <div class="test-box">
+                    <div class="form-group">
+                        <label>测试消息</label>
+                        <textarea class="form-textarea" id="testMessage" rows="2" style="min-height:55px" placeholder="输入测试消息...">你好！请介绍一下这个图书平台上有哪些热门图书。</textarea>
+                    </div>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;align-items:center;">
+                        <span style="font-size:0.77rem;color:#6b7280;">快速测试：</span>
+                        <button type="button" class="preset-btn" onclick="setTestMsg(this)">介绍平台热销图书</button>
+                        <button type="button" class="preset-btn" onclick="setTestMsg(this)">有哪些科幻类图书？</button>
+                        <button type="button" class="preset-btn" onclick="setTestMsg(this)">如何查看我的订单？</button>
+                        <button type="button" class="preset-btn" onclick="setTestMsg(this)">推荐一本适合初学者的书</button>
+                        <button type="button" class="preset-btn" onclick="setTestMsg(this)">平台共有多少本书？</button>
+                        <button type="button" class="preset-btn" onclick="setTestMsg(this)">市场有哪些热门商品？</button>
+                        <button type="button" class="preset-btn" onclick="setTestMsg(this)">有哪些在线课程推荐？</button>
+                        <button type="button" class="preset-btn" onclick="setTestMsg(this)">超市有哪些新鲜商品？</button>
+                    </div>
+                    <button class="btn btn-primary" onclick="runApiTest()" id="testBtn"><i class="fas fa-play"></i>运行测试</button>
+                    <div class="test-response" id="testResponse">
+                        <div id="testContent"></div>
+                        <div class="test-meta" id="testMeta"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--  SESSIONS TAB  -->
+    <div id="tab-sessions" class="tab-panel">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-header-title"><span class="icon-circle"><i class="fas fa-history"></i></span>对话会话记录</div>
+                <button class="btn btn-danger btn-sm" onclick="clearSessions()"><i class="fas fa-trash"></i>清除全部</button>
+            </div>
+            {% if recent_sessions %}
+            <div style="overflow-x:auto">
+                <table class="data-table">
+                    <thead>
+                        <tr><th>#</th><th>会话标识</th><th>用户</th><th>消息数</th><th>开始时间</th><th>最后活跃</th><th>状态</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for s in recent_sessions %}
+                        <tr>
+                            <td style="color:#6b7280">{{ forloop.counter }}</td>
+                            <td><span class="session-key">{{ s.session_key|truncatechars:18 }}</span></td>
+                            <td>
+                                {% if s.user %}<span class="badge-pill badge-user">{{ s.user.username }}</span>
+                                {% else %}<span class="badge-pill badge-anon">匿名</span>{% endif %}
+                            </td>
+                            <td><strong>{{ s.message_count }}</strong></td>
+                            <td style="color:#6b7280;font-size:0.79rem;">{{ s.started_at|date:"m-d H:i" }}</td>
+                            <td style="color:#6b7280;font-size:0.79rem;">{{ s.last_active|date:"m-d H:i" }}</td>
+                            <td>
+                                {% if s.is_closed %}<span class="badge-pill badge-inactive">已结束</span>
+                                {% else %}<span class="badge-pill badge-active">活跃</span>{% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div style="padding:60px 20px;text-align:center;color:#6b7280;">
+                <i class="fas fa-comments fa-3x mb-3" style="opacity:0.15"></i>
+                <p style="font-size:0.88rem">暂无对话记录</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!--  FREE API GUIDE TAB  -->
+    <div id="tab-guide" class="tab-panel">
+        <div class="card mb-4">
+            <div class="card-header"><div class="card-header-title"><span class="icon-circle"><i class="fas fa-key"></i></span>免费 AI API 平台推荐</div></div>
+            <div class="card-body">
+                <p style="font-size:0.84rem;color:#6b7280;margin-bottom:18px;">
+                    以下平台提供免费或丰厚的免费额度。推荐 <strong>OpenRouter</strong>（一个 Key，20+ 免费模型）或 <strong>Google AI Studio</strong>（Gemini 免费额度极大）。
+                </p>
+                <div style="overflow-x:auto">
+                    <table class="data-table">
+                        <thead><tr><th>平台</th><th>免费模型</th><th>说明</th><th>获取 API Key</th><th></th></tr></thead>
+                        <tbody>
+                            {% for p in free_providers %}
+                            <tr>
+                                <td><strong>{{ p.name }}</strong></td>
+                                <td style="font-size:0.79rem;color:#6b7280;max-width:180px;">{{ p.models }}</td>
+                                <td style="font-size:0.79rem;color:#6b7280;">{{ p.note }}</td>
+                                <td><a href="{{ p.url }}" target="_blank" rel="noopener">获取密钥 <i class="fas fa-external-link-alt" style="font-size:0.68rem"></i></a></td>
+                                <td>{% if p.name == 'OpenRouter' %}<span class="badge-pill badge-active"> 当前使用</span>{% endif %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><div class="card-header-title"><span class="icon-circle"></span>OpenRouter 免费模型（点击即可应用）</div></div>
+            <div class="card-body">
+                <p style="font-size:0.83rem;color:#6b7280;margin-bottom:16px;">点击任意模型卡片，自动填充到配置页面并切换至 OpenRouter 供应商。</p>
+                <div class="row g-3">
+                    {% for model_id, model_name, note in free_models_list %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="model-card" onclick="applyModel('{{ model_id }}')">
+                            <div class="model-id">{{ model_id }}</div>
+                            <div class="model-name">{{ model_name }}</div>
+                            <div class="model-note">{{ note }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div><!-- /main-container -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+/* Bilingual helper — returns English when adminLang=en */
+function _t(zh, en) { return (localStorage.getItem('adminLang') === 'en') ? en : zh; }
+
+var PROVIDER_HINTS = {
+    openai:     { zh: '🤖 OpenAI GPT — 业界标准。需要付费账户。', en: '🤖 OpenAI GPT — Industry standard. Paid account required.' },
+    anthropic:  { zh: '🧠 Anthropic Claude — 擅长长上下文与安全。需要付费账户。', en: '🧠 Anthropic Claude — Excels at long context & safety. Paid account required.' },
+    google:     { zh: '💎 Google Gemini — 免费额度丰富（Google AI Studio）。推荐 Flash 系列。', en: '💎 Google Gemini — Generous free tier (Google AI Studio). Recommend Flash series.' },
+    qwen:       { zh: '🚀 Alibaba Qwen — 中文优化，速度快。需要阿里云账户，有免费额度。', en: '🚀 Alibaba Qwen — Chinese optimized, fast. Alibaba Cloud account with free tier.' },
+    deepseek:   { zh: '🔬 DeepSeek — 强推理，价格极低。国内访问顺畅。', en: '🔬 DeepSeek — Strong reasoning, extremely low price.' },
+    openrouter: { zh: '🌐 OpenRouter — 聚合网关，一个 API Key 访问 20+ 免费模型。强烈推荐！', en: '🌐 OpenRouter — One API Key for 20+ free models. Highly recommended!' },
+    custom:     { zh: '⚙️ 自定义 — 填写任意兼容 OpenAI Chat API 格式的服务地址。', en: '⚙️ Custom — Any endpoint compatible with OpenAI Chat API format.' },
+};
+var PROVIDER_INFO = {
+    openai:     { models: ['gpt-4o-mini','gpt-4o','gpt-3.5-turbo'] },
+    anthropic:  { models: ['claude-3-5-haiku-20241022','claude-3-5-sonnet-20241022'] },
+    google:     { models: ['gemini-1.5-flash','gemini-2.0-flash'] },
+    qwen:       { models: ['qwen-plus','qwen-turbo','qwen-max'] },
+    deepseek:   { models: ['deepseek-chat','deepseek-reasoner'] },
+    openrouter: { models: ['nvidia/nemotron-3-super-120b-a12b:free','qwen/qwen3-next-80b-a3b-instruct:free','mistralai/mistral-small-3.1-24b-instruct:free','meta-llama/llama-3.3-70b-instruct:free'] },
+    custom:     { models: [] },
+};
+
+function selectProvider(val, card) {
+    document.querySelectorAll('.provider-item').forEach(c => c.classList.remove('active'));
+    card.classList.add('active');
+    document.getElementById('providerInput').value = val;
+    document.getElementById('customEndpointRow').style.display = val === 'custom' ? '' : 'none';
+    var h = PROVIDER_HINTS[val] || {};
+    var lang = localStorage.getItem('adminLang') === 'en' ? 'en' : 'zh';
+    document.getElementById('providerHintText').textContent = h[lang] || '';
+    buildQuickModels(val);
+}
+
+function buildQuickModels(val) {
+    var c = document.getElementById('quickModels');
+    c.innerHTML = '';
+    var models = (PROVIDER_INFO[val] || {}).models || [];
+    if (!models.length) return;
+    var lbl = document.createElement('small');
+    lbl.style = 'color:#6b7280;font-size:0.77rem;margin-right:4px;';
+    lbl.textContent = _t('快速填充：', 'Quick Fill:');
+    c.appendChild(lbl);
+    models.forEach(function(m) {
+        var btn = document.createElement('button');
+        btn.type = 'button'; btn.style = 'font-family:monospace;font-size:0.74rem;border:1.5px solid #e5e7eb;background:#fff;border-radius:16px;padding:3px 10px;cursor:pointer;color:#667eea;transition:all 0.2s;';
+        btn.textContent = m;
+        btn.onmouseenter = function(){ btn.style.borderColor='#667eea'; btn.style.background='#eef0ff'; };
+        btn.onmouseleave = function(){ btn.style.borderColor='#e5e7eb'; btn.style.background='#fff'; };
+        btn.onclick = function(){ document.getElementById('modelInput').value = m; showToast(_t('已填充模型 ID','Model ID filled'), 'info'); };
+        c.appendChild(btn);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    var cur = document.getElementById('providerInput').value;
+    var h = PROVIDER_HINTS[cur] || {};
+    var lang = localStorage.getItem('adminLang') === 'en' ? 'en' : 'zh';
+    document.getElementById('providerHintText').textContent = h[lang] || '';
+    buildQuickModels(cur);
+});
+
+function switchTab(tab, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    btn.classList.add('active');
+}
+
+document.getElementById('configForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var btn = document.getElementById('saveBtn');
+    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>' + _t('保存中...', 'Saving...');
+    var fd = new FormData(this);
+    ['show_on_public','show_on_admin','is_active'].forEach(function(n){ if(!fd.has(n)) fd.set(n,'off'); });
+    fetch('/manager/admin/chatbot/', { method: 'POST', body: fd })
+        .then(r => r.json())
+        .then(d => {
+            btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i>' + _t('保存配置', 'Save Configuration');
+            showToast(d.success ? (d.message || _t('配置已保存','Configuration saved')) : (d.message || _t('保存失败','Save failed')), d.success ? 'success' : 'error');
+        })
+        .catch(() => { btn.disabled=false; btn.innerHTML='<i class="fas fa-save"></i>' + _t('保存配置','Save Configuration'); showToast(_t('网络错误','Network error'),'error'); });
+});
+
+function toggleApiKey() {
+    var i = document.getElementById('apiKeyInput'), ic = document.getElementById('eyeIcon');
+    i.type = i.type==='password'?'text':'password';
+    ic.className = i.type==='password'?'fas fa-eye':'fas fa-eye-slash';
+}
+
+function setTestMsg(btn) { document.getElementById('testMessage').value = btn.textContent; }
+
+function runApiTest() {
+    var msg = document.getElementById('testMessage').value.trim();
+    if (!msg) { showToast(_t('请输入测试消息','Please enter a test message'),'error'); return; }
+    var btn = document.getElementById('testBtn');
+    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>' + _t('测试中...','Testing...');
+    var res = document.getElementById('testResponse');
+    res.style.display = 'none'; res.className = 'test-response';
+    var fd = new FormData();
+    fd.append('action','test'); fd.append('test_message',msg); fd.append('csrfmiddlewaretoken',getCsrf());
+    fetch('/manager/admin/chatbot/', { method:'POST', body:fd })
+        .then(r => r.json())
+        .then(d => {
+            btn.disabled=false; btn.innerHTML='<i class="fas fa-play"></i>' + _t('运行测试','Run Test');
+            res.style.display='block';
+            if (d.success) {
+                document.getElementById('testContent').textContent = d.reply;
+                document.getElementById('testMeta').innerHTML = '<span><i class="fas fa-coins"></i> Tokens: '+(d.tokens||'')+'</span><span><i class="fas fa-check-circle" style="color:#10b981"></i> ' + _t('成功','Success') + '</span>';
+                showToast(_t('API 测试成功','API test passed'),'success');
+            } else {
+                res.className='test-response error';
+                document.getElementById('testContent').textContent = d.message || _t('未知错误','Unknown error');
+                document.getElementById('testMeta').innerHTML='';
+                showToast(_t('错误: ','Error: ')+(d.message||'').substring(0,60),'error');
+            }
+        })
+        .catch(() => { btn.disabled=false; btn.innerHTML='<i class="fas fa-play"></i>' + _t('运行测试','Run Test'); showToast(_t('网络错误','Network error'),'error'); });
+}
+
+function loadContextPreview() {
+    var el = document.getElementById('contextPreview');
+    el.textContent = _t('加载中...','Loading...');
+    var fd = new FormData(); fd.append('action','get_context'); fd.append('csrfmiddlewaretoken',getCsrf());
+    fetch('/manager/admin/chatbot/', { method:'POST', body:fd })
+        .then(r => r.json())
+        .then(d => { el.textContent = d.success ? d.context : _t('（无法加载上下文数据）','(Unable to load context data)'); })
+        .catch(() => { el.textContent = _t('（网络错误）','(Network error)'); });
+}
+
+function clearSessions() {
+    if (!confirm(_t('确认清除所有对话记录？此操作不可撤销。','Clear all records? This cannot be undone.'))) return;
+    var fd = new FormData(); fd.append('action','clear_sessions'); fd.append('csrfmiddlewaretoken',getCsrf());
+    fetch('/manager/admin/chatbot/', { method:'POST', body:fd })
+        .then(r => r.json())
+        .then(d => { if(d.success){ showToast(d.message,'success'); setTimeout(() => location.reload(), 1200); } else showToast(_t('清除失败','Clear failed'),'error'); });
+}
+
+function applyModel(modelId) {
+    document.getElementById('modelInput').value = modelId;
+    var cur = document.getElementById('providerInput').value;
+    if (cur !== 'openrouter') {
+        var card = document.querySelector('[data-val="openrouter"]');
+        if (card) selectProvider('openrouter', card);
+    }
+    switchTab('settings', document.getElementById('tbtn-settings'));
+    showToast(_t('已应用模型 ID，记得保存配置','Model ID applied, remember to save'), 'info');
+    setTimeout(() => document.getElementById('modelInput').scrollIntoView({behavior:'smooth',block:'center'}), 300);
+}
+
+function showToast(msg, type) {
+    var s = document.getElementById('toastStack');
+    var t = document.createElement('div'); t.className = 'toast-item '+type;
+    var icon = type==='success'?'check-circle':type==='error'?'exclamation-circle':'info-circle';
+    t.innerHTML = '<i class="fas fa-'+icon+'"></i> '+msg;
+    s.appendChild(t);
+    setTimeout(() => { t.style.cssText += 'opacity:0;transform:translateX(40px);transition:all 0.3s;'; setTimeout(() => t.remove(), 300); }, 3500);
+}
+
+function getCsrf() {
+    var m = document.cookie.match('(^|;)\\s*csrftoken=([^;]*)');
+    return m ? decodeURIComponent(m[2]) : '';
+}
+</script>
+<script src="/static/js/admin_i18n.js" defer></script>
+</body>
+</html>

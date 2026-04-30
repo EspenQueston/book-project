@@ -1,0 +1,393 @@
+{% extends "public/base.html" %}
+{% load i18n %}
+
+{% block title %}{{ item.name }} - {% trans "超市" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root { --primary-color: #667eea; --secondary-color: #764ba2; --danger-color: #ef4444; }
+    .breadcrumb-section { background: linear-gradient(135deg, rgba(79,172,254,0.05), rgba(0,242,254,0.05)); padding: 20px 0; }
+    .detail-card { background: #fff; border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.08); overflow: hidden; }
+    .detail-img { width: 100%; max-height: 400px; object-fit: contain; border-radius: 15px; background: linear-gradient(135deg, #f0f9ff, #e0f2fe); padding: 10px; }
+    .detail-price { font-size: 2rem; font-weight: 800; color: #ef4444; }
+    .info-item { display: flex; align-items: center; margin-bottom: 10px; font-size: 0.9rem; color: #475569; }
+    .info-item i { width: 24px; color: #4facfe; margin-right: 10px; }
+    .related-card { background: #fff; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.06); transition: all 0.3s ease; }
+    .related-card:hover { transform: translateY(-5px); box-shadow: 0 12px 30px rgba(79,172,254,0.15); }
+    .related-card img { width: 100%; height: 140px; object-fit: contain; background: #f8fafc; padding: 6px; }
+
+    .option-panel {
+        margin: 18px 0; padding: 20px; border-radius: 18px;
+        background: linear-gradient(135deg, rgba(79,172,254,0.10), rgba(0,242,254,0.07));
+        border: 1px solid rgba(79,172,254,0.18);
+    }
+    .option-panel h5 { font-weight: 800; color: #0f172a; margin-bottom: 12px; }
+    .option-group { margin-bottom: 18px; }
+    .option-group:last-child { margin-bottom: 0; }
+    .option-group-label { display: block; font-weight: 700; font-size: 0.9rem; color: #0f172a; margin-bottom: 8px; }
+    .option-select {
+        width: 100%; padding: 11px 14px; border: 1.5px solid #e2e8f0; border-radius: 10px;
+        font-size: 0.9rem; color: #334155; background: #fff; cursor: pointer;
+        transition: all 0.2s; appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8.825a.5.5 0 0 1-.354-.146l-4-4a.5.5 0 0 1 .708-.708L6 7.617l3.646-3.646a.5.5 0 0 1 .708.708l-4 4A.5.5 0 0 1 6 8.825z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat; background-position: right 14px center;
+    }
+    .option-select:focus { border-color: #4facfe; box-shadow: 0 0 0 3px rgba(79,172,254,0.12); outline: none; }
+    .option-select:hover { border-color: #4facfe; }
+
+    .qty-control { display: inline-flex; align-items: center; border: 2px solid #e2e8f0; border-radius: 12px; overflow: hidden; }
+    .qty-btn { width: 40px; height: 40px; border: none; background: #f8fafc; font-size: 1.1rem; font-weight: 700; cursor: pointer; color: #475569; transition: all 0.2s; }
+    .qty-btn:hover { background: rgba(79,172,254,0.1); color: #4facfe; }
+    .qty-input { width: 50px; text-align: center; border: none; font-weight: 700; font-size: 1rem; color: #1e293b; outline: none; }
+    .btn-buy-now { padding: 14px 32px; border-radius: 12px; border: none; background: linear-gradient(135deg, #4facfe, #00f2fe); color: #fff; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.3s; }
+    .btn-buy-now:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(79,172,254,0.4); }
+    .btn-add-cart { padding: 14px 32px; border-radius: 12px; border: 2px solid var(--primary-color); background: #fff; color: var(--primary-color); font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.3s; }
+    .btn-add-cart:hover { background: rgba(102,126,234,0.06); }
+    .btn-add-cart:disabled, .btn-buy-now:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .toast-msg { position: fixed; top: 90px; right: 20px; z-index: 9999; background: #fff; border-radius: 12px; padding: 16px 24px; box-shadow: 0 8px 30px rgba(0,0,0,0.15); display: none; max-width: 320px; }
+    .toast-msg.success { border-left: 4px solid #10b981; }
+    .toast-msg.error { border-left: 4px solid var(--danger-color); }
+    .cart-fab { position: fixed; bottom: 30px; right: 30px; z-index: 999; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: #fff; border: none; font-size: 1.3rem; box-shadow: 0 6px 20px rgba(102,126,234,0.4); cursor: pointer; transition: all 0.3s; }
+    .cart-fab:hover { transform: scale(1.1); }
+    .cart-badge { position: absolute; top: -4px; right: -4px; background: var(--danger-color); color: #fff; font-size: 0.7rem; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    .spec-row-alt { background: #f8fafc; }
+
+    /* === PWA Task 1: Mobile Taobao Design === */
+    @media (max-width: 768px) {
+        .detail-hero, .desktop-layout { display: none !important; }
+        .product-mobile-page { display: block !important; }
+    }
+    @media (min-width: 769px) {
+        .product-mobile-page { display: none !important; }
+    }
+    .product-mobile-page {
+        background: #f8fafc;
+        padding-bottom: 150px;
+    }
+    .pmp-gallery {
+        width: 100%;
+        height: 380px;
+        background: #fff;
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+    }
+    .pmp-gallery img { width: 100%; height: 100%; object-fit: contain; scroll-snap-align: center; flex: 0 0 100%; }
+    .pmp-info { background: #fff; padding: 15px; margin-bottom: 12px; }
+    .pmp-price { color: #ef4444; font-size: 1.8rem; font-weight: 800; }
+    .pmp-title { font-size: 1.15rem; font-weight: 700; color: #1e293b; margin: 10px 0; }
+    .pmp-seller-row { display:flex; align-items:center; justify-content:space-between; gap:10px; padding-top:10px; border-top:1px solid #f1f5f9; color:#64748b; font-size:.85rem; }
+    .pmp-bottom-bar {
+        position: fixed; bottom: 62px; left: 0; right: 0; background: #fff; height: 60px;
+        display: flex; align-items: center; padding: 0 10px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 1000;
+    }
+    .pmp-icon-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 50px; color: #64748b; font-size: 0.70rem; text-decoration: none; }
+    .pmp-icon-btn i { font-size: 1.25rem; margin-bottom: 2px; }
+    .pmp-action-btn { flex: 1; height: 40px; border-radius: 20px; font-weight: 700; color: #fff; border: none; margin-left: 8px; }
+    .pmp-cart { background: linear-gradient(135deg, #f59e0b, #f97316); }
+    .pmp-buy { background: linear-gradient(135deg, #ef4444, #ec4899); }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ===== PWA T1 & T2: MOBILE ONLY ===== -->
+<div class="product-mobile-page">
+    <div class="pmp-gallery">
+        <img src="{{ item.get_image_url }}" alt="{{ item.name }}">
+    </div>
+    <div class="pmp-info">
+        <div class="pmp-price">¥{{ item.price }}</div>
+        <h1 class="pmp-title">{{ item.name }}</h1>
+        <div class="pmp-seller-row">
+            <span><i class="fas fa-store me-1"></i>DUNO 360</span>
+            <span>{% trans "Support admin" %}</span>
+        </div>
+    </div>
+    
+    <div class="pmp-bottom-bar">
+        <a href="{% url 'manager:public_home' %}" class="pmp-icon-btn"><i class="fas fa-store"></i><span>店铺</span></a>
+        <a href="{% url 'manager:start_conversation' %}?item_type=supermarket&item_id={{ item.id }}&subject={{ item.name|urlencode }}" class="pmp-icon-btn"><i class="fas fa-comment-dots"></i><span>聊天</span></a>
+        
+        <button class="pmp-action-btn pmp-cart" onclick="addToCart({{ item.id }})">加入购物车</button>
+        <button class="pmp-action-btn pmp-buy" onclick="buyNow({{ item.id }})">立即购买</button>
+    </div>
+</div>
+<script>
+    function addToCart() {
+        if (typeof window.addToCart === 'function') window.addToCart();
+    }
+    function buyNow() {
+        if (typeof window.buyNow === 'function') window.buyNow();
+    }
+</script>
+<div class="desktop-layout">
+<div class="breadcrumb-section">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'marketplace:home' %}" style="color:var(--primary-color);">{% trans "市场" %}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'marketplace:supermarket_list' %}" style="color:var(--primary-color);">{% trans "超市" %}</a></li>
+                <li class="breadcrumb-item active">{{ item.name }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="detail-card p-4 p-md-5">
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <img src="{{ item.get_image_url }}" alt="{{ item.name }}" class="detail-img">
+            </div>
+            <div class="col-lg-6">
+                <h1 style="font-weight:800; font-size:1.8rem; margin-bottom:15px;">{{ item.name }}</h1>
+
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                    {% if item.is_organic %}
+                    <span class="badge" style="background:linear-gradient(135deg,#10b981,#34d399); padding:6px 14px; border-radius:25px; font-size:0.8rem;">
+                        <i class="fas fa-leaf me-1"></i>{% trans "有机食品" %}
+                    </span>
+                    {% endif %}
+                    {% if item.category %}
+                    <span style="background:rgba(79,172,254,0.1); color:#4facfe; border-radius:20px; padding:5px 14px; font-size:0.8rem; font-weight:600;">
+                        {{ item.category.name }}
+                    </span>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    <span class="detail-price">¥{{ item.price }}</span>
+                    <span style="font-size:1rem; color:#64748b;"> / {{ item.get_unit_display }}</span>
+                    {% if item.original_price %}
+                    <span style="font-size:1rem; color:#94a3b8; text-decoration:line-through; margin-left:10px;">¥{{ item.original_price }}</span>
+                    <span class="badge ms-2" style="background:linear-gradient(135deg,#ef4444,#f97316);">-{{ item.get_discount_percent }}%</span>
+                    {% endif %}
+                </div>
+
+                <div class="mb-4">
+                    {% if item.brand %}
+                    <div class="info-item"><i class="fas fa-award"></i>{% trans "品牌" %}: {{ item.brand }}</div>
+                    {% endif %}
+                    {% if item.origin %}
+                    <div class="info-item"><i class="fas fa-map-marker-alt"></i>{% trans "产地" %}: {{ item.origin }}</div>
+                    {% endif %}
+                    <div class="info-item">
+                        <i class="fas fa-box"></i>{% trans "库存" %}:
+                        {% if item.in_stock %}
+                        <span class="text-success fw-bold ms-1">{% trans "有货" %} ({{ item.stock }}{{ item.get_unit_display }})</span>
+                        {% else %}
+                        <span class="text-danger fw-bold ms-1">{% trans "缺货" %}</span>
+                        {% endif %}
+                    </div>
+                    <div class="info-item"><i class="fas fa-fire"></i>{% trans "已售" %}: {{ item.sales_count }}</div>
+                </div>
+
+                {% if item.description %}
+                <hr>
+                <h5 class="fw-bold mb-3">{% trans "商品描述" %}</h5>
+                <div style="line-height:1.8; color:#475569;">{{ item.description|linebreaksbr }}</div>
+                {% endif %}
+
+                {% if selectable_attributes %}
+                <div class="option-panel">
+                    <h5><i class="fas fa-sliders me-2" style="color:#0284c7;"></i>{% trans "选择规格" %}</h5>
+                    {% for group in selectable_attributes %}
+                    <div class="option-group" data-attribute-name="{{ group.name }}">
+                        <label class="option-group-label">{{ group.name }}</label>
+                        <select class="option-select" data-attribute-name="{{ group.name }}">
+                            <option value="">{% trans "选择一个选项" %}</option>
+                            {% for value in group.values %}
+                            <option value="{{ value }}">{{ value }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if specification_attributes %}
+                <hr>
+                <h5 class="fw-bold mb-3"><i class="fas fa-list-check me-2" style="color:#4facfe;"></i>{% trans "商品规格" %}</h5>
+                <div class="table-responsive">
+                    <table class="table table-sm mb-0" style="font-size:0.9rem;">
+                        <tbody>
+                        {% for attr in specification_attributes %}
+                            <tr{% if forloop.counter|divisibleby:2 %} class="spec-row-alt"{% endif %}>
+                                <td style="width:35%; padding:10px 14px; color:#64748b; font-weight:600; border:none;">{{ attr.name }}</td>
+                                <td style="padding:10px 14px; color:#1e293b; border:none;">{{ attr.display_value }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+
+                <!-- Quantity & Cart Actions -->
+                <hr>
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <span style="font-weight:600; color:#334155;">{% trans "数量" %}:</span>
+                    <div class="qty-control">
+                        <button class="qty-btn" onclick="changeQty(-1)" {% if not item.in_stock %}disabled{% endif %}>−</button>
+                        <input type="number" id="qtyInput" class="qty-input" value="1" min="1" max="{{ item.stock }}" readonly>
+                        <button class="qty-btn" onclick="changeQty(1)" {% if not item.in_stock %}disabled{% endif %}>+</button>
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap gap-3 align-items-center">
+                    <button class="btn-buy-now" onclick="buyNow()" {% if not item.in_stock %}disabled{% endif %}>
+                        <i class="fas fa-bolt me-2"></i>{% trans "立即购买" %}
+                    </button>
+                    <button class="btn-add-cart" onclick="addToCart()" {% if not item.in_stock %}disabled{% endif %}>
+                        <i class="fas fa-cart-plus me-2"></i>{% trans "加入购物车" %}
+                    </button>
+                    <a href="{% url 'manager:start_conversation' %}?item_type=supermarket&item_id={{ item.id }}&subject={{ item.name|urlencode }}" class="btn-add-cart text-decoration-none">
+                        <i class="fas fa-comment-dots me-2"></i>{% trans "聊天" %}
+                    </a>
+                    <button class="btn-wishlist-action" id="wishBtn" onclick="toggleWishlist()" title="{% trans '收藏' %}" style="width:48px;height:48px;border-radius:50%;background:rgba(102,126,234,0.1);border:2px solid rgba(102,126,234,0.3);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.3s;color:#667eea;font-size:1.2rem;">
+                        <i class="far fa-heart" id="wishIcon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if related_items %}
+    <div class="mt-5">
+        <h3 class="fw-bold mb-4"><i class="fas fa-th-large me-2" style="color:#4facfe;"></i>{% trans "相关商品" %}</h3>
+        <div class="row g-4">
+            {% for r in related_items %}
+            <div class="col-sm-6 col-md-3">
+                <a href="{% url 'marketplace:supermarket_detail' r.slug %}" style="text-decoration:none; color:inherit;">
+                    <div class="related-card">
+                        <img src="{{ r.get_image_url }}" alt="{{ r.name }}">
+                        <div class="p-3">
+                            <h6 class="fw-bold mb-1">{{ r.name }}</h6>
+                            <span style="font-weight:800; color:#ef4444;">¥{{ r.price }}/{{ r.get_unit_display }}</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Cart FAB -->
+<a href="{% url 'manager:view_cart' %}" class="cart-fab">
+    <i class="fas fa-shopping-cart"></i>
+    <span class="cart-badge" id="cartBadge" style="display:none;">0</span>
+</a>
+
+<!-- Toast -->
+<div class="toast-msg" id="toastMsg"><span id="toastText"></span></div>
+
+<script>
+const maxItemStock = parseInt('{{ item.stock|default:0 }}', 10) || 0;
+function changeQty(d){
+    const inp = document.getElementById('qtyInput');
+    let v = parseInt(inp.value, 10) + d;
+    if(v < 1) v = 1;
+    if(v > maxItemStock) v = maxItemStock;
+    inp.value = v;
+}
+function showToast(msg, type){
+    const t = document.getElementById('toastMsg');
+    t.className = 'toast-msg ' + type;
+    document.getElementById('toastText').textContent = msg;
+    t.style.display = 'block';
+    setTimeout(()=>{ t.style.display='none'; }, 3000);
+}
+function getSelectedAttributes(){
+    const selected = {};
+    const selects = document.querySelectorAll('.option-select');
+    for (const sel of selects) {
+        const name = sel.dataset.attributeName;
+        if (!sel.value) {
+            showToast(`请选择${name}`, 'error');
+            return null;
+        }
+        selected[name] = sel.value;
+    }
+    return selected;
+}
+function addToCart(){
+    const selectedAttributes = getSelectedAttributes();
+    if (selectedAttributes === null) {
+        return;
+    }
+    const fd = new FormData();
+    fd.append('item_type', 'supermarket');
+    fd.append('item_id', '{{ item.id }}');
+    fd.append('quantity', document.getElementById('qtyInput').value);
+    fd.append('selected_attributes', JSON.stringify(selectedAttributes));
+    fd.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    fetch("{% url 'manager:add_marketplace_item_to_cart' %}", { method:'POST', body: fd })
+        .then(r=>r.json())
+        .then(d=>{
+            showToast(d.message, d.success ? 'success' : 'error');
+            if(d.cart_count !== undefined) updateBadge(d.cart_count);
+        }).catch(()=> showToast('网络错误', 'error'));
+}
+function buyNow(){
+    const selectedAttributes = getSelectedAttributes();
+    if (selectedAttributes === null) {
+        return;
+    }
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = "{% url 'marketplace:buy_now' %}";
+    [['csrfmiddlewaretoken','{{ csrf_token }}'],['item_type','supermarket'],['item_id','{{ item.id }}'],['quantity',document.getElementById('qtyInput').value],['selected_attributes', JSON.stringify(selectedAttributes)]].forEach(([n,v])=>{
+        const inp = document.createElement('input'); inp.type='hidden'; inp.name=n; inp.value=v;
+        form.appendChild(inp);
+    });
+    document.body.appendChild(form);
+    form.submit();
+}
+function updateBadge(count){
+    const b = document.getElementById('cartBadge');
+    if(count > 0){ b.textContent=count; b.style.display='flex'; } else { b.style.display='none'; }
+}
+fetch("{% url 'manager:get_cart_count' %}").then(r=>r.json()).then(d=>updateBadge(d.cart_count)).catch(()=>{});
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.option-group').forEach((group) => {
+        const firstOption = group.querySelector('.option-chip');
+        if (firstOption) {
+            firstOption.classList.add('active');
+        }
+    });
+});
+
+// Wishlist
+function toggleWishlist(){
+    var btn = document.getElementById('wishBtn');
+    var icon = document.getElementById('wishIcon');
+    var fd = new FormData();
+    fd.append('item_type', 'supermarket');
+    fd.append('item_id', '{{ item.id }}');
+    fd.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    fetch('{% url "manager:user_toggle_wishlist" %}', { method:'POST', body: fd })
+    .then(r=>r.json()).then(d=>{
+        if(d.login_required){ window.location.href='{% url "manager:user_login" %}'; return; }
+        if(d.success){
+            btn.style.background = d.wishlisted ? '#ef4444' : 'rgba(102,126,234,0.1)';
+            btn.style.borderColor = d.wishlisted ? '#ef4444' : 'rgba(102,126,234,0.3)';
+            btn.style.color = d.wishlisted ? '#fff' : '#667eea';
+            icon.className = d.wishlisted ? 'fas fa-heart' : 'far fa-heart';
+            showToast(d.message, 'success');
+        } else { showToast(d.message, 'error'); }
+    });
+}
+(function(){
+    fetch('{% url "manager:user_check_wishlist" %}?item_type=supermarket&item_id={{ item.id }}')
+    .then(r=>r.json()).then(d=>{
+        if(d.wishlisted){
+            var btn=document.getElementById('wishBtn'), icon=document.getElementById('wishIcon');
+            btn.style.background='#ef4444'; btn.style.borderColor='#ef4444'; btn.style.color='#fff';
+            icon.className='fas fa-heart';
+        }
+    });
+})();
+</script>
+</div>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "marketplace/admin/base.html" %}
+{% block title %}分类管理 - 市场管理{% endblock %}
+{% block nav_categories %}active{% endblock %}
+
+{% block admin_content %}
+<div class="page-header-card">
+    <div class="d-flex justify-content-between align-items-center">
+        <h4><i class="fas fa-folder-open me-2"></i>分类管理</h4>
+        <a href="{% url 'marketplace:admin_category_add' %}" class="btn btn-light rounded-pill px-4"><i class="fas fa-plus me-2"></i>添加分类</a>
+    </div>
+</div>
+
+<div class="content-card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th class="ps-4">分类名称</th>
+                    <th>版块</th>
+                    <th>上级分类</th>
+                    <th>排序</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cat in categories %}
+                <tr>
+                    <td class="ps-4">
+                        <div class="d-flex align-items-center">
+                            {% if cat.image %}
+                            <img src="{{ cat.image.url }}" style="width:40px; height:40px; object-fit:cover; border-radius:8px; margin-right:12px;">
+                            {% else %}
+                            <div style="width:40px; height:40px; border-radius:8px; margin-right:12px; background:linear-gradient(135deg,#667eea,#764ba2); display:flex; align-items:center; justify-content:center;">
+                                <i class="fas fa-folder text-white"></i>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <div class="fw-bold">{{ cat.name }}</div>
+                                {% if cat.name_en %}<small class="text-muted">{{ cat.name_en }}</small>{% endif %}
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        {% if cat.section == 'products' %}<span class="badge" style="background:linear-gradient(135deg,#667eea,#764ba2);">商品</span>
+                        {% elif cat.section == 'courses' %}<span class="badge" style="background:linear-gradient(135deg,#f093fb,#f5576c);">课程</span>
+                        {% else %}<span class="badge" style="background:linear-gradient(135deg,#4facfe,#00f2fe);">超市</span>{% endif %}
+                    </td>
+                    <td>{{ cat.parent.name|default:"-" }}</td>
+                    <td>{{ cat.display_order }}</td>
+                    <td>{% if cat.is_active %}<span class="badge bg-success">启用</span>{% else %}<span class="badge bg-secondary">禁用</span>{% endif %}</td>
+                    <td>
+                        <a href="{% url 'marketplace:admin_category_edit' cat.pk %}" class="btn btn-sm btn-outline-primary rounded-pill"><i class="fas fa-edit"></i></a>
+                        <form method="post" action="{% url 'marketplace:admin_category_delete' cat.pk %}" style="display:inline;" onsubmit="return confirm('确定删除该分类？')">
+                            {% csrf_token %}
+                            <button class="btn btn-sm btn-outline-danger rounded-pill"><i class="fas fa-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-center py-5 text-muted"><i class="fas fa-folder-open d-block mb-2" style="font-size:2rem;"></i>暂无分类</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

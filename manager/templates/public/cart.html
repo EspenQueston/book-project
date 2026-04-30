@@ -1,7 +1,7 @@
 {% extends 'public/base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans "购物车" %} - {% trans "图书管理系统" %}{% endblock %}
+{% block title %}{% trans "购物车" %} - {% trans "DUNO 360" %}{% endblock %}
 
 {% block content %}
 <!-- Cart Header -->
@@ -10,7 +10,7 @@
         <div class="row align-items-center">
             <div class="col-md-8">
                 <h2 class="mb-0"><i class="fas fa-shopping-cart"></i> {% trans "购物车" %}</h2>
-                <p class="mb-0 mt-2">{% trans "管理您选择的图书" %}</p>
+                <p class="mb-0 mt-2">{% trans "管理您选择的商品" %}</p>
             </div>
             <div class="col-md-4 text-md-end">
                 <span class="badge bg-light text-dark fs-6">
@@ -34,28 +34,49 @@
                     </div>
                     <div class="card-body p-0">
                         {% for item in cart_items %}
-                        <div class="cart-item p-4 border-bottom" data-item-id="{{ item.id }}">
+                        <div class="cart-item p-4 border-bottom" data-item-id="{{ item.id }}" data-item-type="{{ item.item_type }}">
                             <div class="row align-items-center">
-                                <!-- Book Info -->
+                                <!-- Item Info -->
                                 <div class="col-md-6">
                                     <div class="d-flex align-items-center">
-                                        <div class="book-cover me-3">
-                                            {% if item.book.cover_image %}
-                                                <img src="{{ item.book.cover_image.url }}" 
-                                                     alt="{{ item.book.name }}" 
+                                        <div class="item-cover me-3">
+                                            {% if item.image_url %}
+                                                <img src="{{ item.image_url }}" 
+                                                     alt="{{ item.name }}" 
                                                      class="img-fluid" 
                                                      style="width: 60px; height: 75px; object-fit: cover; border-radius: 5px;">
                                             {% else %}
                                                 <div class="bg-light d-flex align-items-center justify-content-center text-muted"
                                                      style="width: 60px; height: 75px; border-radius: 5px;">
-                                                    <i class="fas fa-book"></i>
+                                                    {% if item.item_type == 'book' %}
+                                                        <i class="fas fa-book"></i>
+                                                    {% elif item.item_type == 'course' %}
+                                                        <i class="fas fa-graduation-cap"></i>
+                                                    {% else %}
+                                                        <i class="fas fa-box"></i>
+                                                    {% endif %}
                                                 </div>
                                             {% endif %}
                                         </div>
                                         <div>
-                                            <h6 class="mb-1">{{ item.book.name }}</h6>
-                                            <p class="text-muted mb-1 small">{{ item.book.publisher.publisher_name }}</p>
-                                            <p class="text-success mb-0">{% trans "库存" %}：{{ item.book.inventory }}{% trans "本" %}</p>
+                                            <h6 class="mb-1">{{ item.name }}</h6>
+                                            {% if item.publisher %}
+                                            <p class="text-muted mb-1 small">{{ item.publisher }}</p>
+                                            {% endif %}
+                                            <span class="badge {% if item.item_type == 'book' %}bg-primary{% elif item.item_type == 'course' %}bg-info{% elif item.item_type == 'product' %}bg-success{% else %}bg-warning text-dark{% endif %} rounded-pill" style="font-size: 0.7rem;">
+                                                {% if item.item_type == 'book' %}📚 {% trans "图书" %}
+                                                {% elif item.item_type == 'course' %}🎓 {% trans "课程" %}
+                                                {% elif item.item_type == 'product' %}🛍️ {% trans "商品" %}
+                                                {% elif item.item_type == 'supermarket' %}🛒 {% trans "超市" %}
+                                                {% endif %}
+                                            </span>
+                                            {% if item.selected_attribute_list %}
+                                            <div class="mt-2 d-flex flex-wrap gap-1">
+                                                {% for attr in item.selected_attribute_list %}
+                                                <span class="badge rounded-pill text-bg-light border">{{ attr.name }}: {{ attr.value }}</span>
+                                                {% endfor %}
+                                            </div>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>
@@ -64,34 +85,40 @@
                                 <div class="col-md-3">
                                     <div class="quantity-controls">
                                         <label class="form-label small">{% trans "数量" %}:</label>
+                                        {% if item.item_type == 'course' %}
+                                        <div class="text-center">
+                                            <span class="badge bg-secondary">1</span>
+                                        </div>
+                                        {% else %}
                                         <div class="input-group input-group-sm">
                                             <button class="btn btn-outline-secondary quantity-btn" 
                                                     type="button" 
-                                                    onclick="stepQuantity({{ item.id }}, -1)">
+                                                    onclick="stepQuantity({{ item.id }}, '{{ item.item_type }}', -1)">
                                                 <i class="fas fa-minus"></i>
                                             </button>
                                             <input type="number" 
                                                    class="form-control text-center quantity-input" 
                                                    value="{{ item.quantity }}" 
                                                    min="1" 
-                                                   max="{{ item.book.inventory }}"
-                                                   onchange="updateQuantity({{ item.id }}, parseInt(this.value))"
-                                                   id="quantity-{{ item.id }}">
+                                                   max="{{ item.inventory }}"
+                                                   onchange="updateQuantity({{ item.id }}, '{{ item.item_type }}', parseInt(this.value))"
+                                                   id="quantity-{{ item.item_type }}-{{ item.id }}">
                                             <button class="btn btn-outline-secondary quantity-btn" 
                                                     type="button" 
-                                                    onclick="stepQuantity({{ item.id }}, 1)">
+                                                    onclick="stepQuantity({{ item.id }}, '{{ item.item_type }}', 1)">
                                                 <i class="fas fa-plus"></i>
                                             </button>
                                         </div>
+                                        {% endif %}
                                     </div>
                                 </div>
                                 
                                 <!-- Price -->
                                 <div class="col-md-2 text-center">
                                     <div class="price-info">
-                                        <p class="mb-1 small text-muted">{% trans "单价" %}: ¥{{ item.book.price }}</p>
-                                        <p class="mb-0 fw-bold text-success h6" id="item-total-{{ item.id }}">
-                                            ¥{{ item.get_total_price }}
+                                        <p class="mb-1 small text-muted">{% trans "单价" %}: ¥{{ item.price }}</p>
+                                        <p class="mb-0 fw-bold text-success h6" id="item-total-{{ item.item_type }}-{{ item.id }}">
+                                            ¥{{ item.total_price }}
                                         </p>
                                     </div>
                                 </div>
@@ -99,7 +126,7 @@
                                 <!-- Remove Button -->
                                 <div class="col-md-1 text-center">
                                     <button class="btn btn-outline-danger btn-sm" 
-                                            onclick="removeItem({{ item.id }})"
+                                            onclick="removeItem({{ item.id }}, '{{ item.item_type }}')"
                                             title="{% trans '移除商品' %}">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -113,7 +140,10 @@
                 <!-- Continue Shopping -->
                 <div class="mt-4 d-flex gap-3 flex-wrap">
                     <a href="{% url 'manager:public_books' %}" class="btn btn-outline-primary">
-                        <i class="fas fa-arrow-left"></i> {% trans "继续购物" %}
+                        <i class="fas fa-book"></i> {% trans "浏览图书" %}
+                    </a>
+                    <a href="/marketplace/" class="btn btn-outline-info">
+                        <i class="fas fa-store"></i> {% trans "浏览市场" %}
                     </a>
                     <button onclick="clearCart()" class="btn btn-outline-danger">
                         <i class="fas fa-trash-alt"></i> {% trans "清空购物车" %}
@@ -169,9 +199,14 @@
             <i class="fas fa-shopping-cart text-muted" style="font-size: 5rem; opacity: 0.3;"></i>
             <h4 class="mt-4 text-muted">{% trans "购物车为空" %}</h4>
             <p class="text-muted mb-4">{% trans "还没有添加任何商品到购物车" %}</p>
-            <a href="{% url 'manager:public_books' %}" class="btn btn-primary btn-lg">
-                <i class="fas fa-book"></i> {% trans "去选购图书" %}
-            </a>
+            <div class="d-flex gap-3 justify-content-center">
+                <a href="{% url 'manager:public_books' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-book"></i> {% trans "去选购图书" %}
+                </a>
+                <a href="/marketplace/" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-store"></i> {% trans "浏览市场" %}
+                </a>
+            </div>
         </div>
         {% endif %}
     </div>
@@ -194,35 +229,33 @@ function getCsrfToken() {
 }
 const CSRF_TOKEN = getCsrfToken();
 
-// Step quantity by +1 or -1 based on current input value
-function stepQuantity(itemId, delta) {
-    var input = document.getElementById('quantity-' + itemId);
+function stepQuantity(itemId, itemType, delta) {
+    var input = document.getElementById('quantity-' + itemType + '-' + itemId);
     var current = parseInt(input.value) || 1;
     var newVal = current + delta;
     if (newVal < 1) {
         gConfirm('{% trans "确定要移除这个商品吗？" %}', function() {
-            doRemoveItem(itemId);
+            doRemoveItem(itemId, itemType);
         }, {danger: true, title: '{% trans "移除商品" %}'});
         return;
     }
-    updateQuantity(itemId, newVal);
+    updateQuantity(itemId, itemType, newVal);
 }
 
-// Update quantity function
-function updateQuantity(itemId, newQuantity) {
+function updateQuantity(itemId, itemType, newQuantity) {
     newQuantity = parseInt(newQuantity);
     if (isNaN(newQuantity) || newQuantity < 1) {
         gConfirm('{% trans "确定要移除这个商品吗？" %}', function() {
-            doRemoveItem(itemId);
+            doRemoveItem(itemId, itemType);
         }, {danger: true, title: '{% trans "移除商品" %}'});
         return;
     }
 
-    var quantityInput = document.getElementById('quantity-' + itemId);
+    var quantityInput = document.getElementById('quantity-' + itemType + '-' + itemId);
     var maxQuantity = parseInt(quantityInput.getAttribute('max'));
 
     if (newQuantity > maxQuantity) {
-        gToast('库存不足！最大可购买：' + maxQuantity + '本', 'warning');
+        gToast('库存不足！最大可购买：' + maxQuantity, 'warning');
         quantityInput.value = maxQuantity;
         newQuantity = maxQuantity;
     }
@@ -236,12 +269,12 @@ function updateQuantity(itemId, newQuantity) {
             'Content-Type': 'application/json',
             'X-CSRFToken': CSRF_TOKEN
         },
-        body: JSON.stringify({ item_id: itemId, quantity: newQuantity })
+        body: JSON.stringify({ item_id: itemId, item_type: itemType, quantity: newQuantity })
     })
     .then(function(r) { if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
     .then(function(data) {
         if (data.success) {
-            var itemTotal = document.getElementById('item-total-' + itemId);
+            var itemTotal = document.getElementById('item-total-' + itemType + '-' + itemId);
             if (itemTotal) itemTotal.textContent = '¥' + parseFloat(data.item_total).toFixed(2);
             updateCartSummary(data.cart_total, data.total_items);
             gToast(data.message, 'success');
@@ -252,24 +285,26 @@ function updateQuantity(itemId, newQuantity) {
     .catch(function() { gToast('{% trans "更新失败，请重试" %}', 'error'); });
 }
 
-// Remove item with confirm
-function removeItem(itemId) {
+function removeItem(itemId, itemType) {
     gConfirm('{% trans "确定要移除这个商品吗？" %}', function() {
-        doRemoveItem(itemId);
+        doRemoveItem(itemId, itemType);
     }, {danger: true, title: '{% trans "移除商品" %}'});
 }
 
-// Actually delete the item via AJAX
-function doRemoveItem(itemId) {
+function doRemoveItem(itemId, itemType) {
+    var formData = new FormData();
+    formData.append('item_type', itemType);
+    
     fetch('/manager/cart/remove/' + itemId + '/', {
         method: 'POST',
         credentials: 'same-origin',
-        headers: { 'X-CSRFToken': CSRF_TOKEN, 'X-Requested-With': 'XMLHttpRequest' }
+        headers: { 'X-CSRFToken': CSRF_TOKEN, 'X-Requested-With': 'XMLHttpRequest' },
+        body: formData
     })
     .then(function(r) { if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
     .then(function(data) {
         if (data.success) {
-            var row = document.querySelector('.cart-item[data-item-id="' + itemId + '"]');
+            var row = document.querySelector('.cart-item[data-item-id="' + itemId + '"][data-item-type="' + itemType + '"]');
             if (row) {
                 row.style.transition = 'opacity 0.3s, max-height 0.3s';
                 row.style.opacity = '0';
@@ -288,7 +323,6 @@ function doRemoveItem(itemId) {
     .catch(function() { gToast('移除失败，请重试', 'error'); });
 }
 
-// Clear entire cart
 function clearCart() {
     gConfirm('{% trans "确定要清空整个购物车吗？" %}', function() {
         fetch('/manager/cart/clear/', {
@@ -307,7 +341,6 @@ function clearCart() {
     }, {danger: true, title: '{% trans "清空购物车" %}'});
 }
 
-// Update cart summary display
 function updateCartSummary(totalAmount, totalItems) {
     var si = document.getElementById('summary-items');
     var ss = document.getElementById('summary-subtotal');
@@ -319,13 +352,11 @@ function updateCartSummary(totalAmount, totalItems) {
     if (ti) ti.textContent = totalItems;
 }
 
-// Update nav cart badge
 function updateNavBadge(count) {
     var badge = document.getElementById('cart-badge');
     if (badge) badge.textContent = count;
 }
 
-// Fetch and update cart badge on page load
 document.addEventListener('DOMContentLoaded', function() {
     fetch('/manager/cart/count/')
         .then(function(r) { return r.json(); })

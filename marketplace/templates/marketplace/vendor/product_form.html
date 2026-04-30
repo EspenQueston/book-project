@@ -1,0 +1,179 @@
+{% extends "marketplace/vendor/base.html" %}
+
+{% block title %}{% if product %}编辑商品{% else %}添加商品{% endif %} - {{ vendor.company_name }}{% endblock %}
+{% block nav_products %}active{% endblock %}
+
+{% block extra_vendor_css %}
+<style>
+    .form-card { background: #fff; border-radius: 15px; padding: 28px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); margin-bottom: 24px; }
+    .form-card h6 { font-weight: 700; color: #1e293b; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid rgba(102,126,234,0.1); }
+    .form-label { font-weight: 600; font-size: 0.85rem; color: #374151; }
+    .form-control, .form-select { border-radius: 10px; border: 1.5px solid #e2e8f0; padding: 10px 14px; font-size: 0.9rem; transition: all 0.2s; }
+    .form-control:focus, .form-select:focus { border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,0.12); }
+    .img-preview { width: 120px; height: 120px; border-radius: 12px; object-fit: cover; border: 2px dashed #e2e8f0; }
+    .attr-row { background: rgba(102,126,234,0.03); border-radius: 10px; padding: 12px; margin-bottom: 8px; }
+    .btn-submit { background: linear-gradient(135deg, #667eea, #764ba2); border: none; border-radius: 10px; padding: 12px 36px; font-weight: 600; color: #fff; }
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102,126,234,0.3); color: #fff; }
+</style>
+{% endblock %}
+
+{% block vendor_content %}
+<div class="page-header-card">
+    <div class="d-flex align-items-center justify-content-between">
+        <div>
+            <h4><i class="fas fa-{% if product %}edit{% else %}plus-circle{% endif %} me-2"></i>{% if product %}编辑商品{% else %}添加商品{% endif %}</h4>
+            <p class="mb-0 opacity-75" style="font-size:0.9rem;">{% if product %}修改 "{{ product.name }}"{% else %}填写商品信息{% endif %}</p>
+        </div>
+        <a href="{% url 'marketplace:vendor_products' %}" class="btn btn-light btn-sm px-3"><i class="fas fa-arrow-left me-1"></i>返回列表</a>
+    </div>
+</div>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <!-- Basic Info -->
+    <div class="form-card">
+        <h6><i class="fas fa-info-circle me-2" style="color:var(--primary-color);"></i>基本信息</h6>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">商品名称 <span class="text-danger">*</span></label>
+                <input type="text" name="name" class="form-control" required value="{{ product.name|default:'' }}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">英文名称</label>
+                <input type="text" name="name_en" class="form-control" value="{{ product.name_en|default:'' }}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">分类</label>
+                <select name="category" class="form-select">
+                    <option value="">选择分类</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.pk }}" {% if product and product.category_id == cat.pk %}selected{% endif %}>{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">品牌</label>
+                <input type="text" name="brand" class="form-control" value="{{ product.brand|default:'' }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">商品状况</label>
+                <select name="condition" class="form-select">
+                    <option value="new" {% if product.condition == 'new' %}selected{% endif %}>全新</option>
+                    <option value="like_new" {% if product.condition == 'like_new' %}selected{% endif %}>几乎全新</option>
+                    <option value="used" {% if product.condition == 'used' %}selected{% endif %}>二手</option>
+                    <option value="refurbished" {% if product.condition == 'refurbished' %}selected{% endif %}>翻新</option>
+                </select>
+            </div>
+            <div class="col-12">
+                <label class="form-label">商品描述</label>
+                <textarea name="description" class="form-control" rows="4">{{ product.description|default:'' }}</textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pricing -->
+    <div class="form-card">
+        <h6><i class="fas fa-yen-sign me-2" style="color:#10b981;"></i>价格与库存</h6>
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">销售价格 <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <span class="input-group-text">¥</span>
+                    <input type="number" step="0.01" name="price" class="form-control" required value="{{ product.price|default:'' }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">原价</label>
+                <div class="input-group">
+                    <span class="input-group-text">¥</span>
+                    <input type="number" step="0.01" name="original_price" class="form-control" value="{{ product.original_price|default:'' }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">库存 <span class="text-danger">*</span></label>
+                <input type="number" name="stock" class="form-control" value="{{ product.stock|default:'0' }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">重量 (kg)</label>
+                <input type="number" step="0.01" name="weight" class="form-control" value="{{ product.weight|default:'' }}">
+            </div>
+        </div>
+    </div>
+
+    <!-- Images -->
+    <div class="form-card">
+        <h6><i class="fas fa-images me-2" style="color:#f59e0b;"></i>商品图片</h6>
+        <div class="row g-4">
+            <div class="col-md-4 text-center">
+                <label class="form-label d-block">主图</label>
+                {% if product and product.image %}
+                <img src="{{ product.image.url }}" class="img-preview mb-2 d-block mx-auto">
+                {% endif %}
+                <input type="file" name="image" class="form-control" accept="image/*">
+            </div>
+            <div class="col-md-4 text-center">
+                <label class="form-label d-block">图片 2</label>
+                {% if product and product.image_2 %}
+                <img src="{{ product.image_2.url }}" class="img-preview mb-2 d-block mx-auto">
+                {% endif %}
+                <input type="file" name="image_2" class="form-control" accept="image/*">
+            </div>
+            <div class="col-md-4 text-center">
+                <label class="form-label d-block">图片 3</label>
+                {% if product and product.image_3 %}
+                <img src="{{ product.image_3.url }}" class="img-preview mb-2 d-block mx-auto">
+                {% endif %}
+                <input type="file" name="image_3" class="form-control" accept="image/*">
+            </div>
+        </div>
+    </div>
+
+    <!-- Attributes -->
+    <div class="form-card">
+        <h6><i class="fas fa-tags me-2" style="color:#f093fb;"></i>商品属性</h6>
+        <div id="attr-container">
+            {% if product %}
+            {% for attr in product.attributes.all %}
+            <div class="attr-row d-flex gap-2 align-items-center">
+                <input type="text" name="attr_name" class="form-control" placeholder="属性名 (如: 颜色)" value="{{ attr.name }}">
+                <input type="text" name="attr_value" class="form-control" placeholder="属性值 (如: 红,蓝,绿)" value="{{ attr.value }}">
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-primary mt-2" style="border-radius:8px;" onclick="addAttrRow()"><i class="fas fa-plus me-1"></i>添加属性</button>
+    </div>
+
+    <!-- Status & Submit -->
+    <div class="form-card">
+        <div class="d-flex align-items-center justify-content-between">
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" name="is_active" id="isActive" {% if not product or product.is_active %}checked{% endif %}>
+                <label class="form-check-label fw-bold" for="isActive">立即上架</label>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{% url 'marketplace:vendor_products' %}" class="btn btn-outline-secondary px-4" style="border-radius:10px;">取消</a>
+                <button type="submit" class="btn btn-submit"><i class="fas fa-save me-1"></i>{% if product %}保存修改{% else %}添加商品{% endif %}</button>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_vendor_js %}
+<script>
+function addAttrRow() {
+    const container = document.getElementById('attr-container');
+    const row = document.createElement('div');
+    row.className = 'attr-row d-flex gap-2 align-items-center';
+    row.innerHTML = `
+        <input type="text" name="attr_name" class="form-control" placeholder="属性名 (如: 颜色)">
+        <input type="text" name="attr_value" class="form-control" placeholder="属性值 (如: 红,蓝,绿)">
+        <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
+    `;
+    container.appendChild(row);
+}
+</script>
+{% endblock %}

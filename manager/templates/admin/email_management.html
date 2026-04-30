@@ -147,32 +147,172 @@
         .empty-state { text-align: center; padding: 64px 20px; }
         .empty-icon { width: 80px; height: 80px; background: linear-gradient(135deg,rgba(102,126,234,0.1),rgba(118,75,162,0.1)); border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; }
 
-        /* ===== Compose Overlay ===== */
-        .compose-overlay {
-            display: none; position: fixed; bottom: 20px; right: 30px; width: 520px; max-height: 85vh;
-            background: white; border-radius: 16px; box-shadow: 0 12px 40px rgba(0,0,0,0.2);
-            z-index: 1050; overflow: hidden; flex-direction: column;
+        /* ===== Slide Panel (Email Reader) ===== */
+        .slide-panel-backdrop {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15,23,42,0.4); backdrop-filter: blur(4px); z-index: 1060;
+            opacity: 0; transition: opacity 0.3s ease;
         }
-        .compose-overlay.show { display: flex; }
+        .slide-panel-backdrop.show { display: block; opacity: 1; }
+        .slide-panel {
+            position: fixed; top: 0; right: -620px; width: 600px; max-width: 92vw; height: 100vh;
+            background: white; z-index: 1070; display: flex; flex-direction: column;
+            box-shadow: -8px 0 40px rgba(0,0,0,0.15); transition: right 0.35s cubic-bezier(0.4,0,0.2,1);
+        }
+        .slide-panel.show { right: 0; }
+        .sp-toolbar {
+            display: flex; align-items: center; gap: 8px; padding: 14px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); flex-shrink: 0;
+        }
+        .sp-toolbar-btn {
+            width: 36px; height: 36px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.25);
+            background: rgba(255,255,255,0.12); color: white; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 0.88rem;
+            transition: all 0.2s; backdrop-filter: blur(4px);
+        }
+        .sp-toolbar-btn:hover { background: rgba(255,255,255,0.25); transform: scale(1.05); }
+        .sp-toolbar-btn.danger:hover { background: rgba(239,68,68,0.6); }
+        .sp-toolbar-title { color: white; font-weight: 700; font-size: 0.92rem; flex: 1; margin: 0 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sp-header { padding: 22px 24px 16px; border-bottom: 1px solid #f1f5f9; flex-shrink: 0; }
+        .rp-subject { font-size: 1.2rem; font-weight: 800; color: #0f172a; margin-bottom: 10px; line-height: 1.4; }
+        .rp-sender-bar { display: flex; align-items: center; gap: 12px; padding: 12px 0 4px; }
+        .rp-avatar { width: 44px; height: 44px; border-radius: 14px; background: linear-gradient(135deg,#667eea,#764ba2); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.05rem; flex-shrink: 0; }
+        .rp-sender-info { flex: 1; min-width: 0; }
+        .rp-sender-name { font-weight: 700; color: #1e293b; font-size: 0.95rem; }
+        .rp-sender-email { font-size: 0.8rem; color: #64748b; }
+        .rp-recipients { font-size: 0.78rem; color: #94a3b8; margin-top: 2px; }
+        .rp-date { font-size: 0.78rem; color: #94a3b8; background: #f1f5f9; padding: 4px 10px; border-radius: 8px; white-space: nowrap; }
+        .sp-body-wrap { flex: 1; overflow-y: auto; overscroll-behavior: contain; }
+        .rp-body { padding: 22px 24px; font-size: 0.92rem; line-height: 1.85; color: #334155; }
+        .rp-body pre { white-space: pre-wrap; word-wrap: break-word; font-family: inherit; margin: 0; }
+        .rp-attachments { padding: 14px 24px; border-top: 1px solid #f1f5f9; }
+        .rp-att-item {
+            display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px;
+            background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; margin: 4px 6px 4px 0;
+            font-size: 0.82rem; color: #475569; text-decoration: none; transition: all 0.2s;
+        }
+        .rp-att-item:hover { background: #e0e7ff; border-color: #667eea; color: #667eea; }
+        .sp-actions {
+            padding: 14px 24px; border-top: 1px solid #f1f5f9; display: flex; gap: 8px; flex-wrap: wrap; flex-shrink: 0;
+            background: #fafbfc;
+        }
+        .rp-btn { padding: 9px 18px; border-radius: 10px; border: 1px solid #e2e8f0; background: white; color: #475569; font-size: 0.82rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 7px; transition: all 0.2s; }
+        .rp-btn:hover { background: #f0f1ff; border-color: #667eea; color: #667eea; transform: translateY(-1px); }
+        .rp-btn.primary { background: linear-gradient(135deg,#667eea,#764ba2); color: white; border: none; }
+        .rp-btn.primary:hover { box-shadow: 0 4px 14px rgba(102,126,234,0.35); transform: translateY(-1px); }
+        .rp-btn.danger { color: #ef4444; border-color: #fecaca; }
+        .rp-btn.danger:hover { background: #fef2f2; transform: translateY(-1px); }
+
+        /* ===== Inline Reply (inside slide panel) ===== */
+        .inline-reply { padding: 16px 24px; border-top: 1px solid #f1f5f9; display: none; flex-shrink: 0; }
+        .inline-reply.show { display: block; }
+        .inline-reply textarea { width: 100%; border: 2px solid #e2e8f0; border-radius: 10px; padding: 12px; font-size: 0.88rem; resize: vertical; min-height: 100px; outline: none; transition: border-color 0.2s; }
+        .inline-reply textarea:focus { border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,0.1); }
+        .inline-reply-actions { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
+
+        /* ===== Compose Overlay ===== */
+        .compose-backdrop {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15,23,42,0.3); backdrop-filter: blur(2px); z-index: 1048;
+            opacity: 0; transition: opacity 0.3s ease;
+        }
+        .compose-backdrop.show { display: block; opacity: 1; }
+        .compose-overlay {
+            display: none; position: fixed; bottom: 24px; right: 30px; width: 580px; max-width: 95vw; max-height: 85vh;
+            background: white; border-radius: 18px; box-shadow: 0 20px 60px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.05);
+            z-index: 1050; overflow: hidden; flex-direction: column;
+            transform: translateY(20px) scale(0.95); opacity: 0; transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+        .compose-overlay.show { display: flex; transform: translateY(0) scale(1); opacity: 1; }
         .compose-header {
             background: linear-gradient(135deg, #667eea, #764ba2); color: white;
-            padding: 14px 20px; display: flex; justify-content: space-between; align-items: center;
+            padding: 16px 22px; display: flex; justify-content: space-between; align-items: center;
         }
-        .compose-header h6 { margin: 0; font-weight: 700; }
-        .compose-close { background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; }
-        .compose-body { padding: 16px 20px; overflow-y: auto; flex: 1; }
-        .compose-body .form-control { font-size: 0.88rem; border-radius: 8px; }
+        .compose-header h6 { margin: 0; font-weight: 700; font-size: 0.95rem; }
+        .compose-close {
+            width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,0.15); border: none;
+            color: white; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .compose-close:hover { background: rgba(255,255,255,0.3); }
+        .compose-body { padding: 18px 22px; overflow-y: auto; flex: 1; }
+        .compose-body .form-control { font-size: 0.88rem; border-radius: 10px; border: 2px solid #e2e8f0; transition: border-color 0.2s, box-shadow 0.2s; }
+        .compose-body .form-control:focus { border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,0.1); }
         .compose-body label { font-size: 0.78rem; font-weight: 600; color: #64748b; margin-bottom: 4px; }
-        .compose-footer { padding: 12px 20px; border-top: 1px solid #f1f5f9; display: flex; gap: 10px; }
-        .compose-footer .btn-send { background: linear-gradient(135deg,#667eea,#764ba2); color: white; border: none; border-radius: 10px; padding: 9px 22px; font-weight: 600; cursor: pointer; }
-        .compose-footer .btn-draft { background: #f1f5f9; color: #475569; border: none; border-radius: 10px; padding: 9px 18px; font-weight: 600; cursor: pointer; }
+        .compose-footer { padding: 14px 22px; border-top: 1px solid #f1f5f9; display: flex; gap: 10px; background: #fafbfc; }
+        .compose-footer .btn-send {
+            background: linear-gradient(135deg,#667eea,#764ba2); color: white; border: none;
+            border-radius: 10px; padding: 10px 24px; font-weight: 700; cursor: pointer; font-size: 0.88rem;
+            transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+        }
+        .compose-footer .btn-send:hover { box-shadow: 0 4px 14px rgba(102,126,234,0.35); transform: translateY(-1px); }
+        .compose-footer .btn-draft {
+            background: white; color: #475569; border: 1px solid #e2e8f0;
+            border-radius: 10px; padding: 10px 18px; font-weight: 600; cursor: pointer; font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .compose-footer .btn-draft:hover { background: #f1f5f9; border-color: #cbd5e1; }
 
-        /* ===== Toast ===== */
-        .toast-container { position: fixed; top: 90px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-        .toast-item { padding: 14px 20px; border-radius: 12px; color: white; font-weight: 600; font-size: 0.9rem; box-shadow: 0 6px 20px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 10px; min-width: 260px; animation: toastIn 0.3s ease; }
+        /* ===== Modern Toast ===== */
+        .toast-container { position: fixed; top: 90px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+        .toast-item {
+            padding: 0; border-radius: 14px; color: white; font-weight: 600; font-size: 0.88rem;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.18); min-width: 300px; max-width: 420px;
+            animation: toastSlideIn 0.4s cubic-bezier(0.34,1.56,0.64,1); overflow: hidden;
+            pointer-events: auto; display: flex; flex-direction: column;
+        }
+        .toast-item.removing { animation: toastSlideOut 0.3s ease forwards; }
+        .toast-body { display: flex; align-items: center; gap: 12px; padding: 16px 18px; }
+        .toast-icon { width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 0.95rem; flex-shrink: 0; }
         .toast-success { background: linear-gradient(135deg,#10b981,#059669); }
+        .toast-success .toast-icon { background: rgba(255,255,255,0.2); }
         .toast-error { background: linear-gradient(135deg,#ef4444,#dc2626); }
-        @keyframes toastIn { from { opacity:0; transform:translateX(30px); } to { opacity:1; transform:translateX(0); } }
+        .toast-error .toast-icon { background: rgba(255,255,255,0.2); }
+        .toast-info { background: linear-gradient(135deg,#667eea,#764ba2); }
+        .toast-info .toast-icon { background: rgba(255,255,255,0.2); }
+        .toast-warning { background: linear-gradient(135deg,#f59e0b,#d97706); }
+        .toast-warning .toast-icon { background: rgba(255,255,255,0.2); }
+        .toast-close { background: none; border: none; color: rgba(255,255,255,0.7); cursor: pointer; font-size: 1rem; padding: 0 4px; transition: color 0.2s; flex-shrink: 0; }
+        .toast-close:hover { color: white; }
+        .toast-progress { height: 3px; background: rgba(255,255,255,0.3); border-radius: 0 0 14px 14px; }
+        .toast-progress-bar { height: 100%; background: rgba(255,255,255,0.7); border-radius: 0 0 14px 14px; animation: toastProgress 3s linear forwards; }
+        @keyframes toastSlideIn { from { opacity:0; transform:translateX(40px) scale(0.9); } to { opacity:1; transform:translateX(0) scale(1); } }
+        @keyframes toastSlideOut { from { opacity:1; transform:translateX(0); } to { opacity:0; transform:translateX(40px); } }
+        @keyframes toastProgress { from { width: 100%; } to { width: 0%; } }
+
+        /* ===== Confirm Modal ===== */
+        .confirm-backdrop {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15,23,42,0.5); backdrop-filter: blur(4px); z-index: 2000;
+            opacity: 0; transition: opacity 0.25s ease;
+        }
+        .confirm-backdrop.show { display: flex; align-items: center; justify-content: center; opacity: 1; }
+        .confirm-dialog {
+            background: white; border-radius: 20px; width: 400px; max-width: 90vw;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2); overflow: hidden;
+            transform: scale(0.9) translateY(10px); transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .confirm-backdrop.show .confirm-dialog { transform: scale(1) translateY(0); }
+        .confirm-icon-wrap {
+            width: 56px; height: 56px; border-radius: 16px; margin: 28px auto 16px;
+            display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+        }
+        .confirm-icon-wrap.danger { background: #fef2f2; color: #ef4444; }
+        .confirm-icon-wrap.warning { background: #fffbeb; color: #f59e0b; }
+        .confirm-icon-wrap.info { background: #eff6ff; color: #667eea; }
+        .confirm-title { text-align: center; font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 6px; padding: 0 24px; }
+        .confirm-message { text-align: center; font-size: 0.88rem; color: #64748b; padding: 0 28px 24px; line-height: 1.5; }
+        .confirm-actions { display: flex; gap: 10px; padding: 0 24px 24px; justify-content: center; }
+        .confirm-btn {
+            padding: 10px 24px; border-radius: 10px; font-weight: 600; font-size: 0.88rem;
+            cursor: pointer; border: none; transition: all 0.2s; min-width: 100px;
+        }
+        .confirm-btn.cancel { background: #f1f5f9; color: #475569; }
+        .confirm-btn.cancel:hover { background: #e2e8f0; }
+        .confirm-btn.danger { background: linear-gradient(135deg,#ef4444,#dc2626); color: white; }
+        .confirm-btn.danger:hover { box-shadow: 0 4px 14px rgba(239,68,68,0.35); transform: translateY(-1px); }
+        .confirm-btn.primary { background: linear-gradient(135deg,#667eea,#764ba2); color: white; }
+        .confirm-btn.primary:hover { box-shadow: 0 4px 14px rgba(102,126,234,0.35); transform: translateY(-1px); }
 
         .spin { animation: spin 1s linear infinite; }
         @keyframes spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
@@ -180,6 +320,7 @@
         @media (max-width: 768px) {
             .sidebar-card { display: none; }
             .content-grid { flex-direction: column; }
+            .slide-panel { width: 100vw; max-width: 100vw; }
         }
     </style>
 </head>
@@ -188,7 +329,7 @@
 <nav class="top-navbar">
     <a href="/manager/dashboard/" class="nav-brand">
         <i class="fas fa-book-open"></i>
-        <span>图书管理系统</span>
+        <span>DUNO 360</span>
     </a>
     <div class="nav-links">
         <a href="/manager/dashboard/" class="nav-link-btn"><i class="fas fa-tachometer-alt"></i>仪表盘</a>
@@ -323,7 +464,11 @@
                 </button>
 
                 <!-- Bulk Actions -->
-                <div id="bulkActions" style="display:none;gap:6px;">
+                <div id="bulkActions" style="display:none;gap:6px;align-items:center;">
+                    <label class="btn-bulk" style="cursor:pointer;margin:0;" title="全选/取消">
+                        <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this)" style="margin-right:4px;">全选
+                    </label>
+                    <span id="selectedCount" style="font-size:0.78rem;font-weight:700;color:#667eea;min-width:30px;"></span>
                     <button class="btn-bulk" onclick="bulkAction('mark_read')"><i class="fas fa-check-double"></i>已读</button>
                     <button class="btn-bulk" onclick="bulkAction('mark_unread')"><i class="fas fa-circle"></i>未读</button>
                     <button class="btn-bulk" onclick="bulkAction('archive')"><i class="fas fa-archive"></i>归档</button>
@@ -387,8 +532,7 @@
                             <i class="fas fa-star"></i>
                         </button>
                         <div class="msg-avatar">{{ email.sender_name|first|upper|default:"?" }}</div>
-                        <div class="msg-content" onclick="window.location='/manager/email/detail/{{ email.id }}/';">
-                            <div class="msg-header">
+                        <div class="msg-content" onclick="openEmailInPane({{ email.id }})">                            <div class="msg-header">
                                 <span class="msg-name">{{ email.sender_name|default:email.sender_email }}</span>
                                 <span class="msg-email-addr">&lt;{{ email.sender_email }}&gt;</span>
                                 {% if not email.is_read %}<span class="badge-unread"><i class="fas fa-circle" style="font-size:0.4rem;"></i>未读</span>{% endif %}
@@ -424,15 +568,93 @@
                 </div>
                 {% endif %}
             </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Slide Panel (Email Reader) -->
+<div class="slide-panel-backdrop" id="slidePanelBackdrop" onclick="closeReadingPane()"></div>
+<div class="slide-panel" id="slidePanel">
+    <!-- Panel Toolbar -->
+    <div class="sp-toolbar">
+        <button class="sp-toolbar-btn" onclick="closeReadingPane()" title="关闭"><i class="fas fa-times"></i></button>
+        <span class="sp-toolbar-title" id="spToolbarTitle">邮件详情</span>
+        <button class="sp-toolbar-btn" onclick="replyFromPane()" title="回复"><i class="fas fa-reply"></i></button>
+        <button class="sp-toolbar-btn" onclick="forwardFromPane()" title="转发"><i class="fas fa-share"></i></button>
+        <button class="sp-toolbar-btn" onclick="archiveFromPane()" title="归档"><i class="fas fa-archive"></i></button>
+        <button class="sp-toolbar-btn danger" onclick="deleteFromPane()" title="删除"><i class="fas fa-trash"></i></button>
+        <a class="sp-toolbar-btn" id="rpFullLink" href="#" title="全屏" style="color:white;text-decoration:none;"><i class="fas fa-expand"></i></a>
+    </div>
+
+    <!-- Panel Header -->
+    <div class="sp-header">
+        <div class="rp-subject" id="rpSubject"></div>
+        <div id="rpLabels" style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;"></div>
+        <div class="rp-sender-bar">
+            <div class="rp-avatar" id="rpAvatar"></div>
+            <div class="rp-sender-info">
+                <div class="rp-sender-name" id="rpSenderName"></div>
+                <div class="rp-sender-email" id="rpSenderEmail"></div>
+                <div class="rp-recipients" id="rpRecipients"></div>
+            </div>
+            <div class="rp-date" id="rpDate"></div>
+        </div>
+    </div>
+
+    <!-- Scrollable Body -->
+    <div class="sp-body-wrap">
+        <div class="rp-body" id="rpBody"></div>
+        <div class="rp-attachments" id="rpAttachments" style="display:none;"></div>
+    </div>
+
+    <!-- Bottom Actions -->
+    <div class="sp-actions">
+        <button class="rp-btn primary" onclick="replyFromPane()"><i class="fas fa-reply"></i> 回复</button>
+        <button class="rp-btn" onclick="replyAllFromPane()"><i class="fas fa-reply-all"></i> 全部回复</button>
+        <button class="rp-btn" onclick="forwardFromPane()"><i class="fas fa-share"></i> 转发</button>
+    </div>
+
+    <!-- Inline Reply -->
+    <div class="inline-reply" id="inlineReply">
+        <div style="font-size:0.82rem;font-weight:600;color:#64748b;margin-bottom:8px;" id="inlineReplyLabel">回复</div>
+        <div class="mb-2" id="inlineFwdTo" style="display:none;">
+            <input type="text" id="inlineFwdRecipient" class="form-control form-control-sm" placeholder="转发收件人...">
+        </div>
+        <textarea id="inlineReplyBody" placeholder="输入回复内容..."></textarea>
+        <div class="inline-reply-actions">
+            <select id="inlineReplyAccount" class="form-control form-control-sm" style="max-width:250px;">
+                {% for acc in accounts %}
+                <option value="{{ acc.id }}" {% if acc.is_default %}selected{% endif %}>{{ acc.name }}</option>
+                {% endfor %}
+            </select>
+            <button class="rp-btn primary" onclick="sendInlineReply()"><i class="fas fa-paper-plane"></i> 发送</button>
+            <button class="rp-btn" onclick="cancelInlineReply()">取消</button>
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Modal -->
+<div class="confirm-backdrop" id="confirmBackdrop">
+    <div class="confirm-dialog">
+        <div class="confirm-icon-wrap danger" id="confirmIconWrap">
+            <i class="fas fa-trash-alt" id="confirmIcon"></i>
+        </div>
+        <div class="confirm-title" id="confirmTitle">确定删除？</div>
+        <div class="confirm-message" id="confirmMessage">此操作无法撤销</div>
+        <div class="confirm-actions">
+            <button class="confirm-btn cancel" onclick="closeConfirm(false)">取消</button>
+            <button class="confirm-btn danger" id="confirmOkBtn" onclick="closeConfirm(true)">确定</button>
         </div>
     </div>
 </div>
 
 <!-- Compose Overlay -->
+<div class="compose-backdrop" id="composeBackdrop" onclick="closeCompose()"></div>
 <div class="compose-overlay" id="composeOverlay">
     <div class="compose-header">
         <h6><i class="fas fa-pen me-2"></i>写邮件</h6>
-        <button class="compose-close" onclick="closeCompose()">&times;</button>
+        <button class="compose-close" onclick="closeCompose()"><i class="fas fa-times"></i></button>
     </div>
     <div class="compose-body">
         <form id="composeForm" enctype="multipart/form-data">
@@ -446,24 +668,32 @@
             </div>
             <div class="mb-2">
                 <label>收件人</label>
-                <input type="text" name="to" class="form-control form-control-sm" required>
+                <input type="text" name="to" id="composeTo" class="form-control form-control-sm" required>
             </div>
-            <div class="mb-2">
+            <div class="mb-2" id="ccRow">
                 <label>抄送 (CC)</label>
-                <input type="text" name="cc" class="form-control form-control-sm">
+                <input type="text" name="cc" id="composeCc" class="form-control form-control-sm">
+            </div>
+            <div class="mb-2" id="bccRow" style="display:none;">
+                <label>密送 (BCC)</label>
+                <input type="text" name="bcc" id="composeBcc" class="form-control form-control-sm">
+            </div>
+            <div style="margin-bottom:8px;">
+                <a href="#" onclick="document.getElementById('bccRow').style.display='block';this.style.display='none';return false;" style="font-size:0.78rem;color:#667eea;">+ 添加密送</a>
             </div>
             <div class="mb-2">
                 <label>主题</label>
-                <input type="text" name="subject" class="form-control form-control-sm">
+                <input type="text" name="subject" id="composeSubject" class="form-control form-control-sm">
             </div>
             <div class="mb-2">
                 <label>正文</label>
-                <textarea name="body" class="form-control" rows="8" style="font-size:0.88rem;"></textarea>
+                <textarea name="body" id="composeBody" class="form-control" rows="8" style="font-size:0.88rem;"></textarea>
             </div>
             <div class="mb-2">
                 <label>附件</label>
                 <input type="file" name="attachments" class="form-control form-control-sm" multiple>
             </div>
+            <input type="hidden" name="in_reply_to" id="composeReplyTo" value="">
         </form>
     </div>
     <div class="compose-footer">
@@ -488,22 +718,52 @@ let selectMode = false;
 
 function showToast(msg, type) {
     type = type || 'success';
+    var icons = { success: 'check', error: 'times', info: 'info', warning: 'exclamation-triangle' };
     var c = document.getElementById('toastContainer');
     var d = document.createElement('div');
     d.className = 'toast-item toast-' + type;
-    d.innerHTML = '<i class="fas fa-' + (type==='success'?'check-circle':'times-circle') + '"></i>' + msg;
+    d.innerHTML = '<div class="toast-body">' +
+        '<div class="toast-icon"><i class="fas fa-' + (icons[type] || 'check') + '"></i></div>' +
+        '<span style="flex:1;">' + msg + '</span>' +
+        '<button class="toast-close" onclick="this.closest(\'.toast-item\').remove()">&times;</button>' +
+        '</div><div class="toast-progress"><div class="toast-progress-bar"></div></div>';
     c.appendChild(d);
-    setTimeout(function() { d.style.opacity='0'; d.style.transform='translateX(30px)'; d.style.transition='all 0.3s'; setTimeout(function(){ d.remove(); }, 300); }, 3000);
+    setTimeout(function() {
+        d.classList.add('removing');
+        setTimeout(function(){ d.remove(); }, 300);
+    }, 3000);
 }
 
 /* ===== Compose ===== */
-function openCompose() { document.getElementById('composeOverlay').classList.add('show'); }
-function closeCompose() { document.getElementById('composeOverlay').classList.remove('show'); }
+function openCompose(to, subject, body, replyTo) {
+    document.getElementById('composeTo').value = to || '';
+    document.getElementById('composeSubject').value = subject || '';
+    document.getElementById('composeBody').value = body || '';
+    document.getElementById('composeReplyTo').value = replyTo || '';
+    document.getElementById('composeCc').value = '';
+    document.getElementById('composeBcc').value = '';
+    var overlay = document.getElementById('composeOverlay');
+    var backdrop = document.getElementById('composeBackdrop');
+    backdrop.classList.add('show');
+    overlay.classList.add('show');
+    // Force reflow for animation
+    overlay.offsetHeight;
+}
+function closeCompose() {
+    document.getElementById('composeOverlay').classList.remove('show');
+    document.getElementById('composeBackdrop').classList.remove('show');
+}
 
 function sendEmail(isDraft) {
     var form = document.getElementById('composeForm');
     var fd = new FormData(form);
     if (isDraft) fd.append('save_draft', '1');
+
+    var btns = document.querySelectorAll('.compose-footer button');
+    btns.forEach(function(b){ b.disabled = true; });
+    var sendBtn = document.querySelector('.btn-send');
+    var origText = sendBtn.innerHTML;
+    sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>' + (isDraft ? '保存中...' : '发送中...');
 
     fetch('/manager/email/compose/', {
         method: 'POST', credentials: 'same-origin',
@@ -512,10 +772,16 @@ function sendEmail(isDraft) {
     })
     .then(function(r){ return r.json(); })
     .then(function(d){
+        btns.forEach(function(b){ b.disabled = false; });
+        sendBtn.innerHTML = origText;
         if (d.success) { showToast(d.message); closeCompose(); form.reset(); setTimeout(function(){ location.reload(); }, 800); }
         else showToast(d.error || '操作失败', 'error');
     })
-    .catch(function(){ showToast('发送失败', 'error'); });
+    .catch(function(){
+        btns.forEach(function(b){ b.disabled = false; });
+        sendBtn.innerHTML = origText;
+        showToast('发送失败，请检查网络', 'error');
+    });
 }
 
 /* ===== Sync ===== */
@@ -565,85 +831,120 @@ function toggleSelectMode() {
     var checkboxes = document.querySelectorAll('.msg-checkbox');
     var bulk = document.getElementById('bulkActions');
     var btn = document.getElementById('selectAllBtn');
+    var saChk = document.getElementById('selectAllCheckbox');
     checkboxes.forEach(function(cb){ cb.style.display = selectMode ? 'inline-block' : 'none'; });
     bulk.style.display = selectMode ? 'flex' : 'none';
     btn.innerHTML = selectMode ? '<i class="fas fa-times"></i>取消' : '<i class="fas fa-check-square"></i>选择';
-    if (!selectMode) { checkboxes.forEach(function(cb){ cb.checked = false; }); }
+    if (!selectMode) {
+        checkboxes.forEach(function(cb){ cb.checked = false; });
+        if (saChk) saChk.checked = false;
+    }
+    updateBulkUI();
+}
+
+function toggleSelectAll(masterChk) {
+    var checkboxes = document.querySelectorAll('.msg-checkbox');
+    checkboxes.forEach(function(cb){ if(cb.style.display !== 'none') cb.checked = masterChk.checked; });
+    updateBulkUI();
 }
 
 function updateBulkUI() {
-    var checked = document.querySelectorAll('.msg-checkbox:checked').length;
+    var checkboxes = document.querySelectorAll('.msg-checkbox');
+    var visible = Array.from(checkboxes).filter(function(cb){ return cb.style.display !== 'none'; });
+    var checked = visible.filter(function(cb){ return cb.checked; }).length;
+    var total = visible.length;
     var bulk = document.getElementById('bulkActions');
-    if (selectMode && checked > 0) bulk.style.display = 'flex';
-    else if (selectMode) bulk.style.display = 'flex';
+    var counter = document.getElementById('selectedCount');
+    var saChk = document.getElementById('selectAllCheckbox');
+    if (selectMode) { bulk.style.display = 'flex'; }
+    if (counter) { counter.textContent = checked > 0 ? checked + '/' + total : ''; }
+    if (saChk) { saChk.checked = (total > 0 && checked === total); saChk.indeterminate = (checked > 0 && checked < total); }
 }
 
 function bulkAction(action) {
     var folder = '{{ current_folder }}';
 
     if (folder === 'contact') {
-        // Bulk action on contact messages
         var ids = Array.from(document.querySelectorAll('.contact-select:checked')).map(function(cb){ return cb.dataset.id; });
         if (!ids.length) return;
-        if (action === 'delete' && !confirm('确定删除选中的 ' + ids.length + ' 条消息？')) return;
-        fetch('/manager/admin_messages/bulk/', {
-            method: 'POST', credentials: 'same-origin',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCsrf() },
-            body: 'action=' + action + '&ids=' + ids.join(',')
-        })
-        .then(function(r){ return r.json(); })
-        .then(function(d){ if (d.success) { showToast('操作成功'); setTimeout(function(){ location.reload(); }, 600); } });
+        var doAction = function() {
+            fetch('/manager/admin_messages/bulk/', {
+                method: 'POST', credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCsrf() },
+                body: 'action=' + action + '&ids=' + ids.join(',')
+            })
+            .then(function(r){ return r.json(); })
+            .then(function(d){ if (d.success) { showToast('操作成功'); setTimeout(function(){ location.reload(); }, 600); } });
+        };
+        if (action === 'delete') {
+            showConfirm('确定删除 ' + ids.length + ' 条消息？', '删除后将无法恢复，请确认操作。', 'danger', doAction);
+        } else { doAction(); }
     } else {
-        // Bulk action on emails
         var ids = Array.from(document.querySelectorAll('.email-select:checked')).map(function(cb){ return cb.dataset.id; });
         if (!ids.length) return;
-        if (action === 'delete' && !confirm('确定删除选中的 ' + ids.length + ' 封邮件？')) return;
-        fetch('/manager/email/action/', {
-            method: 'POST', credentials: 'same-origin',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCsrf() },
-            body: 'action=' + action + '&ids=' + ids.join(',')
-        })
-        .then(function(r){ return r.json(); })
-        .then(function(d){ if (d.success) { showToast('操作成功'); setTimeout(function(){ location.reload(); }, 600); } });
+        var doAction = function() {
+            fetch('/manager/email/action/', {
+                method: 'POST', credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCsrf() },
+                body: 'action=' + action + '&ids=' + ids.join(',')
+            })
+            .then(function(r){ return r.json(); })
+            .then(function(d){ if (d.success) { showToast('操作成功'); setTimeout(function(){ location.reload(); }, 600); } });
+        };
+        if (action === 'delete') {
+            showConfirm('确定删除 ' + ids.length + ' 封邮件？', '删除后将移至回收站。', 'danger', doAction);
+        } else { doAction(); }
     }
 }
 
 /* ===== Delete Single ===== */
 function deleteEmail(id) {
-    if (!confirm('确定删除此邮件？')) return;
-    fetch('/manager/email/action/', {
-        method: 'POST', credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCsrf() },
-        body: 'action=trash&ids=' + id
-    })
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-        if (d.success) {
-            var row = document.getElementById('emailRow' + id);
-            row.style.transition = 'all 0.3s'; row.style.opacity = '0'; row.style.height = row.offsetHeight + 'px';
-            setTimeout(function(){ row.style.height = '0'; row.style.padding = '0'; }, 50);
-            setTimeout(function(){ row.remove(); }, 350);
-            showToast('已移至回收站');
-        }
+    showConfirm('确定删除此邮件？', '邮件将被移至回收站。', 'danger', function() {
+        fetch('/manager/email/action/', {
+            method: 'POST', credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCsrf() },
+            body: 'action=trash&ids=' + id
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+            if (d.success) {
+                var row = document.getElementById('emailRow' + id);
+                if (row) {
+                    row.style.transition = 'all 0.3s'; row.style.opacity = '0'; row.style.height = row.offsetHeight + 'px';
+                    setTimeout(function(){ row.style.height = '0'; row.style.padding = '0'; }, 50);
+                    setTimeout(function(){ row.remove(); }, 350);
+                }
+                showToast('已移至回收站');
+            } else {
+                showToast(d.error || '操作失败', 'error');
+            }
+        })
+        .catch(function(){ showToast('操作失败', 'error'); });
     });
 }
 
 function deleteContactMsg(id) {
-    if (!confirm('确定删除此消息？')) return;
-    fetch('/manager/admin_messages/delete/', {
-        method: 'POST', credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCsrf() },
-        body: 'id=' + id
-    })
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-        if (d.success) {
-            var row = document.getElementById('contactRow' + id);
-            row.style.transition = 'all 0.3s'; row.style.opacity = '0'; row.style.height = row.offsetHeight + 'px';
-            setTimeout(function(){ row.style.height = '0'; row.style.padding = '0'; }, 50);
-            setTimeout(function(){ row.remove(); }, 350);
-            showToast('消息已删除');
-        }
+    showConfirm('确定删除此消息？', '删除后将无法恢复。', 'danger', function() {
+        fetch('/manager/admin_messages/delete/', {
+            method: 'POST', credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCsrf() },
+            body: 'id=' + id
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+            if (d.success) {
+                var row = document.getElementById('contactRow' + id);
+                if (row) {
+                    row.style.transition = 'all 0.3s'; row.style.opacity = '0'; row.style.height = row.offsetHeight + 'px';
+                    setTimeout(function(){ row.style.height = '0'; row.style.padding = '0'; }, 50);
+                    setTimeout(function(){ row.remove(); }, 350);
+                }
+                showToast('消息已删除');
+            } else {
+                showToast(d.error || '操作失败', 'error');
+            }
+        })
+        .catch(function(){ showToast('操作失败', 'error'); });
     });
 }
 
@@ -680,6 +981,276 @@ function bulkLabelAction(action, labelId) {
         .then(function(d){ if (d.success) { showToast('标签已更新'); setTimeout(function(){ location.reload(); }, 600); } });
     }
 }
+
+/* ===== Confirm Modal ===== */
+var confirmCallback = null;
+
+function showConfirm(title, message, type, onConfirm) {
+    var iconMap = { danger: 'trash-alt', warning: 'exclamation-triangle', info: 'info-circle' };
+    document.getElementById('confirmTitle').textContent = title;
+    document.getElementById('confirmMessage').textContent = message;
+    document.getElementById('confirmIcon').className = 'fas fa-' + (iconMap[type] || 'question-circle');
+    var iconWrap = document.getElementById('confirmIconWrap');
+    iconWrap.className = 'confirm-icon-wrap ' + (type || 'danger');
+    var okBtn = document.getElementById('confirmOkBtn');
+    okBtn.className = 'confirm-btn ' + (type || 'danger');
+    confirmCallback = onConfirm;
+    var backdrop = document.getElementById('confirmBackdrop');
+    backdrop.classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeConfirm(confirmed) {
+    document.getElementById('confirmBackdrop').classList.remove('show');
+    document.body.style.overflow = '';
+    if (confirmed && confirmCallback) {
+        confirmCallback();
+    }
+    confirmCallback = null;
+}
+
+/* ===== Reading Pane (Slide Panel) ===== */
+var currentPaneEmail = null;
+
+function openEmailInPane(emailId) {
+    // Show panel immediately with loading state
+    var panel = document.getElementById('slidePanel');
+    var backdrop = document.getElementById('slidePanelBackdrop');
+    document.getElementById('rpSubject').textContent = '加载中...';
+    document.getElementById('rpBody').innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem;"></i><p style="margin-top:12px;">正在加载邮件内容...</p></div>';
+    document.getElementById('rpAvatar').textContent = '';
+    document.getElementById('rpSenderName').textContent = '';
+    document.getElementById('rpSenderEmail').textContent = '';
+    document.getElementById('rpRecipients').textContent = '';
+    document.getElementById('rpDate').textContent = '';
+    document.getElementById('rpLabels').innerHTML = '';
+    document.getElementById('rpAttachments').style.display = 'none';
+    document.getElementById('spToolbarTitle').textContent = '邮件详情';
+    backdrop.classList.add('show');
+    panel.classList.add('show');
+    document.body.style.overflow = 'hidden';
+
+    fetch('/manager/email/detail/' + emailId + '/?format=json', {
+        credentials: 'same-origin'
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+        currentPaneEmail = data;
+        showReadingPane(data);
+    })
+    .catch(function() {
+        window.location = '/manager/email/detail/' + emailId + '/';
+    });
+
+    // Mark the row as read visually
+    var row = document.getElementById('emailRow' + emailId);
+    if (row) { row.classList.remove('unread'); }
+}
+
+function showReadingPane(data) {
+    document.getElementById('rpSubject').textContent = data.subject || '(无主题)';
+    document.getElementById('spToolbarTitle').textContent = data.subject || '(无主题)';
+    document.getElementById('rpAvatar').textContent = (data.sender_name || data.sender_email || '?')[0].toUpperCase();
+    document.getElementById('rpSenderName').textContent = data.sender_name || data.sender_email;
+    document.getElementById('rpSenderEmail').textContent = '<' + data.sender_email + '>';
+    document.getElementById('rpRecipients').textContent = '收件人: ' + data.recipients + (data.cc ? ' | 抄送: ' + data.cc : '');
+    document.getElementById('rpDate').textContent = data.date || '';
+    document.getElementById('rpFullLink').href = '/manager/email/detail/' + data.id + '/';
+
+    // Labels
+    var labelsHtml = '';
+    if (data.labels) {
+        data.labels.forEach(function(l) {
+            labelsHtml += '<span style="font-size:0.72rem;padding:3px 10px;border-radius:8px;color:white;background:' + l.color + ';font-weight:600;">' + l.name + '</span>';
+        });
+    }
+    document.getElementById('rpLabels').innerHTML = labelsHtml;
+
+    // Body
+    if (data.body_html) {
+        document.getElementById('rpBody').innerHTML = '<iframe style="border:none;width:100%;min-height:300px;" sandbox="allow-same-origin" srcdoc="' + data.body_html.replace(/"/g, '&quot;') + '" onload="this.style.height=this.contentWindow.document.body.scrollHeight+20+\'px\'"></iframe>';
+    } else {
+        document.getElementById('rpBody').innerHTML = '<pre>' + escapeHtml(data.body_text || '') + '</pre>';
+    }
+
+    // Attachments
+    var attDiv = document.getElementById('rpAttachments');
+    if (data.attachments && data.attachments.length > 0) {
+        var attHtml = '<div style="font-size:0.78rem;font-weight:600;color:#64748b;margin-bottom:8px;"><i class="fas fa-paperclip"></i> 附件 (' + data.attachments.length + ')</div>';
+        data.attachments.forEach(function(a) {
+            attHtml += '<a href="' + a.url + '" download class="rp-att-item"><i class="fas fa-file"></i>' + escapeHtml(a.filename) + '</a>';
+        });
+        attDiv.innerHTML = attHtml;
+        attDiv.style.display = 'block';
+    } else {
+        attDiv.style.display = 'none';
+    }
+
+    cancelInlineReply();
+}
+
+function escapeHtml(text) {
+    var div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function closeReadingPane() {
+    document.getElementById('slidePanel').classList.remove('show');
+    document.getElementById('slidePanelBackdrop').classList.remove('show');
+    document.body.style.overflow = '';
+    currentPaneEmail = null;
+}
+
+function replyFromPane() {
+    if (!currentPaneEmail) return;
+    document.getElementById('inlineReplyLabel').textContent = '回复给 ' + (currentPaneEmail.sender_name || currentPaneEmail.sender_email);
+    document.getElementById('inlineFwdTo').style.display = 'none';
+    document.getElementById('inlineReplyBody').value = '';
+    document.getElementById('inlineReply').classList.add('show');
+    document.getElementById('inlineReply').dataset.mode = 'reply';
+    document.getElementById('inlineReplyBody').focus();
+}
+
+function replyAllFromPane() {
+    if (!currentPaneEmail) return;
+    document.getElementById('inlineReplyLabel').textContent = '全部回复';
+    document.getElementById('inlineFwdTo').style.display = 'none';
+    document.getElementById('inlineReplyBody').value = '';
+    document.getElementById('inlineReply').classList.add('show');
+    document.getElementById('inlineReply').dataset.mode = 'reply_all';
+    document.getElementById('inlineReplyBody').focus();
+}
+
+function forwardFromPane() {
+    if (!currentPaneEmail) return;
+    document.getElementById('inlineReplyLabel').textContent = '转发';
+    document.getElementById('inlineFwdTo').style.display = 'block';
+    document.getElementById('inlineFwdRecipient').value = '';
+    var fwdBody = '\n\n---------- 转发消息 ----------\n' +
+        '发件人: ' + (currentPaneEmail.sender_name || '') + ' <' + currentPaneEmail.sender_email + '>\n' +
+        '日期: ' + (currentPaneEmail.date || '') + '\n' +
+        '主题: ' + (currentPaneEmail.subject || '') + '\n\n' +
+        (currentPaneEmail.body_text || '');
+    document.getElementById('inlineReplyBody').value = fwdBody;
+    document.getElementById('inlineReply').classList.add('show');
+    document.getElementById('inlineReply').dataset.mode = 'forward';
+    document.getElementById('inlineFwdRecipient').focus();
+}
+
+function cancelInlineReply() {
+    document.getElementById('inlineReply').classList.remove('show');
+    document.getElementById('inlineReplyBody').value = '';
+}
+
+function sendInlineReply() {
+    if (!currentPaneEmail) return;
+    var mode = document.getElementById('inlineReply').dataset.mode;
+    var body = document.getElementById('inlineReplyBody').value.trim();
+    var accountId = document.getElementById('inlineReplyAccount').value;
+
+    if (!body) { showToast('请输入内容', 'error'); return; }
+
+    var to = '', subject = '', cc = '';
+
+    if (mode === 'forward') {
+        to = document.getElementById('inlineFwdRecipient').value.trim();
+        if (!to) { showToast('请输入转发收件人', 'error'); return; }
+        subject = 'Fwd: ' + (currentPaneEmail.subject || '');
+    } else if (mode === 'reply_all') {
+        to = currentPaneEmail.sender_email;
+        cc = currentPaneEmail.recipients || '';
+        subject = 'Re: ' + (currentPaneEmail.subject || '').replace(/^Re:\s*/i, '');
+        // Build reply body with quote
+        body = body + '\n\n--- 原始邮件 ---\n' +
+            '发件人: ' + (currentPaneEmail.sender_name || '') + ' <' + currentPaneEmail.sender_email + '>\n' +
+            '日期: ' + (currentPaneEmail.date || '') + '\n\n' +
+            (currentPaneEmail.body_text || '');
+    } else {
+        to = currentPaneEmail.sender_email;
+        subject = 'Re: ' + (currentPaneEmail.subject || '').replace(/^Re:\s*/i, '');
+        body = body + '\n\n--- 原始邮件 ---\n' +
+            '发件人: ' + (currentPaneEmail.sender_name || '') + ' <' + currentPaneEmail.sender_email + '>\n' +
+            '日期: ' + (currentPaneEmail.date || '') + '\n\n' +
+            (currentPaneEmail.body_text || '');
+    }
+
+    var fd = new FormData();
+    fd.append('account_id', accountId);
+    fd.append('to', to);
+    fd.append('cc', cc);
+    fd.append('subject', subject);
+    fd.append('body', body);
+    fd.append('in_reply_to', currentPaneEmail.message_uid || '');
+
+    fetch('/manager/email/compose/', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'X-CSRFToken': getCsrf() },
+        body: fd
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+        if (d.success) {
+            showToast(mode === 'forward' ? '转发成功' : '回复已发送');
+            cancelInlineReply();
+        } else {
+            showToast(d.error || '发送失败', 'error');
+        }
+    })
+    .catch(function(){ showToast('发送失败', 'error'); });
+}
+
+function archiveFromPane() {
+    if (!currentPaneEmail) return;
+    fetch('/manager/email/action/', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCsrf() },
+        body: 'action=archive&ids=' + currentPaneEmail.id
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+        if (d.success) {
+            showToast('已归档');
+            closeReadingPane();
+            var row = document.getElementById('emailRow' + currentPaneEmail.id);
+            if (row) row.remove();
+        }
+    });
+}
+
+function deleteFromPane() {
+    if (!currentPaneEmail) return;
+    showConfirm('确定删除此邮件？', '邮件将被移至回收站。', 'danger', function() {
+        fetch('/manager/email/action/', {
+            method: 'POST', credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCsrf() },
+            body: 'action=trash&ids=' + currentPaneEmail.id
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+            if (d.success) {
+                showToast('已移至回收站');
+                closeReadingPane();
+                var row = document.getElementById('emailRow' + currentPaneEmail.id);
+                if (row) row.remove();
+            }
+        });
+    });
+}
+
+/* ===== Keyboard shortcuts ===== */
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        if (document.getElementById('confirmBackdrop').classList.contains('show')) {
+            closeConfirm(false);
+        } else if (document.getElementById('slidePanel').classList.contains('show')) {
+            closeReadingPane();
+        } else if (document.getElementById('composeOverlay').classList.contains('show')) {
+            closeCompose();
+        }
+    }
+});
 </script>
+<script src="/static/js/admin_i18n.js" defer></script>
 </body>
 </html>

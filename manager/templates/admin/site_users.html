@@ -1,0 +1,441 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="zh-hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户管理 - DUNO 360</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+        }
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .main-container { min-height: 100vh; padding: 20px 0; }
+        .header-card {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white; border-radius: 15px; padding: 20px; margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .content-card {
+            background: white; border-radius: 15px; padding: 30px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1); border: none;
+        }
+        .table-modern {
+            border-collapse: separate; border-spacing: 0; border-radius: 10px;
+            overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%;
+        }
+        .table-modern thead th {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white; border: none; padding: 15px; font-weight: 600;
+        }
+        .table-modern tbody td {
+            padding: 14px 15px; border-bottom: 1px solid #e5e7eb;
+            vertical-align: middle; font-size: 0.92rem;
+        }
+        .table-modern tbody tr:hover { background-color: #f8fafc; }
+        .table-modern tbody tr:last-child td { border-bottom: none; }
+        .btn-action {
+            padding: 6px 12px; border-radius: 6px; border: none;
+            margin: 0 2px; transition: all 0.3s ease;
+        }
+        .btn-action:hover { transform: translateY(-2px); }
+        .btn-edit { background: var(--warning-color); color: white; }
+        .btn-delete { background: var(--danger-color); color: white; }
+        .btn-toggle-on { background: var(--success-color); color: white; }
+        .btn-toggle-off { background: #6b7280; color: white; }
+        .badge-active { background: #d1fae5; color: #065f46; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+        .badge-inactive { background: #fee2e2; color: #991b1b; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+        .toolbar {
+            background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e5e7eb;
+        }
+        .btn-modern { border-radius: 8px; padding: 10px 20px; font-weight: 600; transition: all 0.3s ease; border: none; }
+        .btn-primary-modern {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); color: white;
+        }
+        .btn-primary-modern:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.3); color: white; }
+        .breadcrumb-modern { background: none; padding: 0; margin-bottom: 20px; }
+        .breadcrumb-modern .breadcrumb-item a { color: white; text-decoration: none; }
+        .breadcrumb-modern .breadcrumb-item.active { color: rgba(255,255,255,0.8); }
+        .filter-bar {
+            background: white; border-radius: 10px; padding: 15px 20px; margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e5e7eb;
+        }
+        .avatar-thumb { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+        .avatar-placeholder { width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .avatar-placeholder i { color: rgba(255,255,255,0.7); font-size: 1rem; }
+        /* Modal System */
+        .g-modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:10000;justify-content:center;align-items:center}
+        .g-modal-card{background:#fff;border-radius:20px;padding:40px;max-width:420px;width:90%;text-align:center;box-shadow:0 25px 60px rgba(0,0,0,0.3);animation:gModalIn .3s ease}
+        @keyframes gModalIn{from{opacity:0;transform:scale(.8) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+        .g-modal-icon{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:28px}
+        .g-modal-icon.confirm{background:#fef3c7;color:#f59e0b}.g-modal-icon.warning{background:#fee2e2;color:#ef4444}
+        .g-modal-title{font-size:1.25rem;font-weight:700;margin-bottom:10px;color:#1e293b}
+        .g-modal-message{color:#64748b;margin-bottom:25px;line-height:1.6}
+        .g-modal-actions{display:flex;gap:12px;justify-content:center}
+        .g-modal-btn{padding:10px 28px;border-radius:12px;border:none;font-weight:600;cursor:pointer;transition:all .2s;font-size:.95rem}
+        .g-modal-btn.cancel{background:#f1f5f9;color:#64748b}.g-modal-btn.cancel:hover{background:#e2e8f0}
+        .g-modal-btn.primary{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff}.g-modal-btn.primary:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(102,126,234,.4)}
+        .g-modal-btn.danger{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff}.g-modal-btn.danger:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(239,68,68,.4)}
+        .g-toast-container{position:fixed;top:90px;right:20px;z-index:10001;display:flex;flex-direction:column;gap:10px}
+        .g-toast{padding:14px 24px;border-radius:12px;color:#fff;font-weight:500;box-shadow:0 8px 25px rgba(0,0,0,.15);animation:gToastIn .3s ease;display:flex;align-items:center;gap:10px}
+        .g-toast.success{background:linear-gradient(135deg,#10b981,#059669)}.g-toast.error{background:linear-gradient(135deg,#ef4444,#dc2626)}.g-toast.warning{background:linear-gradient(135deg,#f59e0b,#d97706)}
+        @keyframes gToastIn{from{opacity:0;transform:translateX(100px)}to{opacity:1;transform:translateX(0)}}
+        /* Edit/Add Modal */
+        .edit-modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:9999;justify-content:center;align-items:center}
+        .edit-modal-card{background:#fff;border-radius:20px;padding:0;max-width:550px;width:95%;box-shadow:0 25px 60px rgba(0,0,0,0.3);animation:gModalIn .3s ease;max-height:90vh;overflow-y:auto}
+        .edit-modal-header{background:linear-gradient(135deg,var(--primary-color),var(--secondary-color));color:#fff;padding:20px 30px;border-radius:20px 20px 0 0}
+        .edit-modal-body{padding:30px}
+        .edit-modal-footer{padding:15px 30px;border-top:1px solid #e5e7eb;display:flex;justify-content:flex-end;gap:10px}
+    </style>
+</head>
+<body>
+    <div class="g-toast-container" id="toastContainer"></div>
+
+    <div class="main-container">
+        <div class="container-fluid">
+            <!-- Header -->
+            <div class="header-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <nav class="breadcrumb-modern">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/manager/dashboard/"><i class="fas fa-home"></i> 仪表板</a></li>
+                                <li class="breadcrumb-item active">用户管理</li>
+                            </ol>
+                        </nav>
+                        <h2 class="mb-0"><i class="fas fa-users"></i> 用户管理</h2>
+                        <p class="mb-0 mt-2 opacity-75">管理网站注册用户 · 共 {{ total_users }} 位用户</p>
+                    </div>
+                    <div class="text-end">
+                        <p class="mb-0">欢迎回来，<strong>{{ name }}</strong> 管理员</p>
+                        <small class="opacity-75">今天是 <span id="currentDate"></span></small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <h5 class="mb-0 text-muted">
+                            <i class="fas fa-list"></i> 用户列表
+                            <span class="badge bg-primary ms-2">{{ total_users }} 位用户</span>
+                        </h5>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button class="btn btn-primary-modern btn-modern" onclick="openAddModal()">
+                            <i class="fas fa-plus"></i> 添加用户
+                        </button>
+                        <a href="/manager/dashboard/" class="btn btn-outline-primary btn-modern">
+                            <i class="fas fa-chart-line"></i> 仪表盘
+                        </a>
+                        <a href="/manager/book_list/" class="btn btn-outline-secondary btn-modern">
+                            <i class="fas fa-book"></i> 图书管理
+                        </a>
+                        <a href="/manager/publisher_list/" class="btn btn-outline-secondary btn-modern">
+                            <i class="fas fa-building"></i> 出版社
+                        </a>
+                        <a href="/manager/order_list/" class="btn btn-outline-secondary btn-modern">
+                            <i class="fas fa-shopping-cart"></i> 订单管理
+                        </a>
+                        <a href="/manager/blog_list/" class="btn btn-outline-secondary btn-modern">
+                            <i class="fas fa-blog"></i> 博客管理
+                        </a>
+                        <a href="/manager/admin/vendors/" class="btn btn-outline-info btn-modern">
+                            <i class="fas fa-store"></i> 卖家管理
+                        </a>
+                        <a href="/manager/logout/" class="btn btn-outline-danger btn-modern">
+                            <i class="fas fa-sign-out-alt"></i> 退出
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Bar -->
+            <div class="filter-bar">
+                <form method="get" class="d-flex gap-2 align-items-center flex-wrap">
+                    <input type="text" name="search" value="{{ search_query }}" class="form-control" placeholder="搜索姓名、邮箱或电话..." style="border-radius: 10px; max-width: 300px;">
+                    <select name="status" class="form-select" style="border-radius: 10px; max-width: 160px;">
+                        <option value="">所有状态</option>
+                        <option value="active" {% if status_filter == 'active' %}selected{% endif %}>已启用</option>
+                        <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>已禁用</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary-modern btn-modern">
+                        <i class="fas fa-search"></i> 搜索
+                    </button>
+                </form>
+            </div>
+
+            <!-- Content -->
+            <div class="content-card">
+                {% if users %}
+                <div class="table-responsive">
+                    <table class="table-modern">
+                        <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>头像</th>
+                                <th>姓名</th>
+                                <th>邮箱</th>
+                                <th>电话</th>
+                                <th>状态</th>
+                                <th>注册时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr id="row-{{ user.id }}">
+                                <td class="text-center">{{ forloop.counter }}</td>
+                                <td>
+                                    {% if user.avatar %}
+                                    <img src="{{ user.avatar.url }}" class="avatar-thumb" alt="{{ user.name }}">
+                                    {% else %}
+                                    <div class="avatar-placeholder"><i class="fas fa-user"></i></div>
+                                    {% endif %}
+                                </td>
+                                <td class="fw-bold">{{ user.name }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>{{ user.phone|default:"-" }}</td>
+                                <td>
+                                    {% if user.is_active %}
+                                    <span class="badge-active"><i class="fas fa-check-circle me-1"></i>启用</span>
+                                    {% else %}
+                                    <span class="badge-inactive"><i class="fas fa-times-circle me-1"></i>禁用</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ user.created_at|date:"Y-m-d H:i" }}</td>
+                                <td>
+                                    <button class="btn btn-action btn-edit btn-sm" onclick="openEditModal({{ user.id }})" title="编辑">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-action btn-sm {% if user.is_active %}btn-toggle-on{% else %}btn-toggle-off{% endif %}" onclick="toggleUser({{ user.id }}, '{{ user.name|escapejs }}')" title="{% if user.is_active %}禁用{% else %}启用{% endif %}">
+                                        <i class="fas {% if user.is_active %}fa-toggle-on{% else %}fa-toggle-off{% endif %}"></i>
+                                    </button>
+                                    <button class="btn btn-action btn-delete btn-sm" onclick="deleteUser({{ user.id }}, '{{ user.name|escapejs }}')" title="删除">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-users" style="font-size: 3rem; color: #d1d5db;"></i>
+                    <h5 class="text-muted mt-3">暂无用户</h5>
+                    <p class="text-muted">点击"添加用户"开始管理</p>
+                    <button class="btn btn-primary-modern btn-modern" onclick="openAddModal()">
+                        <i class="fas fa-plus"></i> 添加用户
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div class="g-modal-overlay" id="gModalOverlay">
+        <div class="g-modal-card">
+            <div class="g-modal-icon" id="gModalIcon"><i id="gModalIconI" class="fas fa-question"></i></div>
+            <div class="g-modal-title" id="gModalTitle"></div>
+            <div class="g-modal-message" id="gModalMessage"></div>
+            <div class="g-modal-actions">
+                <button class="g-modal-btn cancel" onclick="closeGModal()">取消</button>
+                <button class="g-modal-btn" id="gModalConfirmBtn" onclick="gModalCallback()">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div class="edit-modal-overlay" id="editModalOverlay">
+        <div class="edit-modal-card">
+            <div class="edit-modal-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-user me-2"></i><span id="editModalTitle">添加用户</span></h5>
+                    <button class="btn btn-sm btn-light" onclick="closeEditModal()" style="border-radius:50%;width:32px;height:32px;padding:0;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="edit-modal-body">
+                <form id="userForm">
+                    <input type="hidden" id="userId" name="id">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">姓名 <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="userName" name="name" required style="border-radius:10px;">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">邮箱 <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" id="userEmail" name="email" required style="border-radius:10px;">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">电话</label>
+                            <input type="text" class="form-control" id="userPhone" name="phone" style="border-radius:10px;">
+                        </div>
+                        <div class="col-md-6" id="passwordGroup">
+                            <label class="form-label fw-bold">密码 <span class="text-danger" id="pwdRequired">*</span></label>
+                            <input type="password" class="form-control" id="userPassword" name="password" style="border-radius:10px;">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">状态</label>
+                            <select class="form-select" id="userActive" name="is_active" style="border-radius:10px;">
+                                <option value="1">启用</option>
+                                <option value="0">禁用</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="edit-modal-footer">
+                <button class="btn btn-secondary" onclick="closeEditModal()" style="border-radius:10px;">取消</button>
+                <button class="btn btn-primary-modern" onclick="saveUser()" style="border-radius:10px;">
+                    <i class="fas fa-save me-1"></i> 保存
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    // Date
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('zh-CN', {year:'numeric',month:'long',day:'numeric',weekday:'long'});
+
+    // Cookie
+    function getCookie(name) {
+        var val = document.cookie.match('(^|;)\\s*' + name + '=([^;]*)');
+        return val ? decodeURIComponent(val[2]) : '';
+    }
+
+    // Toast System
+    function gToast(message, type) {
+        type = type || 'success';
+        var c = document.getElementById('toastContainer');
+        var icons = {success:'fa-check-circle',error:'fa-exclamation-circle',warning:'fa-exclamation-triangle'};
+        var t = document.createElement('div');
+        t.className = 'g-toast ' + type;
+        t.innerHTML = '<i class="fas ' + (icons[type]||icons.success) + '"></i> ' + message;
+        c.appendChild(t);
+        setTimeout(function() { t.style.animation = 'gToastIn .3s ease reverse'; setTimeout(function() { t.remove(); }, 300); }, 3000);
+    }
+
+    // Confirm Modal
+    var _gModalCb = null;
+    function gConfirm(title, message, type, btnClass, callback) {
+        document.getElementById('gModalTitle').textContent = title;
+        document.getElementById('gModalMessage').textContent = message;
+        var icon = document.getElementById('gModalIcon');
+        icon.className = 'g-modal-icon ' + (type||'confirm');
+        var iconMap = {confirm:'fa-question',warning:'fa-exclamation-triangle'};
+        document.getElementById('gModalIconI').className = 'fas ' + (iconMap[type]||'fa-question');
+        var btn = document.getElementById('gModalConfirmBtn');
+        btn.className = 'g-modal-btn ' + (btnClass||'primary');
+        btn.textContent = '确定';
+        _gModalCb = callback;
+        document.getElementById('gModalOverlay').style.display = 'flex';
+    }
+    function closeGModal() { document.getElementById('gModalOverlay').style.display = 'none'; _gModalCb = null; }
+    function gModalCallback() { if (_gModalCb) _gModalCb(); closeGModal(); }
+
+    // Toggle user
+    function toggleUser(id, name) {
+        gConfirm('切换状态', '确定要切换用户 "' + name + '" 的状态吗？', 'confirm', 'primary', function() {
+            fetch('/manager/admin/users/toggle/', {
+                method: 'POST',
+                headers: {'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/x-www-form-urlencoded'},
+                body: 'id=' + id
+            }).then(function(r) { return r.json(); }).then(function(d) {
+                if (d.success) { gToast('状态已切换', 'success'); setTimeout(function() { location.reload(); }, 800); }
+                else { gToast(d.error || '操作失败', 'error'); }
+            });
+        });
+    }
+
+    // Delete user
+    function deleteUser(id, name) {
+        gConfirm('删除用户', '确定要删除用户 "' + name + '" 吗？此操作不可撤销。', 'warning', 'danger', function() {
+            fetch('/manager/admin/users/delete/', {
+                method: 'POST',
+                headers: {'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/x-www-form-urlencoded'},
+                body: 'id=' + id
+            }).then(function(r) { return r.json(); }).then(function(d) {
+                if (d.success) {
+                    gToast('用户已删除', 'success');
+                    var row = document.getElementById('row-' + id);
+                    if (row) row.remove();
+                } else { gToast(d.error || '删除失败', 'error'); }
+            });
+        });
+    }
+
+    // Add Modal
+    var _isEditing = false;
+    function openAddModal() {
+        _isEditing = false;
+        document.getElementById('editModalTitle').textContent = '添加用户';
+        document.getElementById('userForm').reset();
+        document.getElementById('userId').value = '';
+        document.getElementById('passwordGroup').style.display = '';
+        document.getElementById('pwdRequired').style.display = '';
+        document.getElementById('userPassword').required = true;
+        document.getElementById('userActive').value = '1';
+        document.getElementById('editModalOverlay').style.display = 'flex';
+    }
+
+    // Edit Modal
+    function openEditModal(id) {
+        _isEditing = true;
+        document.getElementById('editModalTitle').textContent = '编辑用户';
+        document.getElementById('userForm').reset();
+        document.getElementById('pwdRequired').style.display = 'none';
+        document.getElementById('userPassword').required = false;
+        fetch('/manager/admin/users/edit/?id=' + id)
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (d.success) {
+                    var u = d.user;
+                    document.getElementById('userId').value = u.id;
+                    document.getElementById('userName').value = u.name;
+                    document.getElementById('userEmail').value = u.email;
+                    document.getElementById('userPhone').value = u.phone || '';
+                    document.getElementById('userActive').value = u.is_active ? '1' : '0';
+                    document.getElementById('editModalOverlay').style.display = 'flex';
+                } else { gToast('加载失败', 'error'); }
+            });
+    }
+    function closeEditModal() { document.getElementById('editModalOverlay').style.display = 'none'; }
+
+    // Save user
+    function saveUser() {
+        var form = document.getElementById('userForm');
+        if (!form.checkValidity()) { form.reportValidity(); return; }
+        var fd = new FormData(form);
+        var url = _isEditing ? '/manager/admin/users/edit/' : '/manager/admin/users/add/';
+        fetch(url, {
+            method: 'POST',
+            headers: {'X-CSRFToken': getCookie('csrftoken')},
+            body: fd
+        }).then(function(r) { return r.json(); }).then(function(d) {
+            if (d.success) {
+                gToast(_isEditing ? '用户已更新' : '用户已添加', 'success');
+                closeEditModal();
+                setTimeout(function() { location.reload(); }, 800);
+            } else { gToast(d.error || '操作失败', 'error'); }
+        });
+    }
+    </script>
+<script src="/static/js/admin_i18n.js" defer></script>
+</body>
+</html>

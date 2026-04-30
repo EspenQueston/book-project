@@ -1,0 +1,181 @@
+{% extends "marketplace/vendor/base.html" %}
+
+{% block title %}我的商品 - {{ vendor.company_name }}{% endblock %}
+{% block nav_products %}active{% endblock %}
+
+{% block extra_vendor_css %}
+    .badge-active { background: rgba(16,185,129,0.12); color: #10b981; font-weight: 600; }
+    .badge-inactive { background: rgba(239,68,68,0.12); color: #ef4444; font-weight: 600; }
+    .stock-low { color: #ef4444; font-weight: 600; }
+    .stock-ok { color: #10b981; }
+    /* Product thumbnail — bulletproof sizing */
+    .prod-thumb {
+        width: 48px !important;
+        height: 48px !important;
+        min-width: 48px !important;
+        max-width: 48px !important;
+        min-height: 48px !important;
+        max-height: 48px !important;
+        object-fit: cover;
+        border-radius: 10px;
+        flex-shrink: 0;
+        display: block;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .prod-thumb-placeholder {
+        width: 48px !important;
+        height: 48px !important;
+        min-width: 48px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: rgba(255,255,255,0.8);
+        font-size: 1.1rem;
+    }
+    .product-name { font-weight: 700; font-size: 0.92rem; color: #1e293b; max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .product-sku { font-size: 0.78rem; color: #94a3b8; }
+    /* Metrics pills */
+    .metric-pill { display: inline-flex; align-items: center; gap: 6px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; padding: 5px 14px; font-size: 0.82rem; color: #64748b; font-weight: 500; }
+    .metric-pill strong { color: #1e293b; font-weight: 700; }
+    .metric-pill i { font-size: 0.75rem; }
+    .metric-pill.active i { color: #10b981; }
+    .metric-pill.sales i { color: #f59e0b; }
+    .metric-pill.stock i { color: #06b6d4; }
+    /* Table refinements */
+    .table td { font-size: 0.9rem; padding: 12px 15px !important; }
+    .table th { padding: 14px 15px !important; }
+    .action-btns { display: flex; gap: 6px; align-items: center; }
+{% endblock %}
+
+{% block vendor_content %}
+<div class="page-header-card">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h4 class="mb-1"><i class="fas fa-shopping-bag me-2"></i>我的商品</h4>
+            <small style="opacity:0.85;">管理您的所有商品</small>
+        </div>
+        <a href="{% url 'marketplace:vendor_product_add' %}" class="btn btn-light rounded-pill px-4"><i class="fas fa-plus me-2"></i>添加商品</a>
+    </div>
+</div>
+
+<div class="toolbar d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <form method="get" class="d-flex gap-2">
+        <input type="text" name="q" class="form-control" placeholder="搜索商品名称或SKU..." value="{{ search_query|default:'' }}" style="max-width:280px; border-radius:10px;">
+        <button type="submit" class="btn btn-primary-gradient"><i class="fas fa-search"></i></button>
+    </form>
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+        <span class="metric-pill"><i class="fas fa-box"></i> 全部 <strong>{{ total_products }}</strong></span>
+        <span class="metric-pill active"><i class="fas fa-check-circle"></i> 上架 <strong>{{ active_products }}</strong></span>
+        <span class="metric-pill sales"><i class="fas fa-chart-line"></i> 销量 <strong>{{ total_sales }}</strong></span>
+        <span class="metric-pill stock"><i class="fas fa-warehouse"></i> 库存 <strong>{{ total_stock }}</strong></span>
+    </div>
+</div>
+
+<div class="content-card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0" style="table-layout:fixed;">
+            <thead>
+                <tr>
+                    <th class="ps-4" style="width:35%;">商品</th>
+                    <th style="width:12%;">分类</th>
+                    <th style="width:10%;">价格</th>
+                    <th style="width:8%;">库存</th>
+                    <th style="width:8%;">销量</th>
+                    <th style="width:10%;">状态</th>
+                    <th style="width:17%;">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr id="row-{{ product.pk }}">
+                    <td class="ps-4">
+                        <div class="d-flex align-items-center gap-3">
+                            {% if product.image %}
+                            <img src="{{ product.get_image_url }}" class="prod-thumb" alt="{{ product.name }}">
+                            {% else %}
+                            <div class="prod-thumb-placeholder"><i class="fas fa-box"></i></div>
+                            {% endif %}
+                            <div style="min-width:0; flex:1;">
+                                <div class="product-name">{{ product.name }}</div>
+                                <div class="product-sku">SKU: {{ product.sku|default:"-" }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="badge bg-light text-dark" style="font-size:0.8rem;">{{ product.category.name|default:"-" }}</span></td>
+                    <td><span class="fw-bold text-danger">¥{{ product.price }}</span></td>
+                    <td>
+                        <span class="{% if product.stock < 5 %}stock-low{% else %}stock-ok{% endif %}">{{ product.stock }}</span>
+                    </td>
+                    <td>{{ product.sales_count }}</td>
+                    <td>
+                        <button onclick="toggleProduct({{ product.pk }}, this)" title="切换状态" style="border:none;background:none;cursor:pointer;">
+                            {% if product.is_active %}
+                            <span class="badge badge-active"><i class="fas fa-check-circle me-1"></i>上架</span>
+                            {% else %}
+                            <span class="badge badge-inactive"><i class="fas fa-times-circle me-1"></i>下架</span>
+                            {% endif %}
+                        </button>
+                    </td>
+                    <td>
+                        <div class="action-btns">
+                            <a href="{% url 'marketplace:vendor_product_edit' product.pk %}" class="btn btn-sm btn-outline-primary rounded-pill" title="编辑"><i class="fas fa-edit"></i></a>
+                            <form method="post" action="{% url 'marketplace:vendor_product_delete' product.pk %}" style="display:inline;" onsubmit="return confirm('确定删除此商品?');">
+                                {% csrf_token %}
+                                <button class="btn btn-sm btn-outline-danger rounded-pill" title="删除"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center py-5">
+                        <i class="fas fa-box-open d-block mb-3" style="font-size:2.5rem; opacity:0.2;"></i>
+                        <p class="text-muted mb-2">暂无商品</p>
+                        <a href="{% url 'marketplace:vendor_product_add' %}" class="btn btn-sm btn-primary-gradient px-4">添加第一个商品</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if products.has_other_pages %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if products.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ products.previous_page_number }}&q={{ search_query|default:'' }}">&laquo;</a></li>{% endif %}
+        {% for num in products.paginator.page_range %}
+        <li class="page-item {% if products.number == num %}active{% endif %}"><a class="page-link" href="?page={{ num }}&q={{ search_query|default:'' }}">{{ num }}</a></li>
+        {% endfor %}
+        {% if products.has_next %}<li class="page-item"><a class="page-link" href="?page={{ products.next_page_number }}&q={{ search_query|default:'' }}">&raquo;</a></li>{% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}
+
+{% block extra_vendor_js %}
+<script>
+function toggleProduct(pk, btn) {
+    fetch(`/marketplace/vendor/products/${pk}/toggle/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': '{{ csrf_token }}', 'X-Requested-With': 'XMLHttpRequest'}
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.status === 'ok') {
+            const badge = btn.querySelector('.badge');
+            if (data.is_active) {
+                badge.className = 'badge badge-active';
+                badge.innerHTML = '<i class="fas fa-check-circle me-1"></i>上架';
+            } else {
+                badge.className = 'badge badge-inactive';
+                badge.innerHTML = '<i class="fas fa-times-circle me-1"></i>下架';
+            }
+        }
+    });
+}
+</script>
+{% endblock %}

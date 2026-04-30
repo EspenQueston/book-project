@@ -1,7 +1,7 @@
 {% extends 'public/base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans "智能图书管理系统" %} - {% trans "首页" %}{% endblock %}
+{% block title %}DUNO 360 - {% trans "首页" %}{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -291,6 +291,37 @@
         background-position: top;
     }
 
+    .search-tabs {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 25px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .search-tab {
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.25);
+        color: rgba(255,255,255,0.85);
+        padding: 10px 24px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        backdrop-filter: blur(5px);
+    }
+
+    .search-tab:hover { background: rgba(255,255,255,0.25); color: #fff; }
+
+    .search-tab.active {
+        background: white;
+        color: var(--primary-color);
+        border-color: white;
+        box-shadow: 0 4px 20px rgba(255,255,255,0.3);
+    }
+
     .search-form {
         max-width: 600px;
         margin: 0 auto;
@@ -337,74 +368,99 @@
     }
 
     /* Featured Books Section */
-    .featured-books-section {
+    .featured-section {
         padding: 120px 0;
         background: white;
     }
 
+    .showcase-tabs {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 50px;
+    }
+
+    .showcase-tab {
+        background: #f1f5f9;
+        border: 2px solid transparent;
+        color: #64748b;
+        padding: 12px 28px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .showcase-tab:hover { color: var(--primary-color); background: #ede9fe; }
+
+    .showcase-tab.active {
+        background: var(--hero-gradient);
+        color: white;
+        box-shadow: 0 4px 20px rgba(102,126,234,0.3);
+    }
+
+    .showcase-panel { display: none; }
+    .showcase-panel.active { display: block; }
+
     .book-card {
         background: white;
-        border-radius: 20px;
+        border-radius: 16px;
         overflow: hidden;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-        transition: all 0.4s ease;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
         border: none;
         height: 100%;
         position: relative;
     }
 
     .book-card:hover {
-        transform: translateY(-15px);
-        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+        transform: translateY(-8px);
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.13);
     }
 
     .book-image {
-        height: 220px;
-        background: var(--hero-gradient);
+        height: 180px;
+        background: linear-gradient(135deg, #f0f0ff 0%, #e8e0ff 100%);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 3.5rem;
-        color: white;
+        font-size: 2.5rem;
+        color: #b4a0d8;
         position: relative;
         overflow: hidden;
+        padding: 12px;
     }
-
-    .book-image::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="white" opacity="0.1"><circle cx="50" cy="50" r="40"/></svg>');
-        background-size: 80px;
-        background-repeat: no-repeat;
-        background-position: center;
+    .book-image img {
+        width: 100%; height: 100%;
+        object-fit: contain;
+        filter: drop-shadow(0 3px 8px rgba(0,0,0,0.12));
+        transition: transform 0.3s ease;
     }
+    .book-card:hover .book-image img { transform: scale(1.05); }
 
     .book-info {
-        padding: 30px;
+        padding: 18px;
     }
 
     .book-title {
-        font-size: 1.2rem;
+        font-size: 0.95rem;
         font-weight: 700;
         color: var(--primary-color);
-        margin-bottom: 12px;
-        line-height: 1.4;
+        margin-bottom: 8px;
+        line-height: 1.3;
     }
 
     .book-publisher {
         color: #64748b;
-        font-size: 0.95rem;
-        margin-bottom: 20px;
+        font-size: 0.82rem;
+        margin-bottom: 12px;
         display: flex;
         align-items: center;
     }
 
     .book-publisher i {
-        margin-right: 8px;
+        margin-right: 6px;
         color: var(--secondary-color);
     }
 
@@ -412,37 +468,37 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 25px;
+        margin-bottom: 14px;
     }
 
     .book-price {
         background: var(--success-gradient);
         color: white;
-        padding: 10px 20px;
-        border-radius: 25px;
+        padding: 6px 14px;
+        border-radius: 20px;
         font-weight: 700;
-        font-size: 1.1rem;
+        font-size: 0.9rem;
     }
 
     .book-sales {
         background: #f1f5f9;
         color: #475569;
-        padding: 8px 15px;
-        border-radius: 20px;
-        font-size: 0.9rem;
+        padding: 5px 10px;
+        border-radius: 16px;
+        font-size: 0.78rem;
         font-weight: 600;
         display: flex;
         align-items: center;
     }
 
     .book-sales i {
-        margin-right: 5px;
+        margin-right: 4px;
         color: #f39c12;
     }
 
     .book-actions {
         display: flex;
-        gap: 10px;
+        gap: 8px;
     }
 
     .btn-book-detail {
@@ -450,9 +506,10 @@
         background: transparent;
         color: var(--primary-color);
         border: 2px solid var(--primary-color);
-        padding: 12px 20px;
-        border-radius: 25px;
+        padding: 8px 14px;
+        border-radius: 20px;
         font-weight: 600;
+        font-size: 0.82rem;
         transition: all 0.3s ease;
     }
 
@@ -466,11 +523,11 @@
         background: var(--hero-gradient);
         color: white;
         border: none;
-        padding: 12px 20px;
-        border-radius: 25px;
+        padding: 8px 14px;
+        border-radius: 20px;
         font-weight: 600;
         transition: all 0.3s ease;
-        min-width: 120px;
+        min-width: auto;
     }
 
     .btn-add-cart:hover {
@@ -478,6 +535,106 @@
         box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
         color: white;
     }
+
+    /* Product Card */
+    .product-card {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    .product-card:hover { transform: translateY(-8px); box-shadow: 0 16px 40px rgba(0,0,0,0.13); }
+    .product-card-img {
+        height: 180px;
+        background: linear-gradient(135deg, #fff5f7 0%, #ffe0e6 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        position: relative;
+        padding: 12px;
+    }
+    .product-card-img img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 3px 8px rgba(0,0,0,0.1)); transition: transform 0.3s ease; }
+    .product-card:hover .product-card-img img { transform: scale(1.05); }
+    .product-card-img i { font-size: 2.5rem; color: rgba(255,255,255,0.6); }
+    .product-card-body { padding: 16px; }
+    .product-card-body h5 { font-size: 0.95rem; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
+    .product-card-body .cat-badge {
+        display: inline-block;
+        background: #ede9fe;
+        color: #7c3aed;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        margin-bottom: 12px;
+    }
+    .product-card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .product-card-footer .price { font-size: 1.05rem; font-weight: 800; color: #ef4444; }
+    .product-card-footer .sales { font-size: 0.8rem; color: #94a3b8; }
+    .product-card-footer .sales i { color: #f59e0b; }
+
+    /* Course Card */
+    .course-card {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    .course-card:hover { transform: translateY(-8px); box-shadow: 0 16px 40px rgba(0,0,0,0.13); }
+    .course-card-img {
+        height: 180px;
+        background: linear-gradient(135deg, #f0f8ff 0%, #e0f0ff 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px;
+        overflow: hidden;
+        position: relative;
+    }
+    .course-card-img img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 3px 8px rgba(0,0,0,0.1)); transition: transform 0.3s ease; }
+    .course-card:hover .course-card-img img { transform: scale(1.05); }
+    .course-card-img i { font-size: 2.5rem; color: rgba(255,255,255,0.6); }
+    .course-level-badge {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        padding: 4px 14px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: white;
+        backdrop-filter: blur(8px);
+    }
+    .course-level-badge.beginner { background: rgba(16,185,129,0.85); }
+    .course-level-badge.intermediate { background: rgba(245,158,11,0.85); }
+    .course-level-badge.advanced { background: rgba(239,68,68,0.85); }
+    .course-card-body { padding: 16px; }
+    .course-card-body h5 { font-size: 0.95rem; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+    .course-card-body .instructor { font-size: 0.82rem; color: #667eea; font-weight: 600; margin-bottom: 8px; }
+    .course-card-meta {
+        display: flex;
+        gap: 10px;
+        font-size: 0.78rem;
+        color: #94a3b8;
+        margin-bottom: 10px;
+    }
+    .course-card-meta i { margin-right: 4px; }
+    .course-card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .course-card-footer .price { font-size: 1.2rem; font-weight: 800; color: #667eea; }
+    .course-card-footer .enroll { font-size: 0.85rem; color: #94a3b8; }
 
     /* Call to Action Section */
     .cta-section {
@@ -621,6 +778,346 @@
         0% { background-position: -200% 0; }
         100% { background-position: 200% 0; }
     }
+
+    /* ===== King Kong Zone ===== */
+    .king-kong-zone {
+        background: #fff;
+        padding: 14px 12px 8px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    html[data-theme="dark"] .king-kong-zone { background: #1e293b; }
+    .kk-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 6px 4px;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+    .kk-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        text-decoration: none;
+        color: #374151;
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 4px 2px;
+        border-radius: 10px;
+        transition: transform 0.2s;
+    }
+    html[data-theme="dark"] .kk-item { color: #e2e8f0; }
+    .kk-item:hover { transform: scale(1.08); color: #667eea; }
+    .kk-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 1.15rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    /* Show king kong zone on mobile, hide on desktop (already full nav) */
+    @media (min-width: 769px) {
+        .king-kong-zone { display: none; }
+    }
+
+    /* ===== Flash Sales Zone ===== */
+    .flash-sales-section {
+        padding: 16px 0 10px;
+        background: #fff;
+    }
+    html[data-theme="dark"] .flash-sales-section { background: #0f172a; }
+    .flash-banner {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 12px 10px;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    .flash-banner-title {
+        font-size: 1rem;
+        font-weight: 800;
+        color: #ef4444;
+        letter-spacing: -0.3px;
+    }
+    .flash-countdown {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+        margin-left: auto;
+    }
+    .flash-cd-part {
+        background: #1a1a2e;
+        color: #fff;
+        font-size: 0.8rem;
+        font-weight: 700;
+        padding: 2px 6px;
+        border-radius: 5px;
+        min-width: 26px;
+        text-align: center;
+    }
+    .flash-cd-sep { color: #ef4444; font-weight: 700; font-size: 0.9rem; }
+    .flash-scroll {
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        padding: 4px 12px 8px;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    .flash-scroll::-webkit-scrollbar { display: none; }
+    .flash-card {
+        flex-shrink: 0;
+        width: 130px;
+        background: var(--card-bg, #fff);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.10);
+        scroll-snap-align: start;
+        text-decoration: none;
+        color: inherit;
+        transition: transform 0.2s;
+    }
+    .flash-card:hover { transform: translateY(-3px); }
+    .flash-card-img {
+        width: 100%;
+        height: 110px;
+        object-fit: cover;
+        background: #f3f4f6;
+    }
+    .flash-card-body { padding: 6px 8px 8px; }
+    .flash-card-name {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #1a1a2e;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    html[data-theme="dark"] .flash-card-name { color: #e2e8f0; }
+    .flash-card-prices { display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+    .flash-price { font-size: 0.85rem; font-weight: 800; color: #ef4444; }
+    .flash-orig { font-size: 0.7rem; color: #9ca3af; text-decoration: line-through; }
+    .flash-badge {
+        display: inline-block;
+        background: #ef4444;
+        color: #fff;
+        font-size: 0.6rem;
+        font-weight: 700;
+        padding: 1px 5px;
+        border-radius: 6px;
+        margin-top: 3px;
+    }
+    .flash-stock-bar {
+        height: 3px;
+        background: #fee2e2;
+        border-radius: 3px;
+        margin-top: 4px;
+        overflow: hidden;
+    }
+    .flash-stock-fill { height: 100%; background: linear-gradient(90deg,#ef4444,#f97316); border-radius: 3px; }
+
+    /* ===== PWA: Mobile Search Bar ===== */
+    .pwa-search-bar {
+        display: none;
+    }
+    @media (max-width: 768px) {
+        .pwa-search-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            background: #fff;
+            padding: 10px 12px;
+            position: sticky;
+            top: 56px;
+            z-index: 800;
+            border-bottom: 1px solid #f0f0f0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        html[data-theme="dark"] .pwa-search-bar { background: #1e293b; border-bottom-color: #334155; }
+        .pwa-search-tabs {
+            width: 100%;
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .pwa-search-tabs::-webkit-scrollbar { display: none; }
+        .pwa-search-tab {
+            border: none;
+            border-radius: 999px;
+            padding: 6px 12px;
+            background: #f3f4f6;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .pwa-search-tab.active {
+            background: linear-gradient(135deg,#667eea,#764ba2);
+            color: #fff;
+        }
+        .pwa-search-inner {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            background: #F5F5F5;
+            border-radius: 20px;
+            padding: 0 12px;
+            height: 42px;
+            gap: 8px;
+        }
+        html[data-theme="dark"] .pwa-search-inner { background: #0f172a; }
+        .pwa-search-inner input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 13px;
+            outline: none;
+            color: #333;
+            padding: 0;
+        }
+        html[data-theme="dark"] .pwa-search-inner input { color: #e2e8f0; }
+        .pwa-search-inner i { color: #999; font-size: 15px; }
+        .pwa-scan-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 16px;
+        }
+    }
+    /* ===== PWA: Best Deals horizontal scroll ===== */
+    .best-deals-section {
+        display: none;
+    }
+    @media (max-width: 768px) {
+        .best-deals-section {
+            display: block;
+            background: #fff;
+            padding: 10px 0 6px;
+            margin-bottom: 6px;
+        }
+        html[data-theme="dark"] .best-deals-section { background: #1e293b; }
+        .best-deals-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 12px 8px;
+        }
+        .best-deals-header .bd-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: #333;
+        }
+        html[data-theme="dark"] .best-deals-header .bd-title { color: #e2e8f0; }
+        .best-deals-header a {
+            font-size: 12px;
+            color: #667eea;
+            text-decoration: none;
+        }
+        .best-deals-scroll {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 0 12px 8px;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .best-deals-scroll::-webkit-scrollbar { display: none; }
+        .bd-card {
+            flex: 0 0 120px;
+            scroll-snap-align: start;
+            background: #fff;
+            border-radius: 10px;
+            border: 1px solid #f0f0f0;
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        html[data-theme="dark"] .bd-card { background: #0f172a; border-color: #334155; }
+        .bd-card img { width: 100%; height: 80px; object-fit: cover; background: #f3f4f6; }
+        .bd-card-body { padding: 6px 8px 8px; }
+        .bd-name { font-size: 11px; color: #333; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        html[data-theme="dark"] .bd-name { color: #e2e8f0; }
+        .bd-price { font-size: 14px; font-weight: 800; color: #E4393C; margin-top: 3px; }
+    }
+    .feed-title { font-size: 1rem; font-weight: 800; color: #1a1a2e; margin-bottom: 12px; }
+    html[data-theme="dark"] .feed-title { color: #e2e8f0; }
+    .feed-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    @media (min-width: 769px) {
+        .feed-grid { grid-template-columns: repeat(4, 1fr); }
+        .flash-sales-section { padding: 30px 0 20px; }
+        .flash-scroll { padding: 4px 0 8px; max-width: 100%; }
+    }
+    .feed-card {
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        transition: transform 0.2s;
+    }
+    html[data-theme="dark"] .feed-card { background: #1e293b; }
+    .feed-card:hover { transform: translateY(-3px); }
+    .feed-card-img { width: 100%; aspect-ratio: 3/4; object-fit: cover; background: #f3f4f6; }
+    .feed-card-body { padding: 8px 10px 10px; }
+    .feed-card-name { font-size: 0.8rem; font-weight: 600; color: #1a1a2e; line-height: 1.3; }
+    html[data-theme="dark"] .feed-card-name { color: #e2e8f0; }
+    .feed-card-price { font-size: 0.85rem; font-weight: 800; color: #667eea; margin-top: 4px; }
+    .feed-card-tag {
+        display: inline-block;
+        font-size: 0.6rem;
+        font-weight: 700;
+        padding: 2px 6px;
+        border-radius: 8px;
+        margin-top: 4px;
+    }
+    .feed-load-more { text-align: center; padding: 16px 0; }
+    .feed-load-more button {
+        background: linear-gradient(135deg,#667eea,#764ba2);
+        color: #fff;
+        border: none;
+        padding: 10px 30px;
+        border-radius: 25px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 0.85rem;
+    }
+    #feedLoader { text-align: center; padding: 12px; color: #9ca3af; font-size: 0.85rem; }
+    @media (min-width: 769px) {
+        .feed-section { display: none; }
+    }
+
+/* ===== MOBILE: Hide all sections after the feed ===== */
+@media (max-width: 768px) {
+    .features-section,
+    .search-section,
+    .featured-section,
+    .cta-section {
+        display: none !important;
+    }
+}
 </style>
 {% endblock %}
 
@@ -631,17 +1128,17 @@
         <div class="hero-content">
             <div class="row align-items-center">
                 <div class="col-lg-7" data-aos="fade-right">
-                    <h1 class="hero-title">{% trans "智能图书管理系统" %}</h1>
+                    <h1 class="hero-title"><span data-zh="DUNO 360" data-en="DUNO 360" data-fr="DUNO 360">DUNO 360</span></h1>
                     <p class="hero-subtitle">
-                        {% trans "现代化的图书管理平台，为读者和管理员提供高效、便捷的图书查询、浏览和管理服务。探索知识的海洋，发现阅读的乐趣。" %}
+                        <span data-zh="一站式综合平台 — 图书、在线课程、电商市场与生鲜超市，满足您对知识和生活品质的全方位需求。" data-en="Your all-in-one platform — Books, Online Courses, Marketplace &amp; Fresh Supermarket. Everything you need for knowledge and quality living." data-fr="Votre plateforme tout-en-un — Livres, Cours en ligne, Marketplace &amp; Supermarché frais. Tout pour le savoir et la qualité de vie.">一站式综合平台 — 图书、在线课程、电商市场与生鲜超市，满足您对知识和生活品质的全方位需求。</span>
                     </p>
                     
                     <div class="cta-buttons" data-aos="fade-up" data-aos-delay="300">
                         <a href="{% url 'manager:public_books' %}" class="btn btn-hero btn-hero-primary">
-                            <i class="fas fa-search me-2"></i>{% trans "浏览图书" %}
+                            <i class="fas fa-book me-2"></i><span data-zh="浏览图书" data-en="Browse Books" data-fr="Parcourir les livres">浏览图书</span>
                         </a>
-                        <a href="/manager/login/" class="btn btn-hero btn-hero-secondary">
-                            <i class="fas fa-user-shield me-2"></i>{% trans "管理员登录" %}
+                        <a href="/marketplace/" class="btn btn-hero btn-hero-secondary">
+                            <i class="fas fa-store me-2"></i><span data-zh="探索市场" data-en="Explore Market" data-fr="Explorer le marché">探索市场</span>
                         </a>
                     </div>
                 </div>
@@ -650,15 +1147,19 @@
                     <div class="hero-stats">
                         <div class="hero-stat" data-aos="zoom-in" data-aos-delay="400">
                             <span class="hero-stat-number">{{ book_count|default:0 }}</span>
-                            <span class="hero-stat-label">{% trans "精选图书" %}</span>
+                            <span class="hero-stat-label" data-zh="精选图书" data-en="Books" data-fr="Livres">精选图书</span>
                         </div>
                         <div class="hero-stat" data-aos="zoom-in" data-aos-delay="500">
-                            <span class="hero-stat-number">{{ publisher_count|default:0 }}</span>
-                            <span class="hero-stat-label">{% trans "合作出版社" %}</span>
+                            <span class="hero-stat-number">{{ product_count|default:0 }}</span>
+                            <span class="hero-stat-label" data-zh="商品上架" data-en="Products" data-fr="Produits">商品上架</span>
                         </div>
                         <div class="hero-stat" data-aos="zoom-in" data-aos-delay="600">
-                            <span class="hero-stat-number">{{ author_count|default:0 }}</span>
-                            <span class="hero-stat-label">{% trans "知名作者" %}</span>
+                            <span class="hero-stat-number">{{ course_count|default:0 }}</span>
+                            <span class="hero-stat-label" data-zh="在线课程" data-en="Courses" data-fr="Cours en ligne">在线课程</span>
+                        </div>
+                        <div class="hero-stat" data-aos="zoom-in" data-aos-delay="700">
+                            <span class="hero-stat-number">{{ vendor_count|default:0 }}</span>
+                            <span class="hero-stat-label" data-zh="合作卖家" data-en="Vendors" data-fr="Vendeurs">合作卖家</span>
                         </div>
                     </div>
                 </div>
@@ -667,85 +1168,235 @@
     </div>
 </section>
 
+<!-- ===== PWA: Mobile Search Bar (sticky, mobile only) ===== -->
+<div class="pwa-search-bar" id="pwaSearchBar">
+    <form class="pwa-search-inner" action="{% url 'manager:public_search' %}" method="get" id="pwaQuickSearchForm" style="flex:1;">
+        <i class="fas fa-search"></i>
+        <input type="text" name="q" id="pwaSearchInput" placeholder="{% trans '搜索图书、商品、课程...' %}" autocomplete="off">
+    </form>
+    <button class="pwa-scan-btn" onclick="document.getElementById('pwaQuickSearchForm').submit()">
+        <i class="fas fa-search"></i>
+    </button>
+</div>
+<script>
+// Rotating placeholder
+(function() {
+    var inp = document.getElementById('pwaSearchInput');
+    if (!inp) return;
+    var hints = ['Django pour débutants...','Python, Machine Learning...','Livres de cuisine...','Cours de Business...','Manga et BD...','Romans policiers...'];
+    var i = 0;
+    function cycle() {
+        if (inp.name !== 'search') return;
+        inp.placeholder = hints[i % hints.length];
+        i++;
+    }
+    cycle();
+    setInterval(cycle, 3000);
+})();
+</script>
+
+<!-- ===== PWA: Best Deals horizontal scroll (mobile only) ===== -->
+{% if featured_books or featured_products %}
+<section class="best-deals-section" id="bestDeals">
+    <div class="best-deals-header">
+        <span class="bd-title" data-zh="🔥 最优惠" data-en="🔥 Best Deals" data-fr="🔥 Meilleures Offres">🔥 Meilleures Offres</span>
+        <a href="{% url 'manager:public_books' %}" data-zh="查看全部" data-en="See all >" data-fr="Voir tout >">查看全部 &gt;</a>
+    </div>
+    <div class="best-deals-scroll">
+        {% for book in featured_books|slice:":8" %}
+        <a href="{% url 'manager:public_book_detail' book.id %}" class="bd-card">
+            <img src="{{ book.get_cover_url }}" alt="{{ book.name }}" loading="lazy" onerror="this.src='/static/img/default_cover.png'">
+            <div class="bd-card-body">
+                <div class="bd-name">{{ book.name|truncatechars:18 }}</div>
+                <div class="bd-price">&yen;{{ book.price }}</div>
+            </div>
+        </a>
+        {% endfor %}
+        {% for product in featured_products|slice:":6" %}
+        <a href="/marketplace/products/{{ product.slug }}/" class="bd-card">
+            <img src="{{ product.get_image_url }}" alt="{{ product.name }}" loading="lazy" onerror="this.src='/static/img/default_product.png'">
+            <div class="bd-card-body">
+                <div class="bd-name">{{ product.name|truncatechars:18 }}</div>
+                <div class="bd-price">&yen;{{ product.price }}</div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<!-- ===== PWA Feature 2: King Kong Category Zone (mobile: 2 rows x 5 icons) ===== -->
+<section class="king-kong-zone" id="kingKongZone">
+    <div class="kk-grid">
+        <a href="{% url 'manager:public_books' %}" class="kk-item">
+            <div class="kk-icon" style="background:linear-gradient(135deg,#667eea,#764ba2)"><i class="fas fa-book"></i></div>
+            <span data-zh="图书" data-en="Books" data-fr="Livres">图书</span>
+        </a>
+        <a href="/marketplace/products/" class="kk-item">
+            <div class="kk-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706)"><i class="fas fa-store"></i></div>
+            <span data-zh="商城" data-en="Market" data-fr="Marché">商城</span>
+        </a>
+        <a href="/marketplace/courses/" class="kk-item">
+            <div class="kk-icon" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed)"><i class="fas fa-graduation-cap"></i></div>
+            <span data-zh="课程" data-en="Courses" data-fr="Cours">课程</span>
+        </a>
+        <a href="/marketplace/supermarket/" class="kk-item">
+            <div class="kk-icon" style="background:linear-gradient(135deg,#10b981,#059669)"><i class="fas fa-shopping-basket"></i></div>
+            <span data-zh="超市" data-en="Grocery" data-fr="Supermarché">超市</span>
+        </a>
+        <a href="#flash-sales" class="kk-item">
+            <div class="kk-icon" style="background:linear-gradient(135deg,#ef4444,#dc2626)"><i class="fas fa-bolt"></i></div>
+            <span data-zh="特价" data-en="Deals" data-fr="Promos">特价</span>
+        </a>
+        <a href="{% url 'manager:public_authors' %}" class="kk-item">
+            <div class="kk-icon" style="background:linear-gradient(135deg,#ec4899,#db2777)"><i class="fas fa-user-edit"></i></div>
+            <span data-zh="作者" data-en="Authors" data-fr="Auteurs">作者</span>
+        </a>
+        <a href="{% url 'manager:public_publishers' %}" class="kk-item">
+            <div class="kk-icon" style="background:linear-gradient(135deg,#06b6d4,#0891b2)"><i class="fas fa-building"></i></div>
+            <span data-zh="出版社" data-en="Publishers" data-fr="Éditions">出版社</span>
+        </a>
+        <a href="{% url 'manager:public_blog' %}" class="kk-item">
+            <div class="kk-icon" style="background:linear-gradient(135deg,#f97316,#ea580c)"><i class="fas fa-blog"></i></div>
+            <span data-zh="博客" data-en="Blog" data-fr="Blog">博客</span>
+        </a>
+        <a href="{% url 'manager:track_order' %}" class="kk-item">
+            <div class="kk-icon" style="background:linear-gradient(135deg,#6366f1,#4f46e5)"><i class="fas fa-receipt"></i></div>
+            <span data-zh="订单" data-en="Orders" data-fr="Commandes">订单</span>
+        </a>
+        <a href="{% url 'manager:public_contact' %}" class="kk-item">
+            <div class="kk-icon" style="background:linear-gradient(135deg,#6b7280,#4b5563)"><i class="fas fa-headset"></i></div>
+            <span data-zh="客服" data-en="Support" data-fr="Support">客服</span>
+        </a>
+    </div>
+</section>
+
+<!-- ===== PWA Feature 3: Flash Sales Section ===== -->
+{% if flash_sales %}
+<section class="flash-sales-section" id="flash-sales">
+    <div class="container">
+        <div class="flash-banner">
+            <i class="fas fa-bolt" style="color:#ef4444;font-size:1.3rem;"></i>
+            <span class="flash-banner-title" data-zh="⚡ 限时秒杀" data-en="⚡ Flash Sales" data-fr="⚡ Ventes Flash">⚡ 限时秒杀</span>
+            <div class="flash-countdown" id="flashCountdown">
+                <span class="flash-cd-part" id="flashH">00</span>
+                <span class="flash-cd-sep">:</span>
+                <span class="flash-cd-part" id="flashM">00</span>
+                <span class="flash-cd-sep">:</span>
+                <span class="flash-cd-part" id="flashS">00</span>
+            </div>
+        </div>
+        <div class="flash-scroll">
+            {% for sale in flash_sales %}
+            <a href="{{ sale.get_item_url }}" class="flash-card">
+                <img class="flash-card-img" src="{{ sale.get_item_image_url }}" alt="{{ sale.get_item_name }}" loading="lazy" onerror="this.src='/static/img/default_product.png'">
+                <div class="flash-card-body">
+                    <div class="flash-card-name">{{ sale.get_item_name }}</div>
+                    <div class="flash-card-prices">
+                        <span class="flash-price">¥{{ sale.flash_price }}</span>
+                        {% if sale.get_original_price != sale.flash_price %}
+                        <span class="flash-orig">¥{{ sale.get_original_price }}</span>
+                        {% endif %}
+                    </div>
+                    {% if sale.get_discount_percent > 0 %}
+                    <span class="flash-badge">-{{ sale.get_discount_percent }}%</span>
+                    {% endif %}
+                    <div class="flash-stock-bar">
+                        <div class="flash-stock-fill" style="width:{% widthratio sale.sold_count sale.stock_limit 100 %}%"></div>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- ===== PWA Feature 1: Infinite 2-column Feed (homepage preview) ===== -->
+<section class="feed-section" id="homeFeed">
+    <div class="container-fluid px-0">
+        <div class="feed-title px-3" data-zh="🔥 热门推荐" data-en="🔥 Hot Items" data-fr="🔥 En vedette">🔥 热门推荐</div>
+        <div class="feed-grid px-2" id="homeFeedGrid">
+            {% for book in featured_books %}
+            <a href="{% url 'manager:public_book_detail' book.id %}" class="feed-card">
+                <img class="feed-card-img" src="{{ book.get_cover_url }}" alt="{{ book.name }}" loading="lazy" onerror="this.src='/static/img/default_cover.png'">
+                <div class="feed-card-body">
+                    <div class="feed-card-name">{{ book.name|truncatechars:28 }}</div>
+                    <div class="feed-card-price">¥{{ book.price }}</div>
+                    <span class="feed-card-tag" style="background:#ede9fe;color:#7c3aed;" data-zh="图书" data-en="Book" data-fr="Livre">图书</span>
+                </div>
+            </a>
+            {% endfor %}
+            {% for product in featured_products %}
+            <a href="/marketplace/products/{{ product.slug }}/" class="feed-card">
+                <img class="feed-card-img" src="{{ product.get_image_url }}" alt="{{ product.name }}" loading="lazy" onerror="this.src='/static/img/default_product.png'">
+                <div class="feed-card-body">
+                    <div class="feed-card-name">{{ product.name|truncatechars:28 }}</div>
+                    <div class="feed-card-price">¥{{ product.price }}</div>
+                    <span class="feed-card-tag" style="background:#fef3c7;color:#d97706;" data-zh="商品" data-en="Product" data-fr="Produit">商品</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        <div id="feedLoader" style="display:none"><i class="fas fa-spinner fa-spin"></i> <span data-zh="加载中..." data-en="Loading..." data-fr="Chargement...">加载中...</span></div>
+    </div>
+</section>
+
 <!-- Features Section -->
 <section class="features-section">
     <div class="container">
         <div class="section-header" data-aos="fade-up">
-            <h2 class="section-title">{% trans "为什么选择我们的图书馆" %}</h2>
+            <h2 class="section-title"><span data-zh="平台四大核心服务" data-en="Four Core Services" data-fr="Quatre services essentiels">平台四大核心服务</span></h2>
             <p class="section-subtitle">
-                {% trans "精心策划的阅读体验，优质的服务保障，让每一次购买都物超所值，开启您的精彩阅读之旅" %}
+                <span data-zh="一个账号，畅享图书、课程、商城与超市全方位服务" data-en="One account, full access to books, courses, marketplace &amp; supermarket" data-fr="Un compte, accès complet aux livres, cours, marketplace &amp; supermarché">一个账号，畅享图书、课程、商城与超市全方位服务</span>
             </p>
         </div>
         
         <div class="row g-4">
-            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-gem"></i>
+                        <i class="fas fa-book-open"></i>
                     </div>
-                    <h4>{% trans "精选优质图书" %}</h4>
+                    <h4><span data-zh="精选图书" data-en="Curated Books" data-fr="Livres sélectionnés">精选图书</span></h4>
                     <p>
-                        {% trans "每本图书都经过专业团队精心挑选，涵盖文学、科技、艺术等各个领域，确保您购买的每一本书都具有极高的阅读价值和收藏意义。" %}
+                        <span data-zh="涵盖文学、科技、艺术等各个领域的正版图书。专业团队精心挑选，品质保证，支持7天无理由退换。" data-en="Authentic books across literature, tech, and arts. Handpicked by experts, quality guaranteed, 7-day returns." data-fr="Livres authentiques en littérature, tech et arts. Sélectionnés par des experts, qualité garantie, retours sous 7 jours.">涵盖文学、科技、艺术等各个领域的正版图书。专业团队精心挑选，品质保证，支持7天无理由退换。</span>
                     </p>
                 </div>
             </div>
             
-            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
                 <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-tags"></i>
+                    <div class="feature-icon" style="background: var(--secondary-gradient);">
+                        <i class="fas fa-graduation-cap"></i>
                     </div>
-                    <h4>{% trans "超值优惠价格" %}</h4>
+                    <h4><span data-zh="在线课程" data-en="Online Courses" data-fr="Cours en ligne">在线课程</span></h4>
                     <p>
-                        {% trans "直接与出版社合作，省去中间环节，为您提供市场最优价格。定期推出限时折扣、会员专享等优惠活动，让知识更加亲民。" %}
+                        <span data-zh="从编程到设计，从语言到商业。多种难度级别的视频课程，随时随地学习，提升自我。" data-en="From coding to design, languages to business. Multi-level video courses, learn anytime, anywhere." data-fr="De la programmation au design, des langues au commerce. Cours vidéo multi-niveaux, apprenez partout.">从编程到设计，从语言到商业。多种难度级别的视频课程，随时随地学习，提升自我。</span>
                     </p>
                 </div>
             </div>
             
-            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
                 <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-shipping-fast"></i>
+                    <div class="feature-icon" style="background: var(--success-gradient);">
+                        <i class="fas fa-store"></i>
                     </div>
-                    <h4>{% trans "快速便捷配送" %}</h4>
+                    <h4><span data-zh="电商市场" data-en="Marketplace" data-fr="Marketplace">电商市场</span></h4>
                     <p>
-                        {% trans "专业物流团队，24小时内发货，全国包邮服务。精美包装保护图书品质，让您尽快拿到心爱的图书，立即开始阅读。" %}
+                        <span data-zh="认证卖家入驻，优质商品汇聚。从时尚服饰到电子产品，安全支付，快速配送。" data-en="Verified vendors, quality products. From fashion to electronics — secure payment, fast delivery." data-fr="Vendeurs vérifiés, produits de qualité. De la mode à l'électronique — paiement sécurisé, livraison rapide.">认证卖家入驻，优质商品汇聚。从时尚服饰到电子产品，安全支付，快速配送。</span>
                     </p>
                 </div>
             </div>
             
-            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
                 <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-award"></i>
+                    <div class="feature-icon" style="background: var(--warning-gradient);">
+                        <i class="fas fa-apple-alt"></i>
                     </div>
-                    <h4>{% trans "正版品质保证" %}</h4>
+                    <h4><span data-zh="生鲜超市" data-en="Fresh Supermarket" data-fr="Supermarché frais">生鲜超市</span></h4>
                     <p>
-                        {% trans "所有图书均为正版授权，印刷清晰，装帧精美。提供品质保证，支持7天无理由退换，让您购买无忧，阅读放心。" %}
-                    </p>
-                </div>
-            </div>
-            
-            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="500">
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-user-friends"></i>
-                    </div>
-                    <h4>{% trans "专业推荐服务" %}</h4>
-                    <p>
-                        {% trans "资深阅读顾问为您量身推荐适合的图书，根据您的兴趣偏好和阅读水平，打造个性化的阅读清单，发现更多精彩内容。" %}
-                    </p>
-                </div>
-            </div>
-            
-            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="600">
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-heart"></i>
-                    </div>
-                    <h4>{% trans "贴心售后服务" %}</h4>
-                    <p>
-                        {% trans "专业客服团队7×24小时在线服务，解答您的任何疑问。建立读者社群，分享阅读心得，让购书不仅是消费，更是加入知识社区。" %}
+                        <span data-zh="新鲜果蔬、有机食品、日用百货一站购齐。产地直采，品质新鲜，当日配送到家。" data-en="Fresh produce, organic food, daily essentials in one place. Farm-direct, fresh quality, same-day delivery." data-fr="Produits frais, bio, essentiels du quotidien. Direct producteur, qualité fraîche, livraison le jour même.">新鲜果蔬、有机食品、日用百货一站购齐。产地直采，品质新鲜，当日配送到家。</span>
                     </p>
                 </div>
             </div>
@@ -757,14 +1408,29 @@
 <section class="search-section">
     <div class="container">
         <div class="text-center" data-aos="fade-up">
-            <h2 class="mb-4" style="font-size: 2.5rem; font-weight: 800;">{% trans "快速搜索图书" %}</h2>
-            <p class="mb-5" style="font-size: 1.2rem; opacity: 0.9;">{% trans "输入书名关键词，快速找到您感兴趣的图书" %}</p>
+            <h2 class="mb-3" style="font-size: 2.5rem; font-weight: 800; position:relative; z-index:2;">
+                <span data-zh="快速搜索" data-en="Quick Search" data-fr="Recherche rapide">快速搜索</span>
+            </h2>
+            <p class="mb-4" style="font-size: 1.1rem; opacity: 0.9; position:relative; z-index:2;">
+                <span data-zh="搜索图书、商品或课程，快速找到您需要的内容" data-en="Search books, products or courses to find what you need" data-fr="Recherchez des livres, produits ou cours pour trouver ce dont vous avez besoin">搜索图书、商品或课程，快速找到您需要的内容</span>
+            </p>
+            <div class="search-tabs" data-aos="fade-up" data-aos-delay="100">
+                <span class="search-tab active" data-target="books" data-action="{% url 'manager:public_books' %}" data-placeholder="{% trans '输入书名进行搜索...' %}">
+                    <i class="fas fa-book me-1"></i><span data-zh="图书" data-en="Books" data-fr="Livres">图书</span>
+                </span>
+                <span class="search-tab" data-target="products" data-action="/marketplace/products/" data-placeholder="{% trans '搜索商品...' %}">
+                    <i class="fas fa-shopping-bag me-1"></i><span data-zh="商品" data-en="Products" data-fr="Produits">商品</span>
+                </span>
+                <span class="search-tab" data-target="courses" data-action="/marketplace/courses/" data-placeholder="{% trans '搜索课程...' %}">
+                    <i class="fas fa-graduation-cap me-1"></i><span data-zh="课程" data-en="Courses" data-fr="Cours">课程</span>
+                </span>
+            </div>
             <div class="search-form">
-                <form action="{% url 'manager:public_books' %}" method="get">
-                    <input type="search" name="search" class="search-input" 
-                           placeholder="{% trans '输入书名进行搜索...' %}" value="{{ request.GET.search }}">
+                <form id="searchForm" action="{% url 'manager:public_search' %}" method="get">
+                    <input type="search" name="q" class="search-input" id="searchInput"
+                           placeholder="{% trans '搜索图书、商品、课程...' %}" value="{{ request.GET.q }}">
                     <button type="submit" class="search-btn">
-                        <i class="fas fa-search me-2"></i>{% trans "开始搜索" %}
+                        <i class="fas fa-search me-2"></i><span data-zh="开始搜索" data-en="Search" data-fr="Rechercher">开始搜索</span>
                     </button>
                 </form>
             </div>
@@ -772,59 +1438,175 @@
     </div>
 </section>
 
-<!-- Featured Books Section -->
-{% if featured_books %}
-<section class="featured-books-section">
+<!-- Featured Content Showcase -->
+<section class="featured-section">
     <div class="container">
         <div class="section-header" data-aos="fade-up">
-            <h2 class="section-title">{% trans "热门图书推荐" %}</h2>
+            <h2 class="section-title"><span data-zh="热门推荐" data-en="Popular Picks" data-fr="Sélections populaires">热门推荐</span></h2>
             <p class="section-subtitle">
-                {% trans "精选优质图书，为您推荐最受欢迎的阅读选择，开启您的知识之旅" %}
+                <span data-zh="精选图书、热销商品与优质课程，为您推荐最受欢迎的内容" data-en="Featured books, bestselling products &amp; top courses — the most popular content for you" data-fr="Livres sélectionnés, produits populaires &amp; meilleurs cours — le contenu le plus populaire pour vous">精选图书、热销商品与优质课程，为您推荐最受欢迎的内容</span>
             </p>
         </div>
-        
-        <div class="row g-4">
-            {% for book in featured_books %}
-            <div class="col-lg-4 col-md-6" data-aos="zoom-in" data-aos-delay="{{ forloop.counter0|add:100 }}">
-                <div class="book-card">
-                    <div class="book-image">
-                        <i class="fas fa-book"></i>
-                    </div>
-                    <div class="book-info">
-                        <h5 class="book-title">{{ book.name|truncatechars:40 }}</h5>
-                        <p class="book-publisher">
-                            <i class="fas fa-building"></i>{{ book.publisher.publisher_name }}
-                        </p>
-                        <div class="book-stats">
-                            <span class="book-price">¥{{ book.price }}</span>
-                            <span class="book-sales">
-                                <i class="fas fa-fire"></i>{% trans "销量" %} {{ book.sale_num }}
-                            </span>
-                        </div>
-                        <div class="book-actions">
-                            <a href="{% url 'manager:public_book_detail' book.id %}" class="btn btn-book-detail">
-                                {% trans "查看详情" %}
-                            </a>
-                            {% if book.inventory > 0 %}
-                                <button onclick="addToCartQuick({{ book.id }})" class="btn btn-add-cart">
-                                    <i class="fas fa-shopping-cart"></i>
-                                </button>
+
+        <div class="showcase-tabs" data-aos="fade-up" data-aos-delay="100">
+            <span class="showcase-tab active" onclick="showPanel('books-panel', this)">
+                <i class="fas fa-book me-1"></i><span data-zh="图书" data-en="Books" data-fr="Livres">图书</span>
+            </span>
+            <span class="showcase-tab" onclick="showPanel('products-panel', this)">
+                <i class="fas fa-shopping-bag me-1"></i><span data-zh="商品" data-en="Products" data-fr="Produits">商品</span>
+            </span>
+            <span class="showcase-tab" onclick="showPanel('courses-panel', this)">
+                <i class="fas fa-graduation-cap me-1"></i><span data-zh="课程" data-en="Courses" data-fr="Cours">课程</span>
+            </span>
+        </div>
+
+        <!-- Books Panel -->
+        <div id="books-panel" class="showcase-panel active">
+            {% if featured_books %}
+            <div class="row g-3">
+                {% for book in featured_books %}
+                {% if forloop.counter <= 4 %}
+                <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="{{ forloop.counter0|add:50 }}">
+                    <div class="book-card">
+                        <div class="book-image">
+                            {% if book.cover_image %}
+                                <img src="{{ book.cover_image.url }}" alt="{{ book.name }}">
+                            {% else %}
+                                <i class="fas fa-book"></i>
                             {% endif %}
+                        </div>
+                        <div class="book-info">
+                            <h5 class="book-title">{{ book.name|truncatechars:30 }}</h5>
+                            <p class="book-publisher">
+                                <i class="fas fa-building"></i>{{ book.publisher.publisher_name }}
+                            </p>
+                            <div class="book-stats">
+                                <span class="book-price">¥{{ book.price }}</span>
+                                <span class="book-sales"><i class="fas fa-fire"></i><span data-zh="销量" data-en="Sales" data-fr="Ventes">销量</span> {{ book.sale_num }}</span>
+                            </div>
+                            <div class="book-actions">
+                                <a href="{% url 'manager:public_book_detail' book.id %}" class="btn btn-book-detail">
+                                    <span data-zh="查看详情" data-en="Details" data-fr="Détails">查看详情</span>
+                                </a>
+                                {% if book.inventory > 0 %}
+                                    <button onclick="addToCartQuick({{ book.id }})" class="btn btn-add-cart">
+                                        <i class="fas fa-shopping-cart"></i>
+                                    </button>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 </div>
+                {% endif %}
+                {% endfor %}
             </div>
-            {% endfor %}
+            <div class="text-center mt-4">
+                <a href="{% url 'manager:public_books' %}" class="btn btn-cta" style="background:var(--hero-gradient);color:white;">
+                    <i class="fas fa-book-open me-2"></i><span data-zh="查看更多图书" data-en="View More Books" data-fr="Voir plus de livres">查看更多图书</span>
+                </a>
+            </div>
+            {% else %}
+            <div class="text-center py-5 text-muted">
+                <i class="fas fa-book fa-3x mb-3" style="opacity:0.3;"></i>
+                <p><span data-zh="暂无图书" data-en="No books yet" data-fr="Aucun livre pour le moment">暂无图书</span></p>
+            </div>
+            {% endif %}
         </div>
-        
-        <div class="text-center mt-5" data-aos="fade-up">
-            <a href="{% url 'manager:public_books' %}" class="btn btn-cta">
-                <i class="fas fa-books me-2"></i>{% trans "查看更多图书" %}
-            </a>
+
+        <!-- Products Panel -->
+        <div id="products-panel" class="showcase-panel">
+            {% if featured_products %}
+            <div class="row g-3">
+                {% for product in featured_products %}
+                {% if forloop.counter <= 4 %}
+                <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="{{ forloop.counter0|add:50 }}">
+                    <a href="/marketplace/products/{{ product.slug }}/" class="text-decoration-none">
+                    <div class="product-card">
+                        <div class="product-card-img">
+                            {% if product.image %}
+                                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                            {% else %}
+                                <i class="fas fa-shopping-bag"></i>
+                            {% endif %}
+                        </div>
+                        <div class="product-card-body">
+                            {% if product.category %}
+                                <span class="cat-badge">{{ product.category.name }}</span>
+                            {% endif %}
+                            <h5>{{ product.name|truncatechars:28 }}</h5>
+                            <div class="product-card-footer">
+                                <span class="price">¥{{ product.price }}</span>
+                                <span class="sales"><i class="fas fa-fire me-1"></i>{{ product.sales_count }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    </a>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+            <div class="text-center mt-4">
+                <a href="/marketplace/products/" class="btn btn-cta" style="background:linear-gradient(135deg,#f093fb,#f5576c);color:white;">
+                    <i class="fas fa-store me-2"></i><span data-zh="查看更多商品" data-en="View More Products" data-fr="Voir plus de produits">查看更多商品</span>
+                </a>
+            </div>
+            {% else %}
+            <div class="text-center py-5 text-muted">
+                <i class="fas fa-shopping-bag fa-3x mb-3" style="opacity:0.3;"></i>
+                <p><span data-zh="暂无商品" data-en="No products yet" data-fr="Aucun produit pour le moment">暂无商品</span></p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Courses Panel -->
+        <div id="courses-panel" class="showcase-panel">
+            {% if featured_courses %}
+            <div class="row g-3">
+                {% for course in featured_courses %}
+                {% if forloop.counter <= 4 %}
+                <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="{{ forloop.counter0|add:50 }}">
+                    <a href="/marketplace/courses/{{ course.slug }}/" class="text-decoration-none">
+                    <div class="course-card">
+                        <div class="course-card-img">
+                            {% if course.image %}
+                                <img src="{{ course.image.url }}" alt="{{ course.title }}">
+                            {% else %}
+                                <i class="fas fa-graduation-cap"></i>
+                            {% endif %}
+                            <span class="course-level-badge {{ course.difficulty }}">{{ course.get_difficulty_display }}</span>
+                        </div>
+                        <div class="course-card-body">
+                            <h5>{{ course.title|truncatechars:28 }}</h5>
+                            <div class="instructor"><i class="fas fa-user-tie me-1"></i>{{ course.instructor }}</div>
+                            <div class="course-card-meta">
+                                <span><i class="fas fa-users"></i>{{ course.enrollment_count }}</span>
+                                <span><i class="fas fa-clock"></i>{{ course.duration }}</span>
+                            </div>
+                            <div class="course-card-footer">
+                                <span class="price">{% if course.price %}¥{{ course.price }}{% else %}<span data-zh="免费" data-en="Free" data-fr="Gratuit">免费</span>{% endif %}</span>
+                                <span class="enroll"><i class="fas fa-user-graduate me-1"></i>{{ course.enrollment_count }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    </a>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+            <div class="text-center mt-4">
+                <a href="/marketplace/courses/" class="btn btn-cta" style="background:linear-gradient(135deg,#4facfe,#00f2fe);color:white;">
+                    <i class="fas fa-graduation-cap me-2"></i><span data-zh="查看更多课程" data-en="View More Courses" data-fr="Voir plus de cours">查看更多课程</span>
+                </a>
+            </div>
+            {% else %}
+            <div class="text-center py-5 text-muted">
+                <i class="fas fa-graduation-cap fa-3x mb-3" style="opacity:0.3;"></i>
+                <p><span data-zh="暂无课程" data-en="No courses yet" data-fr="Aucun cours pour le moment">暂无课程</span></p>
+            </div>
+            {% endif %}
         </div>
     </div>
 </section>
-{% endif %}
 
 <!-- Call to Action Section -->
 <section class="cta-section">
@@ -832,13 +1614,21 @@
         <div class="text-center cta-content">
             <div class="row align-items-center">
                 <div class="col-lg-8 mx-auto" data-aos="fade-up">
-                    <h3 class="cta-title">{% trans "开始探索知识的海洋" %}</h3>
+                    <h3 class="cta-title"><span data-zh="开始探索DUNO 360" data-en="Start Exploring DUNO 360" data-fr="Explorez DUNO 360">开始探索DUNO 360</span></h3>
                     <p class="cta-subtitle">
-                        {% trans "立即浏览我们丰富的图书收藏，发现您感兴趣的内容，开启精彩的阅读之旅" %}
+                        <span data-zh="浏览图书、发现课程、探索市场、选购生鲜 — 一站式满足您的一切需求" data-en="Browse books, discover courses, explore the marketplace, shop fresh — all in one place" data-fr="Parcourez les livres, découvrez les cours, explorez le marché, achetez frais — tout en un seul endroit">浏览图书、发现课程、探索市场、选购生鲜 — 一站式满足您的一切需求</span>
                     </p>
-                    <a href="{% url 'manager:public_books' %}" class="btn btn-cta">
-                        <i class="fas fa-rocket me-2"></i>{% trans "立即开始探索" %}
-                    </a>
+                    <div class="d-flex flex-wrap justify-content-center gap-3">
+                        <a href="{% url 'manager:public_books' %}" class="btn btn-cta" style="background:white;color:#667eea;font-weight:700;padding:16px 36px;border-radius:50px;font-size:1.05rem;box-shadow:0 8px 25px rgba(0,0,0,0.15);transition:all 0.3s ease;">
+                            <i class="fas fa-book-open me-2"></i><span data-zh="浏览图书" data-en="Browse Books" data-fr="Parcourir les livres">浏览图书</span>
+                        </a>
+                        <a href="/marketplace/" class="btn btn-cta" style="background:transparent;color:white;font-weight:700;padding:16px 36px;border-radius:50px;font-size:1.05rem;border:2px solid rgba(255,255,255,0.7);transition:all 0.3s ease;">
+                            <i class="fas fa-store me-2"></i><span data-zh="探索市场" data-en="Explore Market" data-fr="Explorer le marché">探索市场</span>
+                        </a>
+                        <a href="/marketplace/courses/" class="btn btn-cta" style="background:transparent;color:white;font-weight:700;padding:16px 36px;border-radius:50px;font-size:1.05rem;border:2px solid rgba(255,255,255,0.7);transition:all 0.3s ease;">
+                            <i class="fas fa-graduation-cap me-2"></i><span data-zh="发现课程" data-en="Discover Courses" data-fr="Découvrir les cours">发现课程</span>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -848,6 +1638,40 @@
 
 {% block extra_js %}
 <script>
+// Showcase tab switching
+function showPanel(panelId, tab) {
+    document.querySelectorAll('.showcase-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.showcase-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(panelId).classList.add('active');
+    tab.classList.add('active');
+}
+
+// Search tab switching: desktop and mobile share the same target/action/name.
+function syncQuickSearch(target, action, placeholder, inputName) {
+    var desktopForm = document.getElementById('searchForm');
+    var desktopInput = document.getElementById('searchInput');
+    var mobileForm = document.getElementById('pwaQuickSearchForm');
+    var mobileInput = document.getElementById('pwaSearchInput');
+    if (desktopForm && desktopInput) {
+        desktopForm.action = action;
+        desktopInput.placeholder = placeholder;
+        desktopInput.name = inputName;
+    }
+    if (mobileForm && mobileInput) {
+        mobileForm.action = action;
+        mobileInput.placeholder = placeholder;
+        mobileInput.name = inputName;
+    }
+    document.querySelectorAll('.search-tab, .pwa-search-tab').forEach(function(tab) {
+        tab.classList.toggle('active', tab.dataset.target === target);
+    });
+}
+document.querySelectorAll('.search-tab, .pwa-search-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+        syncQuickSearch(this.dataset.target, this.dataset.action, this.dataset.placeholder, this.dataset.name || (this.dataset.target === 'books' ? 'search' : 'q'));
+    });
+});
+
 // Quick add to cart function
 function addToCartQuick(bookId) {
     // Add CSRF token if not present
@@ -955,5 +1779,82 @@ function getCsrfToken() {
     const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
     return csrfInput ? csrfInput.value : '{{ csrf_token }}';
 }
+
+// ===== PWA Feature 3: Flash Sale Countdown =====
+(function() {
+    var endTime = {% if flash_sales %}new Date('{{ flash_sale_end|date:"c" }}'){% else %}null{% endif %};
+    if (!endTime) return;
+    function updateCd() {
+        var now = new Date();
+        var diff = Math.max(0, Math.floor((endTime - now) / 1000));
+        var h = Math.floor(diff / 3600);
+        var m = Math.floor((diff % 3600) / 60);
+        var s = diff % 60;
+        var pad = function(n) { return n < 10 ? '0'+n : ''+n; };
+        var elH = document.getElementById('flashH');
+        var elM = document.getElementById('flashM');
+        var elS = document.getElementById('flashS');
+        if (elH) elH.textContent = pad(h);
+        if (elM) elM.textContent = pad(m);
+        if (elS) elS.textContent = pad(s);
+        if (diff <= 0) clearInterval(cdInterval);
+    }
+    updateCd();
+    var cdInterval = setInterval(updateCd, 1000);
+})();
+
+// ===== PWA Feature 1: Infinite Feed with Intersection Observer =====
+(function() {
+    var feedGrid = document.getElementById('homeFeedGrid');
+    var feedLoader = document.getElementById('feedLoader');
+    if (!feedGrid) return;
+    var page = 2; // page 1 already rendered server-side
+    var loading = false;
+    var finished = false;
+
+    var sentinel = document.createElement('div');
+    sentinel.id = 'feedSentinel';
+    feedGrid.parentElement.appendChild(sentinel);
+
+    var observer = new IntersectionObserver(function(entries) {
+        if (entries[0].isIntersecting && !loading && !finished) {
+            loadMore();
+        }
+    }, { rootMargin: '200px' });
+    observer.observe(sentinel);
+
+    function loadMore() {
+        loading = true;
+        if (feedLoader) feedLoader.style.display = 'block';
+        fetch('/manager/api/feed/?page=' + page)
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.items && data.items.length > 0) {
+                    data.items.forEach(function(item) {
+                        var card = document.createElement('a');
+                        card.href = item.url;
+                        card.className = 'feed-card';
+                        var tagStyle = item.type === 'book'
+                            ? 'background:#ede9fe;color:#7c3aed;'
+                            : item.type === 'product'
+                            ? 'background:#fef3c7;color:#d97706;'
+                            : 'background:#d1fae5;color:#065f46;';
+                        card.innerHTML = '<img class="feed-card-img" src="'+item.image+'" alt="'+item.name+'" loading="lazy" onerror="this.src=\'/static/img/default_cover.png\'"><div class="feed-card-body"><div class="feed-card-name">'+item.name+'</div><div class="feed-card-price">¥'+item.price+'</div><span class="feed-card-tag" style="'+tagStyle+'">'+item.type_label+'</span></div>';
+                        feedGrid.appendChild(card);
+                    });
+                    page++;
+                } else {
+                    // Loop: restart from page 1
+                    page = 1;
+                    finished = false;
+                }
+                loading = false;
+                if (feedLoader) feedLoader.style.display = 'none';
+            }).catch(function() {
+                loading = false;
+                if (feedLoader) feedLoader.style.display = 'none';
+            });
+    }
+})();
 </script>
 {% endblock %}

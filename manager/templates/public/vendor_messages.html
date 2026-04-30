@@ -1,0 +1,332 @@
+{% extends 'public/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "消息管理" %} - {{ vendor.company_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+    --msg-primary: #667eea;
+    --msg-primary-dark: #764ba2;
+    --msg-bg: #f0f2f5;
+    --msg-sidebar-bg: #fff;
+    --msg-chat-bg: #e5ddd5;
+    --msg-bubble-out: #d9fdd3;
+    --msg-bubble-in: #fff;
+}
+html[data-theme="dark"] {
+    --msg-bg: #111b21;
+    --msg-sidebar-bg: #1f2c34;
+    --msg-chat-bg: #0b141a;
+    --msg-bubble-out: #005c4b;
+    --msg-bubble-in: #1f2c34;
+}
+.msg-app {
+    display: flex;
+    height: calc(100vh - 80px);
+    background: var(--msg-bg);
+    overflow: hidden;
+}
+.msg-sidebar {
+    width: 360px; min-width: 300px;
+    background: var(--msg-sidebar-bg);
+    border-right: 1px solid #e5e7eb;
+    display: flex; flex-direction: column; flex-shrink: 0;
+}
+html[data-theme="dark"] .msg-sidebar { border-right-color: #2a3942; }
+.msg-sidebar-header {
+    padding: 14px 16px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #fff;
+    display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+}
+.msg-sidebar-header h3 { font-size: 1.1rem; font-weight: 700; margin: 0; flex: 1; }
+.msg-search-box {
+    padding: 8px 12px; background: var(--msg-sidebar-bg); flex-shrink: 0;
+}
+.msg-search-box input {
+    width: 100%; border: none; border-radius: 20px;
+    padding: 8px 16px; font-size: 0.85rem;
+    background: #f0f2f5; outline: none;
+}
+html[data-theme="dark"] .msg-search-box input { background: #2a3942; color: #e2e8f0; }
+.msg-convo-list { flex: 1; overflow-y: auto; scrollbar-width: thin; }
+.msg-convo-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px; cursor: pointer;
+    transition: background 0.15s; border-bottom: 1px solid #f0f2f5;
+}
+html[data-theme="dark"] .msg-convo-item { border-bottom-color: #2a3942; }
+.msg-convo-item:hover, .msg-convo-item.active { background: #f0f2f5; }
+html[data-theme="dark"] .msg-convo-item:hover, html[data-theme="dark"] .msg-convo-item.active { background: #2a3942; }
+.msg-avatar {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 1.1rem; flex-shrink: 0;
+}
+.msg-convo-info { flex: 1; min-width: 0; }
+.msg-convo-name {
+    font-weight: 600; font-size: 0.9rem; color: #111;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+html[data-theme="dark"] .msg-convo-name { color: #e2e8f0; }
+.msg-convo-preview {
+    font-size: 0.8rem; color: #667781; margin-top: 2px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.msg-convo-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+.msg-convo-time { font-size: 0.7rem; color: #667781; }
+.msg-unread-badge {
+    background: #ef4444; color: #fff; font-size: 0.65rem;
+    font-weight: 700; min-width: 20px; height: 20px;
+    border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; padding: 0 4px;
+}
+.msg-chat-area { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.msg-chat-header {
+    padding: 10px 16px; background: var(--msg-sidebar-bg);
+    border-bottom: 1px solid #e5e7eb;
+    display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+}
+html[data-theme="dark"] .msg-chat-header { border-bottom-color: #2a3942; }
+.msg-chat-header-name { font-weight: 600; font-size: 0.95rem; color: #111; flex: 1; }
+html[data-theme="dark"] .msg-chat-header-name { color: #e2e8f0; }
+.msg-chat-back { display: none; background: none; border: none; font-size: 1.2rem; color: var(--msg-primary); cursor: pointer; padding: 4px 8px; }
+.msg-messages-area {
+    flex: 1; overflow-y: auto; padding: 16px;
+    background: var(--msg-chat-bg); display: flex;
+    flex-direction: column; gap: 4px;
+}
+.msg-date-separator { text-align: center; margin: 12px 0; }
+.msg-date-separator span {
+    background: rgba(0,0,0,0.08); color: #54656f;
+    font-size: 0.72rem; padding: 4px 12px; border-radius: 8px; font-weight: 500;
+}
+html[data-theme="dark"] .msg-date-separator span { background: rgba(255,255,255,0.1); color: #8696a0; }
+.msg-bubble-row { display: flex; max-width: 75%; }
+.msg-bubble-row.out { align-self: flex-end; }
+.msg-bubble-row.in { align-self: flex-start; }
+.msg-bubble {
+    padding: 6px 10px 4px; border-radius: 8px;
+    font-size: 0.88rem; line-height: 1.45;
+    position: relative; word-break: break-word; white-space: pre-wrap;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.08);
+}
+.msg-bubble-row.out .msg-bubble { background: var(--msg-bubble-out); border-top-right-radius: 0; }
+.msg-bubble-row.in .msg-bubble { background: var(--msg-bubble-in); border-top-left-radius: 0; }
+.msg-bubble-time { font-size: 0.65rem; color: #667781; text-align: right; margin-top: 2px; }
+.msg-input-area {
+    padding: 8px 12px; background: var(--msg-sidebar-bg);
+    display: flex; align-items: flex-end; gap: 8px; flex-shrink: 0;
+    border-top: 1px solid #e5e7eb;
+}
+html[data-theme="dark"] .msg-input-area { border-top-color: #2a3942; }
+.msg-input-area textarea {
+    flex: 1; border: none; border-radius: 20px;
+    padding: 10px 16px; font-size: 0.9rem;
+    background: #f0f2f5; outline: none; resize: none;
+    max-height: 120px; line-height: 1.4; font-family: inherit;
+}
+html[data-theme="dark"] .msg-input-area textarea { background: #2a3942; color: #e2e8f0; }
+.msg-send-btn {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #fff; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; flex-shrink: 0; transition: transform 0.15s;
+}
+.msg-send-btn:hover { transform: scale(1.08); }
+.msg-empty-state {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    flex-direction: column; color: #8696a0; text-align: center; padding: 40px;
+}
+.msg-empty-state i { font-size: 4rem; margin-bottom: 16px; opacity: 0.3; }
+
+@media (max-width: 768px) {
+    .msg-app { height: calc(100vh - 60px); }
+    .msg-sidebar { width: 100%; border-right: none; }
+    .msg-chat-area { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 100; background: var(--msg-bg); }
+    .msg-chat-area.mobile-open { display: flex; }
+    .msg-chat-back { display: block; }
+    .msg-bubble-row { max-width: 85%; }
+    .msg-app { position: relative; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="msg-app" id="msgApp">
+    <div class="msg-sidebar" id="msgSidebar">
+        <div class="msg-sidebar-header">
+            <i class="fas fa-store fa-lg"></i>
+            <h3>{{ vendor.company_name }} - <span data-zh="消息" data-en="Messages" data-fr="Messages">消息</span></h3>
+            <a href="{% url 'manager:vendor_dashboard' %}" style="color:#fff;font-size:0.8rem;text-decoration:none;">
+                <i class="fas fa-arrow-left me-1"></i><span data-zh="返回" data-en="Back" data-fr="Retour">返回</span>
+            </a>
+        </div>
+        <div class="msg-search-box">
+            <input type="text" id="msgSearchInput" placeholder="{% trans '搜索客户...' %}" oninput="filterConversations(this.value)">
+        </div>
+        <div class="msg-convo-list" id="msgConvoList">
+            <div class="msg-empty-state" id="msgListEmpty" style="padding:40px 20px;">
+                <i class="fas fa-inbox"></i>
+                <p data-zh="暂无客户消息" data-en="No customer messages" data-fr="Aucun message client">暂无客户消息</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="msg-chat-area" id="msgChatArea">
+        <div class="msg-empty-state" id="msgNoChatSelected">
+            <i class="fas fa-comment-dots"></i>
+            <h3 data-zh="选择一个对话" data-en="Select a conversation" data-fr="Sélectionnez une conversation">选择一个对话</h3>
+            <p data-zh="从左侧选择客户的对话" data-en="Choose a customer conversation from the left" data-fr="Choisissez une conversation client">从左侧选择客户的对话</p>
+        </div>
+        <div id="msgChatContent" style="display:none;flex-direction:column;flex:1;min-height:0;">
+            <div class="msg-chat-header">
+                <button class="msg-chat-back" onclick="closeMobileChat()"><i class="fas fa-arrow-left"></i></button>
+                <div class="msg-avatar" id="chatAvatar">U</div>
+                <div style="flex:1;min-width:0;">
+                    <div class="msg-chat-header-name" id="chatHeaderName">Customer</div>
+                    <div class="msg-chat-header-sub" id="chatHeaderSub" style="font-size:0.75rem;color:#667781;"></div>
+                </div>
+            </div>
+            <div class="msg-messages-area" id="msgMessagesArea"></div>
+            <div class="msg-input-area">
+                <textarea id="msgInput" rows="1" placeholder="{% trans '回复客户...' %}" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
+                <button class="msg-send-btn" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    var conversations = [];
+    var activeConvoId = null;
+    var pollTimer = null;
+
+    function loadConversations() {
+        fetch('/manager/api/vendor/conversations/')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                conversations = data.conversations || [];
+                renderConvoList();
+            });
+    }
+
+    function renderConvoList() {
+        var list = document.getElementById('msgConvoList');
+        var empty = document.getElementById('msgListEmpty');
+        if (conversations.length === 0) {
+            list.innerHTML = '';
+            list.appendChild(empty);
+            empty.style.display = 'flex';
+            return;
+        }
+        empty.style.display = 'none';
+        var html = '';
+        conversations.forEach(function(c) {
+            html += '<div class="msg-convo-item' + (c.id === activeConvoId ? ' active' : '') + '" onclick="openChat(' + c.id + ')" data-search="' + escAttr(c.buyer_name + ' ' + c.subject) + '">';
+            html += '<div class="msg-avatar">' + escHtml(c.buyer_avatar) + '</div>';
+            html += '<div class="msg-convo-info">';
+            html += '<div class="msg-convo-name">' + escHtml(c.buyer_name) + '</div>';
+            html += '<div class="msg-convo-preview">' + escHtml(c.last_message || c.subject) + '</div>';
+            html += '</div>';
+            html += '<div class="msg-convo-meta">';
+            html += '<span class="msg-convo-time">' + (c.last_time || '') + '</span>';
+            if (c.unread > 0) html += '<span class="msg-unread-badge">' + c.unread + '</span>';
+            html += '</div></div>';
+        });
+        list.innerHTML = html;
+    }
+
+    window.openChat = function(convoId) {
+        activeConvoId = convoId;
+        renderConvoList();
+        document.getElementById('msgNoChatSelected').style.display = 'none';
+        document.getElementById('msgChatContent').style.display = 'flex';
+        document.getElementById('msgChatArea').classList.add('mobile-open');
+        var convo = conversations.find(function(c) { return c.id === convoId; });
+        if (convo) {
+            document.getElementById('chatAvatar').textContent = convo.buyer_avatar;
+            document.getElementById('chatHeaderName').textContent = convo.buyer_name;
+            document.getElementById('chatHeaderSub').textContent = convo.subject;
+        }
+        loadMessages(convoId);
+        if (pollTimer) clearInterval(pollTimer);
+        pollTimer = setInterval(function() { loadMessages(convoId, true); }, 5000);
+    };
+
+    window.closeMobileChat = function() {
+        document.getElementById('msgChatArea').classList.remove('mobile-open');
+        activeConvoId = null;
+        if (pollTimer) clearInterval(pollTimer);
+        loadConversations();
+    };
+
+    function loadMessages(convoId, silent) {
+        fetch('/manager/api/vendor/conversations/' + convoId + '/messages/')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (!silent || convoId === activeConvoId) renderMessages(data.messages || []);
+                if (!silent) loadConversations();
+            });
+    }
+
+    function renderMessages(msgs) {
+        var area = document.getElementById('msgMessagesArea');
+        var html = '';
+        var lastDate = '';
+        msgs.forEach(function(m) {
+            if (m.date !== lastDate) {
+                html += '<div class="msg-date-separator"><span>' + m.date + '</span></div>';
+                lastDate = m.date;
+            }
+            var isOut = m.sender_type === 'vendor';
+            html += '<div class="msg-bubble-row ' + (isOut ? 'out' : 'in') + '">';
+            html += '<div class="msg-bubble">';
+            html += escHtml(m.content);
+            html += '<div class="msg-bubble-time">' + m.time + '</div>';
+            html += '</div></div>';
+        });
+        area.innerHTML = html;
+        area.scrollTop = area.scrollHeight;
+    }
+
+    window.sendMessage = function() {
+        var input = document.getElementById('msgInput');
+        var text = input.value.trim();
+        if (!text || !activeConvoId) return;
+        input.value = '';
+        var csrf = getCookie('csrftoken');
+        var fd = new FormData();
+        fd.append('conversation_id', activeConvoId);
+        fd.append('content', text);
+        fetch('/manager/api/vendor/messages/send/', { method: 'POST', body: fd, headers: { 'X-CSRFToken': csrf } })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    loadMessages(activeConvoId);
+                    loadConversations();
+                }
+            });
+    };
+
+    window.filterConversations = function(q) {
+        q = q.toLowerCase();
+        document.querySelectorAll('.msg-convo-item').forEach(function(el) {
+            el.style.display = (el.dataset.search || '').toLowerCase().indexOf(q) !== -1 ? '' : 'none';
+        });
+    };
+
+    function escHtml(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+    function escAttr(s) { return (s || '').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+    function getCookie(name) { var v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)'); return v ? v[2] : ''; }
+
+    loadConversations();
+})();
+</script>
+{% endblock %}

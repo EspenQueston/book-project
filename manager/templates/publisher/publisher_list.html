@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>出版社列表 - 图书管理系统</title>
+    <title>出版社列表 - DUNO 360</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -270,6 +270,12 @@
         </div>
     </div>
 
+    <!-- Hidden form for CSRF-safe POST deletion -->
+    <form id="deletePublisherForm" method="post" action="/manager/delete_publisher/" style="display:none">
+        {% csrf_token %}
+        <input type="hidden" name="id" id="deletePublisherId" value="">
+    </form>
+
     <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="deleteModal" tabindex="-1">
         <div class="modal-dialog">
@@ -289,9 +295,10 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                    <a href="#" id="confirmDeleteBtn" class="btn btn-danger">
+                    <button type="button" id="confirmDeleteBtn" class="btn btn-danger"
+                            onclick="document.getElementById('deletePublisherForm').submit()">
                         <i class="fas fa-trash"></i> 确定删除
-                    </a>
+                    </button>
                 </div>
             </div>
         </div>
@@ -302,12 +309,13 @@
         // Display current date
         document.getElementById('currentDate').textContent = new Date().toLocaleDateString('zh-CN');
         
-        // Delete confirmation
+        // Delete confirmation — POST to prevent CSRF via GET
         function confirmDelete(publisherId, publisherName) {
             document.getElementById('publisherName').textContent = publisherName;
-            document.getElementById('confirmDeleteBtn').href = `/manager/delete_publisher/?id=${publisherId}`;
+            document.getElementById('deletePublisherId').value = publisherId;
             new bootstrap.Modal(document.getElementById('deleteModal')).show();
         }
     </script>
+<script src="/static/js/admin_i18n.js" defer></script>
 </body>
 </html>

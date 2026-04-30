@@ -1,6 +1,7 @@
 """
 Order Management System - Django Signals
 Handles database notifications when payments are made
+Also auto-translates Book / Publisher / Author on creation via Gemma 4.
 """
 
 from django.db.models.signals import post_save, pre_save
@@ -180,8 +181,61 @@ def send_refund_notification(order):
 @receiver(post_save, sender=Order)
 def update_order_status_on_payment(sender, instance, created, **kwargs):
     """Automatically update order status when payment is confirmed"""
-    
+
     if not created and instance.payment_status == 'paid' and instance.status == 'pending':
         # Automatically move to processing when payment is confirmed
         Order.objects.filter(pk=instance.pk).update(status='processing')
         logger.info(f"Order {instance.order_number} status automatically updated to processing after payment")
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Traduction automatique — Book / Author
+# ──────────────────────────────────────────────────────────────────────────────
+
+def _get_translation_service():
+    """Import lazy pour éviter les problèmes de démarrage."""
+    from core.services.translation_service import TranslationService
+    return TranslationService()
+
+
+@receiver(post_save, sender='manager.Book')
+def auto_translate_book(sender, instance, created, **kwargs):
+    """Translate Book name & description to EN and FR on creation."""
+    if not created:
+        return
+    name_src = instance.name_zh_hans or instance.name
+    desc_src = instance.description_zh_hans or instance.description or ''
+    if not name_src:
+        return
+    try:
+        svc = _get_translation_service()
+        from manager.models import Book
+        Book.objects.filter(pk=instance.pk).update(
+            name_en=svc.translate(name_src, 'zh-hans', 'en', 'book_name'),
+            name_fr=svc.translate(name_src, 'zh-hans', 'fr', 'book_name'),
+            description_en=svc.translate(desc_src, 'zh-hans', 'en', 'book_description') if desc_src else '',
+            description_fr=svc.translate(desc_src, 'zh-hans', 'fr', 'book_description') if desc_src else '',
+        )
+        logger.info("Auto-translated Book #%s", instance.pk)
+    except Exception as exc:
+        logger.error("auto_translate_book error for #%s: %s", instance.pk, exc)
+
+
+@receiver(post_save, sender='manager.Author')
+def auto_translate_author(sender, instance, created, **kwargs):
+    """Translate Author name to EN and FR on creation."""
+    if not created:
+        return
+    name_src = instance.name_zh_hans or instance.name
+    if not name_src:
+        return
+    try:
+        svc = _get_translation_service()
+        from manager.models import Author
+        Author.objects.filter(pk=instance.pk).update(
+            name_en=svc.translate(name_src, 'zh-hans', 'en', 'general'),
+            name_fr=svc.translate(name_src, 'zh-hans', 'fr', 'general'),
+        )
+        logger.info("Auto-translated Author #%s", instance.pk)
+    except Exception as exc:
+        logger.error("auto_translate_author error for #%s: %s", instance.pk, exc)

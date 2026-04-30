@@ -1,38 +1,157 @@
 {% extends 'public/base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans "出版社目录" %} - {% trans "图书管理系统" %}{% endblock %}
+{% block title %}{% trans "出版社目录" %} - {% trans "DUNO 360" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .pub-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 100px 0 80px;
+        position: relative;
+        overflow: hidden;
+    }
+    .pub-hero::before {
+        content: ''; position: absolute; top: -50%; right: -10%;
+        width: 500px; height: 500px; background: rgba(255,255,255,0.05);
+        border-radius: 50%;
+    }
+    .pub-hero::after {
+        content: ''; position: absolute; bottom: -30%; left: -8%;
+        width: 350px; height: 350px; background: rgba(255,255,255,0.03);
+        border-radius: 50%;
+    }
+    .hero-stat {
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(10px);
+        border-radius: 16px; padding: 20px 28px;
+        text-align: center; border: 1px solid rgba(255,255,255,0.2);
+    }
+    .hero-stat h3 { font-size: 2rem; font-weight: 800; margin: 0; }
+    .hero-stat p { margin: 4px 0 0; opacity: 0.85; font-size: 0.9rem; }
+
+    .search-card {
+        background: white; border-radius: 20px; padding: 24px 32px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.08); margin-top: -40px;
+        position: relative; z-index: 2;
+    }
+    .search-card input {
+        border: 2px solid #e8ecf1; border-radius: 14px; padding: 14px 20px;
+        font-size: 1rem; transition: all 0.3s;
+    }
+    .search-card input:focus { border-color: #667eea; box-shadow: 0 0 0 4px rgba(102,126,234,0.1); }
+    .search-card .btn-search {
+        background: linear-gradient(135deg, #667eea, #764ba2); color: white;
+        border: none; border-radius: 14px; padding: 14px 28px; font-weight: 700;
+    }
+
+    .pub-card {
+        background: white; border-radius: 20px; overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06); transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+        border: 1px solid rgba(0,0,0,0.04); position: relative;
+    }
+    .pub-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 50px rgba(102,126,234,0.18);
+    }
+    .pub-card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 32px 24px 40px; text-align: center; position: relative;
+    }
+    .pub-card-header::after {
+        content: ''; position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%);
+        width: 0; height: 0; border-left: 30px solid transparent; border-right: 30px solid transparent;
+        border-top: 20px solid #764ba2;
+    }
+    .pub-avatar {
+        width: 80px; height: 80px; border-radius: 50%;
+        background: rgba(255,255,255,0.2); backdrop-filter: blur(10px);
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 12px; font-size: 1.8rem; color: white;
+        border: 3px solid rgba(255,255,255,0.4);
+    }
+    .pub-name { color: white; font-size: 1.1rem; font-weight: 700; margin: 0; }
+
+    .pub-card-body { padding: 32px 24px 24px; }
+    .pub-stat-row { display: flex; gap: 12px; margin-bottom: 16px; }
+    .pub-stat-item {
+        flex: 1; background: #f8f9ff; border-radius: 12px; padding: 12px;
+        text-align: center; border: 1px solid rgba(102,126,234,0.08);
+    }
+    .pub-stat-item .stat-val { font-size: 1.2rem; font-weight: 800; color: #667eea; }
+    .pub-stat-item .stat-lbl { font-size: 0.72rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
+
+    .pub-address {
+        display: flex; align-items: center; gap: 10px;
+        background: #fafbff; border-radius: 12px; padding: 14px; margin-bottom: 16px;
+        font-size: 0.88rem; color: #475569;
+    }
+    .pub-address i { color: #667eea; font-size: 1rem; flex-shrink: 0; }
+
+    .featured-book {
+        display: flex; align-items: center; gap: 12px;
+        background: #fafbff; border-radius: 12px; padding: 12px; margin-bottom: 16px;
+    }
+    .featured-book-cover {
+        width: 42px; height: 56px; border-radius: 6px; object-fit: cover;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .featured-book-info { flex: 1; min-width: 0; }
+    .featured-book-info .book-title { font-size: 0.85rem; font-weight: 600; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .featured-book-info .book-price { font-size: 0.78rem; color: #667eea; font-weight: 700; }
+
+    .btn-pub-detail {
+        display: block; text-align: center; padding: 12px;
+        background: linear-gradient(135deg, #667eea, #764ba2); color: white;
+        border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 0.9rem;
+        transition: all 0.3s;
+    }
+    .btn-pub-detail:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102,126,234,0.35); color: white; }
+
+    .empty-state-card {
+        background: white; border-radius: 20px; padding: 60px 40px;
+        text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    }
+    .empty-state-card i { font-size: 4rem; color: #cbd5e1; margin-bottom: 20px; }
+</style>
+{% endblock %}
 
 {% block content %}
-    <!-- Page Header with gradient background -->
-    <section class="hero-section text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 0; margin-bottom: 30px;">
-        <div class="container">
-            <div class="row">
-                <div class="col-12 text-center">
-                    <h1 class="display-5 fw-bold mb-3">{% trans "出版社目录" %}</h1>
-                    <p class="lead">{% trans "浏览我们合作的优质出版社" %}</p>
+    <!-- Hero Section -->
+    <section class="pub-hero text-white">
+        <div class="container position-relative" style="z-index:2;">
+            <div class="row align-items-center">
+                <div class="col-lg-6 mb-4 mb-lg-0">
+                    <h1 class="display-4 fw-bold mb-3" data-aos="fade-right">{% trans "出版社目录" %}</h1>
+                    <p class="lead mb-0" style="opacity:0.9;" data-aos="fade-right" data-aos-delay="100">{% trans "浏览我们合作的优质出版社，发现精品图书" %}</p>
+                </div>
+                <div class="col-lg-6">
+                    <div class="row g-3" data-aos="fade-left" data-aos-delay="200">
+                        <div class="col-6">
+                            <div class="hero-stat">
+                                <h3>{{ total_publishers }}</h3>
+                                <p><i class="fas fa-building me-1"></i>{% trans "家出版社" %}</p>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="hero-stat">
+                                <h3>{{ total_books }}</h3>
+                                <p><i class="fas fa-book me-1"></i>{% trans "本图书" %}</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Search Section -->
-    <section class="py-4 bg-light mb-4">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-8">
-                    <form method="get" class="d-flex gap-3">
-                        <input type="search" name="search" class="form-control search-box" 
-                               placeholder="{% trans '搜索出版社名称...' %}" value="{{ search_query }}">
-                        <button type="submit" class="btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                            <i class="fas fa-search"></i> {% trans "搜索" %}
-                        </button>
-                    </form>
-                </div>
-                <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-                    <span class="text-muted">{% blocktrans with count=publishers.count %}共找到 {{ count }} 家出版社{% endblocktrans %}</span>
-                </div>
-            </div>
+    <!-- Search -->
+    <section class="container">
+        <div class="search-card" data-aos="fade-up">
+            <form method="get" class="d-flex gap-3">
+                <input type="search" name="search" class="form-control" placeholder="{% trans '搜索出版社名称...' %}" value="{{ search_query }}">
+                <button type="submit" class="btn-search"><i class="fas fa-search me-2"></i>{% trans "搜索" %}</button>
+            </form>
         </div>
     </section>
 
@@ -40,29 +159,46 @@
     <section class="py-5">
         <div class="container">
             {% if publishers %}
-            <div class="row">
+            <div class="row g-4">
                 {% for publisher in publishers %}
-                <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:100 }}">
-                    <div class="card h-100" style="border-radius: 15px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: none;">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                <h5 class="card-title fw-bold mb-0">{{ publisher.publisher_name }}</h5>
+                <div class="col-xl-3 col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:'50' }}">
+                    <div class="pub-card h-100 d-flex flex-column">
+                        <div class="pub-card-header">
+                            <div class="pub-avatar"><i class="fas fa-building"></i></div>
+                            <h5 class="pub-name">{{ publisher.publisher_name }}</h5>
+                        </div>
+                        <div class="pub-card-body flex-grow-1 d-flex flex-column">
+                            <div class="pub-stat-row">
+                                <div class="pub-stat-item">
+                                    <div class="stat-val">{{ publisher.book_set.count }}</div>
+                                    <div class="stat-lbl">{% trans "图书" %}</div>
+                                </div>
+                                <div class="pub-stat-item">
+                                    <div class="stat-val">{% with books=publisher.book_set.all %}{% for b in books %}{% if forloop.first %}{{ b.sale_num }}{% endif %}{% empty %}0{% endfor %}{% endwith %}</div>
+                                    <div class="stat-lbl">{% trans "畅销" %}</div>
+                                </div>
                             </div>
-                            
-                            <div class="mb-3">
-                                <p class="text-muted mb-1">
-                                    <i class="fas fa-map-marker-alt text-primary"></i> 
-                                    <strong>{% trans "地址" %}:</strong> {{ publisher.publisher_address }}
-                                </p>
-                                <p class="text-muted mb-1">
-                                    <i class="fas fa-book text-primary"></i> 
-                                    <strong>{% trans "图书数" %}:</strong> {{ publisher.book_set.count }}
-                                </p>
+
+                            <div class="pub-address">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>{{ publisher.publisher_address }}</span>
                             </div>
-                            
+
+                            {% with first_book=publisher.book_set.first %}
+                            {% if first_book %}
+                            <div class="featured-book">
+                                <img src="{{ first_book.get_cover_url }}" alt="{{ first_book.name }}" class="featured-book-cover">
+                                <div class="featured-book-info">
+                                    <div class="book-title">{{ first_book.name }}</div>
+                                    <div class="book-price">¥{{ first_book.price }}</div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% endwith %}
+
                             <div class="mt-auto">
-                                <a href="{% url 'manager:public_publisher_detail' publisher.id %}" class="btn btn-sm w-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                                    <i class="fas fa-info-circle"></i> {% trans "查看详情" %}
+                                <a href="{% url 'manager:public_publisher_detail' publisher.id %}" class="btn-pub-detail">
+                                    <i class="fas fa-arrow-right me-1"></i>{% trans "查看详情" %}
                                 </a>
                             </div>
                         </div>
@@ -71,47 +207,15 @@
                 {% endfor %}
             </div>
             {% else %}
-            <!-- Empty State -->
-            <div class="text-center py-5" data-aos="zoom-in">
-                <div class="mb-4">
-                    <i class="fas fa-search text-muted" style="font-size: 5rem; opacity: 0.3;"></i>
-                </div>
-                <h4 class="text-muted mb-3">{% trans "未找到相关出版社" %}</h4>
+            <div class="empty-state-card" data-aos="zoom-in">
+                <i class="fas fa-building d-block"></i>
+                <h4 class="fw-bold text-muted mb-3">{% trans "未找到相关出版社" %}</h4>
                 <p class="text-muted mb-4">{% trans "请尝试其他搜索关键词或浏览所有出版社" %}</p>
-                <a href="{% url 'manager:public_publishers' %}" class="btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                    <i class="fas fa-building"></i> {% trans "浏览所有出版社" %}
+                <a href="{% url 'manager:public_publishers' %}" class="btn-pub-detail" style="display:inline-block;padding:12px 30px;">
+                    <i class="fas fa-building me-1"></i>{% trans "浏览所有出版社" %}
                 </a>
             </div>
             {% endif %}
         </div>
     </section>
-
-    <!-- Quick Links -->
-    <section class="py-5 text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-        <div class="container">
-            <div class="row text-center">
-                <div class="col-md-4 mb-3" data-aos="fade-up" data-aos-delay="100">
-                    <a href="{% url 'manager:public_books' %}" class="text-white text-decoration-none">
-                        <i class="fas fa-book fa-3x mb-3"></i>
-                        <h5>{% trans "浏览图书" %}</h5>
-                        <p class="mb-0">{% trans "查看所有图书信息" %}</p>
-                    </a>
-                </div>
-                <div class="col-md-4 mb-3" data-aos="fade-up" data-aos-delay="200">
-                    <a href="{% url 'manager:public_authors' %}" class="text-white text-decoration-none">
-                        <i class="fas fa-user-edit fa-3x mb-3"></i>
-                        <h5>{% trans "浏览作者" %}</h5>
-                        <p class="mb-0">{% trans "查看所有作者信息" %}</p>
-                    </a>
-                </div>
-                <div class="col-md-4 mb-3" data-aos="fade-up" data-aos-delay="300">
-                    <a href="{% url 'manager:public_home' %}" class="text-white text-decoration-none">
-                        <i class="fas fa-home fa-3x mb-3"></i>
-                        <h5>{% trans "返回首页" %}</h5>
-                        <p class="mb-0">{% trans "回到主页面" %}</p>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
-    {% endblock %}
+{% endblock %}

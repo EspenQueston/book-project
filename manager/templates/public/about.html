@@ -1,7 +1,7 @@
 {% extends 'public/base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans "图书管理系统" %} - {% trans "关于我们" %}{% endblock %}
+{% block title %}{% trans "DUNO 360" %} - {% trans "关于我们" %}{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -310,12 +310,12 @@
         <div class="row align-items-center">
             <div class="col-lg-7" data-aos="fade-right">
                 <div class="hero-pill"><i class="fas fa-star"></i>{% trans "关于我们" %}</div>
-                <h1>{% trans "致力于推广阅读文化" %}</h1>
-                <p class="lead">{% trans "我们是一个充满激情的团队，致力于通过技术创新让每个人都能享受到阅读的乐趣。我们的使命是建设一个智能、便捷的图书管理平台。" %}</p>
+                <h1>{% trans "知识与生活的一站式平台" %}</h1>
+                <p class="lead">{% trans "我们是一支充满激情的团队，致力于打造集图书、在线课程、生活商品于一体的综合性数字平台。从电子书下载到在线学习，从生鲜超市到多元市场，让知识与便利触手可及。" %}</p>
             </div>
             <div class="col-lg-5 d-none d-lg-flex" data-aos="fade-left" data-aos-delay="200">
                 <div class="hero-visual mx-auto">
-                    <div class="hero-glow"><i class="fas fa-book-open"></i></div>
+                    <div class="hero-glow"><i class="fas fa-globe"></i></div>
                 </div>
             </div>
         </div>
@@ -327,17 +327,18 @@
         <div class="row align-items-center g-5">
             <div class="col-lg-6" data-aos="fade-right">
                 <div class="story-visual">
-                    <div class="story-visual-inner"><i class="fas fa-book-reader"></i></div>
+                    <div class="story-visual-inner"><i class="fas fa-rocket"></i></div>
                     <div class="story-year"><h3>2024</h3><span>{% trans "成立年份" %}</span></div>
                 </div>
             </div>
             <div class="col-lg-6" data-aos="fade-left">
                 <p class="sec-label">{% trans "我们的故事" %}</p>
-                <h2 class="sec-heading">{% trans "从一个想法到一个平台" %}</h2>
-                <p class="sec-desc">{% trans "我们的图书管理系统诞生于对知识传播的热爱。从最初的构想到如今功能完善的平台，我们始终坚持以用户为中心，不断优化产品体验。" %}</p>
-                <p class="sec-desc mt-3">{% trans "我们相信，每一本书都承载着智慧与力量。通过我们的平台，读者可以轻松发现、购买和管理他们喜爱的书籍。" %}</p>
+                <h2 class="sec-heading">{% trans "从图书管理到综合平台" %}</h2>
+                <p class="sec-desc">{% trans "最初，我们只是一个简单的DUNO 360。随着用户需求的增长，我们逐步拓展为一个集图书电商、在线教育、生活超市和多元市场于一体的综合性平台。" %}</p>
+                <p class="sec-desc mt-3">{% trans "如今，用户可以在我们的平台上购买并下载电子书、学习在线视频课程、选购各类商品，并通过智能AI助手获取即时帮助。我们用技术连接知识与生活。" %}</p>
                 <div class="mt-4">
-                    <a href="{% url 'manager:public_books' %}" class="story-btn"><i class="fas fa-arrow-right"></i>{% trans "浏览图书" %}</a>
+                    <a href="{% url 'manager:public_books' %}" class="story-btn me-2"><i class="fas fa-book-open"></i>{% trans "浏览图书" %}</a>
+                    <a href="{% url 'marketplace:home' %}" class="story-btn" style="background:linear-gradient(135deg,#10b981,#06b6d4)"><i class="fas fa-store"></i>{% trans "逛市场" %}</a>
                 </div>
             </div>
         </div>
@@ -355,28 +356,28 @@
                 <div class="val-card">
                     <div class="val-ico"><i class="fas fa-lightbulb"></i></div>
                     <h4>{% trans "创新" %}</h4>
-                    <p>{% trans "我们不断探索新技术和新方法，为用户提供最前沿的图书管理体验。" %}</p>
+                    <p>{% trans "融合AI智能助手、在线课程和电子商务，不断探索数字平台的新可能。" %}</p>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
                 <div class="val-card">
                     <div class="val-ico"><i class="fas fa-heart"></i></div>
                     <h4>{% trans "热情" %}</h4>
-                    <p>{% trans "对阅读的热爱驱动着我们，我们希望将这份热情传递给每一位用户。" %}</p>
+                    <p>{% trans "对知识传播和用户体验的热爱驱动着我们，将最好的服务带给全球用户。" %}</p>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
                 <div class="val-card">
                     <div class="val-ico"><i class="fas fa-shield-alt"></i></div>
                     <h4>{% trans "可靠" %}</h4>
-                    <p>{% trans "我们承诺提供稳定、安全的服务，让用户可以放心地使用我们的平台。" %}</p>
+                    <p>{% trans "安全的支付系统和稳定的服务体验，让用户放心购书、学习和购物。" %}</p>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
                 <div class="val-card">
-                    <div class="val-ico"><i class="fas fa-users"></i></div>
-                    <h4>{% trans "以用户为中心" %}</h4>
-                    <p>{% trans "用户的需求和体验始终是我们决策的核心，我们倾听每一个声音。" %}</p>
+                    <div class="val-ico"><i class="fas fa-globe-asia"></i></div>
+                    <h4>{% trans "全球化" %}</h4>
+                    <p>{% trans "支持中文、英文、法文三语，覆盖微信、支付宝、PayPal等多种支付方式，服务全球用户。" %}</p>
                 </div>
             </div>
         </div>
@@ -397,18 +398,29 @@
 <section class="sec">
     <div class="container">
         <div class="text-center mb-5" data-aos="fade-up">
-            <p class="sec-label">{% trans "我们的团队" %}</p>
-            <h2 class="sec-heading">{% trans "专业的团队，卓越的服务" %}</h2>
+            <p class="sec-label">{% trans "平台功能" %}</p>
+            <h2 class="sec-heading">{% trans "一个平台，多种服务" %}</h2>
         </div>
         <div class="row g-4 justify-content-center">
             <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
-                <div class="team-card"><div class="team-pic"><i class="fas fa-user-tie"></i></div><h5>{% trans "创始人" %}</h5><p class="role">CEO & {% trans "产品设计" %}</p></div>
+                <a href="{% url 'manager:public_books' %}" class="text-decoration-none">
+                <div class="team-card" style="cursor:pointer;"><div class="team-pic" style="background:linear-gradient(135deg,#667eea,#764ba2)"><i class="fas fa-book-open"></i></div><h5>{% trans "电子书商店" %}</h5><p class="role">{% trans "购买与下载电子书" %}</p></div>
+                </a>
             </div>
             <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
-                <div class="team-card"><div class="team-pic"><i class="fas fa-laptop-code"></i></div><h5>{% trans "技术团队" %}</h5><p class="role">{% trans "全栈开发" %}</p></div>
+                <a href="{% url 'marketplace:course_list' %}" class="text-decoration-none">
+                <div class="team-card" style="cursor:pointer;"><div class="team-pic" style="background:linear-gradient(135deg,#f093fb,#f5576c)"><i class="fas fa-graduation-cap"></i></div><h5>{% trans "在线课程" %}</h5><p class="role">{% trans "视频课程学习" %}</p></div>
+                </a>
             </div>
             <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
-                <div class="team-card"><div class="team-pic"><i class="fas fa-headset"></i></div><h5>{% trans "客服团队" %}</h5><p class="role">{% trans "客户支持" %}</p></div>
+                <a href="{% url 'marketplace:home' %}" class="text-decoration-none">
+                <div class="team-card" style="cursor:pointer;"><div class="team-pic" style="background:linear-gradient(135deg,#43e97b,#38f9d7)"><i class="fas fa-store"></i></div><h5>{% trans "综合市场" %}</h5><p class="role">{% trans "商品与生鲜超市" %}</p></div>
+                </a>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                <a href="{% url 'manager:public_home' %}#chatbot" class="text-decoration-none">
+                <div class="team-card" style="cursor:pointer;"><div class="team-pic" style="background:linear-gradient(135deg,#4facfe,#00f2fe)"><i class="fas fa-robot"></i></div><h5>{% trans "AI智能助手" %}</h5><p class="role">{% trans "实时智能客服" %}</p></div>
+                </a>
             </div>
         </div>
     </div>
@@ -418,8 +430,9 @@
     <div class="container">
         <div class="cta-box" data-aos="zoom-in">
             <h2>{% trans "准备好开始了吗？" %}</h2>
-            <p>{% trans "浏览我们的图书目录，发现您的下一本好书。" %}</p>
-            <a href="{% url 'manager:public_books' %}" class="cta-btn"><i class="fas fa-book-open"></i>{% trans "浏览图书" %}</a>
+            <p>{% trans "浏览图书、探索课程、选购商品——从这里开始您的旅程。" %}</p>
+            <a href="{% url 'manager:public_books' %}" class="cta-btn me-3"><i class="fas fa-book-open"></i>{% trans "浏览图书" %}</a>
+            <a href="{% url 'marketplace:home' %}" class="cta-btn" style="background:#10b981;color:#fff;box-shadow:0 10px 30px rgba(16,185,129,0.3)"><i class="fas fa-store"></i>{% trans "逛市场" %}</a>
         </div>
     </div>
 </section>

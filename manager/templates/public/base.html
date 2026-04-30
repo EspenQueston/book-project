@@ -2,10 +2,11 @@
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE }}">
 <head>
+    <script>if(localStorage.getItem('theme')==='dark')document.documentElement.setAttribute('data-theme','dark');</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>{% block title %}{% trans "图书管理系统" %}{% endblock %}</title>
+    <title>{% block title %}DUNO 360{% endblock %}</title>
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -26,6 +27,122 @@
             --footer-bg: #1a1a2e;
             --footer-secondary: #16213e;
             --footer-accent: #0f3460;
+            --body-bg: #ffffff;
+            --card-bg: #ffffff;
+            --card-border: rgba(0,0,0,0.04);
+            --input-bg: #ffffff;
+            --input-border: #e0e0e0;
+            --muted-text: #6c757d;
+            --section-bg: #f8f9fa;
+        }
+
+        /* Dark Mode */
+        html[data-theme="dark"] {
+            --body-bg: #0f172a;
+            --card-bg: #1e293b;
+            --card-border: rgba(255,255,255,0.06);
+            --dark-text: #e2e8f0;
+            --light-bg: #1e293b;
+            --input-bg: #1e293b;
+            --input-border: #334155;
+            --muted-text: #94a3b8;
+            --section-bg: #0f172a;
+            --footer-bg: #020617;
+            --footer-secondary: #0f172a;
+            --footer-accent: #1e293b;
+        }
+        html[data-theme="dark"] body {
+            background: var(--body-bg);
+            color: var(--dark-text);
+        }
+        html[data-theme="dark"] .card, html[data-theme="dark"] .card-modern {
+            background: var(--card-bg) !important;
+            border-color: var(--card-border) !important;
+            color: var(--dark-text);
+        }
+        html[data-theme="dark"] .bg-light, html[data-theme="dark"] .bg-white {
+            background: var(--card-bg) !important;
+        }
+        html[data-theme="dark"] .text-dark, html[data-theme="dark"] .text-muted {
+            color: var(--muted-text) !important;
+        }
+        html[data-theme="dark"] h1, html[data-theme="dark"] h2, html[data-theme="dark"] h3,
+        html[data-theme="dark"] h4, html[data-theme="dark"] h5, html[data-theme="dark"] h6 {
+            color: var(--dark-text);
+        }
+        html[data-theme="dark"] .form-control, html[data-theme="dark"] .form-select {
+            background: var(--input-bg);
+            border-color: var(--input-border);
+            color: var(--dark-text);
+        }
+        html[data-theme="dark"] .form-control:focus, html[data-theme="dark"] .form-select:focus {
+            background: var(--input-bg);
+            color: var(--dark-text);
+        }
+        html[data-theme="dark"] .dropdown-menu {
+            background: var(--card-bg);
+            border-color: var(--card-border);
+        }
+        html[data-theme="dark"] .dropdown-item {
+            color: var(--dark-text);
+        }
+        html[data-theme="dark"] .dropdown-item:hover {
+            background: rgba(102,126,234,0.15);
+        }
+        .navbar .dropdown-item {
+            transition: all 0.2s ease;
+        }
+        .navbar .dropdown-item:hover {
+            background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1));
+            transform: translateX(4px);
+        }
+        .navbar .dropdown-menu {
+            animation: dropdownFadeIn 0.2s ease;
+        }
+        @keyframes dropdownFadeIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        html[data-theme="dark"] .stats-card {
+            background: var(--card-bg);
+        }
+        html[data-theme="dark"] .table { color: var(--dark-text); }
+        html[data-theme="dark"] .table-striped>tbody>tr:nth-of-type(odd)>* {
+            color: var(--dark-text);
+            background-color: rgba(255,255,255,0.02);
+        }
+        html[data-theme="dark"] .modal-content {
+            background: var(--card-bg);
+            color: var(--dark-text);
+        }
+        html[data-theme="dark"] .g-modal-card, html[data-theme="dark"] .wechat-modal-card {
+            background: var(--card-bg);
+        }
+        html[data-theme="dark"] .g-modal-title { color: var(--dark-text); }
+        html[data-theme="dark"] .g-modal-text { color: var(--muted-text); }
+        html[data-theme="dark"] .g-modal-btn-cancel { background: #334155; color: var(--dark-text); }
+        html[data-theme="dark"] .search-box {
+            background: var(--input-bg);
+            border-color: var(--input-border);
+            color: var(--dark-text);
+        }
+        html[data-theme="dark"] .footer {
+            background: linear-gradient(135deg, var(--footer-bg) 0%, var(--footer-secondary) 50%, var(--footer-accent) 100%);
+        }
+        /* Dark mode toggle button */
+        .theme-toggle {
+            width: 38px; height: 38px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 1.1rem;
+            cursor: pointer; transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+        .theme-toggle:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-2px);
         }
         
         body {
@@ -427,8 +544,38 @@
             font-size: 1.2rem;
         }
         
-        /* Responsive Design */
+        /* ===== MOBILE PWA: Hide footer (Chinese app style) ===== */
         @media (max-width: 768px) {
+            .footer, footer { display: none !important; }
+        }
+
+        /* ===== GLOBAL MOBILE: No horizontal scroll ===== */
+        @media (max-width: 768px) {
+            html, body { overflow-x: hidden !important; max-width: 100vw; }
+            * { box-sizing: border-box; }
+            img, video, iframe, table { max-width: 100%; }
+        }
+
+        /* ===== GLOBAL MOBILE: Chinese-app density ===== */
+        @media (max-width: 768px) {
+            body { font-size: 13px; line-height: 1.4; background: #F5F5F5; }
+            h1 { font-size: 18px !important; }
+            h2 { font-size: 15px !important; }
+            h3 { font-size: 14px !important; }
+            p, li { font-size: 12px; }
+            .container { padding-left: 8px !important; padding-right: 8px !important; }
+            section { margin-bottom: 8px !important; }
+            .card { padding: 8px; }
+            .btn, button { padding: 8px 14px; font-size: 13px; border-radius: 20px; }
+            .btn-primary { background: #667eea; border-color: #667eea; }
+            input, select, textarea { font-size: 14px !important; }
+            /* product cards dense */
+            .product-card img { aspect-ratio: 3/4; object-fit: cover; }
+            .product-card .info { padding: 6px; }
+        }
+
+        /* Responsive Design — footer adjustments (desktop only) */
+        @media (min-width: 769px) and (max-width: 992px) {
             .footer {
                 padding: 40px 0 20px 0;
                 margin-top: 40px;
@@ -543,8 +690,8 @@
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="{% url 'manager:public_home' %}" style="font-weight: 700; font-size: 1.2rem;">
-                <i class="fas fa-book-open" style="margin-right: 8px; font-size: 1.3rem; color: #fff;"></i>
-                <span style="background: linear-gradient(90deg, #fff, #e0f2ff); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: transparent;">{% trans "图书管理系统" %}</span>
+                <i class="fas fa-globe" style="margin-right: 8px; font-size: 1.3rem; color: #fff;"></i>
+                <span style="background: linear-gradient(90deg, #fff, #e0f2ff); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: transparent;">DUNO 360</span>
             </a>
             
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" style="padding: 8px 12px;">
@@ -558,19 +705,44 @@
                             <i class="fas fa-home me-1"></i><span>{% trans "首页" %}</span>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link px-2 py-2" href="{% url 'manager:public_books' %}" style="font-weight: 500; font-size: 0.9rem; transition: all 0.3s ease; border-radius: 8px;">
-                            <i class="fas fa-book me-1"></i><span>{% trans "图书目录" %}</span>
+                    <!-- Books Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link px-2 py-2 dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-weight: 500; font-size: 0.9rem; transition: all 0.3s ease; border-radius: 8px;">
+                            <i class="fas fa-book me-1"></i><span>{% trans "图书" %}</span>
                         </a>
+                        <ul class="dropdown-menu" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: none; padding: 8px; min-width: 220px;">
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'manager:public_books' %}" style="border-radius: 8px; padding: 10px 16px;">
+                                    <i class="fas fa-book-open text-primary"></i>
+                                    <div>
+                                        <div class="fw-bold" style="font-size:0.9rem;">{% trans "图书目录" %}</div>
+                                        <small class="text-muted">{% trans "浏览所有图书" %}</small>
+                                    </div>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'manager:public_authors' %}" style="border-radius: 8px; padding: 10px 16px;">
+                                    <i class="fas fa-user-edit text-success"></i>
+                                    <div>
+                                        <div class="fw-bold" style="font-size:0.9rem;">{% trans "作者" %}</div>
+                                        <small class="text-muted">{% trans "查看作者列表" %}</small>
+                                    </div>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'manager:public_publishers' %}" style="border-radius: 8px; padding: 10px 16px;">
+                                    <i class="fas fa-building text-info"></i>
+                                    <div>
+                                        <div class="fw-bold" style="font-size:0.9rem;">{% trans "出版社" %}</div>
+                                        <small class="text-muted">{% trans "合作出版机构" %}</small>
+                                    </div>
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link px-2 py-2" href="{% url 'manager:public_authors' %}" style="font-weight: 500; font-size: 0.9rem; transition: all 0.3s ease; border-radius: 8px;">
-                            <i class="fas fa-user-edit me-1"></i><span>{% trans "作者" %}</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link px-2 py-2" href="{% url 'manager:public_publishers' %}" style="font-weight: 500; font-size: 0.9rem; transition: all 0.3s ease; border-radius: 8px;">
-                            <i class="fas fa-building me-1"></i><span>{% trans "出版社" %}</span>
+                        <a class="nav-link px-2 py-2" href="{% url 'marketplace:home' %}" style="font-weight: 500; font-size: 0.9rem; transition: all 0.3s ease; border-radius: 8px;">
+                            <i class="fas fa-store me-1"></i><span>{% trans "市场" %}</span>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -583,9 +755,59 @@
                             <i class="fas fa-blog me-1"></i><span>{% trans "博客" %}</span>
                         </a>
                     </li>
+                    <!-- More Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link px-2 py-2 dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-weight: 500; font-size: 0.9rem; transition: all 0.3s ease; border-radius: 8px;">
+                            <i class="fas fa-ellipsis-h me-1"></i><span>{% trans "更多" %}</span>
+                        </a>
+                        <ul class="dropdown-menu" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: none; padding: 8px; min-width: 220px;">
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'manager:public_about' %}" style="border-radius: 8px; padding: 10px 16px;">
+                                    <i class="fas fa-info-circle text-primary"></i>
+                                    <div>
+                                        <div class="fw-bold" style="font-size:0.9rem;">{% trans "关于我们" %}</div>
+                                        <small class="text-muted">{% trans "了解我们的平台" %}</small>
+                                    </div>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'manager:public_services' %}" style="border-radius: 8px; padding: 10px 16px;">
+                                    <i class="fas fa-concierge-bell text-warning"></i>
+                                    <div>
+                                        <div class="fw-bold" style="font-size:0.9rem;">{% trans "服务" %}</div>
+                                        <small class="text-muted">{% trans "我们提供的服务" %}</small>
+                                    </div>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'manager:public_messages' %}" style="border-radius: 8px; padding: 10px 16px;">
+                                    <i class="fas fa-comments text-info"></i>
+                                    <div>
+                                        <div class="fw-bold" style="font-size:0.9rem;">{% trans "消息" %}</div>
+                                        <small class="text-muted">{% trans "与卖家沟通" %}</small>
+                                    </div>
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider my-1"></li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'manager:public_contact' %}" style="border-radius: 8px; padding: 10px 16px;">
+                                    <i class="fas fa-envelope text-success"></i>
+                                    <div>
+                                        <div class="fw-bold" style="font-size:0.9rem;">{% trans "联系我们" %}</div>
+                                        <small class="text-muted">{% trans "获取帮助和支持" %}</small>
+                                    </div>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
                 </ul>
                 
                 <div class="d-flex align-items-center gap-2">
+                    <!-- Dark Mode Toggle -->
+                    <button class="theme-toggle" id="themeToggle" onclick="toggleDarkMode()" title="{% trans '切换主题' %}">
+                        <i class="fas fa-moon" id="themeIcon"></i>
+                    </button>
+
                     <!-- Language Switcher Dropdown -->
                     <div class="dropdown">
                         <button class="btn btn-sm d-flex align-items-center dropdown-toggle" data-bs-toggle="dropdown" style="background: rgba(255,255,255,0.15); color: #fff; padding: 6px 12px; border-radius: 25px; font-weight: 600; font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.25); transition: all 0.3s ease; backdrop-filter: blur(10px);" id="languageDropdown">
@@ -611,6 +833,30 @@
                         </ul>
                     </div>
                     
+                    <!-- User Account -->
+                    {% if request.session.site_user_id %}
+                    <div class="dropdown">
+                        <button class="btn btn-sm d-flex align-items-center dropdown-toggle" data-bs-toggle="dropdown" style="background: rgba(255,255,255,0.15); color: #fff; padding: 6px 12px; border-radius: 25px; font-weight: 600; font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.25); transition: all 0.3s ease; backdrop-filter: blur(10px);">
+                            <i class="fas fa-user-circle me-1"></i>
+                            {{ request.session.site_user_name|truncatechars:10 }}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" style="min-width: 160px; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.15);">
+                            <li><a class="dropdown-item" href="{% url 'manager:user_profile' %}"><i class="fas fa-user me-2"></i>{% trans "个人中心" %}</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="{% url 'manager:user_logout' %}"><i class="fas fa-sign-out-alt me-2"></i>{% trans "退出" %}</a></li>
+                        </ul>
+                    </div>
+                    {% else %}
+                    <a href="{% url 'manager:user_login' %}" class="d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background: rgba(255,255,255,0.15); border-radius: 50%; backdrop-filter: blur(10px); transition: all 0.3s ease; text-decoration: none;" title="{% trans '登录' %}">
+                        <i class="fas fa-user" style="font-size: 1rem; color: #fff;"></i>
+                    </a>
+                    {% endif %}
+
+                    <!-- Vendor Portal -->
+                    <a href="{% url 'manager:vendor_dashboard' %}" class="d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background: rgba(255,255,255,0.15); border-radius: 50%; backdrop-filter: blur(10px); transition: all 0.3s ease; text-decoration: none;" title="{% trans '卖家中心' %}">
+                        <i class="fas fa-store" style="font-size: 1rem; color: #fff;"></i>
+                    </a>
+
                     <a href="{% url 'manager:view_cart' %}" class="position-relative" style="text-decoration: none; transition: transform 0.3s ease;">
                         <div class="d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background: rgba(255,255,255,0.15); border-radius: 50%; backdrop-filter: blur(10px); transition: all 0.3s ease;">
                             <i class="fas fa-shopping-cart" style="font-size: 1.2rem; color: #fff;"></i>
@@ -685,11 +931,11 @@
                 <div class="col-lg-4 col-md-6">
                     <div class="footer-section">
                         <div class="footer-logo">
-                            <i class="fas fa-book-reader"></i>
-                            <h4>{% trans "图书管理系统" %}</h4>
+                            <i class="fas fa-globe"></i>
+                            <h4>DUNO 360</h4>
                         </div>
                         <p class="footer-description">
-                            {% trans "现代化的智能图书管理平台，为读者和管理员提供便捷、高效的图书查询、浏览和管理服务。致力于推广阅读文化，建设知识型社会。" %}
+                            <span data-zh="综合性数字平台，融合图书、在线课程、电商市场与生鲜超市，为您提供一站式的知识获取与购物体验。" data-en="A comprehensive digital platform combining books, online courses, e-commerce marketplace and fresh supermarket — your one-stop destination for knowledge and shopping." data-fr="Plateforme numérique complète combinant livres, cours en ligne, marketplace e-commerce et supermarché — votre destination unique pour le savoir et le shopping.">综合性数字平台，融合图书、在线课程、电商市场与生鲜超市，为您提供一站式的知识获取与购物体验。</span>
                         </p>
                         <div class="social-links">
                             <a href="https://www.facebook.com/poires.gomai" class="social-link" title="Facebook" target="_blank" rel="noopener noreferrer">
@@ -790,7 +1036,7 @@
                 <div class="row align-items-center">
                     <div class="col-md-6">
                         <div class="copyright">
-                            <p>&copy; 2024 <span>{% trans "图书管理系统" %}</span>. <span>{% trans "保留所有权利" %}</span>.</p>
+                            <p>&copy; 2024 <span>DUNO 360</span>. <span data-zh="保留所有权利" data-en="All rights reserved" data-fr="Tous droits réservés">保留所有权利</span>.</p>
                             <div class="legal-links">
                                 <a href="#">{% trans "隐私政策" %}</a>
                                 <span>|</span>
@@ -996,6 +1242,215 @@
     })();
     </script>
 
+    <!-- Dark Mode -->
+    <script>
+    (function(){
+        var saved = localStorage.getItem('theme');
+        if (saved === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+        updateThemeIcon();
+    })();
+    function toggleDarkMode() {
+        var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        if (isDark) {
+            document.documentElement.removeAttribute('data-theme');
+            localStorage.setItem('theme', 'light');
+        } else {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+        }
+        updateThemeIcon();
+    }
+    function updateThemeIcon() {
+        var icon = document.getElementById('themeIcon');
+        if (!icon) return;
+        var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+    }
+    </script>
+
     {% block extra_js %}{% endblock %}
+
+    <!-- Client-side i18n: translates data-zh/data-en/data-fr elements -->
+    <script src="{% static 'js/admin_i18n.js' %}"></script>
+    <script>
+    /* Bridge: sync Django server-side language → JS i18n (for data-zh/data-en/data-fr).
+       Django session is always authoritative — localStorage is corrected if they diverge. */
+    (function() {
+        var djangoLang = '{{ LANGUAGE_CODE }}';  // e.g. 'zh-hans', 'en', 'fr'
+        var jsLang = djangoLang === 'zh-hans' ? 'zh' : djangoLang;
+
+        // Correction de divergence : si localStorage dit autre chose que Django, on le corrige
+        var storedLang = localStorage.getItem('adminLang');
+        if (storedLang && storedLang !== jsLang) {
+            localStorage.setItem('adminLang', jsLang);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.adminI18n && typeof window.adminI18n.setLang === 'function') {
+                window.adminI18n.setLang(jsLang);
+            }
+            /* Hide the floating toggle button — public pages already have
+               the Django language dropdown in the navbar */
+            var floatBtn = document.getElementById('adminLangToggle');
+            if (floatBtn) floatBtn.style.display = 'none';
+        });
+    })();
+    </script>
+
+    <script src="/static/js/chatbot_widget.js" defer></script>
+
+    <!-- ===== PWA Feature 6: Bottom Tab Bar (mobile only) ===== -->
+    <style>
+    .mobile-floating-cart {
+        display: none;
+        position: fixed;
+        right: 14px;
+        bottom: 78px;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ff6b35, #ef4444);
+        color: #fff;
+        box-shadow: 0 10px 25px rgba(239,68,68,.35);
+        z-index: 8999;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+    }
+    .mobile-floating-cart i { font-size: 1.2rem; }
+    @media (max-width: 768px) {
+        body:not(.me-page) .mobile-floating-cart { display: flex; }
+    }
+    .pwa-bottom-nav {
+        display: none;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 62px;
+        background: #fff;
+        border-top: 1px solid rgba(0,0,0,0.08);
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.10);
+        z-index: 9000;
+        align-items: stretch;
+    }
+    html[data-theme="dark"] .pwa-bottom-nav {
+        background: #1e293b;
+        border-top-color: rgba(255,255,255,0.08);
+    }
+    .pwa-tab {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        text-decoration: none;
+        color: #9ca3af;
+        font-size: 0.65rem;
+        font-weight: 600;
+        transition: color 0.2s;
+        position: relative;
+        padding: 6px 2px 4px;
+    }
+    .pwa-tab i { font-size: 1.2rem; }
+    .pwa-tab.active, .pwa-tab:hover { color: #667eea; }
+    html[data-theme="dark"] .pwa-tab { color: #6b7280; }
+    html[data-theme="dark"] .pwa-tab.active, html[data-theme="dark"] .pwa-tab:hover { color: #818cf8; }
+    .pwa-tab-badge {
+        position: absolute;
+        top: 4px;
+        right: calc(50% - 18px);
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: #fff;
+        font-size: 0.6rem;
+        font-weight: 700;
+        min-width: 16px;
+        height: 16px;
+        border-radius: 8px;
+        padding: 0 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    @media (max-width: 768px) {
+        .pwa-bottom-nav { display: flex; }
+        main, body > footer { padding-bottom: 62px; }
+        .back-to-top { bottom: 78px !important; }
+    }
+    </style>
+    {% if request.resolver_match.url_name != 'public_my_profile' %}
+    <a href="{% url 'manager:view_cart' %}" class="mobile-floating-cart" aria-label="Cart">
+        <i class="fas fa-shopping-cart"></i>
+        <span id="pwaCartBadge" class="pwa-tab-badge" style="display:none;top:-2px;right:-4px;">0</span>
+    </a>
+    {% endif %}
+    <nav class="pwa-bottom-nav" id="pwaBottomNav">
+        <a href="{% url 'manager:public_home' %}" class="pwa-tab" id="pwaTabHome">
+            <i class="fas fa-home"></i>
+            <span data-zh="首页" data-en="Home" data-fr="Accueil">首页</span>
+        </a>
+        <a href="{% url 'manager:public_books' %}" class="pwa-tab" id="pwaTabBooks">
+            <i class="fas fa-book-open"></i>
+            <span data-zh="图书" data-en="Books" data-fr="Livres">图书</span>
+        </a>
+        <a href="{% url 'manager:public_messages' %}" class="pwa-tab" id="pwaTabMessages">
+            <i class="fas fa-comment-dots"></i>
+            <span class="pwa-tab-badge" id="pwaMsgBadge" style="display:none">0</span>
+            <span data-zh="消息" data-en="Messages" data-fr="Messages">消息</span>
+        </a>
+        <a href="{% url 'manager:track_order' %}" class="pwa-tab" id="pwaTabOrders">
+            <i class="fas fa-receipt"></i>
+            <span data-zh="订单" data-en="Orders" data-fr="Commandes">订单</span>
+        </a>
+        {% if request.session.site_user_id %}
+        <a href="{% url 'manager:public_my_profile' %}" class="pwa-tab" id="pwaTabProfile">
+            <i class="fas fa-user-circle"></i>
+            <span data-zh="我的" data-en="Me" data-fr="Moi">我的</span>
+        </a>
+        {% else %}
+        <a href="{% url 'manager:public_my_profile' %}" class="pwa-tab" id="pwaTabProfile">
+            <i class="fas fa-user-circle"></i>
+            <span data-zh="我的" data-en="Me" data-fr="Moi">我的</span>
+        </a>
+        {% endif %}
+    </nav>
+    <script>
+    // Highlight active tab
+    (function() {
+        var path = window.location.pathname;
+        var tabs = {
+            pwaTabHome: ['/', '/manager/public/', '/manager/public'],
+            pwaTabBooks: ['/manager/public/books/'],
+            pwaTabMessages: ['/manager/public/messages/'],
+            pwaTabOrders: ['/manager/track-order/', '/manager/public/orders/'],
+            pwaTabProfile: ['/manager/public/user/profile/', '/manager/public/user/login/', '/manager/public/my-profile/'],
+        };
+        Object.keys(tabs).forEach(function(id) {
+            var el = document.getElementById(id);
+            if (!el) return;
+            tabs[id].forEach(function(p) {
+                if (path === p || path.startsWith(p) && p !== '/') el.classList.add('active');
+            });
+        });
+        // Sync cart badge with main badge
+        var mainBadge = document.getElementById('cart-badge');
+        var pwaBadge = document.getElementById('pwaCartBadge');
+        if (mainBadge && pwaBadge) {
+            var observer = new MutationObserver(function() {
+                var cnt = mainBadge.textContent.trim();
+                if (cnt && cnt !== '0') {
+                    pwaBadge.textContent = cnt;
+                    pwaBadge.style.display = 'flex';
+                } else {
+                    pwaBadge.style.display = 'none';
+                }
+            });
+            observer.observe(mainBadge, {childList: true, characterData: true, subtree: true});
+        }
+    })();
+    </script>
 </body>
 </html>

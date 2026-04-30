@@ -1,0 +1,224 @@
+{% extends "marketplace/admin/base.html" %}
+{% block title %}订单管理 - 市场管理{% endblock %}
+{% block nav_orders %}active{% endblock %}
+
+{% block admin_content %}
+<div class="page-header-card">
+    <h4><i class="fas fa-receipt me-2"></i>市场订单管理</h4>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm h-100" style="border-radius:12px;">
+            <div class="card-body text-center">
+                <div class="text-primary fw-bold fs-3">{{ total_orders }}</div>
+                <small class="text-muted">总订单数</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm h-100" style="border-radius:12px;">
+            <div class="card-body text-center">
+                <div class="text-warning fw-bold fs-3">{{ pending_orders }}</div>
+                <small class="text-muted">待处理</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm h-100" style="border-radius:12px;">
+            <div class="card-body text-center">
+                <div class="text-success fw-bold fs-3">{{ completed_orders }}</div>
+                <small class="text-muted">已完成</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm h-100" style="border-radius:12px;">
+            <div class="card-body text-center">
+                <div class="text-danger fw-bold fs-3">¥{{ total_revenue }}</div>
+                <small class="text-muted">总收入</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search Bar -->
+<div class="card border-0 shadow-sm mb-4" style="border-radius:12px;">
+    <div class="card-body py-3">
+        <form method="get" class="d-flex gap-2 flex-wrap align-items-center">
+            <div class="flex-grow-1">
+                <input type="text" name="search" class="form-control" placeholder="搜索订单号、客户名、邮箱、电话..." value="{{ current_search }}" style="border-radius:10px;">
+            </div>
+            <select name="payment_status" class="form-select" style="width:auto; border-radius:10px;">
+                <option value="">全部支付状态</option>
+                {% for value, label in payment_status_choices %}
+                <option value="{{ value }}" {% if current_payment_status == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-primary-gradient rounded-pill px-4"><i class="fas fa-search me-1"></i>搜索</button>
+            {% if current_search or current_payment_status %}
+            <a href="{% url 'marketplace:admin_orders' %}" class="btn btn-outline-secondary rounded-pill px-3"><i class="fas fa-times"></i></a>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+<div class="toolbar d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{% url 'marketplace:admin_orders' %}" class="btn btn-sm {% if not current_status %}btn-primary-gradient{% else %}btn-outline-secondary{% endif %} rounded-pill">全部</a>
+        <a href="?status=pending" class="btn btn-sm {% if current_status == 'pending' %}btn-primary-gradient{% else %}btn-outline-secondary{% endif %} rounded-pill">待付款</a>
+        <a href="?status=paid" class="btn btn-sm {% if current_status == 'paid' %}btn-primary-gradient{% else %}btn-outline-secondary{% endif %} rounded-pill">已付款</a>
+        <a href="?status=processing" class="btn btn-sm {% if current_status == 'processing' %}btn-primary-gradient{% else %}btn-outline-secondary{% endif %} rounded-pill">处理中</a>
+        <a href="?status=shipped" class="btn btn-sm {% if current_status == 'shipped' %}btn-primary-gradient{% else %}btn-outline-secondary{% endif %} rounded-pill">已发货</a>
+        <a href="?status=delivered" class="btn btn-sm {% if current_status == 'delivered' %}btn-primary-gradient{% else %}btn-outline-secondary{% endif %} rounded-pill">已送达</a>
+        <a href="?status=cancelled" class="btn btn-sm {% if current_status == 'cancelled' %}btn-primary-gradient{% else %}btn-outline-secondary{% endif %} rounded-pill">已取消</a>
+    </div>
+    <span class="text-muted">共 {{ orders.paginator.count }} 笔订单</span>
+</div>
+
+<div class="content-card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th class="ps-4">订单号</th>
+                    <th>客户</th>
+                    <th>商品</th>
+                    <th>金额</th>
+                    <th>订单状态</th>
+                    <th>支付状态</th>
+                    <th>时间</th>
+                    <th class="text-center">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td class="ps-4">
+                        <a href="{% url 'marketplace:admin_order_detail' order.pk %}" class="text-decoration-none">
+                            <code class="fw-bold">{{ order.order_number }}</code>
+                        </a>
+                    </td>
+                    <td>
+                        <div class="fw-bold">{{ order.user_name|default:"未知" }}</div>
+                        <small class="text-muted">{{ order.user_email }}</small>
+                    </td>
+                    <td>
+                        {% for item in order.items.all %}
+                        <div class="small">
+                            <span class="badge {% if item.item_type == 'course' %}bg-info{% elif item.item_type == 'supermarket' %}bg-warning text-dark{% else %}bg-success{% endif %}" style="font-size:0.6rem;">{{ item.get_item_type_display }}</span>
+                            {{ item.item_name }} x{{ item.quantity }}
+                        </div>
+                        {% endfor %}
+                    </td>
+                    <td class="fw-bold text-danger">¥{{ order.total_amount }}</td>
+                    <td>
+                        <span class="badge {% if order.status == 'delivered' %}bg-success{% elif order.status == 'cancelled' %}bg-danger{% elif order.status == 'refunded' %}bg-dark{% elif order.status == 'pending' or order.status == 'payment_pending' %}bg-warning text-dark{% elif order.status == 'paid' %}bg-primary{% else %}bg-info{% endif %}">
+                            {{ order.get_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge {% if order.payment_status == 'completed' %}bg-success{% elif order.payment_status == 'failed' or order.payment_status == 'cancelled' %}bg-danger{% elif order.payment_status == 'pending' %}bg-warning text-dark{% elif order.payment_status == 'refunded' %}bg-dark{% else %}bg-info{% endif %}">
+                            {{ order.get_payment_status_display }}
+                        </span>
+                    </td>
+                    <td class="text-muted small">{{ order.created_at|date:"Y-m-d H:i" }}</td>
+                    <td class="text-center">
+                        <div class="d-flex gap-1 justify-content-center">
+                            <a href="{% url 'marketplace:admin_order_detail' order.pk %}" class="btn btn-sm btn-outline-primary rounded-pill" title="查看详情">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <button class="btn btn-sm btn-outline-danger rounded-pill" onclick="quickDelete({{ order.pk }}, '{{ order.order_number }}', '{{ order.status }}', '{{ order.payment_status }}')" title="删除">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8" class="text-center py-5 text-muted"><i class="fas fa-receipt d-block mb-2" style="font-size:2rem;"></i>暂无订单</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if orders.has_other_pages %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if orders.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ orders.previous_page_number }}&status={{ current_status }}">&laquo;</a></li>{% endif %}
+        {% for num in orders.paginator.page_range %}
+        <li class="page-item {% if orders.number == num %}active{% endif %}"><a class="page-link" href="?page={{ num }}&status={{ current_status }}">{{ num }}</a></li>
+        {% endfor %}
+        {% if orders.has_next %}<li class="page-item"><a class="page-link" href="?page={{ orders.next_page_number }}&status={{ current_status }}">&raquo;</a></li>{% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+<!-- Quick Delete Modal -->
+<div class="modal fade" id="quickDeleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>确认删除订单</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> <strong>警告：</strong>此操作不可逆！</div>
+                <p>确定要删除订单 <strong id="deleteOrderNumber"></strong> 吗？</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn" onclick="confirmQuickDelete()">
+                    <i class="fas fa-trash"></i> 确认删除
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let deleteOrderPk = null;
+
+function quickDelete(pk, orderNumber, status, paymentStatus) {
+    if (status === 'delivered' || paymentStatus === 'completed') {
+        alert('已完成或已送达的订单不能删除！');
+        return;
+    }
+    deleteOrderPk = pk;
+    document.getElementById('deleteOrderNumber').textContent = orderNumber;
+    new bootstrap.Modal(document.getElementById('quickDeleteModal')).show();
+}
+
+function confirmQuickDelete() {
+    if (!deleteOrderPk) return;
+    const csrfToken = '{{ csrf_token }}';
+    const btn = document.getElementById('confirmDeleteBtn');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 删除中...';
+    btn.disabled = true;
+
+    fetch(`/marketplace/admin/orders/${deleteOrderPk}/delete/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrfToken,
+        }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.message);
+            btn.innerHTML = '<i class="fas fa-trash"></i> 确认删除';
+            btn.disabled = false;
+        }
+    })
+    .catch(() => {
+        alert('删除时发生错误');
+        btn.innerHTML = '<i class="fas fa-trash"></i> 确认删除';
+        btn.disabled = false;
+    });
+}
+</script>
+{% endblock %}

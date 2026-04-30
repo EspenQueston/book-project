@@ -1,0 +1,175 @@
+{% extends "public/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "在线课程" %} - {% trans "市场" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root { --primary-color: #667eea; --secondary-color: #764ba2; }
+    .page-header {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        padding: 50px 0 40px;
+        color: #fff;
+        text-align: center;
+    }
+    .page-header h1 { font-weight: 800; font-size: 2.2rem; }
+    .filter-bar {
+        background: #fff;
+        border-radius: 15px;
+        padding: 20px 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        margin-top: -30px;
+        position: relative;
+        z-index: 2;
+    }
+    .course-card {
+        background: #fff;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    .course-card:hover { transform: translateY(-5px); box-shadow: 0 12px 30px rgba(240,147,251,0.2); }
+    .course-card-img { width: 100%; height: 200px; object-fit: contain; background: linear-gradient(135deg, #fdf2f8, #fce7f3); padding: 8px; }
+    .course-card-body { padding: 20px; }
+    .course-card-body h5 { font-weight: 700; font-size: 1rem; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .course-price { font-size: 1.3rem; font-weight: 800; color: #ef4444; }
+    .course-meta { font-size: 0.8rem; color: #64748b; }
+    .level-badge { font-size: 0.7rem; padding: 3px 10px; border-radius: 20px; font-weight: 600; }
+    .level-beginner { background: #dcfce7; color: #16a34a; }
+    .level-intermediate { background: #fef3c7; color: #d97706; }
+    .level-advanced { background: #fee2e2; color: #dc2626; }
+    .level-all { background: #e0e7ff; color: #4f46e5; }
+    .rating-stars { color: #f59e0b; font-size: 0.85rem; }
+    .btn-filter { background: linear-gradient(135deg, #f093fb, #f5576c); color: #fff; border: none; border-radius: 10px; padding: 8px 20px; font-weight: 600; }
+    .btn-filter:hover { color: #fff; box-shadow: 0 4px 15px rgba(240,147,251,0.3); }
+    .empty-state { text-align: center; padding: 80px 20px; color: #94a3b8; }
+    .empty-state i { font-size: 4rem; margin-bottom: 20px; opacity: 0.3; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-graduation-cap me-2"></i>{% trans "在线课程" %}</h1>
+        <p class="mb-0 opacity-75">{% trans "探索专业课程，提升技能，开启学习之旅" %}</p>
+    </div>
+</div>
+
+<div class="container mb-5">
+    <div class="filter-bar mb-4">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label fw-bold text-muted small">{% trans "搜索" %}</label>
+                <input type="text" name="q" class="form-control" placeholder="{% trans '搜索课程...' %}" value="{{ query }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold text-muted small">{% trans "分类" %}</label>
+                <select name="category" class="form-select">
+                    <option value="">{% trans "全部" %}</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.slug }}" {% if current_category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold text-muted small">{% trans "级别" %}</label>
+                <select name="level" class="form-select">
+                    <option value="">{% trans "全部" %}</option>
+                    <option value="beginner" {% if current_level == 'beginner' %}selected{% endif %}>{% trans "入门" %}</option>
+                    <option value="intermediate" {% if current_level == 'intermediate' %}selected{% endif %}>{% trans "中级" %}</option>
+                    <option value="advanced" {% if current_level == 'advanced' %}selected{% endif %}>{% trans "高级" %}</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold text-muted small">{% trans "排序" %}</label>
+                <select name="sort" class="form-select">
+                    <option value="-created_at" {% if current_sort == '-created_at' %}selected{% endif %}>{% trans "最新" %}</option>
+                    <option value="price" {% if current_sort == 'price' %}selected{% endif %}>{% trans "价格↑" %}</option>
+                    <option value="-price" {% if current_sort == '-price' %}selected{% endif %}>{% trans "价格↓" %}</option>
+                    <option value="-rating" {% if current_sort == '-rating' %}selected{% endif %}>{% trans "评分" %}</option>
+                    <option value="-enrollment_count" {% if current_sort == '-enrollment_count' %}selected{% endif %}>{% trans "热门" %}</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-filter w-100"><i class="fas fa-search me-1"></i>{% trans "筛选" %}</button>
+            </div>
+        </form>
+    </div>
+
+    {% if courses %}
+    <div class="row g-4">
+        {% for course in courses %}
+        <div class="col-sm-6 col-md-4 col-lg-3" data-aos="fade-up">
+            <a href="{% url 'marketplace:course_detail' course.slug %}" style="text-decoration:none; color:inherit;">
+                <div class="course-card">
+                    <div style="position:relative;">
+                        <img src="{{ course.get_image_url }}" alt="{{ course.title }}" class="course-card-img">
+                        <span class="position-absolute top-0 end-0 m-2 level-badge level-{{ course.level }}">{{ course.get_level_display }}</span>
+                        {% if course.is_featured %}
+                        <span class="position-absolute top-0 start-0 m-2 badge" style="background:linear-gradient(135deg,#f59e0b,#f97316);font-size:0.7rem;"><i class="fas fa-star me-1"></i>{% trans "推荐" %}</span>
+                        {% endif %}
+                    </div>
+                    <div class="course-card-body">
+                        <h5>{{ course.title }}</h5>
+                        <div class="course-meta mb-2">
+                            <i class="fas fa-user me-1"></i>{{ course.instructor }}
+                        </div>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="course-meta"><i class="fas fa-clock me-1"></i>{{ course.duration_hours }}h</span>
+                            <span class="course-meta"><i class="fas fa-book me-1"></i>{{ course.lessons_count }} {% trans "课时" %}</span>
+                        </div>
+                        {% if course.rating %}
+                        <div class="rating-stars mb-2">
+                            {% for i in "12345" %}
+                            {% if forloop.counter <= course.rating|floatformat:"0"|add:"0" %}
+                            <i class="fas fa-star"></i>
+                            {% else %}
+                            <i class="far fa-star"></i>
+                            {% endif %}
+                            {% endfor %}
+                            <small class="text-muted ms-1">({{ course.enrollment_count }})</small>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <span class="course-price">¥{{ course.price }}</span>
+                            {% if course.original_price %}
+                            <span style="font-size:0.85rem; color:#94a3b8; text-decoration:line-through; margin-left:8px;">¥{{ course.original_price }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if courses.has_other_pages %}
+    <nav class="mt-5">
+        <ul class="pagination justify-content-center">
+            {% if courses.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ courses.previous_page_number }}&q={{ query }}&category={{ current_category }}&level={{ current_level }}&sort={{ current_sort }}">&laquo;</a></li>
+            {% endif %}
+            {% for num in courses.paginator.page_range %}
+            <li class="page-item {% if courses.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}&q={{ query }}&category={{ current_category }}&level={{ current_level }}&sort={{ current_sort }}">{{ num }}</a>
+            </li>
+            {% endfor %}
+            {% if courses.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ courses.next_page_number }}&q={{ query }}&category={{ current_category }}&level={{ current_level }}&sort={{ current_sort }}">&raquo;</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-graduation-cap d-block"></i>
+        <h4>{% trans "暂无课程" %}</h4>
+        <p>{% trans "课程正在筹备中，敬请期待" %}</p>
+        <a href="{% url 'marketplace:home' %}" class="btn btn-filter mt-3">{% trans "返回市场" %}</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

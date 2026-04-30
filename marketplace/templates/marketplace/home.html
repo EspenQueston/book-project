@@ -1,0 +1,265 @@
+{% extends "public/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "市场" %} - ScholarQuest{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-color: #667eea;
+        --secondary-color: #764ba2;
+        --success-color: #10b981;
+        --warning-color: #f59e0b;
+        --danger-color: #ef4444;
+    }
+    .marketplace-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 70px 0 50px;
+        color: #fff;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    .marketplace-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%; left: -50%; width: 200%; height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+        animation: heroFloat 15s infinite ease-in-out;
+    }
+    @keyframes heroFloat { 0%,100%{transform:translate(0,0)} 50%{transform:translate(30px,-30px)} }
+    .marketplace-hero h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: .8rem; position: relative; }
+    .marketplace-hero p { font-size: 1.1rem; opacity: 0.9; max-width: 600px; margin: 0 auto; position: relative; }
+    .stats-banner {
+        background: rgba(255,255,255,0.97);
+        border-radius: 16px;
+        padding: 24px;
+        margin: -35px auto 35px;
+        position: relative; z-index: 2;
+        max-width: 800px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    }
+    .section-stat { font-size: 1.8rem; font-weight: 800; color: var(--primary-color); }
+    .section-stat-label { color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
+    .section-card {
+        background: #fff;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    .section-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(102,126,234,0.18); }
+    .section-card-header { padding: 32px 24px; text-align: center; }
+    .section-card-header.products-bg { background: linear-gradient(135deg, #667eea, #764ba2); }
+    .section-card-header.courses-bg { background: linear-gradient(135deg, #f093fb, #f5576c); }
+    .section-card-header.supermarket-bg { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+    .section-card-header i { font-size: 2.5rem; color: #fff; }
+    .section-card-header h3 { color: #fff; font-weight: 700; margin: 8px 0 0; font-size: 1.3rem; }
+    .section-card-body { padding: 18px 24px 24px; text-align: center; }
+    .section-card-body p { color: #64748b; font-size: 0.9rem; margin-bottom: 12px; }
+    .section-title {
+        font-size: 1.6rem; font-weight: 800;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .section-divider { width: 50px; height: 3px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 2px; margin: 8px 0 0; }
+    .section-header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .view-all-link { color: var(--primary-color); text-decoration: none; font-weight: 600; font-size: 0.9rem; }
+    .view-all-link:hover { color: var(--secondary-color); }
+    .product-card {
+        background: #fff;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        transition: all 0.3s ease;
+        height: 100%;
+        display: flex; flex-direction: column;
+    }
+    .product-card:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(102,126,234,0.14); }
+    .product-card-img { width: 100%; height: 200px; object-fit: cover; }
+    .product-card-body { padding: 16px; flex: 1; display: flex; flex-direction: column; }
+    .product-card-body h5 { font-weight: 700; font-size: 0.95rem; margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: #1e293b; }
+    .product-card-body .meta { color: #94a3b8; font-size: 0.8rem; margin-bottom: 8px; }
+    .product-card-body .price-row { margin-top: auto; }
+    .item-price { font-size: 1.15rem; font-weight: 800; color: var(--danger-color); }
+    .item-price-original { font-size: 0.8rem; color: #94a3b8; text-decoration: line-through; margin-left: 6px; }
+    .badge-discount { background: linear-gradient(135deg, #ef4444, #f97316); color: #fff; font-size: 0.65rem; padding: 2px 7px; border-radius: 12px; font-weight: 600; }
+    .badge-organic { background: linear-gradient(135deg, #10b981, #34d399); color: #fff; font-size: 0.65rem; padding: 2px 8px; border-radius: 12px; font-weight: 600; }
+    .btn-marketplace {
+        background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none;
+        border-radius: 25px; padding: 10px 28px; font-weight: 600; font-size: 0.9rem;
+        transition: all 0.3s ease; text-decoration: none; display: inline-block;
+    }
+    .btn-marketplace:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102,126,234,0.35); color: #fff; }
+    .cart-fab {
+        position: fixed; bottom: 30px; right: 30px; z-index: 1000;
+        width: 56px; height: 56px; border-radius: 50%;
+        background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none;
+        box-shadow: 0 6px 20px rgba(102,126,234,0.4); font-size: 1.3rem;
+        display: flex; align-items: center; justify-content: center;
+        transition: all 0.3s; text-decoration: none;
+    }
+    .cart-fab:hover { transform: scale(1.1); color: #fff; }
+    .cart-badge-float {
+        position: absolute; top: -4px; right: -4px; background: var(--danger-color);
+        color: #fff; border-radius: 50%; width: 22px; height: 22px; font-size: 0.7rem;
+        display: flex; align-items: center; justify-content: center; font-weight: 700;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<div class="marketplace-hero">
+    <div class="container">
+        <h1 data-aos="fade-up"><i class="fas fa-store me-3"></i>{% trans "市场" %}</h1>
+        <p data-aos="fade-up" data-aos-delay="100">{% trans "探索商品、课程和超市，在一个平台上满足您的所有需求" %}</p>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="container">
+    <div class="stats-banner" data-aos="fade-up" data-aos-delay="200">
+        <div class="row text-center">
+            <div class="col-4">
+                <div class="section-stat">{{ product_count }}</div>
+                <div class="section-stat-label">{% trans "商品" %}</div>
+            </div>
+            <div class="col-4">
+                <div class="section-stat">{{ course_count }}</div>
+                <div class="section-stat-label">{% trans "课程" %}</div>
+            </div>
+            <div class="col-4">
+                <div class="section-stat">{{ supermarket_count }}</div>
+                <div class="section-stat-label">{% trans "超市" %}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section Cards -->
+<div class="container mb-5">
+    <div class="row g-4 mb-5" data-aos="fade-up" data-aos-delay="300">
+        <div class="col-md-4">
+            <a href="{% url 'marketplace:product_list' %}" style="text-decoration:none;">
+                <div class="section-card">
+                    <div class="section-card-header products-bg"><i class="fas fa-shopping-bag d-block"></i><h3>{% trans "商品中心" %}</h3></div>
+                    <div class="section-card-body"><p>{% trans "浏览精选商品，发现高品质产品" %}</p><span class="btn-marketplace">{% trans "浏览商品" %} <i class="fas fa-arrow-right ms-2"></i></span></div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{% url 'marketplace:course_list' %}" style="text-decoration:none;">
+                <div class="section-card">
+                    <div class="section-card-header courses-bg"><i class="fas fa-graduation-cap d-block"></i><h3>{% trans "在线课程" %}</h3></div>
+                    <div class="section-card-body"><p>{% trans "探索专业课程，提升技能" %}</p><span class="btn-marketplace">{% trans "浏览课程" %} <i class="fas fa-arrow-right ms-2"></i></span></div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{% url 'marketplace:supermarket_list' %}" style="text-decoration:none;">
+                <div class="section-card">
+                    <div class="section-card-header supermarket-bg"><i class="fas fa-apple-alt d-block"></i><h3>{% trans "超市" %}</h3></div>
+                    <div class="section-card-body"><p>{% trans "新鲜食品和日常用品" %}</p><span class="btn-marketplace">{% trans "去超市" %} <i class="fas fa-arrow-right ms-2"></i></span></div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- 超市精选 -->
+    {% if featured_supermarket %}
+    <div class="section-header-row" data-aos="fade-up">
+        <div><h2 class="section-title"><i class="fas fa-leaf me-2"></i>{% trans "超市精选" %}</h2><div class="section-divider"></div></div>
+        <a href="{% url 'marketplace:supermarket_list' %}" class="view-all-link">{% trans "查看全部" %} <i class="fas fa-chevron-right ms-1"></i></a>
+    </div>
+    <div class="row g-3 mb-5">
+        {% for item in featured_supermarket %}
+        <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="{{ forloop.counter0 }}50">
+            <a href="{% url 'marketplace:supermarket_detail' item.slug %}" style="text-decoration:none; color:inherit;">
+                <div class="product-card">
+                    <div style="position:relative; overflow:hidden;">
+                        <img src="{{ item.get_image_url }}" alt="{{ item.name }}" class="product-card-img">
+                        {% if item.is_organic %}<span class="badge-organic position-absolute top-0 start-0 m-2"><i class="fas fa-leaf me-1"></i>{% trans "有机" %}</span>{% endif %}
+                        {% if item.get_discount_percent %}<span class="badge-discount position-absolute top-0 end-0 m-2">-{{ item.get_discount_percent }}%</span>{% endif %}
+                    </div>
+                    <div class="product-card-body">
+                        <h5>{{ item.name }}</h5>
+                        {% if item.brand %}<div class="meta">{{ item.brand }}</div>{% endif %}
+                        <div class="price-row"><span class="item-price">¥{{ item.price }}</span><span style="font-size:0.75rem; color:#64748b;">/{{ item.get_unit_display }}</span></div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- 热门课程 -->
+    {% if featured_courses %}
+    <div class="section-header-row" data-aos="fade-up">
+        <div><h2 class="section-title"><i class="fas fa-star me-2"></i>{% trans "热门课程" %}</h2><div class="section-divider"></div></div>
+        <a href="{% url 'marketplace:course_list' %}" class="view-all-link">{% trans "查看全部" %} <i class="fas fa-chevron-right ms-1"></i></a>
+    </div>
+    <div class="row g-3 mb-5">
+        {% for course in featured_courses %}
+        <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="{{ forloop.counter0 }}50">
+            <a href="{% url 'marketplace:course_detail' course.slug %}" style="text-decoration:none; color:inherit;">
+                <div class="product-card">
+                    <div style="position:relative; overflow:hidden;">
+                        <img src="{{ course.get_image_url }}" alt="{{ course.title }}" class="product-card-img">
+                        {% if course.get_discount_percent %}<span class="badge-discount position-absolute top-0 end-0 m-2">-{{ course.get_discount_percent }}%</span>{% endif %}
+                    </div>
+                    <div class="product-card-body">
+                        <h5>{{ course.title }}</h5>
+                        <div class="meta"><i class="fas fa-user me-1"></i>{{ course.instructor }}</div>
+                        <div class="price-row"><span class="item-price">¥{{ course.price }}</span>{% if course.original_price %}<span class="item-price-original">¥{{ course.original_price }}</span>{% endif %}</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- 精选商品 -->
+    {% if featured_products %}
+    <div class="section-header-row" data-aos="fade-up">
+        <div><h2 class="section-title"><i class="fas fa-fire me-2"></i>{% trans "精选商品" %}</h2><div class="section-divider"></div></div>
+        <a href="{% url 'marketplace:product_list' %}" class="view-all-link">{% trans "查看全部" %} <i class="fas fa-chevron-right ms-1"></i></a>
+    </div>
+    <div class="row g-3 mb-5">
+        {% for product in featured_products %}
+        <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="{{ forloop.counter0 }}50">
+            <a href="{% url 'marketplace:product_detail' product.slug %}" style="text-decoration:none; color:inherit;">
+                <div class="product-card">
+                    <div style="position:relative; overflow:hidden;">
+                        <img src="{{ product.get_image_url }}" alt="{{ product.name }}" class="product-card-img">
+                        {% if product.get_discount_percent %}<span class="badge-discount position-absolute top-0 end-0 m-2">-{{ product.get_discount_percent }}%</span>{% endif %}
+                    </div>
+                    <div class="product-card-body">
+                        <h5>{{ product.name }}</h5>
+                        {% if product.brand %}<div class="meta">{{ product.brand }}</div>{% endif %}
+                        <div class="price-row"><span class="item-price">¥{{ product.price }}</span>{% if product.original_price %}<span class="item-price-original">¥{{ product.original_price }}</span>{% endif %}</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Cart FAB -->
+<a href="{% url 'marketplace:view_cart' %}" class="cart-fab" id="cartFab">
+    <i class="fas fa-shopping-cart"></i>
+    <span class="cart-badge-float" id="cartBadge" style="display:none;">0</span>
+</a>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    fetch("{% url 'marketplace:get_cart_count' %}").then(r=>r.json()).then(d=>{
+        if(d.cart_count>0){document.getElementById('cartBadge').textContent=d.cart_count;document.getElementById('cartBadge').style.display='flex';}
+    }).catch(()=>{});
+});
+</script>
+{% endblock %}

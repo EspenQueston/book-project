@@ -1,0 +1,410 @@
+{% extends "marketplace/admin/base.html" %}
+{% block title %}课程内容管理 - {{ course.title }}{% endblock %}
+{% block nav_courses %}active{% endblock %}
+
+{% block extra_admin_css %}
+<style>
+    .section-card { background: #fff; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); margin-bottom: 20px; overflow: hidden; }
+    .section-header-bar { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; }
+    .section-header-bar h5 { margin: 0; font-weight: 700; font-size: 1rem; }
+    .lesson-row { display: flex; align-items: center; padding: 14px 20px; border-bottom: 1px solid #f1f5f9; transition: background 0.2s; }
+    .lesson-row:hover { background: #f8fafc; }
+    .lesson-row:last-child { border-bottom: none; }
+    .lesson-num { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+    .lesson-info { flex: 1; margin-left: 14px; }
+    .lesson-info .title { font-weight: 600; color: #1e293b; font-size: 0.9rem; }
+    .lesson-info .meta { font-size: 0.78rem; color: #94a3b8; margin-top: 2px; }
+    .lesson-info .meta .badge { font-size: 0.65rem; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+    .badge-free { background: #dcfce7; color: #16a34a; }
+    .badge-video { background: #dbeafe; color: #2563eb; }
+    .badge-pdf { background: #fef3c7; color: #d97706; }
+    .btn-icon { width: 32px; height: 32px; border-radius: 8px; border: none; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; font-size: 0.8rem; margin-left: 4px; }
+    .btn-icon-edit { background: #dbeafe; color: #2563eb; }
+    .btn-icon-edit:hover { background: #bfdbfe; }
+    .btn-icon-del { background: #fee2e2; color: #ef4444; }
+    .btn-icon-del:hover { background: #fecaca; }
+    .add-lesson-btn { display: flex; align-items: center; justify-content: center; padding: 12px; color: #667eea; font-weight: 600; font-size: 0.85rem; cursor: pointer; border-top: 2px dashed #e2e8f0; transition: all 0.2s; }
+    .add-lesson-btn:hover { background: #f0f4ff; }
+    .modal-custom .modal-content { border-radius: 15px; border: none; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+    .modal-custom .modal-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; border-radius: 15px 15px 0 0; }
+    .empty-state { text-align: center; padding: 60px 20px; color: #94a3b8; }
+    .empty-state i { font-size: 3rem; opacity: 0.3; margin-bottom: 15px; display: block; }
+    .upload-info { font-size: 0.75rem; color: #94a3b8; margin-top: 4px; }
+    .file-current { font-size: 0.78rem; color: #667eea; margin-top: 4px; }
+    .file-current i { margin-right: 4px; }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="page-header-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <h4><i class="fas fa-video me-2"></i>课程内容管理</h4>
+            <div style="opacity:0.8; font-size:0.9rem; margin-top:6px;">{{ course.title }}</div>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'marketplace:admin_course_edit' course.pk %}" class="btn btn-light rounded-pill px-3"><i class="fas fa-edit me-1"></i>编辑课程</a>
+            <a href="{% url 'marketplace:admin_courses' %}" class="btn btn-light rounded-pill px-3"><i class="fas fa-arrow-left me-1"></i>返回列表</a>
+        </div>
+    </div>
+</div>
+
+<!-- Add Section Button -->
+<div class="toolbar d-flex justify-content-between align-items-center">
+    <div>
+        <span style="font-weight:600; color:#1e293b;">
+            <i class="fas fa-layer-group me-2"></i>{{ sections|length }} 个章节
+        </span>
+    </div>
+    <button class="btn btn-primary-gradient" onclick="showAddSectionModal()">
+        <i class="fas fa-plus me-1"></i>添加章节
+    </button>
+</div>
+
+<!-- Sections & Lessons -->
+<div id="sectionsContainer">
+{% for section in sections %}
+<div class="section-card" id="section-{{ section.id }}">
+    <div class="section-header-bar">
+        <h5><i class="fas fa-folder-open me-2"></i>{{ section.title }}{% if section.title_en %} <small style="opacity:0.7;font-weight:400;">/ {{ section.title_en }}</small>{% endif %}</h5>
+        <div>
+            <span style="font-size:0.8rem; opacity:0.8; margin-right:10px;">{{ section.lessons.count }} 课时</span>
+            <button class="btn-icon" style="background:rgba(255,255,255,0.2);color:#fff;" onclick="showEditSectionModal({{ section.id }}, '{{ section.title|escapejs }}', '{{ section.title_en|escapejs }}', {{ section.order }})" title="编辑"><i class="fas fa-edit"></i></button>
+            <button class="btn-icon" style="background:rgba(255,255,255,0.2);color:#fff;" onclick="deleteSection({{ section.id }}, '{{ section.title|escapejs }}')" title="删除"><i class="fas fa-trash"></i></button>
+        </div>
+    </div>
+    <div class="lessons-list">
+        {% for lesson in section.lessons.all %}
+        <div class="lesson-row" id="lesson-{{ lesson.id }}">
+            <div class="lesson-num">{{ forloop.counter }}</div>
+            <div class="lesson-info">
+                <div class="title">{{ lesson.title }}</div>
+                <div class="meta">
+                    <i class="fas fa-clock me-1"></i>{{ lesson.duration_minutes }}分钟
+                    {% if lesson.is_free %}<span class="badge badge-free ms-1">免费</span>{% endif %}
+                    {% if lesson.video_file or lesson.video_url %}<span class="badge badge-video ms-1"><i class="fas fa-video me-1"></i>视频</span>{% endif %}
+                    {% if lesson.pdf_file %}<span class="badge badge-pdf ms-1"><i class="fas fa-file-pdf me-1"></i>PDF</span>{% endif %}
+                </div>
+            </div>
+            <div>
+                <button class="btn-icon btn-icon-edit" onclick="showEditLessonModal({{ lesson.id }}, {{ section.id }})" title="编辑"><i class="fas fa-edit"></i></button>
+                <button class="btn-icon btn-icon-del" onclick="deleteLesson({{ lesson.id }}, '{{ lesson.title|escapejs }}')" title="删除"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-4" style="color:#94a3b8; font-size:0.85rem;">
+            <i class="fas fa-video-slash me-1"></i>暂无课时
+        </div>
+        {% endfor %}
+    </div>
+    <div class="add-lesson-btn" onclick="showAddLessonModal({{ section.id }}, '{{ section.title|escapejs }}')">
+        <i class="fas fa-plus me-1"></i>添加课时
+    </div>
+</div>
+{% empty %}
+<div class="section-card">
+    <div class="empty-state">
+        <i class="fas fa-layer-group"></i>
+        <h5 style="color:#64748b;">暂无章节</h5>
+        <p>点击上方"添加章节"开始创建课程内容</p>
+    </div>
+</div>
+{% endfor %}
+</div>
+
+<!-- Add Section Modal -->
+<div class="modal fade modal-custom" id="sectionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="sectionModalTitle"><i class="fas fa-folder-plus me-2"></i>添加章节</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="sectionId" value="">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">章节标题 <span class="text-danger">*</span></label>
+                    <input type="text" id="sectionTitle" class="form-control" placeholder="例如: 第一章 基础入门" style="border-radius:10px;">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">English Title</label>
+                    <input type="text" id="sectionTitleEn" class="form-control" placeholder="e.g. Chapter 1: Getting Started" style="border-radius:10px;">
+                </div>
+                <div class="mb-3" id="sectionOrderGroup" style="display:none;">
+                    <label class="form-label fw-bold">排序</label>
+                    <input type="number" id="sectionOrder" class="form-control" value="0" style="border-radius:10px;">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary-gradient px-4" onclick="saveSection()"><i class="fas fa-save me-1"></i>保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Lesson Modal -->
+<div class="modal fade modal-custom" id="lessonModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="lessonModalTitle"><i class="fas fa-plus-circle me-2"></i>添加课时</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="lessonForm" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" id="lessonId" value="">
+                    <input type="hidden" id="lessonSectionId" value="">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label fw-bold">课时标题 <span class="text-danger">*</span></label>
+                            <input type="text" id="lessonTitle" name="title" class="form-control" required style="border-radius:10px;">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">时长(分钟)</label>
+                            <input type="number" id="lessonDuration" name="duration_minutes" class="form-control" value="0" style="border-radius:10px;">
+                        </div>
+                    </div>
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-8">
+                            <label class="form-label fw-bold">English Title</label>
+                            <input type="text" id="lessonTitleEn" name="title_en" class="form-control" style="border-radius:10px;">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">排序</label>
+                            <input type="number" id="lessonOrder" name="order" class="form-control" value="0" style="border-radius:10px;">
+                        </div>
+                    </div>
+                    <div class="mb-3 mt-3">
+                        <label class="form-label fw-bold">课时描述</label>
+                        <textarea id="lessonDesc" name="description" class="form-control" rows="3" style="border-radius:10px;"></textarea>
+                    </div>
+                    <hr>
+                    <h6 class="fw-bold mb-3"><i class="fas fa-video me-2" style="color:#667eea;"></i>视频内容</h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">上传视频文件</label>
+                            <input type="file" id="lessonVideoFile" name="video_file" class="form-control" accept="video/*" style="border-radius:10px;">
+                            <div class="upload-info">支持 MP4, WebM, OGG 等格式，最大 500MB</div>
+                            <div class="file-current" id="currentVideoFile" style="display:none;"></div>
+                            <div class="form-check mt-1" id="clearVideoGroup" style="display:none;">
+                                <input type="checkbox" class="form-check-input" id="clearVideoFile" name="clear_video_file" value="1">
+                                <label class="form-check-label" for="clearVideoFile" style="font-size:0.8rem;">删除当前视频</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">或输入视频链接</label>
+                            <input type="url" id="lessonVideoUrl" name="video_url" class="form-control" placeholder="https://..." style="border-radius:10px;">
+                            <div class="upload-info">YouTube, Bilibili 等嵌入链接</div>
+                        </div>
+                    </div>
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold"><i class="fas fa-file-pdf me-1" style="color:#ef4444;"></i>PDF课件</label>
+                            <input type="file" id="lessonPdfFile" name="pdf_file" class="form-control" accept=".pdf" style="border-radius:10px;">
+                            <div class="file-current" id="currentPdfFile" style="display:none;"></div>
+                            <div class="form-check mt-1" id="clearPdfGroup" style="display:none;">
+                                <input type="checkbox" class="form-check-input" id="clearPdfFile" name="clear_pdf_file" value="1">
+                                <label class="form-check-label" for="clearPdfFile" style="font-size:0.8rem;">删除当前PDF</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end">
+                            <div class="form-check form-switch">
+                                <input type="checkbox" class="form-check-input" id="lessonIsFree" name="is_free">
+                                <label class="form-check-label fw-bold" for="lessonIsFree">免费试看</label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary-gradient px-4" onclick="saveLesson()" id="saveLessonBtn"><i class="fas fa-save me-1"></i>保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_admin_js %}
+<script>
+const CSRF = '{{ csrf_token }}';
+const COURSE_PK = {{ course.pk }};
+
+// Lesson data cache for editing
+const lessonDataCache = {
+    {% for section in sections %}
+    {% for lesson in section.lessons.all %}
+    {{ lesson.id }}: {
+        title: '{{ lesson.title|escapejs }}',
+        title_en: '{{ lesson.title_en|escapejs }}',
+        description: `{{ lesson.description|escapejs }}`,
+        video_url: '{{ lesson.video_url|escapejs }}',
+        video_file_name: '{{ lesson.video_file.name|default:""|escapejs }}',
+        pdf_file_name: '{{ lesson.pdf_file.name|default:""|escapejs }}',
+        duration_minutes: {{ lesson.duration_minutes }},
+        order: {{ lesson.order }},
+        is_free: {{ lesson.is_free|yesno:"true,false" }},
+        section_id: {{ section.id }},
+    },
+    {% endfor %}
+    {% endfor %}
+};
+
+// Section Modal
+function showAddSectionModal(){
+    document.getElementById('sectionId').value = '';
+    document.getElementById('sectionTitle').value = '';
+    document.getElementById('sectionTitleEn').value = '';
+    document.getElementById('sectionOrderGroup').style.display = 'none';
+    document.getElementById('sectionModalTitle').innerHTML = '<i class="fas fa-folder-plus me-2"></i>添加章节';
+    new bootstrap.Modal(document.getElementById('sectionModal')).show();
+}
+function showEditSectionModal(id, title, titleEn, order){
+    document.getElementById('sectionId').value = id;
+    document.getElementById('sectionTitle').value = title;
+    document.getElementById('sectionTitleEn').value = titleEn;
+    document.getElementById('sectionOrder').value = order;
+    document.getElementById('sectionOrderGroup').style.display = 'block';
+    document.getElementById('sectionModalTitle').innerHTML = '<i class="fas fa-edit me-2"></i>编辑章节';
+    new bootstrap.Modal(document.getElementById('sectionModal')).show();
+}
+function saveSection(){
+    const id = document.getElementById('sectionId').value;
+    const title = document.getElementById('sectionTitle').value.trim();
+    const titleEn = document.getElementById('sectionTitleEn').value.trim();
+    if(!title){ alert('请输入章节标题'); return; }
+
+    const fd = new FormData();
+    fd.append('title', title);
+    fd.append('title_en', titleEn);
+    fd.append('csrfmiddlewaretoken', CSRF);
+
+    let url;
+    if(id){
+        fd.append('order', document.getElementById('sectionOrder').value);
+        url = `/marketplace/admin/courses/sections/${id}/edit/`;
+    } else {
+        url = `/marketplace/admin/courses/${COURSE_PK}/sections/add/`;
+    }
+
+    fetch(url, {method:'POST', body:fd})
+    .then(r=>r.json()).then(d=>{
+        if(d.success){ location.reload(); }
+        else { alert(d.message); }
+    }).catch(()=>alert('操作失败'));
+}
+function deleteSection(id, name){
+    if(!confirm(`确定删除章节 "${name}" 及其所有课时？`)) return;
+    const fd = new FormData();
+    fd.append('csrfmiddlewaretoken', CSRF);
+    fetch(`/marketplace/admin/courses/sections/${id}/delete/`, {method:'POST', body:fd})
+    .then(r=>r.json()).then(d=>{
+        if(d.success){ location.reload(); }
+        else { alert(d.message); }
+    });
+}
+
+// Lesson Modal
+function showAddLessonModal(sectionId, sectionTitle){
+    document.getElementById('lessonId').value = '';
+    document.getElementById('lessonSectionId').value = sectionId;
+    document.getElementById('lessonTitle').value = '';
+    document.getElementById('lessonTitleEn').value = '';
+    document.getElementById('lessonDesc').value = '';
+    document.getElementById('lessonVideoUrl').value = '';
+    document.getElementById('lessonVideoFile').value = '';
+    document.getElementById('lessonPdfFile').value = '';
+    document.getElementById('lessonDuration').value = '0';
+    document.getElementById('lessonOrder').value = '0';
+    document.getElementById('lessonIsFree').checked = false;
+    document.getElementById('currentVideoFile').style.display = 'none';
+    document.getElementById('clearVideoGroup').style.display = 'none';
+    document.getElementById('currentPdfFile').style.display = 'none';
+    document.getElementById('clearPdfGroup').style.display = 'none';
+    document.getElementById('lessonModalTitle').innerHTML = `<i class="fas fa-plus-circle me-2"></i>添加课时 - ${sectionTitle}`;
+    new bootstrap.Modal(document.getElementById('lessonModal')).show();
+}
+function showEditLessonModal(lessonId, sectionId){
+    const data = lessonDataCache[lessonId];
+    if(!data){ alert('找不到课时数据'); return; }
+
+    document.getElementById('lessonId').value = lessonId;
+    document.getElementById('lessonSectionId').value = sectionId;
+    document.getElementById('lessonTitle').value = data.title;
+    document.getElementById('lessonTitleEn').value = data.title_en;
+    document.getElementById('lessonDesc').value = data.description;
+    document.getElementById('lessonVideoUrl').value = data.video_url;
+    document.getElementById('lessonVideoFile').value = '';
+    document.getElementById('lessonPdfFile').value = '';
+    document.getElementById('lessonDuration').value = data.duration_minutes;
+    document.getElementById('lessonOrder').value = data.order;
+    document.getElementById('lessonIsFree').checked = data.is_free;
+
+    const cvf = document.getElementById('currentVideoFile');
+    const cvg = document.getElementById('clearVideoGroup');
+    if(data.video_file_name){
+        cvf.innerHTML = '<i class="fas fa-video"></i> ' + data.video_file_name.split('/').pop();
+        cvf.style.display = 'block';
+        cvg.style.display = 'block';
+        document.getElementById('clearVideoFile').checked = false;
+    } else { cvf.style.display = 'none'; cvg.style.display = 'none'; }
+
+    const cpf = document.getElementById('currentPdfFile');
+    const cpg = document.getElementById('clearPdfGroup');
+    if(data.pdf_file_name){
+        cpf.innerHTML = '<i class="fas fa-file-pdf"></i> ' + data.pdf_file_name.split('/').pop();
+        cpf.style.display = 'block';
+        cpg.style.display = 'block';
+        document.getElementById('clearPdfFile').checked = false;
+    } else { cpf.style.display = 'none'; cpg.style.display = 'none'; }
+
+    document.getElementById('lessonModalTitle').innerHTML = '<i class="fas fa-edit me-2"></i>编辑课时';
+    new bootstrap.Modal(document.getElementById('lessonModal')).show();
+}
+function saveLesson(){
+    const id = document.getElementById('lessonId').value;
+    const sectionId = document.getElementById('lessonSectionId').value;
+    const title = document.getElementById('lessonTitle').value.trim();
+    if(!title){ alert('请输入课时标题'); return; }
+
+    const fd = new FormData(document.getElementById('lessonForm'));
+
+    let url;
+    if(id){
+        fd.append('section_id', sectionId);
+        url = `/marketplace/admin/courses/lessons/${id}/edit/`;
+    } else {
+        url = `/marketplace/admin/courses/sections/${sectionId}/lessons/add/`;
+    }
+
+    document.getElementById('saveLessonBtn').disabled = true;
+    document.getElementById('saveLessonBtn').innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>保存中...';
+
+    fetch(url, {method:'POST', body:fd})
+    .then(r=>r.json()).then(d=>{
+        if(d.success){ location.reload(); }
+        else {
+            alert(d.message);
+            document.getElementById('saveLessonBtn').disabled = false;
+            document.getElementById('saveLessonBtn').innerHTML = '<i class="fas fa-save me-1"></i>保存';
+        }
+    }).catch(()=>{
+        alert('操作失败');
+        document.getElementById('saveLessonBtn').disabled = false;
+        document.getElementById('saveLessonBtn').innerHTML = '<i class="fas fa-save me-1"></i>保存';
+    });
+}
+function deleteLesson(id, name){
+    if(!confirm(`确定删除课时 "${name}" ？`)) return;
+    const fd = new FormData();
+    fd.append('csrfmiddlewaretoken', CSRF);
+    fetch(`/marketplace/admin/courses/lessons/${id}/delete/`, {method:'POST', body:fd})
+    .then(r=>r.json()).then(d=>{
+        if(d.success){ location.reload(); }
+        else { alert(d.message); }
+    });
+}
+</script>
+{% endblock %}

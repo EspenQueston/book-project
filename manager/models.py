@@ -10,8 +10,19 @@ import uuid
 class Manager(models.Model):
     id = models.AutoField(primary_key=True)
     number = models.CharField(max_length=32, verbose_name="账号")
-    password = models.CharField(max_length=32, verbose_name="密码")
+    # max_length=128 to hold Django PBKDF2 hashes
+    password = models.CharField(max_length=128, verbose_name="密码")
     name = models.CharField(max_length=32, verbose_name="名字")
+    # Flag used by AdminDebugMiddleware – only real admins see stack traces
+    is_admin = models.BooleanField(default=True, verbose_name="管理员权限")
+
+    def set_password(self, raw_password):
+        from django.contrib.auth.hashers import make_password
+        self.password = make_password(raw_password)
+
+    def check_password(self, raw_password):
+        from django.contrib.auth.hashers import check_password
+        return check_password(raw_password, self.password)
 
     # 指定数据表名称（未指定即为默认类名）
     class Meta:
@@ -21,13 +32,40 @@ class Manager(models.Model):
 # 出版社类
 class Publisher(models.Model):
     # 出版社名称
-    publisher_name = models.CharField(max_length=32, verbose_name="出版社名称")
+    publisher_name = models.CharField(max_length=128, verbose_name="出版社名称")
     # 出版社地址
-    publisher_address = models.CharField(max_length=32, verbose_name="出版社地址")
+    publisher_address = models.CharField(max_length=128, verbose_name="出版社地址")
 
     # 指定数据表名称（未指定即为默认类名）
     class Meta:
         db_table = "publisher"
+
+
+class BookCategory(models.Model):
+    """Book category shared by mobile and desktop book filters."""
+    name = models.CharField(max_length=100, verbose_name='分类名称')
+    name_en = models.CharField(max_length=100, blank=True, default='', verbose_name='英文名称')
+    name_fr = models.CharField(max_length=100, blank=True, default='', verbose_name='法文名称')
+    slug = models.SlugField(max_length=120, unique=True)
+    description = models.TextField(blank=True, verbose_name='描述')
+    icon = models.CharField(max_length=50, default='fas fa-book', verbose_name='图标CSS类')
+    color = models.CharField(max_length=7, default='#667eea', verbose_name='颜色(hex)')
+    display_order = models.IntegerField(default=0, verbose_name='排序权重')
+    is_active = models.BooleanField(default=True, verbose_name='是否启用')
+    parent = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='children', verbose_name='父分类')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'book_category'
+        ordering = ['display_order', 'name']
+        verbose_name = '图书分类'
+        verbose_name_plural = '图书分类'
+
+    def __str__(self):
+        return self.name
+
+    def get_display_name(self):
+        return self.name
 
 
 # 图书类
@@ -35,7 +73,7 @@ class Book(models.Model):
     # 图书id
     id = models.AutoField(primary_key=True)
     # 图书名称
-    name = models.CharField(max_length=32)
+    name = models.CharField(max_length=255)
     # 图书描述
     description = models.TextField(verbose_name='图书描述', blank=True, null=True, help_text='图书详细描述信息')
     # 图书封面
@@ -62,13 +100,15 @@ class Book(models.Model):
         help_text='外部下载链接（Google Drive、OneDrive等）'
     )
     # 图书价格 最多5位，小数保留2位
-    price = models.DecimalField(max_digits=5, decimal_places=2)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
     # 库存
     inventory = models.IntegerField(verbose_name='库存数')
     # 销量
     sale_num = models.IntegerField(verbose_name='卖出数')
     # 出版社（一对一 外键）
     publisher = models.ForeignKey(to='Publisher', on_delete=models.CASCADE)
+    category = models.ForeignKey(BookCategory, on_delete=models.SET_NULL, null=True, blank=True, related_name='books', verbose_name='分类')
+    is_active = models.BooleanField(default=True, verbose_name='是否上架')
 
     class Meta:
         db_table = "book"
@@ -137,13 +177,14 @@ class Author(models.Model):
 # E-commerce Models for Shopping Cart and Orders
 
 PAYMENT_METHOD_CHOICES = [
-    ('credit_card', '信用卡'),
-    ('debit_card', '借记卡'),
-    ('paypal', 'PayPal'),
-    ('alipay', '支付宝'),
+    ('mtn_money', 'MTN Money'),
+    ('orange_money', 'Orange Money'),
+    ('airtel_money', 'Airtel Money'),
     ('wechat_pay', '微信支付'),
+    ('alipay', '支付宝'),
+    ('paypal', 'PayPal'),
+    ('credit_card', 'Visa / Mastercard'),
     ('bank_transfer', '银行转账'),
-    ('cash_on_delivery', '货到付款'),
 ]
 
 ORDER_STATUS_CHOICES = [
@@ -173,7 +214,7 @@ class Order(models.Model):
     """Order model for customer purchases - Digital Products Only"""
     order_number = models.CharField(max_length=32, unique=True, verbose_name="订单号")
     customer_name = models.CharField(max_length=100, verbose_name="客户姓名")
-    customer_email = models.EmailField(verbose_name="客户邮箱")
+    customer_email = models.EmailField(db_index=True, verbose_name="客户邮箱")
     customer_phone = models.CharField(max_length=20, verbose_name="微信/电话号码")
     
     # 国家信息 (仅用于数字产品)
@@ -329,7 +370,7 @@ class OrderItem(models.Model):
 # 购物车模型（用于多本图书选择）
 class CartItem(models.Model):
     """Shopping cart item model"""
-    session_key = models.CharField(max_length=40, verbose_name="会话密钥")
+    session_key = models.CharField(max_length=40, db_index=True, verbose_name="会话密钥")
     book = models.ForeignKey(Book, on_delete=models.CASCADE, verbose_name="图书")
     quantity = models.PositiveIntegerField(default=1, verbose_name="数量")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="添加时间")
@@ -470,6 +511,8 @@ class ContactMessage(models.Model):
     labels = models.ManyToManyField('EmailLabel', blank=True, related_name='contact_messages', verbose_name='标签')
     replied = models.BooleanField(default=False, verbose_name='已回复')
     replied_at = models.DateTimeField(null=True, blank=True, verbose_name='回复时间')
+    admin_reply = models.TextField(blank=True, default='', verbose_name='管理员回复')
+    session_key = models.CharField(max_length=64, blank=True, default='', verbose_name='会话标识')
 
     class Meta:
         db_table = 'contact_message'
@@ -640,6 +683,544 @@ class EmailAutoRule(models.Model):
 
     def __str__(self):
         return f'{self.name} ({self.get_action_display()})'
+
+
+# ==========================================
+# Site User Authentication System
+# ==========================================
+
+class SiteUser(models.Model):
+    """Public site user model for optional user accounts"""
+    email = models.EmailField(unique=True, verbose_name='邮箱')
+    password = models.CharField(max_length=128, verbose_name='密码')
+    name = models.CharField(max_length=100, verbose_name='姓名')
+    phone = models.CharField(max_length=20, blank=True, default='', verbose_name='电话')
+    avatar = models.ImageField(upload_to='user_avatars/', blank=True, null=True, verbose_name='头像')
+    is_active = models.BooleanField(default=True, verbose_name='启用')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='注册时间')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='更新时间')
+
+    class Meta:
+        db_table = 'site_user'
+        ordering = ['-created_at']
+        verbose_name = '站点用户'
+        verbose_name_plural = '站点用户'
+
+    def __str__(self):
+        return f'{self.name} <{self.email}>'
+
+    def get_avatar_url(self):
+        if self.avatar and hasattr(self.avatar, 'url'):
+            return self.avatar.url
+        return None
+
+
+VERIFICATION_TYPE_CHOICES = [
+    ('user', '用户注册'),
+    ('vendor', '卖家注册'),
+    ('password_reset', '密码重置'),
+]
+
+
+class EmailVerification(models.Model):
+    """PIN code verification for new user/vendor registration"""
+    email = models.EmailField(verbose_name='邮箱')
+    pin_code = models.CharField(max_length=6, verbose_name='验证码')
+    name = models.CharField(max_length=100, verbose_name='姓名')
+    password = models.CharField(max_length=128, verbose_name='密码(已加密)')
+    phone = models.CharField(max_length=20, blank=True, default='', verbose_name='电话')
+    verification_type = models.CharField(max_length=20, choices=VERIFICATION_TYPE_CHOICES, default='user', verbose_name='验证类型')
+    company_name = models.CharField(max_length=200, blank=True, default='', verbose_name='公司名称')
+    description = models.TextField(blank=True, default='', verbose_name='描述')
+    is_verified = models.BooleanField(default=False, verbose_name='已验证')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+    expires_at = models.DateTimeField(verbose_name='过期时间')
+
+    class Meta:
+        db_table = 'email_verification'
+        ordering = ['-created_at']
+        verbose_name = '邮箱验证'
+        verbose_name_plural = '邮箱验证'
+
+    def __str__(self):
+        return f'{self.email} - {self.pin_code}'
+
+    def is_expired(self):
+        from django.utils import timezone
+        return timezone.now() > self.expires_at
+
+
+class Wishlist(models.Model):
+    """User wishlist / favorites - supports books and marketplace items"""
+    ITEM_TYPE_CHOICES = [
+        ('book', '图书'),
+        ('product', '商品'),
+        ('course', '课程'),
+        ('supermarket', '超市商品'),
+    ]
+
+    user = models.ForeignKey(SiteUser, on_delete=models.CASCADE, related_name='wishlists', verbose_name='用户')
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, null=True, blank=True, verbose_name='图书')
+    item_type = models.CharField(max_length=20, choices=ITEM_TYPE_CHOICES, default='book', verbose_name='商品类型')
+    item_id = models.PositiveIntegerField(null=True, blank=True, verbose_name='商品ID')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='添加时间')
+
+    class Meta:
+        db_table = 'wishlist'
+        ordering = ['-created_at']
+        verbose_name = '收藏'
+        verbose_name_plural = '收藏'
+
+    def __str__(self):
+        if self.item_type == 'book' and self.book:
+            return f'{self.user.name} - {self.book.name}'
+        return f'{self.user.name} - {self.get_item_type_display()} #{self.item_id}'
+
+    def get_item(self):
+        """Get the actual item object (for marketplace items)"""
+        if self.item_type == 'book':
+            return self.book
+        try:
+            from marketplace.models import Product, Course, SupermarketItem
+            if self.item_type == 'product':
+                return Product.objects.filter(pk=self.item_id).first()
+            elif self.item_type == 'course':
+                return Course.objects.filter(pk=self.item_id).first()
+            elif self.item_type == 'supermarket':
+                return SupermarketItem.objects.filter(pk=self.item_id).first()
+        except Exception:
+            pass
+        return None
+
+    def get_item_name(self):
+        item = self.get_item()
+        if not item:
+            return '商品已下架'
+        if self.item_type == 'course':
+            return item.title
+        return getattr(item, 'name', str(item))
+
+    def get_item_price(self):
+        item = self.get_item()
+        if item:
+            return item.price
+        return None
+
+    def get_item_image_url(self):
+        item = self.get_item()
+        if item and hasattr(item, 'get_image_url'):
+            return item.get_image_url()
+        if item and hasattr(item, 'get_cover_url'):
+            return item.get_cover_url()
+        return '/static/img/default_product.png'
+
+
+# ==========================================
+# Vendor / Seller System
+# ==========================================
+
+VENDOR_STATUS_CHOICES = [
+    ('pending', '待审核'),
+    ('approved', '已批准'),
+    ('rejected', '已拒绝'),
+    ('suspended', '已暂停'),
+]
+
+
+class Vendor(models.Model):
+    """Vendor / Seller model for marketplace"""
+    user = models.OneToOneField(SiteUser, on_delete=models.CASCADE, null=True, blank=True, related_name='vendor_profile', verbose_name='关联用户')
+    company_name = models.CharField(max_length=200, verbose_name='公司/店铺名称')
+    contact_name = models.CharField(max_length=100, verbose_name='联系人')
+    email = models.EmailField(verbose_name='邮箱')
+    phone = models.CharField(max_length=20, blank=True, default='', verbose_name='电话')
+    password = models.CharField(max_length=128, verbose_name='密码')
+    description = models.TextField(blank=True, default='', verbose_name='店铺描述')
+    logo = models.ImageField(upload_to='vendor_logos/', blank=True, null=True, verbose_name='Logo')
+    status = models.CharField(max_length=20, choices=VENDOR_STATUS_CHOICES, default='pending', verbose_name='状态')
+    commission_rate = models.DecimalField(max_digits=5, decimal_places=2, default=10.00, verbose_name='佣金比例(%)')
+    is_active = models.BooleanField(default=True, verbose_name='启用')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='注册时间')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='更新时间')
+
+    class Meta:
+        db_table = 'vendor'
+        ordering = ['-created_at']
+        verbose_name = '卖家'
+        verbose_name_plural = '卖家'
+
+    def __str__(self):
+        return self.company_name
+
+    def get_logo_url(self):
+        if self.logo and hasattr(self.logo, 'url'):
+            return self.logo.url
+        return None
+
+    def get_total_books(self):
+        return self.vendorbook_set.count()
+
+    def get_total_sales(self):
+        return sum(vb.book.sale_num for vb in self.vendorbook_set.select_related('book').all())
+
+
+class VendorBook(models.Model):
+    """Books listed by a vendor"""
+    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, verbose_name='卖家')
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, verbose_name='图书')
+    vendor_price = models.DecimalField(max_digits=8, decimal_places=2, verbose_name='卖家定价')
+    is_active = models.BooleanField(default=True, verbose_name='上架')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='上架时间')
+
+    class Meta:
+        db_table = 'vendor_book'
+        unique_together = ('vendor', 'book')
+        verbose_name = '卖家图书'
+        verbose_name_plural = '卖家图书'
+
+    def __str__(self):
+        return f'{self.vendor.company_name} - {self.book.name}'
+
+
+# ==========================================
+# Admin Notification System
+# ==========================================
+
+NOTIFICATION_TYPE_CHOICES = [
+    ('new_order', '新订单'),
+    ('new_user', '新用户注册'),
+    ('abandoned_cart', '待下单提醒'),
+    ('incomplete_registration', '未完成注册'),
+    ('order_paid', '订单已付款'),
+    ('vendor_registered', '新卖家注册'),
+    ('low_stock', '库存不足'),
+    ('contact_message', '联系消息'),
+    ('cs_chat', '客服聊天'),
+]
+
+
+class AdminNotification(models.Model):
+    """Notification system for admin panel"""
+    notification_type = models.CharField(max_length=30, choices=NOTIFICATION_TYPE_CHOICES, verbose_name='类型')
+    title = models.CharField(max_length=200, verbose_name='标题')
+    message = models.TextField(verbose_name='内容')
+    icon = models.CharField(max_length=50, default='fas fa-bell', verbose_name='图标')
+    color = models.CharField(max_length=20, default='#667eea', verbose_name='颜色')
+    link = models.CharField(max_length=500, blank=True, default='', verbose_name='链接')
+    is_read = models.BooleanField(default=False, verbose_name='已读')
+    is_dismissed = models.BooleanField(default=False, verbose_name='已清除')
+    related_id = models.IntegerField(null=True, blank=True, verbose_name='关联ID')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+
+    class Meta:
+        db_table = 'admin_notification'
+        ordering = ['-created_at']
+        verbose_name = '管理员通知'
+        verbose_name_plural = '管理员通知'
+
+    def __str__(self):
+        return f'[{self.get_notification_type_display()}] {self.title}'
+
+
+# ==========================================
+# AI Chatbot System
+# ==========================================
+
+AI_PROVIDER_CHOICES = [
+    ('openai', 'OpenAI (ChatGPT)'),
+    ('anthropic', 'Anthropic (Claude)'),
+    ('google', 'Google (Gemini)'),
+    ('qwen', 'Alibaba (Qwen/通义千问)'),
+    ('deepseek', 'DeepSeek'),
+    ('openrouter', 'OpenRouter'),
+    ('custom', 'Custom / Local'),
+]
+
+CHAT_ROLE_CHOICES = [
+    ('user', 'User'),
+    ('assistant', 'Assistant'),
+    ('system', 'System'),
+]
+
+
+class ChatbotConfig(models.Model):
+    """Global chatbot configuration — one active config at a time."""
+    name = models.CharField(max_length=100, default='Default Config', verbose_name='配置名称')
+    is_active = models.BooleanField(default=True, verbose_name='启用')
+    provider = models.CharField(max_length=20, choices=AI_PROVIDER_CHOICES, default='openai', verbose_name='AI 提供商')
+    api_key = models.CharField(max_length=500, blank=True, default='', verbose_name='API Key')
+    model_name = models.CharField(max_length=100, blank=True, default='', verbose_name='模型名称',
+                                  help_text='e.g. gpt-4o, claude-3-5-sonnet-20241022, gemini-1.5-pro, qwen-plus')
+    api_endpoint = models.CharField(max_length=500, blank=True, default='', verbose_name='自定义 API 地址',
+                                    help_text='Leave blank to use provider default')
+    system_prompt = models.TextField(
+        default='你是DUNO 360平台的友好、专业助手。你帮助用户了解图书、作者、出版社、在线课程、市场商品和生鲜超市信息，并回答关于购物、订单等问题。请用简洁、友好的语言回答。',
+        verbose_name='系统提示词 (System Prompt)'
+    )
+    max_tokens = models.IntegerField(default=1000, verbose_name='最大 Token 数')
+    temperature = models.FloatField(default=0.7, verbose_name='温度 (0.0 - 2.0)')
+    # Widget appearance
+    widget_title = models.CharField(max_length=100, default='AI 助手', verbose_name='聊天窗口标题')
+    widget_subtitle = models.CharField(max_length=200, default='有什么可以帮助你的？', verbose_name='副标题')
+    welcome_message = models.TextField(
+        default='你好！我是 AI 助手，有什么可以帮助你的吗？',
+        verbose_name='欢迎消息'
+    )
+    # Scope: show on public pages, admin pages, or both
+    show_on_public = models.BooleanField(default=True, verbose_name='在前端显示')
+    show_on_admin = models.BooleanField(default=True, verbose_name='在管理后台显示')
+    # Rate limiting
+    max_messages_per_session = models.IntegerField(default=50, verbose_name='每会话最大消息数')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'chatbot_config'
+        verbose_name = '聊天机器人配置'
+        verbose_name_plural = '聊天机器人配置'
+
+    def __str__(self):
+        return f'{self.name} ({self.get_provider_display()})'
+
+    def get_masked_api_key(self):
+        """Return masked API key for display."""
+        if not self.api_key:
+            return ''
+        k = self.api_key
+        if len(k) <= 8:
+            return '*' * len(k)
+        return k[:4] + '*' * (len(k) - 8) + k[-4:]
+
+    def get_default_model(self):
+        defaults = {
+            'openai': 'gpt-4o-mini',
+            'anthropic': 'claude-3-5-haiku-20241022',
+            'google': 'gemini-1.5-flash',
+            'qwen': 'qwen-plus',
+            'deepseek': 'deepseek-chat',
+            'openrouter': 'nvidia/nemotron-3-super-120b-a12b:free',
+            'custom': '',
+        }
+        return self.model_name or defaults.get(self.provider, '')
+
+
+class ChatSession(models.Model):
+    """A single chat session (anonymous or user-linked)."""
+    session_key = models.CharField(max_length=64, db_index=True, verbose_name='Session Key')
+    user = models.ForeignKey('SiteUser', null=True, blank=True, on_delete=models.SET_NULL,
+                             related_name='chat_sessions', verbose_name='用户')
+    config = models.ForeignKey(ChatbotConfig, null=True, on_delete=models.SET_NULL,
+                               related_name='sessions', verbose_name='配置')
+    started_at = models.DateTimeField(auto_now_add=True, verbose_name='开始时间')
+    last_active = models.DateTimeField(auto_now=True, verbose_name='最近活跃')
+    message_count = models.IntegerField(default=0, verbose_name='消息数')
+    is_closed = models.BooleanField(default=False)
+    context = models.TextField(blank=True, default='', verbose_name='上下文摘要')
+
+    class Meta:
+        db_table = 'chat_session'
+        ordering = ['-last_active']
+        verbose_name = '聊天会话'
+        verbose_name_plural = '聊天会话'
+
+    def __str__(self):
+        return f'Session {self.session_key[:12]} ({self.message_count} msgs)'
+
+
+class ChatMessage(models.Model):
+    """A single message in a chat session."""
+    session = models.ForeignKey(ChatSession, on_delete=models.CASCADE,
+                                related_name='messages', verbose_name='会话')
+    role = models.CharField(max_length=10, choices=CHAT_ROLE_CHOICES, verbose_name='角色')
+    content = models.TextField(verbose_name='内容')
+    tokens_used = models.IntegerField(default=0, verbose_name='Token 用量')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='时间')
+
+    class Meta:
+        db_table = 'chat_message'
+        ordering = ['created_at']
+        verbose_name = '聊天消息'
+        verbose_name_plural = '聊天消息'
+
+    def __str__(self):
+        return f'[{self.role}] {self.content[:60]}'
+
+
+# ==========================================
+# Loyalty / Gamification System
+# ==========================================
+
+class LoyaltyPoints(models.Model):
+    """Loyalty points balance and tier for each SiteUser."""
+    TIER_CHOICES = [
+        ('bronze', '铜牌'),
+        ('silver', '银牌'),
+        ('gold', '金牌'),
+        ('platinum', '白金'),
+    ]
+
+    user = models.OneToOneField(SiteUser, on_delete=models.CASCADE,
+                                 related_name='loyalty', verbose_name='用户')
+    points_balance = models.PositiveIntegerField(default=0, verbose_name='积分余额')
+    lifetime_points = models.PositiveIntegerField(default=0, verbose_name='累计积分')
+    tier = models.CharField(max_length=20, choices=TIER_CHOICES, default='bronze', verbose_name='会员等级')
+    last_spin = models.DateField(null=True, blank=True, verbose_name='上次转盘日期')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'loyalty_points'
+        verbose_name = '积分账户'
+        verbose_name_plural = '积分账户'
+
+    def __str__(self):
+        return f'{self.user.name} — {self.points_balance}pts ({self.get_tier_display()})'
+
+    def update_tier(self):
+        lp = self.lifetime_points
+        if lp >= 5000:
+            self.tier = 'platinum'
+        elif lp >= 1000:
+            self.tier = 'gold'
+        elif lp >= 200:
+            self.tier = 'silver'
+        else:
+            self.tier = 'bronze'
+
+    def next_tier_threshold(self):
+        thresholds = {'bronze': 200, 'silver': 1000, 'gold': 5000, 'platinum': None}
+        return thresholds.get(self.tier)
+
+    def can_spin(self):
+        from datetime import date
+        return self.last_spin != date.today()
+
+    @property
+    def last_spin_today(self):
+        from datetime import date
+        return self.last_spin == date.today()
+
+
+class PointTransaction(models.Model):
+    """Individual point earn/spend transactions."""
+    REASON_CHOICES = [
+        ('purchase', '购买'),
+        ('review', '评价'),
+        ('daily_spin', '每日转盘'),
+        ('referral', '推荐好友'),
+        ('redeem', '积分兑换'),
+        ('admin', '管理员调整'),
+    ]
+
+    user = models.ForeignKey(SiteUser, on_delete=models.CASCADE,
+                              related_name='point_transactions', verbose_name='用户')
+    points = models.IntegerField(verbose_name='积分变动(正=增加,负=扣除)')
+    reason = models.CharField(max_length=20, choices=REASON_CHOICES, verbose_name='原因')
+    description = models.CharField(max_length=200, blank=True, default='', verbose_name='描述')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'point_transaction'
+        ordering = ['-created_at']
+        verbose_name = '积分流水'
+        verbose_name_plural = '积分流水'
+
+    def __str__(self):
+        sign = '+' if self.points > 0 else ''
+        return f'{self.user.name} {sign}{self.points} ({self.get_reason_display()})'
+
+
+class UserFollowedShop(models.Model):
+    """Tracks which publishers/shops a SiteUser follows."""
+    user = models.ForeignKey(SiteUser, on_delete=models.CASCADE,
+                              related_name='followed_shops', verbose_name='用户')
+    publisher = models.ForeignKey(Publisher, on_delete=models.CASCADE,
+                                   related_name='followers', verbose_name='出版商')
+    followed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'user_followed_shop'
+        unique_together = ('user', 'publisher')
+        ordering = ['-followed_at']
+        verbose_name = '关注的店铺'
+        verbose_name_plural = '关注的店铺'
+
+    def __str__(self):
+        return f'{self.user.name} → {self.publisher.publisher_name}'
+
+
+class UserFollowedVendor(models.Model):
+    """Tracks which marketplace vendors a SiteUser follows."""
+    user = models.ForeignKey(SiteUser, on_delete=models.CASCADE,
+                              related_name='followed_vendors', verbose_name='用户')
+    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE,
+                                related_name='followers', verbose_name='卖家')
+    followed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'user_followed_vendor'
+        unique_together = ('user', 'vendor')
+        ordering = ['-followed_at']
+        verbose_name = '关注的卖家'
+        verbose_name_plural = '关注的卖家'
+
+    def __str__(self):
+        return f'{self.user.name} → {self.vendor.company_name}'
+
+
+CONVERSATION_TYPE_CHOICES = [
+    ('buyer_seller', '买家-卖家'),
+    ('support', '用户-客服'),
+    ('vendor_support', '卖家-客服'),
+]
+
+SENDER_TYPE_CHOICES = [
+    ('buyer', '买家'),
+    ('vendor', '卖家'),
+    ('admin', '管理员'),
+]
+
+
+class Conversation(models.Model):
+    """Direct messaging conversation. AI chatbot remains separate for support/admin interactions."""
+    conversation_type = models.CharField(max_length=20, choices=CONVERSATION_TYPE_CHOICES, default='support', verbose_name='会话类型')
+    buyer = models.ForeignKey(SiteUser, on_delete=models.CASCADE, null=True, blank=True, related_name='buyer_conversations', verbose_name='买家')
+    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, null=True, blank=True, related_name='vendor_conversations', verbose_name='卖家')
+    subject = models.CharField(max_length=200, blank=True, default='', verbose_name='主题')
+    ref_item_type = models.CharField(max_length=20, blank=True, default='', verbose_name='商品类型')
+    ref_item_id = models.PositiveIntegerField(null=True, blank=True, verbose_name='商品ID')
+    is_closed = models.BooleanField(default=False, verbose_name='已关闭')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'conversation'
+        ordering = ['-updated_at']
+        verbose_name = '会话'
+        verbose_name_plural = '会话'
+
+    def __str__(self):
+        return self.subject or f'{self.get_conversation_type_display()} #{self.pk}'
+
+
+class DirectMessage(models.Model):
+    """Message inside a direct conversation."""
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='direct_messages', verbose_name='会话')
+    sender_type = models.CharField(max_length=10, choices=SENDER_TYPE_CHOICES, verbose_name='发送方类型')
+    sender_name = models.CharField(max_length=100, blank=True, default='', verbose_name='发送方名称')
+    content = models.TextField(verbose_name='内容')
+    attachment = models.FileField(upload_to='message_attachments/%Y/%m/', blank=True, null=True, verbose_name='附件')
+    is_read = models.BooleanField(default=False, verbose_name='已读')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'direct_message'
+        ordering = ['created_at']
+        verbose_name = '消息'
+        verbose_name_plural = '消息'
+
+    def __str__(self):
+        return f'[{self.sender_type}] {self.content[:60]}'
 
 
 # 创建(同步)数据表命令

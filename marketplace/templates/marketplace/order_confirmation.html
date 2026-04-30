@@ -1,0 +1,117 @@
+{% extends "public/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "订单确认" %} - {% trans "市场" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root { --primary-color: #667eea; --secondary-color: #764ba2; --danger-color: #ef4444; --success-color: #10b981; }
+    .confirm-wrapper { max-width: 700px; margin: 40px auto; }
+    .success-card {
+        background: #fff; border-radius: 20px; padding: 48px 36px; text-align: center;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    }
+    .success-icon {
+        width: 80px; height: 80px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+        background: linear-gradient(135deg, var(--success-color), #34d399); color: #fff;
+        font-size: 2.5rem; margin-bottom: 20px;
+        animation: bounceIn 0.6s ease;
+    }
+    @keyframes bounceIn { 0%{transform:scale(0);} 60%{transform:scale(1.15);} 100%{transform:scale(1);} }
+
+    .order-number { font-size: 1rem; color: #64748b; margin-bottom: 6px; }
+    .order-number strong { color: var(--primary-color); font-weight: 800; font-size: 1.15rem; }
+
+    .detail-card {
+        background: #f8fafc; border-radius: 14px; padding: 24px;
+        text-align: left; margin-top: 28px;
+    }
+    .detail-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 0.9rem; color: #475569; border-bottom: 1px solid #f1f5f9; }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-row .label { font-weight: 600; color: #334155; }
+
+    .items-section { margin-top: 24px; text-align: left; }
+    .items-section h6 { font-weight: 700; margin-bottom: 12px; color: #334155; }
+    .item-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
+    .item-row:last-child { border-bottom: none; }
+    .item-img { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+    .item-name { flex: 1; font-weight: 600; font-size: 0.88rem; }
+    .item-qty { color: #94a3b8; font-size: 0.85rem; }
+    .item-price { font-weight: 700; color: var(--danger-color); }
+
+    .total-row { display: flex; justify-content: space-between; padding: 16px 0; margin-top: 8px; border-top: 2px solid #e2e8f0; }
+    .total-row span:last-child { font-size: 1.3rem; font-weight: 800; color: var(--danger-color); }
+
+    .action-buttons { display: flex; gap: 12px; justify-content: center; margin-top: 28px; flex-wrap: wrap; }
+    .btn-primary-custom {
+        padding: 14px 32px; border-radius: 12px; border: none;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: #fff; font-weight: 700; text-decoration: none; transition: all 0.3s;
+    }
+    .btn-primary-custom:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.4); color: #fff; }
+    .btn-outline-custom {
+        padding: 14px 32px; border-radius: 12px; background: #fff;
+        border: 2px solid var(--primary-color); color: var(--primary-color);
+        font-weight: 700; text-decoration: none; transition: all 0.3s;
+    }
+    .btn-outline-custom:hover { background: rgba(102,126,234,0.04); color: var(--primary-color); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="confirm-wrapper">
+        <div class="success-card">
+            <div class="success-icon"><i class="fas fa-check"></i></div>
+            <h2 style="font-weight:800; color:#1e293b; margin-bottom:8px;">{% trans "下单成功！" %}</h2>
+            <p class="text-muted">{% trans "感谢您的购买，我们会尽快处理您的订单" %}</p>
+
+            <div class="order-number">
+                {% trans "订单编号" %}: <strong>{{ order.order_number }}</strong>
+            </div>
+
+            <div class="detail-card">
+                <div class="detail-row"><span class="label">{% trans "下单时间" %}</span><span>{{ order.created_at|date:"Y-m-d H:i" }}</span></div>
+                <div class="detail-row"><span class="label">{% trans "客户姓名" %}</span><span>{{ order.user_name }}</span></div>
+                {% if order.user_email %}
+                <div class="detail-row"><span class="label">{% trans "邮箱" %}</span><span>{{ order.user_email }}</span></div>
+                {% endif %}
+                <div class="detail-row"><span class="label">{% trans "订单状态" %}</span><span style="color:var(--success-color); font-weight:700;">{{ order.get_status_display }}</span></div>
+            </div>
+
+            <div class="items-section">
+                <h6><i class="fas fa-box-open me-2" style="color:var(--primary-color);"></i>{% trans "订单商品" %}</h6>
+                {% for item in order.items.all %}
+                <div class="item-row">
+                    <div class="item-name">
+                        {{ item.item_name }}
+                        {% if item.selected_attributes %}
+                        <div class="d-flex flex-wrap gap-1 mt-1">
+                            {% for name, value in item.selected_attributes.items %}
+                            <span class="badge rounded-pill text-bg-light border">{{ name }}: {{ value }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <span class="item-qty">×{{ item.quantity }}</span>
+                    <span class="item-price">¥{{ item.subtotal }}</span>
+                </div>
+                {% endfor %}
+                <div class="total-row">
+                    <span style="font-weight:700;">{% trans "订单总额" %}</span>
+                    <span>¥{{ order.total_amount }}</span>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <a href="{% url 'marketplace:home' %}" class="btn-primary-custom">
+                    <i class="fas fa-home me-2"></i>{% trans "返回首页" %}
+                </a>
+                <a href="{% url 'marketplace:product_list' %}" class="btn-outline-custom">
+                    <i class="fas fa-store me-2"></i>{% trans "继续购物" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

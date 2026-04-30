@@ -1,0 +1,210 @@
+{% extends 'public/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "搜索结果" %} - DUNO 360{% endblock %}
+
+{% block extra_css %}
+<style>
+    .search-page { padding: 30px 0 100px; min-height: 80vh; }
+    .search-header { text-align: center; margin-bottom: 30px; }
+    .search-header h2 { font-size: 1.5rem; color: #1a1a2e; font-weight: 700; }
+    html[data-theme="dark"] .search-header h2 { color: #e2e8f0; }
+    .search-form-top {
+        max-width: 600px; margin: 0 auto 30px;
+        display: flex; gap: 8px;
+    }
+    .search-form-top input {
+        flex: 1; border: 2px solid #667eea; border-radius: 25px;
+        padding: 10px 20px; font-size: 1rem; outline: none;
+    }
+    .search-form-top button {
+        background: linear-gradient(135deg,#667eea,#764ba2);
+        color: #fff; border: none; border-radius: 25px;
+        padding: 10px 25px; font-weight: 600; cursor: pointer;
+    }
+    .search-tabs {
+        display: flex; justify-content: center; gap: 8px;
+        margin-bottom: 20px; flex-wrap: wrap;
+    }
+    .search-tab-btn {
+        border: 2px solid #667eea; background: transparent;
+        color: #667eea; border-radius: 20px; padding: 6px 16px;
+        font-size: 0.85rem; cursor: pointer; font-weight: 600;
+        transition: all 0.2s;
+    }
+    .search-tab-btn.active, .search-tab-btn:hover {
+        background: linear-gradient(135deg,#667eea,#764ba2);
+        color: #fff; border-color: transparent;
+    }
+    .search-results-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 16px;
+    }
+    .sr-card {
+        background: #fff; border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        overflow: hidden; transition: transform 0.2s;
+        cursor: pointer; text-decoration: none; color: inherit;
+    }
+    html[data-theme="dark"] .sr-card { background: #1e293b; }
+    .sr-card:hover { transform: translateY(-3px); }
+    .sr-card img {
+        width: 100%; aspect-ratio: 1/1; object-fit: cover;
+        background: #f3f4f6;
+    }
+    .sr-card-body { padding: 10px 12px 14px; }
+    .sr-card-type {
+        display: inline-block; font-size: 0.65rem; font-weight: 700;
+        padding: 2px 8px; border-radius: 8px; margin-bottom: 4px;
+    }
+    .sr-card-type.book { background: #ede9fe; color: #7c3aed; }
+    .sr-card-type.product { background: #dbeafe; color: #2563eb; }
+    .sr-card-type.course { background: #d1fae5; color: #059669; }
+    .sr-card-type.supermarket { background: #fef3c7; color: #d97706; }
+    .sr-card-name {
+        font-size: 0.85rem; font-weight: 600; color: #1a1a2e;
+        line-height: 1.3; display: -webkit-box;
+        -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    html[data-theme="dark"] .sr-card-name { color: #e2e8f0; }
+    .sr-card-price { font-size: 0.9rem; font-weight: 800; color: #667eea; margin-top: 4px; }
+    .search-empty {
+        text-align: center; padding: 60px 20px; color: #6b7280;
+    }
+    .search-empty i { font-size: 3rem; margin-bottom: 12px; display: block; color: #d1d5db; }
+    .search-empty h3 { color: #374151; margin-bottom: 8px; }
+    html[data-theme="dark"] .search-empty h3 { color: #e2e8f0; }
+    .suggestions-title {
+        text-align: center; font-size: 1.1rem; font-weight: 700;
+        margin: 30px 0 16px; color: #374151;
+    }
+    html[data-theme="dark"] .suggestions-title { color: #e2e8f0; }
+    #searchLoader { text-align: center; padding: 40px; display: none; }
+    .spinner { display: inline-block; width: 32px; height: 32px; border: 3px solid #e5e7eb; border-top-color: #667eea; border-radius: 50%; animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 768px) {
+        .search-page { padding: 10px 12px 120px; }
+        .search-results-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .search-form-top { margin: 0 8px 20px; }
+        .sr-card img { aspect-ratio: 3/4; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="search-page">
+    <div class="container">
+        <div class="search-header">
+            <h2><i class="fas fa-search me-2"></i><span data-zh="搜索结果" data-en="Search Results" data-fr="Résultats">搜索结果</span></h2>
+        </div>
+        <form class="search-form-top" id="pageSearchForm" method="get" action="{% url 'manager:public_search' %}">
+            <input type="text" name="q" id="pageSearchInput" value="{{ query }}" placeholder="{% trans '搜索图书、商品、课程...' %}" autocomplete="off">
+            <button type="submit"><i class="fas fa-search me-1"></i><span data-zh="搜索" data-en="Search" data-fr="Chercher">搜索</span></button>
+        </form>
+        <div class="search-tabs" id="searchFilterTabs">
+            <button type="button" class="search-tab-btn active" data-filter="all"><span data-zh="全部" data-en="All" data-fr="Tout">全部</span></button>
+            <button type="button" class="search-tab-btn" data-filter="book"><i class="fas fa-book me-1"></i><span data-zh="图书" data-en="Books" data-fr="Livres">图书</span></button>
+            <button type="button" class="search-tab-btn" data-filter="product"><i class="fas fa-shopping-bag me-1"></i><span data-zh="商品" data-en="Products" data-fr="Produits">商品</span></button>
+            <button type="button" class="search-tab-btn" data-filter="course"><i class="fas fa-graduation-cap me-1"></i><span data-zh="课程" data-en="Courses" data-fr="Cours">课程</span></button>
+            <button type="button" class="search-tab-btn" data-filter="supermarket"><i class="fas fa-store me-1"></i><span data-zh="超市" data-en="Supermarket" data-fr="Supermarché">超市</span></button>
+        </div>
+        <div id="searchLoader"><div class="spinner"></div></div>
+        <div id="searchResultsContainer"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    var query = '{{ query|escapejs }}';
+    var allResults = [];
+    var suggestions = [];
+    var activeFilter = 'all';
+
+    function renderResults(filter) {
+        var container = document.getElementById('searchResultsContainer');
+        var filtered = filter === 'all' ? allResults : allResults.filter(function(r) { return r.type === filter; });
+
+        if (!query) {
+            container.innerHTML = '<div class="search-empty"><i class="fas fa-search"></i><h3 data-zh="请输入搜索关键词" data-en="Enter a search term" data-fr="Entrez un terme">请输入搜索关键词</h3></div>';
+            return;
+        }
+        if (filtered.length === 0 && allResults.length === 0) {
+            var html = '<div class="search-empty"><i class="fas fa-box-open"></i>';
+            html += '<h3 data-zh="未找到相关商品" data-en="No products found" data-fr="Aucun produit trouvé">未找到相关商品</h3>';
+            html += '<p data-zh="您搜索的商品暂时未上架，试试下面的热门推荐" data-en="This product is not yet available. Try these popular items:" data-fr="Ce produit n\'est pas encore disponible. Essayez ces articles populaires :">您搜索的商品暂时未上架，试试下面的热门推荐</p></div>';
+            if (suggestions.length > 0) {
+                html += '<div class="suggestions-title" data-zh="热门推荐" data-en="Popular Items" data-fr="Articles populaires">热门推荐</div>';
+                html += '<div class="search-results-grid">';
+                suggestions.forEach(function(s) {
+                    html += buildCard(s);
+                });
+                html += '</div>';
+            }
+            container.innerHTML = html;
+            return;
+        }
+        if (filtered.length === 0) {
+            container.innerHTML = '<div class="search-empty"><i class="fas fa-filter"></i><h3 data-zh="该分类下无结果" data-en="No results in this category" data-fr="Aucun résultat dans cette catégorie">该分类下无结果</h3></div>';
+            return;
+        }
+        var html = '<div class="search-results-grid">';
+        filtered.forEach(function(r) { html += buildCard(r); });
+        html += '</div>';
+        container.innerHTML = html;
+    }
+
+    function buildCard(item) {
+        return '<a href="' + item.url + '" class="sr-card">' +
+            '<img src="' + item.image + '" alt="' + escHtml(item.name) + '" loading="lazy">' +
+            '<div class="sr-card-body">' +
+            '<span class="sr-card-type ' + item.type + '">' + item.type_label + '</span>' +
+            '<div class="sr-card-name">' + escHtml(item.name) + '</div>' +
+            '<div class="sr-card-price">¥' + item.price + '</div>' +
+            '</div></a>';
+    }
+
+    function escHtml(s) {
+        var d = document.createElement('div');
+        d.textContent = s;
+        return d.innerHTML;
+    }
+
+    function doSearch() {
+        if (!query) { renderResults('all'); return; }
+        var loader = document.getElementById('searchLoader');
+        loader.style.display = 'block';
+        document.getElementById('searchResultsContainer').innerHTML = '';
+        fetch('/manager/api/search/?q=' + encodeURIComponent(query))
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                allResults = data.results || [];
+                suggestions = data.suggestions || [];
+                loader.style.display = 'none';
+                renderResults(activeFilter);
+                if (typeof switchLanguage === 'function') switchLanguage(document.documentElement.getAttribute('data-lang') || 'zh');
+            })
+            .catch(function() {
+                loader.style.display = 'none';
+                document.getElementById('searchResultsContainer').innerHTML =
+                    '<div class="search-empty"><i class="fas fa-exclamation-triangle"></i><h3>搜索出错</h3></div>';
+            });
+    }
+
+    document.querySelectorAll('.search-tab-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.search-tab-btn').forEach(function(b) { b.classList.remove('active'); });
+            this.classList.add('active');
+            activeFilter = this.dataset.filter;
+            renderResults(activeFilter);
+        });
+    });
+
+    doSearch();
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,259 @@
+{% extends 'public/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "验证邮箱" %} - {% trans "DUNO 360" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 80px 0 60px;
+        position: relative; overflow: hidden;
+    }
+    .auth-hero::before {
+        content: ''; position: absolute; top: -50%; right: -10%;
+        width: 500px; height: 500px; background: rgba(255,255,255,0.05);
+        border-radius: 50%;
+    }
+    .auth-card {
+        background: var(--card-bg, #fff); border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+        padding: 48px 40px; margin-top: -40px;
+        position: relative; z-index: 2;
+    }
+    .pin-inputs {
+        display: flex; gap: 10px; justify-content: center; margin: 28px 0;
+    }
+    .pin-input {
+        width: 56px; height: 64px; text-align: center; font-size: 1.8rem;
+        font-weight: 800; border: 2px solid var(--input-border, #e8ecf1);
+        border-radius: 14px; outline: none; transition: all 0.3s;
+        background: var(--input-bg, #fff); color: var(--dark-text, #333);
+    }
+    .pin-input:focus {
+        border-color: #667eea; box-shadow: 0 0 0 4px rgba(102,126,234,0.15);
+        transform: scale(1.05);
+    }
+    .pin-input.filled { border-color: #10b981; background: rgba(16,185,129,0.05); }
+    .btn-auth {
+        background: linear-gradient(135deg, #667eea, #764ba2); color: #fff;
+        border: none; border-radius: 14px; padding: 14px; font-weight: 700;
+        font-size: 1rem; width: 100%; transition: all 0.3s;
+    }
+    .btn-auth:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.35); color: #fff; }
+    .btn-auth:disabled { opacity: 0.6; transform: none; }
+    .email-icon-box {
+        width: 80px; height: 80px; border-radius: 50%;
+        background: linear-gradient(135deg, rgba(102,126,234,0.12), rgba(118,75,162,0.12));
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 20px;
+    }
+    .email-icon-box i { font-size: 2rem; color: #667eea; }
+    .resend-link {
+        color: #667eea; font-weight: 600; cursor: pointer;
+        text-decoration: none; transition: opacity 0.3s;
+    }
+    .resend-link:hover { opacity: 0.8; }
+    .resend-link.disabled { opacity: 0.4; pointer-events: none; }
+    .countdown { font-weight: 700; color: #667eea; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="auth-hero text-white">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 text-center">
+                <h1 class="display-5 fw-bold mb-3" data-aos="fade-up">{% trans "验证邮箱" %}</h1>
+                <p class="lead" style="opacity:0.9;" data-aos="fade-up" data-aos-delay="100">{% trans "请输入发送到您邮箱的6位验证码" %}</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="container pb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-5 col-md-7">
+            <div class="auth-card" data-aos="fade-up">
+                <div class="text-center">
+                    <div class="email-icon-box">
+                        <i class="fas fa-envelope-open-text"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">{% trans "查看您的邮箱" %}</h5>
+                    <p class="text-muted mb-0" style="font-size:0.93rem;">
+                        {% trans "验证码已发送至" %}
+                    </p>
+                    <p class="fw-bold" style="color:#667eea;">{{ email }}</p>
+                </div>
+
+                <form id="verifyForm" onsubmit="return submitVerify(event)">
+                    {% csrf_token %}
+                    <input type="hidden" name="email" value="{{ email }}">
+                    <input type="hidden" name="pin" id="pinHidden">
+
+                    <div class="pin-inputs">
+                        <input type="text" class="pin-input" maxlength="1" inputmode="numeric" pattern="[0-9]" data-index="0" autofocus>
+                        <input type="text" class="pin-input" maxlength="1" inputmode="numeric" pattern="[0-9]" data-index="1">
+                        <input type="text" class="pin-input" maxlength="1" inputmode="numeric" pattern="[0-9]" data-index="2">
+                        <input type="text" class="pin-input" maxlength="1" inputmode="numeric" pattern="[0-9]" data-index="3">
+                        <input type="text" class="pin-input" maxlength="1" inputmode="numeric" pattern="[0-9]" data-index="4">
+                        <input type="text" class="pin-input" maxlength="1" inputmode="numeric" pattern="[0-9]" data-index="5">
+                    </div>
+
+                    <button type="submit" class="btn-auth mb-3" id="verifyBtn" disabled>
+                        <i class="fas fa-check-circle me-2"></i>{% trans "验证" %}
+                    </button>
+                </form>
+
+                <div class="text-center mt-3">
+                    <p class="text-muted mb-2" style="font-size:0.9rem;">{% trans "没有收到验证码？" %}</p>
+                    <a href="#" class="resend-link" id="resendLink" onclick="resendPin()">
+                        <i class="fas fa-redo me-1"></i>{% trans "重新发送" %}
+                    </a>
+                    <span id="resendCountdown" style="display:none;" class="text-muted" style="font-size:0.9rem;">
+                        {% trans "重新发送" %} (<span class="countdown" id="countdownNum">60</span>s)
+                    </span>
+                </div>
+
+                <div class="text-center mt-4 pt-3" style="border-top:1px solid var(--input-border, #e8ecf1);">
+                    <a href="{% url 'manager:user_register' %}" style="color:#667eea;font-weight:600;font-size:0.9rem;">
+                        <i class="fas fa-arrow-left me-1"></i>{% trans "返回注册" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    const inputs = document.querySelectorAll('.pin-input');
+    const verifyBtn = document.getElementById('verifyBtn');
+    const pinHidden = document.getElementById('pinHidden');
+
+    function getPin() {
+        let pin = '';
+        inputs.forEach(i => pin += i.value);
+        return pin;
+    }
+
+    function updateState() {
+        const pin = getPin();
+        pinHidden.value = pin;
+        verifyBtn.disabled = pin.length < 6;
+        inputs.forEach(i => {
+            i.classList.toggle('filled', i.value.length > 0);
+        });
+    }
+
+    inputs.forEach((input, idx) => {
+        input.addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            if (this.value && idx < 5) inputs[idx + 1].focus();
+            updateState();
+        });
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Backspace' && !this.value && idx > 0) {
+                inputs[idx - 1].focus();
+                inputs[idx - 1].value = '';
+                updateState();
+            }
+        });
+        input.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const paste = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g, '').slice(0, 6);
+            for (let i = 0; i < paste.length && i < 6; i++) {
+                inputs[i].value = paste[i];
+            }
+            if (paste.length > 0) inputs[Math.min(paste.length, 5)].focus();
+            updateState();
+        });
+    });
+})();
+
+function submitVerify(e) {
+    e.preventDefault();
+    var form = document.getElementById('verifyForm');
+    var btn = document.getElementById('verifyBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{% trans "验证中..." %}';
+    fetch('{% url "manager:verify_email_pin" %}', {
+        method: 'POST',
+        body: new FormData(form)
+    }).then(r => r.json()).then(d => {
+        if (d.success) {
+            gToast(d.message, 'success');
+            setTimeout(() => { window.location.href = d.redirect; }, 1000);
+        } else {
+            gToast(d.message, 'error');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-check-circle me-2"></i>{% trans "验证" %}';
+            // Shake the inputs
+            document.querySelector('.pin-inputs').style.animation = 'shake 0.4s ease';
+            setTimeout(() => { document.querySelector('.pin-inputs').style.animation = ''; }, 500);
+        }
+    }).catch(() => {
+        gToast('{% trans "网络错误" %}', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check-circle me-2"></i>{% trans "验证" %}';
+    });
+    return false;
+}
+
+var resendTimer = null;
+function resendPin() {
+    var link = document.getElementById('resendLink');
+    var countdown = document.getElementById('resendCountdown');
+    var countNum = document.getElementById('countdownNum');
+    link.style.display = 'none';
+    countdown.style.display = 'inline';
+    var sec = 60;
+    countNum.textContent = sec;
+    resendTimer = setInterval(function() {
+        sec--;
+        countNum.textContent = sec;
+        if (sec <= 0) {
+            clearInterval(resendTimer);
+            link.style.display = 'inline';
+            countdown.style.display = 'none';
+        }
+    }, 1000);
+
+    var fd = new FormData();
+    fd.append('email', '{{ email }}');
+    fd.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+    fetch('{% url "manager:resend_verification_pin" %}', {
+        method: 'POST',
+        body: fd
+    }).then(r => r.json()).then(d => {
+        if (d.success) gToast(d.message, 'success');
+        else gToast(d.message, 'error');
+    }).catch(() => { gToast('{% trans "网络错误" %}', 'error'); });
+}
+
+// Start cooldown on page load
+(function() {
+    var link = document.getElementById('resendLink');
+    var countdown = document.getElementById('resendCountdown');
+    var countNum = document.getElementById('countdownNum');
+    link.style.display = 'none';
+    countdown.style.display = 'inline';
+    var sec = 60;
+    countNum.textContent = sec;
+    var t = setInterval(function() {
+        sec--;
+        countNum.textContent = sec;
+        if (sec <= 0) { clearInterval(t); link.style.display = 'inline'; countdown.style.display = 'none'; }
+    }, 1000);
+})();
+</script>
+<style>
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-8px); }
+    40%, 80% { transform: translateX(8px); }
+}
+</style>
+{% endblock %}

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>作者管理 - 图书管理系统</title>
+    <title>作者管理 - DUNO 360</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -299,6 +299,12 @@
         </div>
     </div>
 
+    <!-- Hidden form for CSRF-safe POST deletion -->
+    <form id="deleteAuthorForm" method="post" action="/manager/delete_author/" style="display:none">
+        {% csrf_token %}
+        <input type="hidden" name="id" id="deleteAuthorId" value="">
+    </form>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -314,7 +320,8 @@
 
         function deleteAuthor(authorId, authorName) {
             gConfirm('确定要删除作者 "' + authorName + '" 吗？<br><br><small>注意：删除作者不会删除相关图书，但会解除作者与图书的关联关系。</small>', function() {
-                window.location.href = '/manager/delete_author/?id=' + authorId;
+                document.getElementById('deleteAuthorId').value = authorId;
+                document.getElementById('deleteAuthorForm').submit();
             }, {danger: true, title: '删除作者', icon: 'fa-trash', confirmText: '确认删除'});
         }
     </script>
@@ -323,5 +330,6 @@
     function gConfirm(msg,cb,opts){opts=opts||{};var o=document.createElement('div');o.className='g-modal-overlay';o.style.display='flex';var t=opts.danger?'warning':'confirm';var b=opts.danger?'danger':'primary';o.innerHTML='<div class="g-modal-card"><div class="g-modal-icon '+t+'"><i class="fas '+(opts.icon||'fa-question-circle')+'"></i></div><div class="g-modal-title">'+(opts.title||'确认操作')+'</div><div class="g-modal-message">'+msg+'</div><div class="g-modal-actions"><button class="g-modal-btn cancel" id="gCc">取消</button><button class="g-modal-btn '+b+'" id="gCo">'+(opts.confirmText||'确定')+'</button></div></div>';document.body.appendChild(o);o.querySelector('#gCc').onclick=function(){o.remove()};o.querySelector('#gCo').onclick=function(){o.remove();if(cb)cb()};}
     function gToast(msg,type,dur){type=type||'success';dur=dur||3000;var c=document.querySelector('.g-toast-container');if(!c){c=document.createElement('div');c.className='g-toast-container';document.body.appendChild(c);}var icons={success:'fa-check-circle',error:'fa-times-circle',warning:'fa-exclamation-triangle'};var t=document.createElement('div');t.className='g-toast '+type;t.innerHTML='<i class="fas '+(icons[type]||'fa-info-circle')+'"></i>'+msg;c.appendChild(t);setTimeout(function(){t.style.opacity='0';setTimeout(function(){t.remove()},300)},dur);}
     </script>
+<script src="/static/js/admin_i18n.js" defer></script>
 </body>
 </html>

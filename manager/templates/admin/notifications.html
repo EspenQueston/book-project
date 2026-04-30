@@ -1,0 +1,446 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="zh-hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>通知管理 - DUNO 360</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #06b6d4;
+        }
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .main-container { min-height: 100vh; padding: 20px 0; }
+        .header-card {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white; border-radius: 15px; padding: 20px; margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .content-card {
+            background: white; border-radius: 15px; padding: 30px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1); border: none;
+        }
+        .toolbar {
+            background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e5e7eb;
+        }
+        .filter-bar {
+            background: white; border-radius: 10px; padding: 15px 20px; margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e5e7eb;
+        }
+        .btn-modern { border-radius: 8px; padding: 10px 20px; font-weight: 600; transition: all 0.3s ease; border: none; }
+        .btn-primary-modern {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); color: white;
+        }
+        .btn-primary-modern:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.3); color: white; }
+        .breadcrumb-modern { background: none; padding: 0; margin-bottom: 20px; }
+        .breadcrumb-modern .breadcrumb-item a { color: white; text-decoration: none; }
+        .breadcrumb-modern .breadcrumb-item.active { color: rgba(255,255,255,0.8); }
+
+        /* Stats cards */
+        .stat-card {
+            border-radius: 12px; padding: 20px; text-align: center; color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .stat-card .stat-num { font-size: 2rem; font-weight: 800; }
+        .stat-card .stat-label { font-size: 0.85rem; opacity: 0.9; margin-top: 4px; }
+
+        /* Notification list */
+        .notif-item {
+            background: #fff; border: 1px solid #e5e7eb; border-radius: 12px;
+            padding: 18px 20px; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 16px;
+            transition: all 0.3s ease; cursor: pointer; position: relative;
+        }
+        .notif-item:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+        .notif-item.unread { border-left: 4px solid var(--primary-color); background: #f8f9ff; }
+        .notif-item.unread .notif-title { font-weight: 700; }
+        .notif-icon-box {
+            width: 48px; height: 48px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; font-size: 1.2rem;
+        }
+        .notif-content { flex: 1; min-width: 0; }
+        .notif-title { font-weight: 600; font-size: 0.95rem; color: #1e293b; margin-bottom: 4px; }
+        .notif-message { font-size: 0.87rem; color: #64748b; margin-bottom: 6px; line-height: 1.5; }
+        .notif-meta { display: flex; align-items: center; gap: 12px; font-size: 0.8rem; color: #94a3b8; }
+        .notif-type-badge {
+            padding: 3px 10px; border-radius: 20px; font-size: 0.73rem; font-weight: 600;
+        }
+        .notif-actions {
+            display: flex; gap: 6px; flex-shrink: 0; align-items: center;
+        }
+        .notif-actions .btn-icon {
+            width: 34px; height: 34px; border-radius: 50%; border: 1px solid #e5e7eb;
+            background: #fff; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s; font-size: 0.85rem; color: #94a3b8;
+        }
+        .notif-actions .btn-icon:hover { background: #f1f5f9; color: #475569; }
+        .notif-actions .btn-icon.danger:hover { background: #fee2e2; color: #ef4444; border-color: #fca5a5; }
+        .notif-link-btn {
+            padding: 4px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 600;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: #fff; border: none; text-decoration: none; display: inline-flex;
+            align-items: center; gap: 4px; transition: all 0.2s;
+        }
+        .notif-link-btn:hover { transform: translateY(-1px); color: #fff; box-shadow: 0 4px 10px rgba(102,126,234,0.3); }
+        .empty-state { text-align: center; padding: 60px 0; }
+        .empty-state i { font-size: 3rem; color: #d1d5db; }
+
+        /* Detail modal */
+        .detail-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 10000;
+            justify-content: center; align-items: center;
+        }
+        .detail-card {
+            background: #fff; border-radius: 20px; max-width: 600px; width: 95%;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.3); animation: modalIn 0.3s ease;
+            overflow: hidden;
+        }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .detail-header {
+            padding: 24px 30px; display: flex; align-items: center; gap: 16px;
+        }
+        .detail-body { padding: 0 30px 20px; }
+        .detail-footer { padding: 16px 30px; border-top: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; }
+
+        /* Toast */
+        .g-toast-container{position:fixed;top:30px;right:20px;z-index:10001;display:flex;flex-direction:column;gap:10px}
+        .g-toast{padding:14px 24px;border-radius:12px;color:#fff;font-weight:500;box-shadow:0 8px 25px rgba(0,0,0,.15);animation:gToastIn .3s ease;display:flex;align-items:center;gap:10px}
+        .g-toast.success{background:linear-gradient(135deg,#10b981,#059669)}.g-toast.error{background:linear-gradient(135deg,#ef4444,#dc2626)}
+        @keyframes gToastIn{from{opacity:0;transform:translateX(100px)}to{opacity:1;transform:translateX(0)}}
+    </style>
+</head>
+<body>
+    <div class="g-toast-container" id="toastContainer"></div>
+
+    <div class="main-container">
+        <div class="container-fluid">
+            <!-- Header -->
+            <div class="header-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <nav class="breadcrumb-modern">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/manager/dashboard/"><i class="fas fa-home"></i> 仪表板</a></li>
+                                <li class="breadcrumb-item active">通知管理</li>
+                            </ol>
+                        </nav>
+                        <h2 class="mb-0"><i class="fas fa-bell"></i> 通知管理</h2>
+                        <p class="mb-0 mt-2 opacity-75">查看和管理所有系统通知 · 共 {{ total }} 条通知</p>
+                    </div>
+                    <div class="text-end">
+                        <p class="mb-0">欢迎回来，<strong>{{ name }}</strong> 管理员</p>
+                        <small class="opacity-75">今天是 <span id="currentDate"></span></small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <h5 class="mb-0 text-muted">
+                            <i class="fas fa-list"></i> 通知列表
+                            {% if unread > 0 %}
+                            <span class="badge bg-danger ms-2">{{ unread }} 条未读</span>
+                            {% endif %}
+                        </h5>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button class="btn btn-primary-modern btn-modern" onclick="markAllRead()">
+                            <i class="fas fa-check-double"></i> 全部已读
+                        </button>
+                        <a href="/manager/dashboard/" class="btn btn-outline-primary btn-modern">
+                            <i class="fas fa-chart-line"></i> 仪表盘
+                        </a>
+                        <a href="/manager/order_list/" class="btn btn-outline-secondary btn-modern">
+                            <i class="fas fa-shopping-cart"></i> 订单管理
+                        </a>
+                        <a href="/manager/admin/users/" class="btn btn-outline-info btn-modern">
+                            <i class="fas fa-users"></i> 用户管理
+                        </a>
+                        <a href="/manager/admin/vendors/" class="btn btn-outline-secondary btn-modern">
+                            <i class="fas fa-store"></i> 卖家管理
+                        </a>
+                        <a href="/manager/logout/" class="btn btn-outline-danger btn-modern">
+                            <i class="fas fa-sign-out-alt"></i> 退出
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="stat-card" style="background:linear-gradient(135deg,var(--primary-color),var(--secondary-color));">
+                        <div class="stat-num">{{ total }}</div>
+                        <div class="stat-label"><i class="fas fa-bell me-1"></i>总通知数</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card" style="background:linear-gradient(135deg,#ef4444,#dc2626);">
+                        <div class="stat-num">{{ unread }}</div>
+                        <div class="stat-label"><i class="fas fa-envelope me-1"></i>未读通知</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card" style="background:linear-gradient(135deg,var(--success-color),#059669);">
+                        <div class="stat-num">{{ read_count }}</div>
+                        <div class="stat-label"><i class="fas fa-envelope-open me-1"></i>已读通知</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card" style="background:linear-gradient(135deg,var(--info-color),#0891b2);">
+                        <div class="stat-num">{{ notification_types|length }}</div>
+                        <div class="stat-label"><i class="fas fa-tags me-1"></i>通知类型</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Bar -->
+            <div class="filter-bar">
+                <form method="get" class="d-flex gap-2 align-items-center flex-wrap">
+                    <select name="type" class="form-select" style="border-radius: 10px; max-width: 200px;">
+                        <option value="">所有类型</option>
+                        {% for code, label in notification_types %}
+                        <option value="{{ code }}" {% if type_filter == code %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <select name="read" class="form-select" style="border-radius: 10px; max-width: 160px;">
+                        <option value="">全部状态</option>
+                        <option value="unread" {% if read_filter == 'unread' %}selected{% endif %}>未读</option>
+                        <option value="read" {% if read_filter == 'read' %}selected{% endif %}>已读</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary-modern btn-modern">
+                        <i class="fas fa-filter"></i> 筛选
+                    </button>
+                    <a href="{% url 'manager:admin_notifications_page' %}" class="btn btn-outline-secondary btn-modern">
+                        <i class="fas fa-redo"></i> 重置
+                    </a>
+                </form>
+            </div>
+
+            <!-- Notification List -->
+            <div class="content-card" style="padding: 20px;">
+                {% if notifications %}
+                    {% for n in notifications %}
+                    <div class="notif-item {% if not n.is_read %}unread{% endif %}" id="notif-{{ n.id }}">
+                        <div class="notif-icon-box" style="background: {{ n.color }}22; color: {{ n.color }};">
+                            <i class="{{ n.icon }}"></i>
+                        </div>
+                        <div class="notif-content" onclick="openDetail({{ n.id }})">
+                            <div class="notif-title">{{ n.title }}</div>
+                            <div class="notif-message">{{ n.message|truncatewords:30 }}</div>
+                            <div class="notif-meta">
+                                <span class="notif-type-badge" style="background: {{ n.color }}15; color: {{ n.color }};">
+                                    {{ n.type_display }}
+                                </span>
+                                <span><i class="fas fa-clock me-1"></i>{{ n.time_ago }}</span>
+                                <span>{{ n.created_at|date:"Y-m-d H:i" }}</span>
+                                {% if not n.is_read %}
+                                <span style="color:var(--danger-color);"><i class="fas fa-circle" style="font-size:0.5rem;"></i> 未读</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="notif-actions">
+                            {% if n.link %}
+                            <a href="{{ n.link }}" class="notif-link-btn" title="前往">
+                                <i class="fas fa-external-link-alt"></i> 查看
+                            </a>
+                            {% endif %}
+                            {% if not n.is_read %}
+                            <button class="btn-icon" onclick="markRead({{ n.id }})" title="标为已读">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            {% endif %}
+                            <button class="btn-icon danger" onclick="deleteNotif({{ n.id }})" title="删除">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-bell-slash"></i>
+                        <h5 class="text-muted mt-3">暂无通知</h5>
+                        <p class="text-muted">系统暂时没有通知，有新的事件时会自动显示</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div class="detail-overlay" id="detailOverlay" onclick="if(event.target===this)closeDetail()">
+        <div class="detail-card">
+            <div class="detail-header" id="detailHeader">
+                <div class="notif-icon-box" id="detailIcon" style="width:56px;height:56px;font-size:1.4rem;"></div>
+                <div style="flex:1;">
+                    <div id="detailTitle" style="font-weight:700;font-size:1.1rem;color:#1e293b;"></div>
+                    <div id="detailType" style="font-size:0.85rem;color:#94a3b8;margin-top:4px;"></div>
+                </div>
+                <button onclick="closeDetail()" style="background:none;border:none;font-size:1.3rem;color:#94a3b8;cursor:pointer;padding:4px 8px;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="detail-body">
+                <div id="detailMessage" style="color:#475569;line-height:1.8;font-size:0.95rem;padding:10px 0 16px; white-space: pre-wrap;"></div>
+                <div id="detailMeta" style="display:flex;gap:16px;flex-wrap:wrap;font-size:0.85rem;color:#94a3b8;padding-top:12px;border-top:1px solid #e5e7eb;">
+                </div>
+            </div>
+            <div class="detail-footer">
+                <div id="detailLinkArea"></div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-outline-secondary" onclick="closeDetail()" style="border-radius:8px;">关闭</button>
+                    <button class="btn btn-sm btn-outline-danger" id="detailDeleteBtn" onclick="" style="border-radius:8px;">
+                        <i class="fas fa-trash me-1"></i>删除
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('zh-CN',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
+
+    function getCookie(n){var v=document.cookie.match('(^|;)\\s*'+n+'=([^;]*)');return v?decodeURIComponent(v[2]):''}
+
+    function gToast(msg,type){
+        var c=document.getElementById('toastContainer'),t=document.createElement('div');
+        t.className='g-toast '+(type||'success');
+        var icons={success:'fa-check-circle',error:'fa-exclamation-circle'};
+        t.innerHTML='<i class="fas '+(icons[type]||icons.success)+'"></i> '+msg;
+        c.appendChild(t);
+        setTimeout(function(){t.style.animation='gToastIn .3s ease reverse';setTimeout(function(){t.remove()},300)},3000);
+    }
+
+    function apiPost(action, id, cb) {
+        var body = 'action=' + action;
+        if (id) body += '&id=' + id;
+        fetch('/manager/admin/notifications/', {
+            method: 'POST',
+            headers: {'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/x-www-form-urlencoded'},
+            body: body
+        }).then(function(r){return r.json()}).then(function(d){
+            if (d.success && cb) cb(d);
+            else if (!d.success) gToast('操作失败','error');
+        }).catch(function(){
+            gToast('网络错误，请重试','error');
+        });
+    }
+
+    function markRead(id) {
+        apiPost('mark_read', id, function() {
+            var el = document.getElementById('notif-' + id);
+            if (el) {
+                el.classList.remove('unread');
+                var checkBtn = el.querySelector('.btn-icon:not(.danger)');
+                if (checkBtn) checkBtn.remove();
+                var unreadDot = el.querySelector('.notif-meta span:last-child');
+                if (unreadDot && unreadDot.textContent.trim() === '未读') unreadDot.remove();
+            }
+            gToast('已标为已读','success');
+        });
+    }
+
+    function markAllRead() {
+        apiPost('mark_all_read', null, function() {
+            document.querySelectorAll('.notif-item.unread').forEach(function(el) {
+                el.classList.remove('unread');
+            });
+            gToast('全部已标为已读','success');
+            setTimeout(function(){location.reload()},800);
+        });
+    }
+
+    function deleteNotif(id) {
+        if (!confirm('确定删除此通知？')) return;
+        apiPost('delete', id, function() {
+            var el = document.getElementById('notif-' + id);
+            if (el) { el.style.opacity = '0'; el.style.transform = 'translateX(100px)'; setTimeout(function(){el.remove()}, 300); }
+            gToast('通知已删除','success');
+        });
+    }
+
+    function clearRead() {
+        if (!confirm('确定清除所有已读通知？')) return;
+        apiPost('clear_all', null, function() {
+            gToast('已读通知已清除','success');
+            setTimeout(function(){location.reload()},800);
+        });
+    }
+
+    // Detail data from server
+    var notifData = {};
+    {% for n in notifications %}
+    notifData[{{ n.id }}] = {
+        id: {{ n.id }},
+        title: "{{ n.title|escapejs }}",
+        message: "{{ n.message|escapejs }}",
+        icon: '{{ n.icon }}',
+        color: '{{ n.color }}',
+        type_display: '{{ n.type_display }}',
+        link: '{{ n.link }}',
+        is_read: {{ n.is_read|yesno:"true,false" }},
+        related_id: {{ n.related_id|default:"null" }},
+        time_ago: '{{ n.time_ago }}',
+        created_at: '{{ n.created_at|date:"Y-m-d H:i:s" }}',
+    };
+    {% endfor %}
+
+    function openDetail(id) {
+        var n = notifData[id];
+        if (!n) return;
+
+        // Mark as read when opening
+        if (!n.is_read) {
+            markRead(id);
+            n.is_read = true;
+        }
+
+        document.getElementById('detailIcon').style.background = n.color + '22';
+        document.getElementById('detailIcon').style.color = n.color;
+        document.getElementById('detailIcon').innerHTML = '<i class="' + n.icon + '"></i>';
+        document.getElementById('detailTitle').textContent = n.title;
+        document.getElementById('detailType').innerHTML = '<span class="notif-type-badge" style="background:' + n.color + '15;color:' + n.color + ';">' + n.type_display + '</span> · ' + n.time_ago;
+        document.getElementById('detailMessage').textContent = n.message;
+        document.getElementById('detailMeta').innerHTML =
+            '<span><i class="fas fa-clock me-1"></i>' + n.created_at + '</span>' +
+            (n.related_id ? '<span><i class="fas fa-link me-1"></i>关联ID: ' + n.related_id + '</span>' : '');
+
+        var linkArea = document.getElementById('detailLinkArea');
+        if (n.link) {
+            linkArea.innerHTML = '<a href="' + n.link + '" class="notif-link-btn" style="padding:8px 18px;font-size:0.9rem;"><i class="fas fa-external-link-alt me-1"></i>前往相关页面</a>';
+        } else {
+            linkArea.innerHTML = '';
+        }
+
+        document.getElementById('detailDeleteBtn').setAttribute('onclick', 'deleteNotif(' + id + ');closeDetail()');
+
+        document.getElementById('detailOverlay').style.display = 'flex';
+    }
+
+    function closeDetail() {
+        document.getElementById('detailOverlay').style.display = 'none';
+    }
+
+    // Keyboard
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeDetail();
+    });
+    </script>
+<script src="/static/js/admin_i18n.js" defer></script>
+</body>
+</html>

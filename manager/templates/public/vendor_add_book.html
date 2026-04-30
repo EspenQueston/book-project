@@ -1,0 +1,274 @@
+{% extends 'public/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "上架图书" %} - {% trans "DUNO 360" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .add-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 80px 0 60px;
+        position: relative; overflow: hidden;
+    }
+    .add-hero::before {
+        content: ''; position: absolute; top: -50%; right: -10%;
+        width: 500px; height: 500px; background: rgba(255,255,255,0.05);
+        border-radius: 50%;
+    }
+    .add-card {
+        background: var(--card-bg, #fff); border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+        padding: 40px; margin-top: -40px;
+        position: relative; z-index: 2;
+    }
+    .add-card .form-control, .add-card .form-select {
+        border: 2px solid var(--input-border, #e8ecf1); border-radius: 14px;
+        padding: 14px 20px; font-size: 1rem; transition: all 0.3s;
+        background: var(--input-bg, #fff); color: var(--dark-text, #333);
+    }
+    .add-card .form-control:focus, .add-card .form-select:focus {
+        border-color: #667eea; box-shadow: 0 0 0 4px rgba(102,126,234,0.1);
+    }
+    .btn-submit {
+        background: linear-gradient(135deg, #667eea, #764ba2); color: #fff;
+        border: none; border-radius: 14px; padding: 14px 32px; font-weight: 700;
+        font-size: 1rem; transition: all 0.3s;
+    }
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.35); }
+    .inline-add-btn {
+        background: linear-gradient(135deg, #667eea, #764ba2); color: #fff;
+        border: none; border-radius: 8px; padding: 5px 10px; font-size: 0.8rem;
+        font-weight: 600; cursor: pointer; transition: all 0.3s;
+    }
+    .inline-add-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(102,126,234,0.3); }
+    .v-modal-overlay {
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5); z-index: 9999; display: none;
+        align-items: center; justify-content: center;
+    }
+    .v-modal-overlay.show { display: flex; }
+    .v-modal {
+        background: var(--card-bg, #fff); border-radius: 20px; padding: 30px;
+        width: 90%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="add-hero text-white">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 text-center">
+                <h1 class="display-5 fw-bold mb-3" data-aos="fade-up"><i class="fas fa-plus-circle me-2"></i>{% trans "上架新书" %}</h1>
+                <p class="lead" style="opacity:0.9;" data-aos="fade-up" data-aos-delay="100">{% trans "填写图书信息将其添加到平台" %}</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="container pb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9">
+            <div class="add-card" data-aos="fade-up">
+                <form id="addBookForm" onsubmit="return submitBook(event)" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {% if admin_access and not vendor %}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">{% trans "卖家ID" %}</label>
+                        <input type="number" name="vendor_id" class="form-control" required>
+                    </div>
+                    {% endif %}
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-bold">{% trans "图书名称" %} <span class="text-danger">*</span></label>
+                            <input type="text" name="name" class="form-control" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">{% trans "售价 (¥)" %} <span class="text-danger">*</span></label>
+                            <input type="number" name="price" class="form-control" step="0.01" min="0" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">{% trans "卖家定价 (¥)" %}</label>
+                            <input type="number" name="vendor_price" class="form-control" step="0.01" min="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">{% trans "库存" %}</label>
+                            <input type="number" name="inventory" class="form-control" min="0" value="0">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold d-flex align-items-center justify-content-between">
+                                <span>{% trans "出版社" %} <span class="text-danger">*</span></span>
+                                <button type="button" class="inline-add-btn" onclick="openVModal('publisher')">
+                                    <i class="fas fa-plus"></i> {% trans "新建" %}
+                                </button>
+                            </label>
+                            <select name="publisher_id" id="vPublisherSelect" class="form-select" required>
+                                <option value="">{% trans "选择出版社" %}</option>
+                                {% for pub in publishers %}
+                                <option value="{{ pub.id }}">{{ pub.publisher_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold d-flex align-items-center justify-content-between">
+                                <span>{% trans "作者" %} <span class="text-danger">*</span></span>
+                                <button type="button" class="inline-add-btn" onclick="openVModal('author')">
+                                    <i class="fas fa-plus"></i> {% trans "新建作者" %}
+                                </button>
+                            </label>
+                            <select name="author_ids" id="vAuthorSelect" class="form-select" multiple required style="min-height:100px;">
+                                {% for author in authors %}
+                                <option value="{{ author.id }}">{{ author.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted">{% trans "按住 Ctrl/Cmd 可多选" %}</small>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold">{% trans "图书描述" %}</label>
+                            <textarea name="description" class="form-control" rows="4"></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold">{% trans "封面图片" %}</label>
+                            <input type="file" name="cover_image" class="form-control" accept="image/*">
+                            <small class="text-muted">{% trans "如不上传，系统将自动生成精美封面" %}</small>
+                        </div>
+
+                        <!-- Ebook Download Section -->
+                        <div class="col-12 mt-2">
+                            <h6 class="fw-bold mb-3" style="color:#667eea;"><i class="fas fa-download me-2"></i>{% trans "电子书下载" %}</h6>
+                            <div class="alert alert-info py-2 px-3" style="border-radius:12px;font-size:0.9rem;">
+                                <i class="fas fa-info-circle me-1"></i> {% trans "您可以上传电子书文件或提供外部下载链接" %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold"><i class="fas fa-file-upload me-1"></i> {% trans "上传电子书文件" %}</label>
+                            <input type="file" name="book_file" class="form-control"
+                                   accept=".pdf,.epub,.mobi,.azw,.azw3,.txt,.doc,.docx">
+                            <small class="text-muted">PDF, EPUB, MOBI, AZW, TXT, DOC, DOCX</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold"><i class="fas fa-link me-1"></i> {% trans "外部下载链接" %}</label>
+                            <input type="url" name="download_link" class="form-control"
+                                   placeholder="https://drive.google.com/...">
+                            <small class="text-muted">Google Drive, OneDrive, Dropbox...</small>
+                        </div>
+
+                        <div class="col-12 d-flex gap-3">
+                            <button type="submit" class="btn-submit" id="submitBtn">
+                                <i class="fas fa-upload me-2"></i>{% trans "上架" %}
+                            </button>
+                            <a href="{% url 'manager:vendor_dashboard' %}" class="btn btn-outline-secondary" style="border-radius:14px;padding:14px 28px;font-weight:600;">
+                                {% trans "返回" %}
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function submitBook(e) {
+    e.preventDefault();
+    var form = document.getElementById('addBookForm');
+    var btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{% trans "上架中..." %}';
+    fetch('{% url "manager:vendor_add_book" %}', {
+        method: 'POST', body: new FormData(form)
+    }).then(r => r.json()).then(d => {
+        if (d.success) {
+            gToast(d.message, 'success');
+            setTimeout(() => { window.location.href = '{% url "manager:vendor_dashboard" %}'; }, 800);
+        } else {
+            gToast(d.message, 'error');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-upload me-2"></i>{% trans "上架" %}';
+        }
+    }).catch(() => {
+        gToast('网络错误', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-upload me-2"></i>{% trans "上架" %}';
+    });
+    return false;
+}
+
+function openVModal(type) { document.getElementById('v' + type + 'Modal').classList.add('show'); }
+function closeVModal(type) { document.getElementById('v' + type + 'Modal').classList.remove('show'); }
+
+function vCreateAuthor() {
+    var name = document.getElementById('vNewAuthorName').value.trim();
+    if (!name) return;
+    var fd = new FormData();
+    fd.append('action', 'create_author');
+    fd.append('author_name', name);
+    fd.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+    fetch('{% url "manager:vendor_add_book" %}', { method: 'POST', body: fd })
+        .then(r => r.json()).then(d => {
+            if (d.success) {
+                var opt = new Option(d.name, d.id, true, true);
+                document.getElementById('vAuthorSelect').appendChild(opt);
+                document.getElementById('vNewAuthorName').value = '';
+                closeVModal('author');
+            } else { gToast(d.message, 'error'); }
+        });
+}
+
+function vCreatePublisher() {
+    var name = document.getElementById('vNewPubName').value.trim();
+    var addr = document.getElementById('vNewPubAddr').value.trim();
+    if (!name) return;
+    var fd = new FormData();
+    fd.append('action', 'create_publisher');
+    fd.append('publisher_name', name);
+    fd.append('publisher_address', addr);
+    fd.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+    fetch('{% url "manager:vendor_add_book" %}', { method: 'POST', body: fd })
+        .then(r => r.json()).then(d => {
+            if (d.success) {
+                var sel = document.getElementById('vPublisherSelect');
+                var opt = new Option(d.name, d.id, true, true);
+                sel.appendChild(opt); sel.value = d.id;
+                document.getElementById('vNewPubName').value = '';
+                document.getElementById('vNewPubAddr').value = '';
+                closeVModal('publisher');
+            } else { gToast(d.message, 'error'); }
+        });
+}
+</script>
+
+<!-- Vendor inline modals -->
+<div class="v-modal-overlay" id="vauthorModal">
+    <div class="v-modal">
+        <h5 class="fw-bold mb-3"><i class="fas fa-user-plus me-2" style="color:#667eea"></i>{% trans "新建作者" %}</h5>
+        <div class="mb-3">
+            <label class="form-label fw-bold">{% trans "作者名称" %} <span class="text-danger">*</span></label>
+            <input type="text" id="vNewAuthorName" class="form-control" style="border-radius:14px;padding:14px 20px;">
+        </div>
+        <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-outline-secondary" style="border-radius:12px;" onclick="closeVModal('author')">{% trans "取消" %}</button>
+            <button type="button" class="btn-submit" style="padding:10px 24px;" onclick="vCreateAuthor()"><i class="fas fa-check me-1"></i>{% trans "创建" %}</button>
+        </div>
+    </div>
+</div>
+<div class="v-modal-overlay" id="vpublisherModal">
+    <div class="v-modal">
+        <h5 class="fw-bold mb-3"><i class="fas fa-building me-2" style="color:#667eea"></i>{% trans "新建出版社" %}</h5>
+        <div class="mb-3">
+            <label class="form-label fw-bold">{% trans "出版社名称" %} <span class="text-danger">*</span></label>
+            <input type="text" id="vNewPubName" class="form-control" style="border-radius:14px;padding:14px 20px;">
+        </div>
+        <div class="mb-3">
+            <label class="form-label fw-bold">{% trans "出版社地址" %}</label>
+            <input type="text" id="vNewPubAddr" class="form-control" style="border-radius:14px;padding:14px 20px;">
+        </div>
+        <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-outline-secondary" style="border-radius:12px;" onclick="closeVModal('publisher')">{% trans "取消" %}</button>
+            <button type="button" class="btn-submit" style="padding:10px 24px;" onclick="vCreatePublisher()"><i class="fas fa-check me-1"></i>{% trans "创建" %}</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

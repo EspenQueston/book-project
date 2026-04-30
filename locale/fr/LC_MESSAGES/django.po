@@ -3,1368 +3,3372 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
+#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: book_project 1.0\n"
+"Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-01 00:00+0800\n"
-"PO-Revision-Date: 2025-01-01 00:00+0800\n"
-"Last-Translator: Auto\n"
-"Language-Team: French\n"
-"Language: fr\n"
+"POT-Creation-Date: 2026-04-29 15:00+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: settings.py
+#: .\book_Project\settings.py:151
 msgid "中文"
 msgstr "Chinois"
 
+#: .\book_Project\settings.py:152
+msgid "English"
+msgstr "Anglais"
+
+#: .\book_Project\settings.py:153
 msgid "Français"
 msgstr "Français"
 
-# ============================================================
-# base.html
-# ============================================================
-
-msgid "图书管理系统"
-msgstr "Système de Gestion de Livres"
-
-msgid "首页"
-msgstr "Accueil"
-
-msgid "图书目录"
-msgstr "Catalogue"
-
-msgid "作者"
-msgstr "Auteurs"
-
-msgid "出版社"
-msgstr "Éditeurs"
-
-msgid "跟踪订单"
-msgstr "Suivi de Commande"
-
-msgid "管理员登录"
-msgstr "Connexion Admin"
-
-msgid "现代化的智能图书管理平台，为读者和管理员提供便捷、高效的图书查询、浏览和管理服务。致力于推广阅读文化，建设知识型社会。"
-msgstr "Une plateforme moderne et intelligente de gestion de livres offrant des services pratiques et efficaces de recherche, de consultation et de gestion pour les lecteurs et les administrateurs. Dédiée à la promotion de la culture de la lecture et à la construction d'une société du savoir."
-
-msgid "快速导航"
-msgstr "Navigation Rapide"
-
-msgid "作者列表"
-msgstr "Liste des Auteurs"
-
-msgid "订单跟踪"
-msgstr "Suivi des Commandes"
-
-msgid "系统功能"
-msgstr "Fonctionnalités"
-
-msgid "图书查询"
-msgstr "Recherche de Livres"
-
-msgid "购物车"
-msgstr "Panier"
-
-msgid "管理后台"
-msgstr "Panneau d'Administration"
-
-msgid "联系我们"
-msgstr "Nous Contacter"
-
-msgid "地址"
-msgstr "Adresse"
-
-msgid "北京市海淀区中关村科技园区"
-msgstr "Parc Scientifique de Zhongguancun, District de Haidian, Pékin"
-
-msgid "电话"
-msgstr "Téléphone"
-
-msgid "邮箱"
-msgstr "E-mail"
-
-msgid "服务时间"
-msgstr "Heures de Service"
-
-msgid "周一至周五 9:00-18:00"
-msgstr "Lundi au Vendredi 9h00-18h00"
-
-msgid "管理员入口"
-msgstr "Accès Administrateur"
-
-msgid "保留所有权利"
-msgstr "Tous Droits Réservés"
-
-msgid "隐私政策"
-msgstr "Politique de Confidentialité"
-
-msgid "使用条款"
-msgstr "Conditions d'Utilisation"
-
-msgid "网站地图"
-msgstr "Plan du Site"
-
-msgid "最后更新: 2024年12月"
-msgstr "Dernière mise à jour : Décembre 2024"
-
-# ============================================================
-# home.html
-# ============================================================
-
-msgid "智能图书管理系统"
-msgstr "Système Intelligent de Gestion de Livres"
-
-msgid "现代化的图书管理平台，为读者和管理员提供高效、便捷的图书查询、浏览和管理服务。探索知识的海洋，发现阅读的乐趣。"
-msgstr "Une plateforme moderne de gestion de livres offrant des services efficaces et pratiques de recherche, de consultation et de gestion. Explorez l'océan du savoir et découvrez le plaisir de la lecture."
-
-msgid "浏览图书"
-msgstr "Parcourir les Livres"
-
-msgid "精选图书"
-msgstr "Livres Sélectionnés"
-
-msgid "合作出版社"
-msgstr "Éditeurs Partenaires"
-
-msgid "知名作者"
-msgstr "Auteurs Célèbres"
-
-msgid "为什么选择我们的图书馆"
-msgstr "Pourquoi Choisir Notre Librairie"
-
-msgid "精心策划的阅读体验，优质的服务保障，让每一次购买都物超所值，开启您的精彩阅读之旅"
-msgstr "Une expérience de lecture soigneusement conçue avec un service de qualité garantie, rendant chaque achat rentable. Commencez votre merveilleux voyage de lecture."
-
-msgid "精选优质图书"
-msgstr "Livres de Qualité Sélectionnés"
-
-msgid "每本图书都经过专业团队精心挑选，涵盖文学、科技、艺术等各个领域，确保您购买的每一本书都具有极高的阅读价值和收藏意义。"
-msgstr "Chaque livre est soigneusement sélectionné par notre équipe professionnelle, couvrant la littérature, la technologie, l'art et bien d'autres domaines, garantissant une excellente valeur de lecture et de collection."
-
-msgid "超值优惠价格"
-msgstr "Prix Exceptionnels"
-
-msgid "直接与出版社合作，省去中间环节，为您提供市场最优价格。定期推出限时折扣、会员专享等优惠活动，让知识更加亲民。"
-msgstr "Des partenariats directs avec les éditeurs éliminent les intermédiaires, offrant les meilleurs prix du marché. Des réductions régulières et des offres exclusives rendent le savoir plus accessible."
-
-msgid "快速便捷配送"
-msgstr "Livraison Rapide et Pratique"
-
-msgid "专业物流团队，24小时内发货，全国包邮服务。精美包装保护图书品质，让您尽快拿到心爱的图书，立即开始阅读。"
-msgstr "Équipe logistique professionnelle, expédition sous 24 heures, livraison gratuite. Un emballage soigné protège la qualité des livres pour que vous puissiez commencer à lire rapidement."
-
-msgid "正版品质保证"
-msgstr "Garantie d'Authenticité"
-
-msgid "所有图书均为正版授权，印刷清晰，装帧精美。提供品质保证，支持7天无理由退换，让您购买无忧，阅读放心。"
-msgstr "Tous les livres sont officiellement autorisés avec une impression nette et une belle reliure. Garantie de qualité avec retour sans condition sous 7 jours pour un achat sans souci."
-
-msgid "专业推荐服务"
-msgstr "Service de Recommandation Professionnel"
-
-msgid "资深阅读顾问为您量身推荐适合的图书，根据您的兴趣偏好和阅读水平，打造个性化的阅读清单，发现更多精彩内容。"
-msgstr "Des conseillers en lecture expérimentés vous recommandent des livres personnalisés selon vos intérêts et votre niveau de lecture, créant des listes de lecture sur mesure pour découvrir plus de contenu passionnant."
-
-msgid "贴心售后服务"
-msgstr "Service Après-Vente Attentionné"
-
-msgid "专业客服团队7×24小时在线服务，解答您的任何疑问。建立读者社群，分享阅读心得，让购书不仅是消费，更是加入知识社区。"
-msgstr "Équipe de service client professionnelle disponible 24h/24, 7j/7 pour répondre à toutes vos questions. Créez des communautés de lecteurs, partagez vos expériences — acheter des livres, c'est aussi rejoindre une communauté du savoir."
-
-msgid "快速搜索图书"
-msgstr "Recherche Rapide de Livres"
-
-msgid "输入书名关键词，快速找到您感兴趣的图书"
-msgstr "Entrez des mots-clés pour trouver rapidement les livres qui vous intéressent"
-
-msgid "输入书名进行搜索..."
-msgstr "Entrez un titre de livre pour rechercher..."
-
-msgid "开始搜索"
-msgstr "Lancer la Recherche"
-
-msgid "热门图书推荐"
-msgstr "Recommandations de Livres Populaires"
-
-msgid "精选优质图书，为您推荐最受欢迎的阅读选择，开启您的知识之旅"
-msgstr "Livres de qualité sélectionnés, les choix de lecture les plus populaires pour commencer votre voyage du savoir"
-
-msgid "销量"
-msgstr "Ventes"
-
-msgid "查看详情"
-msgstr "Voir les Détails"
-
-msgid "查看更多图书"
-msgstr "Voir Plus de Livres"
-
-msgid "开始探索知识的海洋"
-msgstr "Explorez l'Océan du Savoir"
-
-msgid "立即浏览我们丰富的图书收藏，发现您感兴趣的内容，开启精彩的阅读之旅"
-msgstr "Parcourez dès maintenant notre riche collection de livres, découvrez du contenu qui vous intéresse et commencez un voyage de lecture passionnant"
-
-msgid "立即开始探索"
-msgstr "Commencer l'Exploration"
-
-msgid "添加中..."
-msgstr "Ajout en cours..."
-
-msgid "已添加"
-msgstr "Ajouté"
-
-# ============================================================
-# books.html
-# ============================================================
-
-msgid "浏览我们丰富的图书收藏"
-msgstr "Parcourez notre riche collection de livres"
-
-msgid "搜索图书名称..."
-msgstr "Rechercher un titre de livre..."
-
-msgid "按名称排序"
-msgstr "Trier par Nom"
-
-msgid "价格从低到高"
-msgstr "Prix : Croissant"
-
-msgid "价格从高到低"
-msgstr "Prix : Décroissant"
-
-msgid "按销量排序"
-msgstr "Trier par Ventes"
-
-msgid "搜索"
-msgstr "Rechercher"
-
-msgid "暂无封面"
-msgstr "Pas de Couverture"
-
-msgid "缺货"
-msgstr "Rupture de Stock"
-
-msgid "库存"
-msgstr "Stock"
-
-msgid "立即购买"
-msgstr "Acheter Maintenant"
-
-msgid "加入购物车"
-msgstr "Ajouter au Panier"
-
-msgid "未找到相关图书"
-msgstr "Aucun Livre Trouvé"
-
-msgid "请尝试其他搜索关键词或浏览所有图书"
-msgstr "Essayez d'autres mots-clés ou parcourez tous les livres"
-
-msgid "浏览所有图书"
-msgstr "Parcourir Tous les Livres"
-
-msgid "浏览作者"
-msgstr "Parcourir les Auteurs"
-
-msgid "查看所有作者信息"
-msgstr "Voir Toutes les Informations sur les Auteurs"
-
-msgid "浏览出版社"
-msgstr "Parcourir les Éditeurs"
-
-msgid "查看所有出版社"
-msgstr "Voir Tous les Éditeurs"
-
-msgid "返回首页"
-msgstr "Retour à l'Accueil"
-
-msgid "回到主页面"
-msgstr "Retour à la Page Principale"
-
-#, python-format
-msgid "共找到 %(count)s 本图书"
-msgstr "%(count)s livres trouvés"
-
-#, python-format
-msgid "仅剩%(inv)s本"
-msgstr "Plus que %(inv)s en stock"
-
-# ============================================================
-# authors.html
-# ============================================================
-
-msgid "作者目录"
-msgstr "Répertoire des Auteurs"
-
-msgid "探索我们平台的优秀作者"
-msgstr "Explorez les excellents auteurs de notre plateforme"
-
-msgid "搜索作者名称..."
-msgstr "Rechercher un nom d'auteur..."
-
-msgid "代表作"
-msgstr "Œuvre Principale"
-
-msgid "未找到相关作者"
-msgstr "Aucun Auteur Trouvé"
-
-msgid "请尝试其他搜索关键词或浏览所有作者"
-msgstr "Essayez d'autres mots-clés ou parcourez tous les auteurs"
-
-msgid "浏览所有作者"
-msgstr "Parcourir Tous les Auteurs"
-
-msgid "查看所有图书信息"
-msgstr "Voir Toutes les Informations sur les Livres"
-
-#, python-format
-msgid "共找到 %(count)s 位作者"
-msgstr "%(count)s auteurs trouvés"
-
-#, python-format
-msgid "%(count)s 本著作"
-msgstr "%(count)s ouvrages"
-
-# ============================================================
-# publishers.html
-# ============================================================
-
-msgid "出版社目录"
-msgstr "Répertoire des Éditeurs"
-
-msgid "浏览我们合作的优质出版社"
-msgstr "Parcourez nos éditeurs partenaires de qualité"
-
-msgid "搜索出版社名称..."
-msgstr "Rechercher un nom d'éditeur..."
-
-msgid "图书数"
-msgstr "Nombre de Livres"
-
-msgid "未找到相关出版社"
-msgstr "Aucun Éditeur Trouvé"
-
-msgid "请尝试其他搜索关键词或浏览所有出版社"
-msgstr "Essayez d'autres mots-clés ou parcourez tous les éditeurs"
-
-msgid "浏览所有出版社"
-msgstr "Parcourir Tous les Éditeurs"
-
-#, python-format
-msgid "共找到 %(count)s 家出版社"
-msgstr "%(count)s éditeurs trouvés"
-
-# ============================================================
-# cart.html
-# ============================================================
-
-msgid "管理您选择的图书"
-msgstr "Gérez vos livres sélectionnés"
-
-msgid "件商品"
-msgstr "articles"
-
-msgid "购物车商品"
-msgstr "Articles du Panier"
-
-msgid "本"
-msgstr "exemplaire(s)"
-
-msgid "数量"
-msgstr "Quantité"
-
-msgid "单价"
-msgstr "Prix Unitaire"
-
-msgid "移除商品"
-msgstr "Supprimer l'Article"
-
-msgid "继续购物"
-msgstr "Continuer les Achats"
-
-msgid "订单摘要"
-msgstr "Résumé de la Commande"
-
-msgid "商品数量"
-msgstr "Nombre d'Articles"
-
-msgid "件"
-msgstr "articles"
-
-msgid "商品总额"
-msgstr "Sous-total"
-
-msgid "总计"
-msgstr "Total"
-
-msgid "立即结算"
-msgstr "Passer à la Caisse"
-
-msgid "安全购物"
-msgstr "Achat Sécurisé"
-
-msgid "您的购物信息和支付数据受到安全保护"
-msgstr "Vos informations d'achat et de paiement sont protégées en toute sécurité"
-
-msgid "购物车为空"
-msgstr "Votre Panier est Vide"
-
-msgid "还没有添加任何商品到购物车"
-msgstr "Aucun article n'a encore été ajouté au panier"
-
-msgid "去选购图书"
-msgstr "Aller Acheter des Livres"
-
-msgid "确定要移除这个商品吗？"
-msgstr "Êtes-vous sûr de vouloir supprimer cet article ?"
-
-msgid "更新失败，请重试"
-msgstr "Échec de la mise à jour, veuillez réessayer"
-
-msgid "移除失败，请重试"
-msgstr "Échec de la suppression, veuillez réessayer"
-
-# ============================================================
-# checkout.html
-# ============================================================
-
-msgid "结账"
-msgstr "Paiement"
-
-msgid "选择商品"
-msgstr "Sélectionner les Articles"
-
-msgid "填写信息"
-msgstr "Remplir les Informations"
-
-msgid "完成订单"
-msgstr "Finaliser la Commande"
-
-msgid "客户信息"
-msgstr "Informations Client"
-
-msgid "我们销售的是数字产品，无需填写收货地址"
-msgstr "Nous vendons des produits numériques, aucune adresse de livraison n'est requise"
-
-msgid "姓名"
-msgstr "Nom"
-
-msgid "请输入您的姓名"
-msgstr "Veuillez entrer votre nom"
-
-msgid "请输入您的邮箱地址"
-msgstr "Veuillez entrer votre adresse e-mail"
-
-msgid "用于接收订单和电子书"
-msgstr "Pour recevoir les commandes et les e-books"
-
-msgid "微信/电话号码"
-msgstr "WeChat / Numéro de Téléphone"
-
-msgid "微信号或电话号码"
-msgstr "Identifiant WeChat ou numéro de téléphone"
-
-msgid "国家"
-msgstr "Pays"
-
-msgid "请选择国家"
-msgstr "Veuillez sélectionner un pays"
-
-msgid "支付方式"
-msgstr "Mode de Paiement"
-
-msgid "固定价格"
-msgstr "Prix Fixe"
-
-msgid "请先选择国家以显示可用的支付方式"
-msgstr "Veuillez d'abord sélectionner un pays pour afficher les modes de paiement disponibles"
-
-msgid "备注信息"
-msgstr "Notes"
-
-msgid "订单备注"
-msgstr "Notes de Commande"
-
-msgid "如有特殊要求，请在此说明（可选）"
-msgstr "Si vous avez des exigences particulières, veuillez les préciser ici (facultatif)"
-
-msgid "商品总计"
-msgstr "Sous-total des Articles"
-
-msgid "运费"
-msgstr "Frais de Livraison"
-
-msgid "免费"
-msgstr "Gratuit"
-
-msgid "订单总额"
-msgstr "Total de la Commande"
-
-msgid "确认订单并支付"
-msgstr "Confirmer la Commande et Payer"
-
-msgid "您的支付信息经过安全加密保护"
-msgstr "Vos informations de paiement sont protégées par un cryptage sécurisé"
-
-msgid "微信支付"
-msgstr "Paiement WeChat"
-
-msgid "支付宝"
-msgstr "Alipay"
-
-msgid "信用卡"
-msgstr "Carte de Crédit"
-
-msgid "银行转账"
-msgstr "Virement Bancaire"
-
-msgid "点击选择"
-msgstr "Cliquez pour Sélectionner"
-
-msgid "请选择支付方式"
-msgstr "Veuillez sélectionner un mode de paiement"
-
-msgid "请使用手机扫描二维码完成支付"
-msgstr "Veuillez scanner le code QR avec votre téléphone pour effectuer le paiement"
-
-msgid "金额"
-msgstr "Montant"
-
-msgid "请确认您的支付状态"
-msgstr "Veuillez confirmer votre statut de paiement"
-
-msgid "已完成支付"
-msgstr "Paiement Effectué"
-
-msgid "尚未支付"
-msgstr "Pas Encore Payé"
-
-# ============================================================
-# book_detail.html
-# ============================================================
-
-msgid "图书详情"
-msgstr "Détails du Livre"
-
-msgid "图书信息"
-msgstr "Informations du Livre"
-
-msgid "图书简介"
-msgstr "Description du Livre"
-
-msgid "出版社信息"
-msgstr "Informations de l'Éditeur"
-
-msgid "出版社名称"
-msgstr "Nom de l'Éditeur"
-
-msgid "出版社地址"
-msgstr "Adresse de l'Éditeur"
-
-msgid "作者信息"
-msgstr "Informations sur l'Auteur"
-
-msgid "购买选项"
-msgstr "Options d'Achat"
-
-msgid "选择数量"
-msgstr "Sélectionner la Quantité"
-
-msgid "抱歉，商品已售罄"
-msgstr "Désolé, cet article est en rupture de stock"
-
-msgid "该商品暂时缺货，无法购买"
-msgstr "Cet article est temporairement indisponible et ne peut être acheté"
-
-msgid "查看出版社详情"
-msgstr "Voir les Détails de l'Éditeur"
-
-msgid "返回列表"
-msgstr "Retour à la Liste"
-
-msgid "相关推荐"
-msgstr "Recommandations Similaires"
-
-msgid "来自同一出版社的优质图书"
-msgstr "Livres de qualité du même éditeur"
-
-msgid "数量不能少于1本"
-msgstr "La quantité ne peut pas être inférieure à 1"
-
-msgid "库存不足！最大可购买"
-msgstr "Stock insuffisant ! Maximum disponible"
-
-#, python-format
-msgid "最多 %(inv)s 本"
-msgstr "Maximum %(inv)s"
-
-# ============================================================
-# author_detail.html
-# ============================================================
-
-msgid "作者详情"
-msgstr "Détails de l'Auteur"
-
-msgid "作品"
-msgstr "Œuvres"
-
-msgid "均价"
-msgstr "Prix Moyen"
-
-msgid "注册时间"
-msgstr "Date d'Inscription"
-
-msgid "未知"
-msgstr "Inconnu"
-
-msgid "作品列表"
-msgstr "Liste des Œuvres"
-
-msgid "详情"
-msgstr "Détails"
-
-msgid "购买"
-msgstr "Acheter"
-
-msgid "暂无作品"
-msgstr "Aucune Œuvre"
-
-msgid "该作者目前还没有任何已发布的作品。"
-msgstr "Cet auteur n'a actuellement aucune œuvre publiée."
-
-# ============================================================
-# track_order.html
-# ============================================================
-
-msgid "订单跟踪"
-msgstr "Suivi de Commande"
-
-msgid "输入您的订单号或邮箱来查看订单状态和物流信息"
-msgstr "Entrez votre numéro de commande ou votre e-mail pour consulter le statut de la commande et les informations logistiques"
-
-msgid "订单号查询"
-msgstr "Recherche par Numéro de Commande"
-
-msgid "邮箱查询"
-msgstr "Recherche par E-mail"
-
-msgid "订单号"
-msgstr "Numéro de Commande"
-
-msgid "请输入您的订单号"
-msgstr "Veuillez entrer votre numéro de commande"
-
-msgid "查询订单"
-msgstr "Rechercher la Commande"
-
-msgid "客户邮箱"
-msgstr "E-mail du Client"
-
-msgid "将显示与此邮箱相关的所有订单"
-msgstr "Toutes les commandes associées à cet e-mail seront affichées"
-
-msgid "订单金额"
-msgstr "Montant de la Commande"
-
-msgid "支付状态"
-msgstr "Statut de Paiement"
-
-msgid "立即支付"
-msgstr "Payer Maintenant"
-
-msgid "取消订单"
-msgstr "Annuler la Commande"
-
-msgid "订单"
-msgstr "Commande"
-
-msgid "客户姓名"
-msgstr "Nom du Client"
-
-msgid "联系电话"
-msgstr "Téléphone de Contact"
-
-msgid "下单时间"
-msgstr "Date de Commande"
-
-msgid "订单进度"
-msgstr "Progression de la Commande"
-
-msgid "订单已创建"
-msgstr "Commande Créée"
-
-msgid "支付完成"
-msgstr "Paiement Effectué"
-
-msgid "等待支付"
-msgstr "En Attente de Paiement"
-
-msgid "请尽快完成支付"
-msgstr "Veuillez effectuer le paiement dès que possible"
-
-msgid "订单已确认"
-msgstr "Commande Confirmée"
-
-msgid "商家已确认您的订单"
-msgstr "Le commerçant a confirmé votre commande"
-
-msgid "等待确认"
-msgstr "En Attente de Confirmation"
-
-msgid "商家正在处理您的订单"
-msgstr "Le commerçant traite votre commande"
-
-msgid "订单已发货"
-msgstr "Commande Expédiée"
-
-msgid "您的订单正在配送中"
-msgstr "Votre commande est en cours de livraison"
-
-msgid "等待发货"
-msgstr "En Attente d'Expédition"
-
-msgid "商品准备中"
-msgstr "Articles en cours de préparation"
-
-msgid "订单已送达"
-msgstr "Commande Livrée"
-
-msgid "等待签收"
-msgstr "En Attente de Réception"
-
-msgid "商品将尽快送达"
-msgstr "Les articles seront livrés dès que possible"
-
-msgid "订单已取消"
-msgstr "Commande Annulée"
-
-msgid "商品清单"
-msgstr "Liste des Articles"
-
-msgid "商品名称"
-msgstr "Nom de l'Article"
-
-msgid "小计"
-msgstr "Sous-total"
-
-msgid "图书下载"
-msgstr "Téléchargement de Livres"
-
-msgid "文件下载"
-msgstr "Téléchargement de Fichier"
-
-msgid "外部链接"
-msgstr "Lien Externe"
-
-msgid "下载图书"
-msgstr "Télécharger le Livre"
-
-msgid "您购买的图书暂无电子版下载，如需纸质版请等待配送。"
-msgstr "Les livres que vous avez achetés n'ont pas de téléchargement numérique disponible. Pour les copies papier, veuillez attendre la livraison."
-
-msgid "需要帮助？"
-msgstr "Besoin d'Aide ?"
-
-msgid "如果您对订单有任何疑问，请联系我们的客服"
-msgstr "Si vous avez des questions concernant votre commande, veuillez contacter notre service client"
-
-msgid "未找到订单"
-msgstr "Aucune Commande Trouvée"
-
-msgid "请检查您输入的订单号是否正确，或联系客服获取帮助。"
-msgstr "Veuillez vérifier que le numéro de commande saisi est correct, ou contactez le service client pour obtenir de l'aide."
-
-msgid "确定要取消此订单吗？"
-msgstr "Êtes-vous sûr de vouloir annuler cette commande ?"
-
-#, python-format
-msgid "找到 %(count)s 个订单"
-msgstr "%(count)s commandes trouvées"
-
-# ============================================================
-# order_confirmation.html
-# ============================================================
-
-msgid "订单确认"
-msgstr "Confirmation de Commande"
-
-msgid "订单创建成功！"
-msgstr "Commande Créée avec Succès !"
-
-msgid "感谢您的购买，我们将尽快为您处理订单"
-msgstr "Merci pour votre achat, nous traiterons votre commande dans les plus brefs délais"
-
-msgid "订单详情"
-msgstr "Détails de la Commande"
-
-msgid "联系邮箱"
-msgstr "E-mail de Contact"
-
-msgid "订单商品"
-msgstr "Articles de la Commande"
-
-msgid "支付信息"
-msgstr "Informations de Paiement"
-
-msgid "应付金额"
-msgstr "Montant à Payer"
-
-msgid "订单创建"
-msgstr "Commande Créée"
-
-msgid "等待付款"
-msgstr "En Attente de Paiement"
-
-msgid "验证处理"
-msgstr "Vérification"
-
-msgid "可下载"
-msgstr "Téléchargeable"
-
-msgid "支付步骤"
-msgstr "Étapes de Paiement"
-
-msgid "扫描二维码"
-msgstr "Scanner le Code QR"
-
-msgid "点击下方按钮，用手机扫描付款码"
-msgstr "Cliquez sur le bouton ci-dessous et scannez le code de paiement avec votre téléphone"
-
-msgid "完成付款"
-msgstr "Finaliser le Paiement"
-
-msgid "点击"我已支付""
-msgstr "Cliquez sur « J'ai payé »"
-
-msgid "确认后系统将在5-10分钟内验证"
-msgstr "Le système vérifiera dans les 5 à 10 minutes après confirmation"
-
-msgid "扫码支付"
-msgstr "Scanner pour Payer"
-
-msgid "支付时间已过期，订单已自动取消"
-msgstr "Le délai de paiement a expiré, la commande a été automatiquement annulée"
-
-msgid "下一步"
-msgstr "Étape Suivante"
-
-msgid "已付款"
-msgstr "Payé"
-
-msgid "验证中"
-msgstr "En cours de Vérification"
-
-msgid "验证处理中..."
-msgstr "Vérification en cours..."
-
-msgid "我们正在验证您的付款"
-msgstr "Nous vérifions votre paiement"
-
-msgid "预计"
-msgstr "Estimé"
-
-msgid "分钟"
-msgstr "minutes"
-
-msgid "内完成确认。"
-msgstr "pour finaliser la confirmation."
-
-msgid "确认完成后，您将可以直接下载电子书。无需刷新页面，系统会自动更新状态。"
-msgstr "Une fois confirmé, vous pourrez télécharger directement l'e-book. Pas besoin de rafraîchir la page, le système mettra automatiquement à jour le statut."
-
-msgid "需要加快确认？添加客服微信"
-msgstr "Besoin d'une confirmation plus rapide ? Ajoutez le service client sur WeChat"
-
-msgid "扫描二维码或搜索微信ID添加好友"
-msgstr "Scannez le code QR ou recherchez l'identifiant WeChat pour ajouter comme ami"
-
-msgid "请等待5-10分钟，系统正在验证付款。确认后即可下载电子书。"
-msgstr "Veuillez patienter 5 à 10 minutes, le système vérifie le paiement. Vous pourrez télécharger l'e-book après confirmation."
-
-msgid "已确认"
-msgstr "Confirmé"
-
-msgid "已发货"
-msgstr "Expédié"
-
-msgid "您的电子书已准备好下载！"
-msgstr "Vos e-books sont prêts à être téléchargés !"
-
-msgid "下载您的电子书"
-msgstr "Téléchargez Vos E-books"
-
-msgid "感谢您的购买！您现在可以下载已购买的电子书。"
-msgstr "Merci pour votre achat ! Vous pouvez maintenant télécharger vos e-books achetés."
-
-msgid "下载"
-msgstr "Télécharger"
-
-msgid "下载文件准备中，请联系客服"
-msgstr "Fichier en cours de préparation, veuillez contacter le service client"
-
-msgid "客户备注"
-msgstr "Notes du Client"
-
-msgid "跟踪订单"
-msgstr "Suivre la Commande"
-
-msgid "继续购书"
-msgstr "Continuer les Achats"
-
-msgid "重要提醒"
-msgstr "Rappel Important"
-
-msgid "请保存好您的订单号"
-msgstr "Veuillez conserver votre numéro de commande"
-
-msgid "订单确认邮件已发送至"
-msgstr "L'e-mail de confirmation de commande a été envoyé à"
-
-msgid "如有疑问，请联系客服并提供订单号"
-msgstr "En cas de question, veuillez contacter le service client avec votre numéro de commande"
-
-msgid "您可以随时使用订单号和邮箱查询订单状态"
-msgstr "Vous pouvez vérifier le statut de votre commande à tout moment avec votre numéro de commande et votre e-mail"
-
-msgid "正在验证支付..."
-msgstr "Vérification du paiement en cours..."
-
-msgid "请稍候，系统正在确认您的付款"
-msgstr "Veuillez patienter, le système confirme votre paiement"
-
-msgid "点击复制订单号"
-msgstr "Cliquez pour copier le numéro de commande"
-
-msgid "我已完成支付"
-msgstr "J'ai Effectué le Paiement"
-
-msgid "请按照订单信息中的支付方式完成付款"
-msgstr "Veuillez effectuer le paiement selon le mode de paiement indiqué dans les informations de la commande"
-
-msgid "支付确认成功!"
-msgstr "Confirmation de paiement réussie !"
-
-msgid "系统正在验证，预计 5-10 分钟内完成确认"
-msgstr "Le système vérifie, confirmation estimée dans les 5 à 10 minutes"
-
-msgid "确认失败，请重试"
-msgstr "Échec de la confirmation, veuillez réessayer"
-
-msgid "网络错误，请重试"
-msgstr "Erreur réseau, veuillez réessayer"
-
-msgid "确定要取消此订单吗？取消后无法恢复。"
-msgstr "Êtes-vous sûr de vouloir annuler cette commande ? Cette action est irréversible."
-
-msgid "取消中..."
-msgstr "Annulation en cours..."
-
-msgid "已取消"
-msgstr "Annulé"
-
-msgid "取消失败，请重试"
-msgstr "Échec de l'annulation, veuillez réessayer"
-
-#, python-format
-msgid "点击上方"扫码支付"按钮，使用 %(method)s 完成付款"
-msgstr "Cliquez sur le bouton « Scanner pour Payer » ci-dessus et utilisez %(method)s pour effectuer le paiement"
-
-# ============================================================
-# publisher_detail.html
-# ============================================================
-
-msgid "出版社详情"
-msgstr "Détails de l'Éditeur"
-
-msgid "返回出版社列表"
-msgstr "Retour aux Éditeurs"
-
-msgid "出版图书"
-msgstr "Livres Publiés"
-
-msgid "总销量"
-msgstr "Ventes Totales"
-
-msgid "总库存"
-msgstr "Stock Total"
-
-msgid "合作作者"
-msgstr "Auteurs Associés"
-
-msgid "基本信息"
-msgstr "Informations Générales"
-
-msgid "出版社ID"
-msgstr "ID de l'Éditeur"
-
-msgid "名称"
-msgstr "Nom"
-
-msgid "出版统计"
-msgstr "Statistiques de Publication"
-
-msgid "平均价格"
-msgstr "Prix Moyen"
-
-msgid "总收入"
-msgstr "Revenu Total"
-
-msgid "查看该出版社图书"
-msgstr "Voir les Livres de cet Éditeur"
-
-msgid "该出版社出版的所有图书"
-msgstr "Tous les livres publiés par cet éditeur"
-
-msgid "未知作者"
-msgstr "Auteur Inconnu"
-
-msgid "暂无出版图书"
-msgstr "Aucun Livre Publié"
-
-msgid "该出版社目前还没有出版任何图书"
-msgstr "Cet éditeur n'a actuellement publié aucun livre"
-
-msgid "浏览其他图书"
-msgstr "Parcourir d'Autres Livres"
-
-# ============================================================
-# Shared across templates
-# ============================================================
-
-msgid "订单状态"
-msgstr "Statut de la Commande"
-
-
-# ============================================================
-# New pages: About, Services, Contact, Blog
-# ============================================================
-msgid "博客"
-msgstr "Blog"
-
-msgid "更多"
-msgstr "Plus"
-
+#: .\manager\templates\includes\global_popups.html:43
+#: .\manager\templates\public\base.html:1104
+#: .\manager\templates\public\vendor_add_book.html:252
+#: .\manager\templates\public\vendor_add_book.html:269
+#: .\manager\templates\public\vendor_edit_book.html:259
+#: .\manager\templates\public\vendor_edit_book.html:276
+msgid "取消"
+msgstr "Annuler"
+
+#: .\manager\templates\includes\global_popups.html:44
+#: .\manager\templates\includes\global_popups.html:64
+#: .\manager\templates\public\base.html:1105
+#: .\manager\templates\public\base.html:1171
+msgid "确认"
+msgstr "Confirmer"
+
+#: .\manager\templates\includes\global_popups.html:55
+#: .\manager\templates\public\base.html:1117
+msgid "知道了"
+msgstr "Compris"
+
+#: .\manager\templates\includes\global_popups.html:64
+#: .\manager\templates\public\base.html:1166
+msgid "确认操作"
+msgstr "Confirmer l'action"
+
+#: .\manager\templates\includes\global_popups.html:66
+#: .\manager\templates\public\base.html:1183
+msgid "提示"
+msgstr "Avertissement"
+
+#: .\manager\templates\public\about.html:4
+#: .\manager\templates\public\author_detail_old.html:4
+#: .\manager\templates\public\authors.html:4
+#: .\manager\templates\public\blog.html:4
+#: .\manager\templates\public\books.html:4
+#: .\manager\templates\public\cart.html:4
+#: .\manager\templates\public\checkout.html:4
+#: .\manager\templates\public\contact.html:4
+#: .\manager\templates\public\publisher_detail_old.html:4
+#: .\manager\templates\public\publishers.html:4
+#: .\manager\templates\public\services.html:4
+#: .\manager\templates\public\track_order.html:4
+#: .\manager\templates\public\user_login.html:4
+#: .\manager\templates\public\user_profile.html:4
+#: .\manager\templates\public\user_register.html:4
+#: .\manager\templates\public\vendor_add_book.html:4
+#: .\manager\templates\public\vendor_edit_book.html:4
+#: .\manager\templates\public\vendor_login.html:4
+#: .\manager\templates\public\vendor_register.html:4
+#: .\manager\templates\public\verify_email.html:4
+msgid "DUNO 360"
+msgstr "DUNO 360"
+
+#: .\manager\templates\public\about.html:4
+#: .\manager\templates\public\about.html:312
+#: .\manager\templates\public\base.html:738
+#: .\manager\templates\public\base.html:941
 msgid "关于我们"
-msgstr "À Propos"
+msgstr "À propos de nous"
 
-msgid "我们的服务"
-msgstr "Nos Services"
+#: .\manager\templates\public\about.html:313
+msgid "知识与生活的一站式平台"
+msgstr "Plateforme tout-en-un de connaissances et de vie"
 
-msgid "微信"
-msgstr "WeChat"
+#: .\manager\templates\public\about.html:314
+msgid ""
+"我们是一支充满激情的团队，致力于打造集图书、在线课程、生活商品于一体的综合性数字平台。从电子书下载到在线学习，从生鲜超市到多元市场，让知识与便利触手可及。"
+msgstr ""
+"Nous sommes une équipe passionnée, dédiée à créer une plateforme numérique "
+"intégrée combinant livres, cours en ligne et produits de vie. Du "
+"téléchargement de livres électroniques à l'apprentissage en ligne, du "
+"supermarché de produits frais au marché diversifié, nous rendons la "
+"connaissance et la commodité à portée de main."
 
-msgid "致力于推广阅读文化"
-msgstr "Dédiés à la Promotion de la Culture de Lecture"
-
-msgid "我们是一个充满激情的团队，致力于通过技术创新让每个人都能享受到阅读的乐趣。我们的使命是建设一个智能、便捷的图书管理平台。"
-msgstr "Nous sommes une équipe passionnée dédiée à rendre la lecture accessible à tous grâce à l'innovation technologique. Notre mission est de construire une plateforme de gestion de livres intelligente et pratique."
-
+#: .\manager\templates\public\about.html:331
 msgid "成立年份"
-msgstr "Année de Fondation"
+msgstr "Année de création"
 
+#: .\manager\templates\public\about.html:335
 msgid "我们的故事"
-msgstr "Notre Histoire"
+msgstr "Notre histoire"
 
-msgid "从一个想法到一个平台"
-msgstr "D'une Idée à une Plateforme"
+#: .\manager\templates\public\about.html:336
+msgid "从图书管理到综合平台"
+msgstr "De la gestion de livres à la plateforme intégrée"
 
-msgid "我们的图书管理系统诞生于对知识传播的热爱。从最初的构想到如今功能完善的平台，我们始终坚持以用户为中心，不断优化产品体验。"
-msgstr "Notre système de gestion de livres est né d'un amour du partage des connaissances. Du concept initial à la plateforme complète d'aujourd'hui, nous restons centrés sur l'utilisateur, optimisant continuellement l'expérience."
+#: .\manager\templates\public\about.html:337
+msgid "最初，我们只是一个简单的DUNO 360。随着用户需求的增长，我们逐步拓展为一个集图书电商、在线教育、生活超市和多元市场于一体的综合性平台。"
+msgstr ""
+"Au départ, nous n'étions qu'un simple DUNO 360. Au fur et à mesure que les "
+"besoins des utilisateurs ont grandi, nous avons progressivement évolué pour "
+"devenir une plateforme intégrée combinant commerce électronique de livres, "
+"éducation en ligne, supermarché de vie et marché diversifié."
 
-msgid "我们相信，每一本书都承载着智慧与力量。通过我们的平台，读者可以轻松发现、购买和管理他们喜爱的书籍。"
-msgstr "Nous croyons que chaque livre porte sagesse et puissance. Grâce à notre plateforme, les lecteurs peuvent facilement découvrir, acheter et gérer leurs livres préférés."
+#: .\manager\templates\public\about.html:338
+msgid "如今，用户可以在我们的平台上购买并下载电子书、学习在线视频课程、选购各类商品，并通过智能AI助手获取即时帮助。我们用技术连接知识与生活。"
+msgstr ""
+"Aujourd'hui, les utilisateurs peuvent acheter et télécharger des livres "
+"électroniques, suivre des cours vidéo en ligne, sélectionner divers produits"
+" et obtenir de l'aide instantanée grâce à l'assistant IA intelligent. Nous "
+"utilisons la technologie pour connecter la connaissance et la vie."
 
+#: .\manager\templates\public\about.html:340
+#: .\manager\templates\public\about.html:434
+#: .\manager\templates\public\blog_detail.html:514
+#: .\manager\templates\public\cart.html:143
+#: .\manager\templates\public\services.html:362
+#: .\manager\templates\public\user_profile.html:266
+msgid "浏览图书"
+msgstr "Parcourir les livres"
+
+#: .\manager\templates\public\about.html:341
+#: .\manager\templates\public\about.html:435
+#: .\manager\templates\public\order_confirmation.html:605
+#: .\manager\templates\public\services.html:363
+#: .\manager\templates\public\user_profile.html:269
+msgid "逛市场"
+msgstr "Explorer le marché"
+
+#: .\manager\templates\public\about.html:351
 msgid "我们的价值观"
-msgstr "Nos Valeurs"
+msgstr "Nos valeurs"
 
+#: .\manager\templates\public\about.html:352
 msgid "驱动我们前行的核心理念"
-msgstr "Principes Fondamentaux Qui Nous Font Avancer"
+msgstr "Les principes fondamentaux qui nous motivent"
 
+#: .\manager\templates\public\about.html:358
 msgid "创新"
 msgstr "Innovation"
 
-msgid "我们不断探索新技术和新方法，为用户提供最前沿的图书管理体验。"
-msgstr "Nous explorons constamment de nouvelles technologies et méthodes pour offrir aux utilisateurs des expériences de gestion de livres à la pointe."
+#: .\manager\templates\public\about.html:359
+msgid "融合AI智能助手、在线课程和电子商务，不断探索数字平台的新可能。"
+msgstr ""
+"Intégrer l'assistant IA intelligent, les cours en ligne et le commerce "
+"électronique, et explorer continuellement les nouvelles possibilités d'une "
+"plateforme numérique."
 
+#: .\manager\templates\public\about.html:365
 msgid "热情"
 msgstr "Passion"
 
-msgid "对阅读的热爱驱动着我们，我们希望将这份热情传递给每一位用户。"
-msgstr "Notre amour de la lecture nous motive, et nous espérons transmettre cette passion à chaque utilisateur."
+#: .\manager\templates\public\about.html:366
+msgid "对知识传播和用户体验的热爱驱动着我们，将最好的服务带给全球用户。"
+msgstr ""
+"L'amour de la diffusion du savoir et de l'expérience utilisateur nous pousse"
+" à offrir le meilleur service aux utilisateurs du monde entier."
 
+#: .\manager\templates\public\about.html:372
 msgid "可靠"
-msgstr "Fiable"
+msgstr "Fiabilité"
 
-msgid "我们承诺提供稳定、安全的服务，让用户可以放心地使用我们的平台。"
-msgstr "Nous promettons de fournir des services stables et sécurisés pour que les utilisateurs puissent utiliser notre plateforme en toute confiance."
+#: .\manager\templates\public\about.html:373
+msgid "安全的支付系统和稳定的服务体验，让用户放心购书、学习和购物。"
+msgstr ""
+"Un système de paiement sécurisé et une expérience de service stable "
+"permettent aux utilisateurs d'acheter des livres, d'étudier et de faire des "
+"achats en toute confiance."
 
-msgid "以用户为中心"
-msgstr "Centré sur l'Utilisateur"
+#: .\manager\templates\public\about.html:379
+msgid "全球化"
+msgstr "Mondialisation"
 
-msgid "用户的需求和体验始终是我们决策的核心，我们倾听每一个声音。"
-msgstr "Les besoins et l'expérience des utilisateurs sont toujours au cœur de nos décisions. Nous écoutons chaque voix."
+#: .\manager\templates\public\about.html:380
+msgid "支持中文、英文、法文三语，覆盖微信、支付宝、PayPal等多种支付方式，服务全球用户。"
+msgstr ""
+"Prise en charge du chinois, de l'anglais et du français, couvrant WeChat, "
+"Alipay, PayPal et d'autres modes de paiement, pour servir les utilisateurs "
+"du monde entier."
 
+#: .\manager\templates\public\about.html:390
 msgid "图书数量"
-msgstr "Nombre de Livres"
+msgstr "Nombre de livres"
 
+#: .\manager\templates\public\about.html:391
 msgid "作者数量"
-msgstr "Nombre d'Auteurs"
+msgstr "Nombre d'auteurs"
 
-msgid "我们的团队"
-msgstr "Notre Équipe"
+#: .\manager\templates\public\about.html:392
+#: .\manager\templates\public\base.html:706
+#: .\manager\templates\public\base.html:929
+#: .\manager\templates\public\book_detail.html:156
+#: .\manager\templates\public\publisher_detail.html:48
+#: .\manager\templates\public\vendor_add_book.html:100
+#: .\manager\templates\public\vendor_edit_book.html:96
+msgid "出版社"
+msgstr "Maison d'édition"
 
-msgid "专业的团队，卓越的服务"
-msgstr "Équipe Professionnelle, Service Excellent"
+#: .\manager\templates\public\about.html:393
+#: .\manager\templates\public\author_detail.html:72
+#: .\manager\templates\public\author_detail.html:99
+#: .\manager\templates\public\publisher_detail.html:68
+#: .\manager\templates\public\publisher_detail.html:95
+#: .\manager\templates\public\publisher_detail.html:156
+#: .\manager\templates\public\publisher_detail_old.html:194
+msgid "总销量"
+msgstr "Ventes totales"
 
-msgid "创始人"
-msgstr "Fondateur"
+#: .\manager\templates\public\about.html:401
+msgid "平台功能"
+msgstr "Fonctionnalités de la plateforme"
 
-msgid "产品设计"
-msgstr "Conception Produit"
+#: .\manager\templates\public\about.html:402
+msgid "一个平台，多种服务"
+msgstr "Une plateforme, plusieurs services"
 
-msgid "技术团队"
-msgstr "Équipe Technique"
+#: .\manager\templates\public\about.html:407
+#: .\manager\templates\public\services.html:258
+msgid "电子书商店"
+msgstr "Boutique de livres électroniques"
 
-msgid "全栈开发"
-msgstr "Développement Full-Stack"
+#: .\manager\templates\public\about.html:407
+msgid "购买与下载电子书"
+msgstr "Acheter et télécharger des livres électroniques"
 
-msgid "客服团队"
-msgstr "Équipe Support"
+#: .\manager\templates\public\about.html:412
+#: .\manager\templates\public\services.html:270
+#: .\marketplace\templates\marketplace\courses.html:4
+#: .\marketplace\templates\marketplace\courses.html:55
+#: .\marketplace\templates\marketplace\home.html:155
+msgid "在线课程"
+msgstr "Cours en ligne"
 
-msgid "客户支持"
-msgstr "Support Client"
+#: .\manager\templates\public\about.html:412
+#: .\manager\templates\public\services.html:273
+msgid "视频课程学习"
+msgstr "Apprentissage par cours vidéo"
 
+#: .\manager\templates\public\about.html:417
+#: .\manager\templates\public\services.html:282
+msgid "综合市场"
+msgstr "Marché intégré"
+
+#: .\manager\templates\public\about.html:417
+msgid "商品与生鲜超市"
+msgstr "Supermarché de produits et de produits frais"
+
+#: .\manager\templates\public\about.html:422
+#: .\manager\templates\public\services.html:306
+msgid "AI智能助手"
+msgstr "Assistant intelligent AI"
+
+#: .\manager\templates\public\about.html:422
+msgid "实时智能客服"
+msgstr "Service client intelligent en temps réel"
+
+#: .\manager\templates\public\about.html:432
 msgid "准备好开始了吗？"
-msgstr "Prêt à Commencer ?"
+msgstr "Prêt à commencer ?"
 
-msgid "浏览我们的图书目录，发现您的下一本好书。"
-msgstr "Parcourez notre catalogue de livres et découvrez votre prochaine lecture."
+#: .\manager\templates\public\about.html:433
+msgid "浏览图书、探索课程、选购商品——从这里开始您的旅程。"
+msgstr ""
+"Parcourez les livres, explorez les cours, choisissez des produits — "
+"commencez votre voyage ici."
 
-msgid "全方位的图书服务"
-msgstr "Services Complets de Livres"
+#: .\manager\templates\public\author_detail.html:4
+#: .\manager\templates\public\author_detail_old.html:4
+msgid "作者详情"
+msgstr "Détails de l'auteur"
 
-msgid "从图书搜索到订单管理，我们提供一站式的智能图书服务，让您的阅读体验更加便捷和愉悦。"
-msgstr "De la recherche de livres à la gestion des commandes, nous offrons des services intelligents tout-en-un pour rendre votre expérience de lecture plus pratique et agréable."
+#: .\manager\templates\public\author_detail.html:56
+#: .\manager\templates\public\base.html:675
+#: .\manager\templates\public\base.html:926
+#: .\manager\templates\public\blog_detail.html:409
+#: .\manager\templates\public\book_detail.html:105
+#: .\manager\templates\public\book_detail_old.html:13
+#: .\manager\templates\public\home.html:4
+#: .\manager\templates\public\publisher_detail.html:47
+msgid "首页"
+msgstr "Accueil"
 
-msgid "核心服务"
-msgstr "Services Principaux"
+#: .\manager\templates\public\author_detail.html:57
+#: .\manager\templates\public\author_detail_old.html:17
+#: .\manager\templates\public\base.html:697
+#: .\manager\templates\public\book_detail.html:179
+#: .\manager\templates\public\track_order.html:619
+#: .\manager\templates\public\vendor_add_book.html:114
+#: .\manager\templates\public\vendor_edit_book.html:110
+msgid "作者"
+msgstr "Auteur"
 
-msgid "我们为您提供什么"
-msgstr "Ce Que Nous Offrons"
+#: .\manager\templates\public\author_detail.html:69
+#: .\manager\templates\public\authors.html:132
+msgid "本著作"
+msgstr "Cette œuvre"
 
-msgid "智能图书搜索"
-msgstr "Recherche Intelligente de Livres"
+#: .\manager\templates\public\author_detail.html:90
+#: .\manager\templates\public\author_detail.html:202
+msgid "著作数量"
+msgstr "Nombre d'œuvres"
 
-msgid "通过关键字、作者或出版社快速搜索您需要的图书，智能排序让您更快找到心仪的书籍。"
-msgstr "Recherchez rapidement des livres par mot-clé, auteur ou éditeur. Le tri intelligent vous aide à trouver vos livres plus rapidement."
+#: .\manager\templates\public\author_detail.html:108
+#: .\manager\templates\public\publisher_detail.html:162
+#: .\manager\templates\public\publisher_detail_old.html:203
+msgid "总库存"
+msgstr "Stock total"
 
-msgid "多维度搜索"
-msgstr "Recherche Multi-Dimensionnelle"
+#: .\manager\templates\public\author_detail.html:117
+#: .\manager\templates\public\author_detail.html:221
+#: .\manager\templates\public\publisher_detail.html:113
+#: .\manager\templates\public\vendor_dashboard.html:165
+msgid "平均售价"
+msgstr "Prix moyen"
 
-msgid "智能排序"
-msgstr "Tri Intelligent"
+#: .\manager\templates\public\author_detail.html:132
+#: .\manager\templates\public\author_detail_old.html:117
+msgid "作品列表"
+msgstr "Liste des œuvres"
 
-msgid "实时结果"
-msgstr "Résultats en Temps Réel"
+#: .\manager\templates\public\author_detail.html:159
+#: .\manager\templates\public\author_detail_old.html:175
+msgid "详情"
+msgstr "Détails"
 
-msgid "在线购书"
-msgstr "Achat de Livres en Ligne"
+#: .\manager\templates\public\author_detail.html:166
+#: .\manager\templates\public\author_detail_old.html:181
+#: .\manager\templates\public\book_detail.html:197
+msgid "购买"
+msgstr "Acheter"
 
-msgid "便捷的购物车系统，支持多种支付方式，让您轻松完成图书购买。"
-msgstr "Système de panier pratique supportant plusieurs méthodes de paiement pour des achats de livres faciles."
+#: .\manager\templates\public\author_detail.html:178
+msgid "暂无相关图书"
+msgstr "Aucun livre correspondant"
 
-msgid "安全支付"
-msgstr "Paiement Sécurisé"
+#: .\manager\templates\public\author_detail.html:187
+#: .\manager\templates\public\author_detail_old.html:87
+#: .\manager\templates\public\book_detail_old.html:143
+msgid "作者信息"
+msgstr "Informations sur l'auteur"
 
-msgid "购物车管理"
-msgstr "Gestion du Panier"
+#: .\manager\templates\public\author_detail.html:193
+msgid "作者编号"
+msgstr "Numéro d'auteur"
 
-msgid "电子书下载"
-msgstr "Téléchargement d'E-Books"
+#: .\manager\templates\public\author_detail.html:203
+#: .\manager\templates\public\author_detail.html:212
+#: .\manager\templates\public\author_detail_old.html:119
+#: .\manager\templates\public\book_detail.html:168
+#: .\manager\templates\public\book_detail.html:169
+#: .\manager\templates\public\book_detail.html:175
+#: .\manager\templates\public\book_detail_old.html:359
+#: .\manager\templates\public\book_detail_old.html:450
+#: .\manager\templates\public\publisher_detail.html:202
+#: .\manager\templates\public\publisher_detail_old.html:312
+#: .\manager\templates\public\publisher_detail_old.html:316
+msgid "本"
+msgstr "Cet"
 
-msgid "购买后即可下载电子版本，随时随地享受阅读的乐趣。"
-msgstr "Téléchargez les versions numériques après l'achat et profitez de la lecture partout et à tout moment."
+#: .\manager\templates\public\author_detail.html:211
+msgid "累计销量"
+msgstr "Ventes cumulées"
 
-msgid "即时下载"
-msgstr "Téléchargement Instantané"
+#: .\manager\templates\public\author_detail.html:229
+msgid "返回作者列表"
+msgstr "Retour à la liste des auteurs"
 
-msgid "多格式支持"
-msgstr "Support Multi-Format"
+#: .\manager\templates\public\author_detail.html:232
+#: .\manager\templates\public\base.html:689
+#: .\manager\templates\public\books.html:209
+#: .\manager\templates\public\publisher_detail.html:230
+msgid "浏览所有图书"
+msgstr "Parcourir tous les livres"
 
-msgid "永久访问"
-msgstr "Accès Permanent"
+#: .\manager\templates\public\author_detail_old.html:21
+#: .\manager\templates\public\book_detail_old.html:243
+#: .\manager\templates\public\publisher_detail_old.html:262
+msgid "返回列表"
+msgstr "Retour à la liste"
 
-msgid "图书管理"
-msgstr "Gestion des Livres"
+#: .\manager\templates\public\author_detail_old.html:38
+msgid "作品"
+msgstr "Œuvres"
 
-msgid "强大的后台管理系统，帮助管理员高效管理图书、作者和出版社信息。"
-msgstr "Système de gestion backend puissant aidant les administrateurs à gérer efficacement les livres, auteurs et éditeurs."
+#: .\manager\templates\public\author_detail_old.html:49
+#: .\manager\templates\public\author_detail_old.html:166
+#: .\manager\templates\public\book_detail.html:123
+#: .\manager\templates\public\book_detail.html:174
+#: .\manager\templates\public\book_detail_old.html:81
+#: .\manager\templates\public\books.html:170
+#: .\manager\templates\public\publisher_detail_old.html:316
+#: .\manager\templates\public\vendor_dashboard.html:110
+#: .\manager\templates\public\vendor_dashboard.html:227
+msgid "销量"
+msgstr "Ventes"
 
-msgid "库存管理"
-msgstr "Gestion des Stocks"
+#: .\manager\templates\public\author_detail_old.html:60
+#: .\manager\templates\public\author_detail_old.html:160
+#: .\manager\templates\public\book_detail.html:166
+#: .\manager\templates\public\book_detail_old.html:49
+#: .\manager\templates\public\book_detail_old.html:53
+#: .\manager\templates\public\book_detail_old.html:72
+#: .\manager\templates\public\books.html:169
+#: .\manager\templates\public\publisher_detail_old.html:312
+#: .\manager\templates\public\vendor_add_book.html:95
+#: .\manager\templates\public\vendor_dashboard.html:128
+#: .\manager\templates\public\vendor_edit_book.html:91
+#: .\marketplace\templates\marketplace\product_detail.html:216
+#: .\marketplace\templates\marketplace\supermarket_detail.html:109
+msgid "库存"
+msgstr "Stock"
 
-msgid "数据分析"
-msgstr "Analyse de Données"
+#: .\manager\templates\public\author_detail_old.html:71
+msgid "均价"
+msgstr "Prix moyen"
 
-msgid "报表导出"
-msgstr "Export de Rapports"
+#: .\manager\templates\public\author_detail_old.html:91
+#: .\manager\templates\public\checkout.html:193
+#: .\manager\templates\public\user_profile.html:149
+#: .\manager\templates\public\user_register.html:63
+#: .\marketplace\templates\marketplace\checkout.html:81
+msgid "姓名"
+msgstr "Nom"
 
-msgid "多语言支持"
-msgstr "Support Multilingue"
+#: .\manager\templates\public\author_detail_old.html:99
+msgid "注册时间"
+msgstr "Date d'inscription"
 
-msgid "支持中文、英文和法文，为全球用户提供无障碍的浏览体验。"
-msgstr "Prise en charge du chinois, de l'anglais et du français pour une expérience de navigation sans obstacle pour les utilisateurs du monde entier."
+#: .\manager\templates\public\author_detail_old.html:105
+msgid "未知"
+msgstr "Inconnu"
 
-msgid "三语切换"
-msgstr "Commutation Trilingue"
+#: .\manager\templates\public\author_detail_old.html:186
+#: .\manager\templates\public\book_detail.html:170
+#: .\manager\templates\public\book_detail_old.html:57
+#: .\manager\templates\public\books.html:154
+#: .\manager\templates\public\books.html:187
+#: .\manager\templates\public\publisher_detail.html:203
+#: .\manager\templates\public\vendor_dashboard.html:233
+#: .\marketplace\templates\marketplace\product_detail.html:220
+#: .\marketplace\templates\marketplace\products.html:161
+#: .\marketplace\templates\marketplace\supermarket.html:99
+#: .\marketplace\templates\marketplace\supermarket_detail.html:113
+msgid "缺货"
+msgstr "Rupture de stock"
 
-msgid "实时翻译"
-msgstr "Traduction en Temps Réel"
+#: .\manager\templates\public\author_detail_old.html:202
+msgid "暂无作品"
+msgstr "Pas d'œuvres disponibles"
 
-msgid "本地化体验"
-msgstr "Expérience Localisée"
+#: .\manager\templates\public\author_detail_old.html:203
+msgid "该作者目前还没有任何已发布的作品。"
+msgstr "Cet auteur n'a pas encore publié d'œuvres."
 
-msgid "专业的客服团队随时为您解答问题，确保您获得最佳的服务体验。"
-msgstr "Équipe de service client professionnelle prête à répondre à vos questions et assurer la meilleure expérience de service."
+#: .\manager\templates\public\authors.html:4
+#: .\manager\templates\public\authors.html:118
+msgid "作者目录"
+msgstr "Catalogue des auteurs"
 
-msgid "在线客服"
-msgstr "Service en Ligne"
+#: .\manager\templates\public\authors.html:119
+msgid "探索我们平台的优秀作者，发现他们的精彩作品"
+msgstr ""
+"Explorez les excellents auteurs de notre plateforme et découvrez leurs "
+"œuvres remarquables"
 
-msgid "邮件支持"
-msgstr "Support par Email"
+#: .\manager\templates\public\authors.html:126
+msgid "位作者"
+msgstr "Auteur"
 
-msgid "常见问题"
-msgstr "FAQ"
+#: .\manager\templates\public\authors.html:145
+msgid "搜索作者名称..."
+msgstr "Rechercher le nom de l'auteur..."
 
-msgid "购书流程"
-msgstr "Processus d'Achat"
+#: .\manager\templates\public\authors.html:146
+#: .\manager\templates\public\blog.html:404
+#: .\manager\templates\public\books.html:116
+#: .\manager\templates\public\publishers.html:153
+#: .\marketplace\templates\marketplace\courses.html:64
+#: .\marketplace\templates\marketplace\products.html:99
+#: .\marketplace\templates\marketplace\supermarket.html:44
+msgid "搜索"
+msgstr "Rechercher"
 
-msgid "简单四步，轻松购书"
-msgstr "Quatre Étapes Simples pour Acheter des Livres"
+#: .\manager\templates\public\authors.html:167
+msgid "著作"
+msgstr "Œuvres"
 
-msgid "在我们的图书目录中搜索和浏览您感兴趣的书籍。"
-msgstr "Recherchez et parcourez les livres qui vous intéressent dans notre catalogue."
+#: .\manager\templates\public\authors.html:171
+#: .\manager\templates\public\publishers.html:178
+#: .\marketplace\templates\marketplace\supermarket.html:62
+msgid "畅销"
+msgstr "Best-seller"
 
-msgid "将喜欢的图书加入购物车，随时调整数量。"
-msgstr "Ajoutez vos livres préférés au panier et ajustez les quantités à tout moment."
+#: .\manager\templates\public\authors.html:189
+#: .\manager\templates\public\book_detail_old.html:297
+#: .\manager\templates\public\books.html:192
+#: .\manager\templates\public\publisher_detail.html:207
+#: .\manager\templates\public\publisher_detail_old.html:325
+#: .\manager\templates\public\publishers.html:201
+#: .\manager\templates\public\track_order.html:345
+#: .\manager\templates\public\track_order.html:411
+msgid "查看详情"
+msgstr "Voir les détails"
 
-msgid "安全结算"
-msgstr "Paiement Sécurisé"
+#: .\manager\templates\public\authors.html:200
+msgid "未找到相关作者"
+msgstr "Aucun auteur correspondant trouvé"
 
-msgid "选择支付方式，完成安全的在线结算。"
-msgstr "Choisissez votre méthode de paiement et effectuez un paiement en ligne sécurisé."
+#: .\manager\templates\public\authors.html:201
+msgid "请尝试其他搜索关键词或浏览所有作者"
+msgstr ""
+"Veuillez essayer d'autres mots-clés de recherche ou parcourir tous les "
+"auteurs"
 
-msgid "享受阅读"
-msgstr "Profitez de la Lecture"
+#: .\manager\templates\public\authors.html:203
+msgid "浏览所有作者"
+msgstr "Parcourir tous les auteurs"
 
-msgid "收到图书后，开始您的阅读之旅！"
-msgstr "Après avoir reçu vos livres, commencez votre voyage de lecture !"
+#: .\manager\templates\public\base.html:681
+#: .\manager\templates\public\cart.html:67
+#: .\manager\templates\public\checkout.html:314
+#: .\manager\templates\public\order_confirmation.html:330
+#: .\manager\templates\public\publishers.html:174
+#: .\manager\templates\public\user_profile.html:183
+#: .\manager\templates\public\user_profile.html:302
+#: .\manager\templates\public\vendor_dashboard.html:104
+#: .\manager\templates\public\vendor_dashboard.html:292
+#: .\manager\templates\public\vendor_dashboard.html:329
+#: .\manager\templates\public\vendor_dashboard.html:362
+msgid "图书"
+msgstr "Livres"
 
-msgid "立即开始您的阅读之旅"
-msgstr "Commencez Votre Voyage de Lecture Maintenant"
+#: .\manager\templates\public\base.html:688
+#: .\manager\templates\public\base.html:927
+#: .\manager\templates\public\blog_detail.html:519
+#: .\manager\templates\public\book_detail.html:106
+#: .\manager\templates\public\book_detail_old.html:14
+#: .\manager\templates\public\books.html:4
+#: .\manager\templates\public\books.html:94
+msgid "图书目录"
+msgstr "Table des matières"
 
-msgid "探索我们的图书目录，找到您的下一本好书。"
-msgstr "Explorez notre catalogue de livres et trouvez votre prochaine lecture."
+#: .\manager\templates\public\base.html:698
+msgid "查看作者列表"
+msgstr "Voir la liste des auteurs"
 
-msgid "与我们取得联系"
-msgstr "Contactez-Nous"
+#: .\manager\templates\public\base.html:707
+msgid "合作出版机构"
+msgstr "Institutions de publication partenaires"
 
-msgid "如果您有任何问题、建议或合作意向，请随时与我们联系。我们的团队将尽快回复您。"
-msgstr "Si vous avez des questions, des suggestions ou des intérêts de collaboration, n'hésitez pas à nous contacter. Notre équipe vous répondra dans les plus brefs délais."
+#: .\manager\templates\public\base.html:715
+#: .\manager\templates\public\user_profile.html:183
+#: .\marketplace\templates\marketplace\cart.html:4
+#: .\marketplace\templates\marketplace\checkout.html:4
+#: .\marketplace\templates\marketplace\course_detail.html:154
+#: .\marketplace\templates\marketplace\courses.html:4
+#: .\marketplace\templates\marketplace\home.html:4
+#: .\marketplace\templates\marketplace\home.html:116
+#: .\marketplace\templates\marketplace\order_confirmation.html:4
+#: .\marketplace\templates\marketplace\product_detail.html:4
+#: .\marketplace\templates\marketplace\product_detail.html:146
+#: .\marketplace\templates\marketplace\products.html:4
+#: .\marketplace\templates\marketplace\supermarket.html:4
+#: .\marketplace\templates\marketplace\supermarket_detail.html:62
+msgid "市场"
+msgstr "Marché"
 
-msgid "发送消息"
-msgstr "Envoyer le Message"
+#: .\manager\templates\public\base.html:720
+#: .\manager\templates\public\order_confirmation.html:599
+msgid "跟踪订单"
+msgstr "Suivre la commande"
 
-msgid "给我们留言"
-msgstr "Laissez-Nous un Message"
+#: .\manager\templates\public\base.html:725
+#: .\manager\templates\public\base.html:931
+#: .\manager\templates\public\base.html:944
+#: .\manager\templates\public\blog.html:4
+#: .\manager\templates\public\blog.html:395
+#: .\manager\templates\public\blog_detail.html:5
+#: .\manager\templates\public\blog_detail.html:411
+msgid "博客"
+msgstr "Blog"
 
-msgid "感谢您的留言！我们会尽快回复您。"
-msgstr "Merci pour votre message ! Nous vous répondrons dans les plus brefs délais."
+#: .\manager\templates\public\base.html:731
+#: .\manager\templates\public\base.html:939
+msgid "更多"
+msgstr "Plus"
 
-msgid "您的姓名"
-msgstr "Votre Nom"
+#: .\manager\templates\public\base.html:739
+msgid "了解我们的平台"
+msgstr "Découvrez notre plateforme"
 
-msgid "您的邮箱"
-msgstr "Votre Email"
+#: .\manager\templates\public\base.html:747
+msgid "服务"
+msgstr "Services"
 
-msgid "主题"
-msgstr "Sujet"
+#: .\manager\templates\public\base.html:748
+msgid "我们提供的服务"
+msgstr "Nos services"
 
-msgid "您的留言"
-msgstr "Votre Message"
+#: .\manager\templates\public\base.html:757
+#: .\manager\templates\public\base.html:943
+#: .\manager\templates\public\base.html:952
+#: .\manager\templates\public\contact.html:4
+#: .\manager\templates\public\contact.html:228
+msgid "联系我们"
+msgstr "Contactez-nous"
 
-msgid "其他联系方式"
-msgstr "Autres Moyens de Contact"
+#: .\manager\templates\public\base.html:758
+msgid "获取帮助和支持"
+msgstr "Obtenez de l'aide et du support"
 
-msgid "关注我们"
-msgstr "Suivez-Nous"
+#: .\manager\templates\public\base.html:768
+msgid "切换主题"
+msgstr "Changer de thème"
 
+#: .\manager\templates\public\base.html:805
+#: .\manager\templates\public\user_profile.html:4
+msgid "个人中心"
+msgstr "Centre personnel"
+
+#: .\manager\templates\public\base.html:807
+#: .\manager\templates\public\user_profile.html:125
+#: .\manager\templates\public\vendor_dashboard.html:151
+msgid "退出"
+msgstr "Se déconnecter"
+
+#: .\manager\templates\public\base.html:811
+#: .\manager\templates\public\user_login.html:4
+#: .\manager\templates\public\user_login.html:76
+#: .\manager\templates\public\user_login.html:107
+#: .\manager\templates\public\user_login.html:112
+#: .\manager\templates\public\user_register.html:88
+#: .\manager\templates\public\vendor_login.html:74
+#: .\manager\templates\public\vendor_login.html:104
+#: .\manager\templates\public\vendor_login.html:109
+#: .\manager\templates\public\vendor_register.html:102
+msgid "登录"
+msgstr "Se connecter"
+
+#: .\manager\templates\public\base.html:817
+#: .\manager\templates\public\vendor_dashboard.html:4
+msgid "卖家中心"
+msgstr "Centre vendeur"
+
+#: .\manager\templates\public\base.html:905
+#: .\manager\templates\public\base.html:1126
+msgid "微信"
+msgstr "WeChat"
+
+#: .\manager\templates\public\base.html:911
+#: .\manager\templates\public\base.html:971
+#: .\manager\templates\public\checkout.html:200
+#: .\manager\templates\public\contact.html:264
+#: .\manager\templates\public\contact.html:336
+#: .\manager\templates\public\user_login.html:63
+#: .\manager\templates\public\user_register.html:67
+#: .\manager\templates\public\vendor_dashboard.html:205
+#: .\manager\templates\public\vendor_dashboard.html:294
+#: .\manager\templates\public\vendor_dashboard.html:364
+#: .\manager\templates\public\vendor_login.html:61
+#: .\manager\templates\public\vendor_register.html:70
+#: .\marketplace\templates\marketplace\checkout.html:93
+#: .\marketplace\templates\marketplace\order_confirmation.html:77
+msgid "邮箱"
+msgstr "Email"
+
+#: .\manager\templates\public\base.html:924
+msgid "快速导航"
+msgstr "Navigation rapide"
+
+#: .\manager\templates\public\base.html:928
+msgid "作者列表"
+msgstr "Liste des auteurs"
+
+#: .\manager\templates\public\base.html:930
+#: .\manager\templates\public\track_order.html:4
+#: .\manager\templates\public\track_order.html:214
+msgid "订单跟踪"
+msgstr "Suivi des commandes"
+
+#: .\manager\templates\public\base.html:942
+#: .\manager\templates\public\services.html:4
+#: .\manager\templates\public\services.html:233
+msgid "我们的服务"
+msgstr "Nos services"
+
+#: .\manager\templates\public\base.html:957
+#: .\manager\templates\public\book_detail.html:162
+#: .\manager\templates\public\contact.html:250
+#: .\manager\templates\public\publisher_detail.html:137
+#: .\manager\templates\public\publisher_detail_old.html:236
+msgid "地址"
+msgstr "Adresse"
+
+#: .\manager\templates\public\base.html:958
+#: .\manager\templates\public\contact.html:251
+#: .\manager\templates\public\contact.html:340
+msgid "北京市海淀区中关村科技园区"
+msgstr "Parc Technologique Zhongguancun, District Haidian, Pékin"
+
+#: .\manager\templates\public\base.html:964
+#: .\manager\templates\public\contact.html:257
+#: .\manager\templates\public\user_profile.html:153
+#: .\manager\templates\public\user_register.html:71
+#: .\manager\templates\public\vendor_dashboard.html:206
+#: .\manager\templates\public\vendor_register.html:74
+#: .\marketplace\templates\marketplace\checkout.html:87
+msgid "电话"
+msgstr "Téléphone"
+
+#: .\manager\templates\public\base.html:978
+#: .\manager\templates\public\contact.html:271
+msgid "服务时间"
+msgstr "Horaires de service"
+
+#: .\manager\templates\public\base.html:979
+#: .\manager\templates\public\contact.html:272
+msgid "周一至周五 9:00-18:00"
+msgstr "Lundi à vendredi 9:00-18:00"
+
+#: .\manager\templates\public\base.html:987
+msgid "管理员入口"
+msgstr "Entrée administrateur"
+
+#: .\manager\templates\public\base.html:1002
+msgid "隐私政策"
+msgstr "Politique de confidentialité"
+
+#: .\manager\templates\public\base.html:1004
+msgid "使用条款"
+msgstr "Conditions d'utilisation"
+
+#: .\manager\templates\public\base.html:1006
+msgid "网站地图"
+msgstr "Plan du site"
+
+#: .\manager\templates\public\base.html:1017
+msgid "最后更新: 2024年12月"
+msgstr "Dernière mise à jour : 2024年12月"
+
+#: .\manager\templates\public\base.html:1127
+msgid "扫描或复制ID添加好友"
+msgstr "Scanner ou copier l'ID pour ajouter un ami"
+
+#: .\manager\templates\public\base.html:1130
+msgid "复制微信ID"
+msgstr "Copier l'ID WeChat"
+
+#: .\manager\templates\public\base.html:1132
+msgid "微信ID已复制到剪贴板"
+msgstr "ID WeChat a été copié dans le presse-papiers"
+
+#: .\manager\templates\public\base.html:1134
+msgid "关闭"
+msgstr "Fermer"
+
+#: .\manager\templates\public\blog.html:397
 msgid "最新文章与资讯"
-msgstr "Derniers Articles et Actualités"
+msgstr "Derniers articles et actualités"
 
+#: .\manager\templates\public\blog.html:398
 msgid "探索我们的博客，获取图书推荐、阅读技巧、行业动态等精彩内容。"
-msgstr "Explorez notre blog pour des recommandations de livres, des astuces de lecture, des actualités du secteur, et plus encore."
+msgstr ""
+"Explorez notre blog pour découvrir des recommandations de livres, des "
+"conseils de lecture, des tendances du secteur et bien plus encore."
 
+#: .\manager\templates\public\blog.html:403
 msgid "搜索文章..."
 msgstr "Rechercher des articles..."
 
+#: .\manager\templates\public\blog.html:421
 msgid "精选推荐"
+msgstr "Sélection recommandée"
+
+#: .\manager\templates\public\blog.html:422
+msgid "精选文章"
+msgstr "Articles sélectionnés"
+
+#: .\manager\templates\public\blog.html:434
+msgid "精选"
 msgstr "Sélection"
 
-msgid "精选文章"
-msgstr "Articles en Vedette"
-
-msgid "精选"
-msgstr "En Vedette"
-
+#: .\manager\templates\public\blog.html:465
 msgid "搜索结果"
-msgstr "Résultats de Recherche"
+msgstr "Résultats de recherche"
 
+#: .\manager\templates\public\blog.html:466
 msgid "篇文章"
 msgstr "articles"
 
+#: .\manager\templates\public\blog.html:494
 msgid "阅读更多"
-msgstr "Lire la Suite"
+msgstr "Lire la suite"
 
+#: .\manager\templates\public\blog.html:504
 msgid "暂无文章"
-msgstr "Aucun Article"
+msgstr "Aucun article"
 
+#: .\manager\templates\public\blog.html:505
 msgid "敬请期待更多精彩内容"
 msgstr "Restez à l'écoute pour plus de contenu passionnant"
 
+#: .\manager\templates\public\blog.html:514
 msgid "文章分类"
+msgstr "Catégories d'articles"
+
+#: .\manager\templates\public\blog.html:518
+msgid "全部文章"
+msgstr "Tous les articles"
+
+#: .\manager\templates\public\blog.html:535
+msgid "关于博客"
+msgstr "À propos du blog"
+
+#: .\manager\templates\public\blog.html:537
+msgid "在这里，我们分享关于图书、阅读和技术的最新资讯。关注我们，获取更多精彩内容。"
+msgstr ""
+"Ici, nous partageons les dernières nouvelles sur les livres, la lecture et "
+"la technologie. Suivez-nous pour plus de contenu passionnant."
+
+#: .\manager\templates\public\blog_detail.html:428
+msgid "次浏览"
+msgstr "Dernière visite"
+
+#: .\manager\templates\public\blog_detail.html:429
+msgid "分钟阅读"
+msgstr "Lecture en minutes"
+
+#: .\manager\templates\public\blog_detail.html:459
+msgid "文章作者"
+msgstr "Auteur de l’article"
+
+#: .\manager\templates\public\blog_detail.html:465
+msgid "分享文章"
+msgstr "Partager l’article"
+
+#: .\manager\templates\public\blog_detail.html:484
+msgid "返回博客列表"
+msgstr "Retour à la liste des blogs"
+
+#: .\manager\templates\public\blog_detail.html:494
+msgid "相关文章"
+msgstr "Articles connexes"
+
+#: .\manager\templates\public\blog_detail.html:516
+msgid "探索我们的图书目录，找到您的下一本好书。"
+msgstr ""
+"Explorez notre catalogue de livres pour trouver votre prochain bon livre."
+
+#: .\manager\templates\public\blog_detail.html:533
+msgid "您可能还感兴趣"
+msgstr "Vous pourriez également être intéressé"
+
+#: .\manager\templates\public\book_detail.html:4
+#: .\manager\templates\public\book_detail_old.html:4
+msgid "图书详情"
+msgstr "Détails du livre"
+
+#: .\manager\templates\public\book_detail.html:112
+#: .\manager\templates\public\books.html:138
+#: .\manager\templates\public\user_profile.html:137
+#: .\marketplace\templates\marketplace\course_detail.html:315
+#: .\marketplace\templates\marketplace\product_detail.html:267
+#: .\marketplace\templates\marketplace\supermarket_detail.html:176
+msgid "收藏"
+msgstr "Favoris"
+
+#: .\manager\templates\public\book_detail.html:125
+msgid "现货充足"
+msgstr "Stock suffisant"
+
+#: .\manager\templates\public\book_detail.html:127
+msgid "库存紧张"
+msgstr "Stock limité"
+
+#: .\manager\templates\public\book_detail.html:129
+#: .\manager\templates\public\book_detail.html:253
+#: .\marketplace\templates\marketplace\product_detail.html:274
+msgid "暂时缺货"
+msgstr "En rupture de stock temporairement"
+
+#: .\manager\templates\public\book_detail.html:147
+#: .\manager\templates\public\book_detail_old.html:100
+msgid "图书简介"
+msgstr "Présentation du livre"
+
+#: .\manager\templates\public\book_detail.html:154
+#: .\manager\templates\public\book_detail_old.html:93
+msgid "图书信息"
+msgstr "Informations sur le livre"
+
+#: .\manager\templates\public\book_detail.html:202
+msgid "含税价格"
+msgstr "Prix TTC"
+
+#: .\manager\templates\public\book_detail.html:207
+#: .\manager\templates\public\book_detail.html:225
+#: .\manager\templates\public\book_detail_old.html:196
+#: .\manager\templates\public\cart.html:87
+#: .\manager\templates\public\track_order.html:600
+#: .\manager\templates\public\track_order.html:827
+#: .\manager\templates\public\vendor_dashboard.html:295
+#: .\manager\templates\public\vendor_dashboard.html:330
+#: .\marketplace\templates\marketplace\product_detail.html:251
+#: .\marketplace\templates\marketplace\supermarket_detail.html:162
+msgid "数量"
+msgstr "Quantité"
+
+#: .\manager\templates\public\book_detail.html:221
+#: .\manager\templates\public\book_detail_old.html:192
+#: .\manager\templates\public\cart.html:119
+#: .\manager\templates\public\order_confirmation.html:333
+#: .\manager\templates\public\order_confirmation.html:370
+#: .\manager\templates\public\track_order.html:601
+#: .\manager\templates\public\track_order.html:828
+msgid "单价"
+msgstr "Prix unitaire"
+
+#: .\manager\templates\public\book_detail.html:230
+#: .\manager\templates\public\book_detail_old.html:202
+#: .\manager\templates\public\cart.html:171
+#: .\manager\templates\public\track_order.html:633
+#: .\manager\templates\public\track_order.html:856
+msgid "总计"
+msgstr "Total"
+
+#: .\manager\templates\public\book_detail.html:241
+#: .\manager\templates\public\book_detail_old.html:213
+#: .\manager\templates\public\books.html:179
+#: .\marketplace\templates\marketplace\course_detail.html:310
+#: .\marketplace\templates\marketplace\product_detail.html:265
+#: .\marketplace\templates\marketplace\supermarket_detail.html:171
+msgid "立即购买"
+msgstr "Acheter maintenant"
+
+#: .\manager\templates\public\book_detail.html:245
+#: .\manager\templates\public\book_detail_old.html:220
+#: .\manager\templates\public\books.html:182
+#: .\manager\templates\public\services.html:344
+#: .\marketplace\templates\marketplace\course_detail.html:313
+#: .\marketplace\templates\marketplace\product_detail.html:262
+#: .\marketplace\templates\marketplace\supermarket_detail.html:174
+msgid "加入购物车"
+msgstr "Ajouter au panier"
+
+#: .\manager\templates\public\book_detail.html:254
+#: .\manager\templates\public\book_detail_old.html:228
+msgid "该商品暂时缺货，无法购买"
+msgstr "Cet article est temporairement en rupture de stock, achat impossible"
+
+#: .\manager\templates\public\book_detail.html:261
+msgid "查看出版社"
+msgstr "Voir l'éditeur"
+
+#: .\manager\templates\public\book_detail.html:266
+#: .\manager\templates\public\vendor_add_book.html:161
+#: .\manager\templates\public\vendor_edit_book.html:168
+msgid "返回"
+msgstr "Retour"
+
+#: .\manager\templates\public\book_detail.html:271
+#: .\manager\templates\public\book_detail_old.html:248
+#: .\manager\templates\public\cart.html:4
+#: .\manager\templates\public\cart.html:12
+#: .\marketplace\templates\marketplace\cart.html:4
+#: .\marketplace\templates\marketplace\cart.html:70
+msgid "购物车"
+msgstr "Panier"
+
+#: .\manager\templates\public\book_detail.html:284
+#: .\manager\templates\public\book_detail_old.html:267
+msgid "相关推荐"
+msgstr "Livres recommandés"
+
+#: .\manager\templates\public\book_detail.html:285
+msgid "来自同一出版社"
+msgstr "Provenant du même éditeur"
+
+#: .\manager\templates\public\book_detail.html:300
+#: .\manager\templates\public\user_profile.html:217
+#: .\manager\templates\public\user_profile.html:308
+msgid "查看"
+msgstr "Voir"
+
+#: .\manager\templates\public\book_detail.html:342
+#: .\manager\templates\public\book_detail_old.html:455
+#: .\manager\templates\public\home.html:1164
+msgid "添加中..."
+msgstr "Ajout en cours..."
+
+#: .\manager\templates\public\book_detail.html:350
+#: .\manager\templates\public\home.html:1185
+msgid "已添加"
+msgstr "Ajouté"
+
+#: .\manager\templates\public\book_detail_old.html:111
+#: .\manager\templates\public\publisher_detail.html:127
+msgid "出版社信息"
+msgstr "Informations sur l'éditeur"
+
+#: .\manager\templates\public\book_detail_old.html:120
+#: .\manager\templates\public\vendor_add_book.html:261
+#: .\manager\templates\public\vendor_edit_book.html:268
+msgid "出版社名称"
+msgstr "Nom de l'éditeur"
+
+#: .\manager\templates\public\book_detail_old.html:131
+#: .\manager\templates\public\vendor_add_book.html:265
+#: .\manager\templates\public\vendor_edit_book.html:272
+msgid "出版社地址"
+msgstr "Adresse de l'éditeur"
+
+#: .\manager\templates\public\book_detail_old.html:162
+msgid "购买选项"
+msgstr "Options d'achat"
+
+#: .\manager\templates\public\book_detail_old.html:169
+msgid "选择数量"
+msgstr "Choisir la quantité"
+
+#: .\manager\templates\public\book_detail_old.html:184
+#, python-format
+msgid "最多 %(inv)s 本"
+msgstr "Maximum de %(inv)s exemplaires"
+
+#: .\manager\templates\public\book_detail_old.html:227
+msgid "抱歉，商品已售罄"
+msgstr "Désolé, le produit est épuisé"
+
+#: .\manager\templates\public\book_detail_old.html:238
+msgid "查看出版社详情"
+msgstr "Voir les détails de l'éditeur"
+
+#: .\manager\templates\public\book_detail_old.html:269
+msgid "来自同一出版社的优质图书"
+msgstr "Livres de qualité de la même maison d'édition"
+
+#: .\manager\templates\public\book_detail_old.html:356
+msgid "数量不能少于1本"
+msgstr "La quantité ne peut pas être inférieure à 1"
+
+#: .\manager\templates\public\book_detail_old.html:359
+#: .\manager\templates\public\book_detail_old.html:450
+msgid "库存不足！最大可购买"
+msgstr "Stock insuffisant ! Vous pouvez acheter au maximum"
+
+#: .\manager\templates\public\book_detail_old.html:484
+msgid "已添加到购物车"
+msgstr "Ajouté au panier"
+
+#: .\manager\templates\public\book_detail_old.html:501
+#: .\manager\templates\public\home.html:1210
+msgid "添加到购物车失败，请重试"
+msgstr "Échec de l'ajout au panier, veuillez réessayer"
+
+#: .\manager\templates\public\books.html:95
+msgid "浏览我们丰富的图书收藏"
+msgstr "Parcourez notre riche collection de livres"
+
+#: .\manager\templates\public\books.html:108
+msgid "搜索图书名称..."
+msgstr "Rechercher le nom du livre..."
+
+#: .\manager\templates\public\books.html:110
+msgid "按名称排序"
+msgstr "Trier par nom"
+
+#: .\manager\templates\public\books.html:111
+msgid "价格从低到高"
+msgstr "Prix croissant"
+
+#: .\manager\templates\public\books.html:112
+msgid "价格从高到低"
+msgstr "Prix décroissant"
+
+#: .\manager\templates\public\books.html:113
+msgid "按销量排序"
+msgstr "Trier par ventes"
+
+#: .\manager\templates\public\books.html:121
+#, python-format
+msgid "共找到 %(count)s 本图书"
+msgstr "{{count}} livres trouvés"
+
+#: .\manager\templates\public\books.html:147
+msgid "暂无封面"
+msgstr "Pas de couverture disponible"
+
+#: .\manager\templates\public\books.html:156
+#, python-format
+msgid "仅剩%(inv)s本"
+msgstr "Il ne reste que {{inv}} exemplaires"
+
+#: .\manager\templates\public\books.html:206
+msgid "未找到相关图书"
+msgstr "Aucun livre correspondant trouvé"
+
+#: .\manager\templates\public\books.html:207
+msgid "请尝试其他搜索关键词或浏览所有图书"
+msgstr "Veuillez essayer d’autres mots-clés ou parcourir tous les livres"
+
+#: .\manager\templates\public\books.html:223
+msgid "浏览作者"
+msgstr "Parcourir les auteurs"
+
+#: .\manager\templates\public\books.html:224
+msgid "查看所有作者信息"
+msgstr "Voir toutes les informations sur les auteurs"
+
+#: .\manager\templates\public\books.html:230
+msgid "浏览出版社"
+msgstr "Parcourir les éditeurs"
+
+#: .\manager\templates\public\books.html:231
+msgid "查看所有出版社"
+msgstr "Voir toutes les informations sur les éditeurs"
+
+#: .\manager\templates\public\books.html:237
+#: .\marketplace\templates\marketplace\order_confirmation.html:108
+msgid "返回首页"
+msgstr "Retour à l'accueil"
+
+#: .\manager\templates\public\books.html:238
+msgid "回到主页面"
+msgstr "Retour à la page principale"
+
+#: .\manager\templates\public\books.html:306
+msgid "添加失败，请重试"
+msgstr "Échec de l'ajout, veuillez réessayer"
+
+#: .\manager\templates\public\cart.html:13
+msgid "管理您选择的商品"
+msgstr "Gérez vos articles sélectionnés"
+
+#: .\manager\templates\public\cart.html:17
+#: .\manager\templates\public\user_profile.html:192
+msgid "件商品"
+msgstr "articles"
+
+#: .\manager\templates\public\cart.html:33
+msgid "购物车商品"
+msgstr "Articles du panier"
+
+#: .\manager\templates\public\cart.html:68
+#: .\manager\templates\public\checkout.html:314
+#: .\manager\templates\public\order_confirmation.html:359
+#: .\manager\templates\public\user_profile.html:138
+#: .\manager\templates\public\user_profile.html:302
+#: .\marketplace\templates\marketplace\cart.html:83
+#: .\marketplace\templates\marketplace\course_detail.html:4
+#: .\marketplace\templates\marketplace\course_detail.html:155
+#: .\marketplace\templates\marketplace\home.html:131
+msgid "课程"
+msgstr "Cours"
+
+#: .\manager\templates\public\cart.html:69
+#: .\manager\templates\public\checkout.html:314
+#: .\manager\templates\public\order_confirmation.html:359
+#: .\manager\templates\public\user_profile.html:302
+#: .\marketplace\templates\marketplace\cart.html:83
+#: .\marketplace\templates\marketplace\home.html:127
+#: .\marketplace\templates\marketplace\product_detail.html:147
+#: .\marketplace\templates\marketplace\products.html:4
+msgid "商品"
+msgstr "Article"
+
+#: .\manager\templates\public\cart.html:70
+#: .\manager\templates\public\checkout.html:314
+#: .\manager\templates\public\order_confirmation.html:359
+#: .\manager\templates\public\user_profile.html:302
+#: .\marketplace\templates\marketplace\cart.html:83
+#: .\marketplace\templates\marketplace\home.html:135
+#: .\marketplace\templates\marketplace\home.html:163
+#: .\marketplace\templates\marketplace\supermarket.html:4
+#: .\marketplace\templates\marketplace\supermarket.html:35
+#: .\marketplace\templates\marketplace\supermarket_detail.html:4
+#: .\marketplace\templates\marketplace\supermarket_detail.html:63
+msgid "超市"
+msgstr "Supermarché"
+
+#: .\manager\templates\public\cart.html:130
+#: .\manager\templates\public\cart.html:239
+#: .\manager\templates\public\cart.html:250
+#: .\manager\templates\public\cart.html:291
+msgid "移除商品"
+msgstr "Supprimer l'article"
+
+#: .\manager\templates\public\cart.html:146
+#: .\manager\templates\public\cart.html:207
+msgid "浏览市场"
+msgstr "Parcourir le marché"
+
+#: .\manager\templates\public\cart.html:149
+#: .\manager\templates\public\cart.html:341
+msgid "清空购物车"
+msgstr "Vider le panier"
+
+#: .\manager\templates\public\cart.html:158
+#: .\manager\templates\public\checkout.html:288
+#: .\marketplace\templates\marketplace\cart.html:114
+msgid "订单摘要"
+msgstr "Résumé de la commande"
+
+#: .\manager\templates\public\cart.html:162
+#: .\marketplace\templates\marketplace\cart.html:116
+#: .\marketplace\templates\marketplace\checkout.html:181
+msgid "商品数量"
+msgstr "Quantité d'articles"
+
+#: .\manager\templates\public\cart.html:163
+#: .\marketplace\templates\marketplace\cart.html:117
+#: .\marketplace\templates\marketplace\checkout.html:182
+msgid "件"
+msgstr "articles"
+
+#: .\manager\templates\public\cart.html:166
+msgid "商品总额"
+msgstr "Montant total des articles"
+
+#: .\manager\templates\public\cart.html:177
+msgid "立即结算"
+msgstr "Payer immédiatement"
+
+#: .\manager\templates\public\cart.html:187
+msgid "安全购物"
+msgstr "Achat sécurisé"
+
+#: .\manager\templates\public\cart.html:189
+msgid "您的购物信息和支付数据受到安全保护"
+msgstr "Vos informations d'achat et vos données de paiement sont protégées"
+
+#: .\manager\templates\public\cart.html:200
+msgid "购物车为空"
+msgstr "Le panier est vide"
+
+#: .\manager\templates\public\cart.html:201
+msgid "还没有添加任何商品到购物车"
+msgstr "Aucun article n'a encore été ajouté au panier"
+
+#: .\manager\templates\public\cart.html:204
+msgid "去选购图书"
+msgstr "Aller sélectionner des livres"
+
+#: .\manager\templates\public\cart.html:237
+#: .\manager\templates\public\cart.html:248
+#: .\manager\templates\public\cart.html:289
+msgid "确定要移除这个商品吗？"
+msgstr "Voulez-vous vraiment supprimer cet article ?"
+
+#: .\manager\templates\public\cart.html:285
+msgid "更新失败，请重试"
+msgstr "Échec de la mise à jour, veuillez réessayer"
+
+#: .\manager\templates\public\cart.html:327
+msgid "确定要清空整个购物车吗？"
+msgstr "Voulez-vous vraiment vider tout le panier ?"
+
+#: .\manager\templates\public\checkout.html:4
+msgid "结账"
+msgstr "Passer à la caisse"
+
+#: .\manager\templates\public\checkout.html:170
+msgid "选择商品"
+msgstr "Sélectionner un article"
+
+#: .\manager\templates\public\checkout.html:174
+msgid "填写信息"
+msgstr "Remplir les informations"
+
+#: .\manager\templates\public\checkout.html:178
+msgid "完成订单"
+msgstr "Finaliser la commande"
+
+#: .\manager\templates\public\checkout.html:189
+msgid "客户信息"
+msgstr "Informations client"
+
+#: .\manager\templates\public\checkout.html:195
+msgid "请输入您的姓名"
+msgstr "Veuillez saisir votre nom"
+
+#: .\manager\templates\public\checkout.html:202
+msgid "用于接收订单信息"
+msgstr "Utilisé pour recevoir les informations de commande"
+
+#: .\manager\templates\public\checkout.html:209
+#: .\manager\templates\public\order_confirmation.html:291
+msgid "微信/电话号码"
+msgstr "WeChat / numéro de téléphone"
+
+#: .\manager\templates\public\checkout.html:211
+msgid "微信号或电话号码"
+msgstr "Nom WeChat ou numéro de téléphone"
+
+#: .\manager\templates\public\checkout.html:216
+#: .\manager\templates\public\order_confirmation.html:296
+#: .\manager\templates\public\track_order.html:454
+#: .\manager\templates\public\track_order.html:756
+#: .\marketplace\templates\marketplace\checkout.html:109
+msgid "国家"
+msgstr "Pays"
+
+#: .\manager\templates\public\checkout.html:218
+#: .\marketplace\templates\marketplace\checkout.html:111
+msgid "请选择国家"
+msgstr "Veuillez sélectionner un pays"
+
+#: .\manager\templates\public\checkout.html:265
+#: .\manager\templates\public\order_confirmation.html:301
+#: .\manager\templates\public\order_confirmation.html:382
+#: .\manager\templates\public\track_order.html:331
+#: .\manager\templates\public\track_order.html:387
+#: .\manager\templates\public\track_order.html:460
+#: .\manager\templates\public\track_order.html:760
+#: .\marketplace\templates\marketplace\checkout.html:158
+msgid "支付方式"
+msgstr "Mode de paiement"
+
+#: .\manager\templates\public\checkout.html:270
+#: .\manager\templates\public\checkout.html:383
+#: .\marketplace\templates\marketplace\checkout.html:162
+msgid "请先选择国家以显示可用的支付方式"
+msgstr ""
+"Veuillez d’abord sélectionner un pays pour afficher les modes de paiement "
+"disponibles"
+
+#: .\manager\templates\public\checkout.html:276
+msgid "备注信息"
+msgstr "Informations supplémentaires"
+
+#: .\manager\templates\public\checkout.html:278
+msgid "订单备注"
+msgstr "Remarques de la commande"
+
+#: .\manager\templates\public\checkout.html:280
+msgid "如有特殊要求，请在此说明（可选）"
+msgstr ""
+"Si vous avez des exigences particulières, veuillez les indiquer ici "
+"(facultatif)"
+
+#: .\manager\templates\public\checkout.html:335
+msgid "商品总计"
+msgstr "Total des articles"
+
+#: .\manager\templates\public\checkout.html:339
+msgid "运费"
+msgstr "Frais de port"
+
+#: .\manager\templates\public\checkout.html:340
+#: .\marketplace\templates\marketplace\course_detail.html:189
+#: .\marketplace\templates\marketplace\course_detail.html:264
+msgid "免费"
+msgstr "Gratuit"
+
+#: .\manager\templates\public\checkout.html:343
+#: .\manager\templates\public\order_confirmation.html:306
+#: .\marketplace\templates\marketplace\order_confirmation.html:101
+msgid "订单总额"
+msgstr "Montant total de la commande"
+
+#: .\manager\templates\public\checkout.html:350
+msgid "确认订单并支付"
+msgstr "Confirmer la commande et payer"
+
+#: .\manager\templates\public\checkout.html:357
+msgid "您的支付信息经过安全加密保护"
+msgstr "Vos informations de paiement sont protégées par un cryptage sécurisé"
+
+#: .\manager\templates\public\checkout.html:405
+msgid "点击选择"
+msgstr "Cliquer pour sélectionner"
+
+#: .\manager\templates\public\checkout.html:436
+msgid "请选择支付方式"
+msgstr "Veuillez choisir votre mode de paiement"
+
+#: .\manager\templates\public\checkout.html:457
+#: .\manager\templates\public\checkout.html:502
+#: .\manager\templates\public\order_confirmation.html:720
+msgid "微信支付"
+msgstr "Paiement WeChat"
+
+#: .\manager\templates\public\checkout.html:460
+#: .\manager\templates\public\order_confirmation.html:720
+msgid "支付宝"
+msgstr "Alipay"
+
+#: .\manager\templates\public\checkout.html:509
+msgid "请使用手机扫描二维码完成支付"
+msgstr ""
+"Veuillez scanner le code QR avec votre téléphone pour effectuer le paiement"
+
+#: .\manager\templates\public\checkout.html:510
+#: .\manager\templates\public\vendor_dashboard.html:296
+#: .\marketplace\templates\marketplace\checkout.html:214
+msgid "金额"
+msgstr "Montant"
+
+#: .\manager\templates\public\checkout.html:518
+msgid "请确认您的支付状态"
+msgstr "Veuillez confirmer votre statut de paiement"
+
+#: .\manager\templates\public\checkout.html:521
+#: .\marketplace\templates\marketplace\checkout.html:221
+msgid "已完成支付"
+msgstr "Paiement effectué"
+
+#: .\manager\templates\public\checkout.html:524
+#: .\marketplace\templates\marketplace\checkout.html:224
+msgid "尚未支付"
+msgstr "Pas encore payé"
+
+#: .\manager\templates\public\contact.html:229
+msgid "与我们取得联系"
+msgstr "Contactez-nous"
+
+#: .\manager\templates\public\contact.html:230
+msgid "如果您有任何问题、建议或合作意向，请随时与我们联系。我们的团队将尽快回复您。"
+msgstr ""
+"Si vous avez des questions, des suggestions ou des propositions de "
+"collaboration, n’hésitez pas à nous contacter. Notre équipe vous répondra "
+"dans les plus brefs délais."
+
+#: .\manager\templates\public\contact.html:283
+#: .\manager\templates\public\contact.html:311
+msgid "发送消息"
+msgstr "Envoyer un message"
+
+#: .\manager\templates\public\contact.html:284
+msgid "给我们留言"
+msgstr "Laisser un message à nous"
+
+#: .\manager\templates\public\contact.html:285
+msgid "感谢您的留言！我们会尽快回复您。"
+msgstr "Merci pour votre message ! Nous vous répondrons dès que possible."
+
+#: .\manager\templates\public\contact.html:292
+#: .\manager\templates\public\contact.html:293
+msgid "您的姓名"
+msgstr "Votre nom"
+
+#: .\manager\templates\public\contact.html:298
+#: .\manager\templates\public\contact.html:299
+msgid "您的邮箱"
+msgstr "Votre e‑mail"
+
+#: .\manager\templates\public\contact.html:304
+#: .\manager\templates\public\contact.html:305
+msgid "主题"
+msgstr "Sujet"
+
+#: .\manager\templates\public\contact.html:308
+#: .\manager\templates\public\contact.html:309
+msgid "您的留言"
+msgstr "Votre message"
+
+#: .\manager\templates\public\contact.html:316
+msgid "其他联系方式"
+msgstr "Autres coordonnées"
+
+#: .\manager\templates\public\contact.html:317
+msgid "关注我们"
+msgstr "Suivez-nous"
+
+#: .\manager\templates\public\contact.html:357
+msgid "发送中..."
+msgstr "Envoi en cours..."
+
+#: .\manager\templates\public\contact.html:375
+msgid "发送失败，请稍后重试。"
+msgstr "Échec de l’envoi, veuillez réessayer plus tard."
+
+#: .\manager\templates\public\contact.html:381
+msgid "网络错误，请稍后重试。"
+msgstr "Erreur réseau, veuillez réessayer plus tard."
+
+#: .\manager\templates\public\forgot_password.html:4
+msgid "忘记密码"
+msgstr "Mot de passe oublié"
+
+#: .\manager\templates\public\forgot_password.html:144
+msgid "example@email.com"
+msgstr "example@email.com"
+
+#: .\manager\templates\public\forgot_password.html:182
+msgid "至少6个字符"
+msgstr "Au moins 6 caractères"
+
+#: .\manager\templates\public\forgot_password.html:186
+#: .\manager\templates\public\user_register.html:80
+msgid "再次输入密码"
+msgstr "Confirmez le mot de passe"
+
+#: .\manager\templates\public\home.html:904
+#: .\manager\templates\public\home.html:917
+msgid "输入书名进行搜索..."
+msgstr "Entrez le titre du livre pour rechercher..."
+
+#: .\manager\templates\public\home.html:907
+#: .\marketplace\templates\marketplace\products.html:100
+#: .\marketplace\templates\marketplace\supermarket.html:45
+msgid "搜索商品..."
+msgstr "Recherche de produit..."
+
+#: .\manager\templates\public\home.html:910
+#: .\marketplace\templates\marketplace\courses.html:65
+msgid "搜索课程..."
+msgstr "Recherche de cours..."
+
+#: .\manager\templates\public\order_confirmation.html:4
+#: .\marketplace\templates\marketplace\order_confirmation.html:4
+msgid "订单确认"
+msgstr "Confirmation de commande"
+
+#: .\manager\templates\public\order_confirmation.html:257
+msgid "订单创建成功！"
+msgstr "Commande créée avec succès !"
+
+#: .\manager\templates\public\order_confirmation.html:258
+msgid "感谢您的购买，我们将尽快为您处理订单"
+msgstr ""
+"Merci pour votre achat, nous traiterons votre commande dès que possible"
+
+#: .\manager\templates\public\order_confirmation.html:263
+#: .\marketplace\templates\marketplace\checkout.html:169
+msgid "订单详情"
+msgstr "Détails de la commande"
+
+#: .\manager\templates\public\order_confirmation.html:266
+#: .\manager\templates\public\track_order.html:242
+msgid "订单号"
+msgstr "Numéro de commande"
+
+#: .\manager\templates\public\order_confirmation.html:271
+#: .\manager\templates\public\track_order.html:449
+#: .\manager\templates\public\track_order.html:752
+#: .\marketplace\templates\marketplace\order_confirmation.html:74
+msgid "下单时间"
+msgstr "Heure de commande"
+
+#: .\manager\templates\public\order_confirmation.html:276
+#: .\manager\templates\public\order_confirmation.html:384
+#: .\marketplace\templates\marketplace\order_confirmation.html:79
+msgid "订单状态"
+msgstr "Statut de la commande"
+
+#: .\manager\templates\public\order_confirmation.html:281
+#: .\manager\templates\public\track_order.html:437
+#: .\manager\templates\public\track_order.html:740
+#: .\marketplace\templates\marketplace\order_confirmation.html:75
+msgid "客户姓名"
+msgstr "Nom du client"
+
+#: .\manager\templates\public\order_confirmation.html:286
+msgid "联系邮箱"
+msgstr "E‑mail de contact"
+
+#: .\manager\templates\public\order_confirmation.html:313
+#: .\marketplace\templates\marketplace\order_confirmation.html:83
+msgid "订单商品"
+msgstr "Produits de la commande"
+
+#: .\manager\templates\public\order_confirmation.html:381
+msgid "支付信息"
+msgstr "Informations de paiement"
+
+#: .\manager\templates\public\order_confirmation.html:383
+#: .\marketplace\templates\marketplace\checkout.html:185
+msgid "应付金额"
+msgstr "Montant à payer"
+
+#: .\manager\templates\public\order_confirmation.html:391
+#: .\manager\templates\public\order_confirmation.html:465
+#: .\manager\templates\public\order_confirmation.html:520
+msgid "订单创建"
+msgstr "Création de commande"
+
+#: .\manager\templates\public\order_confirmation.html:395
+msgid "等待付款"
+msgstr "En attente de paiement"
+
+#: .\manager\templates\public\order_confirmation.html:399
+msgid "验证处理"
+msgstr "Traitement de la vérification"
+
+#: .\manager\templates\public\order_confirmation.html:403
+#: .\manager\templates\public\order_confirmation.html:477
+#: .\manager\templates\public\order_confirmation.html:532
+msgid "可下载"
+msgstr "Téléchargeable"
+
+#: .\manager\templates\public\order_confirmation.html:403
+#: .\manager\templates\public\order_confirmation.html:477
+#: .\manager\templates\public\order_confirmation.html:532
+#: .\marketplace\templates\marketplace\course_detail.html:243
+msgid "已完成"
+msgstr "Terminé"
+
+#: .\manager\templates\public\order_confirmation.html:414
+msgid "支付步骤"
+msgstr "Étape de paiement"
+
+#: .\manager\templates\public\order_confirmation.html:419
+msgid "扫描二维码"
+msgstr "Scanner le code QR"
+
+#: .\manager\templates\public\order_confirmation.html:420
+msgid "点击下方按钮，用手机扫描付款码"
+msgstr ""
+"Cliquez sur le bouton ci-dessous pour scanner le code de paiement avec votre"
+" téléphone"
+
+#: .\manager\templates\public\order_confirmation.html:426
+msgid "完成付款"
+msgstr "Paiement effectué"
+
+#: .\manager\templates\public\order_confirmation.html:433
+msgid "点击“我已支付”"
+msgstr "Cliquez sur « J’ai payé »"
+
+#: .\manager\templates\public\order_confirmation.html:434
+msgid "确认后系统将在5-10分钟内验证"
+msgstr "Après confirmation, le système vérifiera dans 5 à 10 minutes"
+
+#: .\manager\templates\public\order_confirmation.html:441
+#: .\marketplace\templates\marketplace\checkout.html:208
+msgid "扫码支付"
+msgstr "Paiement par scan"
+
+#: .\manager\templates\public\order_confirmation.html:444
+#: .\manager\templates\public\order_confirmation.html:839
+#: .\manager\templates\public\track_order.html:352
+#: .\manager\templates\public\track_order.html:916
+msgid "取消订单"
+msgstr "Annuler la commande"
+
+#: .\manager\templates\public\order_confirmation.html:448
+msgid "支付时间已过期，订单已自动取消"
+msgstr ""
+"Le délai de paiement est expiré, la commande a été annulée automatiquement"
+
+#: .\manager\templates\public\order_confirmation.html:456
+#: .\manager\templates\public\order_confirmation.html:509
+#: .\manager\templates\public\order_confirmation.html:511
+msgid "下一步"
+msgstr "Étape suivante"
+
+#: .\manager\templates\public\order_confirmation.html:456
+#, python-format
+msgid "点击上方“扫码支付”按钮，使用 %(method)s 完成付款"
+msgstr ""
+"Cliquez sur le bouton « Scanner le paiement » ci‑dessus, utilisez %(method)s"
+" pour effectuer le paiement"
+
+#: .\manager\templates\public\order_confirmation.html:469
+#: .\manager\templates\public\order_confirmation.html:524
+msgid "已付款"
+msgstr "Payé"
+
+#: .\manager\templates\public\order_confirmation.html:473
+msgid "验证中"
+msgstr "En vérification"
+
+#: .\manager\templates\public\order_confirmation.html:484
+msgid "验证处理中..."
+msgstr "Vérification en cours..."
+
+#: .\manager\templates\public\order_confirmation.html:486
+msgid "我们正在验证您的付款"
+msgstr "Nous vérifions votre paiement"
+
+#: .\manager\templates\public\order_confirmation.html:486
+msgid "预计"
+msgstr "Prévu"
+
+#: .\manager\templates\public\order_confirmation.html:486
+#: .\marketplace\templates\marketplace\course_detail.html:188
+#: .\marketplace\templates\marketplace\course_detail.html:262
+msgid "分钟"
+msgstr "minutes"
+
+#: .\manager\templates\public\order_confirmation.html:486
+msgid "内完成确认。"
+msgstr "confirmation terminée dans"
+
+#: .\manager\templates\public\order_confirmation.html:488
+msgid "确认完成后，您将可以直接下载电子书。无需刷新页面，系统会自动更新状态。"
+msgstr ""
+"Une fois la confirmation terminée, vous pourrez télécharger directement le "
+"livre électronique. Pas besoin de rafraîchir la page, le système mettra "
+"automatiquement à jour le statut."
+
+#: .\manager\templates\public\order_confirmation.html:490
+msgid "确认完成后，您的订单将进入处理环节。"
+msgstr ""
+"Une fois la confirmation terminée, votre commande passera à l'étape de "
+"traitement."
+
+#: .\manager\templates\public\order_confirmation.html:493
+msgid "需要加快确认？添加客服微信"
+msgstr ""
+"Besoin d'accélérer la confirmation ? Ajoutez le service client WeChat."
+
+#: .\manager\templates\public\order_confirmation.html:500
+msgid "扫描二维码或搜索微信ID添加好友"
+msgstr "Scannez le code QR ou recherchez l'ID WeChat pour ajouter un ami."
+
+#: .\manager\templates\public\order_confirmation.html:509
+msgid "请等待5-10分钟，系统正在验证付款。确认后即可下载电子书。"
+msgstr ""
+"Veuillez attendre 5-10 minutes, le système vérifie le paiement. Après "
+"confirmation, vous pourrez télécharger le livre électronique."
+
+#: .\manager\templates\public\order_confirmation.html:511
+msgid "请等待5-10分钟，系统正在验证付款。确认后订单将进入处理流程。"
+msgstr ""
+"Veuillez attendre 5-10 minutes, le système vérifie le paiement. Après "
+"confirmation, la commande passera à l'étape de traitement."
+
+#: .\manager\templates\public\order_confirmation.html:528
+msgid "已确认"
+msgstr "Confirmé"
+
+#: .\manager\templates\public\order_confirmation.html:539
+#: .\manager\templates\public\track_order.html:801
+msgid "已发货"
+msgstr "Expédié"
+
+#: .\manager\templates\public\order_confirmation.html:539
+msgid "您的电子书已准备好下载！"
+msgstr "Votre e-book est prêt à être téléchargé !"
+
+#: .\manager\templates\public\order_confirmation.html:544
+msgid "下载您的商品"
+msgstr "Télécharger votre produit"
+
+#: .\manager\templates\public\order_confirmation.html:545
+msgid "感谢您的购买！您现在可以下载已购买的商品。"
+msgstr ""
+"Merci pour votre achat ! Vous pouvez maintenant télécharger les articles "
+"achetés."
+
+#: .\manager\templates\public\order_confirmation.html:552
+msgid "下载"
+msgstr "Télécharger"
+
+#: .\manager\templates\public\order_confirmation.html:559
+msgid "下载文件准备中，请联系客服"
+msgstr ""
+"Préparation du fichier de téléchargement, veuillez contacter le service "
+"client"
+
+#: .\manager\templates\public\order_confirmation.html:568
+#: .\manager\templates\public\order_confirmation.html:573
+msgid "订单已完成"
+msgstr "Commande terminée"
+
+#: .\manager\templates\public\order_confirmation.html:568
+msgid "您的订单已处理完毕！"
+msgstr "Votre commande a été entièrement traitée !"
+
+#: .\manager\templates\public\order_confirmation.html:574
+msgid "感谢您的购买！您的订单已成功处理。"
+msgstr "Merci pour votre achat ! Votre commande a été traitée avec succès."
+
+#: .\manager\templates\public\order_confirmation.html:591
+msgid "客户备注"
+msgstr "Remarques client"
+
+#: .\manager\templates\public\order_confirmation.html:602
+msgid "继续购书"
+msgstr "Continuer à acheter des livres"
+
+#: .\manager\templates\public\order_confirmation.html:611
+msgid "重要提醒"
+msgstr "Rappel important"
+
+#: .\manager\templates\public\order_confirmation.html:613
+msgid "请保存好您的订单号"
+msgstr "Veuillez conserver votre numéro de commande"
+
+#: .\manager\templates\public\order_confirmation.html:614
+msgid "订单确认邮件已发送至"
+msgstr "Le courriel de confirmation de commande a été envoyé à"
+
+#: .\manager\templates\public\order_confirmation.html:615
+msgid "如有疑问，请联系客服并提供订单号"
+msgstr ""
+"En cas de doute, veuillez contacter le service client et fournir votre "
+"numéro de commande"
+
+#: .\manager\templates\public\order_confirmation.html:616
+msgid "您可以随时使用订单号和邮箱查询订单状态"
+msgstr ""
+"Vous pouvez à tout moment vérifier l’état de votre commande avec votre "
+"numéro de commande et votre e‑mail"
+
+#: .\manager\templates\public\order_confirmation.html:624
+msgid "正在验证支付..."
+msgstr "Vérification du paiement en cours..."
+
+#: .\manager\templates\public\order_confirmation.html:625
+msgid "请稍候，系统正在确认您的付款"
+msgstr "Veuillez patienter, le système confirme votre paiement"
+
+#: .\manager\templates\public\order_confirmation.html:634
+msgid "点击复制订单号"
+msgstr "Cliquez pour copier le numéro de commande"
+
+#: .\manager\templates\public\order_confirmation.html:740
+msgid "我已完成支付"
+msgstr "J'ai terminé le paiement"
+
+#: .\manager\templates\public\order_confirmation.html:749
+msgid "请按照订单信息中的支付方式完成付款"
+msgstr ""
+"Veuillez effectuer le paiement selon le mode indiqué dans les informations "
+"de la commande"
+
+#: .\manager\templates\public\order_confirmation.html:790
+msgid "支付确认成功!"
+msgstr "Confirmation du paiement réussie !"
+
+#: .\manager\templates\public\order_confirmation.html:791
+msgid "系统正在验证，预计 5-10 分钟内完成确认"
+msgstr "Le système vérifie, confirmation prévue dans 5-10 minutes"
+
+#: .\manager\templates\public\order_confirmation.html:799
+msgid "确认失败，请重试"
+msgstr "Confirmation échouée, veuillez réessayer"
+
+#: .\manager\templates\public\order_confirmation.html:803
+#: .\manager\templates\public\order_confirmation.html:837
+msgid "网络错误，请重试"
+msgstr "Erreur réseau, veuillez réessayer"
+
+#: .\manager\templates\public\order_confirmation.html:808
+msgid "确定要取消此订单吗？取消后无法恢复。"
+msgstr ""
+"Voulez-vous vraiment annuler cette commande ? L'annulation est irréversible."
+
+#: .\manager\templates\public\order_confirmation.html:812
+msgid "取消中..."
+msgstr "Annulation en cours..."
+
+#: .\manager\templates\public\order_confirmation.html:826
+msgid "已取消"
+msgstr "Annulé"
+
+#: .\manager\templates\public\order_confirmation.html:832
+msgid "取消失败，请重试"
+msgstr "Échec de l'annulation, veuillez réessayer"
+
+#: .\manager\templates\public\publisher_detail.html:4
+#: .\manager\templates\public\publisher_detail_old.html:4
+msgid "出版社详情"
+msgstr "Détails de l'éditeur"
+
+#: .\manager\templates\public\publisher_detail.html:65
+#: .\manager\templates\public\publishers.html:139
+msgid "本图书"
+msgstr "Ce livre"
+
+#: .\manager\templates\public\publisher_detail.html:86
+#: .\manager\templates\public\publisher_detail.html:179
+#: .\manager\templates\public\publisher_detail_old.html:185
+#: .\manager\templates\public\publisher_detail_old.html:276
+msgid "出版图书"
+msgstr "Livres publiés"
+
+#: .\manager\templates\public\publisher_detail.html:104
+#: .\manager\templates\public\publisher_detail_old.html:212
+msgid "合作作者"
+msgstr "Auteurs collaborateurs"
+
+#: .\manager\templates\public\publisher_detail.html:129
+msgid "编号"
+msgstr "Numéro"
+
+#: .\manager\templates\public\publisher_detail.html:133
+#: .\manager\templates\public\publisher_detail_old.html:232
+#: .\marketplace\templates\marketplace\products.html:118
+msgid "名称"
+msgstr "Nom"
+
+#: .\manager\templates\public\publisher_detail.html:145
+msgid "经营数据"
+msgstr "Données commerciales"
+
+#: .\manager\templates\public\publisher_detail.html:150
+msgid "图书总数"
+msgstr "Nombre total de livres"
+
+#: .\manager\templates\public\publisher_detail.html:168
+msgid "预计营收"
+msgstr "Revenu prévu"
+
+#: .\manager\templates\public\publisher_detail.html:201
+#: .\marketplace\templates\marketplace\product_detail.html:218
+#: .\marketplace\templates\marketplace\products.html:159
+#: .\marketplace\templates\marketplace\supermarket.html:97
+#: .\marketplace\templates\marketplace\supermarket_detail.html:111
+msgid "有货"
+msgstr "En stock"
+
+#: .\manager\templates\public\publisher_detail.html:229
+msgid "该出版社暂无图书"
+msgstr "Cette maison d'édition n'a pas encore de livres"
+
+#: .\manager\templates\public\publisher_detail.html:238
+#: .\manager\templates\public\publisher_detail_old.html:169
+msgid "返回出版社列表"
+msgstr "Retour à la liste des maisons d'édition"
+
+#: .\manager\templates\public\publisher_detail.html:241
+msgid "筛选该出版社图书"
+msgstr "Filtrer les livres de cette maison d'édition"
+
+#: .\manager\templates\public\publisher_detail_old.html:224
+msgid "基本信息"
+msgstr "Informations de base"
+
+#: .\manager\templates\public\publisher_detail_old.html:228
+msgid "出版社ID"
+msgstr "ID de l'éditeur"
+
+#: .\manager\templates\public\publisher_detail_old.html:244
+msgid "出版统计"
+msgstr "Statistiques de publication"
+
+#: .\manager\templates\public\publisher_detail_old.html:249
+msgid "平均价格"
+msgstr "Prix moyen"
+
+#: .\manager\templates\public\publisher_detail_old.html:253
+msgid "总收入"
+msgstr "Revenu total"
+
+#: .\manager\templates\public\publisher_detail_old.html:265
+msgid "查看该出版社图书"
+msgstr "Voir les livres de cette maison d'édition"
+
+#: .\manager\templates\public\publisher_detail_old.html:277
+msgid "该出版社出版的所有图书"
+msgstr "Tous les livres publiés par cette maison d'édition"
+
+#: .\manager\templates\public\publisher_detail_old.html:306
+msgid "未知作者"
+msgstr "Auteur inconnu"
+
+#: .\manager\templates\public\publisher_detail_old.html:337
+msgid "查看更多图书"
+msgstr "Voir plus de livres"
+
+#: .\manager\templates\public\publisher_detail_old.html:351
+msgid "暂无出版图书"
+msgstr "Aucun livre publié pour le moment"
+
+#: .\manager\templates\public\publisher_detail_old.html:352
+msgid "该出版社目前还没有出版任何图书"
+msgstr "Cette maison d'édition n'a pas encore publié de livres"
+
+#: .\manager\templates\public\publisher_detail_old.html:354
+msgid "浏览其他图书"
+msgstr "Parcourir d'autres livres"
+
+#: .\manager\templates\public\publishers.html:4
+#: .\manager\templates\public\publishers.html:125
+msgid "出版社目录"
+msgstr "Répertoire des maisons d'édition"
+
+#: .\manager\templates\public\publishers.html:126
+msgid "浏览我们合作的优质出版社，发现精品图书"
+msgstr ""
+"Parcourez nos maisons d'édition partenaires de qualité et découvrez des "
+"livres de premier choix"
+
+#: .\manager\templates\public\publishers.html:133
+msgid "家出版社"
+msgstr "Maison d'édition"
+
+#: .\manager\templates\public\publishers.html:152
+msgid "搜索出版社名称..."
+msgstr "Rechercher le nom de la maison d'édition..."
+
+#: .\manager\templates\public\publishers.html:212
+msgid "未找到相关出版社"
+msgstr "Aucune maison d'édition correspondante trouvée"
+
+#: .\manager\templates\public\publishers.html:213
+msgid "请尝试其他搜索关键词或浏览所有出版社"
+msgstr ""
+"Veuillez essayer d'autres mots-clés de recherche ou parcourir toutes les "
+"maisons d'édition"
+
+#: .\manager\templates\public\publishers.html:215
+msgid "浏览所有出版社"
+msgstr "Parcourir toutes les maisons d'édition"
+
+#: .\manager\templates\public\services.html:234
+msgid "全方位的数字服务平台"
+msgstr "Plateforme de services numériques à 360°"
+
+#: .\manager\templates\public\services.html:235
+msgid "从电子书下载到在线课程学习，从综合市场到智能AI助手，我们为您打造一站式的知识与生活服务体验。"
+msgstr ""
+"De la lecture de livres numériques à l'apprentissage en ligne, du marché "
+"complet aux assistants IA intelligents, nous créons pour vous une expérience"
+" de services de connaissances et de vie tout-en-un."
+
+#: .\manager\templates\public\services.html:251
+msgid "核心服务"
+msgstr "Services principaux"
+
+#: .\manager\templates\public\services.html:252
+msgid "我们为您提供什么"
+msgstr "Ce que nous vous proposons"
+
+#: .\manager\templates\public\services.html:259
+msgid "浏览丰富的图书目录，在线购买后即可下载电子书。支持按作者、出版社、分类等多维度搜索和筛选。"
+msgstr ""
+"Parcourez un catalogue riche de livres, achetez en ligne et téléchargez "
+"immédiatement votre e‑book. Recherche et filtrage multidimensionnels par "
+"auteur, éditeur, catégorie, etc."
+
+#: .\manager\templates\public\services.html:261
+msgid "即购即下载"
+msgstr "Achat instantané et téléchargement"
+
+#: .\manager\templates\public\services.html:262
+msgid "多维度搜索与筛选"
+msgstr "Recherche et filtrage multidimensionnels"
+
+#: .\manager\templates\public\services.html:263
+msgid "收藏与心愿单"
+msgstr "Favoris et liste de souhaits"
+
+#: .\manager\templates\public\services.html:271
+msgid "优质的视频课程资源，章节化学习结构，支持在线观看视频课程，提升您的技能和知识。"
+msgstr ""
+"Ressources vidéo de qualité, structure d'apprentissage par chapitres, "
+"visionnage en ligne des cours pour améliorer vos compétences et vos "
+"connaissances."
+
+#: .\manager\templates\public\services.html:274
+msgid "章节化课程结构"
+msgstr "Structure de cours par chapitres"
+
+#: .\manager\templates\public\services.html:275
+msgid "在线观看与购买"
+msgstr "Visionnage en ligne et achat"
+
+#: .\manager\templates\public\services.html:283
+msgid "集合各类商品、生鲜超市于一体的综合市场，满足您的日常购物需求。统一购物车与结算体验。"
+msgstr ""
+"Un marché complet réunissant divers produits et un supermarché de produits "
+"frais, pour répondre à vos besoins quotidiens d'achat. Expérience de panier "
+"et de paiement unifiée."
+
+#: .\manager\templates\public\services.html:285
+msgid "商品与超市"
+msgstr "Produits et supermarché"
+
+#: .\manager\templates\public\services.html:286
+#: .\manager\templates\public\services.html:297
+msgid "统一购物车"
+msgstr "Panier unifié"
+
+#: .\manager\templates\public\services.html:287
+msgid "订单全流程跟踪"
+msgstr "Suivi complet du processus de commande"
+
+#: .\manager\templates\public\services.html:294
+msgid "统一购物与支付"
+msgstr "Unifier les achats et les paiements"
+
+#: .\manager\templates\public\services.html:295
+msgid "图书与市场商品共享统一购物车和结算流程。支持微信、支付宝、PayPal、银行转账等多种支付方式。"
+msgstr ""
+"Livres et produits du marché partagent un panier et un processus de paiement"
+" unifiés. Prise en charge de WeChat, Alipay, PayPal, virement bancaire et "
+"d’autres modes de paiement."
+
+#: .\manager\templates\public\services.html:298
+msgid "多种支付方式"
+msgstr "Plusieurs modes de paiement"
+
+#: .\manager\templates\public\services.html:299
+#: .\manager\templates\public\services.html:347
+msgid "安全结算"
+msgstr "Paiement sécurisé"
+
+#: .\manager\templates\public\services.html:307
+msgid "内置智能AI聊天机器人，随时为您解答关于平台使用、图书推荐、订单查询等问题，提供24/7即时帮助。"
+msgstr ""
+"Robot de chat IA intégré, disponible à tout moment pour répondre à vos "
+"questions sur l’utilisation de la plateforme, les recommandations de livres,"
+" les vérifications de commandes, etc., offrant une assistance instantanée "
+"24/7."
+
+#: .\manager\templates\public\services.html:309
+msgid "实时智能对话"
+msgstr "Conversation intelligente en temps réel"
+
+#: .\manager\templates\public\services.html:310
+msgid "平台功能指引"
+msgstr "Guide des fonctionnalités de la plateforme"
+
+#: .\manager\templates\public\services.html:311
+msgid "24/7全天候服务"
+msgstr "Service 24/7"
+
+#: .\manager\templates\public\services.html:318
+msgid "多语言支持"
+msgstr "Support multilingue"
+
+#: .\manager\templates\public\services.html:319
+msgid "平台支持中文、英文和法文三种语言，满足全球用户的需求，一键切换语言环境。"
+msgstr ""
+"La plateforme prend en charge le chinois, l’anglais et le français, "
+"répondant aux besoins des utilisateurs du monde entier, avec un changement "
+"de langue en un clic."
+
+#: .\manager\templates\public\services.html:321
+msgid "三语切换"
+msgstr "Changement de langue en trois langues"
+
+#: .\manager\templates\public\services.html:322
+msgid "实时翻译"
+msgstr "Traduction en temps réel"
+
+#: .\manager\templates\public\services.html:323
+msgid "本地化体验"
+msgstr "Expérience localisée"
+
+#: .\manager\templates\public\services.html:334
+msgid "使用流程"
+msgstr "Processus d’utilisation"
+
+#: .\manager\templates\public\services.html:335
+msgid "简单四步，畅享服务"
+msgstr "Simple en quatre étapes, profitez du service"
+
+#: .\manager\templates\public\services.html:341
+msgid "浏览与发现"
+msgstr "Parcourir et découvrir"
+
+#: .\manager\templates\public\services.html:341
+msgid "在图书商店、课程中心或综合市场中发现您感兴趣的内容和商品。"
+msgstr ""
+"Découvrez les contenus et produits qui vous intéressent dans la librairie, "
+"le centre de cours ou le marché intégré."
+
+#: .\manager\templates\public\services.html:344
+msgid "将喜欢的图书、课程或商品加入统一购物车，随时调整数量和选择。"
+msgstr ""
+"Ajoutez vos livres, cours ou produits préférés au panier commun, ajustez les"
+" quantités et faites vos choix à tout moment."
+
+#: .\manager\templates\public\services.html:347
+msgid "选择微信、支付宝、PayPal等支付方式，完成安全便捷的在线结算。"
+msgstr ""
+"Sélectionnez WeChat, Alipay, PayPal, etc. pour un paiement en ligne sécurisé"
+" et pratique."
+
+#: .\manager\templates\public\services.html:350
+msgid "畅享服务"
+msgstr "Profitez du service"
+
+#: .\manager\templates\public\services.html:350
+msgid "下载电子书、观看课程视频、跟踪商品配送——一切尽在掌握！"
+msgstr ""
+"Téléchargez des livres électroniques, regardez des vidéos de cours, suivez "
+"la livraison des produits — tout est sous contrôle !"
+
+#: .\manager\templates\public\services.html:360
+msgid "立即开始探索"
+msgstr "Commencez à explorer immédiatement"
+
+#: .\manager\templates\public\services.html:361
+msgid "浏览图书、选修课程、逛市场——开启您的一站式数字生活。"
+msgstr ""
+"Parcourez les livres, choisissez des cours, flânez dans le marché — lancez "
+"votre vie numérique tout-en-un."
+
+#: .\manager\templates\public\track_order.html:216
+msgid "输入您的订单号或邮箱来查看订单状态和物流信息"
+msgstr ""
+"Entrez votre numéro de commande ou votre e‑mail pour consulter le statut de "
+"votre commande et les informations de suivi"
+
+#: .\manager\templates\public\track_order.html:224
+msgid "订单号查询"
+msgstr "Recherche par numéro de commande"
+
+#: .\manager\templates\public\track_order.html:229
+msgid "邮箱查询"
+msgstr "Recherche par e‑mail"
+
+#: .\manager\templates\public\track_order.html:247
+msgid "请输入您的订单号"
+msgstr "Veuillez saisir votre numéro de commande"
+
+#: .\manager\templates\public\track_order.html:252
+#: .\manager\templates\public\track_order.html:276
+msgid "查询订单"
+msgstr "Rechercher la commande"
+
+#: .\manager\templates\public\track_order.html:266
+msgid "客户邮箱"
+msgstr "E‑mail client"
+
+#: .\manager\templates\public\track_order.html:271
+msgid "请输入您的邮箱地址"
+msgstr "Veuillez saisir votre adresse e‑mail"
+
+#: .\manager\templates\public\track_order.html:281
+msgid "将显示与此邮箱相关的所有订单"
+msgstr "Afficher toutes les commandes associées à cette adresse e‑mail"
+
+#: .\manager\templates\public\track_order.html:302
+msgid "查找到的订单"
+msgstr "Commandes trouvées"
+
+#: .\manager\templates\public\track_order.html:306
+msgid "图书订单"
+msgstr "Commande de livres"
+
+#: .\manager\templates\public\track_order.html:327
+#: .\manager\templates\public\track_order.html:383
+#: .\manager\templates\public\track_order.html:445
+#: .\manager\templates\public\track_order.html:748
+msgid "订单金额"
+msgstr "Montant de la commande"
+
+#: .\manager\templates\public\track_order.html:335
+#: .\manager\templates\public\track_order.html:391
+msgid "支付状态"
+msgstr "Statut du paiement"
+
+#: .\manager\templates\public\track_order.html:349
+msgid "立即支付"
+msgstr "Payer immédiatement"
+
+#: .\manager\templates\public\track_order.html:362
+#: .\manager\templates\public\track_order.html:727
+msgid "市场订单"
+msgstr "Commande du marché"
+
+#: .\manager\templates\public\track_order.html:423
+#: .\manager\templates\public\user_profile.html:136
+msgid "订单"
+msgstr "Commande"
+
+#: .\manager\templates\public\track_order.html:441
+#: .\manager\templates\public\track_order.html:744
+msgid "联系电话"
+msgstr "Téléphone de contact"
+
+#: .\manager\templates\public\track_order.html:467
+#: .\manager\templates\public\track_order.html:766
+msgid "订单进度"
+msgstr "État de la commande"
+
+#: .\manager\templates\public\track_order.html:475
+#: .\manager\templates\public\track_order.html:771
+msgid "订单已创建"
+msgstr "Commande créée"
+
+#: .\manager\templates\public\track_order.html:487
+#: .\manager\templates\public\track_order.html:779
+msgid "支付完成"
+msgstr "Paiement effectué"
+
+#: .\manager\templates\public\track_order.html:503
+#: .\manager\templates\public\track_order.html:787
+msgid "等待支付"
+msgstr "En attente de paiement"
+
+#: .\manager\templates\public\track_order.html:504
+#: .\manager\templates\public\track_order.html:788
+msgid "请尽快完成支付"
+msgstr "Veuillez effectuer le paiement dès que possible"
+
+#: .\manager\templates\public\track_order.html:516
+msgid "订单已确认"
+msgstr "Commande confirmée"
+
+#: .\manager\templates\public\track_order.html:517
+msgid "商家已确认您的订单"
+msgstr "Le commerçant a confirmé votre commande"
+
+#: .\manager\templates\public\track_order.html:526
+msgid "等待确认"
+msgstr "En attente de confirmation"
+
+#: .\manager\templates\public\track_order.html:527
+msgid "商家正在处理您的订单"
+msgstr "Le commerçant traite votre commande"
+
+#: .\manager\templates\public\track_order.html:539
+msgid "订单已发货"
+msgstr "La commande a été expédiée"
+
+#: .\manager\templates\public\track_order.html:540
+msgid "您的订单正在配送中"
+msgstr "Votre commande est en cours de livraison"
+
+#: .\manager\templates\public\track_order.html:549
+msgid "等待发货"
+msgstr "En attente d'expédition"
+
+#: .\manager\templates\public\track_order.html:550
+msgid "商品准备中"
+msgstr "Préparation du produit"
+
+#: .\manager\templates\public\track_order.html:562
+msgid "订单已送达"
+msgstr "La commande a été livrée"
+
+#: .\manager\templates\public\track_order.html:572
+msgid "等待签收"
+msgstr "En attente de signature"
+
+#: .\manager\templates\public\track_order.html:573
+msgid "商品将尽快送达"
+msgstr "Le produit sera livré dès que possible"
+
+#: .\manager\templates\public\track_order.html:585
+#: .\manager\templates\public\track_order.html:813
+#: .\manager\templates\public\track_order.html:912
+msgid "订单已取消"
+msgstr "La commande a été annulée"
+
+#: .\manager\templates\public\track_order.html:594
+#: .\manager\templates\public\track_order.html:820
+msgid "商品清单"
+msgstr "Liste des articles"
+
+#: .\manager\templates\public\track_order.html:599
+#: .\manager\templates\public\track_order.html:825
+msgid "商品名称"
+msgstr "Nom du produit"
+
+#: .\manager\templates\public\track_order.html:602
+#: .\manager\templates\public\track_order.html:829
+msgid "小计"
+msgstr "Sous-total"
+
+#: .\manager\templates\public\track_order.html:644
+msgid "图书下载"
+msgstr "Téléchargement du livre"
+
+#: .\manager\templates\public\track_order.html:675
+msgid "文件下载"
+msgstr "Téléchargement de fichiers"
+
+#: .\manager\templates\public\track_order.html:677
+msgid "外部链接"
+msgstr "Lien externe"
+
+#: .\manager\templates\public\track_order.html:685
+msgid "下载图书"
+msgstr "Télécharger le livre"
+
+#: .\manager\templates\public\track_order.html:698
+msgid "您购买的图书暂无电子版下载，如需纸质版请等待配送。"
+msgstr ""
+"Le livre que vous avez acheté n’est pas encore disponible en version "
+"électronique. Si vous avez besoin d’une version papier, veuillez attendre la"
+" livraison."
+
+#: .\manager\templates\public\track_order.html:706
+#: .\manager\templates\public\track_order.html:866
+msgid "需要帮助？"
+msgstr "Besoin d’aide ?"
+
+#: .\manager\templates\public\track_order.html:707
+#: .\manager\templates\public\track_order.html:867
+msgid "如果您对订单有任何疑问，请联系我们的客服"
+msgstr ""
+"Si vous avez des questions concernant votre commande, veuillez contacter "
+"notre service client."
+
+#: .\manager\templates\public\track_order.html:717
+msgid "未找到订单"
+msgstr "Commande non trouvée"
+
+#: .\manager\templates\public\track_order.html:718
+msgid "请检查您输入的订单号是否正确，或联系客服获取帮助。"
+msgstr ""
+"Veuillez vérifier que le numéro de commande que vous avez entré est correct,"
+" ou contactez le service client pour obtenir de l’aide."
+
+#: .\manager\templates\public\track_order.html:795
+msgid "处理中"
+msgstr "En cours de traitement"
+
+#: .\manager\templates\public\track_order.html:807
+msgid "已送达"
+msgstr "Livré"
+
+#: .\manager\templates\public\track_order.html:826
+msgid "类型"
+msgstr "Type"
+
+#: .\manager\templates\public\track_order.html:899
+msgid "确定要取消此订单吗？"
+msgstr "Voulez-vous vraiment annuler cette commande ?"
+
+#: .\manager\templates\public\user_login.html:49
+msgid "欢迎回来"
+msgstr "Bienvenue de retour"
+
+#: .\manager\templates\public\user_login.html:50
+msgid "登录后可跟踪订单、管理收藏"
+msgstr ""
+"Après connexion, vous pouvez suivre votre commande et gérer vos favoris"
+
+#: .\manager\templates\public\user_login.html:64
+#: .\manager\templates\public\user_register.html:68
+#: .\manager\templates\public\vendor_login.html:62
+msgid "请输入邮箱"
+msgstr "Veuillez saisir votre e‑mail"
+
+#: .\manager\templates\public\user_login.html:67
+#: .\manager\templates\public\user_register.html:75
+#: .\manager\templates\public\vendor_login.html:65
+#: .\manager\templates\public\vendor_register.html:86
+msgid "密码"
+msgstr "Mot de passe"
+
+#: .\manager\templates\public\user_login.html:68
+#: .\manager\templates\public\vendor_login.html:66
+msgid "请输入密码"
+msgstr "Veuillez entrer le mot de passe"
+
+#: .\manager\templates\public\user_login.html:79
+#: .\manager\templates\public\user_register.html:86
+#: .\manager\templates\public\vendor_login.html:77
+#: .\manager\templates\public\vendor_register.html:100
+msgid "或"
+msgstr "ou"
+
+#: .\manager\templates\public\user_login.html:81
+msgid "没有账户？"
+msgstr "Pas de compte ?"
+
+#: .\manager\templates\public\user_login.html:81
+#: .\manager\templates\public\user_register.html:4
+#: .\manager\templates\public\user_register.html:83
+#: .\manager\templates\public\user_register.html:114
+#: .\manager\templates\public\user_register.html:119
+#: .\manager\templates\public\vendor_login.html:79
+msgid "注册"
+msgstr "S'inscrire"
+
+#: .\manager\templates\public\user_login.html:96
+#: .\manager\templates\public\vendor_login.html:94
+msgid "登录中..."
+msgstr "Connexion en cours..."
+
+#: .\manager\templates\public\user_profile.html:135
+msgid "资料"
+msgstr "Profil"
+
+#: .\manager\templates\public\user_profile.html:144
+msgid "编辑资料"
+msgstr "Modifier le profil"
+
+#: .\manager\templates\public\user_profile.html:157
+msgid "头像"
+msgstr "Photo de profil"
+
+#: .\manager\templates\public\user_profile.html:161
+msgid "保存"
+msgstr "Enregistrer"
+
+#: .\manager\templates\public\user_profile.html:242
+msgid "暂无商品明细"
+msgstr "Aucun détail de produit"
+
+#: .\manager\templates\public\user_profile.html:254
+msgid "查看订单详情"
+msgstr "Voir les détails de la commande"
+
+#: .\manager\templates\public\user_profile.html:263
+msgid "暂无订单"
+msgstr "Aucun ordre"
+
+#: .\manager\templates\public\user_profile.html:279
+msgid "我的收藏"
+msgstr "Mes favoris"
+
+#: .\manager\templates\public\user_profile.html:315
+msgid "暂无收藏"
+msgstr "Aucun favori"
+
+#: .\manager\templates\public\user_profile.html:324
+msgid "我的课程"
+msgstr "Mes cours"
+
+#: .\manager\templates\public\user_profile.html:341
+#: .\marketplace\templates\marketplace\course_detail.html:252
+#: .\marketplace\templates\marketplace\course_detail.html:293
+#: .\marketplace\templates\marketplace\courses.html:121
+msgid "课时"
+msgstr "Leçon"
+
+#: .\manager\templates\public\user_profile.html:349
+msgid "复习"
+msgstr "Révision"
+
+#: .\manager\templates\public\user_profile.html:349
+msgid "继续学习"
+msgstr "Continuer l’apprentissage"
+
+#: .\manager\templates\public\user_profile.html:362
+#: .\marketplace\templates\marketplace\courses.html:169
+msgid "暂无课程"
+msgstr "Aucun cours disponible"
+
+#: .\manager\templates\public\user_profile.html:364
+#: .\marketplace\templates\marketplace\home.html:156
+msgid "浏览课程"
+msgstr "Parcourir les cours"
+
+#: .\manager\templates\public\user_register.html:49
+msgid "创建账户"
+msgstr "Créer un compte"
+
+#: .\manager\templates\public\user_register.html:50
+msgid "注册后可跟踪订单、管理收藏和个人资料"
+msgstr ""
+"Après l’inscription, vous pourrez suivre vos commandes, gérer vos favoris et"
+" votre profil"
+
+#: .\manager\templates\public\user_register.html:64
+msgid "请输入姓名"
+msgstr "Veuillez saisir votre nom"
+
+#: .\manager\templates\public\user_register.html:72
+#: .\marketplace\templates\marketplace\checkout.html:93
+#: .\marketplace\templates\marketplace\checkout.html:99
+#: .\marketplace\templates\marketplace\checkout.html:105
+msgid "选填"
+msgstr "Facultatif"
+
+#: .\manager\templates\public\user_register.html:76
+msgid "至少6位"
+msgstr "Au moins 6 caractères"
+
+#: .\manager\templates\public\user_register.html:79
+#: .\manager\templates\public\vendor_register.html:90
+msgid "确认密码"
+msgstr "Confirmer le mot de passe"
+
+#: .\manager\templates\public\user_register.html:88
+msgid "已有账户？"
+msgstr "Vous avez déjà un compte ?"
+
+#: .\manager\templates\public\user_register.html:103
+msgid "注册中..."
+msgstr "Inscription en cours…"
+
+#: .\manager\templates\public\vendor_add_book.html:4
+msgid "上架图书"
+msgstr "Mettre en vente le livre"
+
+#: .\manager\templates\public\vendor_add_book.html:62
+#: .\manager\templates\public\vendor_dashboard.html:148
+msgid "上架新书"
+msgstr "Mettre en vente un nouveau livre"
+
+#: .\manager\templates\public\vendor_add_book.html:63
+msgid "填写图书信息将其添加到平台"
+msgstr "Remplissez les informations du livre pour l'ajouter à la plateforme"
+
+#: .\manager\templates\public\vendor_add_book.html:77
+msgid "卖家ID"
+msgstr "ID du vendeur"
+
+#: .\manager\templates\public\vendor_add_book.html:83
+#: .\manager\templates\public\vendor_edit_book.html:79
+msgid "图书名称"
+msgstr "Nom du livre"
+
+#: .\manager\templates\public\vendor_add_book.html:87
+#: .\manager\templates\public\vendor_edit_book.html:83
+msgid "售价 (¥)"
+msgstr "Prix de vente (¥)"
+
+#: .\manager\templates\public\vendor_add_book.html:91
+#: .\manager\templates\public\vendor_edit_book.html:87
+msgid "卖家定价 (¥)"
+msgstr "Prix fixé par le vendeur (¥)"
+
+#: .\manager\templates\public\vendor_add_book.html:102
+#: .\manager\templates\public\vendor_edit_book.html:98
+msgid "新建"
+msgstr "Créer"
+
+#: .\manager\templates\public\vendor_add_book.html:106
+#: .\manager\templates\public\vendor_edit_book.html:102
+msgid "选择出版社"
+msgstr "Sélectionner l'éditeur"
+
+#: .\manager\templates\public\vendor_add_book.html:116
+#: .\manager\templates\public\vendor_add_book.html:246
+#: .\manager\templates\public\vendor_edit_book.html:112
+#: .\manager\templates\public\vendor_edit_book.html:253
+msgid "新建作者"
+msgstr "Créer un auteur"
+
+#: .\manager\templates\public\vendor_add_book.html:124
+#: .\manager\templates\public\vendor_edit_book.html:120
+msgid "按住 Ctrl/Cmd 可多选"
+msgstr "Maintenez Ctrl/Cmd pour sélectionner plusieurs éléments"
+
+#: .\manager\templates\public\vendor_add_book.html:127
+#: .\manager\templates\public\vendor_edit_book.html:123
+msgid "图书描述"
+msgstr "Description du livre"
+
+#: .\manager\templates\public\vendor_add_book.html:131
+#: .\manager\templates\public\vendor_edit_book.html:127
+msgid "封面图片"
+msgstr "Image de couverture"
+
+#: .\manager\templates\public\vendor_add_book.html:133
+msgid "如不上传，系统将自动生成精美封面"
+msgstr ""
+"Si vous ne téléchargez pas, le système générera automatiquement une "
+"couverture élégante"
+
+#: .\manager\templates\public\vendor_add_book.html:138
+#: .\manager\templates\public\vendor_edit_book.html:139
+msgid "电子书下载"
+msgstr "Téléchargement du livre numérique"
+
+#: .\manager\templates\public\vendor_add_book.html:140
+#: .\manager\templates\public\vendor_edit_book.html:141
+msgid "您可以上传电子书文件或提供外部下载链接"
+msgstr ""
+"Vous pouvez télécharger le fichier du livre numérique ou fournir un lien de "
+"téléchargement externe"
+
+#: .\manager\templates\public\vendor_add_book.html:144
+#: .\manager\templates\public\vendor_edit_book.html:145
+msgid "上传电子书文件"
+msgstr "Télécharger le fichier du livre électronique"
+
+#: .\manager\templates\public\vendor_add_book.html:150
+#: .\manager\templates\public\vendor_edit_book.html:156
+msgid "外部下载链接"
+msgstr "Lien de téléchargement externe"
+
+#: .\manager\templates\public\vendor_add_book.html:158
+#: .\manager\templates\public\vendor_add_book.html:189
+#: .\manager\templates\public\vendor_add_book.html:194
+#: .\manager\templates\public\vendor_dashboard.html:242
+msgid "上架"
+msgstr "Mettre en vente"
+
+#: .\manager\templates\public\vendor_add_book.html:179
+msgid "上架中..."
+msgstr "Mise en vente en cours…"
+
+#: .\manager\templates\public\vendor_add_book.html:248
+#: .\manager\templates\public\vendor_edit_book.html:255
+msgid "作者名称"
+msgstr "Nom de l'auteur"
+
+#: .\manager\templates\public\vendor_add_book.html:253
+#: .\manager\templates\public\vendor_add_book.html:270
+#: .\manager\templates\public\vendor_edit_book.html:260
+#: .\manager\templates\public\vendor_edit_book.html:277
+msgid "创建"
+msgstr "Créer"
+
+#: .\manager\templates\public\vendor_add_book.html:259
+#: .\manager\templates\public\vendor_edit_book.html:266
+msgid "新建出版社"
+msgstr "Créer une maison d'édition"
+
+#: .\manager\templates\public\vendor_dashboard.html:116
+msgid "收入"
+msgstr "Revenu"
+
+#: .\manager\templates\public\vendor_dashboard.html:122
+msgid "上架中"
+msgstr "En cours de mise en vente"
+
+#: .\manager\templates\public\vendor_dashboard.html:142
+msgid "快捷操作"
+msgstr "Actions rapides"
+
+#: .\manager\templates\public\vendor_dashboard.html:145
+msgid "市场卖家中心"
+msgstr "Centre vendeur du marché"
+
+#: .\manager\templates\public\vendor_dashboard.html:156
+msgid "管理员视图"
+msgstr "Vue administrateur"
+
+#: .\manager\templates\public\vendor_dashboard.html:162
+msgid "业绩概览"
+msgstr "Vue d'ensemble des performances"
+
+#: .\manager\templates\public\vendor_dashboard.html:171
+msgid "上架率"
+msgstr "Taux de mise en vente"
+
+#: .\manager\templates\public\vendor_dashboard.html:182
+msgid "佣金率"
+msgstr "Taux de commission"
+
+#: .\manager\templates\public\vendor_dashboard.html:189
+msgid "畅销图书"
+msgstr "Livres à succès"
+
+#: .\manager\templates\public\vendor_dashboard.html:194
+#: .\marketplace\templates\marketplace\product_detail.html:225
+#: .\marketplace\templates\marketplace\supermarket_detail.html:116
+msgid "已售"
+msgstr "Vendu"
+
+#: .\manager\templates\public\vendor_dashboard.html:203
+msgid "账户信息"
+msgstr "Informations de compte"
+
+#: .\manager\templates\public\vendor_dashboard.html:204
+#: .\manager\templates\public\vendor_register.html:66
+msgid "联系人"
+msgstr "Contact"
+
+#: .\manager\templates\public\vendor_dashboard.html:207
+msgid "入驻时间"
+msgstr "Date d'inscription"
+
+#: .\manager\templates\public\vendor_dashboard.html:215
+msgid "我的图书"
+msgstr "Mes livres"
+
+#: .\manager\templates\public\vendor_dashboard.html:217
+msgid "已下架"
+msgstr "Retiré"
+
+#: .\manager\templates\public\vendor_dashboard.html:227
+msgid "售价"
+msgstr "Prix de vente"
+
+#: .\manager\templates\public\vendor_dashboard.html:231
+msgid "库存不足"
+msgstr "Stock insuffisant"
+
+#: .\manager\templates\public\vendor_dashboard.html:238
+msgid "编辑"
+msgstr "Éditer"
+
+#: .\manager\templates\public\vendor_dashboard.html:242
+msgid "下架"
+msgstr "Retirer"
+
+#: .\manager\templates\public\vendor_dashboard.html:244
+#: .\marketplace\templates\marketplace\cart.html:105
+msgid "删除"
+msgstr "Supprimer"
+
+#: .\manager\templates\public\vendor_dashboard.html:253
+msgid "暂无上架图书"
+msgstr "Aucun livre mis en vente pour le moment"
+
+#: .\manager\templates\public\vendor_dashboard.html:254
+msgid "上架第一本书"
+msgstr "Mettre votre premier livre en vente"
+
+#: .\manager\templates\public\vendor_dashboard.html:267
+msgid "已购买"
+msgstr "Déjà acheté"
+
+#: .\manager\templates\public\vendor_dashboard.html:273
+msgid "在购物车中"
+msgstr "Dans le panier"
+
+#: .\manager\templates\public\vendor_dashboard.html:279
+#: .\manager\templates\public\vendor_dashboard.html:356
+msgid "收藏/关注"
+msgstr "Favoris/Suivi"
+
+#: .\manager\templates\public\vendor_dashboard.html:286
+msgid "购买记录"
+msgstr "Historique des achats"
+
+#: .\manager\templates\public\vendor_dashboard.html:293
+msgid "客户"
+msgstr "Client"
+
+#: .\manager\templates\public\vendor_dashboard.html:297
+msgid "状态"
+msgstr "Statut"
+
+#: .\manager\templates\public\vendor_dashboard.html:298
+msgid "日期"
+msgstr "Date"
+
+#: .\manager\templates\public\vendor_dashboard.html:317
+msgid "暂无购买记录"
+msgstr "Aucun historique d'achat"
+
+#: .\manager\templates\public\vendor_dashboard.html:323
+msgid "购物车中的图书"
+msgstr "Livres dans le panier"
+
+#: .\manager\templates\public\vendor_dashboard.html:331
+msgid "会话"
+msgstr "Session"
+
+#: .\manager\templates\public\vendor_dashboard.html:332
+msgid "添加时间"
+msgstr "Heure d'ajout"
+
+#: .\manager\templates\public\vendor_dashboard.html:333
+msgid "更新时间"
+msgstr "Heure de mise à jour"
+
+#: .\manager\templates\public\vendor_dashboard.html:350
+msgid "暂无购物车数据"
+msgstr "Aucune donnée de panier"
+
+#: .\manager\templates\public\vendor_dashboard.html:363
+msgid "用户"
+msgstr "Utilisateur"
+
+#: .\manager\templates\public\vendor_dashboard.html:365
+msgid "收藏时间"
+msgstr "Heure de sauvegarde"
+
+#: .\manager\templates\public\vendor_dashboard.html:381
+msgid "暂无收藏数据"
+msgstr "Aucune donnée de favori"
+
+#: .\manager\templates\public\vendor_dashboard.html:403
+msgid "确定要从您的店铺中移除此图书吗？"
+msgstr "Voulez-vous vraiment supprimer ce livre de votre boutique ?"
+
+#: .\manager\templates\public\vendor_edit_book.html:4
+#: .\manager\templates\public\vendor_edit_book.html:63
+msgid "编辑图书"
+msgstr "Modifier le livre"
+
+#: .\manager\templates\public\vendor_edit_book.html:131
+msgid "当前封面（上传新图片可替换）"
+msgstr "Couverture actuelle (téléchargez une nouvelle image pour remplacer)"
+
+#: .\manager\templates\public\vendor_edit_book.html:148
+msgid "已上传文件"
+msgstr "Fichier téléchargé"
+
+#: .\manager\templates\public\vendor_edit_book.html:165
+#: .\manager\templates\public\vendor_edit_book.html:196
+#: .\manager\templates\public\vendor_edit_book.html:201
+msgid "保存修改"
+msgstr "Enregistrer les modifications"
+
+#: .\manager\templates\public\vendor_edit_book.html:186
+msgid "保存中..."
+msgstr "Enregistrement en cours…"
+
+#: .\manager\templates\public\vendor_login.html:4
+#: .\manager\templates\public\vendor_login.html:47
+msgid "卖家登录"
+msgstr "Connexion vendeur"
+
+#: .\manager\templates\public\vendor_login.html:48
+msgid "登录卖家后台管理您的图书"
+msgstr "Connectez-vous à l’administration vendeur pour gérer vos livres"
+
+#: .\manager\templates\public\vendor_login.html:79
+msgid "还没有卖家账户？"
+msgstr "Vous n’avez pas encore de compte vendeur ?"
+
+#: .\manager\templates\public\vendor_register.html:4
+#: .\manager\templates\public\verify_vendor_email.html:4
+msgid "卖家注册"
+msgstr "Inscription vendeur"
+
+#: .\manager\templates\public\vendor_register.html:47
+msgid "卖家入驻"
+msgstr "Accès vendeur"
+
+#: .\manager\templates\public\vendor_register.html:48
+msgid "注册成为卖家，在平台上销售您的图书"
+msgstr ""
+"Inscrivez-vous en tant que vendeur et vendez vos livres sur la plateforme"
+
+#: .\manager\templates\public\vendor_register.html:62
+msgid "公司/店铺名称"
+msgstr "Nom de l’entreprise/boutique"
+
+#: .\manager\templates\public\vendor_register.html:78
+msgid "店铺描述"
+msgstr "Description de la boutique"
+
+#: .\manager\templates\public\vendor_register.html:82
+msgid "店铺Logo"
+msgstr "Logo de la boutique"
+
+#: .\manager\templates\public\vendor_register.html:95
+#: .\manager\templates\public\vendor_register.html:127
+#: .\manager\templates\public\vendor_register.html:132
+msgid "注册成为卖家"
+msgstr "S'inscrire en tant que vendeur"
+
+#: .\manager\templates\public\vendor_register.html:102
+msgid "已有卖家账户？"
+msgstr "Vous avez déjà un compte vendeur ?"
+
+#: .\manager\templates\public\vendor_register.html:117
+msgid "发送验证码..."
+msgstr "Envoi du code..."
+
+#: .\manager\templates\public\verify_email.html:4
+#: .\manager\templates\public\verify_email.html:67
+#: .\manager\templates\public\verify_vendor_email.html:4
+#: .\manager\templates\public\verify_vendor_email.html:67
+msgid "验证邮箱"
+msgstr "Vérifier l'e-mail"
+
+#: .\manager\templates\public\verify_email.html:68
+msgid "请输入发送到您邮箱的6位验证码"
+msgstr "Veuillez saisir le code à 6 chiffres envoyé à votre e-mail"
+
+#: .\manager\templates\public\verify_email.html:82
+#: .\manager\templates\public\verify_vendor_email.html:82
+msgid "查看您的邮箱"
+msgstr "Consulter votre e-mail"
+
+#: .\manager\templates\public\verify_email.html:84
+#: .\manager\templates\public\verify_vendor_email.html:84
+msgid "验证码已发送至"
+msgstr "Code envoyé à"
+
+#: .\manager\templates\public\verify_email.html:104
+#: .\manager\templates\public\verify_email.html:192
+#: .\manager\templates\public\verify_email.html:200
+msgid "验证"
+msgstr "Vérifier"
+
+#: .\manager\templates\public\verify_email.html:109
+#: .\manager\templates\public\verify_vendor_email.html:109
+msgid "没有收到验证码？"
+msgstr "Vous n'avez pas reçu le code ?"
+
+#: .\manager\templates\public\verify_email.html:111
+#: .\manager\templates\public\verify_email.html:114
+#: .\manager\templates\public\verify_vendor_email.html:111
+#: .\manager\templates\public\verify_vendor_email.html:114
+msgid "重新发送"
+msgstr "Renvoyer"
+
+#: .\manager\templates\public\verify_email.html:120
+#: .\manager\templates\public\verify_vendor_email.html:120
+msgid "返回注册"
+msgstr "Retour à l'inscription"
+
+#: .\manager\templates\public\verify_email.html:181
+#: .\manager\templates\public\verify_vendor_email.html:181
+msgid "验证中..."
+msgstr "Vérification en cours..."
+
+#: .\manager\templates\public\verify_email.html:198
+#: .\manager\templates\public\verify_email.html:233
+#: .\manager\templates\public\verify_vendor_email.html:197
+#: .\manager\templates\public\verify_vendor_email.html:232
+msgid "网络错误"
+msgstr "Erreur réseau"
+
+#: .\manager\templates\public\verify_vendor_email.html:68
+msgid "请输入发送到您邮箱的6位验证码完成卖家注册"
+msgstr ""
+"Veuillez saisir le code à 6 chiffres envoyé à votre e-mail pour terminer "
+"l'inscription vendeur"
+
+#: .\manager\templates\public\verify_vendor_email.html:104
+#: .\manager\templates\public\verify_vendor_email.html:192
+#: .\manager\templates\public\verify_vendor_email.html:199
+msgid "验证并完成注册"
+msgstr "Vérifier et terminer l'inscription"
+
+#: .\marketplace\templates\marketplace\cart.html:120
+msgid "合计"
+msgstr "Total"
+
+#: .\marketplace\templates\marketplace\cart.html:124
+msgid "去结算"
+msgstr "Aller à la caisse"
+
+#: .\marketplace\templates\marketplace\cart.html:127
+#: .\marketplace\templates\marketplace\order_confirmation.html:111
+msgid "继续购物"
+msgstr "Continuer vos achats"
+
+#: .\marketplace\templates\marketplace\cart.html:137
+msgid "购物车是空的"
+msgstr "Le panier est vide"
+
+#: .\marketplace\templates\marketplace\cart.html:138
+msgid "快去挑选心仪的商品吧！"
+msgstr "Allez choisir vos produits préférés !"
+
+#: .\marketplace\templates\marketplace\cart.html:140
+msgid "去逛逛"
+msgstr "Explorer"
+
+#: .\marketplace\templates\marketplace\checkout.html:4
+#: .\marketplace\templates\marketplace\checkout.html:67
+msgid "结算"
+msgstr "Paiement"
+
+#: .\marketplace\templates\marketplace\checkout.html:76
+msgid "收货信息"
+msgstr "Informations de livraison"
+
+#: .\marketplace\templates\marketplace\checkout.html:99
+msgid "收货地址"
+msgstr "Adresse de livraison"
+
+#: .\marketplace\templates\marketplace\checkout.html:105
+msgid "备注"
+msgstr "Remarques"
+
+#: .\marketplace\templates\marketplace\checkout.html:190
+msgid "确认支付"
+msgstr "Confirmer le paiement"
+
+#: .\marketplace\templates\marketplace\checkout.html:193
+msgid "返回购物车"
+msgstr "Retour au panier"
+
+#: .\marketplace\templates\marketplace\checkout.html:213
+msgid "请使用手机扫码完成支付"
+msgstr "Veuillez scanner le code QR avec votre téléphone pour payer"
+
+#: .\marketplace\templates\marketplace\checkout.html:218
+msgid "请确认支付状态"
+msgstr "Veuillez confirmer l'état du paiement"
+
+#: .\marketplace\templates\marketplace\course_detail.html:171
+msgid "您的浏览器不支持视频播放"
+msgstr "Votre navigateur ne prend pas en charge la lecture vidéo"
+
+#: .\marketplace\templates\marketplace\course_detail.html:178
+msgid "选择课时开始学习"
+msgstr "Sélectionnez une séance pour commencer à apprendre"
+
+#: .\marketplace\templates\marketplace\course_detail.html:199
+msgid "课时描述"
+msgstr "Description de la séance"
+
+#: .\marketplace\templates\marketplace\course_detail.html:203
+msgid "课件PDF"
+msgstr "PDF de la présentation"
+
+#: .\marketplace\templates\marketplace\course_detail.html:207
+msgid "课程介绍"
+msgstr "Présentation du cours"
+
+#: .\marketplace\templates\marketplace\course_detail.html:215
+msgid "本课时暂无描述"
+msgstr "Aucune description pour cette séance"
+
+#: .\marketplace\templates\marketplace\course_detail.html:223
+msgid "下载PDF"
+msgstr "Télécharger le PDF"
+
+#: .\marketplace\templates\marketplace\course_detail.html:242
+msgid "课程目录"
+msgstr "Catalogue du cours"
+
+#: .\marketplace\templates\marketplace\course_detail.html:274
+msgid "课程目录即将上线"
+msgstr "Le catalogue du cours sera bientôt disponible"
+
+#: .\marketplace\templates\marketplace\course_detail.html:291
+msgid "讲师"
+msgstr "Intervenant"
+
+#: .\marketplace\templates\marketplace\course_detail.html:292
+msgid "时长"
+msgstr "Durée"
+
+#: .\marketplace\templates\marketplace\course_detail.html:294
+#: .\marketplace\templates\marketplace\courses.html:77
+msgid "级别"
+msgstr "Niveau"
+
+#: .\marketplace\templates\marketplace\course_detail.html:295
+msgid "语言"
+msgstr "Langue"
+
+#: .\marketplace\templates\marketplace\course_detail.html:296
+msgid "已注册"
+msgstr "Inscrit"
+
+#: .\marketplace\templates\marketplace\course_detail.html:299
+#: .\marketplace\templates\marketplace\courses.html:91
+msgid "评分"
+msgstr "Évaluation"
+
+#: .\marketplace\templates\marketplace\course_detail.html:326
+msgid "相关课程"
+msgstr "Cours associés"
+
+#: .\marketplace\templates\marketplace\courses.html:56
+msgid "探索专业课程，提升技能，开启学习之旅"
+msgstr ""
+"Explorez des cours spécialisés, améliorez vos compétences, lancez votre "
+"parcours d’apprentissage"
+
+#: .\marketplace\templates\marketplace\courses.html:68
+#: .\marketplace\templates\marketplace\products.html:103
+#: .\marketplace\templates\marketplace\supermarket.html:48
+msgid "分类"
 msgstr "Catégories"
 
-msgid "全部文章"
-msgstr "Tous les Articles"
+#: .\marketplace\templates\marketplace\courses.html:70
+#: .\marketplace\templates\marketplace\courses.html:79
+#: .\marketplace\templates\marketplace\supermarket.html:50
+msgid "全部"
+msgstr "Tous"
 
-msgid "关于博客"
-msgstr "À Propos du Blog"
+#: .\marketplace\templates\marketplace\courses.html:80
+msgid "入门"
+msgstr "Débutant"
 
-msgid "在这里，我们分享关于图书、阅读和技术的最新资讯。关注我们，获取更多精彩内容。"
-msgstr "Ici, nous partageons les dernières informations sur les livres, la lecture et la technologie. Suivez-nous pour plus de contenu passionnant."
+#: .\marketplace\templates\marketplace\courses.html:81
+msgid "中级"
+msgstr "Intermédiaire"
 
-msgid "次浏览"
-msgstr "vues"
+#: .\marketplace\templates\marketplace\courses.html:82
+msgid "高级"
+msgstr "Avancé"
 
-msgid "分钟阅读"
-msgstr "min de lecture"
+#: .\marketplace\templates\marketplace\courses.html:86
+#: .\marketplace\templates\marketplace\products.html:112
+#: .\marketplace\templates\marketplace\supermarket.html:57
+msgid "排序"
+msgstr "Trier"
 
-msgid "文章作者"
-msgstr "Auteur de l'Article"
+#: .\marketplace\templates\marketplace\courses.html:88
+#: .\marketplace\templates\marketplace\products.html:114
+#: .\marketplace\templates\marketplace\supermarket.html:59
+msgid "最新"
+msgstr "Nouveautés"
 
-msgid "分享文章"
-msgstr "Partager l'Article"
+#: .\marketplace\templates\marketplace\courses.html:89
+#: .\marketplace\templates\marketplace\supermarket.html:60
+msgid "价格↑"
+msgstr "Prix ↑"
 
-msgid "返回博客列表"
-msgstr "Retour au Blog"
+#: .\marketplace\templates\marketplace\courses.html:90
+#: .\marketplace\templates\marketplace\supermarket.html:61
+msgid "价格↓"
+msgstr "Prix ↓"
 
-msgid "相关文章"
-msgstr "Articles Associés"
+#: .\marketplace\templates\marketplace\courses.html:92
+msgid "热门"
+msgstr "Populaire"
 
-msgid "您可能还感兴趣"
-msgstr "Vous Pourriez Aussi Être Intéressé Par"
+#: .\marketplace\templates\marketplace\courses.html:96
+#: .\marketplace\templates\marketplace\products.html:122
+#: .\marketplace\templates\marketplace\supermarket.html:66
+msgid "筛选"
+msgstr "Filtrer"
+
+#: .\marketplace\templates\marketplace\courses.html:111
+#: .\marketplace\templates\marketplace\products.html:140
+msgid "推荐"
+msgstr "Recommandé"
+
+#: .\marketplace\templates\marketplace\courses.html:170
+msgid "课程正在筹备中，敬请期待"
+msgstr "Le cours est en préparation, restez à l’écoute"
+
+#: .\marketplace\templates\marketplace\courses.html:171
+#: .\marketplace\templates\marketplace\products.html:195
+#: .\marketplace\templates\marketplace\supermarket.html:132
+msgid "返回市场"
+msgstr "Retour au marché"
+
+#: .\marketplace\templates\marketplace\home.html:117
+msgid "探索商品、课程和超市，在一个平台上满足您的所有需求"
+msgstr ""
+"Explorez produits, cours et supermarché, tout sur une seule plateforme"
+
+#: .\marketplace\templates\marketplace\home.html:147
+#: .\marketplace\templates\marketplace\products.html:89
+msgid "商品中心"
+msgstr "Centre des produits"
+
+#: .\marketplace\templates\marketplace\home.html:148
+msgid "浏览精选商品，发现高品质产品"
+msgstr ""
+"Parcourez les produits sélectionnés, découvrez des articles de haute qualité"
+
+#: .\marketplace\templates\marketplace\home.html:148
+msgid "浏览商品"
+msgstr "Parcourir les produits"
+
+#: .\marketplace\templates\marketplace\home.html:156
+msgid "探索专业课程，提升技能"
+msgstr "Explorez les cours spécialisés, améliorez vos compétences"
+
+#: .\marketplace\templates\marketplace\home.html:164
+msgid "新鲜食品和日常用品"
+msgstr "Aliments frais et articles de première nécessité"
+
+#: .\marketplace\templates\marketplace\home.html:164
+msgid "去超市"
+msgstr "Aller au supermarché"
+
+#: .\marketplace\templates\marketplace\home.html:173
+msgid "超市精选"
+msgstr "Sélection du supermarché"
+
+#: .\marketplace\templates\marketplace\home.html:174
+#: .\marketplace\templates\marketplace\home.html:202
+#: .\marketplace\templates\marketplace\home.html:229
+msgid "查看全部"
+msgstr "Voir tout"
+
+#: .\marketplace\templates\marketplace\home.html:183
+#: .\marketplace\templates\marketplace\supermarket.html:80
+msgid "有机"
+msgstr "Bio"
+
+#: .\marketplace\templates\marketplace\home.html:201
+msgid "热门课程"
+msgstr "Cours populaires"
+
+#: .\marketplace\templates\marketplace\home.html:228
+msgid "精选商品"
+msgstr "Produits sélectionnés"
+
+#: .\marketplace\templates\marketplace\order_confirmation.html:66
+msgid "下单成功！"
+msgstr "Commande réussie !"
+
+#: .\marketplace\templates\marketplace\order_confirmation.html:67
+msgid "感谢您的购买，我们会尽快处理您的订单"
+msgstr ""
+"Merci pour votre achat, nous traiterons votre commande dès que possible"
+
+#: .\marketplace\templates\marketplace\order_confirmation.html:70
+msgid "订单编号"
+msgstr "Numéro de commande"
+
+#: .\marketplace\templates\marketplace\product_detail.html:188
+msgid "浏览"
+msgstr "Parcourir"
+
+#: .\marketplace\templates\marketplace\product_detail.html:204
+msgid "状况"
+msgstr "État"
+
+#: .\marketplace\templates\marketplace\product_detail.html:210
+msgid "重量"
+msgstr "Poids"
+
+#: .\marketplace\templates\marketplace\product_detail.html:235
+msgid "选择配置"
+msgstr "Choisir la configuration"
+
+#: .\marketplace\templates\marketplace\product_detail.html:240
+#: .\marketplace\templates\marketplace\supermarket_detail.html:132
+msgid "选择一个选项"
+msgstr "Choisir une option"
+
+#: .\marketplace\templates\marketplace\product_detail.html:281
+#: .\marketplace\templates\marketplace\supermarket_detail.html:144
+msgid "商品规格"
+msgstr "Spécifications du produit"
+
+#: .\marketplace\templates\marketplace\product_detail.html:299
+#: .\marketplace\templates\marketplace\supermarket_detail.html:121
+msgid "商品描述"
+msgstr "Description du produit"
+
+#: .\marketplace\templates\marketplace\product_detail.html:309
+#: .\marketplace\templates\marketplace\supermarket_detail.html:186
+msgid "相关商品"
+msgstr "Produits associés"
+
+#: .\marketplace\templates\marketplace\products.html:90
+msgid "发现高品质产品，享受优惠价格"
+msgstr "Découvrez des produits de haute qualité, profitez de prix avantageux"
+
+#: .\marketplace\templates\marketplace\products.html:105
+msgid "全部分类"
+msgstr "Toutes les catégories"
+
+#: .\marketplace\templates\marketplace\products.html:115
+msgid "价格低到高"
+msgstr "Prix croissant"
+
+#: .\marketplace\templates\marketplace\products.html:116
+msgid "价格高到低"
+msgstr "Prix décroissant"
+
+#: .\marketplace\templates\marketplace\products.html:117
+msgid "最畅销"
+msgstr "Meilleures ventes"
+
+#: .\marketplace\templates\marketplace\products.html:193
+msgid "暂无商品"
+msgstr "Aucun produit disponible"
+
+#: .\marketplace\templates\marketplace\products.html:194
+msgid "我们正在上架新商品，请稍后再来看看"
+msgstr "Nous ajoutons de nouveaux produits, veuillez revenir plus tard"
+
+#: .\marketplace\templates\marketplace\supermarket.html:36
+msgid "新鲜食品和日常用品，快速配送到家"
+msgstr ""
+"Aliments frais et produits de première nécessité, livraison rapide à "
+"domicile"
+
+#: .\marketplace\templates\marketplace\supermarket.html:130
+msgid "超市暂无商品"
+msgstr "Aucun produit disponible dans le supermarché"
+
+#: .\marketplace\templates\marketplace\supermarket.html:131
+msgid "商品正在上架中，请稍后再来"
+msgstr "Le produit est en cours de mise en ligne, veuillez revenir plus tard"
+
+#: .\marketplace\templates\marketplace\supermarket_detail.html:82
+msgid "有机食品"
+msgstr "Aliments biologiques"
+
+#: .\marketplace\templates\marketplace\supermarket_detail.html:103
+msgid "品牌"
+msgstr "Marque"
+
+#: .\marketplace\templates\marketplace\supermarket_detail.html:106
+msgid "产地"
+msgstr "Origine"
+
+#: .\marketplace\templates\marketplace\supermarket_detail.html:127
+msgid "选择规格"
+msgstr "Choisir la spécification"

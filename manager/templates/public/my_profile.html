@@ -1,0 +1,325 @@
+{% extends "public/base.html" %}
+{% load i18n static %}
+
+{% block title %}我的 - DUNO 360{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ===== MY PROFILE (PWA) ===== */
+.mypro-page { background: #F5F5F5; min-height: 100vh; padding-bottom: 80px; }
+.mypro-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 28px 16px 60px;
+    position: relative; overflow: hidden;
+}
+.mypro-header::before {
+    content: ''; position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.mypro-avatar-row { display: flex; align-items: center; gap: 14px; position: relative; }
+.mypro-avatar {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: rgba(255,255,255,.25); border: 3px solid rgba(255,255,255,.6);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; color: #fff; flex-shrink: 0;
+}
+.mypro-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+.mypro-name { font-size: 18px; font-weight: 800; color: #fff; }
+.mypro-email { font-size: 12px; color: rgba(255,255,255,.75); margin-top: 2px; }
+.mypro-tag { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; background: rgba(255,255,255,.2); color: #fff; margin-top: 5px; }
+.mypro-settings-btn { margin-left: auto; color: rgba(255,255,255,.8); font-size: 18px; background: none; border: none; cursor: pointer; }
+
+/* Points card (floating, overlaps header) */
+.mypro-points-card {
+    background: #fff; border-radius: 16px; padding: 14px 18px;
+    margin: -36px 12px 10px; position: relative; z-index: 2;
+    box-shadow: 0 6px 24px rgba(102,126,234,.2);
+    display: flex; align-items: center; gap: 0;
+}
+.mypro-points-col { flex: 1; text-align: center; }
+.mypro-points-val { font-size: 22px; font-weight: 900; color: #667eea; }
+.mypro-points-label { font-size: 11px; color: #999; margin-top: 2px; }
+.mypro-divider-v { width: 1px; height: 40px; background: #f0f0f0; }
+.mypro-points-tier { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 10px; }
+.tier-bronze { background: #fef3c7; color: #92400e; }
+.tier-silver { background: #f1f5f9; color: #475569; }
+.tier-gold { background: #fef9c3; color: #a16207; }
+.tier-platinum { background: #ede9fe; color: #7c3aed; }
+
+/* Orders shortcuts */
+.mypro-orders-section { background: #fff; margin-bottom: 8px; padding: 12px 14px 4px; }
+.mypro-orders-title { font-size: 13px; font-weight: 700; color: #333; display: flex; justify-content: space-between; margin-bottom: 10px; }
+.mypro-orders-title a { font-size: 12px; color: #667eea; text-decoration: none; }
+.mypro-orders-tabs { display: flex; justify-content: space-around; padding-bottom: 10px; }
+.mypro-orders-tab { display: flex; flex-direction: column; align-items: center; gap: 5px; text-decoration: none; color: #555; font-size: 11px; }
+.mypro-orders-tab i { font-size: 20px; color: #667eea; }
+.mypro-orders-tab .badge { background: #E4393C; color: #fff; font-size: 9px; padding: 1px 5px; border-radius: 8px; }
+
+/* Quick actions */
+.mypro-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 12px 10px; }
+.mypro-action-btn {
+    background: #fff; border-radius: 14px; padding: 14px 10px;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    text-decoration: none; color: #333; font-size: 12px; font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06); transition: all .15s;
+}
+.mypro-action-btn i { font-size: 20px; }
+.mypro-action-btn:active { transform: scale(.97); }
+
+/* Followed shops */
+.mypro-shops-section { background: #fff; margin: 0 0 8px; }
+.mypro-shops-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px 8px; font-size: 13px; font-weight: 700; color: #333; }
+.mypro-shops-header a { font-size: 12px; color: #667eea; text-decoration: none; }
+.mypro-shops-list { display: flex; gap: 12px; padding: 0 14px 12px; overflow-x: auto; scrollbar-width: none; }
+.mypro-shops-list::-webkit-scrollbar { display: none; }
+.mypro-shop-chip {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    min-width: 60px; text-decoration: none; color: #333;
+}
+.mypro-shop-avatar {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 16px;
+}
+.mypro-shop-name { font-size: 10px; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 64px; }
+.mypro-empty-shops { padding: 12px 14px; font-size: 12px; color: #999; }
+
+/* 2-col feed */
+.mypro-feed-section { padding: 0 8px; }
+.mypro-feed-title { font-size: 13px; font-weight: 700; color: #333; padding: 12px 6px 8px; }
+.mypro-feed-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mypro-feed-card {
+    background: #fff; border-radius: 12px; overflow: hidden;
+    text-decoration: none; color: #333; display: block;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+.mypro-feed-img {
+    width: 100%; aspect-ratio: 3/4; object-fit: cover;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,.6); font-size: 2rem;
+}
+.mypro-feed-img img { width: 100%; height: 100%; object-fit: cover; }
+.mypro-feed-body { padding: 8px; }
+.mypro-feed-name { font-size: 12px; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: #222; }
+.mypro-feed-price { font-size: 14px; font-weight: 800; color: #E4393C; margin-top: 4px; }
+.mypro-feed-price small { font-size: 10px; }
+
+/* Login prompt (not logged in) */
+.mypro-login-prompt {
+    min-height: 70vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 16px; padding: 24px;
+    text-align: center;
+}
+.mypro-login-icon { font-size: 64px; background: linear-gradient(135deg,#667eea,#764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.mypro-login-title { font-size: 20px; font-weight: 800; color: #333; }
+.mypro-login-sub { font-size: 13px; color: #999; }
+.mypro-login-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff; border: none; border-radius: 22px;
+    padding: 13px 40px; font-size: 15px; font-weight: 700;
+    cursor: pointer; text-decoration: none; display: inline-block;
+    transition: all .2s; box-shadow: 0 4px 16px rgba(102,126,234,.35);
+}
+.mypro-login-btn:hover { color: #fff; transform: translateY(-2px); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mypro-page">
+{% if not site_user %}
+<!-- ===== NOT LOGGED IN ===== -->
+<div class="mypro-login-prompt">
+    <i class="fas fa-user-circle mypro-login-icon"></i>
+    <div class="mypro-login-title" data-zh="登录后解锁全部功能" data-en="Login to unlock everything" data-fr="Connectez-vous pour tout débloquer">登录后解锁全部功能</div>
+    <div class="mypro-login-sub" data-zh="查看订单 · 积分 · 收藏夹 · 关注的店铺" data-en="Orders · Points · Wishlist · Followed Shops" data-fr="Commandes · Points · Favoris · Boutiques suivies">查看订单 · 积分 · 收藏夹 · 关注的店铺</div>
+    <a href="{% url 'manager:user_login' %}" class="mypro-login-btn" data-zh="立即登录" data-en="Sign In" data-fr="Se connecter">立即登录</a>
+    <a href="{% url 'manager:user_register' %}" style="font-size:13px;color:#667eea;text-decoration:none;" data-zh="还没有账号？立即注册" data-en="No account? Register now" data-fr="Pas encore inscrit ?">还没有账号？立即注册</a>
+</div>
+
+{% else %}
+<!-- ===== LOGGED IN PROFILE ===== -->
+
+<!-- Header -->
+<div class="mypro-header">
+    <div class="mypro-avatar-row">
+        <div class="mypro-avatar"><i class="fas fa-user"></i></div>
+        <div>
+            <div class="mypro-name">{{ site_user.name }}</div>
+            <div class="mypro-email">{{ site_user.email }}</div>
+            {% if loyalty %}
+            <span class="mypro-tag tier-{{ loyalty.tier|lower }}">
+                {% if loyalty.tier == 'bronze' %}🥉{% elif loyalty.tier == 'silver' %}🥈{% elif loyalty.tier == 'gold' %}🥇{% elif loyalty.tier == 'platinum' %}💎{% endif %}
+                {{ loyalty.get_tier_display|default:loyalty.tier }}
+            </span>
+            {% endif %}
+        </div>
+        <a href="{% url 'manager:user_profile' %}" class="mypro-settings-btn"><i class="fas fa-cog"></i></a>
+    </div>
+</div>
+
+<!-- Points card -->
+<div class="mypro-points-card">
+    <div class="mypro-points-col">
+        <div class="mypro-points-val">{{ loyalty.points_balance|default:"0" }}</div>
+        <div class="mypro-points-label" data-zh="积分" data-en="Points" data-fr="Points">积分</div>
+    </div>
+    <div class="mypro-divider-v"></div>
+    <div class="mypro-points-col">
+        <div class="mypro-points-val" style="font-size:16px;">{{ orders|length }}</div>
+        <div class="mypro-points-label" data-zh="订单" data-en="Orders" data-fr="Commandes">订单</div>
+    </div>
+    <div class="mypro-divider-v"></div>
+    <div class="mypro-points-col">
+        <div class="mypro-points-val" style="font-size:16px;">{{ following_count|default:0 }}</div>
+        <div class="mypro-points-label" data-zh="关注" data-en="Following" data-fr="Abonnements">关注</div>
+    </div>
+</div>
+
+<!-- Orders shortcuts -->
+<div class="mypro-orders-section">
+    <div class="mypro-orders-title">
+        <span data-zh="我的订单" data-en="My Orders" data-fr="Mes commandes">我的订单</span>
+        <a href="{% url 'manager:track_order' %}" data-zh="查看全部 >" data-en="View all >" data-fr="Voir tout >">查看全部 ></a>
+    </div>
+    <div class="mypro-orders-tabs">
+        <a href="{% url 'manager:track_order' %}?status=pending" class="mypro-orders-tab">
+            <i class="fas fa-clock"></i>
+            <span data-zh="待付款" data-en="Pending" data-fr="En attente">待付款</span>
+        </a>
+        <a href="{% url 'manager:track_order' %}?status=processing" class="mypro-orders-tab">
+            <i class="fas fa-spinner"></i>
+            <span data-zh="处理中" data-en="Processing" data-fr="En cours">处理中</span>
+        </a>
+        <a href="{% url 'manager:track_order' %}?status=shipped" class="mypro-orders-tab">
+            <i class="fas fa-truck"></i>
+            <span data-zh="已发货" data-en="Shipped" data-fr="Expédié">已发货</span>
+        </a>
+        <a href="{% url 'manager:track_order' %}?status=delivered" class="mypro-orders-tab">
+            <i class="fas fa-check-circle"></i>
+            <span data-zh="已完成" data-en="Completed" data-fr="Terminé">已完成</span>
+        </a>
+        <a href="{% url 'manager:track_order' %}?status=" class="mypro-orders-tab">
+            <i class="fas fa-th-list"></i>
+            <span data-zh="退换货" data-en="Returns" data-fr="Retours">退换货</span>
+        </a>
+    </div>
+</div>
+
+<!-- Quick actions -->
+<div class="mypro-actions">
+    <a href="{% url 'manager:user_profile' %}#wishlist" class="mypro-action-btn" style="color:#E4393C;">
+        <i class="fas fa-heart"></i>
+        <span data-zh="我的收藏" data-en="Wishlist" data-fr="Favoris">我的收藏</span>
+    </a>
+    <a href="{% url 'manager:public_messages' %}" class="mypro-action-btn" style="color:#667eea;">
+        <i class="fas fa-comment-dots"></i>
+        <span data-zh="消息中心" data-en="Messages" data-fr="Messages">消息中心</span>
+    </a>
+    <a href="{% url 'manager:public_books' %}" class="mypro-action-btn" style="color:#FF6000;">
+        <i class="fas fa-book-open"></i>
+        <span data-zh="书城" data-en="Books" data-fr="Livres">书城</span>
+    </a>
+    <a href="{% url 'manager:user_profile' %}" class="mypro-action-btn" style="color:#764ba2;">
+        <i class="fas fa-user-cog"></i>
+        <span data-zh="账户设置" data-en="Settings" data-fr="Paramètres">账户设置</span>
+    </a>
+</div>
+
+<!-- Followed shops -->
+<div class="mypro-shops-section">
+    <div class="mypro-shops-header">
+        <span data-zh="关注的店铺" data-en="Followed Shops" data-fr="Boutiques suivies">关注的店铺</span>
+        <a href="{% url 'manager:public_publishers' %}" data-zh="发现更多 >" data-en="Discover >" data-fr="Découvrir >">发现更多 ></a>
+    </div>
+    {% if followed_shops or followed_vendors %}
+    <div class="mypro-shops-list">
+        {% for fs in followed_shops %}
+        <a href="{% url 'manager:public_publisher_detail' fs.publisher.id %}" class="mypro-shop-chip">
+            <div class="mypro-shop-avatar"><i class="fas fa-store"></i></div>
+            <span class="mypro-shop-name">{{ fs.publisher.publisher_name|truncatechars:8 }}</span>
+        </a>
+        {% endfor %}
+        {% for fv in followed_vendors %}
+        <a href="/marketplace/products/?vendor={{ fv.vendor.id }}" class="mypro-shop-chip">
+            <div class="mypro-shop-avatar" style="background:linear-gradient(135deg,#f59e0b,#f97316);"><i class="fas fa-store-alt"></i></div>
+            <span class="mypro-shop-name">{{ fv.vendor.company_name|truncatechars:8 }}</span>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="mypro-empty-shops" data-zh="还没有关注任何店铺" data-en="No followed shops yet" data-fr="Aucune boutique suivie">还没有关注任何店铺</div>
+    {% endif %}
+</div>
+
+<!-- 2-col feed -->
+<div class="mypro-feed-section">
+    <div class="mypro-feed-title" data-zh="为你推荐" data-en="Recommended for you" data-fr="Recommandés pour vous">为你推荐</div>
+    <div class="mypro-feed-grid" id="myproFeedGrid">
+        {% for book in feed_books %}
+        <a href="{% url 'manager:public_book_detail' book.id %}" class="mypro-feed-card">
+            <div class="mypro-feed-img">
+                {% if book.cover_image %}<img src="{{ book.get_cover_url }}" alt="{{ book.name }}">{% else %}<i class="fas fa-book"></i>{% endif %}
+            </div>
+            <div class="mypro-feed-body">
+                <div class="mypro-feed-name">{{ book.name }}</div>
+                <div class="mypro-feed-price"><small>¥</small>{{ book.price }}</div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    <div id="myproLoadingMore" style="text-align:center;padding:12px;color:#999;font-size:12px;display:none;">加载中...</div>
+</div>
+
+{% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Infinite feed for profile (simple, reloads from books API)
+{% if site_user %}
+(function() {
+    var page = 2;
+    var loading = false;
+    var finished = false;
+    var grid = document.getElementById('myproFeedGrid');
+    var loadingEl = document.getElementById('myproLoadingMore');
+    function loadMore() {
+        if (loading || finished) return;
+        loading = true;
+        loadingEl.style.display = 'block';
+        fetch('/manager/public/books/?page=' + page + '&format=json', {
+            headers: {'X-Requested-With': 'XMLHttpRequest'}
+        }).then(function(r) { return r.json(); }).then(function(data) {
+            loading = false;
+            if (!data.books || data.books.length === 0) {
+                finished = true; loadingEl.style.display = 'none'; return;
+            }
+            data.books.forEach(function(b) {
+                var card = document.createElement('a');
+                card.href = '/manager/public/books/' + b.id + '/';
+                card.className = 'mypro-feed-card';
+                var img = b.cover_url
+                    ? '<img src="' + b.cover_url + '" alt="' + b.name + '">'
+                    : '<i class="fas fa-book"></i>';
+                card.innerHTML = '<div class="mypro-feed-img">' + img + '</div>'
+                    + '<div class="mypro-feed-body"><div class="mypro-feed-name">' + b.name + '</div>'
+                    + '<div class="mypro-feed-price"><small>¥</small>' + b.price + '</div></div>';
+                grid.appendChild(card);
+            });
+            page = data.has_more ? page + 1 : 1;
+            finished = !data.has_more;
+            loadingEl.style.display = 'none';
+        }).catch(function() { loading = false; loadingEl.style.display = 'none'; });
+    }
+    window.addEventListener('scroll', function() {
+        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 300) {
+            loadMore();
+        }
+    });
+})();
+{% endif %}
+</script>
+{% endblock %}

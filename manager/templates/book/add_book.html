@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>添加图书 - 图书管理系统</title>
+    <title>添加图书 - DUNO 360</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -167,6 +167,25 @@
         .breadcrumb-modern .breadcrumb-item.active {
             color: rgba(255,255,255,0.8);
         }
+        .inline-add-btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white; border: none; border-radius: 8px; padding: 6px 12px;
+            font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.3s;
+            display: inline-flex; align-items: center; gap: 4px;
+        }
+        .inline-add-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(102,126,234,0.3); }
+        .inline-modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 9999; display: none;
+            align-items: center; justify-content: center;
+        }
+        .inline-modal-overlay.show { display: flex; }
+        .inline-modal {
+            background: white; border-radius: 15px; padding: 30px; width: 90%; max-width: 450px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2); animation: modalIn 0.3s ease;
+        }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        .author-select { min-height: 120px; }
     </style>
 </head>
 <body>
@@ -253,8 +272,13 @@
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label class="form-label">出版社 <span class="required">*</span></label>
-                                                <select name="publisher_id" class="form-select" required>
+                                                <label class="form-label d-flex align-items-center justify-content-between">
+                                                    <span>出版社 <span class="required">*</span></span>
+                                                    <button type="button" class="inline-add-btn" onclick="openModal('publisher')">
+                                                        <i class="fas fa-plus"></i> 新建
+                                                    </button>
+                                                </label>
+                                                <select name="publisher_id" id="publisherSelect" class="form-select" required>
                                                     <option value="">请选择出版社</option>
                                                     {% for publisher_obj in publisher_obj_list %}
                                                     <option value="{{ publisher_obj.id }}">{{ publisher_obj.publisher_name }}</option>
@@ -262,6 +286,37 @@
                                                 </select>
                                             </div>
                                         </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label d-flex align-items-center justify-content-between">
+                                            <span>图书分类</span>
+                                            <a href="/manager/book_categories/" class="inline-add-btn" style="text-decoration:none;">
+                                                <i class="fas fa-layer-group"></i> 管理分类
+                                            </a>
+                                        </label>
+                                        <select name="category_id" class="form-select">
+                                            <option value="">未分类</option>
+                                            {% for category_obj in category_obj_list %}
+                                            <option value="{{ category_obj.id }}">{{ category_obj.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <small class="text-muted">此分类会同步用于移动端和桌面端的 books 筛选。</small>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label d-flex align-items-center justify-content-between">
+                                            <span>作者 <span class="required">*</span></span>
+                                            <button type="button" class="inline-add-btn" onclick="openModal('author')">
+                                                <i class="fas fa-plus"></i> 新建作者
+                                            </button>
+                                        </label>
+                                        <select name="author_ids" id="authorSelect" class="form-select author-select" multiple required>
+                                            {% for author_obj in author_obj_list %}
+                                            <option value="{{ author_obj.id }}">{{ author_obj.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <small class="text-muted">按住 Ctrl/Cmd 可多选作者</small>
                                     </div>
                                     
                                     <div class="row">
@@ -349,6 +404,44 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Inline Add Modals -->
+    <div class="inline-modal-overlay" id="authorModal">
+        <div class="inline-modal">
+            <h5 style="margin-bottom:20px;font-weight:700;"><i class="fas fa-user-plus me-2" style="color:var(--primary-color)"></i>新建作者</h5>
+            <div class="form-group">
+                <label class="form-label">作者名称 <span class="required">*</span></label>
+                <input type="text" id="newAuthorName" class="form-control" placeholder="请输入作者名称">
+            </div>
+            <div class="d-flex justify-content-end gap-2 mt-3">
+                <button type="button" class="btn btn-secondary-modern" style="padding:8px 20px;" onclick="closeModal('author')">取消</button>
+                <button type="button" class="btn btn-primary-modern" style="padding:8px 20px;" onclick="createAuthor()">
+                    <i class="fas fa-check"></i> 创建
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="inline-modal-overlay" id="publisherModal">
+        <div class="inline-modal">
+            <h5 style="margin-bottom:20px;font-weight:700;"><i class="fas fa-building me-2" style="color:var(--primary-color)"></i>新建出版社</h5>
+            <div class="form-group">
+                <label class="form-label">出版社名称 <span class="required">*</span></label>
+                <input type="text" id="newPublisherName" class="form-control" placeholder="请输入出版社名称">
+            </div>
+            <div class="form-group">
+                <label class="form-label">出版社地址</label>
+                <input type="text" id="newPublisherAddress" class="form-control" placeholder="请输入出版社地址">
+            </div>
+            <div class="d-flex justify-content-end gap-2 mt-3">
+                <button type="button" class="btn btn-secondary-modern" style="padding:8px 20px;" onclick="closeModal('publisher')">取消</button>
+                <button type="button" class="btn btn-primary-modern" style="padding:8px 20px;" onclick="createPublisher()">
+                    <i class="fas fa-check"></i> 创建
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Display current date
         document.getElementById('currentDate').textContent = new Date().toLocaleDateString('zh-CN');
@@ -402,8 +495,63 @@
             fileInput.files = files;
             previewImage(fileInput);
         }
+
+        // Modal functions
+        function openModal(type) {
+            document.getElementById(type + 'Modal').classList.add('show');
+        }
+        function closeModal(type) {
+            document.getElementById(type + 'Modal').classList.remove('show');
+        }
+
+        function getCsrf() {
+            var m = document.cookie.match('(^|;)\\s*csrftoken=([^;]*)');
+            return m ? decodeURIComponent(m[2]) : '';
+        }
+
+        function createAuthor() {
+            var name = document.getElementById('newAuthorName').value.trim();
+            if (!name) { alert('请输入作者名称'); return; }
+            var fd = new FormData();
+            fd.append('action', 'create_author');
+            fd.append('author_name', name);
+            fd.append('csrfmiddlewaretoken', getCsrf());
+            fetch('/manager/add_book/', { method: 'POST', body: fd })
+                .then(r => r.json())
+                .then(d => {
+                    if (d.success) {
+                        var opt = new Option(d.name, d.id, true, true);
+                        document.getElementById('authorSelect').appendChild(opt);
+                        document.getElementById('newAuthorName').value = '';
+                        closeModal('author');
+                    } else { alert(d.message); }
+                });
+        }
+
+        function createPublisher() {
+            var name = document.getElementById('newPublisherName').value.trim();
+            var address = document.getElementById('newPublisherAddress').value.trim();
+            if (!name) { alert('请输入出版社名称'); return; }
+            var fd = new FormData();
+            fd.append('action', 'create_publisher');
+            fd.append('publisher_name', name);
+            fd.append('publisher_address', address);
+            fd.append('csrfmiddlewaretoken', getCsrf());
+            fetch('/manager/add_book/', { method: 'POST', body: fd })
+                .then(r => r.json())
+                .then(d => {
+                    if (d.success) {
+                        var sel = document.getElementById('publisherSelect');
+                        var opt = new Option(d.name, d.id, true, true);
+                        sel.appendChild(opt);
+                        sel.value = d.id;
+                        document.getElementById('newPublisherName').value = '';
+                        document.getElementById('newPublisherAddress').value = '';
+                        closeModal('publisher');
+                    } else { alert(d.message); }
+                });
+        }
     </script>
+<script src="/static/js/admin_i18n.js" defer></script>
 </body>
 </html>
-
-

@@ -1,0 +1,104 @@
+{% extends "marketplace/admin/base.html" %}
+{% block title %}{% if course %}编辑课程{% else %}添加课程{% endif %} - 市场管理{% endblock %}
+{% block nav_courses %}active{% endblock %}
+
+{% block admin_content %}
+<div class="page-header-card">
+    <div class="d-flex justify-content-between align-items-center">
+        <h4><i class="fas fa-{% if course %}edit{% else %}plus-circle{% endif %} me-2"></i>{% if course %}编辑课程{% else %}添加课程{% endif %}</h4>
+        <a href="{% url 'marketplace:admin_courses' %}" class="btn btn-light rounded-pill px-4"><i class="fas fa-arrow-left me-2"></i>返回列表</a>
+    </div>
+</div>
+
+<div class="content-card p-4">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row g-4">
+            <div class="col-md-8">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">课程标题 <span class="text-danger">*</span></label>
+                    <input type="text" name="title" class="form-control" value="{{ course.title|default:'' }}" required style="border-radius:10px;">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">English Title</label>
+                    <input type="text" name="title_en" class="form-control" value="{{ course.title_en|default:'' }}" style="border-radius:10px;">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">课程描述</label>
+                    <textarea name="description" class="form-control" rows="5" style="border-radius:10px;">{{ course.description|default:'' }}</textarea>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">价格 <span class="text-danger">*</span></label>
+                        <input type="number" name="price" class="form-control" step="0.01" value="{{ course.price|default:'' }}" required style="border-radius:10px;">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">原价</label>
+                        <input type="number" name="original_price" class="form-control" step="0.01" value="{{ course.original_price|default:'' }}" style="border-radius:10px;">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">讲师 <span class="text-danger">*</span></label>
+                        <input type="text" name="instructor" class="form-control" value="{{ course.instructor|default:'' }}" required style="border-radius:10px;">
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">分类</label>
+                    <select name="category" class="form-select" style="border-radius:10px;">
+                        <option value="">-- 选择分类 --</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.id }}" {% if course.category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <label class="form-label fw-bold">时长(小时)</label>
+                        <input type="number" name="duration_hours" class="form-control" step="0.1" value="{{ course.duration_hours|default:'0' }}" style="border-radius:10px;">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label fw-bold">课时数</label>
+                        <input type="number" name="lessons_count" class="form-control" value="{{ course.lessons_count|default:'0' }}" style="border-radius:10px;">
+                    </div>
+                </div>
+                <div class="mb-3 mt-3">
+                    <label class="form-label fw-bold">难度级别</label>
+                    <select name="level" class="form-select" style="border-radius:10px;">
+                        <option value="all" {% if course.level == 'all' %}selected{% endif %}>全部级别</option>
+                        <option value="beginner" {% if course.level == 'beginner' %}selected{% endif %}>入门</option>
+                        <option value="intermediate" {% if course.level == 'intermediate' %}selected{% endif %}>中级</option>
+                        <option value="advanced" {% if course.level == 'advanced' %}selected{% endif %}>高级</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">教学语言</label>
+                    <input type="text" name="language" class="form-control" value="{{ course.language|default:'中文' }}" style="border-radius:10px;">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">预览链接</label>
+                    <input type="url" name="preview_url" class="form-control" value="{{ course.preview_url|default:'' }}" style="border-radius:10px;">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">封面图片</label>
+                    <input type="file" name="image" class="form-control" accept="image/*" style="border-radius:10px;">
+                    {% if course.image %}<small class="text-muted">当前: {{ course.image.name }}</small>{% endif %}
+                </div>
+                <div class="form-check form-switch mb-2">
+                    <input type="checkbox" name="is_active" class="form-check-input" id="isActive" {% if course.is_active or not course %}checked{% endif %}>
+                    <label class="form-check-label" for="isActive">发布</label>
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input type="checkbox" name="is_featured" class="form-check-input" id="isFeatured" {% if course.is_featured %}checked{% endif %}>
+                    <label class="form-check-label" for="isFeatured">推荐课程</label>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary-gradient px-4"><i class="fas fa-save me-2"></i>{% if course %}保存修改{% else %}添加课程{% endif %}</button>
+            <a href="{% url 'marketplace:admin_courses' %}" class="btn btn-outline-secondary rounded-pill px-4">取消</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

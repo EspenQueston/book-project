@@ -38,6 +38,7 @@
 .info-row .lbl { width: 120px; color: #9ca3af; font-size: 0.88rem; flex-shrink: 0; display: flex; align-items: center; gap: 6px; }
 .info-row .val { font-weight: 600; color: #1e293b; font-size: 0.93rem; }
 .price-tag { font-size: 2.4rem; font-weight: 800; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.detail-hero .price-tag { background: rgba(255,255,255,0.15); -webkit-background-clip: unset; -webkit-text-fill-color: #fff; background-clip: unset; color: #fff; padding: 8px 24px; border-radius: 16px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.25); display: inline-block; }
 .stock-pill {
     padding: 5px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;
 }
@@ -76,13 +77,511 @@
     border: 1px solid rgba(102,126,234,0.08);
 }
 .related-card:hover { transform: translateY(-6px); box-shadow: 0 15px 40px rgba(102,126,234,0.15); }
-.related-cover { height: 180px; overflow: hidden; background: linear-gradient(135deg, #f0f0ff, #e8e0ff); display: flex; align-items: center; justify-content: center; }
-.related-cover img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
-.related-card:hover .related-cover img { transform: scale(1.08); }
+.related-cover { height: 180px; overflow: hidden; background: linear-gradient(135deg, #f0f0ff, #e8e0ff); display: flex; align-items: center; justify-content: center; padding: 12px; }
+.related-cover img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 3px 8px rgba(0,0,0,0.12)); transition: transform 0.3s; }
+.related-card:hover .related-cover img { transform: scale(1.06); }
+.wishlist-btn {
+    position: absolute; top: 14px; left: 14px; z-index: 5;
+    width: 42px; height: 42px; border-radius: 50%;
+    background: rgba(255,255,255,0.2); backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.3);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.3s; color: #fff; font-size: 1.1rem;
+}
+.wishlist-btn:hover { background: rgba(255,255,255,0.35); transform: scale(1.15); }
+.wishlist-btn.active { background: #ef4444; border-color: #ef4444; color: #fff; }
+.wishlist-btn.active:hover { background: #dc2626; }
+@keyframes heart-pop { 0% { transform: scale(1); } 50% { transform: scale(1.35); } 100% { transform: scale(1); } }
+.wishlist-btn.pop i { animation: heart-pop 0.35s ease; }
+
+/* ============================================================
+   MOBILE TAOBAO-STYLE PRODUCT PAGE (@max-width: 768px)
+   ============================================================ */
+@media (max-width: 768px) {
+    /* Hide full desktop layout on mobile */
+    .detail-hero, .main-content { display: none !important; }
+    /* Show mobile layout */
+    .book-mobile-page { display: block !important; }
+}
+@media (min-width: 769px) {
+    .book-mobile-page { display: none !important; }
+}
+
+/* === Mobile Taobao Styles === */
+.book-mobile-page {
+    background: #F5F5F5;
+    padding-bottom: 80px;
+}
+/* Swipeable image gallery */
+.bmp-gallery {
+    position: relative;
+    background: #fff;
+    overflow: hidden;
+    width: 100%;
+    aspect-ratio: 1/1;
+}
+.bmp-gallery-track {
+    display: flex;
+    transition: transform .3s cubic-bezier(.4,0,.2,1);
+    height: 100%;
+}
+.bmp-gallery-slide {
+    flex-shrink: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f0ff;
+}
+.bmp-gallery-slide img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+}
+.bmp-gallery-counter {
+    position: absolute;
+    bottom: 10px; right: 12px;
+    background: rgba(0,0,0,.45);
+    color: #fff;
+    font-size: 11px; font-weight: 600;
+    padding: 2px 8px; border-radius: 10px;
+}
+.bmp-promo-badge {
+    position: absolute;
+    top: 10px; left: 10px;
+    background: #E4393C; color: #fff;
+    font-size: 11px; font-weight: 700;
+    padding: 3px 8px; border-radius: 6px;
+}
+
+/* Price section */
+.bmp-price-section {
+    background: linear-gradient(135deg, rgba(228,57,60,.9), rgba(255,96,0,.9));
+    padding: 12px 14px 10px;
+    color: #fff;
+}
+.bmp-price-main {
+    font-size: 26px; font-weight: 900;
+    line-height: 1;
+}
+.bmp-price-main small { font-size: 14px; font-weight: 600; }
+.bmp-price-original {
+    font-size: 13px;
+    text-decoration: line-through;
+    opacity: .75;
+    margin-left: 8px;
+}
+.bmp-price-sold {
+    font-size: 12px;
+    opacity: .85;
+    margin-left: auto;
+}
+.bmp-low-badge {
+    display: inline-block;
+    background: rgba(255,255,255,.2);
+    border: 1px solid rgba(255,255,255,.4);
+    color: #fff;
+    font-size: 10px; font-weight: 700;
+    padding: 1px 7px; border-radius: 4px;
+    margin-top: 4px;
+}
+
+/* Title section */
+.bmp-title-section {
+    background: #fff;
+    padding: 12px 14px 10px;
+    margin-bottom: 6px;
+}
+.bmp-title {
+    font-size: 15px; font-weight: 700; color: #333;
+    line-height: 1.4;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.bmp-tags-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 7px;
+    flex-wrap: wrap;
+}
+.bmp-tag {
+    font-size: 10px; font-weight: 600;
+    padding: 2px 8px; border-radius: 4px;
+}
+
+/* Delivery section */
+.bmp-delivery-section {
+    background: #fff;
+    padding: 10px 14px;
+    margin-bottom: 6px;
+}
+.bmp-delivery-row {
+    display: flex; align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #666;
+    padding: 5px 0;
+    border-bottom: 1px solid #f5f5f5;
+}
+.bmp-delivery-row:last-child { border-bottom: none; }
+.bmp-delivery-row i { color: #10b981; width: 16px; text-align: center; }
+.bmp-delivery-highlight { color: #10b981; font-weight: 600; }
+
+/* Guarantee strip */
+.bmp-guarantee {
+    background: #f0fdf4;
+    border-left: 3px solid #10b981;
+    padding: 8px 14px;
+    font-size: 12px; color: #065f46;
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 6px;
+}
+
+/* Specs row */
+.bmp-specs-section {
+    background: #fff;
+    padding: 10px 14px;
+    margin-bottom: 6px;
+}
+.bmp-specs-label { font-size: 12px; color: #999; margin-bottom: 6px; }
+.bmp-specs-scroll {
+    display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 2px;
+}
+.bmp-specs-scroll::-webkit-scrollbar { display: none; }
+.bmp-spec-chip {
+    flex-shrink: 0;
+    background: #f5f5f5; border-radius: 6px;
+    padding: 5px 10px; font-size: 11px; color: #555;
+    white-space: nowrap;
+}
+.bmp-spec-chip strong { display: block; font-size: 10px; color: #999; margin-bottom: 1px; }
+
+/* Publisher/seller section */
+.bmp-seller-section {
+    background: #fff;
+    padding: 12px 14px;
+    margin-bottom: 6px;
+}
+.bmp-seller-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 10px;
+}
+.bmp-seller-logo {
+    width: 44px; height: 44px; border-radius: 10px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 18px; flex-shrink: 0;
+}
+.bmp-seller-name { font-size: 14px; font-weight: 700; color: #333; }
+.bmp-seller-meta { font-size: 11px; color: #999; margin-top: 2px; }
+.bmp-seller-scores {
+    display: grid; grid-template-columns: repeat(3,1fr);
+    gap: 6px; margin-bottom: 10px;
+}
+.bmp-score-item { text-align: center; }
+.bmp-score-val { font-size: 14px; font-weight: 700; color: #E4393C; }
+.bmp-score-lbl { font-size: 10px; color: #999; }
+.bmp-seller-btns {
+    display: flex; gap: 8px;
+}
+.bmp-seller-btn {
+    flex: 1; padding: 7px 0; border-radius: 16px;
+    font-size: 12px; font-weight: 600; text-align: center;
+    border: 1px solid #667eea; color: #667eea; cursor: pointer;
+    text-decoration: none;
+    background: #fff;
+}
+.bmp-seller-btn.follow {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff; border-color: transparent;
+}
+
+/* Certifications grid */
+.bmp-certs-section {
+    background: #fff;
+    padding: 12px 14px;
+    margin-bottom: 6px;
+}
+.bmp-certs-title { font-size: 13px; font-weight: 700; color: #333; margin-bottom: 10px; }
+.bmp-certs-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+.bmp-cert-item {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.bmp-cert-icon {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 15px;
+}
+.bmp-cert-label { font-size: 9px; color: #666; text-align: center; line-height: 1.2; }
+
+/* Sticky bottom bar */
+.bmp-bottom-bar {
+    position: fixed; bottom: 60px; left: 0; right: 0;
+    background: #fff;
+    display: flex; align-items: center;
+    border-top: 1px solid #f0f0f0;
+    z-index: 900;
+    padding: 6px 10px;
+    gap: 0;
+}
+.bmp-action-icons {
+    display: flex; gap: 0;
+    margin-right: 8px;
+}
+.bmp-action-icon {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 1px; padding: 0 8px;
+    font-size: 18px; color: #666; cursor: pointer;
+    border: none; background: none;
+    text-decoration: none;
+}
+.bmp-action-icon span { font-size: 9px; color: #999; }
+.bmp-action-icon.active { color: #E4393C; }
+.bmp-buy-btns {
+    display: flex; flex: 1; gap: 0; border-radius: 20px; overflow: hidden;
+}
+.bmp-cart-btn, .bmp-buy-btn {
+    flex: 1; padding: 10px 0;
+    font-size: 13px; font-weight: 700;
+    border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 4px;
+}
+.bmp-cart-btn { background: #FF6000; color: #fff; }
+.bmp-buy-btn  { background: #E4393C; color: #fff; }
+
+/* Q&A section */
+.bmp-qa-section {
+    background: #fff;
+    padding: 12px 14px;
+    margin-bottom: 6px;
+}
+.bmp-qa-title { font-size: 13px; font-weight: 700; color: #333; margin-bottom: 8px; }
+.bmp-qa-item {
+    padding: 8px 0;
+    border-bottom: 1px solid #f5f5f5;
+}
+.bmp-qa-item:last-child { border-bottom: none; }
+.bmp-qa-q { font-size: 12px; font-weight: 600; color: #333; }
+.bmp-qa-q::before { content: 'Q: '; color: #E4393C; }
+.bmp-qa-a { font-size: 12px; color: #666; margin-top: 3px; }
+.bmp-qa-a::before { content: 'A: '; color: #10b981; font-weight: 600; }
 </style>
 {% endblock %}
 
 {% block content %}
+<!-- ===== MOBILE ONLY: Taobao-style product page ===== -->
+<div class="book-mobile-page" style="display:none;">
+
+    <!-- A. Image Gallery (swipeable) -->
+    <div class="bmp-gallery" id="bmpGallery">
+        <div class="bmp-gallery-track" id="bmpTrack">
+            <div class="bmp-gallery-slide">
+                <img src="{{ book.get_cover_url }}" alt="{{ book.name }}" id="bmpMainImg">
+            </div>
+            <!-- Additional slides placeholder (can be extended with more images) -->
+            <div class="bmp-gallery-slide">
+                <img src="{{ book.get_cover_url }}" alt="{{ book.name }}" style="filter:brightness(.9)saturate(1.2);">
+            </div>
+        </div>
+        {% if book.price > 0 and book.sale_num > 0 %}
+        <div class="bmp-promo-badge">{% if book.sale_num > 50 %}🔥 热销{% elif book.inventory <= 5 %}⚡ 限量{% else %}📦 现货{% endif %}</div>
+        {% endif %}
+        <div class="bmp-gallery-counter" id="bmpCounter">1/2</div>
+    </div>
+
+    <!-- B. Price + Quick Info -->
+    <div class="bmp-price-section">
+        <div class="d-flex align-items-baseline">
+            <div class="bmp-price-main"><small>¥</small>{{ book.price }}</div>
+            {% if book.price > 0 %}
+            <div class="bmp-price-original">¥{{ book.price|floatformat:0|add:"30" }}</div>
+            {% endif %}
+            <div class="bmp-price-sold ms-auto">已售 {{ book.sale_num }}+</div>
+        </div>
+        {% if book.inventory > 0 %}
+        <div><span class="bmp-low-badge">近30天低价</span> <span class="bmp-low-badge" style="margin-left:4px;">7天无理由退货</span></div>
+        {% endif %}
+    </div>
+
+    <!-- C. Title -->
+    <div class="bmp-title-section">
+        <div class="bmp-title">{{ book.name }}</div>
+        <div class="bmp-tags-row">
+            <span class="bmp-tag" style="background:#fde68a;color:#92400e;">📚 图书</span>
+            {% for author in book.author_set.all|slice:":2" %}
+            <span class="bmp-tag" style="background:#e0e7ff;color:#3730a3;">✍️ {{ author.name }}</span>
+            {% endfor %}
+            <span class="bmp-tag" style="background:#d1fae5;color:#065f46;">🏢 {{ book.publisher.publisher_name }}</span>
+        </div>
+    </div>
+
+    <!-- D. Delivery Info -->
+    <div class="bmp-delivery-section">
+        <div class="bmp-delivery-row">
+            <i class="fas fa-truck"></i>
+            <span><span class="bmp-delivery-highlight">快递配送</span> · 预计 <strong>2-3天</strong>到达</span>
+            <i class="fas fa-chevron-right ms-auto" style="font-size:10px;color:#ccc;"></i>
+        </div>
+        <div class="bmp-delivery-row">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>发货自 <strong>北京/Dakar</strong> · <span class="bmp-delivery-highlight">包邮</span></span>
+        </div>
+        <div class="bmp-delivery-row">
+            <i class="fas fa-shield-alt"></i>
+            <span>正版保证 · DUNO 平台担保</span>
+        </div>
+    </div>
+
+    <!-- E. Guarantee -->
+    <div class="bmp-guarantee">
+        <i class="fas fa-shield-alt"></i>
+        <span>退货宝 | <strong>7天无理由退换</strong> | 极速退款</span>
+    </div>
+
+    <!-- F. Specs (scrollable) -->
+    <div class="bmp-specs-section">
+        <div class="bmp-specs-label">商品规格</div>
+        <div class="bmp-specs-scroll">
+            {% if book.author_set.all %}
+            <div class="bmp-spec-chip"><strong>作者</strong>{{ book.author_set.first.name|default:"—" }}</div>
+            {% endif %}
+            <div class="bmp-spec-chip"><strong>出版社</strong>{{ book.publisher.publisher_name }}</div>
+            <div class="bmp-spec-chip"><strong>库存</strong>{{ book.inventory }} 本</div>
+            <div class="bmp-spec-chip"><strong>销量</strong>{{ book.sale_num }}+</div>
+            {% if book.description %}
+            <div class="bmp-spec-chip"><strong>简介</strong>{{ book.description|truncatechars:15 }}</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- H. Q&A Section -->
+    <div class="bmp-qa-section">
+        <div class="bmp-qa-title">问大家 <span style="font-size:11px;color:#999;font-weight:400;">({{ book.sale_num }} 人已购买)</span></div>
+        <div class="bmp-qa-item">
+            <div class="bmp-qa-q" data-zh="这本书有电子版吗？" data-en="Is there a digital version?" data-fr="Y a-t-il une version numérique ?">这本书有电子版吗？</div>
+            <div class="bmp-qa-a" data-zh="有的，可以联系客服获取下载码。" data-en="Yes, contact support for a download code." data-fr="Oui, contactez le support pour un code de téléchargement.">有的，可以联系客服获取下载码。</div>
+        </div>
+        <div class="bmp-qa-item">
+            <div class="bmp-qa-q" data-zh="内容和描述一致吗？" data-en="Does it match the description?" data-fr="Est-ce conforme à la description ?">内容和描述一致吗？</div>
+            <div class="bmp-qa-a" data-zh="是正版，质量很好，强烈推荐！" data-en="Genuine product, high quality, highly recommended!" data-fr="Produit authentique, haute qualité, vivement recommandé !">是正版，质量很好，强烈推荐！</div>
+        </div>
+        <a href="{% url 'manager:public_contact' %}" style="color:#667eea;font-size:12px;font-weight:600;text-decoration:none;" data-zh="查看更多 >" data-en="See more >" data-fr="Voir plus >">查看更多 ></a>
+    </div>
+
+    <!-- I. Publisher/Seller Section -->
+    <div class="bmp-seller-section">
+        <div class="bmp-seller-header">
+            <div class="bmp-seller-logo"><i class="fas fa-building"></i></div>
+            <div>
+                <div class="bmp-seller-name">{{ book.publisher.publisher_name }}</div>
+                <div class="bmp-seller-meta">
+                    <i class="fas fa-star" style="color:#f59e0b;"></i> 4.9 · <span data-zh="正规出版商" data-en="Certified Publisher" data-fr="Éditeur certifié">正规出版商</span>
+                </div>
+            </div>
+            <button class="bmp-seller-btn follow ms-auto" onclick="followPublisher({{ book.publisher.id }})" id="followPublisherBtn">
+                <i class="fas fa-plus"></i> <span data-zh="关注" data-en="Follow" data-fr="Suivre">关注</span>
+            </button>
+        </div>
+        <div class="bmp-seller-scores">
+            <div class="bmp-score-item"><div class="bmp-score-val">4.9</div><div class="bmp-score-lbl" data-zh="商品质量" data-en="Quality" data-fr="Qualité">商品质量</div></div>
+            <div class="bmp-score-item"><div class="bmp-score-val">4.8</div><div class="bmp-score-lbl" data-zh="配送速度" data-en="Delivery" data-fr="Livraison">配送速度</div></div>
+            <div class="bmp-score-item"><div class="bmp-score-val">4.9</div><div class="bmp-score-lbl" data-zh="服务态度" data-en="Service" data-fr="Service">服务态度</div></div>
+        </div>
+        <div class="bmp-seller-btns">
+            <a href="{% url 'manager:public_publisher_detail' book.publisher.id %}" class="bmp-seller-btn" data-zh="查看主页" data-en="View Shop" data-fr="Voir la boutique">查看主页</a>
+            <a href="{% url 'manager:public_books' %}" class="bmp-seller-btn" data-zh="全部商品" data-en="All Books" data-fr="Tous les livres">全部商品</a>
+        </div>
+    </div>
+
+    <!-- J. Certifications Grid -->
+    <div class="bmp-certs-section">
+        <div class="bmp-certs-title" data-zh="服务保障" data-en="Service Guarantee" data-fr="Garanties de service">服务保障</div>
+        <div class="bmp-certs-grid">
+            <div class="bmp-cert-item">
+                <div class="bmp-cert-icon" style="background:linear-gradient(135deg,#667eea,#764ba2);"><i class="fas fa-undo"></i></div>
+                <span class="bmp-cert-label" data-zh="15天退换" data-en="15-day return" data-fr="15j retour">15天退换</span>
+            </div>
+            <div class="bmp-cert-item">
+                <div class="bmp-cert-icon" style="background:linear-gradient(135deg,#10b981,#059669);"><i class="fas fa-certificate"></i></div>
+                <span class="bmp-cert-label" data-zh="店铺1年保" data-en="1yr warranty" data-fr="Garantie 1an">店铺1年保</span>
+            </div>
+            <div class="bmp-cert-item">
+                <div class="bmp-cert-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);"><i class="fas fa-shipping-fast"></i></div>
+                <span class="bmp-cert-label" data-zh="运费险" data-en="Free shipping" data-fr="Frais offerts">运费险</span>
+            </div>
+            <div class="bmp-cert-item">
+                <div class="bmp-cert-icon" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8);"><i class="fas fa-check-double"></i></div>
+                <span class="bmp-cert-label" data-zh="50+验货" data-en="50+ checks" data-fr="50+ contrôles">50+验货</span>
+            </div>
+            <div class="bmp-cert-item">
+                <div class="bmp-cert-icon" style="background:linear-gradient(135deg,#ec4899,#be185d);"><i class="fas fa-exchange-alt"></i></div>
+                <span class="bmp-cert-label" data-zh="1赔1" data-en="1-for-1" data-fr="SAV 1p1">1赔1</span>
+            </div>
+            <div class="bmp-cert-item">
+                <div class="bmp-cert-icon" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);"><i class="fas fa-truck"></i></div>
+                <span class="bmp-cert-label" data-zh="包邮" data-en="Free delivery" data-fr="Livraison offerte">包邮</span>
+            </div>
+            <div class="bmp-cert-item">
+                <div class="bmp-cert-icon" style="background:linear-gradient(135deg,#14b8a6,#0f766e);"><i class="fas fa-tools"></i></div>
+                <span class="bmp-cert-label" data-zh="终生维修" data-en="Lifetime repair" data-fr="Réparation vie">终生维修</span>
+            </div>
+            <div class="bmp-cert-item">
+                <div class="bmp-cert-icon" style="background:linear-gradient(135deg,#f97316,#ea580c);"><i class="fas fa-gift"></i></div>
+                <span class="bmp-cert-label" data-zh="新客礼包" data-en="Welcome gift" data-fr="Cadeau bienvenu">新客礼包</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Description (if any) -->
+    {% if book.description %}
+    <div style="background:#fff;padding:12px 14px;margin-bottom:6px;">
+        <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:8px;" data-zh="图书简介" data-en="About this book" data-fr="À propos du livre">图书简介</div>
+        <div style="font-size:13px;color:#666;line-height:1.7;">{{ book.description }}</div>
+    </div>
+    {% endif %}
+
+    <!-- K. Sticky Bottom Action Bar -->
+    <div class="bmp-bottom-bar">
+        <div class="bmp-action-icons">
+            <a href="{% url 'manager:public_publisher_detail' book.publisher.id %}" class="bmp-action-icon">
+                <i class="fas fa-store"></i>
+                <span data-zh="店铺" data-en="Shop" data-fr="Boutique">店铺</span>
+            </a>
+            <a href="{% url 'manager:start_conversation' %}?item_type=book&item_id={{ book.id }}&subject={{ book.name|urlencode }}" class="bmp-action-icon">
+                <i class="fas fa-comments"></i>
+                <span data-zh="聊天" data-en="Chat" data-fr="Chat">聊天</span>
+            </a>
+            <button class="bmp-action-icon" id="bmpWishBtn" onclick="toggleWishlistMobile({{ book.id }})" style="cursor:pointer;">
+                <i class="far fa-heart" id="bmpWishIcon"></i>
+                <span data-zh="收藏" data-en="Save" data-fr="Favoris">收藏</span>
+            </button>
+        </div>
+        <div class="bmp-buy-btns">
+            <button class="bmp-cart-btn" onclick="bmpAddToCart({{ book.id }})">
+                <i class="fas fa-shopping-cart"></i>
+                <span data-zh="加入购物车" data-en="Add to cart" data-fr="Panier">加入购物车</span>
+            </button>
+            <form method="post" action="{% url 'manager:buy_now' book.id %}" style="flex:1;margin:0;">
+                {% csrf_token %}
+                <input type="hidden" name="quantity" value="1">
+                <button type="submit" class="bmp-buy-btn w-100">
+                    <i class="fas fa-bolt"></i>
+                    <span data-zh="立即购买" data-en="Buy now" data-fr="Acheter">立即购买</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+</div><!-- /.book-mobile-page -->
+
+<!-- ===== DESKTOP LAYOUT (unchanged) ===== -->
 <!-- Hero Section -->
 <div class="detail-hero">
     <div class="container position-relative" style="z-index:1;">
@@ -94,7 +593,10 @@
             </ol>
         </nav>
         <div class="row align-items-end g-4">
-            <div class="col-auto">
+            <div class="col-auto" style="position:relative;">
+                <button class="wishlist-btn" id="wishBtn" onclick="toggleWishlist({{ book.id }})" title="{% trans '收藏' %}">
+                    <i class="far fa-heart" id="wishIcon"></i>
+                </button>
                 <div class="cover-wrapper">
                     <img src="{{ book.get_cover_url }}" alt="{{ book.name }}">
                 </div>
@@ -343,5 +845,110 @@ function addToCartWithQuantity(bookId) {
 
 document.getElementById('quantity').addEventListener('change', updateDisplay);
 document.addEventListener('DOMContentLoaded', updateDisplay);
+
+// Wishlist
+function toggleWishlist(bookId) {
+    var btn = document.getElementById('wishBtn');
+    var icon = document.getElementById('wishIcon');
+    var fd = new FormData();
+    fd.append('book_id', bookId);
+    fd.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    fetch('{% url "manager:user_toggle_wishlist" %}', { method: 'POST', body: fd })
+    .then(r => r.json()).then(d => {
+        if (d.login_required) { window.location.href = '{% url "manager:user_login" %}'; return; }
+        if (d.success) {
+            btn.classList.toggle('active', d.wishlisted);
+            icon.className = d.wishlisted ? 'fas fa-heart' : 'far fa-heart';
+            btn.classList.add('pop');
+            setTimeout(() => btn.classList.remove('pop'), 400);
+            if (typeof gToast === 'function') gToast(d.message, 'success');
+        } else {
+            if (typeof gToast === 'function') gToast(d.message, 'error');
+        }
+    });
+}
+(function() {
+    fetch('{% url "manager:user_check_wishlist" %}?book_id={{ book.id }}')
+    .then(r => r.json()).then(d => {
+        if (d.wishlisted) {
+            document.getElementById('wishBtn').classList.add('active');
+            document.getElementById('wishIcon').className = 'fas fa-heart';
+        }
+    });
+})();
+
+// ===== Mobile gallery swipe =====
+(function() {
+    if (window.innerWidth > 768) return;
+    var track = document.getElementById('bmpTrack');
+    var counter = document.getElementById('bmpCounter');
+    if (!track) return;
+    var slides = track.children.length;
+    var cur = 0;
+    var startX = 0;
+    track.parentElement.addEventListener('touchstart', function(e) { startX = e.touches[0].clientX; }, { passive: true });
+    track.parentElement.addEventListener('touchend', function(e) {
+        var dx = e.changedTouches[0].clientX - startX;
+        if (Math.abs(dx) < 40) return;
+        if (dx < 0 && cur < slides - 1) cur++;
+        else if (dx > 0 && cur > 0) cur--;
+        track.style.transform = 'translateX(-' + (cur * 100) + '%)';
+        if (counter) counter.textContent = (cur+1) + '/' + slides;
+    }, { passive: true });
+})();
+
+// ===== Mobile wishlist =====
+function toggleWishlistMobile(bookId) {
+    var csrf = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (!csrf) return;
+    var btn = document.getElementById('bmpWishBtn');
+    var icon = document.getElementById('bmpWishIcon');
+    fetch('/manager/public/user/wishlist/toggle/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrf.value },
+        body: 'book_id=' + bookId
+    }).then(r => r.json()).then(d => {
+        if (d.wishlisted) {
+            icon.className = 'fas fa-heart'; btn.style.color = '#E4393C';
+        } else {
+            icon.className = 'far fa-heart'; btn.style.color = '';
+        }
+        if (typeof gToast === 'function') gToast(d.message, 'success');
+    });
+}
+// ===== Mobile add to cart =====
+function bmpAddToCart(bookId) {
+    var csrf = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (!csrf) return;
+    fetch('/manager/cart/add/' + bookId + '/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrf.value },
+        body: 'quantity=1'
+    }).then(r => r.json()).then(d => {
+        if (typeof gToast === 'function') gToast(d.message || '已加入购物车', 'success');
+    }).catch(function() {
+        if (typeof gToast === 'function') gToast('加入失败，请重试', 'error');
+    });
+}
+// ===== Follow publisher (stub) =====
+function followPublisher(publisherId) {
+    var btn = document.getElementById('followPublisherBtn');
+    if (!btn) return;
+    var csrf = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (!csrf) { window.location.href = '{% url "manager:user_login" %}'; return; }
+    fetch('/manager/publisher/' + publisherId + '/follow/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrf.value },
+        body: ''
+    }).then(r => r.json()).then(d => {
+        if (d.success) {
+            btn.innerHTML = d.following
+                ? '<i class="fas fa-check"></i> <span>已关注</span>'
+                : '<i class="fas fa-plus"></i> <span>关注</span>';
+            btn.classList.toggle('follow', d.following);
+        }
+        if (typeof gToast === 'function') gToast(d.message, 'success');
+    }).catch(function() {});
+}
 </script>
 {% endblock %}

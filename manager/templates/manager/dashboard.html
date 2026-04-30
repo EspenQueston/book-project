@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>管理员仪表板 - 图书管理系统</title>
+    <title>图书仪表板 - DUNO 360</title>
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -37,11 +37,13 @@
 
         .sidebar {
             background: var(--gradient-1);
-            min-height: 100vh;
+            height: 100vh;
             box-shadow: 2px 0 15px rgba(102, 126, 234, 0.3);
             position: fixed;
             width: 220px;
             z-index: 1000;
+            overflow-y: auto;
+            overflow-x: hidden;
         }
 
         .sidebar .nav-link {
@@ -165,12 +167,40 @@
         }
 
         /* Scrollbars */
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
         .main-content::-webkit-scrollbar { width: 6px; }
         .main-content::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 6px; }
         .main-content::-webkit-scrollbar-thumb { background: var(--secondary-color); border-radius: 6px; }
         .table-body::-webkit-scrollbar { width: 4px; }
         .table-body::-webkit-scrollbar-track { background: #f8f9fa; }
         .table-body::-webkit-scrollbar-thumb { background: #dee2e6; border-radius: 4px; }
+
+        /* Notification Bell */
+        .notif-bell { position: relative; cursor: pointer; font-size: 1.3rem; color: rgba(255,255,255,0.9); transition: all .3s; }
+        .notif-bell:hover { color: #fff; transform: scale(1.1); }
+        .notif-badge { position: absolute; top: -6px; right: -8px; background: var(--danger-color); color: #fff; font-size: 0.65rem; font-weight: 700; border-radius: 50%; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; padding: 0 4px; border: 2px solid white; }
+        .notif-dropdown { display: none; position: absolute; top: 100%; right: 0; width: 380px; background: #fff; border-radius: 15px; box-shadow: 0 15px 50px rgba(0,0,0,0.2); z-index: 1001; margin-top: 10px; overflow: hidden; }
+        .notif-dropdown.show { display: block; animation: gModalIn .3s ease; }
+        .notif-header { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .notif-header h6 { margin: 0; font-weight: 700; }
+        .notif-list { max-height: 360px; overflow-y: auto; }
+        .notif-item { padding: 12px 20px; border-bottom: 1px solid #f1f5f9; display: flex; gap: 12px; align-items: flex-start; cursor: pointer; transition: background .2s; }
+        .notif-item:hover { background: #f8fafc; }
+        .notif-item.unread { background: #f0f5ff; }
+        .notif-item:last-child { border-bottom: none; }
+        .notif-icon-wrap { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1rem; }
+        .notif-content { flex: 1; min-width: 0; }
+        .notif-content .title { font-weight: 600; font-size: 0.88rem; color: #1e293b; margin-bottom: 2px; }
+        .notif-content .msg { font-size: 0.8rem; color: #64748b; line-height: 1.4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .notif-content .time { font-size: 0.72rem; color: #94a3b8; margin-top: 2px; }
+        .notif-empty { padding: 40px 20px; text-align: center; color: #94a3b8; }
+        .notif-empty i { font-size: 2.5rem; margin-bottom: 10px; display: block; }
+        .notif-footer { padding: 10px 20px; text-align: center; border-top: 1px solid #f1f5f9; }
+        .notif-footer a { color: var(--primary-color); font-weight: 600; text-decoration: none; font-size: 0.85rem; }
+        @keyframes bellShake { 0%,100%{transform:rotate(0)} 25%{transform:rotate(15deg)} 50%{transform:rotate(-15deg)} 75%{transform:rotate(5deg)} }
+        .bell-shake { animation: bellShake .5s ease; }
     </style>
 </head>
 <body>
@@ -186,8 +216,10 @@
                     
                     <nav class="nav flex-column">
                         <a class="nav-link active" href="/manager/dashboard/">
-                            <i class="fas fa-tachometer-alt"></i> 仪表板
+                            <i class="fas fa-tachometer-alt"></i> 图书仪表板
                         </a>
+                        <div class="dropdown-divider mx-3 my-2" style="border-color: rgba(255,255,255,0.15);"></div>
+                        <small class="text-uppercase px-3 mb-1 d-block" style="color:rgba(255,255,255,0.45);font-size:0.7rem;letter-spacing:1px;">图书中心</small>
                         <a class="nav-link" href="/manager/book_list/">
                             <i class="fas fa-book"></i> 图书管理
                         </a>
@@ -197,6 +229,8 @@
                         <a class="nav-link" href="/manager/publisher_list/">
                             <i class="fas fa-building"></i> 出版社管理
                         </a>
+                        <div class="dropdown-divider mx-3 my-2" style="border-color: rgba(255,255,255,0.15);"></div>
+                        <small class="text-uppercase px-3 mb-1 d-block" style="color:rgba(255,255,255,0.45);font-size:0.7rem;letter-spacing:1px;">运营管理</small>
                         <a class="nav-link" href="/manager/order_list/">
                             <i class="fas fa-shopping-cart"></i> 订单管理
                         </a>
@@ -206,7 +240,21 @@
                         <a class="nav-link" href="/manager/email/">
                             <i class="fas fa-envelope"></i> 消息管理
                         </a>
-                        <div class="dropdown-divider mx-3 my-2" style="border-color: #34495e;"></div>
+                        <a class="nav-link" href="/marketplace/admin/dashboard/">
+                            <i class="fas fa-store"></i> 市场管理
+                        </a>
+                        <div class="dropdown-divider mx-3 my-2" style="border-color: rgba(255,255,255,0.15);"></div>
+                        <small class="text-uppercase px-3 mb-1 d-block" style="color:rgba(255,255,255,0.45);font-size:0.7rem;letter-spacing:1px;">平台管理</small>
+                        <a class="nav-link" href="/manager/admin/users/">
+                            <i class="fas fa-users"></i> 用户管理
+                        </a>
+                        <a class="nav-link" href="/manager/admin/vendors/">
+                            <i class="fas fa-store"></i> 卖家管理
+                        </a>
+                        <a class="nav-link" href="/manager/admin/chatbot/">
+                            <i class="fas fa-robot"></i> AI 聊天配置
+                        </a>
+                        <div class="dropdown-divider mx-3 my-2" style="border-color: rgba(255,255,255,0.15);"></div>
                         <a class="nav-link" href="/manager/public/">
                             <i class="fas fa-globe"></i> 查看网站
                         </a>
@@ -223,11 +271,31 @@
                         <div class="row align-items-center">
                             <div class="col-md-8">
                                 <h3 class="mb-1">
-                                    <i class="fas fa-chart-line"></i> 智能数据分析仪表板
+                                    <i class="fas fa-book-open"></i> 图书仪表板
                                 </h3>
-                                <p class="mb-0 opacity-75">系统概览 · 数据分析 · 业务洞察</p>
+                                <p class="mb-0 opacity-75">数据概览 · 图书分析 · 市场洞察</p>
                             </div>
-                            <div class="col-md-4 text-end">
+                            <div class="col-md-4 text-end d-flex align-items-center justify-content-end gap-3">
+                                <!-- Notification Bell -->
+                                <div style="position:relative;">
+                                    <div class="notif-bell" onclick="toggleNotifDropdown(event)">
+                                        <i class="fas fa-bell" id="bellIcon"></i>
+                                        <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+                                    </div>
+                                    <div class="notif-dropdown" id="notifDropdown">
+                                        <div class="notif-header">
+                                            <h6><i class="fas fa-bell me-2"></i>通知中心</h6>
+                                            <button class="btn btn-sm btn-light" onclick="markAllRead()" style="border-radius:8px;font-size:0.75rem;padding:3px 10px;">全部已读</button>
+                                        </div>
+                                        <div class="notif-list" id="notifList">
+                                            <div class="notif-empty"><i class="fas fa-bell-slash"></i>暂无通知</div>
+                                        </div>
+                                        <div class="notif-footer" style="display:flex;justify-content:space-between;align-items:center;">
+                                            <a href="{% url 'manager:admin_notifications_page' %}"><i class="fas fa-list me-1"></i>查看全部通知</a>
+                                            <a href="#" onclick="clearAllNotifs()" style="color:#94a3b8;">清空已读</a>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="kpi-value">{{ current_date }}</div>
                             </div>
                         </div>
@@ -308,6 +376,54 @@
                                 <div class="kpi-info">
                                     <div class="kpi-value">¥{{ revenue_this_month|floatformat:0 }}</div>
                                     <div class="kpi-label">本月收入</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Marketplace Section Header -->
+                    <div style="margin: 20px 0 14px; padding: 14px 18px; background: linear-gradient(135deg, rgba(102,126,234,0.08) 0%, rgba(118,75,162,0.08) 100%); border-radius: 12px; border-left: 4px solid var(--primary-color);">
+                        <h5 style="margin:0; color: #1e1b4b; font-size:0.97rem; font-weight:700;">
+                            <i class="fas fa-store me-2" style="color:var(--primary-color)"></i>综合市场概览
+                        </h5>
+                        <p style="margin:4px 0 0; font-size:0.78rem; color:#6b7280;">商品市场·在线课程·生鲜超市实时数据</p>
+                    </div>
+
+                    <!-- Marketplace KPI Cards Row -->
+                    <div class="row">
+                        <div class="col-xl-3 col-md-6">
+                            <div class="kpi-card" style="background: linear-gradient(135deg, #0ea5e9, #0284c7);">
+                                <div class="kpi-icon"><i class="fas fa-boxes"></i></div>
+                                <div class="kpi-info">
+                                    <div class="kpi-value">{{ total_products }}</div>
+                                    <div class="kpi-label">市场商品</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6">
+                            <div class="kpi-card" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                                <div class="kpi-icon"><i class="fas fa-graduation-cap"></i></div>
+                                <div class="kpi-info">
+                                    <div class="kpi-value">{{ total_courses }}</div>
+                                    <div class="kpi-label">在线课程</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6">
+                            <div class="kpi-card" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                <div class="kpi-icon"><i class="fas fa-shopping-basket"></i></div>
+                                <div class="kpi-info">
+                                    <div class="kpi-value">{{ total_supermarket }}</div>
+                                    <div class="kpi-label">超市商品</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6">
+                            <div class="kpi-card" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                                <div class="kpi-icon"><i class="fas fa-receipt"></i></div>
+                                <div class="kpi-info">
+                                    <div class="kpi-value">{{ mkt_order_count }}</div>
+                                    <div class="kpi-label">市场订单</div>
                                 </div>
                             </div>
                         </div>
@@ -622,5 +738,106 @@
         }
     });
     </script>
+
+    <!-- Notification System -->
+    <script>
+    function getCookie(name) {
+        var val = document.cookie.match('(^|;)\\s*' + name + '=([^;]*)');
+        return val ? decodeURIComponent(val[2]) : '';
+    }
+
+    function toggleNotifDropdown(e) {
+        e.stopPropagation();
+        var dd = document.getElementById('notifDropdown');
+        dd.classList.toggle('show');
+        if (dd.classList.contains('show')) loadNotifications();
+    }
+
+    document.addEventListener('click', function(e) {
+        var dd = document.getElementById('notifDropdown');
+        if (dd && !dd.contains(e.target) && !e.target.closest('.notif-bell')) {
+            dd.classList.remove('show');
+        }
+    });
+
+    function loadNotifications() {
+        fetch('/manager/admin/notifications/')
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (!d.success) return;
+                var badge = document.getElementById('notifBadge');
+                if (d.unread_count > 0) {
+                    badge.textContent = d.unread_count > 99 ? '99+' : d.unread_count;
+                    badge.style.display = 'flex';
+                } else {
+                    badge.style.display = 'none';
+                }
+                var list = document.getElementById('notifList');
+                if (!d.notifications || d.notifications.length === 0) {
+                    list.innerHTML = '<div class="notif-empty"><i class="fas fa-bell-slash"></i>暂无通知</div>';
+                    return;
+                }
+                var html = '';
+                d.notifications.forEach(function(n) {
+                    html += '<div class="notif-item ' + (n.is_read ? '' : 'unread') + '" onclick="markRead(' + n.id + ', \'' + (n.link || '') + '\')">';
+                    html += '<div class="notif-icon-wrap" style="background:' + n.color + '20;color:' + n.color + '"><i class="' + n.icon + '"></i></div>';
+                    html += '<div class="notif-content"><div class="title">' + n.title + '</div>';
+                    html += '<div class="msg">' + n.message + '</div>';
+                    html += '<div class="time"><i class="fas fa-clock"></i> ' + n.time_ago + '</div>';
+                    html += '</div></div>';
+                });
+                list.innerHTML = html;
+            });
+    }
+
+    function markRead(id, link) {
+        fetch('/manager/admin/notifications/', {
+            method: 'POST',
+            headers: {'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'action=mark_read&id=' + id
+        }).then(function() {
+            if (link) window.location.href = link;
+            else loadNotifications();
+        });
+    }
+
+    function markAllRead() {
+        fetch('/manager/admin/notifications/', {
+            method: 'POST',
+            headers: {'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'action=mark_all_read'
+        }).then(function() { loadNotifications(); });
+    }
+
+    function clearAllNotifs() {
+        fetch('/manager/admin/notifications/', {
+            method: 'POST',
+            headers: {'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'action=clear_all'
+        }).then(function() { loadNotifications(); });
+    }
+
+    // Initial load & polling every 30 seconds
+    loadNotifications();
+    setInterval(function() {
+        fetch('/manager/admin/notifications/')
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (!d.success) return;
+                var badge = document.getElementById('notifBadge');
+                var bell = document.getElementById('bellIcon');
+                if (d.unread_count > 0) {
+                    badge.textContent = d.unread_count > 99 ? '99+' : d.unread_count;
+                    badge.style.display = 'flex';
+                    bell.classList.add('bell-shake');
+                    setTimeout(function() { bell.classList.remove('bell-shake'); }, 500);
+                } else {
+                    badge.style.display = 'none';
+                }
+            });
+    }, 30000);
+    </script>
+<script src="/static/js/admin_i18n.js" defer></script>
+<script src="/static/js/chatbot_widget.js" defer></script>
 </body>
 </html>

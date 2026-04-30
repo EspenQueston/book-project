@@ -1,5 +1,6 @@
 {% extends 'public/base.html' %}
 {% load i18n %}
+{% load markdown_extras %}
 
 {% block title %}{{ post.title }} - {% trans "博客" %}{% endblock %}
 
@@ -156,6 +157,34 @@
         background: transparent;
         color: inherit;
         padding: 0;
+    }
+
+    .article-content ul, .article-content ol {
+        padding-left: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .article-content li { margin-bottom: 0.4rem; }
+
+    .article-content table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1.5rem 0;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    .article-content th, .article-content td {
+        padding: 10px 16px;
+        border: 1px solid #e8ecf1;
+    }
+    .article-content th {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        font-weight: 600;
+    }
+    .article-content hr {
+        border: none;
+        border-top: 2px solid #e8ecf1;
+        margin: 2rem 0;
     }
 
     /* Author Box */
@@ -417,7 +446,7 @@
             <div class="col-lg-8">
                 <div class="article-card" data-aos="fade-up">
                     <div class="article-content">
-                        {{ post.content|safe }}
+                        {{ post.content|markdown }}
                     </div>
 
                     <!-- Author Box -->

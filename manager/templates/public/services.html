@@ -1,7 +1,7 @@
 {% extends 'public/base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans "图书管理系统" %} - {% trans "我们的服务" %}{% endblock %}
+{% block title %}{% trans "DUNO 360" %} - {% trans "我们的服务" %}{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -231,8 +231,8 @@
         <div class="row align-items-center">
             <div class="col-lg-7" data-aos="fade-right">
                 <div class="srv-pill"><i class="fas fa-concierge-bell"></i>{% trans "我们的服务" %}</div>
-                <h1>{% trans "全方位的图书服务" %}</h1>
-                <p class="lead">{% trans "从图书搜索到订单管理，我们提供一站式的智能图书服务，让您的阅读体验更加便捷和愉悦。" %}</p>
+                <h1>{% trans "全方位的数字服务平台" %}</h1>
+                <p class="lead">{% trans "从电子书下载到在线课程学习，从综合市场到智能AI助手，我们为您打造一站式的知识与生活服务体验。" %}</p>
             </div>
             <div class="col-lg-5 d-none d-lg-block" data-aos="fade-left" data-aos-delay="200">
                 <div class="hero-orbit">
@@ -254,73 +254,73 @@
         <div class="row g-4">
             <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
                 <div class="srv-card" style="--card-accent:#667eea">
-                    <div class="srv-ico" style="background:linear-gradient(135deg,#667eea,#764ba2)"><i class="fas fa-search"></i></div>
-                    <h4>{% trans "智能图书搜索" %}</h4>
-                    <p>{% trans "通过关键字、作者或出版社快速搜索您需要的图书，智能排序让您更快找到心仪的书籍。" %}</p>
+                    <div class="srv-ico" style="background:linear-gradient(135deg,#667eea,#764ba2)"><i class="fas fa-book-open"></i></div>
+                    <h4>{% trans "电子书商店" %}</h4>
+                    <p>{% trans "浏览丰富的图书目录，在线购买后即可下载电子书。支持按作者、出版社、分类等多维度搜索和筛选。" %}</p>
                     <ul class="srv-feats">
-                        <li><i class="fas fa-check-circle"></i> {% trans "多维度搜索" %}</li>
-                        <li><i class="fas fa-check-circle"></i> {% trans "智能排序" %}</li>
-                        <li><i class="fas fa-check-circle"></i> {% trans "实时结果" %}</li>
+                        <li><i class="fas fa-check-circle"></i> {% trans "即购即下载" %}</li>
+                        <li><i class="fas fa-check-circle"></i> {% trans "多维度搜索与筛选" %}</li>
+                        <li><i class="fas fa-check-circle"></i> {% trans "收藏与心愿单" %}</li>
                     </ul>
                 </div>
             </div>
             <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
                 <div class="srv-card" style="--card-accent:#f5576c">
-                    <div class="srv-ico" style="background:linear-gradient(135deg,#f093fb,#f5576c)"><i class="fas fa-shopping-cart"></i></div>
-                    <h4>{% trans "在线购书" %}</h4>
-                    <p>{% trans "便捷的购物车系统，支持多种支付方式，让您轻松完成图书购买。" %}</p>
+                    <div class="srv-ico" style="background:linear-gradient(135deg,#f093fb,#f5576c)"><i class="fas fa-graduation-cap"></i></div>
+                    <h4>{% trans "在线课程" %}</h4>
+                    <p>{% trans "优质的视频课程资源，章节化学习结构，支持在线观看视频课程，提升您的技能和知识。" %}</p>
                     <ul class="srv-feats">
-                        <li><i class="fas fa-check-circle"></i> {% trans "安全支付" %}</li>
-                        <li><i class="fas fa-check-circle"></i> {% trans "购物车管理" %}</li>
-                        <li><i class="fas fa-check-circle"></i> {% trans "订单跟踪" %}</li>
+                        <li><i class="fas fa-check-circle"></i> {% trans "视频课程学习" %}</li>
+                        <li><i class="fas fa-check-circle"></i> {% trans "章节化课程结构" %}</li>
+                        <li><i class="fas fa-check-circle"></i> {% trans "在线观看与购买" %}</li>
                     </ul>
                 </div>
             </div>
             <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
                 <div class="srv-card" style="--card-accent:#00f2fe">
-                    <div class="srv-ico" style="background:linear-gradient(135deg,#4facfe,#00f2fe)"><i class="fas fa-download"></i></div>
-                    <h4>{% trans "电子书下载" %}</h4>
-                    <p>{% trans "购买后即可下载电子版本，随时随地享受阅读的乐趣。" %}</p>
+                    <div class="srv-ico" style="background:linear-gradient(135deg,#4facfe,#00f2fe)"><i class="fas fa-store"></i></div>
+                    <h4>{% trans "综合市场" %}</h4>
+                    <p>{% trans "集合各类商品、生鲜超市于一体的综合市场，满足您的日常购物需求。统一购物车与结算体验。" %}</p>
                     <ul class="srv-feats">
-                        <li><i class="fas fa-check-circle"></i> {% trans "即时下载" %}</li>
-                        <li><i class="fas fa-check-circle"></i> {% trans "多格式支持" %}</li>
-                        <li><i class="fas fa-check-circle"></i> {% trans "永久访问" %}</li>
+                        <li><i class="fas fa-check-circle"></i> {% trans "商品与超市" %}</li>
+                        <li><i class="fas fa-check-circle"></i> {% trans "统一购物车" %}</li>
+                        <li><i class="fas fa-check-circle"></i> {% trans "订单全流程跟踪" %}</li>
                     </ul>
                 </div>
             </div>
             <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
                 <div class="srv-card" style="--card-accent:#38f9d7">
-                    <div class="srv-ico" style="background:linear-gradient(135deg,#43e97b,#38f9d7)"><i class="fas fa-chart-line"></i></div>
-                    <h4>{% trans "图书管理" %}</h4>
-                    <p>{% trans "强大的后台管理系统，帮助管理员高效管理图书、作者和出版社信息。" %}</p>
+                    <div class="srv-ico" style="background:linear-gradient(135deg,#43e97b,#38f9d7)"><i class="fas fa-shopping-cart"></i></div>
+                    <h4>{% trans "统一购物与支付" %}</h4>
+                    <p>{% trans "图书与市场商品共享统一购物车和结算流程。支持微信、支付宝、PayPal、银行转账等多种支付方式。" %}</p>
                     <ul class="srv-feats">
-                        <li><i class="fas fa-check-circle"></i> {% trans "库存管理" %}</li>
-                        <li><i class="fas fa-check-circle"></i> {% trans "数据分析" %}</li>
-                        <li><i class="fas fa-check-circle"></i> {% trans "报表导出" %}</li>
+                        <li><i class="fas fa-check-circle"></i> {% trans "统一购物车" %}</li>
+                        <li><i class="fas fa-check-circle"></i> {% trans "多种支付方式" %}</li>
+                        <li><i class="fas fa-check-circle"></i> {% trans "安全结算" %}</li>
                     </ul>
                 </div>
             </div>
             <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
                 <div class="srv-card" style="--card-accent:#fee140">
-                    <div class="srv-ico" style="background:linear-gradient(135deg,#fa709a,#fee140)"><i class="fas fa-globe"></i></div>
-                    <h4>{% trans "多语言支持" %}</h4>
-                    <p>{% trans "支持中文、英文和法文，为全球用户提供无障碍的浏览体验。" %}</p>
+                    <div class="srv-ico" style="background:linear-gradient(135deg,#fa709a,#fee140)"><i class="fas fa-robot"></i></div>
+                    <h4>{% trans "AI智能助手" %}</h4>
+                    <p>{% trans "内置智能AI聊天机器人，随时为您解答关于平台使用、图书推荐、订单查询等问题，提供24/7即时帮助。" %}</p>
                     <ul class="srv-feats">
-                        <li><i class="fas fa-check-circle"></i> {% trans "三语切换" %}</li>
-                        <li><i class="fas fa-check-circle"></i> {% trans "实时翻译" %}</li>
-                        <li><i class="fas fa-check-circle"></i> {% trans "本地化体验" %}</li>
+                        <li><i class="fas fa-check-circle"></i> {% trans "实时智能对话" %}</li>
+                        <li><i class="fas fa-check-circle"></i> {% trans "平台功能指引" %}</li>
+                        <li><i class="fas fa-check-circle"></i> {% trans "24/7全天候服务" %}</li>
                     </ul>
                 </div>
             </div>
             <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
                 <div class="srv-card" style="--card-accent:#fbc2eb">
-                    <div class="srv-ico" style="background:linear-gradient(135deg,#a18cd1,#fbc2eb)"><i class="fas fa-headset"></i></div>
-                    <h4>{% trans "客户支持" %}</h4>
-                    <p>{% trans "专业的客服团队随时为您解答问题，确保您获得最佳的服务体验。" %}</p>
+                    <div class="srv-ico" style="background:linear-gradient(135deg,#a18cd1,#fbc2eb)"><i class="fas fa-globe"></i></div>
+                    <h4>{% trans "多语言支持" %}</h4>
+                    <p>{% trans "平台支持中文、英文和法文三种语言，满足全球用户的需求，一键切换语言环境。" %}</p>
                     <ul class="srv-feats">
-                        <li><i class="fas fa-check-circle"></i> {% trans "在线客服" %}</li>
-                        <li><i class="fas fa-check-circle"></i> {% trans "邮件支持" %}</li>
-                        <li><i class="fas fa-check-circle"></i> {% trans "常见问题" %}</li>
+                        <li><i class="fas fa-check-circle"></i> {% trans "三语切换" %}</li>
+                        <li><i class="fas fa-check-circle"></i> {% trans "实时翻译" %}</li>
+                        <li><i class="fas fa-check-circle"></i> {% trans "本地化体验" %}</li>
                     </ul>
                 </div>
             </div>
@@ -331,23 +331,23 @@
 <section class="sec sec-alt">
     <div class="container">
         <div class="text-center mb-5" data-aos="fade-up">
-            <p class="sec-label">{% trans "购书流程" %}</p>
-            <h2 class="sec-heading">{% trans "简单四步，轻松购书" %}</h2>
+            <p class="sec-label">{% trans "使用流程" %}</p>
+            <h2 class="sec-heading">{% trans "简单四步，畅享服务" %}</h2>
         </div>
         <div class="proc-timeline">
             <div class="proc-line d-none d-lg-block"></div>
             <div class="row g-4">
                 <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
-                    <div class="proc-step"><div class="proc-num">1</div><h5>{% trans "浏览图书" %}</h5><p>{% trans "在我们的图书目录中搜索和浏览您感兴趣的书籍。" %}</p></div>
+                    <div class="proc-step"><div class="proc-num">1</div><h5>{% trans "浏览与发现" %}</h5><p>{% trans "在图书商店、课程中心或综合市场中发现您感兴趣的内容和商品。" %}</p></div>
                 </div>
                 <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
-                    <div class="proc-step"><div class="proc-num">2</div><h5>{% trans "加入购物车" %}</h5><p>{% trans "将喜欢的图书加入购物车，随时调整数量。" %}</p></div>
+                    <div class="proc-step"><div class="proc-num">2</div><h5>{% trans "加入购物车" %}</h5><p>{% trans "将喜欢的图书、课程或商品加入统一购物车，随时调整数量和选择。" %}</p></div>
                 </div>
                 <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
-                    <div class="proc-step"><div class="proc-num">3</div><h5>{% trans "安全结算" %}</h5><p>{% trans "选择支付方式，完成安全的在线结算。" %}</p></div>
+                    <div class="proc-step"><div class="proc-num">3</div><h5>{% trans "安全结算" %}</h5><p>{% trans "选择微信、支付宝、PayPal等支付方式，完成安全便捷的在线结算。" %}</p></div>
                 </div>
                 <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
-                    <div class="proc-step"><div class="proc-num">4</div><h5>{% trans "享受阅读" %}</h5><p>{% trans "收到图书后，开始您的阅读之旅！" %}</p></div>
+                    <div class="proc-step"><div class="proc-num">4</div><h5>{% trans "畅享服务" %}</h5><p>{% trans "下载电子书、观看课程视频、跟踪商品配送——一切尽在掌握！" %}</p></div>
                 </div>
             </div>
         </div>
@@ -357,9 +357,10 @@
 <section class="cta-sec">
     <div class="container">
         <div class="cta-box" data-aos="zoom-in">
-            <h2>{% trans "立即开始您的阅读之旅" %}</h2>
-            <p>{% trans "探索我们的图书目录，找到您的下一本好书。" %}</p>
-            <a href="{% url 'manager:public_books' %}" class="cta-btn"><i class="fas fa-book-open"></i>{% trans "浏览图书" %}</a>
+            <h2>{% trans "立即开始探索" %}</h2>
+            <p>{% trans "浏览图书、选修课程、逛市场——开启您的一站式数字生活。" %}</p>
+            <a href="{% url 'manager:public_books' %}" class="cta-btn me-3"><i class="fas fa-book-open"></i>{% trans "浏览图书" %}</a>
+            <a href="{% url 'marketplace:home' %}" class="cta-btn" style="background:#10b981;color:#fff;box-shadow:0 10px 30px rgba(16,185,129,0.3)"><i class="fas fa-store"></i>{% trans "逛市场" %}</a>
         </div>
     </div>
 </section>

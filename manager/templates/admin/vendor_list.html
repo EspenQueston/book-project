@@ -1,0 +1,752 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="zh-hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>卖家管理 - DUNO 360</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+        }
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .main-container { min-height: 100vh; padding: 20px 0; }
+        .header-card {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white; border-radius: 15px; padding: 20px; margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .content-card {
+            background: white; border-radius: 15px; padding: 30px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1); border: none; margin-bottom: 20px;
+        }
+        .table-modern {
+            border-collapse: separate; border-spacing: 0; border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%;
+        }
+        .table-responsive { overflow: visible; }
+        .table-modern thead th {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white; border: none; padding: 15px; font-weight: 600;
+        }
+        .table-modern tbody td {
+            padding: 14px 15px; border-bottom: 1px solid #e5e7eb;
+            vertical-align: middle; font-size: 0.92rem;
+        }
+        .table-modern tbody tr:hover { background-color: #f8fafc; }
+        .table-modern tbody tr:last-child td { border-bottom: none; }
+        .btn-action {
+            padding: 6px 12px; border-radius: 6px; border: none;
+            margin: 0 2px; transition: all 0.3s ease;
+        }
+        .btn-action:hover { transform: translateY(-2px); }
+        .btn-edit { background: var(--warning-color); color: white; }
+        .btn-delete { background: var(--danger-color); color: white; }
+        .btn-view { background: var(--primary-color); color: white; }
+        .badge-status { padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+        .badge-pending { background: #fef3c7; color: #92400e; }
+        .badge-approved { background: #d1fae5; color: #065f46; }
+        .badge-rejected { background: #fee2e2; color: #991b1b; }
+        .badge-suspended { background: #f3f4f6; color: #6b7280; }
+        .toolbar {
+            background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e5e7eb;
+        }
+        .btn-modern { border-radius: 8px; padding: 10px 20px; font-weight: 600; transition: all 0.3s ease; border: none; }
+        .btn-primary-modern {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); color: white;
+        }
+        .btn-primary-modern:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.3); color: white; }
+        .breadcrumb-modern { background: none; padding: 0; margin-bottom: 20px; }
+        .breadcrumb-modern .breadcrumb-item a { color: white; text-decoration: none; }
+        .breadcrumb-modern .breadcrumb-item.active { color: rgba(255,255,255,0.8); }
+        .filter-bar {
+            background: white; border-radius: 10px; padding: 15px 20px; margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e5e7eb;
+        }
+        .vendor-logo-thumb { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+        .vendor-logo-placeholder { width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .vendor-logo-placeholder i { color: rgba(255,255,255,0.7); font-size: 1rem; }
+
+        /* Marketplace Overview Cards */
+        .mp-stat-card { background: #fff; border-radius: 14px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 16px; transition: all 0.3s ease; border: 1px solid rgba(0,0,0,0.04); }
+        .mp-stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .mp-stat-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: #fff; flex-shrink: 0; }
+        .mp-stat-value { font-size: 1.6rem; font-weight: 800; color: #1e293b; line-height: 1; }
+        .mp-stat-label { font-size: 0.78rem; color: #94a3b8; font-weight: 500; margin-top: 4px; }
+
+        /* Top Products / Top Vendors mini-table */
+        .ranking-card { background: #fff; border-radius: 14px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); margin-bottom: 20px; }
+        .ranking-card h6 { font-weight: 700; color: #334155; margin-bottom: 16px; }
+        .ranking-item { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; gap: 12px; }
+        .ranking-item:last-child { border-bottom: none; }
+        .ranking-rank { width: 26px; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; flex-shrink: 0; }
+        .rank-1 { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #fff; }
+        .rank-2 { background: linear-gradient(135deg, #94a3b8, #cbd5e1); color: #fff; }
+        .rank-3 { background: linear-gradient(135deg, #d97706, #f59e0b); color: #fff; }
+        .rank-default { background: #f1f5f9; color: #64748b; }
+        .ranking-name { flex: 1; font-weight: 600; font-size: 0.88rem; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .ranking-value { font-weight: 700; font-size: 0.85rem; color: #667eea; white-space: nowrap; }
+        .ranking-vendor-sub { font-size: 0.75rem; color: #94a3b8; }
+
+        /* Vendor Detail Panel */
+        .vendor-detail-panel { background: #fff; border-radius: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); margin-bottom: 20px; overflow: hidden; }
+        .vendor-detail-header { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: #fff; padding: 20px 24px; }
+        .vendor-detail-body { padding: 0; }
+        .vendor-detail-tabs .nav-link { color: #64748b; font-weight: 600; font-size: 0.88rem; padding: 12px 20px; border: none; border-bottom: 3px solid transparent; }
+        .vendor-detail-tabs .nav-link.active { color: var(--primary-color); border-bottom-color: var(--primary-color); background: transparent; }
+        .vendor-item-card { display: flex; align-items: center; padding: 14px 20px; border-bottom: 1px solid #f1f5f9; transition: background 0.2s; gap: 14px; }
+        .vendor-item-card:last-child { border-bottom: none; }
+        .vendor-item-card:hover { background: #fafbff; }
+        .vendor-item-img { width: 48px; height: 48px; border-radius: 10px; object-fit: cover; flex-shrink: 0; background: #f1f5f9; }
+        .vendor-item-info { flex: 1; min-width: 0; }
+        .vendor-item-name { font-weight: 700; font-size: 0.9rem; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .vendor-item-meta { font-size: 0.78rem; color: #94a3b8; }
+        .vendor-item-price { font-weight: 700; color: #667eea; font-size: 0.9rem; white-space: nowrap; }
+        .vendor-item-delete { color: #ef4444; border: none; background: none; cursor: pointer; padding: 6px; border-radius: 8px; transition: all 0.2s; }
+        .vendor-item-delete:hover { background: #fef2f2; }
+
+        /* Per-vendor inline metric badges */
+        .v-metric { display: inline-flex; align-items: center; gap: 4px; background: #f1f5f9; border-radius: 8px; padding: 3px 10px; font-size: 0.78rem; font-weight: 600; }
+        .v-metric i { font-size: 0.7rem; }
+        .v-metric.prod { color: #667eea; background: rgba(102,126,234,0.08); }
+        .v-metric.course { color: #8b5cf6; background: rgba(139,92,246,0.08); }
+        .v-metric.sales { color: #10b981; background: rgba(16,185,129,0.08); }
+
+        /* Modal System */
+        .g-modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:10000;justify-content:center;align-items:center}
+        .g-modal-card{background:#fff;border-radius:20px;padding:40px;max-width:420px;width:90%;text-align:center;box-shadow:0 25px 60px rgba(0,0,0,0.3);animation:gModalIn .3s ease}
+        @keyframes gModalIn{from{opacity:0;transform:scale(.8) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+        .g-modal-icon{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:28px}
+        .g-modal-icon.confirm{background:#fef3c7;color:#f59e0b}.g-modal-icon.warning{background:#fee2e2;color:#ef4444}.g-modal-icon.info{background:#e0e7ff;color:#667eea}
+        .g-modal-title{font-size:1.25rem;font-weight:700;margin-bottom:10px;color:#1e293b}
+        .g-modal-message{color:#64748b;margin-bottom:25px;line-height:1.6}
+        .g-modal-actions{display:flex;gap:12px;justify-content:center}
+        .g-modal-btn{padding:10px 28px;border-radius:12px;border:none;font-weight:600;cursor:pointer;transition:all .2s;font-size:.95rem}
+        .g-modal-btn.cancel{background:#f1f5f9;color:#64748b}.g-modal-btn.cancel:hover{background:#e2e8f0}
+        .g-modal-btn.primary{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff}.g-modal-btn.primary:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(102,126,234,.4)}
+        .g-modal-btn.danger{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff}.g-modal-btn.danger:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(239,68,68,.4)}
+        .g-toast-container{position:fixed;top:90px;right:20px;z-index:10001;display:flex;flex-direction:column;gap:10px}
+        .g-toast{padding:14px 24px;border-radius:12px;color:#fff;font-weight:500;box-shadow:0 8px 25px rgba(0,0,0,.15);animation:gToastIn .3s ease;display:flex;align-items:center;gap:10px}
+        .g-toast.success{background:linear-gradient(135deg,#10b981,#059669)}.g-toast.error{background:linear-gradient(135deg,#ef4444,#dc2626)}.g-toast.warning{background:linear-gradient(135deg,#f59e0b,#d97706)}
+        @keyframes gToastIn{from{opacity:0;transform:translateX(100px)}to{opacity:1;transform:translateX(0)}}
+        /* Edit/Add Modal */
+        .edit-modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:9999;justify-content:center;align-items:center}
+        .edit-modal-card{background:#fff;border-radius:20px;padding:0;max-width:600px;width:95%;box-shadow:0 25px 60px rgba(0,0,0,0.3);animation:gModalIn .3s ease;max-height:90vh;overflow-y:auto}
+        .edit-modal-header{background:linear-gradient(135deg,var(--primary-color),var(--secondary-color));color:#fff;padding:20px 30px;border-radius:20px 20px 0 0}
+        .edit-modal-body{padding:20px 30px}
+        .edit-modal-footer{padding:15px 30px;border-top:1px solid #e5e7eb;display:flex;justify-content:flex-end;gap:10px}
+
+        /* Section titles */
+        .section-title { font-size: 1rem; font-weight: 700; color: #334155; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .section-title i { color: var(--primary-color); }
+    </style>
+</head>
+<body>
+    <div class="g-toast-container" id="toastContainer"></div>
+
+    <div class="main-container">
+        <div class="container-fluid">
+            <!-- Header -->
+            <div class="header-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <nav class="breadcrumb-modern">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/manager/dashboard/"><i class="fas fa-home"></i> 仪表板</a></li>
+                                <li class="breadcrumb-item active">卖家管理</li>
+                            </ol>
+                        </nav>
+                        <h2 class="mb-0"><i class="fas fa-store"></i> 卖家管理</h2>
+                        <p class="mb-0 mt-2 opacity-75">管理平台卖家和店铺 · 共 {{ total_vendors }} 位卖家</p>
+                    </div>
+                    <div class="text-end">
+                        <p class="mb-0">欢迎回来，<strong>{{ name }}</strong> 管理员</p>
+                        <small class="opacity-75">今天是 <span id="currentDate"></span></small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Marketplace Overview Metrics -->
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-lg-3">
+                    <div class="mp-stat-card">
+                        <div class="mp-stat-icon" style="background:linear-gradient(135deg,#667eea,#764ba2);"><i class="fas fa-store"></i></div>
+                        <div>
+                            <div class="mp-stat-value">{{ total_vendors }}</div>
+                            <div class="mp-stat-label">卖家总数</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="mp-stat-card">
+                        <div class="mp-stat-icon" style="background:linear-gradient(135deg,#06b6d4,#22d3ee);"><i class="fas fa-box"></i></div>
+                        <div>
+                            <div class="mp-stat-value">{{ total_mp_products }}</div>
+                            <div class="mp-stat-label">卖家商品总数</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="mp-stat-card">
+                        <div class="mp-stat-icon" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa);"><i class="fas fa-graduation-cap"></i></div>
+                        <div>
+                            <div class="mp-stat-value">{{ total_mp_courses }}</div>
+                            <div class="mp-stat-label">卖家课程总数</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="mp-stat-card">
+                        <div class="mp-stat-icon" style="background:linear-gradient(135deg,#10b981,#34d399);"><i class="fas fa-chart-line"></i></div>
+                        <div>
+                            <div class="mp-stat-value">{{ total_mp_sales }}</div>
+                            <div class="mp-stat-label">总销量</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Products & Top Vendors side-by-side -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <div class="ranking-card">
+                        <h6><i class="fas fa-fire text-danger me-2"></i>最畅销商品 (全平台)</h6>
+                        {% for p in top_products %}
+                        <div class="ranking-item">
+                            <div class="ranking-rank {% if forloop.counter == 1 %}rank-1{% elif forloop.counter == 2 %}rank-2{% elif forloop.counter == 3 %}rank-3{% else %}rank-default{% endif %}">{{ forloop.counter }}</div>
+                            <div style="flex:1;min-width:0;">
+                                <div class="ranking-name">{{ p.name }}</div>
+                                <div class="ranking-vendor-sub"><i class="fas fa-store me-1"></i>{{ p.vendor.company_name|default:"—" }}</div>
+                            </div>
+                            <div class="ranking-value">{{ p.sales_count }} 件</div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center text-muted py-3" style="font-size:0.85rem;">暂无销售数据</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="ranking-card">
+                        <h6><i class="fas fa-trophy text-warning me-2"></i>销量最高卖家</h6>
+                        {% for v in top_vendors %}
+                        <div class="ranking-item">
+                            <div class="ranking-rank {% if forloop.counter == 1 %}rank-1{% elif forloop.counter == 2 %}rank-2{% elif forloop.counter == 3 %}rank-3{% else %}rank-default{% endif %}">{{ forloop.counter }}</div>
+                            <div style="flex:1;min-width:0;">
+                                <div class="ranking-name">{{ v.company_name }}</div>
+                                <div class="ranking-vendor-sub">{{ v.email }}</div>
+                            </div>
+                            <div class="ranking-value">{{ v.total_sales }} 件</div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center text-muted py-3" style="font-size:0.85rem;">暂无销售数据</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <h5 class="mb-0 text-muted">
+                            <i class="fas fa-list"></i> 卖家列表
+                            <span class="badge bg-primary ms-2">{{ total_vendors }} 位卖家</span>
+                        </h5>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button class="btn btn-primary-modern btn-modern" onclick="openAddModal()">
+                            <i class="fas fa-plus"></i> 添加卖家
+                        </button>
+                        <a href="/manager/dashboard/" class="btn btn-outline-primary btn-modern">
+                            <i class="fas fa-chart-line"></i> 仪表盘
+                        </a>
+                        <a href="/manager/book_list/" class="btn btn-outline-secondary btn-modern">
+                            <i class="fas fa-book"></i> 图书管理
+                        </a>
+                        <a href="/manager/publisher_list/" class="btn btn-outline-secondary btn-modern">
+                            <i class="fas fa-building"></i> 出版社
+                        </a>
+                        <a href="/manager/order_list/" class="btn btn-outline-secondary btn-modern">
+                            <i class="fas fa-shopping-cart"></i> 订单管理
+                        </a>
+                        <a href="/manager/blog_list/" class="btn btn-outline-secondary btn-modern">
+                            <i class="fas fa-blog"></i> 博客管理
+                        </a>
+                        <a href="/manager/admin/users/" class="btn btn-outline-info btn-modern">
+                            <i class="fas fa-users"></i> 用户管理
+                        </a>
+                        <a href="/manager/logout/" class="btn btn-outline-danger btn-modern">
+                            <i class="fas fa-sign-out-alt"></i> 退出
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Bar -->
+            <div class="filter-bar">
+                <form method="get" class="d-flex gap-2 align-items-center flex-wrap">
+                    <input type="text" name="search" value="{{ search_query }}" class="form-control" placeholder="搜索店铺名、联系人或邮箱..." style="border-radius: 10px; max-width: 300px;">
+                    <select name="status" class="form-select" style="border-radius: 10px; max-width: 160px;">
+                        <option value="">所有状态</option>
+                        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>待审核</option>
+                        <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>已批准</option>
+                        <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>已拒绝</option>
+                        <option value="suspended" {% if status_filter == 'suspended' %}selected{% endif %}>已暂停</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary-modern btn-modern">
+                        <i class="fas fa-search"></i> 搜索
+                    </button>
+                </form>
+            </div>
+
+            <!-- Vendor Table -->
+            <div class="content-card">
+                {% if vendors %}
+                <div class="table-responsive">
+                    <table class="table-modern">
+                        <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>Logo</th>
+                                <th>店铺名称</th>
+                                <th>联系人</th>
+                                <th>邮箱</th>
+                                <th>佣金率</th>
+                                <th>市场内容</th>
+                                <th>状态</th>
+                                <th>注册时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for vendor in vendors %}
+                            <tr id="row-{{ vendor.id }}">
+                                <td class="text-center">{{ forloop.counter }}</td>
+                                <td>
+                                    {% if vendor.logo %}
+                                    <img src="{{ vendor.logo.url }}" class="vendor-logo-thumb" alt="{{ vendor.company_name }}">
+                                    {% else %}
+                                    <div class="vendor-logo-placeholder"><i class="fas fa-store"></i></div>
+                                    {% endif %}
+                                </td>
+                                <td class="fw-bold">{{ vendor.company_name }}</td>
+                                <td>{{ vendor.contact_name }}</td>
+                                <td>{{ vendor.email }}</td>
+                                <td>{{ vendor.commission_rate }}%</td>
+                                <td>
+                                    <span class="v-metric prod"><i class="fas fa-box"></i> {{ vendor.product_count|default:0 }}</span>
+                                    <span class="v-metric course"><i class="fas fa-play"></i> {{ vendor.course_count|default:0 }}</span>
+                                    <span class="v-metric sales"><i class="fas fa-chart-line"></i> {{ vendor.mp_total_sales|default:0 }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge-status badge-{{ vendor.status }}">
+                                        {{ vendor.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>{{ vendor.created_at|date:"Y-m-d" }}</td>
+                                <td>
+                                    <a href="?view_vendor={{ vendor.id }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}#vendor-detail" class="btn btn-action btn-view btn-sm" title="查看内容">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <button class="btn btn-action btn-edit btn-sm" onclick="openEditModal({{ vendor.id }})" title="编辑">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <div class="dropdown d-inline">
+                                        <button class="btn btn-sm btn-action btn-view dropdown-toggle" data-bs-toggle="dropdown" title="更改状态">
+                                            <i class="fas fa-exchange-alt"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="#" onclick="setStatus({{ vendor.id }},'approved')"><i class="fas fa-check text-success me-2"></i>批准</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="setStatus({{ vendor.id }},'rejected')"><i class="fas fa-times text-danger me-2"></i>拒绝</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="setStatus({{ vendor.id }},'suspended')"><i class="fas fa-ban text-secondary me-2"></i>暂停</a></li>
+                                        </ul>
+                                    </div>
+                                    <button class="btn btn-action btn-delete btn-sm" onclick="deleteVendor({{ vendor.id }}, '{{ vendor.company_name|escapejs }}')" title="删除">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-store" style="font-size: 3rem; color: #d1d5db;"></i>
+                    <h5 class="text-muted mt-3">暂无卖家</h5>
+                    <p class="text-muted">点击"添加卖家"开始管理</p>
+                    <button class="btn btn-primary-modern btn-modern" onclick="openAddModal()">
+                        <i class="fas fa-plus"></i> 添加卖家
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Vendor Detail Panel (read-only view) -->
+            {% if viewed_vendor %}
+            <div class="vendor-detail-panel" id="vendor-detail">
+                <div class="vendor-detail-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-3">
+                            {% if viewed_vendor.logo %}
+                            <img src="{{ viewed_vendor.logo.url }}" style="width:50px;height:50px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.3);">
+                            {% else %}
+                            <div style="width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;"><i class="fas fa-store text-white" style="font-size:1.3rem;"></i></div>
+                            {% endif %}
+                            <div>
+                                <h5 class="mb-0">{{ viewed_vendor.company_name }} <small class="opacity-75">的市场内容</small></h5>
+                                <small class="opacity-75">{{ viewed_vendor.email }} · {{ viewed_vendor.contact_name }}</small>
+                            </div>
+                        </div>
+                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if status_filter %}status={{ status_filter }}{% endif %}" class="btn btn-sm btn-light" style="border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;">
+                            <i class="fas fa-times"></i>
+                        </a>
+                    </div>
+                    <!-- Quick stats for this vendor -->
+                    <div class="d-flex gap-4 mt-3">
+                        <div><span style="font-size:1.4rem;font-weight:800;">{{ vendor_books_list|length }}</span> <span class="opacity-75" style="font-size:0.85rem;">图书</span></div>
+                        <div><span style="font-size:1.4rem;font-weight:800;">{{ vendor_products_list|length }}</span> <span class="opacity-75" style="font-size:0.85rem;">商品</span></div>
+                        <div><span style="font-size:1.4rem;font-weight:800;">{{ vendor_courses_list|length }}</span> <span class="opacity-75" style="font-size:0.85rem;">课程</span></div>
+                    </div>
+                </div>
+                <div class="vendor-detail-body">
+                    <!-- Tabs -->
+                    <ul class="nav vendor-detail-tabs" id="vendorDetailTabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#vdBooks" role="tab"><i class="fas fa-book me-1"></i> 图书 ({{ vendor_books_list|length }})</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#vdProducts" role="tab"><i class="fas fa-box me-1"></i> 商品 ({{ vendor_products_list|length }})</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#vdCourses" role="tab"><i class="fas fa-graduation-cap me-1"></i> 课程 ({{ vendor_courses_list|length }})</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <!-- Books Tab -->
+                        <div class="tab-pane fade show active" id="vdBooks" role="tabpanel">
+                            {% for vb in vendor_books_list %}
+                            <div class="vendor-item-card" id="item-book-{{ vb.book.pk }}">
+                                {% if vb.book.cover_image %}
+                                <img src="{{ vb.book.cover_image.url }}" class="vendor-item-img" alt="">
+                                {% else %}
+                                <div class="vendor-item-img d-flex align-items-center justify-content-center" style="background:linear-gradient(135deg,#667eea,#764ba2);"><i class="fas fa-book text-white"></i></div>
+                                {% endif %}
+                                <div class="vendor-item-info">
+                                    <div class="vendor-item-name">{{ vb.book.name }}</div>
+                                    <div class="vendor-item-meta">
+                                        {{ vb.book.publisher.publisher_name|default:"—" }} · 库存: {{ vb.book.inventory }} · 销量: {{ vb.book.sale_num }}
+                                        {% if vb.is_active %}<span class="badge bg-success" style="font-size:0.65rem;">上架</span>{% else %}<span class="badge bg-secondary" style="font-size:0.65rem;">下架</span>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="vendor-item-price">¥{{ vb.vendor_price }}</div>
+                                <button class="vendor-item-delete" onclick="deleteVendorItem('book', {{ vb.pk }}, '{{ vb.book.name|escapejs }}')" title="违规删除">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                            {% empty %}
+                            <div class="text-center text-muted py-4" style="font-size:0.88rem;"><i class="fas fa-book d-block mb-2" style="font-size:1.5rem;opacity:0.3;"></i>该卖家暂无图书</div>
+                            {% endfor %}
+                        </div>
+                        <!-- Products Tab -->
+                        <div class="tab-pane fade" id="vdProducts" role="tabpanel">
+                            {% for p in vendor_products_list %}
+                            <div class="vendor-item-card" id="item-product-{{ p.pk }}">
+                                {% if p.image %}
+                                <img src="{{ p.image.url }}" class="vendor-item-img" alt="">
+                                {% else %}
+                                <div class="vendor-item-img d-flex align-items-center justify-content-center" style="background:linear-gradient(135deg,#667eea,#764ba2);"><i class="fas fa-box text-white"></i></div>
+                                {% endif %}
+                                <div class="vendor-item-info">
+                                    <div class="vendor-item-name">{{ p.name }}</div>
+                                    <div class="vendor-item-meta">
+                                        {{ p.category.name|default:"未分类" }} · 库存: {{ p.stock }} · 销量: {{ p.sales_count }}
+                                        {% if p.is_active %}<span class="badge bg-success" style="font-size:0.65rem;">上架</span>{% else %}<span class="badge bg-secondary" style="font-size:0.65rem;">下架</span>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="vendor-item-price">¥{{ p.price }}</div>
+                                <button class="vendor-item-delete" onclick="deleteVendorItem('product', {{ p.pk }}, '{{ p.name|escapejs }}')" title="违规删除">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                            {% empty %}
+                            <div class="text-center text-muted py-4" style="font-size:0.88rem;"><i class="fas fa-box-open d-block mb-2" style="font-size:1.5rem;opacity:0.3;"></i>该卖家暂无商品</div>
+                            {% endfor %}
+                        </div>
+                        <!-- Courses Tab -->
+                        <div class="tab-pane fade" id="vdCourses" role="tabpanel">
+                            {% for c in vendor_courses_list %}
+                            <div class="vendor-item-card" id="item-course-{{ c.pk }}">
+                                {% if c.image %}
+                                <img src="{{ c.image.url }}" class="vendor-item-img" alt="">
+                                {% else %}
+                                <div class="vendor-item-img d-flex align-items-center justify-content-center" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa);"><i class="fas fa-play text-white"></i></div>
+                                {% endif %}
+                                <div class="vendor-item-info">
+                                    <div class="vendor-item-name">{{ c.title }}</div>
+                                    <div class="vendor-item-meta">
+                                        {{ c.instructor|default:"—" }} · {{ c.duration_hours }}h · {{ c.lessons_count }} 课时 · {{ c.enrollment_count }} 注册
+                                        {% if c.is_active %}<span class="badge bg-success" style="font-size:0.65rem;">发布</span>{% else %}<span class="badge bg-secondary" style="font-size:0.65rem;">草稿</span>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="vendor-item-price">¥{{ c.price }}</div>
+                                <button class="vendor-item-delete" onclick="deleteVendorItem('course', {{ c.pk }}, '{{ c.title|escapejs }}')" title="违规删除">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                            {% empty %}
+                            <div class="text-center text-muted py-4" style="font-size:0.88rem;"><i class="fas fa-graduation-cap d-block mb-2" style="font-size:1.5rem;opacity:0.3;"></i>该卖家暂无课程</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div class="g-modal-overlay" id="gModalOverlay">
+        <div class="g-modal-card">
+            <div class="g-modal-icon" id="gModalIcon"><i id="gModalIconI" class="fas fa-question"></i></div>
+            <div class="g-modal-title" id="gModalTitle"></div>
+            <div class="g-modal-message" id="gModalMessage"></div>
+            <div class="g-modal-actions">
+                <button class="g-modal-btn cancel" onclick="closeGModal()">取消</button>
+                <button class="g-modal-btn" id="gModalConfirmBtn" onclick="gModalCallback()">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div class="edit-modal-overlay" id="editModalOverlay">
+        <div class="edit-modal-card">
+            <div class="edit-modal-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-store me-2"></i><span id="editModalTitle">添加卖家</span></h5>
+                    <button class="btn btn-sm btn-light" onclick="closeEditModal()" style="border-radius:50%;width:32px;height:32px;padding:0;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="edit-modal-body">
+                <form id="vendorForm" enctype="multipart/form-data">
+                    <input type="hidden" id="vendorId" name="id">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">店铺名称 <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="companyName" name="company_name" required style="border-radius:10px;">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">联系人 <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="contactName" name="contact_name" required style="border-radius:10px;">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">邮箱 <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" id="vendorEmail" name="email" required style="border-radius:10px;">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">电话</label>
+                            <input type="text" class="form-control" id="vendorPhone" name="phone" style="border-radius:10px;">
+                        </div>
+                        <div class="col-md-6" id="passwordGroup">
+                            <label class="form-label fw-bold">密码 <span class="text-danger" id="pwdRequired">*</span></label>
+                            <input type="password" class="form-control" id="vendorPassword" name="password" style="border-radius:10px;">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">佣金率 (%)</label>
+                            <input type="number" step="0.01" min="0" max="100" class="form-control" id="commissionRate" name="commission_rate" value="10.00" style="border-radius:10px;">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">状态</label>
+                            <select class="form-select" id="vendorStatus" name="status" style="border-radius:10px;">
+                                <option value="pending">待审核</option>
+                                <option value="approved">已批准</option>
+                                <option value="rejected">已拒绝</option>
+                                <option value="suspended">已暂停</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Logo</label>
+                            <input type="file" class="form-control" id="vendorLogo" name="logo" accept="image/*" style="border-radius:10px;">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold">描述</label>
+                            <textarea class="form-control" id="vendorDescription" name="description" rows="2" style="border-radius:10px;"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="edit-modal-footer">
+                <button class="btn btn-secondary" onclick="closeEditModal()" style="border-radius:10px;">取消</button>
+                <button class="btn btn-primary-modern" onclick="saveVendor()" style="border-radius:10px;">
+                    <i class="fas fa-save me-1"></i> 保存
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    // Date
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('zh-CN', {year:'numeric',month:'long',day:'numeric',weekday:'long'});
+
+    // Cookie
+    function getCookie(name) {
+        var val = document.cookie.match('(^|;)\\s*' + name + '=([^;]*)');
+        return val ? decodeURIComponent(val[2]) : '';
+    }
+
+    // Toast System
+    function gToast(message, type='success') {
+        var c = document.getElementById('toastContainer');
+        var icons = {success:'fa-check-circle',error:'fa-exclamation-circle',warning:'fa-exclamation-triangle'};
+        var t = document.createElement('div');
+        t.className = 'g-toast ' + type;
+        t.innerHTML = '<i class="fas ' + (icons[type]||icons.success) + '"></i> ' + message;
+        c.appendChild(t);
+        setTimeout(function() { t.style.animation = 'gToastIn .3s ease reverse'; setTimeout(function() { t.remove(); }, 300); }, 3000);
+    }
+
+    // Confirm Modal
+    var _gModalCb = null;
+    function gConfirm(title, message, type, btnClass, callback) {
+        document.getElementById('gModalTitle').textContent = title;
+        document.getElementById('gModalMessage').textContent = message;
+        var icon = document.getElementById('gModalIcon');
+        icon.className = 'g-modal-icon ' + (type||'confirm');
+        var iconMap = {confirm:'fa-question',warning:'fa-exclamation-triangle',info:'fa-info'};
+        document.getElementById('gModalIconI').className = 'fas ' + (iconMap[type]||'fa-question');
+        var btn = document.getElementById('gModalConfirmBtn');
+        btn.className = 'g-modal-btn ' + (btnClass||'primary');
+        btn.textContent = '确定';
+        _gModalCb = callback;
+        document.getElementById('gModalOverlay').style.display = 'flex';
+    }
+    function closeGModal() { document.getElementById('gModalOverlay').style.display = 'none'; _gModalCb = null; }
+    function gModalCallback() { if (_gModalCb) _gModalCb(); closeGModal(); }
+
+    // Status change
+    function setStatus(id, status) {
+        var labels = {approved:'批准', rejected:'拒绝', suspended:'暂停'};
+        gConfirm('更改状态', '确定要将该卖家状态更改为"' + labels[status] + '"吗？', 'confirm', 'primary', function() {
+            fetch('/manager/admin/vendors/status/', {
+                method: 'POST',
+                headers: {'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/x-www-form-urlencoded'},
+                body: 'id=' + id + '&status=' + status
+            }).then(function(r) { return r.json(); }).then(function(d) {
+                if (d.success) { gToast('状态已更新', 'success'); setTimeout(function() { location.reload(); }, 800); }
+                else { gToast(d.error || '操作失败', 'error'); }
+            });
+        });
+    }
+
+    // Delete vendor
+    function deleteVendor(id, name) {
+        gConfirm('删除卖家', '确定要删除卖家 "' + name + '" 吗？此操作不可撤销。', 'warning', 'danger', function() {
+            fetch('/manager/admin/vendors/delete/', {
+                method: 'POST',
+                headers: {'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/x-www-form-urlencoded'},
+                body: 'id=' + id
+            }).then(function(r) { return r.json(); }).then(function(d) {
+                if (d.success) {
+                    gToast('卖家已删除', 'success');
+                    var row = document.getElementById('row-' + id);
+                    if (row) row.remove();
+                } else { gToast(d.error || '删除失败', 'error'); }
+            });
+        });
+    }
+
+    // Delete vendor item (product or course)
+    function deleteVendorItem(type, id, name) {
+        var label = type === 'product' ? '商品' : '课程';
+        gConfirm('违规删除' + label, '确定要删除' + label + ' "' + name + '" 吗？该操作将从平台中移除此内容。', 'warning', 'danger', function() {
+            fetch('/manager/admin/vendors/delete-item/', {
+                method: 'POST',
+                headers: {'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/x-www-form-urlencoded'},
+                body: 'type=' + type + '&id=' + id
+            }).then(function(r) { return r.json(); }).then(function(d) {
+                if (d.success) {
+                    gToast(d.message || label + '已删除', 'success');
+                    var el = document.getElementById('item-' + type + '-' + id);
+                    if (el) { el.style.transition = 'opacity 0.3s, height 0.3s'; el.style.opacity = '0'; el.style.height = '0'; el.style.overflow = 'hidden'; el.style.padding = '0'; setTimeout(function() { el.remove(); }, 300); }
+                } else { gToast(d.message || '删除失败', 'error'); }
+            });
+        });
+    }
+
+    // Add Modal
+    var _isEditing = false;
+    function openAddModal() {
+        _isEditing = false;
+        document.getElementById('editModalTitle').textContent = '添加卖家';
+        document.getElementById('vendorForm').reset();
+        document.getElementById('vendorId').value = '';
+        document.getElementById('passwordGroup').style.display = '';
+        document.getElementById('pwdRequired').style.display = '';
+        document.getElementById('vendorPassword').required = true;
+        document.getElementById('commissionRate').value = '10.00';
+        document.getElementById('vendorStatus').value = 'approved';
+        document.getElementById('editModalOverlay').style.display = 'flex';
+    }
+
+    // Edit Modal
+    function openEditModal(id) {
+        _isEditing = true;
+        document.getElementById('editModalTitle').textContent = '编辑卖家';
+        document.getElementById('vendorForm').reset();
+        document.getElementById('pwdRequired').style.display = 'none';
+        document.getElementById('vendorPassword').required = false;
+        fetch('/manager/admin/vendors/edit/?id=' + id)
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (d.success) {
+                    var v = d.vendor;
+                    document.getElementById('vendorId').value = v.id;
+                    document.getElementById('companyName').value = v.company_name;
+                    document.getElementById('contactName').value = v.contact_name;
+                    document.getElementById('vendorEmail').value = v.email;
+                    document.getElementById('vendorPhone').value = v.phone || '';
+                    document.getElementById('vendorDescription').value = v.description || '';
+                    document.getElementById('commissionRate').value = v.commission_rate;
+                    document.getElementById('vendorStatus').value = v.status;
+                    document.getElementById('editModalOverlay').style.display = 'flex';
+                } else { gToast('加载失败', 'error'); }
+            });
+    }
+    function closeEditModal() { document.getElementById('editModalOverlay').style.display = 'none'; }
+
+    // Save vendor
+    function saveVendor() {
+        var form = document.getElementById('vendorForm');
+        if (!form.checkValidity()) { form.reportValidity(); return; }
+        var fd = new FormData(form);
+        var url = _isEditing ? '/manager/admin/vendors/edit/' : '/manager/admin/vendors/add/';
+        fetch(url, {
+            method: 'POST',
+            headers: {'X-CSRFToken': getCookie('csrftoken')},
+            body: fd
+        }).then(function(r) { return r.json(); }).then(function(d) {
+            if (d.success) {
+                gToast(_isEditing ? '卖家已更新' : '卖家已添加', 'success');
+                closeEditModal();
+                setTimeout(function() { location.reload(); }, 800);
+            } else { gToast(d.error || '操作失败', 'error'); }
+        });
+    }
+    </script>
+<script src="/static/js/admin_i18n.js" defer></script>
+</body>
+</html>
