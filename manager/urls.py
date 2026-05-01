@@ -56,6 +56,9 @@ urlpatterns = [
     path('publisher/<int:publisher_id>/follow/', views.follow_publisher, name='follow_publisher'),
     path('vendor/<int:vendor_id>/follow/', views.follow_vendor, name='follow_vendor'),
     
+    # =========================Public Vendor Storefront========================
+    path('public/shop/<int:vendor_id>/', views.public_vendor_shop, name='public_vendor_shop'),
+
     # =========================Public Static Pages========================
     path('public/about/', views.public_about, name='public_about'),
     path('public/services/', views.public_services, name='public_services'),
@@ -146,6 +149,13 @@ urlpatterns = [
     path('vendor/login/', views.vendor_login, name='vendor_login'),
     path('vendor/logout/', views.vendor_logout, name='vendor_logout'),
     path('vendor/dashboard/', views.vendor_dashboard, name='vendor_dashboard'),
+    path('vendor/orders/hub/update/', views.vendor_hub_order_update, name='vendor_hub_order_update'),
+    path('vendor/orders/', views.vendor_orders_hub, name='vendor_orders_hub'),
+    path('vendor/books/', views.vendor_books, name='vendor_books'),
+    path('vendor/orders/books/', views.vendor_book_orders, name='vendor_book_orders'),
+    path('vendor/orders/books/<int:order_id>/', views.vendor_book_order_detail, name='vendor_book_order_detail'),
+    path('vendor/orders/books/update-status/', views.vendor_book_order_update_status, name='vendor_book_order_update_status'),
+    path('vendor/orders/books/customer/', views.vendor_book_order_update_customer, name='vendor_book_order_update_customer'),
     path('vendor/messages/', views.vendor_messages_page, name='vendor_messages'),
     path('api/vendor/conversations/', views.api_vendor_conversations, name='api_vendor_conversations'),
     path('api/vendor/conversations/<int:conversation_id>/messages/', views.api_vendor_conversation_messages, name='api_vendor_conversation_messages'),

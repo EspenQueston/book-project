@@ -1,0 +1,132 @@
+{% load i18n %}
+{# Marketplace analytics merged from former product-center dashboard (uses vm_* context keys). #}
+<div class="vm-insights-block mt-2">
+    <div class="row g-4 mb-3">
+        <div class="col-lg-8">
+            <div class="dash-card vm-chart-card">
+                <h5><i class="fas fa-chart-area me-2" style="color:#667eea;"></i>{% trans "近7天市场订单收入" %}</h5>
+                <div class="vm-chart-wrap"><canvas id="vendorInsightRevenueChart" aria-hidden="true"></canvas></div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="dash-card vm-chart-card">
+                <h5><i class="fas fa-chart-pie me-2" style="color:#667eea;"></i>{% trans "商品分类分布" %}</h5>
+                <div class="vm-chart-wrap vm-chart-wrap-sm"><canvas id="vendorInsightCategoryChart" aria-hidden="true"></canvas></div>
+            </div>
+            <div class="dash-card vp-glow-card mt-3">
+                <h6 class="fw-bold mb-3" style="font-size:0.92rem;"><i class="fas fa-balance-scale me-2 text-primary"></i>{% trans "市场订单收入构成（商品 / 课程 / 超市）" %}</h6>
+                <div class="row g-2">
+                    <div class="col-12 col-md-4">
+                        <div class="text-center p-3 rounded-3 h-100" style="background:linear-gradient(160deg,rgba(129,140,248,0.42),rgba(224,231,255,0.25));border:1px solid rgba(255,255,255,0.85);">
+                            <div class="vp-stat-label">{% trans "商品订单收入" %}</div>
+                            <div class="fw-bold pt-1" style="font-size:1.25rem;color:#3730a3;">¥{{ vm_mk_product_revenue|floatformat:0 }}</div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="text-center p-3 rounded-3 h-100" style="background:linear-gradient(160deg,rgba(244,114,182,0.38),rgba(252,231,243,0.28));border:1px solid rgba(255,255,255,0.85);">
+                            <div class="vp-stat-label">{% trans "课程订单收入" %}</div>
+                            <div class="fw-bold pt-1" style="font-size:1.25rem;color:#a21caf;">¥{{ vm_mk_course_revenue|floatformat:0 }}</div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="text-center p-3 rounded-3 h-100" style="background:linear-gradient(160deg,rgba(251,146,60,0.4),rgba(254,215,170,0.3));border:1px solid rgba(255,255,255,0.85);">
+                            <div class="vp-stat-label">{% trans "超市订单收入" %}</div>
+                            <div class="fw-bold pt-1" style="font-size:1.2rem;color:#c2410c;">¥{{ vm_mk_supermarket_revenue|floatformat:0 }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="dash-card vp-glow-card text-center py-3 mb-0" style="background:linear-gradient(160deg,rgba(52,211,153,0.4),rgba(209,250,229,0.22));">
+                <div class="vp-stat-label">{% trans "上架商品" %}</div>
+                <div style="font-size:1.85rem;font-weight:900;color:#047857;line-height:1.1;">{{ vm_active_products }}</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="dash-card vp-glow-card text-center py-3 mb-0" style="background:linear-gradient(160deg,rgba(252,165,165,0.45),rgba(254,226,226,0.25));">
+                <div class="vp-stat-label">{% trans "下架商品" %}</div>
+                <div style="font-size:1.85rem;font-weight:900;color:#b91c1c;line-height:1.1;">{{ vm_inactive_products }}</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="dash-card vp-glow-card text-center py-3 mb-0" style="background:linear-gradient(160deg,rgba(129,140,248,0.4),rgba(224,231,255,0.28));">
+                <div class="vp-stat-label">{% trans "发布课程" %}</div>
+                <div style="font-size:1.85rem;font-weight:900;color:#3730a3;line-height:1.1;">{{ vm_active_courses }}</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="dash-card vp-glow-card text-center py-3 mb-0" style="background:linear-gradient(160deg,rgba(251,191,36,0.42),rgba(254,243,199,0.28));">
+                <div class="vp-stat-label">{% trans "课程注册" %}</div>
+                <div style="font-size:1.85rem;font-weight:900;color:#b45309;line-height:1.1;">{{ vm_total_enrollments }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-4">
+            <div class="dash-card vp-glow-card text-center py-3 mb-0" style="background:linear-gradient(160deg,rgba(190,242,100,0.45),rgba(236,252,203,0.28));">
+                <div class="vp-stat-label">{% trans "上架超市SKU" %}</div>
+                <div style="font-size:1.85rem;font-weight:900;color:#3f6212;line-height:1.1;">{{ vm_active_supermarket }}</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4">
+            <div class="dash-card vp-glow-card text-center py-3 mb-0" style="background:linear-gradient(160deg,rgba(226,232,240,0.9),rgba(241,245,249,0.5));">
+                <div class="vp-stat-label">{% trans "下架超市SKU" %}</div>
+                <div style="font-size:1.85rem;font-weight:900;color:#475569;line-height:1.1;">{{ vm_inactive_supermarket }}</div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="dash-card vp-glow-card text-center py-3 mb-0" style="background:linear-gradient(160deg,rgba(253,224,71,0.42),rgba(254,249,195,0.28));">
+                <div class="vp-stat-label">{% trans "超市累计销量" %}</div>
+                <div style="font-size:1.85rem;font-weight:900;color:#a16207;line-height:1.1;">{{ vm_total_supermarket_sales }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="dash-card">
+                <h5><i class="fas fa-trophy me-2" style="color:#f59e0b;"></i>{% trans "热销商品 TOP 5" %}</h5>
+                {% if vm_top_products %}
+                {% for p in vm_top_products %}
+                <div class="vm-order-row">
+                    <span class="badge bg-light text-dark" style="width:26px;">{{ forloop.counter }}</span>
+                    <img src="{{ p.get_image_url }}" alt="" width="40" height="40" class="rounded-2 object-fit-cover">
+                    <div class="flex-grow-1 text-truncate" style="min-width:0;">
+                        <div class="fw-bold small text-truncate">{{ p.name }}</div>
+                        <small class="text-muted">¥{{ p.price }}</small>
+                    </div>
+                    <span class="badge rounded-pill" style="background:rgba(16,185,129,0.15);color:#059669;">{{ p.sales_count }} {% trans "已售" %}</span>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p class="text-center text-muted py-3 mb-0">{% trans "暂无销量数据" %}</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="dash-card">
+                <h5><i class="fas fa-receipt me-2" style="color:#667eea;"></i>{% trans "最近市场订单" %}</h5>
+                {% if vm_recent_orders %}
+                {% for order in vm_recent_orders %}
+                <div class="vm-order-row">
+                    <span class="badge font-monospace" style="background:rgba(102,126,234,0.12);color:#667eea;font-size:0.72rem;">{{ order.order_number|truncatechars:14 }}</span>
+                    <div class="flex-grow-1" style="min-width:0;">
+                        <div class="fw-bold small">{% if order.user_name %}{{ order.user_name }}{% else %}{% trans "匿名" %}{% endif %}</div>
+                        <small class="text-muted">{{ order.created_at|date:"m/d H:i" }}</small>
+                    </div>
+                    <span class="fw-bold text-danger small">¥{{ order.total_amount }}</span>
+                    <span class="badge rounded-pill text-white" style="background:{{ order.get_status_color }};font-size:0.68rem;">{{ order.get_status_display }}</span>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p class="text-center text-muted py-3 mb-0">{% trans "暂无订单" %}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>

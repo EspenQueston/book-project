@@ -160,6 +160,14 @@ class SupermarketItem(models.Model):
         ('bag', '袋'),
     ]
 
+    vendor = models.ForeignKey(
+        'manager.Vendor',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='supermarket_items',
+        verbose_name='卖家',
+    )
     name = models.CharField(max_length=200, verbose_name='商品名称')
     slug = models.SlugField(max_length=220, unique=True)
     description = models.TextField(blank=True, verbose_name='商品描述')
@@ -309,31 +317,56 @@ class MarketplaceOrder(models.Model):
         self.payment_completed_at = timezone.now()
         self.save()
 
+    UNPAID_CANCEL_HOURS = 24
+    PAID_AUTO_COMPLETE_DAYS = 14
+
     def is_payment_window_expired(self):
         if self.payment_status == 'completed':
             return False
         from datetime import timedelta
-        window = timedelta(minutes=30)
-        return timezone.now() > (self.created_at + window)
+        if self.status in ('cancelled', 'refunded', 'delivered'):
+            return False
+        return timezone.now() > (self.created_at + timedelta(hours=self.UNPAID_CANCEL_HOURS))
 
     def get_payment_time_remaining(self):
         if self.payment_status == 'completed':
             return None
         from datetime import timedelta
-        window = timedelta(minutes=30)
-        expiry_time = self.created_at + window
+        if self.status in ('cancelled', 'refunded', 'delivered'):
+            return None
+        expiry_time = self.created_at + timedelta(hours=self.UNPAID_CANCEL_HOURS)
         remaining = expiry_time - timezone.now()
         if remaining.total_seconds() <= 0:
             return None
         return remaining
 
-    def auto_cancel_if_expired(self):
-        if self.status in ['pending', 'payment_pending'] and self.is_payment_window_expired():
-            self.status = 'cancelled'
-            self.payment_status = 'cancelled'
-            self.save()
+    def apply_ttl_rules(self):
+        """Unpaid → cancelled after 24h; paid → auto-delivered after 14 days if not terminal."""
+        from datetime import timedelta
+        now = timezone.now()
+        terminal = {'cancelled', 'refunded', 'delivered'}
+        changed_fields = []
+
+        if self.payment_status != 'completed':
+            if self.status not in terminal:
+                if now > self.created_at + timedelta(hours=self.UNPAID_CANCEL_HOURS):
+                    self.status = 'cancelled'
+                    self.payment_status = 'cancelled'
+                    changed_fields.extend(['status', 'payment_status'])
+        else:
+            ref = self.payment_completed_at or self.created_at
+            if self.status not in terminal and ref:
+                if now > ref + timedelta(days=self.PAID_AUTO_COMPLETE_DAYS):
+                    self.status = 'delivered'
+                    changed_fields.append('status')
+
+        if changed_fields:
+            self.save(update_fields=list(dict.fromkeys(changed_fields)) + ['updated_at'])
             return True
         return False
+
+    def auto_cancel_if_expired(self):
+        return self.apply_ttl_rules()
 
     def get_status_color(self):
         colors = {
@@ -389,6 +422,29 @@ class MarketplaceOrderItem(models.Model):
     def save(self, *args, **kwargs):
         self.subtotal = self.unit_price * self.quantity
         super().save(*args, **kwargs)
+
+    def get_related_object(self):
+        if self.item_type == 'product':
+            return Product.objects.filter(pk=self.item_id).first()
+        if self.item_type == 'course':
+            return Course.objects.filter(pk=self.item_id).first()
+        if self.item_type == 'supermarket':
+            return SupermarketItem.objects.filter(pk=self.item_id).first()
+        return None
+
+    def get_line_thumbnail_url(self):
+        if self.item_image:
+            return self.item_image
+        obj = self.get_related_object()
+        if obj:
+            return obj.get_image_url()
+        return '/static/img/default_product.png'
+
+    def get_selected_attributes_display(self):
+        return [
+            {'name': key, 'value': value}
+            for key, value in (self.selected_attributes or {}).items()
+        ]
 
 
 class MarketplaceCartItem(models.Model):

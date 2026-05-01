@@ -1,0 +1,104 @@
+{% extends "marketplace/vendor/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "商城订单" %} - {{ vendor.company_name }}{% endblock %}
+
+{% block extra_vendor_css %}
+.stat-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(102,126,234,0.12);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #667eea;
+}
+.vp-mkt-table thead th {
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    color: #fff !important;
+    font-size: 0.82rem;
+    border: none !important;
+}
+{% endblock %}
+
+{% block vendor_content %}
+<div class="page-header-card">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div>
+            <h4 class="mb-1"><i class="fas fa-store me-2"></i>{% trans "商城订单" %}</h4>
+            <small style="opacity:.88;">{% trans "包含您的商品或课程的订单" %}</small>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <span class="stat-pill"><i class="fas fa-list"></i> {{ total_orders }}</span>
+            <span class="stat-pill" style="background:rgba(245,158,11,0.15);color:#b45309;"><i class="fas fa-clock"></i> {% trans "待支付" %} {{ pending_pay }}</span>
+            <span class="stat-pill" style="background:rgba(16,185,129,0.15);color:#047857;"><i class="fas fa-check"></i> {% trans "已支付" %} {{ paid_completed }}</span>
+        </div>
+    </div>
+</div>
+
+<form method="get" class="mv-toolbar toolbar d-flex flex-wrap gap-2 align-items-end mb-3">
+    <select name="status" class="form-select form-select-sm rounded-3" style="max-width:160px;">
+        <option value="">{% trans "订单状态" %}</option>
+        {% for val,label in status_choices %}
+        <option value="{{ val }}" {% if current_status == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    <select name="payment_status" class="form-select form-select-sm rounded-3" style="max-width:160px;">
+        <option value="">{% trans "支付状态" %}</option>
+        {% for val,label in payment_status_choices %}
+        <option value="{{ val }}" {% if current_payment_status == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    <input type="search" name="search" class="form-control form-control-sm rounded-3" style="max-width:220px;" placeholder="{% trans '搜索…' %}" value="{{ current_search }}">
+    <button type="submit" class="btn btn-primary-gradient btn-sm rounded-3"><i class="fas fa-filter"></i></button>
+    <a href="{% url 'marketplace:vendor_marketplace_orders' %}" class="btn btn-outline-secondary btn-sm rounded-3">{% trans "重置" %}</a>
+</form>
+
+<div class="content-card p-0 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 vp-mkt-table">
+            <thead><tr>
+                <th class="ps-4">{% trans "订单号" %}</th>
+                <th>{% trans "客户" %}</th>
+                <th>{% trans "金额" %}</th>
+                <th>{% trans "状态" %}</th>
+                <th>{% trans "支付" %}</th>
+                <th>{% trans "日期" %}</th>
+                <th class="pe-4"></th>
+            </tr></thead>
+            <tbody>
+                {% for o in orders %}
+                <tr>
+                    <td class="ps-4 fw-bold font-monospace small">{{ o.order_number|truncatechars:20 }}</td>
+                    <td>
+                        <div class="small fw-semibold">{{ o.user_name|default:"—" }}</div>
+                        <small class="text-muted">{{ o.user_email|truncatechars:26 }}</small>
+                    </td>
+                    <td class="fw-bold text-danger">¥{{ o.total_amount }}</td>
+                    <td><span class="badge rounded-pill text-white" style="background:{{ o.get_status_color }};">{{ o.get_status_display }}</span></td>
+                    <td><span class="badge bg-secondary">{{ o.get_payment_status_display }}</span></td>
+                    <td><small>{{ o.created_at|date:"Y-m-d H:i" }}</small></td>
+                    <td class="pe-4"><a href="{% url 'marketplace:vendor_marketplace_order_detail' o.pk %}" class="btn btn-sm btn-outline-primary rounded-pill">{% trans "详情" %}</a></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center py-5 text-muted">{% trans "暂无订单" %}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if orders.paginator.num_pages > 1 %}
+<nav class="mt-3">
+    <ul class="pagination justify-content-center pagination-sm">
+        {% if orders.has_previous %}
+        <li class="page-item"><a class="page-link rounded-pill" href="?page={{ orders.previous_page_number }}&status={{ current_status }}&payment_status={{ current_payment_status }}&search={{ current_search }}">«</a></li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link border-0 bg-transparent">{{ orders.number }} / {{ orders.paginator.num_pages }}</span></li>
+        {% if orders.has_next %}
+        <li class="page-item"><a class="page-link rounded-pill" href="?page={{ orders.next_page_number }}&status={{ current_status }}&payment_status={{ current_payment_status }}&search={{ current_search }}">»</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

@@ -3332,3 +3332,159 @@ msgstr "Origin"
 #: .\marketplace\templates\marketplace\supermarket_detail.html:127
 msgid "选择规格"
 msgstr "Choose specification"
+
+# --- Vendor panel — unified orders hub & dashboard (2026-05) ---
+msgid "订单中心"
+msgstr "Order hub"
+
+msgid "图书、商城商品与课程订单统一管理"
+msgstr "Unified management for book and marketplace (products & courses) orders"
+
+msgid "待支付(图)"
+msgstr "Pending pay (books)"
+
+msgid "待支付(商)"
+msgstr "Pending pay (mall)"
+
+msgid "商城"
+msgstr "Marketplace"
+
+msgid "图书与商城共用相近状态键时可联合筛选"
+msgstr "Book and mall orders share similar status keys — combined filtering applies"
+
+msgid "图书订单专页"
+msgstr "Books orders page"
+
+msgid "商城订单专页"
+msgstr "Marketplace orders page"
+
+msgid "类型"
+msgstr "Type"
+
+msgid "商品+课程"
+msgstr "Products + courses"
+
+msgid "商品订单"
+msgstr "Product orders"
+
+msgid "课程订单"
+msgstr "Course orders"
+
+msgid "详情 / 管理"
+msgstr "Details / manage"
+
+msgid "一站式查看与管理图书、商城商品与课程订单；筛选类型、更新履约状态与客户地址。"
+msgstr ""
+"One place to view and manage book and mall orders; filter by type, update "
+"fulfillment and customer addresses."
+
+msgid "点击进入订单中心"
+msgstr "Click to open the order hub"
+
+msgid "订单总数"
+msgstr "Total orders"
+
+msgid "按图书筛选"
+msgstr "Filter by books"
+
+msgid "商品与课程"
+msgstr "Products & courses"
+
+msgid "仅实物商品"
+msgstr "Physical products only"
+
+msgid "在线教育"
+msgstr "Online education"
+
+msgid "书目 CRUD"
+msgstr "Catalog CRUD"
+
+msgid "课程货架"
+msgstr "Course shelf"
+
+msgid "快速上架"
+msgstr "Quick publish"
+
+msgid "查看订单中心"
+msgstr "Open order hub"
+
+msgid "点击查看订单"
+msgstr "Tap to view orders"
+
+msgid "订单与履约"
+msgstr "Orders & fulfillment"
+
+msgid "管理书目"
+msgstr "Manage titles"
+
+msgid "打开货架"
+msgstr "Open shelf"
+
+msgid "提示：可在「订单中心」合并查看图书与商城订单。"
+msgstr "Tip: use Order hub to see book and mall orders together."
+
+msgid "打开订单中心"
+msgstr "Open order hub"
+
+msgid "提示：订单中心可合并筛选图书、商品与课程订单。"
+msgstr ""
+"Tip: Order hub lets you filter book, product and course orders together."
+
+msgid "编辑客户与收货信息"
+msgstr "Edit customer & shipping details"
+
+msgid "用于更正买家联系方式或配送地址（订单未取消 / 未退款时可编辑）。"
+msgstr ""
+"Correct buyer contact or shipping address (editable unless cancelled/refunded)."
+
+msgid "更正联系方式或收货地址（订单未取消 / 未退款时可编辑）。"
+msgstr ""
+"Correct contact or shipping address (editable unless cancelled/refunded)."
+
+msgid "保存联系信息"
+msgstr "Save contact details"
+
+msgid "客户姓名"
+msgstr "Customer name"
+
+msgid "电话 / 微信"
+msgstr "Phone / WeChat"
+
+msgid "国家 / 地区"
+msgstr "Country / region"
+
+msgid "收货地址"
+msgstr "Shipping address"
+
+msgid "设置已保存 (功能开发中)"
+msgstr "Settings saved (feature in development)"
+
+msgid "请以卖家身份登录"
+msgstr "Please log in as a seller"
+
+msgid "无权操作此订单"
+msgstr "You cannot manage this order"
+
+msgid "订单已关闭，无法修改联系信息"
+msgstr "Order is closed — contact info cannot be edited"
+
+msgid "姓名与邮箱不能为空"
+msgstr "Name and email are required"
+
+msgid "客户信息已保存"
+msgstr "Customer details saved"
+
+msgid "邮箱不能为空"
+msgstr "Email is required"
+
+msgid "客户与地址信息已保存"
+msgstr "Customer and address saved"
+
+msgid "商城货架"
+msgstr "Marketplace shelf"
+
+msgid "货架"
+msgstr "Shelf"
+
+msgid "链接已复制!"
+msgstr "Link copied!"

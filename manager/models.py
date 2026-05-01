@@ -219,6 +219,7 @@ class Order(models.Model):
     
     # 国家信息 (仅用于数字产品)
     country = models.CharField(max_length=50, default='China', verbose_name="国家")
+    shipping_address = models.TextField(blank=True, default='', verbose_name="收货地址")
       # 订单详情
     payment_method = models.CharField(
         max_length=20, 
@@ -315,32 +316,58 @@ class Order(models.Model):
         }
         return payment_colors.get(self.payment_status, 'secondary')
     
+    UNPAID_CANCEL_HOURS = 24
+    PAID_AUTO_COMPLETE_DAYS = 14
+
     def is_payment_window_expired(self):
-        """Check if 30-minute payment window has expired for unpaid orders"""
+        """True when unpaid order passed the payment deadline (24 hours)."""
         from datetime import timedelta
-        if self.status != 'payment_pending':
+        if self.payment_status == 'completed':
             return False
-        
-        expiration_time = self.created_at + timedelta(minutes=30)
+        if self.status in ('cancelled', 'refunded', 'delivered'):
+            return False
+        expiration_time = self.created_at + timedelta(hours=self.UNPAID_CANCEL_HOURS)
         return timezone.now() > expiration_time
-    
+
     def get_payment_time_remaining(self):
-        """Get remaining time to pay in seconds"""
+        """Seconds remaining to pay for unpaid orders (24-hour window)."""
         from datetime import timedelta
-        if self.status != 'payment_pending':
+        if self.payment_status == 'completed':
             return 0
-        
-        expiration_time = self.created_at + timedelta(minutes=30)
+        if self.status in ('cancelled', 'refunded', 'delivered'):
+            return 0
+        expiration_time = self.created_at + timedelta(hours=self.UNPAID_CANCEL_HOURS)
         remaining = expiration_time - timezone.now()
         return max(0, int(remaining.total_seconds()))
-    
-    def auto_cancel_if_expired(self):
-        """Auto-cancel order if payment window expired"""
-        if self.is_payment_window_expired():
-            self.status = 'cancelled'
-            self.save()
+
+    def apply_ttl_rules(self):
+        """Platform TTL: unpaid → cancelled after 24h; paid → auto-delivered after 14 days if not terminal."""
+        from datetime import timedelta
+        now = timezone.now()
+        terminal = {'cancelled', 'refunded', 'delivered'}
+        changed_fields = []
+
+        if self.payment_status != 'completed':
+            if self.status not in terminal:
+                if now > self.created_at + timedelta(hours=self.UNPAID_CANCEL_HOURS):
+                    self.status = 'cancelled'
+                    self.payment_status = 'cancelled'
+                    changed_fields.extend(['status', 'payment_status'])
+        else:
+            ref = self.payment_completed_at or self.created_at
+            if self.status not in terminal and ref:
+                if now > ref + timedelta(days=self.PAID_AUTO_COMPLETE_DAYS):
+                    self.status = 'delivered'
+                    changed_fields.append('status')
+
+        if changed_fields:
+            self.save(update_fields=list(dict.fromkeys(changed_fields)) + ['updated_at'])
             return True
         return False
+
+    def auto_cancel_if_expired(self):
+        """Backward-compatible hook — applies full TTL rules."""
+        return self.apply_ttl_rules()
     
     def __str__(self):
         return f"订单 {self.order_number} - {self.customer_name}"

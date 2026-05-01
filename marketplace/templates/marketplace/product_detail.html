@@ -131,41 +131,79 @@
     }
 
 
-    /* === PWA Task 1: Mobile Taobao Design === */
+    /* === Mobile Taobao-style product page === */
     @media (max-width: 768px) {
-        .detail-hero, .desktop-layout { display: none !important; }
+        .breadcrumb-section, .desktop-layout { display: none !important; }
         .product-mobile-page { display: block !important; }
     }
     @media (min-width: 769px) {
         .product-mobile-page { display: none !important; }
     }
-    .product-mobile-page {
-        background: #f8fafc;
-        padding-bottom: 150px;
-    }
-    .pmp-gallery {
-        width: 100%;
-        height: 380px;
-        background: #fff;
-        display: flex;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-    }
-    .pmp-gallery img { width: 100%; height: 100%; object-fit: contain; scroll-snap-align: center; flex: 0 0 100%; }
-    .pmp-info { background: #fff; padding: 15px; margin-bottom: 12px; }
-    .pmp-price { color: #ef4444; font-size: 1.8rem; font-weight: 800; }
-    .pmp-title { font-size: 1.15rem; font-weight: 700; color: #1e293b; margin: 10px 0; }
-    .pmp-seller-row { display:flex; align-items:center; justify-content:space-between; gap:10px; padding-top:10px; border-top:1px solid #f1f5f9; color:#64748b; font-size:.85rem; }
-    .pmp-follow-btn { border:1px solid #667eea; color:#667eea; background:#fff; border-radius:999px; padding:5px 12px; font-weight:700; font-size:.75rem; }
-    .pmp-bottom-bar {
-        position: fixed; bottom: 62px; left: 0; right: 0; background: #fff; height: 60px;
-        display: flex; align-items: center; padding: 0 10px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 1000;
-    }
-    .pmp-icon-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 50px; color: #64748b; font-size: 0.70rem; text-decoration: none; }
-    .pmp-icon-btn i { font-size: 1.25rem; margin-bottom: 2px; }
-    .pmp-action-btn { flex: 1; height: 40px; border-radius: 20px; font-weight: 700; color: #fff; border: none; margin-left: 8px; }
-    .pmp-cart { background: linear-gradient(135deg, #f59e0b, #f97316); }
-    .pmp-buy { background: linear-gradient(135deg, #ef4444, #ec4899); }
+    .product-mobile-page { background: #f5f5f5; padding-bottom: 130px; }
+
+    .bmp-gallery { position: relative; width: 100%; overflow: hidden; background: #fff; }
+    .bmp-gallery-track { display: flex; transition: transform .3s ease; width: 200%; }
+    .bmp-gallery-slide { width: 50%; height: 380px; display: flex; align-items: center; justify-content: center; background: #f8fafc; }
+    .bmp-gallery-slide img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .bmp-gallery-counter { position: absolute; bottom: 12px; right: 14px; background: rgba(0,0,0,.55); color: #fff; font-size: 11px; padding: 3px 10px; border-radius: 10px; }
+    .bmp-promo-badge { position: absolute; top: 10px; left: 0; background: linear-gradient(90deg, #E4393C, #ff7a45); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 14px 4px 10px; border-radius: 0 20px 20px 0; }
+
+    .bmp-price-section { background: linear-gradient(135deg, #E4393C, #ff7a45); padding: 14px 14px 12px; }
+    .bmp-price-main { font-size: 28px; font-weight: 800; color: #fff; }
+    .bmp-price-main small { font-size: 16px; }
+    .bmp-price-original { font-size: 13px; color: rgba(255,255,255,.65); text-decoration: line-through; margin-left: 8px; }
+    .bmp-price-sold { font-size: 12px; color: rgba(255,255,255,.7); }
+    .bmp-low-badge { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 3px; background: rgba(255,255,255,.2); color: #fff; margin-top: 6px; }
+
+    .bmp-title-section { background: #fff; padding: 12px 14px; margin-bottom: 6px; }
+    .bmp-title { font-size: 16px; font-weight: 700; color: #333; line-height: 1.5; }
+    .bmp-tags-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .bmp-tag { display: inline-block; font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+
+    .bmp-delivery-section { background: #fff; padding: 12px 14px; margin-bottom: 6px; }
+    .bmp-delivery-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #666; padding: 6px 0; }
+    .bmp-delivery-row i { color: #667eea; width: 16px; text-align: center; }
+    .bmp-delivery-highlight { color: #E4393C; font-weight: 600; }
+
+    .bmp-guarantee { background: #fff; padding: 10px 14px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: #666; }
+    .bmp-guarantee i { color: #10b981; }
+
+    .bmp-specs-section { background: #fff; padding: 12px 14px; margin-bottom: 6px; }
+    .bmp-specs-label { font-size: 13px; font-weight: 700; color: #333; margin-bottom: 8px; }
+    .bmp-specs-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+    .bmp-specs-scroll::-webkit-scrollbar { display: none; }
+    .bmp-spec-chip { flex: 0 0 auto; background: #f5f5f5; border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #666; white-space: nowrap; }
+    .bmp-spec-chip strong { color: #333; margin-right: 4px; }
+
+    .bmp-seller-section { background: #fff; padding: 14px; margin-bottom: 6px; }
+    .bmp-seller-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .bmp-seller-logo { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; flex-shrink: 0; }
+    .bmp-seller-name { font-size: 14px; font-weight: 700; color: #333; }
+    .bmp-seller-meta { font-size: 11px; color: #999; margin-top: 2px; }
+    .bmp-seller-scores { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; margin-bottom: 10px; }
+    .bmp-score-item { text-align: center; }
+    .bmp-score-val { font-size: 14px; font-weight: 700; color: #E4393C; }
+    .bmp-score-lbl { font-size: 10px; color: #999; }
+    .bmp-seller-btns { display: flex; gap: 8px; }
+    .bmp-seller-btn { flex: 1; padding: 7px 0; border-radius: 16px; font-size: 12px; font-weight: 600; text-align: center; border: 1px solid #667eea; color: #667eea; cursor: pointer; text-decoration: none; background: #fff; }
+    .bmp-seller-btn.follow { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border-color: transparent; }
+
+    .bmp-certs-section { background: #fff; padding: 12px 14px; margin-bottom: 6px; }
+    .bmp-certs-title { font-size: 13px; font-weight: 700; color: #333; margin-bottom: 10px; }
+    .bmp-certs-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .bmp-cert-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .bmp-cert-icon { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 15px; }
+    .bmp-cert-label { font-size: 9px; color: #666; text-align: center; line-height: 1.2; }
+
+    .bmp-bottom-bar { position: fixed; bottom: 60px; left: 0; right: 0; background: #fff; display: flex; align-items: center; border-top: 1px solid #f0f0f0; z-index: 900; padding: 6px 10px; gap: 0; }
+    .bmp-action-icons { display: flex; gap: 0; margin-right: 8px; }
+    .bmp-action-icon { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 0 8px; font-size: 18px; color: #666; cursor: pointer; border: none; background: none; text-decoration: none; }
+    .bmp-action-icon span { font-size: 9px; color: #999; }
+    .bmp-buy-btns { display: flex; flex: 1; gap: 0; border-radius: 20px; overflow: hidden; }
+    .bmp-cart-btn, .bmp-buy-btn { flex: 1; padding: 10px 0; font-size: 13px; font-weight: 700; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
+    .bmp-cart-btn { background: #FF6000; color: #fff; }
+    .bmp-buy-btn { background: #E4393C; color: #fff; }
+
     @media(max-width:768px) {
         .product-info { padding-left: 0; margin-top: 20px; }
         .main-img { height: 280px; }
@@ -176,38 +214,151 @@
 
 {% block content %}
 
-<!-- ===== PWA T1 & T2: MOBILE ONLY ===== -->
-<div class="product-mobile-page">
-    <div class="pmp-gallery">
-        <img src="{{ product.get_image_url }}" alt="{{ product.name }}">
-    </div>
-    <div class="pmp-info">
-        <div class="pmp-price">¥{{ product.price }}</div>
-        <h1 class="pmp-title">{{ product.name }}</h1>
-        <div class="pmp-seller-row">
-            <span><i class="fas fa-store me-1"></i>{% if product.vendor %}{{ product.vendor.company_name }}{% else %}DUNO 360{% endif %}</span>
-            {% if product.vendor %}
-            <button type="button" class="pmp-follow-btn" onclick="toggleVendorFollow({{ product.vendor.id }}, this)">关注</button>
+<!-- ===== MOBILE ONLY: Taobao-style product page ===== -->
+<div class="product-mobile-page" style="display:none;">
+
+    <!-- A. Image Gallery -->
+    <div class="bmp-gallery" id="bmpGallery">
+        <div class="bmp-gallery-track" id="bmpTrack">
+            <div class="bmp-gallery-slide">
+                <img src="{{ product.get_image_url }}" alt="{{ product.name }}">
+            </div>
+            {% if product.image_2 %}
+            <div class="bmp-gallery-slide"><img src="{{ product.image_2.url }}" alt="{{ product.name }}"></div>
+            {% else %}
+            <div class="bmp-gallery-slide"><img src="{{ product.get_image_url }}" alt="{{ product.name }}" style="filter:brightness(.9)saturate(1.2);"></div>
             {% endif %}
         </div>
+        {% if product.sales_count > 0 %}
+        <div class="bmp-promo-badge">{% if product.sales_count > 50 %}🔥 热销{% elif product.stock <= 5 and product.stock > 0 %}⚡ 限量{% else %}📦 现货{% endif %}</div>
+        {% endif %}
+        <div class="bmp-gallery-counter" id="bmpCounter">1/2</div>
     </div>
-    
-    <div class="pmp-bottom-bar">
-        <a href="{% url 'manager:public_home' %}" class="pmp-icon-btn"><i class="fas fa-store"></i><span>店铺</span></a>
-        <a href="{% url 'manager:start_conversation' %}?item_type=product&item_id={{ product.id }}&subject={{ product.name|urlencode }}" class="pmp-icon-btn"><i class="fas fa-comment-dots"></i><span>聊天</span></a>
-        
-        <button class="pmp-action-btn pmp-cart" onclick="addToCart({{ product.id }})">加入购物车</button>
-        <button class="pmp-action-btn pmp-buy" onclick="buyNow({{ product.id }})">立即购买</button>
+
+    <!-- B. Price -->
+    <div class="bmp-price-section">
+        <div class="d-flex align-items-baseline">
+            <div class="bmp-price-main"><small>¥</small>{{ product.price }}</div>
+            {% if product.original_price %}<div class="bmp-price-original">¥{{ product.original_price }}</div>{% endif %}
+            <div class="bmp-price-sold ms-auto">已售 {{ product.sales_count }}+</div>
+        </div>
+        <div><span class="bmp-low-badge">7天无理由退货</span> <span class="bmp-low-badge" style="margin-left:4px;">正品保证</span></div>
     </div>
-</div>
-<script>
-    function addToCart() {
-        if (typeof window.addToCart === 'function') window.addToCart();
-    }
-    function buyNow() {
-        if (typeof window.buyNow === 'function') window.buyNow();
-    }
-</script>
+
+    <!-- C. Title -->
+    <div class="bmp-title-section">
+        <div class="bmp-title">{{ product.name }}</div>
+        <div class="bmp-tags-row">
+            {% if product.category %}<span class="bmp-tag" style="background:#fde68a;color:#92400e;">🏷️ {{ product.category.name }}</span>{% endif %}
+            {% if product.brand %}<span class="bmp-tag" style="background:#e0e7ff;color:#3730a3;">🏅 {{ product.brand }}</span>{% endif %}
+            {% if product.vendor %}<span class="bmp-tag" style="background:#d1fae5;color:#065f46;">🏢 {{ product.vendor.company_name }}</span>{% endif %}
+            <span class="bmp-tag" style="background:#fef3c7;color:#92400e;">{{ product.get_condition_display }}</span>
+        </div>
+    </div>
+
+    <!-- D. Delivery -->
+    <div class="bmp-delivery-section">
+        <div class="bmp-delivery-row"><i class="fas fa-truck"></i><span><span class="bmp-delivery-highlight">快递配送</span> · 预计 <strong>2-3天</strong>到达</span></div>
+        <div class="bmp-delivery-row"><i class="fas fa-shield-alt"></i><span>DUNO 平台担保 · 正品保证</span></div>
+        <div class="bmp-delivery-row"><i class="fas fa-warehouse"></i><span>库存: {% if product.in_stock %}<strong class="bmp-delivery-highlight">{{ product.stock }}</strong> 件{% else %}<span style="color:#E4393C;">缺货</span>{% endif %}</span></div>
+    </div>
+
+    <!-- E. Guarantee -->
+    <div class="bmp-guarantee"><i class="fas fa-shield-alt"></i><span>退货宝 | <strong>7天无理由退换</strong> | 极速退款</span></div>
+
+    <!-- F. Specs -->
+    <div class="bmp-specs-section">
+        <div class="bmp-specs-label">商品规格</div>
+        <div class="bmp-specs-scroll">
+            {% if product.brand %}<div class="bmp-spec-chip"><strong>品牌</strong>{{ product.brand }}</div>{% endif %}
+            {% if product.weight %}<div class="bmp-spec-chip"><strong>重量</strong>{{ product.weight }}kg</div>{% endif %}
+            <div class="bmp-spec-chip"><strong>状态</strong>{{ product.get_condition_display }}</div>
+            <div class="bmp-spec-chip"><strong>库存</strong>{{ product.stock }} 件</div>
+            <div class="bmp-spec-chip"><strong>已售</strong>{{ product.sales_count }}+</div>
+        </div>
+    </div>
+
+    <!-- G. Variant Selectors (if any) -->
+    {% if selectable_attributes %}
+    <div style="background:#fff;padding:12px 14px;margin-bottom:6px;">
+        <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:8px;">选择配置</div>
+        {% for group in selectable_attributes %}
+        <div style="margin-bottom:10px;">
+            <label style="font-size:12px;color:#666;margin-bottom:4px;display:block;">{{ group.name }}</label>
+            <select class="option-select" data-attribute-name="{{ group.name }}" style="width:100%;padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;">
+                <option value="">选择{{ group.name }}</option>
+                {% for value in group.values %}<option value="{{ value }}">{{ value }}</option>{% endfor %}
+            </select>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- H. Description -->
+    {% if product.description %}
+    <div style="background:#fff;padding:12px 14px;margin-bottom:6px;">
+        <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:8px;">商品描述</div>
+        <div style="font-size:13px;color:#666;line-height:1.7;">{{ product.description|linebreaksbr }}</div>
+    </div>
+    {% endif %}
+
+    <!-- I. Seller Section -->
+    <div class="bmp-seller-section">
+        <div class="bmp-seller-header">
+            <div class="bmp-seller-logo"><i class="fas fa-store"></i></div>
+            <div>
+                <div class="bmp-seller-name">{% if product.vendor %}{{ product.vendor.company_name }}{% else %}DUNO 360{% endif %}</div>
+                <div class="bmp-seller-meta"><i class="fas fa-star" style="color:#f59e0b;"></i> 4.9 · 认证商家</div>
+            </div>
+            {% if product.vendor %}
+            <button class="bmp-seller-btn follow ms-auto" onclick="toggleVendorFollow({{ product.vendor.id }}, this)" id="followVendorBtn">
+                <i class="fas fa-plus"></i> 关注
+            </button>
+            {% endif %}
+        </div>
+        <div class="bmp-seller-scores">
+            <div class="bmp-score-item"><div class="bmp-score-val">4.9</div><div class="bmp-score-lbl">商品质量</div></div>
+            <div class="bmp-score-item"><div class="bmp-score-val">4.8</div><div class="bmp-score-lbl">配送速度</div></div>
+            <div class="bmp-score-item"><div class="bmp-score-val">4.9</div><div class="bmp-score-lbl">服务态度</div></div>
+        </div>
+        {% if product.vendor %}
+        <div class="bmp-seller-btns">
+            <a href="{% url 'manager:public_vendor_shop' product.vendor.id %}" class="bmp-seller-btn" data-zh="进入店铺" data-en="Visit Shop" data-fr="Voir boutique">进入店铺</a>
+            <a href="{% url 'manager:start_conversation' %}?subject={{ product.vendor.company_name|urlencode }}" class="bmp-seller-btn" data-zh="联系卖家" data-en="Contact" data-fr="Contacter">联系卖家</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- J. Certifications -->
+    <div class="bmp-certs-section">
+        <div class="bmp-certs-title">服务保障</div>
+        <div class="bmp-certs-grid">
+            <div class="bmp-cert-item"><div class="bmp-cert-icon" style="background:linear-gradient(135deg,#667eea,#764ba2);"><i class="fas fa-undo"></i></div><span class="bmp-cert-label">15天退换</span></div>
+            <div class="bmp-cert-item"><div class="bmp-cert-icon" style="background:linear-gradient(135deg,#10b981,#059669);"><i class="fas fa-certificate"></i></div><span class="bmp-cert-label">正品保证</span></div>
+            <div class="bmp-cert-item"><div class="bmp-cert-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);"><i class="fas fa-shipping-fast"></i></div><span class="bmp-cert-label">运费险</span></div>
+            <div class="bmp-cert-item"><div class="bmp-cert-icon" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8);"><i class="fas fa-check-double"></i></div><span class="bmp-cert-label">品质检验</span></div>
+        </div>
+    </div>
+
+    <!-- K. Sticky Bottom Bar -->
+    <div class="bmp-bottom-bar">
+        <div class="bmp-action-icons">
+            <a href="{% if product.vendor %}{% url 'manager:public_vendor_shop' product.vendor.id %}{% else %}{% url 'marketplace:product_list' %}{% endif %}" class="bmp-action-icon">
+                <i class="fas fa-store"></i><span>店铺</span>
+            </a>
+            <a href="{% url 'manager:start_conversation' %}?item_type=product&item_id={{ product.id }}&subject={{ product.name|urlencode }}" class="bmp-action-icon">
+                <i class="fas fa-comments"></i><span>聊天</span>
+            </a>
+            <button class="bmp-action-icon" id="bmpWishBtn" onclick="mobileToggleWish()" style="cursor:pointer;">
+                <i class="far fa-heart" id="bmpWishIcon"></i><span>收藏</span>
+            </button>
+        </div>
+        <div class="bmp-buy-btns">
+            <button class="bmp-cart-btn" onclick="addToCart()"><i class="fas fa-shopping-cart"></i> 加入购物车</button>
+            <button class="bmp-buy-btn" onclick="buyNow()"><i class="fas fa-bolt"></i> 立即购买</button>
+        </div>
+    </div>
+</div><!-- /.product-mobile-page -->
 <div class="desktop-layout">
 <div class="breadcrumb-section">
     <div class="container">
@@ -253,6 +404,9 @@
                     <span class="meta-tag"><i class="fas fa-tag me-1"></i>{{ product.category.name }}</span>
                     {% endif %}
                     {% if product.vendor %}
+                    <a href="{% url 'manager:public_vendor_shop' product.vendor.id %}" class="meta-tag" style="text-decoration:none;">
+                        <i class="fas fa-store me-1"></i>{{ product.vendor.company_name }}
+                    </a>
                     <button type="button" class="meta-tag border-0" onclick="toggleVendorFollow({{ product.vendor.id }}, this)" style="cursor:pointer;">
                         <i class="fas fa-plus me-1"></i>{% trans "关注卖家" %}
                     </button>
@@ -478,10 +632,14 @@ function showToast(msg, type){
 function getSelectedAttributes(){
     const selected = {};
     const selects = document.querySelectorAll('.option-select');
+    const seen = new Set();
     for (const sel of selects) {
+        if (sel.offsetParent === null) continue;
         const name = sel.dataset.attributeName;
+        if (seen.has(name)) continue;
+        seen.add(name);
         if (!sel.value) {
-            showToast(`请选择${name}`, 'error');
+            showToast('请选择' + name, 'error');
             return null;
         }
         selected[name] = sel.value;
@@ -595,11 +753,49 @@ function toggleWishlist(){
     if (!el) return;
     var base = parseInt(el.textContent) || 5;
     setInterval(function() {
-        var delta = Math.floor(Math.random() * 5) - 2; // -2 to +2
+        var delta = Math.floor(Math.random() * 5) - 2;
         base = Math.max(2, base + delta);
         el.textContent = base;
     }, 8000);
 })();
+
+// Mobile gallery swipe
+(function() {
+    if (window.innerWidth > 768) return;
+    var track = document.getElementById('bmpTrack');
+    var counter = document.getElementById('bmpCounter');
+    if (!track) return;
+    var slides = track.children.length;
+    var cur = 0, startX = 0;
+    track.parentElement.addEventListener('touchstart', function(e) { startX = e.touches[0].clientX; }, {passive:true});
+    track.parentElement.addEventListener('touchend', function(e) {
+        var dx = e.changedTouches[0].clientX - startX;
+        if (Math.abs(dx) < 40) return;
+        if (dx < 0 && cur < slides - 1) cur++;
+        else if (dx > 0 && cur > 0) cur--;
+        track.style.transform = 'translateX(-' + (cur * 50) + '%)';
+        if (counter) counter.textContent = (cur+1) + '/' + slides;
+    }, {passive:true});
+})();
+
+// Mobile wishlist toggle
+function mobileToggleWish() {
+    var icon = document.getElementById('bmpWishIcon');
+    var btn = document.getElementById('bmpWishBtn');
+    var fd = new FormData();
+    fd.append('item_type', 'product');
+    fd.append('item_id', '{{ product.id }}');
+    fd.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    fetch('{% url "manager:user_toggle_wishlist" %}', {method:'POST', body:fd})
+    .then(r=>r.json()).then(d=>{
+        if (d.login_required) { window.location.href='{% url "manager:user_login" %}'; return; }
+        if (d.success) {
+            icon.className = d.wishlisted ? 'fas fa-heart' : 'far fa-heart';
+            btn.style.color = d.wishlisted ? '#E4393C' : '';
+            showToast(d.message, 'success');
+        }
+    });
+}
 </script>
 </div>
 {% endblock %}

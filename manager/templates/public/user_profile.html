@@ -96,6 +96,21 @@
         background: linear-gradient(135deg, #667eea, #764ba2);
         color: #fff; border-color: transparent;
     }
+    .follow-chip {
+        display: flex; align-items: center; gap: 14px;
+        padding: 14px 16px; border-radius: 14px;
+        background: var(--section-bg, #f8fafc);
+        border: 1px solid var(--card-border, rgba(0,0,0,0.06));
+        margin-bottom: 12px; transition: box-shadow 0.2s;
+    }
+    .follow-chip:hover { box-shadow: 0 4px 18px rgba(102,126,234,0.12); }
+    .follow-chip-avatar {
+        width: 48px; height: 48px; border-radius: 12px;
+        object-fit: cover; flex-shrink: 0;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        display: flex; align-items: center; justify-content: center;
+        color: #fff; font-weight: 800; font-size: 1.1rem;
+    }
     /* Status badge colors */
     .status-badge[style*="warning"] { background: rgba(245,158,11,0.12)!important; color: #d97706!important; }
     .status-badge[style*="success"] { background: rgba(16,185,129,0.12)!important; color: #059669!important; }
@@ -132,11 +147,12 @@
 <section class="container py-4">
     <!-- Tabs -->
     <div class="d-flex gap-2 mb-4 flex-wrap" data-aos="fade-up">
-        <button class="tab-btn active" onclick="showTab('profile')"><i class="fas fa-user me-1"></i>{% trans "资料" %}</button>
-        <button class="tab-btn" onclick="showTab('orders')"><i class="fas fa-shopping-bag me-1"></i>{% trans "订单" %} ({{ all_orders|length }})</button>
-        <button class="tab-btn" onclick="showTab('wishlist')"><i class="fas fa-heart me-1"></i>{% trans "收藏" %} ({{ wishlist_data|length }})</button>
-        <button class="tab-btn" onclick="showTab('courses')"><i class="fas fa-graduation-cap me-1"></i>{% trans "课程" %} ({{ courses_progress|length }})</button>
-        <button class="tab-btn" onclick="showTab('loyalty')"><i class="fas fa-star me-1" style="color:#f59e0b;"></i>{% trans "积分" %}{% if loyalty %} ({{ loyalty.points_balance }}){% endif %}</button>
+        <button type="button" class="tab-btn active" onclick="showTab('profile', this)"><i class="fas fa-user me-1"></i>{% trans "资料" %}</button>
+        <button type="button" class="tab-btn" onclick="showTab('orders', this)"><i class="fas fa-shopping-bag me-1"></i>{% trans "订单" %} ({{ all_orders|length }})</button>
+        <button type="button" class="tab-btn" onclick="showTab('wishlist', this)"><i class="fas fa-heart me-1"></i>{% trans "收藏" %} ({{ wishlist_data|length }})</button>
+        <button type="button" class="tab-btn" onclick="showTab('courses', this)"><i class="fas fa-graduation-cap me-1"></i>{% trans "课程" %} ({{ courses_progress|length }})</button>
+        <button type="button" class="tab-btn d-none d-lg-inline-flex align-items-center" onclick="showTab('follows', this)" style="gap:6px;"><i class="fas fa-store me-1"></i>{% trans "关注店铺" %} <span class="badge bg-secondary rounded-pill" style="font-size:0.7rem;">{{ followed_total_count }}</span></button>
+        <button type="button" class="tab-btn" onclick="showTab('loyalty', this)"><i class="fas fa-star me-1" style="color:#f59e0b;"></i>{% trans "积分" %}{% if loyalty %} ({{ loyalty.points_balance }}){% endif %}</button>
     </div>
 
     <!-- Profile Tab -->
@@ -163,6 +179,50 @@
                     </div>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Desktop only: followed marketplace vendors & publishers -->
+    <div id="tab-follows" class="tab-content d-none d-lg-block" style="display:none;" data-aos="fade-up">
+        <div class="profile-card">
+            <h5><i class="fas fa-store me-2" style="color:#667eea;"></i>{% trans "关注的卖家" %}</h5>
+            {% if followed_vendors %}
+            {% for fv in followed_vendors %}
+            <div class="follow-chip" id="follow-vendor-{{ fv.vendor.id }}">
+                {% if fv.vendor.get_logo_url %}
+                <img class="follow-chip-avatar" src="{{ fv.vendor.get_logo_url }}" alt="">
+                {% else %}
+                <div class="follow-chip-avatar">{{ fv.vendor.company_name|first|upper }}</div>
+                {% endif %}
+                <div style="flex:1;min-width:0;">
+                    <div class="fw-bold text-truncate">{{ fv.vendor.company_name }}</div>
+                    <small class="text-muted">{% trans "市场卖家" %} · {{ fv.followed_at|date:"Y-m-d" }}</small>
+                </div>
+                <a href="{% url 'manager:public_vendor_shop' fv.vendor.id %}" class="btn btn-sm btn-outline-primary" style="border-radius:10px;">{% trans "进店" %}</a>
+                <button type="button" class="btn btn-sm btn-outline-danger unfollow-vendor-btn" style="border-radius:10px;" data-vendor-id="{{ fv.vendor.id }}">{% trans "取消关注" %}</button>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p class="text-muted mb-0">{% trans "暂未关注任何卖家。" %}</p>
+            {% endif %}
+        </div>
+        <div class="profile-card">
+            <h5><i class="fas fa-building me-2" style="color:#764ba2;"></i>{% trans "关注的出版社" %}</h5>
+            {% if followed_publishers %}
+            {% for fp in followed_publishers %}
+            <div class="follow-chip" id="follow-publisher-{{ fp.publisher.id }}">
+                <div class="follow-chip-avatar">{{ fp.publisher.publisher_name|first|upper }}</div>
+                <div style="flex:1;min-width:0;">
+                    <div class="fw-bold text-truncate">{{ fp.publisher.publisher_name }}</div>
+                    <small class="text-muted">{% trans "出版社" %} · {{ fp.followed_at|date:"Y-m-d" }}</small>
+                </div>
+                <a href="{% url 'manager:public_publisher_detail' fp.publisher.id %}" class="btn btn-sm btn-outline-primary" style="border-radius:10px;">{% trans "主页" %}</a>
+                <button type="button" class="btn btn-sm btn-outline-danger unfollow-publisher-btn" style="border-radius:10px;" data-publisher-id="{{ fp.publisher.id }}">{% trans "取消关注" %}</button>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p class="text-muted mb-0">{% trans "暂未关注任何出版社。" %}</p>
+            {% endif %}
         </div>
     </div>
 
@@ -466,12 +526,71 @@
 
 {% block extra_js %}
 <script>
-function showTab(name) {
-    document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+function showTab(name, btn) {
+    document.querySelectorAll('.tab-content').forEach(el => { el.style.display = 'none'; });
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-    document.getElementById('tab-' + name).style.display = 'block';
-    event.target.closest('.tab-btn').classList.add('active');
+    var pane = document.getElementById('tab-' + name);
+    if (pane) pane.style.display = 'block';
+    var activator = btn || (typeof event !== 'undefined' && event.target && event.target.closest && event.target.closest('.tab-btn'));
+    if (activator) activator.classList.add('active');
 }
+
+function getProfileCsrf() {
+    var el = document.querySelector('[name=csrfmiddlewaretoken]');
+    return el ? el.value : '{{ csrf_token }}';
+}
+
+function decFollowBadge() {
+    var tabBtn = document.querySelector('.tab-btn.d-none.d-lg-inline-flex .badge');
+    if (!tabBtn) return;
+    var n = parseInt(tabBtn.textContent, 10);
+    if (isNaN(n)) return;
+    tabBtn.textContent = Math.max(0, n - 1);
+}
+
+document.addEventListener('click', function(e) {
+    var vb = e.target.closest('.unfollow-vendor-btn');
+    if (vb) {
+        var vid = vb.getAttribute('data-vendor-id');
+        vb.disabled = true;
+        fetch('/manager/vendor/' + vid + '/follow/', {
+            method: 'POST',
+            headers: {'X-CSRFToken': getProfileCsrf()},
+        }).then(function(r) { return r.json(); }).then(function(d) {
+            if (d.success) {
+                var row = document.getElementById('follow-vendor-' + vid);
+                if (row) row.remove();
+                decFollowBadge();
+                if (typeof gToast === 'function') gToast(d.message || 'OK', 'success');
+            } else {
+                vb.disabled = false;
+                if (d.login_required) window.location.href = '/manager/public/user/login/';
+                else if (typeof gToast === 'function') gToast(d.message || 'Error', 'error');
+            }
+        }).catch(function() { vb.disabled = false; });
+        return;
+    }
+    var pb = e.target.closest('.unfollow-publisher-btn');
+    if (pb) {
+        var pid = pb.getAttribute('data-publisher-id');
+        pb.disabled = true;
+        fetch('/manager/publisher/' + pid + '/follow/', {
+            method: 'POST',
+            headers: {'X-CSRFToken': getProfileCsrf()},
+        }).then(function(r) { return r.json(); }).then(function(d) {
+            if (d.success) {
+                var row = document.getElementById('follow-publisher-' + pid);
+                if (row) row.remove();
+                decFollowBadge();
+                if (typeof gToast === 'function') gToast(d.message || 'OK', 'success');
+            } else {
+                pb.disabled = false;
+                if (d.login_required) window.location.href = '/manager/public/user/login/';
+                else if (typeof gToast === 'function') gToast(d.message || 'Error', 'error');
+            }
+        }).catch(function() { pb.disabled = false; });
+    }
+});
 function toggleOrderItems(id, header) {
     var el = document.getElementById(id);
     var icon = header.querySelector('.fa-chevron-down, .fa-chevron-up');

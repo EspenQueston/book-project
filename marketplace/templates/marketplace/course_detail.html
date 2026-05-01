@@ -141,41 +141,81 @@
     .toast-msg.error { border-left: 4px solid var(--danger-color); }
 
 
-    /* === PWA Task 1: Mobile Taobao Design === */
+    /* === Mobile Taobao-style course page === */
     @media (max-width: 768px) {
-        .detail-hero, .desktop-layout { display: none !important; }
-        .product-mobile-page { display: block !important; }
+        .breadcrumb-section, .desktop-layout { display: none !important; }
+        .course-mobile-page { display: block !important; }
     }
     @media (min-width: 769px) {
-        .product-mobile-page { display: none !important; }
+        .course-mobile-page { display: none !important; }
     }
-    .product-mobile-page {
-        background: #f8fafc;
-        padding-bottom: 150px;
-    }
-    .pmp-gallery {
-        width: 100%;
-        height: 380px;
-        background: #fff;
-        display: flex;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-    }
-    .pmp-gallery img { width: 100%; height: 100%; object-fit: contain; scroll-snap-align: center; flex: 0 0 100%; }
-    .pmp-info { background: #fff; padding: 15px; margin-bottom: 12px; }
-    .pmp-price { color: #ef4444; font-size: 1.8rem; font-weight: 800; }
-    .pmp-title { font-size: 1.15rem; font-weight: 700; color: #1e293b; margin: 10px 0; }
-    .pmp-seller-row { display:flex; align-items:center; justify-content:space-between; gap:10px; padding-top:10px; border-top:1px solid #f1f5f9; color:#64748b; font-size:.85rem; }
-    .pmp-follow-btn { border:1px solid #667eea; color:#667eea; background:#fff; border-radius:999px; padding:5px 12px; font-weight:700; font-size:.75rem; }
-    .pmp-bottom-bar {
-        position: fixed; bottom: 62px; left: 0; right: 0; background: #fff; height: 60px;
-        display: flex; align-items: center; padding: 0 10px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 1000;
-    }
-    .pmp-icon-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 50px; color: #64748b; font-size: 0.70rem; text-decoration: none; }
-    .pmp-icon-btn i { font-size: 1.25rem; margin-bottom: 2px; }
-    .pmp-action-btn { flex: 1; height: 40px; border-radius: 20px; font-weight: 700; color: #fff; border: none; margin-left: 8px; }
-    .pmp-cart { background: linear-gradient(135deg, #f59e0b, #f97316); }
-    .pmp-buy { background: linear-gradient(135deg, #ef4444, #ec4899); }
+    .course-mobile-page { background: #f5f5f5; padding-bottom: 130px; }
+
+    .bmp-gallery { position: relative; width: 100%; overflow: hidden; background: #000; }
+    .bmp-gallery-track { display: flex; transition: transform .3s ease; width: 200%; }
+    .bmp-gallery-slide { width: 50%; height: 260px; display: flex; align-items: center; justify-content: center; }
+    .bmp-gallery-slide img { max-width: 100%; max-height: 100%; object-fit: cover; width: 100%; }
+    .bmp-gallery-counter { position: absolute; bottom: 12px; right: 14px; background: rgba(0,0,0,.55); color: #fff; font-size: 11px; padding: 3px 10px; border-radius: 10px; }
+    .bmp-promo-badge { position: absolute; top: 10px; left: 0; background: linear-gradient(90deg, #f093fb, #f5576c); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 14px 4px 10px; border-radius: 0 20px 20px 0; }
+
+    .bmp-price-section { background: linear-gradient(135deg, #f093fb, #f5576c); padding: 14px 14px 12px; }
+    .bmp-price-main { font-size: 28px; font-weight: 800; color: #fff; }
+    .bmp-price-main small { font-size: 16px; }
+    .bmp-price-original { font-size: 13px; color: rgba(255,255,255,.65); text-decoration: line-through; margin-left: 8px; }
+    .bmp-price-sold { font-size: 12px; color: rgba(255,255,255,.7); }
+    .bmp-low-badge { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 3px; background: rgba(255,255,255,.2); color: #fff; margin-top: 6px; }
+
+    .bmp-title-section { background: #fff; padding: 12px 14px; margin-bottom: 6px; }
+    .bmp-title { font-size: 16px; font-weight: 700; color: #333; line-height: 1.5; }
+    .bmp-tags-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .bmp-tag { display: inline-block; font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+
+    .bmp-delivery-section { background: #fff; padding: 12px 14px; margin-bottom: 6px; }
+    .bmp-delivery-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #666; padding: 6px 0; }
+    .bmp-delivery-row i { color: #f093fb; width: 16px; text-align: center; }
+    .bmp-delivery-highlight { color: #f5576c; font-weight: 600; }
+
+    .bmp-guarantee { background: #fff; padding: 10px 14px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: #666; }
+    .bmp-guarantee i { color: #10b981; }
+
+    .bmp-specs-section { background: #fff; padding: 12px 14px; margin-bottom: 6px; }
+    .bmp-specs-label { font-size: 13px; font-weight: 700; color: #333; margin-bottom: 8px; }
+    .bmp-specs-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+    .bmp-specs-scroll::-webkit-scrollbar { display: none; }
+    .bmp-spec-chip { flex: 0 0 auto; background: #f5f5f5; border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #666; white-space: nowrap; }
+    .bmp-spec-chip strong { color: #333; margin-right: 4px; }
+
+    .bmp-seller-section { background: #fff; padding: 14px; margin-bottom: 6px; }
+    .bmp-seller-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .bmp-seller-logo { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #f093fb, #f5576c); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; flex-shrink: 0; }
+    .bmp-seller-name { font-size: 14px; font-weight: 700; color: #333; }
+    .bmp-seller-meta { font-size: 11px; color: #999; margin-top: 2px; }
+    .bmp-seller-scores { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; margin-bottom: 10px; }
+    .bmp-score-item { text-align: center; }
+    .bmp-score-val { font-size: 14px; font-weight: 700; color: #f5576c; }
+    .bmp-score-lbl { font-size: 10px; color: #999; }
+
+    .bmp-bottom-bar { position: fixed; bottom: 60px; left: 0; right: 0; background: #fff; display: flex; align-items: center; border-top: 1px solid #f0f0f0; z-index: 900; padding: 6px 10px; gap: 0; }
+    .bmp-action-icons { display: flex; gap: 0; margin-right: 8px; }
+    .bmp-action-icon { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 0 8px; font-size: 18px; color: #666; cursor: pointer; border: none; background: none; text-decoration: none; }
+    .bmp-action-icon span { font-size: 9px; color: #999; }
+    .bmp-buy-btns { display: flex; flex: 1; gap: 0; border-radius: 20px; overflow: hidden; }
+    .bmp-cart-btn, .bmp-buy-btn { flex: 1; padding: 10px 0; font-size: 13px; font-weight: 700; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
+    .bmp-cart-btn { background: #FF6000; color: #fff; }
+    .bmp-buy-btn { background: linear-gradient(135deg, #f093fb, #f5576c); color: #fff; }
+
+    /* Course mobile lesson list */
+    .cml-section { background: #fff; margin-bottom: 6px; }
+    .cml-header { padding: 12px 14px; font-size: 13px; font-weight: 700; color: #333; border-bottom: 1px solid #f5f5f5; display: flex; justify-content: space-between; }
+    .cml-lesson { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid #fafafa; text-decoration: none; color: inherit; }
+    .cml-lesson:last-child { border-bottom: none; }
+    .cml-lesson.active { background: rgba(240,147,251,.06); }
+    .cml-num { width: 24px; height: 24px; border-radius: 50%; background: #f5f5f5; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #999; flex-shrink: 0; }
+    .cml-lesson.active .cml-num { background: linear-gradient(135deg,#f093fb,#f5576c); color: #fff; }
+    .cml-info { flex: 1; min-width: 0; }
+    .cml-title { font-size: 13px; font-weight: 600; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cml-meta { font-size: 11px; color: #999; margin-top: 2px; }
+
     @media(max-width:991px) {
         .playlist-panel { max-height: 400px; margin-top: 20px; }
     }
@@ -184,30 +224,138 @@
 
 {% block content %}
 
-<!-- ===== PWA T1 & T2: MOBILE ONLY ===== -->
-<div class="product-mobile-page">
-    <div class="pmp-gallery">
-        <img src="{{ course.get_image_url }}" alt="{{ course.title }}">
+<!-- ===== MOBILE ONLY: Taobao-style course page ===== -->
+<div class="course-mobile-page" style="display:none;">
+
+    <!-- A. Cover Image -->
+    <div class="bmp-gallery" id="bmpGallery">
+        <div class="bmp-gallery-track" id="bmpTrack">
+            <div class="bmp-gallery-slide"><img src="{{ course.get_image_url }}" alt="{{ course.title }}"></div>
+            <div class="bmp-gallery-slide"><img src="{{ course.get_image_url }}" alt="{{ course.title }}" style="filter:brightness(.85)saturate(1.3);"></div>
+        </div>
+        {% if course.enrollment_count > 0 %}
+        <div class="bmp-promo-badge">🎓 {{ course.enrollment_count }}+ 已注册</div>
+        {% endif %}
+        <div class="bmp-gallery-counter" id="bmpCounter">1/2</div>
     </div>
-    <div class="pmp-info">
-        <div class="pmp-price">¥{{ course.price }}</div>
-        <h1 class="pmp-title">{{ course.title }}</h1>
-        <div class="pmp-seller-row">
-            <span><i class="fas fa-store me-1"></i>{% if course.vendor %}{{ course.vendor.company_name }}{% else %}DUNO 360{% endif %}</span>
-            {% if course.vendor %}
-            <button type="button" class="pmp-follow-btn" onclick="toggleVendorFollow({{ course.vendor.id }}, this)">关注</button>
-            {% endif %}
+
+    <!-- B. Price -->
+    <div class="bmp-price-section">
+        <div class="d-flex align-items-baseline">
+            <div class="bmp-price-main"><small>¥</small>{{ course.price }}</div>
+            {% if course.original_price %}<div class="bmp-price-original">¥{{ course.original_price }}</div>{% endif %}
+            <div class="bmp-price-sold ms-auto">{{ course.enrollment_count }}+ 已注册</div>
+        </div>
+        <div><span class="bmp-low-badge">终身学习</span> <span class="bmp-low-badge" style="margin-left:4px;">证书颁发</span></div>
+    </div>
+
+    <!-- C. Title -->
+    <div class="bmp-title-section">
+        <div class="bmp-title">{{ course.title }}</div>
+        <div class="bmp-tags-row">
+            <span class="bmp-tag" style="background:#fce7f3;color:#be185d;">🎓 课程</span>
+            {% if course.category %}<span class="bmp-tag" style="background:#fde68a;color:#92400e;">🏷️ {{ course.category.name }}</span>{% endif %}
+            <span class="bmp-tag" style="background:#e0e7ff;color:#3730a3;">👨‍🏫 {{ course.instructor }}</span>
+            <span class="bmp-tag" style="background:#d1fae5;color:#065f46;">📊 {{ course.get_level_display }}</span>
         </div>
     </div>
-    
-    <div class="pmp-bottom-bar">
-        <a href="{% url 'manager:public_home' %}" class="pmp-icon-btn"><i class="fas fa-store"></i><span>店铺</span></a>
-        <a href="{% url 'manager:start_conversation' %}?item_type=course&item_id={{ course.id }}&subject={{ course.title|urlencode }}" class="pmp-icon-btn"><i class="fas fa-comment-dots"></i><span>聊天</span></a>
-        
-        <button class="pmp-action-btn pmp-cart" onclick="addCourseToCart()">加入购物车</button>
-        <button class="pmp-action-btn pmp-buy" onclick="buyNowCourse()">立即购买</button>
+
+    <!-- D. Course Info -->
+    <div class="bmp-delivery-section">
+        <div class="bmp-delivery-row"><i class="fas fa-play-circle"></i><span>共 <strong>{{ course.lessons_count }}</strong> 课时 · <strong>{{ course.duration_hours }}</strong>h</span></div>
+        <div class="bmp-delivery-row"><i class="fas fa-language"></i><span>授课语言: <strong>{{ course.language }}</strong></span></div>
+        {% if course.rating %}<div class="bmp-delivery-row"><i class="fas fa-star" style="color:#f59e0b;"></i><span>评分: <strong>{{ course.rating }}/5</strong></span></div>{% endif %}
+        <div class="bmp-delivery-row"><i class="fas fa-infinity"></i><span><span class="bmp-delivery-highlight">永久回看</span> · 购买后随时学习</span></div>
     </div>
-</div>
+
+    <!-- E. Guarantee -->
+    <div class="bmp-guarantee"><i class="fas fa-shield-alt"></i><span>品质保障 | <strong>7天退款</strong> | 证书颁发</span></div>
+
+    <!-- F. Specs -->
+    <div class="bmp-specs-section">
+        <div class="bmp-specs-label">课程信息</div>
+        <div class="bmp-specs-scroll">
+            <div class="bmp-spec-chip"><strong>讲师</strong>{{ course.instructor }}</div>
+            <div class="bmp-spec-chip"><strong>课时</strong>{{ course.lessons_count }} 节</div>
+            <div class="bmp-spec-chip"><strong>时长</strong>{{ course.duration_hours }}h</div>
+            <div class="bmp-spec-chip"><strong>级别</strong>{{ course.get_level_display }}</div>
+            <div class="bmp-spec-chip"><strong>注册</strong>{{ course.enrollment_count }}+</div>
+        </div>
+    </div>
+
+    <!-- G. Lesson List -->
+    <div class="cml-section">
+        <div class="cml-header"><span>课程目录</span><span style="color:#999;font-weight:400;">{{ total_lessons }} 课时</span></div>
+        {% for section in sections %}
+        <div style="padding:8px 14px;background:#fafafa;font-size:12px;font-weight:700;color:#667eea;border-bottom:1px solid #f0f0f0;">
+            <i class="fas fa-folder-open me-1"></i>{{ section.title }}
+        </div>
+        {% for lesson in section.lessons.all|slice:":5" %}
+        <a href="?lesson={{ lesson.id }}" class="cml-lesson {% if current_lesson and current_lesson.id == lesson.id %}active{% endif %}">
+            <div class="cml-num">{{ forloop.counter }}</div>
+            <div class="cml-info">
+                <div class="cml-title">{{ lesson.title }}</div>
+                <div class="cml-meta">{{ lesson.duration_minutes }} 分钟 {% if lesson.is_free %}<span style="color:#10b981;font-weight:600;">免费</span>{% endif %}</div>
+            </div>
+        </a>
+        {% endfor %}
+        {% endfor %}
+    </div>
+
+    <!-- H. Description -->
+    {% if course.description %}
+    <div style="background:#fff;padding:12px 14px;margin-bottom:6px;">
+        <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:8px;">课程介绍</div>
+        <div style="font-size:13px;color:#666;line-height:1.7;">{{ course.description|linebreaksbr }}</div>
+    </div>
+    {% endif %}
+
+    <!-- I. Instructor -->
+    <div class="bmp-seller-section">
+        <div class="bmp-seller-header">
+            <div class="bmp-seller-logo"><i class="fas fa-chalkboard-teacher"></i></div>
+            <div>
+                <div class="bmp-seller-name">{{ course.instructor }}</div>
+                <div class="bmp-seller-meta"><i class="fas fa-star" style="color:#f59e0b;"></i> {% if course.vendor %}{{ course.vendor.company_name }}{% else %}DUNO 360{% endif %}</div>
+            </div>
+            {% if course.vendor %}
+            <button class="bmp-seller-btn follow ms-auto" style="flex:0 0 auto;background:linear-gradient(135deg,#f093fb,#f5576c);border-color:transparent;" onclick="toggleVendorFollow({{ course.vendor.id }}, this)">
+                <i class="fas fa-plus"></i> 关注
+            </button>
+            {% endif %}
+        </div>
+        <div class="bmp-seller-scores">
+            <div class="bmp-score-item"><div class="bmp-score-val">{{ course.lessons_count }}</div><div class="bmp-score-lbl">课时数</div></div>
+            <div class="bmp-score-item"><div class="bmp-score-val">{{ course.enrollment_count }}</div><div class="bmp-score-lbl">学生数</div></div>
+            <div class="bmp-score-item"><div class="bmp-score-val">{% if course.rating %}{{ course.rating }}{% else %}4.8{% endif %}</div><div class="bmp-score-lbl">评分</div></div>
+        </div>
+        {% if course.vendor %}
+        <div class="bmp-seller-btns">
+            <a href="{% url 'manager:public_vendor_shop' course.vendor.id %}" class="bmp-seller-btn" data-zh="进入店铺" data-en="Visit Shop" data-fr="Voir boutique">进入店铺</a>
+            <a href="{% url 'manager:start_conversation' %}?subject={{ course.vendor.company_name|urlencode }}" class="bmp-seller-btn" data-zh="联系卖家" data-en="Contact" data-fr="Contacter">联系卖家</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- K. Sticky Bottom Bar -->
+    <div class="bmp-bottom-bar">
+        <div class="bmp-action-icons">
+            <a href="{% url 'marketplace:course_list' %}" class="bmp-action-icon">
+                <i class="fas fa-th-large"></i><span>课程</span>
+            </a>
+            <a href="{% url 'manager:start_conversation' %}?item_type=course&item_id={{ course.id }}&subject={{ course.title|urlencode }}" class="bmp-action-icon">
+                <i class="fas fa-comments"></i><span>聊天</span>
+            </a>
+            <button class="bmp-action-icon" id="bmpWishBtn" onclick="mobileToggleWish()" style="cursor:pointer;">
+                <i class="far fa-heart" id="bmpWishIcon"></i><span>收藏</span>
+            </button>
+        </div>
+        <div class="bmp-buy-btns">
+            <button class="bmp-cart-btn" onclick="addCourseToCart()"><i class="fas fa-shopping-cart"></i> 加入购物车</button>
+            <button class="bmp-buy-btn" onclick="buyNowCourse()"><i class="fas fa-bolt"></i> 立即报名</button>
+        </div>
+    </div>
+</div><!-- /.course-mobile-page -->
 <div class="desktop-layout">
 <div class="breadcrumb-section">
     <div class="container">
@@ -353,7 +501,7 @@
                 <div class="info-row"><i class="fas fa-user"></i>{% trans "讲师" %}: {{ course.instructor }}</div>
                 {% if course.vendor %}
                 <div class="info-row">
-                    <i class="fas fa-store"></i>{% trans "卖家" %}: {{ course.vendor.company_name }}
+                    <i class="fas fa-store"></i>{% trans "卖家" %}: <a href="{% url 'manager:public_vendor_shop' course.vendor.id %}" style="color:#667eea;text-decoration:none;font-weight:600;">{{ course.vendor.company_name }}</a>
                     <button type="button" class="btn btn-sm ms-auto" onclick="toggleVendorFollow({{ course.vendor.id }}, this)" style="border:1px solid #667eea;color:#667eea;border-radius:999px;">{% trans "关注" %}</button>
                 </div>
                 {% endif %}
@@ -507,11 +655,53 @@ function toggleWishlist(){
     .then(r=>r.json()).then(d=>{
         if(d.wishlisted){
             var btn=document.getElementById('wishBtn'), icon=document.getElementById('wishIcon');
-            btn.style.background='#ef4444'; btn.style.borderColor='#ef4444'; btn.style.color='#fff';
-            icon.className='fas fa-heart';
+            if(btn){btn.style.background='#ef4444'; btn.style.borderColor='#ef4444'; btn.style.color='#fff';}
+            if(icon) icon.className='fas fa-heart';
+            var mIcon = document.getElementById('bmpWishIcon');
+            var mBtn = document.getElementById('bmpWishBtn');
+            if(mIcon) mIcon.className='fas fa-heart';
+            if(mBtn) mBtn.style.color='#E4393C';
         }
     });
 })();
+
+// Mobile gallery swipe
+(function() {
+    if (window.innerWidth > 768) return;
+    var track = document.getElementById('bmpTrack');
+    var counter = document.getElementById('bmpCounter');
+    if (!track) return;
+    var slides = track.children.length;
+    var cur = 0, startX = 0;
+    track.parentElement.addEventListener('touchstart', function(e) { startX = e.touches[0].clientX; }, {passive:true});
+    track.parentElement.addEventListener('touchend', function(e) {
+        var dx = e.changedTouches[0].clientX - startX;
+        if (Math.abs(dx) < 40) return;
+        if (dx < 0 && cur < slides - 1) cur++;
+        else if (dx > 0 && cur > 0) cur--;
+        track.style.transform = 'translateX(-' + (cur * 50) + '%)';
+        if (counter) counter.textContent = (cur+1) + '/' + slides;
+    }, {passive:true});
+})();
+
+// Mobile wishlist toggle
+function mobileToggleWish() {
+    var icon = document.getElementById('bmpWishIcon');
+    var btn = document.getElementById('bmpWishBtn');
+    var fd = new FormData();
+    fd.append('item_type', 'course');
+    fd.append('item_id', '{{ course.id }}');
+    fd.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    fetch('{% url "manager:user_toggle_wishlist" %}', {method:'POST', body:fd})
+    .then(r=>r.json()).then(d=>{
+        if (d.login_required) { window.location.href='{% url "manager:user_login" %}'; return; }
+        if (d.success) {
+            icon.className = d.wishlisted ? 'fas fa-heart' : 'far fa-heart';
+            btn.style.color = d.wishlisted ? '#E4393C' : '';
+            if(typeof showToast==='function') showToast(d.message, 'success');
+        }
+    });
+}
 </script>
 </div>
 {% endblock %}

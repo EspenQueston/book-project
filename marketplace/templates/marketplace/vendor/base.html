@@ -1,67 +1,73 @@
-<!DOCTYPE html>
-<html lang="zh-hans">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}卖家中心{% endblock %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        :root { --primary-color: #667eea; --secondary-color: #764ba2; }
-        body { background: #f0f2f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-        .sidebar { position: fixed; top: 0; left: 0; width: 260px; height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); z-index: 1000; overflow-y: auto; }
-        .sidebar .nav-link { color: rgba(255,255,255,0.7); padding: 12px 20px; font-size: 0.9rem; transition: all 0.3s ease; border-radius: 8px; margin: 2px 10px; }
-        .sidebar .nav-link:hover { background: rgba(255,255,255,0.1); color: #fff; }
-        .sidebar .nav-link.active { background: rgba(102,126,234,0.3); color: #fff; font-weight: 600; }
-        .sidebar .nav-link i { width: 22px; margin-right: 10px; }
-        .main-content { margin-left: 260px; padding: 30px; }
-        .page-header-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 25px 30px; color: #fff; margin-bottom: 25px; }
-        .page-header-card h4 { font-weight: 700; margin-bottom: 0; }
-        .content-card { background: #fff; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); }
-        .toolbar { background: #fff; border-radius: 15px; padding: 15px 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); }
-        .btn-primary-gradient { background: linear-gradient(135deg, #667eea, #764ba2); border: none; color: #fff; border-radius: 10px; font-weight: 600; padding: 8px 20px; }
-        .btn-primary-gradient:hover { color: #fff; box-shadow: 0 4px 15px rgba(102,126,234,0.3); }
-        .table th { font-weight: 600; color: #64748b; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #f1f5f9; }
-        .table td { vertical-align: middle; }
-        @media(max-width:768px) { .sidebar { width: 100%; height: auto; position: relative; } .main-content { margin-left: 0; } }
-        {% block extra_vendor_css %}{% endblock %}
-    </style>
-</head>
-<body>
-    <div class="container-fluid p-0">
-        <div class="sidebar">
-            <div class="p-3">
-                <h5 class="text-white mb-0"><i class="fas fa-store-alt"></i> 卖家中心</h5>
-                <small style="color:rgba(255,255,255,0.5);">{{ vendor.company_name|default:"Vendor" }}</small>
-            </div>
-            <nav class="nav flex-column">
-                <a class="nav-link {% block nav_dashboard %}{% endblock %}" href="{% url 'marketplace:vendor_dashboard' %}"><i class="fas fa-tachometer-alt"></i> 仪表板</a>
-                <a class="nav-link {% block nav_products %}{% endblock %}" href="{% url 'marketplace:vendor_products' %}"><i class="fas fa-shopping-bag"></i> 我的商品</a>
-                <a class="nav-link {% block nav_courses %}{% endblock %}" href="{% url 'marketplace:vendor_courses' %}"><i class="fas fa-graduation-cap"></i> 我的课程</a>
-                <a class="nav-link {% block nav_messages %}{% endblock %}" href="{% url 'manager:vendor_messages' %}"><i class="fas fa-comments"></i> 客户消息</a>
-                <div class="dropdown-divider mx-3 my-2" style="border-color: rgba(255,255,255,0.15);"></div>
-                <a class="nav-link" href="{% url 'manager:vendor_dashboard' %}"><i class="fas fa-book"></i> 图书管理</a>
-                <a class="nav-link" href="{% url 'marketplace:home' %}"><i class="fas fa-globe"></i> 查看市场</a>
-                <a class="nav-link" href="{% url 'manager:vendor_logout' %}"><i class="fas fa-sign-out-alt"></i> 退出登录</a>
-            </nav>
-        </div>
+{% extends "public/vendor_panel_base.html" %}
+{% load i18n %}
 
-        <div class="main-content">
-            {% if messages %}
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" style="border-radius:12px;">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-            {% endfor %}
-            {% endif %}
+{% block panel_title %}{% block title %}{% trans "卖家中心" %}{% endblock %}{% endblock %}
 
-            {% block vendor_content %}{% endblock %}
-        </div>
-    </div>
+{% block panel_extra_css %}
+<style>
+    :root {
+        --primary-color: #667eea;
+        --secondary-color: #764ba2;
+        --mv-toolbar-bg: #ffffff;
+    }
+    html[data-theme="dark"] {
+        --mv-toolbar-bg: rgba(30, 41, 59, 0.92);
+    }
+    .mv-toolbar {
+        background: var(--mv-toolbar-bg);
+        border-radius: 15px;
+        padding: 15px 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        border: 1px solid rgba(102,126,234,0.08);
+    }
+    html[data-theme="dark"] .mv-toolbar {
+        border-color: #334155;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+    }
+    .content-card {
+        background: var(--mv-toolbar-bg);
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        border: 1px solid rgba(0,0,0,0.04);
+    }
+    html[data-theme="dark"] .content-card {
+        border-color: #334155;
+    }
+    .btn-primary-gradient {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border: none;
+        color: #fff;
+        border-radius: 10px;
+        font-weight: 600;
+        padding: 8px 20px;
+    }
+    .btn-primary-gradient:hover { color: #fff; box-shadow: 0 4px 15px rgba(102,126,234,0.3); }
+    .mv-page-header-card, .page-header-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 15px;
+        padding: 20px 22px;
+        color: #fff;
+        margin-bottom: 20px;
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.28);
+    }
+    .mv-page-header-card h4, .page-header-card h4 { font-weight: 700; margin-bottom: 0; }
+    .table th {
+        font-weight: 600;
+        color: #64748b;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #f1f5f9;
+    }
+    {% block extra_vendor_css %}{% endblock %}
+</style>
+{% endblock %}
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    {% block extra_vendor_js %}{% endblock %}
-    <script src="/static/js/admin_i18n.js" defer></script>
-</body>
-</html>
+{% block vendor_panel_content %}
+{% block vendor_content %}{% endblock %}
+{% endblock %}
+
+{% block panel_extra_js %}
+{% block extra_vendor_js %}{% endblock %}
+{% endblock %}

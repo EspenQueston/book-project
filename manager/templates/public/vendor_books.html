@@ -1,0 +1,116 @@
+{% extends 'public/vendor_panel_base.html' %}
+{% load i18n %}
+
+{% block panel_title %}{% trans "图书管理" %} · {{ vendor.company_name }}{% endblock %}
+
+{% block panel_extra_css %}
+<style>
+    .vp-page-head {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        padding: 20px 22px;
+        border-radius: 15px;
+        margin-bottom: 20px;
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.28);
+    }
+    .vp-card {
+        background: var(--card-bg, #fff);
+        border-radius: 18px;
+        box-shadow: 0 8px 28px rgba(0,0,0,0.06);
+        padding: 22px;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+    .book-row-v {
+        display: flex; align-items: center; gap: 14px;
+        padding: 14px; border-radius: 14px; margin-bottom: 12px;
+        background: var(--section-bg, #f8f9fa);
+        transition: transform 0.2s;
+    }
+    .book-row-v:hover { transform: translateX(3px); }
+    .book-row-v-cover { width: 52px; height: 68px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+    .status-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
+    .status-dot.on { background: #10b981; }
+    .status-dot.off { background: #ef4444; }
+    .btn-vp {
+        background: linear-gradient(135deg, #667eea, #764ba2); color: #fff;
+        border: none; border-radius: 12px; padding: 10px 20px; font-weight: 700;
+        text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-vp:hover { color: #fff; box-shadow: 0 6px 18px rgba(102,126,234,0.35); }
+</style>
+{% endblock %}
+
+{% block vendor_panel_content %}
+<div class="vp-page-head d-flex flex-wrap justify-content-between align-items-center gap-3">
+    <div>
+        <h4 class="mb-1 fw-bold"><i class="fas fa-book me-2"></i>{% trans "图书管理" %}</h4>
+        <small class="opacity-90">{% trans "上架、编辑、下架或删除您的图书" %}</small>
+    </div>
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+        <span class="badge rounded-pill px-3 py-2" style="background:rgba(255,255,255,0.2);">{% trans "共计" %} {{ total_books }}</span>
+        {% if inactive_books %}<span class="badge rounded-pill px-3 py-2 bg-warning text-dark">{{ inactive_books }} {% trans "已下架" %}</span>{% endif %}
+        <a href="{% url 'manager:vendor_add_book' %}" class="btn btn-light rounded-pill fw-bold"><i class="fas fa-plus me-1"></i>{% trans "上架新书" %}</a>
+    </div>
+</div>
+
+<div class="vp-card">
+    {% if vendor_books %}
+    {% for vb in vendor_books %}
+    <div class="book-row-v">
+        <img src="{{ vb.book.get_cover_url }}" alt="" class="book-row-v-cover">
+        <div class="flex-grow-1" style="min-width:0;">
+            <div class="fw-bold text-truncate">{{ vb.book.name }}</div>
+            <small class="text-muted">{% trans "售价" %} ¥{{ vb.vendor_price }} · {% trans "销量" %} {{ vb.book.sale_num }}
+                {% if vb.book.publisher %} · {{ vb.book.publisher.publisher_name }}{% endif %}
+            </small>
+            {% if vb.book.inventory < 5 and vb.book.inventory > 0 %}
+            <div><small class="text-warning fw-semibold"><i class="fas fa-exclamation-triangle"></i> {% trans "库存不足" %} ({{ vb.book.inventory }})</small></div>
+            {% elif vb.book.inventory == 0 %}
+            <div><small class="text-danger fw-semibold"><i class="fas fa-times-circle"></i> {% trans "缺货" %}</small></div>
+            {% endif %}
+        </div>
+        <div class="d-flex align-items-center gap-2 flex-shrink-0 flex-wrap">
+            <span class="status-dot {% if vb.is_active %}on{% else %}off{% endif %}" title="{% if vb.is_active %}{% trans '上架' %}{% else %}{% trans '下架' %}{% endif %}"></span>
+            <a href="{% url 'manager:vendor_edit_book' %}?id={{ vb.id }}" class="btn btn-sm btn-outline-primary rounded-pill"><i class="fas fa-edit"></i></a>
+            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="vpToggleBook({{ vb.id }}, this)">
+                {% if vb.is_active %}{% trans "下架" %}{% else %}{% trans "上架" %}{% endif %}
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-danger rounded-pill" onclick="vpDeleteBook({{ vb.id }})"><i class="fas fa-trash"></i></button>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="text-center py-5 text-muted">
+        <i class="fas fa-book-open fa-3x mb-3 opacity-50"></i>
+        <p>{% trans "暂无上架图书" %}</p>
+        <a href="{% url 'manager:vendor_add_book' %}" class="btn-vp mt-2"><i class="fas fa-plus me-2"></i>{% trans "上架第一本书" %}</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block panel_extra_js %}
+<script>
+function vpToggleBook(id, btn) {
+    fetch('{% url "manager:vendor_toggle_book" %}', {
+        method: 'POST',
+        headers: {'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'id=' + id
+    }).then(r => r.json()).then(d => {
+        if (d.success) location.reload();
+        else if (typeof gToast === 'function') gToast(d.message || 'Error', 'error');
+    });
+}
+function vpDeleteBook(id) {
+    if (!confirm('{% trans "确定要从您的店铺中移除此图书吗？" %}')) return;
+    fetch('{% url "manager:vendor_delete_book" %}', {
+        method: 'POST',
+        headers: {'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'id=' + id
+    }).then(r => r.json()).then(d => {
+        if (d.success) location.reload();
+        else if (typeof gToast === 'function') gToast(d.message || 'Error', 'error');
+    });
+}
+</script>
+{% endblock %}

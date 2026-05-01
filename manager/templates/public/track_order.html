@@ -405,7 +405,7 @@
         </div>
         <!-- Items -->
         <div class="order-mobile-items">
-            {% for item in order.items.all|slice:":2" %}
+            {% for item in order.orderitem_set.all|slice:":2" %}
             <div class="order-item-row">
                 {% if item.book and item.book.cover_image %}
                 <img class="order-item-img" src="{{ item.book.get_cover_url }}" alt="{{ item.book.name }}">
@@ -419,14 +419,14 @@
                 <span class="order-item-price">¥{{ item.unit_price }}</span>
             </div>
             {% endfor %}
-            {% if order.items.count > 2 %}
-            <div style="font-size:12px;color:#999;text-align:center;padding:4px 0;">...还有 {{ order.items.count|add:"-2" }} 件商品</div>
+            {% if order.orderitem_set.count > 2 %}
+            <div style="font-size:12px;color:#999;text-align:center;padding:4px 0;">...还有 {{ order.orderitem_set.count|add:"-2" }} 件商品</div>
             {% endif %}
         </div>
         <!-- Footer -->
         <div class="order-mobile-footer">
             <span class="order-footer-num">{{ order.order_number }}</span>
-            <span class="order-footer-total">共 {{ order.items.count }} 件 合计 <span>¥{{ order.total_amount }}</span></span>
+            <span class="order-footer-total">共 {{ order.orderitem_set.count }} 件 合计 <span>¥{{ order.total_amount }}</span></span>
             <div class="order-footer-actions">
                 <a href="{% url 'manager:order_confirmation' order.order_number %}" class="order-btn-sm order-btn-outline">
                     <i class="fas fa-eye"></i> 详情

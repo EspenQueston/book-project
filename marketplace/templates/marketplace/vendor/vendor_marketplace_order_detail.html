@@ -1,0 +1,261 @@
+{% extends "marketplace/vendor/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "订单详情" %} - {{ order.order_number }}{% endblock %}
+
+{% block extra_vendor_css %}
+<style>
+    .vmo-wrap { max-width: 1180px; margin: 0 auto; }
+    .vo-meta { opacity: 0.88; font-size: 0.82rem; }
+    .vmo-hero.page-header-card {
+        padding: 24px 26px;
+        border-radius: 18px;
+    }
+    .vmo-card.content-card {
+        padding: 22px !important;
+        border-radius: 16px;
+        margin-bottom: 18px;
+        box-shadow: 0 6px 28px rgba(15, 23, 42, 0.06) !important;
+    }
+    .vmo-card h6 {
+        font-weight: 700;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #64748b;
+        margin-bottom: 16px;
+    }
+    .vmo-status-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+    .vmo-status-box {
+        border-radius: 14px;
+        padding: 14px 16px;
+        background: linear-gradient(145deg, rgba(102,126,234,0.08), rgba(118,75,162,0.04));
+        border: 1px solid rgba(102,126,234,0.12);
+    }
+    .vmo-status-box .lbl { font-size: 0.72rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+    .vmo-status-box .val { margin-top: 6px; font-weight: 700; font-size: 0.95rem; }
+    .vmo-line-item {
+        display: grid;
+        grid-template-columns: 52px 1fr auto auto auto;
+        gap: 14px;
+        align-items: center;
+        padding: 16px;
+        border-radius: 14px;
+        margin-bottom: 10px;
+        background: var(--section-bg, #f8fafc);
+        border: 1px solid rgba(15,23,42,0.05);
+    }
+    html[data-theme="dark"] .vmo-line-item { background: rgba(30,41,59,0.65); border-color: #334155; }
+    .vmo-thumb {
+        width: 52px; height: 52px; border-radius: 12px;
+        object-fit: cover;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+    .vmo-attr { font-size: 0.72rem; color: #64748b; margin-top: 4px; }
+    .vmo-attr span { display: inline-block; margin-right: 10px; }
+    @media (max-width: 767px) {
+        .vmo-line-item {
+            grid-template-columns: 48px 1fr;
+        }
+        .vmo-line-item .vmo-price,
+        .vmo-line-item .vmo-qty,
+        .vmo-line-item .vmo-sub {
+            grid-column: 2;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block vendor_content %}
+<div class="vmo-wrap">
+    <div class="page-header-card vmo-hero">
+        <div class="vo-meta mb-2 small">
+            <a href="{% url 'manager:vendor_orders_hub' %}" class="text-white text-decoration-none opacity-90"><i class="fas fa-layer-group me-1"></i>{% trans "订单中心" %}</a>
+        </div>
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+            <div>
+                <h4 class="mb-1 fw-bold">{{ order.order_number }}</h4>
+                <small style="opacity:.9;">{{ order.created_at|date:"Y-m-d H:i" }}</small>
+            </div>
+            <div class="text-end">
+                <div class="fs-3 fw-bold">¥{{ order.total_amount }}</div>
+                <small style="opacity:.9;">{% trans "您的商品小计" %} · ¥{{ vendor_subtotal }}</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-7">
+            <div class="content-card vmo-card">
+                <h6 style="color:#667eea;"><i class="fas fa-sliders-h me-2"></i>{% trans "状态" %}</h6>
+                <div class="vmo-status-grid">
+                    <div class="vmo-status-box">
+                        <div class="lbl">{% trans "订单状态" %}</div>
+                        <div class="val"><span class="badge rounded-pill text-white px-3" style="background:{{ order.get_status_color }};">{{ order.get_status_display }}</span></div>
+                    </div>
+                    <div class="vmo-status-box">
+                        <div class="lbl">{% trans "支付状态" %}</div>
+                        <div class="val"><span class="badge rounded-pill px-3 text-white" style="background:{{ order.get_payment_status_color }};">{{ order.get_payment_status_display }}</span></div>
+                    </div>
+                </div>
+                {% if can_update_fulfillment %}
+                <p class="small text-muted mb-3">{% trans "更新订单与支付状态。可选备注。" %}</p>
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">{% trans "订单状态" %}</label>
+                        <select id="vmoHubStatus" class="form-select rounded-3">
+                            {% for val,label in fulfillment_statuses %}
+                            <option value="{{ val }}" {% if order.status == val %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">{% trans "支付状态" %}</label>
+                        <select id="vmoHubPay" class="form-select rounded-3">
+                            {% for val,label in payment_status_choices %}
+                            <option value="{{ val }}" {% if order.payment_status == val %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold">{% trans "备注（可选）" %}</label>
+                        <textarea id="vmoHubNote" class="form-control rounded-3" rows="2"></textarea>
+                    </div>
+                    <div class="col-12 mt-2">
+                        <button type="button" class="btn btn-primary-gradient rounded-pill" onclick="vmoHubSave()">{% trans "保存状态" %}</button>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-muted small mb-0"><i class="fas fa-lock me-1"></i>{% trans "订单未支付完成或已关闭，无法修改状态。" %}</p>
+                {% endif %}
+            </div>
+
+            <div class="content-card vmo-card">
+                <h6 style="color:#667eea;"><i class="fas fa-user me-2"></i>{% trans "客户" %}</h6>
+                <p class="fw-semibold mb-1">{{ order.user_name|default:"—" }}</p>
+                <p class="small text-muted mb-1">{{ order.user_email }}</p>
+                <p class="small mb-0">{{ order.customer_phone|default:"" }}</p>
+                {% if order.shipping_address %}
+                <hr class="my-3">
+                <p class="small mb-0"><strong>{% trans "收货地址" %}:</strong><br>{{ order.shipping_address }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            {% if can_edit_customer %}
+            <div class="content-card vmo-card">
+                <h6 style="color:#667eea;"><i class="fas fa-edit me-2"></i>{% trans "编辑客户与收货信息" %}</h6>
+                <p class="small text-muted mb-3">{% trans "更正联系方式或收货地址（订单未取消 / 未退款时可编辑）。" %}</p>
+                <div class="mb-2">
+                    <label class="form-label small">{% trans "客户姓名" %}</label>
+                    <input type="text" id="mktCustName" class="form-control form-control-sm rounded-3" value="{{ order.user_name }}">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small">{% trans "邮箱" %}</label>
+                    <input type="email" id="mktCustEmail" class="form-control form-control-sm rounded-3" value="{{ order.user_email }}">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small">{% trans "电话 / 微信" %}</label>
+                    <input type="text" id="mktCustPhone" class="form-control form-control-sm rounded-3" value="{{ order.customer_phone }}">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small">{% trans "国家 / 地区" %}</label>
+                    <input type="text" id="mktCustCountry" class="form-control form-control-sm rounded-3" value="{{ order.country }}">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small">{% trans "收货地址" %}</label>
+                    <textarea id="mktCustAddr" class="form-control form-control-sm rounded-3" rows="3">{{ order.shipping_address }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small">{% trans "客户备注" %}</label>
+                    <textarea id="mktCustNotes" class="form-control form-control-sm rounded-3" rows="2">{{ order.customer_notes }}</textarea>
+                </div>
+                <button type="button" class="btn btn-primary-gradient rounded-pill" onclick="mktSaveCustomer()">{% trans "保存联系信息" %}</button>
+            </div>
+            {% endif %}
+            {% if order.admin_notes %}
+            <div class="content-card vmo-card">
+                <h6 class="small" style="color:#667eea;">{% trans "备注记录" %}</h6>
+                <pre class="small text-muted mb-0" style="white-space:pre-wrap;">{{ order.admin_notes }}</pre>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="content-card vmo-card p-0 overflow-hidden">
+        <div class="px-4 py-3 border-bottom fw-bold d-flex align-items-center gap-2" style="color:#667eea;">
+            <i class="fas fa-box"></i> {% trans "您的商品明细" %}
+        </div>
+        <div class="p-3">
+            {% for it in vendor_items %}
+            <div class="vmo-line-item">
+                <img class="vmo-thumb" src="{{ it.get_line_thumbnail_url }}" alt="">
+                <div class="min-w-0">
+                    <div class="fw-bold small">{{ it.item_name }}</div>
+                    <div class="vmo-attr">
+                        <span class="badge bg-light text-dark">{{ it.get_item_type_display }}</span>
+                        {% for a in it.get_selected_attributes_display %}
+                        <span>{{ a.name }}: {{ a.value }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="vmo-price small text-muted d-none d-md-block">¥{{ it.unit_price }}</div>
+                <div class="vmo-qty small text-muted">× {{ it.quantity }}</div>
+                <div class="vmo-sub fw-bold">¥{{ it.subtotal }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_vendor_js %}
+<script>
+function getCookie(n) {
+    var m = document.cookie.match('(^|;)\\s*' + n + '=([^;]*)');
+    return m ? decodeURIComponent(m[2]) : '';
+}
+function mktSaveCustomer() {
+    var fd = new URLSearchParams();
+    fd.append('order_id', '{{ order.id }}');
+    fd.append('user_name', document.getElementById('mktCustName').value.trim());
+    fd.append('user_email', document.getElementById('mktCustEmail').value.trim());
+    fd.append('customer_phone', document.getElementById('mktCustPhone').value.trim());
+    fd.append('country', document.getElementById('mktCustCountry').value.trim());
+    fd.append('shipping_address', document.getElementById('mktCustAddr').value.trim());
+    fd.append('customer_notes', document.getElementById('mktCustNotes').value.trim());
+    fd.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+    fetch('{% url "marketplace:vendor_marketplace_order_update_customer" order.pk %}', {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/x-www-form-urlencoded'},
+        body: fd.toString()
+    }).then(function(r){ return r.json(); }).then(function(d){
+        if (d.success) location.reload();
+        else alert(d.message || 'Error');
+    });
+}
+function vmoHubSave() {
+    var fd = new URLSearchParams();
+    fd.append('kind', 'marketplace');
+    fd.append('order_id', '{{ order.id }}');
+    fd.append('status', document.getElementById('vmoHubStatus').value);
+    fd.append('payment_status', document.getElementById('vmoHubPay').value);
+    fd.append('vendor_note', document.getElementById('vmoHubNote').value.trim());
+    fd.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+    fetch('{% url "manager:vendor_hub_order_update" %}', {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/x-www-form-urlencoded'},
+        body: fd.toString()
+    }).then(function(r){ return r.json(); }).then(function(d){
+        if (d.success) location.reload();
+        else alert(d.message || 'Error');
+    }).catch(function(){ alert('Network error'); });
+}
+</script>
+{% endblock %}

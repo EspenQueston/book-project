@@ -1,0 +1,401 @@
+{% extends 'public/base.html' %}
+{% load i18n %}
+
+{% block title %}{{ vendor.company_name }} - {% trans "店铺首页" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ===== Shop Header ===== */
+.vs-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 60px 0 0; position: relative; overflow: hidden;
+}
+.vs-header::before {
+    content: ''; position: absolute; top: -40%; right: -8%;
+    width: 500px; height: 500px; background: rgba(255,255,255,0.05);
+    border-radius: 50%;
+}
+.vs-header::after {
+    content: ''; position: absolute; bottom: -30%; left: -5%;
+    width: 350px; height: 350px; background: rgba(255,255,255,0.03);
+    border-radius: 50%;
+}
+.vs-logo {
+    width: 88px; height: 88px; border-radius: 18px;
+    background: rgba(255,255,255,0.2); backdrop-filter: blur(12px);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.2rem; color: #fff; overflow: hidden; flex-shrink: 0;
+    border: 3px solid rgba(255,255,255,0.3);
+}
+.vs-logo img { width: 100%; height: 100%; object-fit: cover; }
+.vs-name { font-size: 1.6rem; font-weight: 800; color: #fff; margin: 0; }
+.vs-desc { color: rgba(255,255,255,0.8); font-size: 0.9rem; margin-top: 4px; max-width: 500px; }
+.vs-stat-row { display: flex; gap: 24px; margin-top: 12px; }
+.vs-stat { text-align: center; }
+.vs-stat-val { font-size: 1.3rem; font-weight: 800; color: #fff; }
+.vs-stat-lbl { font-size: 0.75rem; color: rgba(255,255,255,0.7); }
+.vs-follow-btn {
+    padding: 10px 32px; border-radius: 24px; font-weight: 700;
+    font-size: 0.9rem; cursor: pointer; transition: all 0.3s;
+    display: inline-flex; align-items: center; gap: 8px;
+    border: 2px solid #fff; background: transparent; color: #fff;
+}
+.vs-follow-btn:hover { background: rgba(255,255,255,0.15); transform: translateY(-2px); }
+.vs-follow-btn.following { background: rgba(255,255,255,0.2); }
+.vs-meta-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.vs-meta-pill {
+    background: rgba(255,255,255,0.12); backdrop-filter: blur(8px);
+    padding: 5px 14px; border-radius: 20px; font-size: 0.8rem; color: #fff;
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid rgba(255,255,255,0.15);
+}
+
+/* ===== Tabs ===== */
+.vs-tabs {
+    background: linear-gradient(135deg, rgba(102,126,234,0.95), rgba(118,75,162,0.95));
+    backdrop-filter: blur(10px);
+    padding: 0;
+    position: sticky; top: 0; z-index: 100;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.vs-tab-list {
+    display: flex; list-style: none; margin: 0; padding: 0;
+    overflow-x: auto; scrollbar-width: none;
+}
+.vs-tab-list::-webkit-scrollbar { display: none; }
+.vs-tab-item {
+    padding: 14px 24px; color: rgba(255,255,255,0.7); font-weight: 600;
+    font-size: 0.9rem; cursor: pointer; white-space: nowrap;
+    border-bottom: 3px solid transparent; transition: all 0.3s;
+    text-decoration: none; display: flex; align-items: center; gap: 6px;
+}
+.vs-tab-item:hover { color: #fff; }
+.vs-tab-item.active {
+    color: #fff; border-bottom-color: #fff;
+    background: rgba(255,255,255,0.08);
+}
+.vs-tab-count {
+    background: rgba(255,255,255,0.2); padding: 1px 8px; border-radius: 10px;
+    font-size: 0.72rem; font-weight: 700;
+}
+
+/* ===== Grid ===== */
+.vs-body { background: var(--body-bg, #f5f6fa); padding: 24px 0 60px; min-height: 50vh; }
+.vs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; }
+.vs-card {
+    background: var(--card-bg, #fff); border-radius: 16px; overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05); transition: all 0.3s;
+    border: 1px solid var(--card-border, rgba(0,0,0,0.04));
+    display: flex; flex-direction: column;
+}
+.vs-card:hover { transform: translateY(-6px); box-shadow: 0 12px 35px rgba(102,126,234,0.15); }
+.vs-card-img {
+    width: 100%; height: 200px; object-fit: cover;
+    background: linear-gradient(135deg, #f0f0ff, #e8e0ff);
+}
+.vs-card-body { padding: 14px; flex: 1; display: flex; flex-direction: column; }
+.vs-card-type {
+    display: inline-block; font-size: 0.68rem; font-weight: 700;
+    padding: 2px 8px; border-radius: 6px; margin-bottom: 6px; width: fit-content;
+}
+.vs-card-type.book { background: #dbeafe; color: #1d4ed8; }
+.vs-card-type.product { background: #fef3c7; color: #92400e; }
+.vs-card-type.course { background: #d1fae5; color: #065f46; }
+.vs-card-title {
+    font-size: 0.9rem; font-weight: 700; color: var(--dark-text, #1e293b);
+    margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4;
+}
+.vs-card-footer { margin-top: auto; display: flex; align-items: center; justify-content: space-between; }
+.vs-card-price { font-size: 1.1rem; font-weight: 800; color: #ef4444; }
+.vs-card-price small { font-size: 0.75rem; }
+.vs-card-sales { font-size: 0.75rem; color: var(--muted-text, #94a3b8); }
+.vs-card-btn {
+    display: inline-block; padding: 6px 14px; border-radius: 8px; font-size: 0.78rem;
+    font-weight: 700; text-decoration: none; color: #fff;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    transition: all 0.3s;
+}
+.vs-card-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(102,126,234,0.35); color: #fff; }
+
+/* ===== Shop Info Sidebar ===== */
+.vs-info-card {
+    background: var(--card-bg, #fff); border-radius: 16px; padding: 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 20px;
+    border: 1px solid var(--card-border, rgba(0,0,0,0.04));
+}
+.vs-info-card h6 { font-weight: 700; color: var(--dark-text, #333); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.vs-info-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0; font-size: 0.85rem;
+    border-bottom: 1px solid var(--card-border, rgba(0,0,0,0.04));
+}
+.vs-info-row:last-child { border-bottom: none; }
+.vs-info-lbl { color: var(--muted-text, #64748b); }
+.vs-info-val { font-weight: 600; color: var(--dark-text, #333); }
+.vs-score-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 12px; }
+.vs-score-item { text-align: center; padding: 12px 8px; background: var(--section-bg, #f8f9fa); border-radius: 12px; }
+.vs-score-val { font-size: 1.2rem; font-weight: 800; color: #ef4444; }
+.vs-score-lbl { font-size: 0.72rem; color: var(--muted-text, #94a3b8); margin-top: 2px; }
+
+.vs-empty {
+    text-align: center; padding: 60px 20px; color: var(--muted-text, #94a3b8);
+}
+.vs-empty i { font-size: 3rem; margin-bottom: 16px; opacity: 0.4; display: block; }
+
+/* ===== Contact Vendor btn ===== */
+.vs-contact-btn {
+    display: block; width: 100%; padding: 12px; border-radius: 12px;
+    background: linear-gradient(135deg, #f59e0b, #f97316); color: #fff;
+    text-align: center; font-weight: 700; text-decoration: none;
+    transition: all 0.3s; border: none; font-size: 0.9rem;
+}
+.vs-contact-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245,158,11,0.35); color: #fff; }
+
+/* ===== Dark Mode ===== */
+html[data-theme="dark"] .vs-card { background: var(--card-bg); }
+html[data-theme="dark"] .vs-card-title { color: var(--dark-text); }
+html[data-theme="dark"] .vs-info-card { background: var(--card-bg); }
+html[data-theme="dark"] .vs-body { background: var(--body-bg); }
+html[data-theme="dark"] .vs-score-item { background: var(--section-bg); }
+
+/* ===== Mobile ===== */
+@media (max-width: 768px) {
+    .vs-header { padding: 40px 0 0; }
+    .vs-logo { width: 60px; height: 60px; font-size: 1.5rem; border-radius: 14px; }
+    .vs-name { font-size: 1.2rem; }
+    .vs-stat-row { gap: 16px; }
+    .vs-stat-val { font-size: 1rem; }
+    .vs-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .vs-card-img { height: 150px; }
+    .vs-card-body { padding: 10px; }
+    .vs-card-title { font-size: 0.82rem; }
+    .vs-card-price { font-size: 0.95rem; }
+    .vs-tab-item { padding: 12px 16px; font-size: 0.82rem; }
+    .vs-info-sidebar { order: -1; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- ===== Shop Header ===== -->
+<section class="vs-header">
+    <div class="container position-relative" style="z-index:2;">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-7">
+                <div class="d-flex align-items-center gap-3" data-aos="fade-right">
+                    <div class="vs-logo">
+                        {% if vendor.get_logo_url %}
+                            <img src="{{ vendor.get_logo_url }}" alt="{{ vendor.company_name }}">
+                        {% else %}
+                            <i class="fas fa-store"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h1 class="vs-name">{{ vendor.company_name }}</h1>
+                        <p class="vs-desc mb-0">{{ vendor.description|default:"" }}</p>
+                        <div class="vs-meta-pills">
+                            <span class="vs-meta-pill"><i class="fas fa-check-circle"></i>
+                                <span data-zh="认证商家" data-en="Verified Seller" data-fr="Vendeur Vérifié">{% trans "认证商家" %}</span>
+                            </span>
+                            <span class="vs-meta-pill"><i class="fas fa-calendar-alt"></i>
+                                <span data-zh="入驻" data-en="Since" data-fr="Depuis">{% trans "入驻" %}</span> {{ vendor.created_at|date:"Y" }}
+                            </span>
+                            {% if follower_count > 0 %}
+                            <span class="vs-meta-pill"><i class="fas fa-users"></i>{{ follower_count }}
+                                <span data-zh="关注" data-en="Followers" data-fr="Abonnés">{% trans "关注" %}</span>
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="d-flex align-items-center justify-content-lg-end gap-4" data-aos="fade-left" data-aos-delay="100">
+                    <div class="vs-stat-row">
+                        <div class="vs-stat">
+                            <div class="vs-stat-val">{{ total_items }}</div>
+                            <div class="vs-stat-lbl" data-zh="全部商品" data-en="Items" data-fr="Articles">{% trans "全部商品" %}</div>
+                        </div>
+                        <div class="vs-stat">
+                            <div class="vs-stat-val">{{ total_sales }}</div>
+                            <div class="vs-stat-lbl" data-zh="总销量" data-en="Sales" data-fr="Ventes">{% trans "总销量" %}</div>
+                        </div>
+                        <div class="vs-stat">
+                            <div class="vs-stat-val">{{ follower_count }}</div>
+                            <div class="vs-stat-lbl" data-zh="粉丝" data-en="Fans" data-fr="Fans">{% trans "粉丝" %}</div>
+                        </div>
+                    </div>
+                    <button class="vs-follow-btn {% if is_following %}following{% endif %}" id="followBtn" onclick="toggleFollow({{ vendor.id }})">
+                        <i class="fas {% if is_following %}fa-check{% else %}fa-plus{% endif %}"></i>
+                        <span id="followText">{% if is_following %}<span data-zh="已关注" data-en="Following" data-fr="Suivi">{% trans "已关注" %}</span>{% else %}<span data-zh="关注店铺" data-en="Follow Shop" data-fr="Suivre">{% trans "关注店铺" %}</span>{% endif %}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Tabs -->
+    <div class="vs-tabs mt-4">
+        <div class="container">
+            <ul class="vs-tab-list">
+                <li><a class="vs-tab-item {% if active_tab == 'all' %}active{% endif %}" href="?tab=all" data-zh="全部商品" data-en="All Items" data-fr="Tous">
+                    <i class="fas fa-th-large"></i> <span data-zh="全部" data-en="All" data-fr="Tous">{% trans "全部" %}</span> <span class="vs-tab-count">{{ total_items }}</span></a></li>
+                <li><a class="vs-tab-item {% if active_tab == 'books' %}active{% endif %}" href="?tab=books" data-zh="图书" data-en="Books" data-fr="Livres">
+                    <i class="fas fa-book"></i> <span data-zh="图书" data-en="Books" data-fr="Livres">{% trans "图书" %}</span> <span class="vs-tab-count">{{ vendor_books|length }}</span></a></li>
+                <li><a class="vs-tab-item {% if active_tab == 'products' %}active{% endif %}" href="?tab=products" data-zh="商品" data-en="Products" data-fr="Produits">
+                    <i class="fas fa-box-open"></i> <span data-zh="商品" data-en="Products" data-fr="Produits">{% trans "商品" %}</span> <span class="vs-tab-count">{{ total_products }}</span></a></li>
+                <li><a class="vs-tab-item {% if active_tab == 'courses' %}active{% endif %}" href="?tab=courses" data-zh="课程" data-en="Courses" data-fr="Cours">
+                    <i class="fas fa-graduation-cap"></i> <span data-zh="课程" data-en="Courses" data-fr="Cours">{% trans "课程" %}</span> <span class="vs-tab-count">{{ total_courses }}</span></a></li>
+                <li><a class="vs-tab-item {% if active_tab == 'shop' %}active{% endif %}" href="?tab=shop" data-zh="店铺" data-en="Shop" data-fr="Boutique">
+                    <i class="fas fa-store-alt"></i> <span data-zh="店铺" data-en="Shop" data-fr="Boutique">{% trans "店铺" %}</span></a></li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- ===== Body ===== -->
+<section class="vs-body">
+    <div class="container">
+        <div class="row g-4">
+            {% if active_tab == 'shop' %}
+            <div class="col-12" data-aos="fade-up">
+                {% include 'public/_vendor_shop_info.html' %}
+            </div>
+            {% else %}
+            <!-- Main Grid -->
+            <div class="col-lg-9" data-aos="fade-up">
+                <div class="vs-grid" id="shopGrid">
+
+                    {% if active_tab == 'all' or active_tab == 'books' %}
+                    {% for vb in vendor_books %}
+                    <div class="vs-card" data-type="book">
+                        <a href="{% url 'manager:public_book_detail' vb.book.id %}">
+                            <img src="{{ vb.book.get_cover_url }}" alt="{{ vb.book.name }}" class="vs-card-img">
+                        </a>
+                        <div class="vs-card-body">
+                            <span class="vs-card-type book"><i class="fas fa-book me-1"></i><span data-zh="图书" data-en="Book" data-fr="Livre">{% trans "图书" %}</span></span>
+                            <a href="{% url 'manager:public_book_detail' vb.book.id %}" style="text-decoration:none;">
+                                <div class="vs-card-title">{{ vb.book.name }}</div>
+                            </a>
+                            <div class="vs-card-footer">
+                                <div>
+                                    <div class="vs-card-price"><small>¥</small>{{ vb.vendor_price }}</div>
+                                    <div class="vs-card-sales"><span data-zh="已售" data-en="Sold" data-fr="Vendu">{% trans "已售" %}</span> {{ vb.book.sale_num }}+</div>
+                                </div>
+                                <a href="{% url 'manager:public_book_detail' vb.book.id %}" class="vs-card-btn" data-zh="查看" data-en="View" data-fr="Voir">{% trans "查看" %}</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
+                    {% if active_tab == 'all' or active_tab == 'products' %}
+                    {% for product in vendor_products %}
+                    <div class="vs-card" data-type="product">
+                        <a href="{% url 'marketplace:product_detail' product.slug %}">
+                            <img src="{{ product.get_image_url }}" alt="{{ product.name }}" class="vs-card-img">
+                        </a>
+                        <div class="vs-card-body">
+                            <span class="vs-card-type product"><i class="fas fa-box-open me-1"></i><span data-zh="商品" data-en="Product" data-fr="Produit">{% trans "商品" %}</span></span>
+                            <a href="{% url 'marketplace:product_detail' product.slug %}" style="text-decoration:none;">
+                                <div class="vs-card-title">{{ product.name }}</div>
+                            </a>
+                            <div class="vs-card-footer">
+                                <div>
+                                    <div class="vs-card-price"><small>¥</small>{{ product.price }}</div>
+                                    <div class="vs-card-sales"><span data-zh="已售" data-en="Sold" data-fr="Vendu">{% trans "已售" %}</span> {{ product.sales_count }}+</div>
+                                </div>
+                                <a href="{% url 'marketplace:product_detail' product.slug %}" class="vs-card-btn" data-zh="查看" data-en="View" data-fr="Voir">{% trans "查看" %}</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
+                    {% if active_tab == 'all' or active_tab == 'courses' %}
+                    {% for course in vendor_courses %}
+                    <div class="vs-card" data-type="course">
+                        <a href="{% url 'marketplace:course_detail' course.slug %}">
+                            <img src="{{ course.get_image_url }}" alt="{{ course.title }}" class="vs-card-img">
+                        </a>
+                        <div class="vs-card-body">
+                            <span class="vs-card-type course"><i class="fas fa-graduation-cap me-1"></i><span data-zh="课程" data-en="Course" data-fr="Cours">{% trans "课程" %}</span></span>
+                            <a href="{% url 'marketplace:course_detail' course.slug %}" style="text-decoration:none;">
+                                <div class="vs-card-title">{{ course.title }}</div>
+                            </a>
+                            <div class="vs-card-footer">
+                                <div>
+                                    <div class="vs-card-price"><small>¥</small>{{ course.price }}</div>
+                                    <div class="vs-card-sales"><i class="fas fa-user-graduate me-1"></i>{{ course.enrollment_count }}</div>
+                                </div>
+                                <a href="{% url 'marketplace:course_detail' course.slug %}" class="vs-card-btn" data-zh="查看" data-en="View" data-fr="Voir">{% trans "查看" %}</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
+                </div>
+
+                {% if total_items == 0 %}
+                <div class="vs-empty">
+                    <i class="fas fa-store-slash"></i>
+                    <p data-zh="该店铺暂无商品" data-en="This shop has no items yet" data-fr="Cette boutique n'a pas encore d'articles">{% trans "该店铺暂无商品" %}</p>
+                </div>
+                {% endif %}
+
+                {% if active_tab == 'books' and not vendor_books %}
+                <div class="vs-empty">
+                    <i class="fas fa-book-open"></i>
+                    <p data-zh="暂无图书" data-en="No books available" data-fr="Aucun livre disponible">{% trans "暂无图书" %}</p>
+                </div>
+                {% endif %}
+
+                {% if active_tab == 'products' and not vendor_products %}
+                <div class="vs-empty">
+                    <i class="fas fa-box-open"></i>
+                    <p data-zh="暂无商品" data-en="No products available" data-fr="Aucun produit disponible">{% trans "暂无商品" %}</p>
+                </div>
+                {% endif %}
+
+                {% if active_tab == 'courses' and not vendor_courses %}
+                <div class="vs-empty">
+                    <i class="fas fa-graduation-cap"></i>
+                    <p data-zh="暂无课程" data-en="No courses available" data-fr="Aucun cours disponible">{% trans "暂无课程" %}</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="col-lg-3 vs-info-sidebar d-none d-lg-block" data-aos="fade-up" data-aos-delay="100">
+                {% include 'public/_vendor_shop_info.html' %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleFollow(vendorId) {
+    var btn = document.getElementById('followBtn');
+    var txt = document.getElementById('followText');
+    fetch('/manager/vendor/' + vendorId + '/follow/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': '{{ csrf_token }}' },
+        body: ''
+    }).then(function(r) { return r.json(); }).then(function(d) {
+        if (d.login_required) { window.location.href = '{% url "manager:user_login" %}'; return; }
+        if (d.success) {
+            btn.classList.toggle('following', d.following);
+            btn.querySelector('i').className = d.following ? 'fas fa-check' : 'fas fa-plus';
+            txt.innerHTML = d.following
+                ? '<span data-zh="已关注" data-en="Following" data-fr="Suivi">已关注</span>'
+                : '<span data-zh="关注店铺" data-en="Follow Shop" data-fr="Suivre">关注店铺</span>';
+            if (typeof switchLanguage === 'function') switchLanguage(document.documentElement.getAttribute('data-lang') || 'zh');
+            if (typeof gToast === 'function') gToast(d.message, 'success');
+        }
+    }).catch(function() {});
+}
+</script>
+{% endblock %}

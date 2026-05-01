@@ -1,35 +1,110 @@
-{% extends 'public/base.html' %}
+{% extends 'public/vendor_panel_base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans "卖家中心" %} - {{ vendor.company_name }}{% endblock %}
+{% block panel_title %}{% trans "卖家中心" %} - {{ vendor.company_name }}{% endblock %}
 
-{% block extra_css %}
+{% block panel_head_extra %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block panel_extra_css %}
 <style>
-    .vendor-hero {
+    .welcome-header {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 80px 0 60px;
-        position: relative; overflow: hidden;
+        color: #ffffff;
+        padding: 20px;
+        border-radius: 15px;
+        margin-bottom: 20px;
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
     }
-    .vendor-hero::before {
-        content: ''; position: absolute; top: -50%; right: -10%;
-        width: 500px; height: 500px; background: rgba(255,255,255,0.05);
-        border-radius: 50%;
-    }
-    .vendor-logo {
-        width: 80px; height: 80px; border-radius: 16px;
-        background: rgba(255,255,255,0.2); backdrop-filter: blur(10px);
+    .welcome-header .vh-logo {
+        width: 52px; height: 52px; border-radius: 12px;
+        background: rgba(255,255,255,0.2);
         display: flex; align-items: center; justify-content: center;
-        font-size: 2rem; color: white; overflow: hidden;
-        border: 3px solid rgba(255,255,255,0.3);
+        overflow: hidden; flex-shrink: 0;
+        border: 2px solid rgba(255,255,255,0.35);
     }
-    .vendor-logo img { width: 100%; height: 100%; object-fit: cover; }
-    .stat-glass {
-        background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);
-        border-radius: 16px; padding: 20px; text-align: center;
-        border: 1px solid rgba(255,255,255,0.2);
+    .welcome-header .vh-logo img { width: 100%; height: 100%; object-fit: cover; }
+    .kpi-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 16px;
+        margin-bottom: 15px;
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.25);
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        transition: transform 0.3s ease;
+        min-height: 92px;
     }
-    .stat-glass h3 { font-size: 1.8rem; font-weight: 800; margin: 0; }
-    .stat-glass p { margin: 4px 0 0; opacity: 0.85; font-size: 0.85rem; }
+    .kpi-card:hover { transform: translateY(-3px); }
+    a.kpi-card-wrap {
+        text-decoration: none !important;
+        color: inherit !important;
+        display: block;
+        height: 100%;
+        border-radius: 15px;
+    }
+    a.kpi-card-wrap:focus-visible {
+        outline: 3px solid rgba(102,126,234,0.55);
+        outline-offset: 3px;
+    }
+    a.kpi-card-wrap .kpi-card { cursor: pointer; }
+    .dash-card.dash-card-click {
+        cursor: pointer;
+        transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+        border: 2px solid transparent;
+    }
+    a.text-decoration-none:hover .dash-card.dash-card-click {
+        transform: translateY(-5px);
+        box-shadow: 0 14px 38px rgba(102,126,234,0.2);
+        border-color: rgba(102,126,234,0.28);
+    }
+    .kpi-card.kpi-alt2 { background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 8px 25px rgba(16, 185, 129, 0.22); }
+    .kpi-card.kpi-alt3 { background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); box-shadow: 0 8px 25px rgba(6, 182, 212, 0.22); }
+    .kpi-card.kpi-alt4 { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); box-shadow: 0 8px 25px rgba(245, 158, 11, 0.22); }
+    .kpi-icon {
+        width: 46px; height: 46px;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.2);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.15rem;
+        flex-shrink: 0;
+    }
+    .kpi-value { font-size: 1.35rem; font-weight: 700; line-height: 1.2; }
+    .kpi-label { font-size: 0.82rem; opacity: 0.95; font-weight: 600; }
+    .dash-rev-num {
+        font-size: 1.95rem;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+    }
+    .dash-rev-num--book { color: #4338ca !important; }
+    .dash-rev-num--product { color: #c2410c !important; text-shadow: 0 1px 0 rgba(255,255,255,0.75); }
+    .dash-rev-num--course { color: #047857 !important; text-shadow: 0 1px 0 rgba(255,255,255,0.75); }
+    .dash-rev-num--supermarket { color: #b45309 !important; text-shadow: 0 1px 0 rgba(255,255,255,0.75); }
+    .dash-beh-num {
+        font-size: 2.35rem;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+    }
+    .dash-beh-num--cart { color: #c2410c !important; }
+    .dash-beh-num--wish { color: #b91c1c !important; }
+    .dash-inv-num {
+        font-size: 1.65rem;
+        font-weight: 900;
+        line-height: 1.15;
+    }
+    .vm-chart-card .vm-chart-wrap { position: relative; width: 100%; height: 260px; }
+    .vm-chart-card .vm-chart-wrap-sm { height: 200px; }
+    .vm-order-row {
+        display: flex; align-items: center; gap: 10px;
+        padding: 10px 0; border-bottom: 1px solid var(--card-border, rgba(0,0,0,0.06));
+        font-size: 0.88rem;
+    }
+    .vm-order-row:last-child { border-bottom: none; }
     .dash-card {
         background: var(--card-bg, #fff); border-radius: 20px;
         box-shadow: 0 8px 30px rgba(0,0,0,0.06);
@@ -68,350 +143,618 @@
     .info-row:last-child { border-bottom: none; }
     .info-label { color: var(--muted-text, #64748b); font-weight: 500; }
     .perf-item { margin-bottom: 4px; }
+
+    /* Dashboard tabs */
+    .dtab-nav { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 24px; }
+    .dtab-btn {
+        padding: 10px 20px; border-radius: 12px; font-weight: 600; font-size: 0.88rem;
+        cursor: pointer; transition: all 0.3s; border: 2px solid var(--card-border, #e5e7eb);
+        background: var(--card-bg, #fff); color: var(--dark-text, #333);
+        display: inline-flex; align-items: center; gap: 6px;
+    }
+    .dtab-btn:hover { border-color: #667eea; color: #667eea; }
+    .dtab-btn.active { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border-color: transparent; }
+    .dtab-panel { display: none; }
+    .dtab-panel.active { display: block; }
+
+    /* Product/Course rows */
+    .item-row {
+        display: flex; align-items: center; gap: 14px;
+        padding: 12px; border-radius: 12px; margin-bottom: 10px;
+        background: var(--section-bg, #f8f9fa); transition: all 0.3s;
+    }
+    .item-row:hover { transform: translateX(4px); }
+    .item-row-img { width: 50px; height: 50px; border-radius: 10px; object-fit: cover; }
+
+    /* Shop link card */
+    .shop-link-card {
+        background: linear-gradient(135deg, rgba(102,126,234,0.06), rgba(118,75,162,0.06));
+        border: 2px dashed rgba(102,126,234,0.3); border-radius: 16px;
+        padding: 20px; text-align: center; margin-bottom: 20px;
+    }
+    .shop-link-card a { font-weight: 700; color: #667eea; text-decoration: none; font-size: 0.9rem; }
+    .shop-link-card a:hover { text-decoration: underline; }
+
     @media (min-width: 768px) {
         .col-md-2-4 { flex: 0 0 20%; max-width: 20%; }
+    }
+    @media (max-width: 768px) {
+        .dtab-nav { gap: 6px; }
+        .dtab-btn { padding: 8px 14px; font-size: 0.8rem; }
     }
 </style>
 {% endblock %}
 
-{% block content %}
-<section class="vendor-hero text-white">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-5">
-                <div class="d-flex align-items-center gap-3 mb-3" data-aos="fade-right">
-                    <div class="vendor-logo">
+{% block vendor_panel_content %}
+<section class="container-fluid px-lg-3 px-2 py-2">
+    <div class="welcome-header">
+        <div class="row align-items-center g-3">
+            <div class="col-lg-8">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="vh-logo">
                         {% if vendor.get_logo_url %}
-                            <img src="{{ vendor.get_logo_url }}" alt="{{ vendor.company_name }}">
+                            <img src="{{ vendor.get_logo_url }}" alt="">
                         {% else %}
-                            <i class="fas fa-store"></i>
+                            <i class="fas fa-store text-white fs-4"></i>
                         {% endif %}
                     </div>
-                    <div>
-                        <h2 class="fw-bold mb-1">{{ vendor.company_name }}</h2>
-                        <span class="vendor-status-badge vendor-status-{{ vendor.status }}">
-                            {{ vendor.get_status_display }}
-                        </span>
+                    <div class="min-w-0">
+                        <h3 class="mb-1 fw-bold"><i class="fas fa-store me-2"></i>{% trans "卖家中心" %}</h3>
+                        <p class="mb-2 mb-lg-1 opacity-90">{{ vendor.company_name }}
+                            <span class="vendor-status-badge vendor-status-{{ vendor.status }} ms-1">{{ vendor.get_status_display }}</span>
+                        </p>
+                        <p class="mb-0 opacity-75 small">{% trans "数据概览 · 店铺与货架 · 订单与设置" %}</p>
                     </div>
                 </div>
-                <p class="mb-0" style="opacity:0.85;" data-aos="fade-right" data-aos-delay="100">{{ vendor.description|default:"" }}</p>
             </div>
-            <div class="col-lg-7">
-                <div class="row g-3 mt-2" data-aos="fade-left" data-aos-delay="200">
-                    <div class="col-4 col-md-2-4">
-                        <div class="stat-glass">
-                            <h3>{{ total_books }}</h3>
-                            <p><i class="fas fa-book me-1"></i>{% trans "图书" %}</p>
+            <div class="col-lg-4 text-lg-end mt-2 mt-lg-0">
+                <span class="badge rounded-pill px-3 py-2" style="background:rgba(255,255,255,0.22);color:#fff;font-weight:600;"><i class="fas fa-clock me-1"></i>{% now "Y-m-d" %}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-6 col-xl-3">
+            <a href="{% url 'manager:vendor_orders_hub' %}" class="kpi-card-wrap h-100" title="{% trans '查看订单中心' %}">
+                <div class="kpi-card mb-0 h-100">
+                    <div class="kpi-icon"><i class="fas fa-shopping-cart"></i></div>
+                    <div>
+                        <div class="kpi-value">{{ combined_sales }}</div>
+                        <div class="kpi-label">{% trans "总销量" %}</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-xl-3">
+            <a href="{% url 'manager:vendor_orders_hub' %}?channel=all" class="kpi-card-wrap h-100" title="{% trans '查看订单中心' %}">
+                <div class="kpi-card kpi-alt2 mb-0 h-100">
+                    <div class="kpi-icon"><i class="fas fa-yen-sign"></i></div>
+                    <div>
+                        <div class="kpi-value">¥{{ combined_revenue|floatformat:0 }}</div>
+                        <div class="kpi-label">{% trans "总收入（预估）" %}</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-xl-3">
+            <a href="{% url 'manager:vendor_books' %}" class="kpi-card-wrap h-100" title="{% trans '图书管理' %}">
+                <div class="kpi-card kpi-alt3 mb-0 h-100">
+                    <div class="kpi-icon"><i class="fas fa-book"></i></div>
+                    <div>
+                        <div class="kpi-value">{{ total_books }}</div>
+                        <div class="kpi-label">{% trans "图书" %}</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-xl-3">
+            <a href="{% url 'marketplace:vendor_products' %}" class="kpi-card-wrap h-100" title="{% trans '商城货架' %}">
+                <div class="kpi-card kpi-alt4 mb-0 h-100">
+                    <div class="kpi-icon"><i class="fas fa-layer-group"></i></div>
+                    <div>
+                        <div class="kpi-value">{{ active_products }} / {{ active_courses }} / {{ active_supermarket_items }}</div>
+                        <div class="kpi-label">{% trans "在售商品 / 课程 / 超市" %}</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Public Shop Link -->
+    <div class="shop-link-card" data-aos="fade-up">
+        <i class="fas fa-external-link-alt me-2" style="color:#667eea;"></i>
+        <span style="color:var(--muted-text, #64748b); font-size:0.88rem;" data-zh="您的店铺主页：" data-en="Your public shop page:" data-fr="Votre page boutique :">{% trans "您的店铺主页：" %}</span>
+        <a href="{% url 'manager:public_vendor_shop' vendor.id %}" target="_blank">
+            {% url 'manager:public_vendor_shop' vendor.id %}
+            <i class="fas fa-arrow-right ms-1"></i>
+        </a>
+    </div>
+
+    <!-- Dashboard Tabs -->
+    <div class="dtab-nav" data-aos="fade-up">
+        <button type="button" class="dtab-btn active" onclick="switchDTab('overview', this)"><i class="fas fa-chart-pie"></i> <span>{% trans "总览" %}</span></button>
+        <button type="button" class="dtab-btn" onclick="switchDTab('settings', this)"><i class="fas fa-cog"></i> <span>{% trans "店铺设置" %}</span></button>
+    </div>
+
+    <!-- ===== OVERVIEW TAB ===== -->
+    <div class="dtab-panel active" id="dtab-overview">
+        <div class="row g-3 mb-4">
+            <div class="col-12">
+                <a href="{% url 'manager:vendor_orders_hub' %}" class="text-decoration-none text-reset">
+                    <div class="dash-card dash-card-click mb-0 py-4 px-3" style="background: linear-gradient(135deg, rgba(102,126,234,0.14), rgba(118,75,162,0.08));">
+                        <div class="row align-items-center g-3">
+                            <div class="col-lg-8">
+                                <h5 class="fw-bold mb-2 text-dark"><i class="fas fa-layer-group me-2" style="color:#667eea;"></i>{% trans "订单中心" %}</h5>
+                                <p class="small text-muted mb-0">{% trans "一站式查看与管理图书、商城（商品 / 课程 / 超市）订单；筛选类型、更新履约状态与客户地址。" %}</p>
+                            </div>
+                            <div class="col-lg-4 text-lg-end">
+                                <div class="display-6 fw-bold mb-0" style="color:#667eea;line-height:1;">{{ hub_orders_total }}</div>
+                                <div class="small text-muted fw-semibold">{% trans "订单总数" %}</div>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-4 col-md-2-4">
-                        <div class="stat-glass">
-                            <h3>{{ total_sales }}</h3>
-                            <p><i class="fas fa-shopping-cart me-1"></i>{% trans "销量" %}</p>
+                </a>
+            </div>
+            <div class="col-6 col-md-4 col-xl-2">
+                <a href="{% url 'manager:vendor_orders_hub' %}?channel=products" class="text-decoration-none">
+                    <div class="dash-card dash-card-click text-center h-100 py-4 mb-0">
+                        <i class="fas fa-box-open fa-2x mb-2 d-block" style="color:#f59e0b;"></i>
+                        <span class="fw-bold text-dark">{% trans "商品订单" %}</span>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-4 col-xl-2">
+                <a href="{% url 'manager:vendor_orders_hub' %}?channel=courses" class="text-decoration-none">
+                    <div class="dash-card dash-card-click text-center h-100 py-4 mb-0">
+                        <i class="fas fa-chalkboard-teacher fa-2x mb-2 d-block" style="color:#06b6d4;"></i>
+                        <span class="fw-bold text-dark">{% trans "课程订单" %}</span>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-4 col-xl-2">
+                <a href="{% url 'manager:vendor_orders_hub' %}?channel=supermarket" class="text-decoration-none">
+                    <div class="dash-card dash-card-click text-center h-100 py-4 mb-0">
+                        <i class="fas fa-apple-alt fa-2x mb-2 d-block" style="color:#84cc16;"></i>
+                        <span class="fw-bold text-dark">{% trans "超市订单" %}</span>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-4 col-xl-2">
+                <a href="{% url 'marketplace:vendor_supermarket' %}" class="text-decoration-none">
+                    <div class="dash-card dash-card-click text-center h-100 py-4 mb-0">
+                        <i class="fas fa-carrot fa-2x mb-2 d-block" style="color:#65a30d;"></i>
+                        <span class="fw-bold text-dark">{% trans "超市商品" %}</span>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-4 col-xl-2">
+                <a href="{% url 'manager:vendor_books' %}" class="text-decoration-none">
+                    <div class="dash-card dash-card-click text-center h-100 py-4 mb-0">
+                        <i class="fas fa-book-open fa-2x mb-2 d-block" style="color:#10b981;"></i>
+                        <span class="fw-bold text-dark">{% trans "图书管理" %}</span>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-4 col-xl-2">
+                <a href="{% url 'marketplace:vendor_products' %}" class="text-decoration-none">
+                    <div class="dash-card dash-card-click text-center h-100 py-4 mb-0">
+                        <i class="fas fa-shopping-bag fa-2x mb-2 d-block" style="color:#f59e0b;"></i>
+                        <span class="fw-bold text-dark">{% trans "商品" %}</span>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-4 col-xl-2">
+                <a href="{% url 'marketplace:vendor_courses' %}" class="text-decoration-none">
+                    <div class="dash-card dash-card-click text-center h-100 py-4 mb-0">
+                        <i class="fas fa-graduation-cap fa-2x mb-2 d-block" style="color:#6366f1;"></i>
+                        <span class="fw-bold text-dark">{% trans "课程" %}</span>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-4 col-xl-2">
+                <a href="{% url 'manager:vendor_add_book' %}" class="text-decoration-none">
+                    <div class="dash-card dash-card-click text-center h-100 py-4 mb-0">
+                        <i class="fas fa-plus-circle fa-2x mb-2 d-block" style="color:#6366f1;"></i>
+                        <span class="fw-bold text-dark">{% trans "上架图书" %}</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div class="row g-4">
+            <!-- Sidebar -->
+            <div class="col-lg-4" data-aos="fade-up">
+                <div class="dash-card">
+                    <h5><i class="fas fa-cogs me-2" style="color:#667eea;"></i>{% trans "快捷操作" %}</h5>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'manager:vendor_messages' %}" class="btn-vendor text-center" style="background:linear-gradient(135deg,#f59e0b,#ea580c);">
+                            <i class="fas fa-comments me-2"></i>{% trans "客户消息" %}
+                        </a>
+                        <a href="{% url 'manager:vendor_add_book' %}" class="btn-vendor text-center" style="background:linear-gradient(135deg,#10b981,#059669);">
+                            <i class="fas fa-plus me-2"></i>{% trans "上架新书" %}
+                        </a>
+                        <a href="{% url 'manager:public_vendor_shop' vendor.id %}" class="btn-vendor text-center" target="_blank" style="background:linear-gradient(135deg,#6366f1,#4f46e5);">
+                            <i class="fas fa-store me-2"></i>{% trans "预览店铺前台" %}
+                        </a>
+                        <a href="{% url 'marketplace:vendor_products' %}" class="btn-vendor text-center" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8);">
+                            <i class="fas fa-shopping-bag me-2"></i>{% trans "商城货架（商品）" %}
+                        </a>
+                        <a href="{% url 'marketplace:vendor_courses' %}" class="btn-vendor text-center" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);">
+                            <i class="fas fa-graduation-cap me-2"></i>{% trans "商城货架（课程）" %}
+                        </a>
+                        <a href="{% url 'marketplace:vendor_supermarket' %}" class="btn-vendor text-center" style="background:linear-gradient(135deg,#84cc16,#4d7c0f);">
+                            <i class="fas fa-apple-alt me-2"></i>{% trans "商城货架（超市）" %}
+                        </a>
+                        <a href="{% url 'manager:vendor_logout' %}" class="btn btn-outline-secondary" style="border-radius:12px;">
+                            <i class="fas fa-sign-out-alt me-2"></i>{% trans "退出" %}
+                        </a>
+                    </div>
+                    {% if admin_access %}
+                    <hr>
+                    <p class="small text-muted mb-0"><i class="fas fa-shield-alt me-1"></i>{% trans "管理员视图" %}</p>
+                    {% endif %}
+                </div>
+
+                <div class="dash-card">
+                    <h5><i class="fas fa-chart-line me-2" style="color:#667eea;"></i>{% trans "业绩概览" %}</h5>
+                    <div class="perf-item">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span style="font-size:0.85rem;color:var(--muted-text, #64748b);">{% trans "平均售价" %}</span>
+                            <strong style="color:var(--dark-text, #333);">¥{{ avg_price|floatformat:2 }}</strong>
                         </div>
                     </div>
-                    <div class="col-4 col-md-2-4">
-                        <div class="stat-glass">
-                            <h3>¥{{ total_revenue|floatformat:0 }}</h3>
-                            <p><i class="fas fa-yen-sign me-1"></i>{% trans "收入" %}</p>
+                    <div class="perf-item">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span style="font-size:0.85rem;color:var(--muted-text, #64748b);">{% trans "粉丝数" %}</span>
+                            <strong style="color:#667eea;">{{ follower_count }}</strong>
                         </div>
                     </div>
-                    <div class="col-6 col-md-2-4">
-                        <div class="stat-glass">
-                            <h3>{{ active_books }}</h3>
-                            <p><i class="fas fa-check-circle me-1"></i>{% trans "上架中" %}</p>
+                    <div class="perf-item">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span style="font-size:0.85rem;color:var(--muted-text, #64748b);">{% trans "上架率" %} <span class="text-muted fw-normal">({% trans "图书 · 商品 · 课程 · 超市" %})</span></span>
+                            <strong style="color:#10b981;">{{ listing_activation_pct }}%</strong>
+                        </div>
+                        {% if total_listings %}
+                        <div style="background:#e5e7eb;border-radius:10px;height:6px;overflow:hidden;">
+                            <div style="background:linear-gradient(90deg,#10b981,#059669);height:100%;border-radius:10px;width:{{ listing_activation_pct }}%;"></div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="perf-item mt-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span style="font-size:0.85rem;color:var(--muted-text, #64748b);">{% trans "佣金率" %}</span>
+                            <strong style="color:#d97706;">{{ vendor.commission_rate|floatformat:1 }}%</strong>
                         </div>
                     </div>
-                    <div class="col-6 col-md-2-4">
-                        <div class="stat-glass">
-                            <h3>{{ total_inventory }}</h3>
-                            <p><i class="fas fa-boxes me-1"></i>{% trans "库存" %}</p>
+                    {% if perf_top_items %}
+                    <hr style="border-color:var(--card-border, #f0f0f0);">
+                    <div style="font-size:0.78rem;color:var(--muted-text, #64748b);margin-bottom:10px;">{% trans "畅销单品" %}</div>
+                    {% for row in perf_top_items %}
+                    <div class="d-flex align-items-center gap-2 mb-3 {% if not forloop.last %}pb-3 border-bottom{% endif %}" style="border-color:var(--card-border,#eee);">
+                        <img src="{{ row.image_url }}" alt="" style="width:40px;height:40px;border-radius:10px;object-fit:cover;flex-shrink:0;">
+                        <div style="min-width:0;flex:1;">
+                            <div class="fw-bold small text-truncate">{{ row.title }}</div>
+                            <small class="text-muted text-uppercase" style="font-size:0.65rem;letter-spacing:0.06em;">
+                                {% if row.kind == 'book' %}{% trans "图书" %}
+                                {% elif row.kind == 'product' %}{% trans "商品" %}
+                                {% elif row.kind == 'course' %}{% trans "课程" %}
+                                {% elif row.kind == 'supermarket' %}{% trans "超市" %}
+                                {% endif %}
+                            </small>
+                        </div>
+                        <span class="badge rounded-pill" style="background:rgba(16,185,129,0.15);color:#059669;">{{ row.value }} {% trans "已售" %}</span>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="dash-card">
+                    <h5><i class="fas fa-id-card me-2" style="color:#667eea;"></i>{% trans "账户信息" %}</h5>
+                    <div class="info-row"><span class="info-label">{% trans "联系人" %}</span><span>{{ vendor.contact_name }}</span></div>
+                    <div class="info-row"><span class="info-label">{% trans "邮箱" %}</span><span style="font-size:0.82rem;">{{ vendor.email }}</span></div>
+                    <div class="info-row"><span class="info-label">{% trans "电话" %}</span><span>{{ vendor.phone|default:"-" }}</span></div>
+                    <div class="info-row"><span class="info-label">{% trans "入驻时间" %}</span><span style="font-size:0.82rem;">{{ vendor.created_at|date:"Y-m-d" }}</span></div>
+                </div>
+            </div>
+
+            <!-- Combined Analytics -->
+            <div class="col-lg-8" data-aos="fade-up" data-aos-delay="100">
+                <!-- Revenue Breakdown -->
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-lg-3">
+                        <div class="dash-card vp-glow-card text-center py-4 mb-0" style="background: linear-gradient(160deg, rgba(129,140,248,0.34), rgba(196,181,253,0.14));">
+                            <div class="vp-stat-label">{% trans "图书收入" %}</div>
+                            <div class="dash-rev-num dash-rev-num--book">¥{{ total_revenue|floatformat:0 }}</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="dash-card vp-glow-card text-center py-4 mb-0" style="background: linear-gradient(160deg, rgba(251,191,36,0.38), rgba(253,224,71,0.16));">
+                            <div class="vp-stat-label">{% trans "商品订单收入" %}</div>
+                            <div class="dash-rev-num dash-rev-num--product">¥{{ vm_mk_product_revenue|floatformat:0 }}</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="dash-card vp-glow-card text-center py-4 mb-0" style="background: linear-gradient(160deg, rgba(52,211,153,0.38), rgba(167,243,208,0.2));">
+                            <div class="vp-stat-label">{% trans "课程订单收入" %}</div>
+                            <div class="dash-rev-num dash-rev-num--course">¥{{ vm_mk_course_revenue|floatformat:0 }}</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="dash-card vp-glow-card text-center py-4 mb-0" style="background: linear-gradient(160deg, rgba(251,146,60,0.38), rgba(254,215,170,0.22));">
+                            <div class="vp-stat-label">{% trans "超市订单收入" %}</div>
+                            <div class="dash-rev-num dash-rev-num--supermarket">¥{{ vm_mk_supermarket_revenue|floatformat:0 }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customer Behavior Stats -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="dash-card vp-glow-card text-center py-4 mb-0" style="background: linear-gradient(160deg, rgba(52,211,153,0.36), rgba(209,250,229,0.2));">
+                            <div class="vp-stat-label">{% trans "已购买" %}</div>
+                            <div class="dash-beh-num" style="color:#047857;">{{ total_purchases }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="dash-card vp-glow-card text-center py-4 mb-0" style="background: linear-gradient(160deg, rgba(251,191,36,0.38), rgba(254,243,199,0.22));">
+                            <div class="vp-stat-label">{% trans "在购物车中" %}</div>
+                            <div class="dash-beh-num dash-beh-num--cart">{{ total_cart_items }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="dash-card vp-glow-card text-center py-4 mb-0" style="background: linear-gradient(160deg, rgba(252,165,165,0.42), rgba(254,226,226,0.22));">
+                            <div class="vp-stat-label">{% trans "收藏/关注" %}</div>
+                            <div class="dash-beh-num dash-beh-num--wish">{{ total_wishlists }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick inventory summary -->
+                <div class="dash-card vp-glow-card">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-boxes me-2 text-primary"></i>{% trans "库存概览" %}</h5>
+                    <div class="row g-3 align-items-stretch">
+                        <div class="col-6 col-lg-3 text-center py-1">
+                            <div class="vp-stat-label">{% trans "图书库存" %}</div>
+                            <div class="dash-inv-num" style="color:#4338ca;">{{ total_inventory }}</div>
+                        </div>
+                        <div class="col-6 col-lg-3 text-center py-1">
+                            <div class="vp-stat-label">{% trans "商品销量" %}</div>
+                            <div class="dash-inv-num" style="color:#c2410c;">{{ total_product_sales }}</div>
+                        </div>
+                        <div class="col-6 col-lg-3 text-center py-1">
+                            <div class="vp-stat-label">{% trans "课程注册" %}</div>
+                            <div class="dash-inv-num" style="color:#047857;">{{ total_course_enrollments }}</div>
+                        </div>
+                        <div class="col-6 col-lg-3 text-center py-1">
+                            <div class="vp-stat-label">{% trans "超市销量" %}</div>
+                            <div class="dash-inv-num" style="color:#b45309;">{{ total_supermarket_sales_count }}</div>
+                        </div>
+                    </div>
+                    <p class="small text-muted mt-3 mb-0"><i class="fas fa-warehouse me-1"></i>{% trans "超市仓储库存（件）" %}: <strong>{{ total_supermarket_stock }}</strong></p>
+                </div>
+
+                {% include 'public/_vendor_marketplace_insights.html' %}
+
+                <div class="row g-3 mt-1">
+                    <div class="col-md-6">
+                        <div class="dash-card">
+                            <h5><i class="fas fa-shopping-cart me-2" style="color:#f59e0b;"></i>{% trans "购物车中的图书" %}</h5>
+                            {% if cart_data %}
+                            <div class="table-responsive">
+                                <table class="table table-hover table-sm mb-0" style="font-size:0.82rem;">
+                                    <thead><tr><th>{% trans "图书" %}</th><th>{% trans "数量" %}</th><th>{% trans "更新" %}</th></tr></thead>
+                                    <tbody>
+                                        {% for c in cart_data %}
+                                        <tr>
+                                            <td class="fw-bold">{{ c.book_name|truncatechars:18 }}</td>
+                                            <td>{{ c.quantity }}</td>
+                                            <td><small>{{ c.updated_at|date:"m-d H:i" }}</small></td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <p class="text-muted text-center py-3 small mb-0">{% trans "暂无数据" %}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="dash-card">
+                            <h5><i class="fas fa-heart me-2" style="color:#ef4444;"></i>{% trans "收藏/关注" %}</h5>
+                            {% if wishlist_data %}
+                            <div class="table-responsive">
+                                <table class="table table-hover table-sm mb-0" style="font-size:0.82rem;">
+                                    <thead><tr><th>{% trans "图书" %}</th><th>{% trans "用户" %}</th><th>{% trans "时间" %}</th></tr></thead>
+                                    <tbody>
+                                        {% for w in wishlist_data %}
+                                        <tr>
+                                            <td class="fw-bold">{{ w.book_name|truncatechars:16 }}</td>
+                                            <td><small>{{ w.user_name }}</small></td>
+                                            <td><small>{{ w.added_at|date:"m-d H:i" }}</small></td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <p class="text-muted text-center py-3 small mb-0">{% trans "暂无数据" %}</p>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</section>
 
-<section class="container py-4">
-    <div class="row g-4">
-        <!-- Sidebar: Actions + Performance -->
-        <div class="col-lg-4" data-aos="fade-up">
-            <div class="dash-card">
-                <h5><i class="fas fa-cogs me-2" style="color:#667eea;"></i>{% trans "快捷操作" %}</h5>
-                <div class="d-grid gap-2">
-                    <a href="{% url 'marketplace:vendor_dashboard' %}" class="btn-vendor text-center">
-                        <i class="fas fa-store me-2"></i>{% trans "市场卖家中心" %}
-                    </a>
-                    <a href="{% url 'manager:vendor_messages' %}" class="btn-vendor text-center" style="background:linear-gradient(135deg,#f59e0b,#ef4444);">
-                        <i class="fas fa-comments me-2"></i>{% trans "客户消息" %}
-                    </a>
-                    <a href="{% url 'manager:vendor_add_book' %}" class="btn-vendor text-center" style="background:linear-gradient(135deg,#10b981,#059669);">
-                        <i class="fas fa-plus me-2"></i>{% trans "上架新书" %}
-                    </a>
-                    <a href="{% url 'manager:vendor_logout' %}" class="btn btn-outline-secondary" style="border-radius:12px;">
-                        <i class="fas fa-sign-out-alt me-2"></i>{% trans "退出" %}
-                    </a>
-                </div>
-                {% if admin_access %}
-                <hr>
-                <p class="small text-muted mb-0"><i class="fas fa-shield-alt me-1"></i>{% trans "管理员视图" %}</p>
-                {% endif %}
-            </div>
-
-            <!-- Performance Card -->
-            <div class="dash-card">
-                <h5><i class="fas fa-chart-line me-2" style="color:#667eea;"></i>{% trans "业绩概览" %}</h5>
-                <div class="perf-item">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span style="font-size:0.85rem;color:var(--muted-text, #64748b);">{% trans "平均售价" %}</span>
-                        <strong style="color:var(--dark-text, #333);">¥{{ avg_price|floatformat:2 }}</strong>
-                    </div>
-                </div>
-                <div class="perf-item">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span style="font-size:0.85rem;color:var(--muted-text, #64748b);">{% trans "上架率" %}</span>
-                        <strong style="color:#10b981;">{% if total_books > 0 %}{% widthratio active_books total_books 100 %}%{% else %}0%{% endif %}</strong>
-                    </div>
-                    {% if total_books > 0 %}
-                    <div style="background:#e5e7eb;border-radius:10px;height:6px;overflow:hidden;">
-                        <div style="background:linear-gradient(90deg,#10b981,#059669);height:100%;border-radius:10px;width:{% widthratio active_books total_books 100 %}%;"></div>
-                    </div>
-                    {% endif %}
-                </div>
-                <div class="perf-item mt-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span style="font-size:0.85rem;color:var(--muted-text, #64748b);">{% trans "佣金率" %}</span>
-                        <strong style="color:#d97706;">{{ vendor.commission_rate|floatformat:1 }}%</strong>
-                    </div>
-                </div>
-                {% if best_seller %}
-                <hr style="border-color:var(--card-border, #f0f0f0);">
-                <div>
-                    <div style="font-size:0.78rem;color:var(--muted-text, #64748b);margin-bottom:6px;">{% trans "畅销图书" %}</div>
-                    <div class="d-flex align-items-center gap-2">
-                        <img src="{{ best_seller.book.get_cover_url }}" style="width:36px;height:48px;border-radius:6px;object-fit:cover;" alt="">
-                        <div style="min-width:0;">
-                            <div class="fw-bold" style="font-size:0.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ best_seller.book.name }}</div>
-                            <small style="color:#10b981;">{{ best_seller.book.sale_num }} {% trans "已售" %}</small>
+    <!-- ===== SETTINGS TAB ===== -->
+    <div class="dtab-panel" id="dtab-settings">
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="dash-card">
+                    <h5><i class="fas fa-palette me-2" style="color:#667eea;"></i>{% trans "店铺定制" %}</h5>
+                    <form id="shopSettingsForm">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold" style="font-size:0.88rem;">{% trans "店铺名称" %}</label>
+                            <input type="text" class="form-control" value="{{ vendor.company_name }}" name="company_name" style="border-radius:10px;">
                         </div>
-                    </div>
-                </div>
-                {% endif %}
-            </div>
-
-            <!-- Account Info -->
-            <div class="dash-card">
-                <h5><i class="fas fa-id-card me-2" style="color:#667eea;"></i>{% trans "账户信息" %}</h5>
-                <div class="info-row"><span class="info-label">{% trans "联系人" %}</span><span>{{ vendor.contact_name }}</span></div>
-                <div class="info-row"><span class="info-label">{% trans "邮箱" %}</span><span style="font-size:0.82rem;">{{ vendor.email }}</span></div>
-                <div class="info-row"><span class="info-label">{% trans "电话" %}</span><span>{{ vendor.phone|default:"-" }}</span></div>
-                <div class="info-row"><span class="info-label">{% trans "入驻时间" %}</span><span style="font-size:0.82rem;">{{ vendor.created_at|date:"Y-m-d" }}</span></div>
-            </div>
-        </div>
-
-        <!-- Books List -->
-        <div class="col-lg-8" data-aos="fade-up" data-aos-delay="100">
-            <div class="dash-card">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <h5 class="mb-0"><i class="fas fa-book me-2" style="color:#667eea;"></i>{% trans "我的图书" %} ({{ total_books }})</h5>
-                    {% if inactive_books > 0 %}
-                    <span style="font-size:0.78rem;color:#ef4444;"><i class="fas fa-exclamation-circle me-1"></i>{{ inactive_books }} {% trans "已下架" %}</span>
-                    {% endif %}
-                </div>
-                {% if vendor_books %}
-                {% for vb in vendor_books %}
-                <div class="book-row">
-                    <img src="{{ vb.book.get_cover_url }}" alt="{{ vb.book.name }}" class="book-row-cover">
-                    <div class="flex-grow-1" style="min-width:0;">
-                        <div class="fw-bold" style="font-size:0.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ vb.book.name }}</div>
-                        <small style="color:var(--muted-text, #94a3b8);">
-                            {% trans "售价" %}: ¥{{ vb.vendor_price }} · {% trans "销量" %}: {{ vb.book.sale_num }}
-                            {% if vb.book.publisher %} · {{ vb.book.publisher.publisher_name }}{% endif %}
-                        </small>
-                        {% if vb.book.inventory < 5 and vb.book.inventory > 0 %}
-                        <div><small style="color:#f59e0b;font-weight:600;"><i class="fas fa-exclamation-triangle"></i> {% trans "库存不足" %} ({{ vb.book.inventory }})</small></div>
-                        {% elif vb.book.inventory == 0 %}
-                        <div><small style="color:#ef4444;font-weight:600;"><i class="fas fa-times-circle"></i> {% trans "缺货" %}</small></div>
-                        {% endif %}
-                    </div>
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="status-dot {% if vb.is_active %}active{% else %}inactive{% endif %}"></span>
-                        <a href="{% url 'manager:vendor_edit_book' %}?id={{ vb.id }}" class="btn btn-sm btn-outline-primary" style="border-radius:8px;" title="{% trans '编辑' %}">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <button class="btn btn-sm btn-outline-secondary" style="border-radius:8px;" onclick="toggleBook({{ vb.id }}, this)">
-                            {% if vb.is_active %}{% trans "下架" %}{% else %}{% trans "上架" %}{% endif %}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold" style="font-size:0.88rem;">{% trans "店铺描述" %}</label>
+                            <textarea class="form-control" rows="4" name="description" style="border-radius:10px;">{{ vendor.description }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold" style="font-size:0.88rem;">{% trans "联系电话" %}</label>
+                            <input type="text" class="form-control" value="{{ vendor.phone }}" name="phone" style="border-radius:10px;">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold" style="font-size:0.88rem;">{% trans "店铺 Logo" %}</label>
+                            <div class="d-flex align-items-center gap-3">
+                                {% if vendor.get_logo_url %}
+                                <img src="{{ vendor.get_logo_url }}" style="width:60px;height:60px;border-radius:12px;object-fit:cover;" alt="">
+                                {% else %}
+                                <div style="width:60px;height:60px;border-radius:12px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.5rem;">
+                                    <i class="fas fa-store"></i>
+                                </div>
+                                {% endif %}
+                                <input type="file" class="form-control" name="logo" accept="image/*" style="border-radius:10px;">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-vendor" style="width:100%;text-align:center;">
+                            <i class="fas fa-save me-2"></i>{% trans "保存设置" %}
                         </button>
-                        <button class="btn btn-sm btn-outline-danger" style="border-radius:8px;" onclick="deleteBook({{ vb.id }})" title="{% trans '删除' %}">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-                {% endfor %}
-                {% else %}
-                <div class="text-center py-4">
-                    <i class="fas fa-book-open fa-3x mb-3" style="color:#cbd5e1;"></i>
-                    <p style="color:var(--muted-text, #94a3b8);">{% trans "暂无上架图书" %}</p>
-                    <a href="{% url 'manager:vendor_add_book' %}" class="btn-vendor"><i class="fas fa-plus me-2"></i>{% trans "上架第一本书" %}</a>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-
-        <!-- Customer Behavior Analytics -->
-        <div class="col-12" data-aos="fade-up" data-aos-delay="200">
-            <!-- Behavior Stats -->
-            <div class="row g-3 mb-4">
-                <div class="col-md-4">
-                    <div class="dash-card text-center" style="background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(5,150,105,0.04));">
-                        <h3 class="fw-bold" style="color:#10b981; font-size:2rem;">{{ total_purchases }}</h3>
-                        <p class="mb-0" style="color:var(--muted-text, #64748b);"><i class="fas fa-shopping-bag me-1"></i>{% trans "已购买" %}</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="dash-card text-center" style="background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(217,119,6,0.04));">
-                        <h3 class="fw-bold" style="color:#f59e0b; font-size:2rem;">{{ total_cart_items }}</h3>
-                        <p class="mb-0" style="color:var(--muted-text, #64748b);"><i class="fas fa-shopping-cart me-1"></i>{% trans "在购物车中" %}</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="dash-card text-center" style="background: linear-gradient(135deg, rgba(239,68,68,0.08), rgba(220,38,38,0.04));">
-                        <h3 class="fw-bold" style="color:#ef4444; font-size:2rem;">{{ total_wishlists }}</h3>
-                        <p class="mb-0" style="color:var(--muted-text, #64748b);"><i class="fas fa-heart me-1"></i>{% trans "收藏/关注" %}</p>
-                    </div>
+                    </form>
                 </div>
             </div>
-
-            <!-- Purchases Table -->
-            <div class="dash-card">
-                <h5><i class="fas fa-shopping-bag me-2" style="color:#10b981;"></i>{% trans "购买记录" %}</h5>
-                {% if purchase_data %}
-                <div class="table-responsive">
-                    <table class="table table-hover" style="font-size:0.88rem;">
-                        <thead style="background: var(--section-bg, #f8f9fa);">
-                            <tr>
-                                <th>{% trans "图书" %}</th>
-                                <th>{% trans "客户" %}</th>
-                                <th>{% trans "邮箱" %}</th>
-                                <th>{% trans "数量" %}</th>
-                                <th>{% trans "金额" %}</th>
-                                <th>{% trans "状态" %}</th>
-                                <th>{% trans "日期" %}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for p in purchase_data %}
-                            <tr>
-                                <td class="fw-bold">{{ p.book_name|truncatechars:20 }}</td>
-                                <td>{{ p.customer_name }}</td>
-                                <td><small>{{ p.customer_email }}</small></td>
-                                <td>{{ p.quantity }}</td>
-                                <td>¥{{ p.total_price }}</td>
-                                <td><span class="badge bg-success">{{ p.status }}</span></td>
-                                <td><small>{{ p.date|date:"Y-m-d H:i" }}</small></td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+            <div class="col-lg-4">
+                <div class="dash-card">
+                    <h5><i class="fas fa-link me-2" style="color:#667eea;"></i>{% trans "店铺链接" %}</h5>
+                    <p style="font-size:0.85rem;color:var(--muted-text, #64748b);" data-zh="分享您的店铺链接给客户" data-en="Share your shop link with customers" data-fr="Partagez votre lien boutique">{% trans "分享您的店铺链接给客户" %}</p>
+                    <div style="background:var(--section-bg, #f8f9fa);padding:12px;border-radius:10px;word-break:break-all;font-size:0.82rem;font-family:monospace;" id="shopUrl">
+                        {{ request.scheme }}://{{ request.get_host }}{% url 'manager:public_vendor_shop' vendor.id %}
+                    </div>
+                    <button class="btn btn-sm btn-outline-primary mt-2 w-100" style="border-radius:8px;" onclick="copyShopUrl()">
+                        <i class="fas fa-copy me-1"></i>{% trans "复制链接" %}
+                    </button>
                 </div>
-                {% else %}
-                <p class="text-muted text-center py-3"><i class="fas fa-inbox me-1"></i>{% trans "暂无购买记录" %}</p>
-                {% endif %}
-            </div>
 
-            <!-- Cart Abandonment -->
-            <div class="dash-card">
-                <h5><i class="fas fa-shopping-cart me-2" style="color:#f59e0b;"></i>{% trans "购物车中的图书" %}</h5>
-                {% if cart_data %}
-                <div class="table-responsive">
-                    <table class="table table-hover" style="font-size:0.88rem;">
-                        <thead style="background: var(--section-bg, #f8f9fa);">
-                            <tr>
-                                <th>{% trans "图书" %}</th>
-                                <th>{% trans "数量" %}</th>
-                                <th>{% trans "会话" %}</th>
-                                <th>{% trans "添加时间" %}</th>
-                                <th>{% trans "更新时间" %}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for c in cart_data %}
-                            <tr>
-                                <td class="fw-bold">{{ c.book_name|truncatechars:20 }}</td>
-                                <td>{{ c.quantity }}</td>
-                                <td><code>{{ c.session_key }}</code></td>
-                                <td><small>{{ c.added_at|date:"Y-m-d H:i" }}</small></td>
-                                <td><small>{{ c.updated_at|date:"Y-m-d H:i" }}</small></td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                <div class="dash-card">
+                    <h5><i class="fas fa-qrcode me-2" style="color:#667eea;"></i>{% trans "店铺预览" %}</h5>
+                    <a href="{% url 'manager:public_vendor_shop' vendor.id %}" target="_blank" class="btn-vendor d-block text-center" style="font-size:0.88rem;">
+                        <i class="fas fa-external-link-alt me-2"></i>{% trans "打开店铺主页" %}
+                    </a>
                 </div>
-                {% else %}
-                <p class="text-muted text-center py-3"><i class="fas fa-inbox me-1"></i>{% trans "暂无购物车数据" %}</p>
-                {% endif %}
-            </div>
-
-            <!-- Wishlist / Favorites -->
-            <div class="dash-card">
-                <h5><i class="fas fa-heart me-2" style="color:#ef4444;"></i>{% trans "收藏/关注" %}</h5>
-                {% if wishlist_data %}
-                <div class="table-responsive">
-                    <table class="table table-hover" style="font-size:0.88rem;">
-                        <thead style="background: var(--section-bg, #f8f9fa);">
-                            <tr>
-                                <th>{% trans "图书" %}</th>
-                                <th>{% trans "用户" %}</th>
-                                <th>{% trans "邮箱" %}</th>
-                                <th>{% trans "收藏时间" %}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for w in wishlist_data %}
-                            <tr>
-                                <td class="fw-bold">{{ w.book_name|truncatechars:20 }}</td>
-                                <td>{{ w.user_name }}</td>
-                                <td><small>{{ w.user_email }}</small></td>
-                                <td><small>{{ w.added_at|date:"Y-m-d H:i" }}</small></td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% else %}
-                <p class="text-muted text-center py-3"><i class="fas fa-inbox me-1"></i>{% trans "暂无收藏数据" %}</p>
-                {% endif %}
             </div>
         </div>
     </div>
 </section>
 {% endblock %}
 
-{% block extra_js %}
+{% block panel_extra_js %}
 <script>
-function toggleBook(id, btn) {
-    fetch('{% url "manager:vendor_toggle_book" %}', {
-        method: 'POST',
-        headers: {'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/x-www-form-urlencoded'},
-        body: 'id=' + id
-    }).then(r => r.json()).then(d => {
-        if (d.success) { location.reload(); }
-        else { gToast(d.message, 'error'); }
+function switchDTab(tabId, btn) {
+    document.querySelectorAll('.dtab-panel').forEach(function(p) { p.classList.remove('active'); });
+    document.querySelectorAll('.dtab-btn').forEach(function(b) { b.classList.remove('active'); });
+    var panel = document.getElementById('dtab-' + tabId);
+    if (panel) panel.classList.add('active');
+    if (btn) btn.classList.add('active');
+}
+
+function copyShopUrl() {
+    var url = document.getElementById('shopUrl').innerText.trim();
+    navigator.clipboard.writeText(url).then(function() {
+        var ok = "{% filter escapejs %}{% trans '链接已复制!' %}{% endfilter %}";
+        if (typeof gToast === 'function') gToast(ok, 'success');
     });
 }
 
-function deleteBook(id) {
-    if (!confirm('{% trans "确定要从您的店铺中移除此图书吗？" %}')) return;
-    fetch('{% url "manager:vendor_delete_book" %}', {
-        method: 'POST',
-        headers: {'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/x-www-form-urlencoded'},
-        body: 'id=' + id
-    }).then(r => r.json()).then(d => {
-        if (d.success) { location.reload(); }
-        else { gToast(d.message, 'error'); }
-    });
-}
+document.getElementById('shopSettingsForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var msg = "{% filter escapejs %}{% trans '设置已保存 (功能开发中)' %}{% endfilter %}";
+    if (typeof gToast === 'function') gToast(msg, 'info');
+});
+
+(function initVendorInsightCharts() {
+    var revEl = document.getElementById('vendorInsightRevenueChart');
+    if (revEl && typeof Chart !== 'undefined') {
+        new Chart(revEl.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: {{ vm_daily_labels|safe }},
+                datasets: [
+                    {
+                        label: '{% trans "商品订单" %}',
+                        data: {{ vm_daily_product_data|safe }},
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102,126,234,0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#667eea',
+                    },
+                    {
+                        label: '{% trans "课程订单" %}',
+                        data: {{ vm_daily_course_data|safe }},
+                        borderColor: '#c026d3',
+                        backgroundColor: 'rgba(192,38,211,0.08)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#c026d3',
+                    },
+                    {
+                        label: '{% trans "超市订单" %}',
+                        data: {{ vm_daily_supermarket_data|safe }},
+                        borderColor: '#ea580c',
+                        backgroundColor: 'rgba(234,88,12,0.08)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#ea580c',
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    }
+    var catEl = document.getElementById('vendorInsightCategoryChart');
+    if (catEl && typeof Chart !== 'undefined') {
+        var catLabels = {{ vm_cat_labels|safe }};
+        var catCounts = {{ vm_cat_counts|safe }};
+        if (catLabels.length > 0) {
+            new Chart(catEl.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: catLabels,
+                    datasets: [{
+                        data: catCounts,
+                        backgroundColor: ['#667eea','#c026d3','#10b981','#f59e0b','#ef4444','#06b6d4'],
+                        borderWidth: 0,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { size: 10 }, padding: 8 } }
+                    }
+                }
+            });
+        } else {
+            catEl.closest('.vm-chart-wrap').innerHTML += '<p class="text-center text-muted small mt-2 mb-0">{% trans "暂无分类数据" %}</p>';
+        }
+    }
+})();
 </script>
 {% endblock %}

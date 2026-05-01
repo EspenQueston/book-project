@@ -52,6 +52,14 @@
         box-shadow: 0 10px 35px rgba(102,126,234,0.65);
         animation: none;
     }
+    #ai-chat-toggle.ai-dragging,
+    #ai-chat-toggle.ai-dragging:hover,
+    #ai-chat-toggle.ai-dragging:active {
+        transition: none !important;
+        animation: none !important;
+        transform: none !important;
+        cursor: grabbing !important;
+    }
     #ai-chat-badge {
         position: absolute;
         top: -4px;
@@ -388,20 +396,32 @@
 
     function makeDraggable(el) {
         var isDragging = false, wasDragged = false;
-        var startX, startY, origX, origY;
+        var startX, startY, origLeft, origTop;
         var DRAG_THRESHOLD = 6;
+
+        function getPos() {
+            var s = getComputedStyle(el);
+            var l = parseFloat(s.left);
+            var t = parseFloat(s.top);
+            if (isNaN(l) || s.left === 'auto') {
+                l = window.innerWidth - el.offsetWidth - parseFloat(s.right || 0);
+            }
+            if (isNaN(t) || s.top === 'auto') {
+                t = window.innerHeight - el.offsetHeight - parseFloat(s.bottom || 0);
+            }
+            return { x: l, y: t };
+        }
 
         function onStart(e) {
             var ev = e.touches ? e.touches[0] : e;
             startX = ev.clientX;
             startY = ev.clientY;
-            var rect = el.getBoundingClientRect();
-            origX = rect.left;
-            origY = rect.top;
+            var p = getPos();
+            origLeft = p.x;
+            origTop = p.y;
             isDragging = true;
             wasDragged = false;
-            el.style.transition = 'none';
-            el.style.animation = 'none';
+            el.classList.add('ai-dragging');
         }
         function onMove(e) {
             if (!isDragging) return;
@@ -411,19 +431,20 @@
             if (!wasDragged && Math.abs(dx) < DRAG_THRESHOLD && Math.abs(dy) < DRAG_THRESHOLD) return;
             wasDragged = true;
             e.preventDefault();
-            var newX = Math.max(0, Math.min(window.innerWidth - el.offsetWidth, origX + dx));
-            var newY = Math.max(0, Math.min(window.innerHeight - el.offsetHeight, origY + dy));
+            var newX = Math.max(0, Math.min(window.innerWidth - el.offsetWidth, origLeft + dx));
+            var newY = Math.max(0, Math.min(window.innerHeight - el.offsetHeight, origTop + dy));
             el.style.left = newX + 'px';
             el.style.top = newY + 'px';
             el.style.right = 'auto';
             el.style.bottom = 'auto';
         }
         function onEnd() {
+            if (!isDragging) return;
             isDragging = false;
-            el.style.transition = 'all 0.3s ease';
             if (wasDragged) {
                 var rect = el.getBoundingClientRect();
                 var midX = rect.left + rect.width / 2;
+                el.style.transition = 'left 0.25s ease, right 0.25s ease';
                 if (midX < window.innerWidth / 2) {
                     el.style.left = '16px';
                     el.style.right = 'auto';
@@ -431,6 +452,12 @@
                     el.style.left = 'auto';
                     el.style.right = '24px';
                 }
+                setTimeout(function() {
+                    el.classList.remove('ai-dragging');
+                    el.style.transition = '';
+                }, 260);
+            } else {
+                el.classList.remove('ai-dragging');
             }
         }
 
@@ -842,6 +869,14 @@
                 injectCSS(css);
                 widgetConfig = cfg;
                 buildWidget(cfg);
+
+                if (new URLSearchParams(window.location.search).get('open_chatbot') === '1') {
+                    setTimeout(function() { openChat(); }, 400);
+                    var cleanUrl = window.location.href.replace(/[?&]open_chatbot=1/, '');
+                    if (cleanUrl !== window.location.href) {
+                        window.history.replaceState(null, '', cleanUrl);
+                    }
+                }
             })
             .catch(function () {
                 // Chatbot not available — fail silently

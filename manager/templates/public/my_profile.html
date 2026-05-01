@@ -227,24 +227,24 @@
     </a>
 </div>
 
-<!-- Followed shops -->
+<!-- Followed shops & vendors -->
 <div class="mypro-shops-section">
     <div class="mypro-shops-header">
         <span data-zh="关注的店铺" data-en="Followed Shops" data-fr="Boutiques suivies">关注的店铺</span>
-        <a href="{% url 'manager:public_publishers' %}" data-zh="发现更多 >" data-en="Discover >" data-fr="Découvrir >">发现更多 ></a>
+        <a href="#discoverSection" onclick="document.getElementById('discoverSection').style.display='block';this.style.display='none';" data-zh="发现更多 >" data-en="Discover >" data-fr="Découvrir >">发现更多 ></a>
     </div>
     {% if followed_shops or followed_vendors %}
     <div class="mypro-shops-list">
-        {% for fs in followed_shops %}
-        <a href="{% url 'manager:public_publisher_detail' fs.publisher.id %}" class="mypro-shop-chip">
-            <div class="mypro-shop-avatar"><i class="fas fa-store"></i></div>
-            <span class="mypro-shop-name">{{ fs.publisher.publisher_name|truncatechars:8 }}</span>
-        </a>
-        {% endfor %}
         {% for fv in followed_vendors %}
-        <a href="/marketplace/products/?vendor={{ fv.vendor.id }}" class="mypro-shop-chip">
+        <a href="{% url 'manager:public_vendor_shop' fv.vendor.id %}" class="mypro-shop-chip">
             <div class="mypro-shop-avatar" style="background:linear-gradient(135deg,#f59e0b,#f97316);"><i class="fas fa-store-alt"></i></div>
             <span class="mypro-shop-name">{{ fv.vendor.company_name|truncatechars:8 }}</span>
+        </a>
+        {% endfor %}
+        {% for fs in followed_shops %}
+        <a href="{% url 'manager:public_publisher_detail' fs.publisher.id %}" class="mypro-shop-chip">
+            <div class="mypro-shop-avatar"><i class="fas fa-building"></i></div>
+            <span class="mypro-shop-name">{{ fs.publisher.publisher_name|truncatechars:8 }}</span>
         </a>
         {% endfor %}
     </div>
@@ -253,10 +253,55 @@
     {% endif %}
 </div>
 
-<!-- 2-col feed -->
+<!-- Discover section (hidden by default, toggleable) -->
+<div id="discoverSection" style="display:none;background:#fff;margin-bottom:8px;padding:12px 14px;">
+    <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+        <span data-zh="发现更多店铺" data-en="Discover Shops" data-fr="Découvrir des boutiques">发现更多店铺</span>
+        <button onclick="document.getElementById('discoverSection').style.display='none';" style="background:none;border:none;color:#999;font-size:18px;cursor:pointer;">×</button>
+    </div>
+    {% if all_vendors %}
+    <div style="font-size:11px;color:#667eea;font-weight:700;margin-bottom:6px;" data-zh="卖家" data-en="Vendors" data-fr="Vendeurs">卖家</div>
+    <div class="mypro-shops-list" style="margin-bottom:10px;">
+        {% for v in all_vendors %}
+        <div class="mypro-shop-chip" style="min-width:80px;">
+            <div class="mypro-shop-avatar" style="background:linear-gradient(135deg,#f59e0b,#f97316);"><i class="fas fa-store-alt"></i></div>
+            <span class="mypro-shop-name" style="max-width:80px;">{{ v.company_name|truncatechars:10 }}</span>
+            <button onclick="followVendor({{ v.id }},this)" style="font-size:10px;padding:2px 8px;border:1px solid #667eea;color:#667eea;background:#fff;border-radius:10px;cursor:pointer;margin-top:2px;" data-zh="关注" data-en="Follow" data-fr="Suivre">关注</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% if all_publishers %}
+    <div style="font-size:11px;color:#667eea;font-weight:700;margin-bottom:6px;" data-zh="出版社" data-en="Publishers" data-fr="Éditeurs">出版社</div>
+    <div class="mypro-shops-list">
+        {% for p in all_publishers %}
+        <div class="mypro-shop-chip" style="min-width:80px;">
+            <div class="mypro-shop-avatar"><i class="fas fa-building"></i></div>
+            <span class="mypro-shop-name" style="max-width:80px;">{{ p.publisher_name|truncatechars:10 }}</span>
+            <button onclick="followPublisher({{ p.id }},this)" style="font-size:10px;padding:2px 8px;border:1px solid #667eea;color:#667eea;background:#fff;border-radius:10px;cursor:pointer;margin-top:2px;" data-zh="关注" data-en="Follow" data-fr="Suivre">关注</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- 2-col feed: mixed books + marketplace -->
 <div class="mypro-feed-section">
     <div class="mypro-feed-title" data-zh="为你推荐" data-en="Recommended for you" data-fr="Recommandés pour vous">为你推荐</div>
     <div class="mypro-feed-grid" id="myproFeedGrid">
+        {% for item in feed_items %}
+        <a href="{{ item.url }}" class="mypro-feed-card">
+            <div class="mypro-feed-img">
+                {% if item.image_url %}<img src="{{ item.image_url }}" alt="{{ item.name }}">{% else %}<i class="fas fa-{% if item.type == 'course' %}graduation-cap{% else %}shopping-bag{% endif %}"></i>{% endif %}
+            </div>
+            <div class="mypro-feed-body">
+                <div class="mypro-feed-name">{{ item.name }}</div>
+                <div class="mypro-feed-price"><small>¥</small>{{ item.price }}
+                    <span style="float:right;font-size:9px;padding:1px 6px;border-radius:8px;{% if item.type == 'product' %}background:#d1fae5;color:#065f46;{% else %}background:#ede9fe;color:#7c3aed;{% endif %}">{{ item.type }}</span>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
         {% for book in feed_books %}
         <a href="{% url 'manager:public_book_detail' book.id %}" class="mypro-feed-card">
             <div class="mypro-feed-img">
@@ -264,7 +309,9 @@
             </div>
             <div class="mypro-feed-body">
                 <div class="mypro-feed-name">{{ book.name }}</div>
-                <div class="mypro-feed-price"><small>¥</small>{{ book.price }}</div>
+                <div class="mypro-feed-price"><small>¥</small>{{ book.price }}
+                    <span style="float:right;font-size:9px;padding:1px 6px;border-radius:8px;background:#dbeafe;color:#1d4ed8;">book</span>
+                </div>
             </div>
         </a>
         {% endfor %}
@@ -278,8 +325,37 @@
 
 {% block extra_js %}
 <script>
-// Infinite feed for profile (simple, reloads from books API)
 {% if site_user %}
+function followVendor(vendorId, btn) {
+    var csrf = document.querySelector('[name=csrfmiddlewaretoken]');
+    var csrfVal = csrf ? csrf.value : '';
+    fetch('/manager/vendor/' + vendorId + '/follow/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrfVal },
+        body: ''
+    }).then(function(r) { return r.json(); }).then(function(d) {
+        if (d.login_required) { window.location.href = '{% url "manager:user_login" %}'; return; }
+        btn.textContent = d.following ? '已关注' : '关注';
+        btn.style.background = d.following ? '#667eea' : '#fff';
+        btn.style.color = d.following ? '#fff' : '#667eea';
+    });
+}
+function followPublisher(pubId, btn) {
+    var csrf = document.querySelector('[name=csrfmiddlewaretoken]');
+    var csrfVal = csrf ? csrf.value : '';
+    fetch('/manager/publisher/' + pubId + '/follow/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrfVal },
+        body: ''
+    }).then(function(r) { return r.json(); }).then(function(d) {
+        if (d.login_required) { window.location.href = '{% url "manager:user_login" %}'; return; }
+        btn.textContent = d.following ? '已关注' : '关注';
+        btn.style.background = d.following ? '#667eea' : '#fff';
+        btn.style.color = d.following ? '#fff' : '#667eea';
+    });
+}
+
+// Infinite feed for profile
 (function() {
     var page = 2;
     var loading = false;

@@ -1,11 +1,13 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse, FileResponse
+from django.urls import reverse
+from django.http import JsonResponse, FileResponse, Http404
 from django.db.models import Q, Sum, Count, Avg
 from django.core.paginator import Paginator
 from django.contrib import messages
 from django.utils.text import slugify
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from django.utils.translation import gettext as _
 from django.views.decorators.clickjacking import xframe_options_sameorigin
 from .models import (
     Category, Product, Course, SupermarketItem,
@@ -1485,97 +1487,206 @@ def _vendor_required(request):
 # ─── Vendor Dashboard ────────────────────────────────────────────────────────
 
 def vendor_dashboard(request):
-    """Vendor dashboard with data insights."""
+    """Former product-center dashboard merged into manager seller hub."""
+    vendor, redir = _vendor_required(request)
+    if redir:
+        return redir
+    return redirect(reverse('manager:vendor_dashboard'))
+
+
+def _vendor_marketplace_order_ids(vendor):
+    pids = list(Product.objects.filter(vendor=vendor).values_list('id', flat=True))
+    cids = list(Course.objects.filter(vendor=vendor).values_list('id', flat=True))
+    sids = list(SupermarketItem.objects.filter(vendor=vendor).values_list('id', flat=True))
+    if not pids and not cids and not sids:
+        return []
+    q_filter = Q()
+    if pids:
+        q_filter |= Q(item_type='product', item_id__in=pids)
+    if cids:
+        q_filter |= Q(item_type='course', item_id__in=cids)
+    if sids:
+        q_filter |= Q(item_type='supermarket', item_id__in=sids)
+    return list(
+        MarketplaceOrderItem.objects.filter(q_filter)
+        .values_list('order_id', flat=True)
+        .distinct()
+    )
+
+
+def _vendor_mkt_order_can_update_fulfillment(order):
+    if order.status in ('cancelled', 'refunded'):
+        return False
+    return order.payment_status == 'completed'
+
+
+VENDOR_MKT_ORDER_ALLOWED_STATUSES = frozenset({'processing', 'shipped', 'delivered'})
+
+
+def _vendor_mkt_order_customer_editable(order):
+    return order.status not in ('cancelled', 'refunded')
+
+
+def vendor_marketplace_orders(request):
+    """Marketplace orders that include this vendor's products or courses."""
     vendor, redir = _vendor_required(request)
     if redir:
         return redir
 
-    from manager.models import OrderItem, CartItem
-    from datetime import timedelta
+    oid_list = _vendor_marketplace_order_ids(vendor)
+    orders = MarketplaceOrder.objects.filter(id__in=oid_list).order_by('-created_at')
 
-    # Vendor's marketplace items
-    vendor_products = Product.objects.filter(vendor=vendor)
-    vendor_courses = Course.objects.filter(vendor=vendor)
+    status_filter = request.GET.get('status', '')
+    payment_filter = request.GET.get('payment_status', '')
+    search_q = request.GET.get('search', '').strip()
+    if status_filter:
+        orders = orders.filter(status=status_filter)
+    if payment_filter:
+        orders = orders.filter(payment_status=payment_filter)
+    if search_q:
+        orders = orders.filter(
+            Q(order_number__icontains=search_q)
+            | Q(user_name__icontains=search_q)
+            | Q(user_email__icontains=search_q)
+            | Q(customer_phone__icontains=search_q)
+        )
 
-    product_count = vendor_products.count()
-    course_count = vendor_courses.count()
-    active_products = vendor_products.filter(is_active=True).count()
-    active_courses = vendor_courses.filter(is_active=True).count()
+    base = MarketplaceOrder.objects.filter(id__in=oid_list)
+    total_orders = base.count()
+    pending_pay = base.filter(payment_status='pending').count()
+    paid_completed = base.filter(payment_status='completed').count()
 
-    total_product_sales = vendor_products.aggregate(s=Sum('sales_count'))['s'] or 0
-    total_enrollments = vendor_courses.aggregate(s=Sum('enrollment_count'))['s'] or 0
-
-    # Revenue from marketplace orders
-    product_ids = list(vendor_products.values_list('id', flat=True))
-    course_ids = list(vendor_courses.values_list('id', flat=True))
-
-    product_order_items = MarketplaceOrderItem.objects.filter(
-        item_type='product', item_id__in=product_ids,
-        order__status__in=['paid', 'processing', 'shipped', 'delivered']
-    ) if product_ids else MarketplaceOrderItem.objects.none()
-
-    course_order_items = MarketplaceOrderItem.objects.filter(
-        item_type='course', item_id__in=course_ids,
-        order__status__in=['paid', 'processing', 'shipped', 'delivered']
-    ) if course_ids else MarketplaceOrderItem.objects.none()
-
-    product_revenue = product_order_items.aggregate(s=Sum('subtotal'))['s'] or 0
-    course_revenue = course_order_items.aggregate(s=Sum('subtotal'))['s'] or 0
-    total_revenue = product_revenue + course_revenue
-
-    # Last 7 days daily revenue for chart
-    daily_labels = []
-    daily_product_data = []
-    daily_course_data = []
-    for i in range(6, -1, -1):
-        day = (timezone.now() - timedelta(days=i)).date()
-        daily_labels.append(day.strftime('%m/%d'))
-        p_rev = product_order_items.filter(order__created_at__date=day).aggregate(s=Sum('subtotal'))['s'] or 0
-        c_rev = course_order_items.filter(order__created_at__date=day).aggregate(s=Sum('subtotal'))['s'] or 0
-        daily_product_data.append(float(p_rev))
-        daily_course_data.append(float(c_rev))
-
-    # Top products by sales
-    top_products = vendor_products.order_by('-sales_count')[:5]
-
-    # Recent orders involving vendor items
-    all_item_ids = product_ids + course_ids
-    recent_order_ids = MarketplaceOrderItem.objects.filter(
-        Q(item_type='product', item_id__in=product_ids) |
-        Q(item_type='course', item_id__in=course_ids)
-    ).values_list('order_id', flat=True).distinct()[:20] if all_item_ids else []
-
-    recent_orders = MarketplaceOrder.objects.filter(
-        id__in=recent_order_ids
-    ).order_by('-created_at')[:10]
-
-    # Category distribution for products
-    cat_data = vendor_products.values('category__name').annotate(
-        cnt=Count('id')
-    ).order_by('-cnt')[:6]
-    cat_labels = [c['category__name'] or '未分类' for c in cat_data]
-    cat_counts = [c['cnt'] for c in cat_data]
+    paginator = Paginator(orders, 20)
+    page = paginator.get_page(request.GET.get('page', 1))
 
     context = {
         'vendor': vendor,
-        'product_count': product_count,
-        'course_count': course_count,
-        'active_products': active_products,
-        'active_courses': active_courses,
-        'total_product_sales': total_product_sales,
-        'total_enrollments': total_enrollments,
-        'total_revenue': total_revenue,
-        'product_revenue': product_revenue,
-        'course_revenue': course_revenue,
-        'daily_labels': json.dumps(daily_labels),
-        'daily_product_data': json.dumps(daily_product_data),
-        'daily_course_data': json.dumps(daily_course_data),
-        'top_products': top_products,
-        'recent_orders': recent_orders,
-        'cat_labels': json.dumps(cat_labels),
-        'cat_counts': json.dumps(cat_counts),
+        'orders': page,
+        'status_choices': MarketplaceOrder.STATUS_CHOICES,
+        'payment_status_choices': MarketplaceOrder.PAYMENT_STATUS_CHOICES,
+        'current_status': status_filter,
+        'current_payment_status': payment_filter,
+        'current_search': search_q,
+        'total_orders': total_orders,
+        'pending_pay': pending_pay,
+        'paid_completed': paid_completed,
+        'fulfillment_statuses': [(k, v) for k, v in MarketplaceOrder.STATUS_CHOICES if k in VENDOR_MKT_ORDER_ALLOWED_STATUSES],
     }
-    return render(request, 'marketplace/vendor/dashboard.html', context)
+    return render(request, 'marketplace/vendor/vendor_marketplace_orders.html', context)
+
+
+def vendor_marketplace_order_detail(request, pk):
+    vendor, redir = _vendor_required(request)
+    if redir:
+        return redir
+
+    allowed_ids = set(_vendor_marketplace_order_ids(vendor))
+    order = get_object_or_404(MarketplaceOrder, pk=pk)
+    if order.id not in allowed_ids:
+        raise Http404('Order not found')
+
+    pids = list(Product.objects.filter(vendor=vendor).values_list('id', flat=True))
+    cids = list(Course.objects.filter(vendor=vendor).values_list('id', flat=True))
+    sids = list(SupermarketItem.objects.filter(vendor=vendor).values_list('id', flat=True))
+    q_items = None
+    if pids:
+        q_items = Q(item_type='product', item_id__in=pids)
+    if cids:
+        cq = Q(item_type='course', item_id__in=cids)
+        q_items = cq if q_items is None else (q_items | cq)
+    if sids:
+        sq = Q(item_type='supermarket', item_id__in=sids)
+        q_items = sq if q_items is None else (q_items | sq)
+    vendor_items = list(order.items.filter(q_items).select_related()) if q_items is not None else []
+
+    vendor_subtotal = sum((it.subtotal for it in vendor_items), Decimal('0'))
+
+    context = {
+        'vendor': vendor,
+        'order': order,
+        'vendor_items': vendor_items,
+        'vendor_subtotal': vendor_subtotal,
+        'can_update_fulfillment': _vendor_mkt_order_can_update_fulfillment(order),
+        'fulfillment_statuses': [(k, v) for k, v in MarketplaceOrder.STATUS_CHOICES if k in VENDOR_MKT_ORDER_ALLOWED_STATUSES],
+        'status_choices': MarketplaceOrder.STATUS_CHOICES,
+        'payment_status_choices': MarketplaceOrder.PAYMENT_STATUS_CHOICES,
+        'can_edit_customer': _vendor_mkt_order_customer_editable(order),
+    }
+    return render(request, 'marketplace/vendor/vendor_marketplace_order_detail.html', context)
+
+
+@require_POST
+def vendor_marketplace_order_update_status(request):
+    vendor, redir = _vendor_required(request)
+    if redir:
+        return JsonResponse({'success': False, 'message': '请以卖家身份登录'}, status=403)
+
+    order_id = request.POST.get('order_id')
+    new_status = request.POST.get('status', '').strip()
+    note = request.POST.get('vendor_note', '').strip()
+
+    if new_status not in VENDOR_MKT_ORDER_ALLOWED_STATUSES:
+        return JsonResponse({'success': False, 'message': '不允许的状态'})
+
+    allowed_ids = set(_vendor_marketplace_order_ids(vendor))
+    order = get_object_or_404(MarketplaceOrder, id=order_id)
+    if order.id not in allowed_ids:
+        return JsonResponse({'success': False, 'message': '无权操作此订单'})
+
+    if not _vendor_mkt_order_can_update_fulfillment(order):
+        return JsonResponse({'success': False, 'message': '订单尚未支付完成或已关闭'})
+
+    order.status = new_status
+    if note:
+        prefix = '[Vendor %s] ' % vendor.company_name[:40]
+        order.admin_notes = (prefix + note + '\n' + (order.admin_notes or '')).strip()
+    order.save(update_fields=['status', 'admin_notes', 'updated_at'])
+
+    status_dict = dict(MarketplaceOrder.STATUS_CHOICES)
+    return JsonResponse({
+        'success': True,
+        'message': '已更新',
+        'new_status': new_status,
+        'new_status_display': status_dict.get(new_status, new_status),
+        'new_status_color': order.get_status_color(),
+    })
+
+
+@require_POST
+def vendor_marketplace_order_update_customer(request):
+    vendor, redir = _vendor_required(request)
+    if redir:
+        return JsonResponse({'success': False, 'message': str(_('请以卖家身份登录'))}, status=403)
+
+    order_id = request.POST.get('order_id')
+    allowed_ids = set(_vendor_marketplace_order_ids(vendor))
+    order = get_object_or_404(MarketplaceOrder, id=order_id)
+    if order.id not in allowed_ids:
+        return JsonResponse({'success': False, 'message': str(_('无权操作此订单'))}, status=403)
+    if not _vendor_mkt_order_customer_editable(order):
+        return JsonResponse({'success': False, 'message': str(_('订单已关闭，无法修改联系信息'))})
+
+    user_name = request.POST.get('user_name', '').strip()
+    user_email = request.POST.get('user_email', '').strip()
+    phone = request.POST.get('customer_phone', '').strip()
+    country = request.POST.get('country', '').strip() or order.country
+    shipping_address = request.POST.get('shipping_address', '').strip()
+    customer_notes = request.POST.get('customer_notes', '').strip()
+
+    if not user_email:
+        return JsonResponse({'success': False, 'message': str(_('邮箱不能为空'))})
+
+    order.user_name = user_name[:100]
+    order.user_email = user_email[:254]
+    order.customer_phone = phone[:20]
+    order.country = country[:50]
+    order.shipping_address = shipping_address
+    order.customer_notes = customer_notes
+    order.save(update_fields=[
+        'user_name', 'user_email', 'customer_phone', 'country',
+        'shipping_address', 'customer_notes', 'updated_at',
+    ])
+    return JsonResponse({'success': True, 'message': str(_('客户与地址信息已保存'))})
 
 
 # ─── Vendor Products ─────────────────────────────────────────────────────────
@@ -2021,3 +2132,159 @@ def vendor_lesson_delete(request, pk):
     name = lesson.title
     lesson.delete()
     return JsonResponse({'success': True, 'message': f'课时 "{name}" 已删除'})
+
+
+# ─── Vendor Supermarket (seller-owned grocery SKUs) ───────────────────────────
+
+def vendor_supermarket(request):
+    vendor, redir = _vendor_required(request)
+    if redir:
+        return redir
+
+    base = SupermarketItem.objects.filter(vendor=vendor)
+    total_items = base.count()
+    active_items = base.filter(is_active=True).count()
+    qs = base.order_by('-created_at')
+    q = request.GET.get('q', '').strip()
+    if q:
+        qs = qs.filter(Q(name__icontains=q) | Q(brand__icontains=q))
+    paginator = Paginator(qs, 15)
+    page = paginator.get_page(request.GET.get('page', 1))
+
+    context = {
+        'vendor': vendor,
+        'items': page,
+        'search_query': q,
+        'total_items': total_items,
+        'active_items': active_items,
+    }
+    return render(request, 'marketplace/vendor/supermarket.html', context)
+
+
+def vendor_supermarket_add(request):
+    vendor, redir = _vendor_required(request)
+    if redir:
+        return redir
+
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        if not name:
+            messages.error(request, _('名称不能为空'))
+            return redirect('marketplace:vendor_supermarket_add')
+
+        item = SupermarketItem(
+            vendor_id=vendor.pk,
+            name=name,
+            name_en=request.POST.get('name_en', '').strip(),
+            slug=slugify(name) or f'sm-{uuid.uuid4().hex[:8]}',
+            description=request.POST.get('description', ''),
+            price=request.POST.get('price', 0),
+            original_price=request.POST.get('original_price') or None,
+            stock=request.POST.get('stock', 0),
+            unit=request.POST.get('unit', 'piece'),
+            brand=request.POST.get('brand', '').strip(),
+            origin=request.POST.get('origin', '').strip(),
+            is_organic=request.POST.get('is_organic') == 'on',
+            is_featured=False,
+            is_active=request.POST.get('is_active', 'on') == 'on',
+        )
+        cat_id = request.POST.get('category')
+        if cat_id:
+            item.category_id = int(cat_id)
+        if 'image' in request.FILES:
+            item.image = request.FILES['image']
+
+        base_slug = item.slug
+        counter = 1
+        while SupermarketItem.objects.filter(slug=item.slug).exists():
+            item.slug = f'{base_slug}-{counter}'
+            counter += 1
+
+        item.save()
+
+        attr_names = request.POST.getlist('attr_name')
+        attr_values = request.POST.getlist('attr_value')
+        for a_name, a_val in zip(attr_names, attr_values):
+            a_name = a_name.strip()
+            a_val = a_val.strip()
+            if a_name and a_val:
+                SupermarketItemAttribute.objects.create(item=item, name=a_name, value=a_val)
+
+        messages.success(request, _('超市商品已添加'))
+        return redirect('marketplace:vendor_supermarket')
+
+    categories = Category.objects.filter(section='supermarket', is_active=True)
+    return render(request, 'marketplace/vendor/supermarket_form.html', {
+        'vendor': vendor,
+        'categories': categories,
+        'item': None,
+        'unit_choices': SupermarketItem.UNIT_CHOICES,
+    })
+
+
+def vendor_supermarket_edit(request, pk):
+    vendor, redir = _vendor_required(request)
+    if redir:
+        return redir
+
+    item = get_object_or_404(SupermarketItem, pk=pk, vendor=vendor)
+
+    if request.method == 'POST':
+        item.name = request.POST.get('name', item.name).strip()
+        item.name_en = request.POST.get('name_en', '').strip()
+        item.description = request.POST.get('description', '')
+        item.price = request.POST.get('price', item.price)
+        item.original_price = request.POST.get('original_price') or None
+        item.stock = request.POST.get('stock', item.stock)
+        item.unit = request.POST.get('unit', item.unit)
+        item.brand = request.POST.get('brand', '').strip()
+        item.origin = request.POST.get('origin', '').strip()
+        item.is_organic = request.POST.get('is_organic') == 'on'
+        item.is_active = request.POST.get('is_active', 'on') == 'on'
+        cat_id = request.POST.get('category')
+        item.category_id = int(cat_id) if cat_id else None
+        if 'image' in request.FILES:
+            item.image = request.FILES['image']
+        item.save()
+
+        item.attributes.all().delete()
+        attr_names = request.POST.getlist('attr_name')
+        attr_values = request.POST.getlist('attr_value')
+        for a_name, a_val in zip(attr_names, attr_values):
+            a_name = a_name.strip()
+            a_val = a_val.strip()
+            if a_name and a_val:
+                SupermarketItemAttribute.objects.create(item=item, name=a_name, value=a_val)
+
+        messages.success(request, _('超市商品已更新'))
+        return redirect('marketplace:vendor_supermarket')
+
+    categories = Category.objects.filter(section='supermarket', is_active=True)
+    return render(request, 'marketplace/vendor/supermarket_form.html', {
+        'vendor': vendor,
+        'categories': categories,
+        'item': item,
+        'unit_choices': SupermarketItem.UNIT_CHOICES,
+    })
+
+
+@require_POST
+def vendor_supermarket_delete(request, pk):
+    vendor, redir = _vendor_required(request)
+    if redir:
+        return redir
+    item = get_object_or_404(SupermarketItem, pk=pk, vendor=vendor)
+    item.delete()
+    messages.success(request, _('超市商品已删除'))
+    return redirect('marketplace:vendor_supermarket')
+
+
+@require_POST
+def vendor_supermarket_toggle(request, pk):
+    vendor, redir = _vendor_required(request)
+    if redir:
+        return JsonResponse({'success': False}, status=403)
+    item = get_object_or_404(SupermarketItem, pk=pk, vendor=vendor)
+    item.is_active = not item.is_active
+    item.save(update_fields=['is_active'])
+    return JsonResponse({'success': True, 'is_active': item.is_active})

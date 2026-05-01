@@ -28,29 +28,21 @@ html[data-theme="dark"] {
     overflow: hidden;
 }
 .msg-sidebar {
-    width: 360px;
-    min-width: 300px;
+    width: 360px; min-width: 300px;
     background: var(--msg-sidebar-bg);
     border-right: 1px solid #e5e7eb;
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 0;
+    display: flex; flex-direction: column; flex-shrink: 0;
 }
 html[data-theme="dark"] .msg-sidebar { border-right-color: #2a3942; }
 .msg-sidebar-header {
     padding: 14px 16px;
     background: linear-gradient(135deg, var(--msg-primary), var(--msg-primary-dark));
     color: #fff;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-shrink: 0;
+    display: flex; align-items: center; gap: 12px; flex-shrink: 0;
 }
 .msg-sidebar-header h3 { font-size: 1.1rem; font-weight: 700; margin: 0; flex: 1; }
 .msg-search-box {
-    padding: 8px 12px;
-    background: var(--msg-sidebar-bg);
-    flex-shrink: 0;
+    padding: 8px 12px; background: var(--msg-sidebar-bg); flex-shrink: 0;
 }
 .msg-search-box input {
     width: 100%; border: none; border-radius: 20px;
@@ -58,25 +50,17 @@ html[data-theme="dark"] .msg-sidebar { border-right-color: #2a3942; }
     background: #f0f2f5; outline: none;
 }
 html[data-theme="dark"] .msg-search-box input { background: #2a3942; color: #e2e8f0; }
-.msg-convo-list {
-    flex: 1;
-    overflow-y: auto;
-    scrollbar-width: thin;
-}
+.msg-convo-list { flex: 1; overflow-y: auto; scrollbar-width: thin; }
 .msg-convo-item {
     display: flex; align-items: center; gap: 12px;
-    padding: 12px 16px;
-    cursor: pointer;
+    padding: 12px 16px; cursor: pointer;
     transition: background 0.15s;
     border-bottom: 1px solid #f0f2f5;
 }
 html[data-theme="dark"] .msg-convo-item { border-bottom-color: #2a3942; }
-.msg-convo-item:hover, .msg-convo-item.active {
-    background: #f0f2f5;
-}
-html[data-theme="dark"] .msg-convo-item:hover, html[data-theme="dark"] .msg-convo-item.active {
-    background: #2a3942;
-}
+.msg-convo-item:hover, .msg-convo-item.active { background: #f0f2f5; }
+html[data-theme="dark"] .msg-convo-item:hover,
+html[data-theme="dark"] .msg-convo-item.active { background: #2a3942; }
 .msg-avatar {
     width: 48px; height: 48px; border-radius: 50%;
     background: linear-gradient(135deg, var(--msg-primary), var(--msg-primary-dark));
@@ -94,8 +78,7 @@ html[data-theme="dark"] .msg-convo-name { color: #e2e8f0; }
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .msg-convo-meta {
-    display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
-    flex-shrink: 0;
+    display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;
 }
 .msg-convo-time { font-size: 0.7rem; color: #667781; }
 .msg-unread-badge {
@@ -104,89 +87,56 @@ html[data-theme="dark"] .msg-convo-name { color: #e2e8f0; }
     border-radius: 50%; display: flex; align-items: center;
     justify-content: center; padding: 0 4px;
 }
-.msg-chat-area {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-}
+.msg-chat-area { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; position: relative; }
+.msg-chat-area.thread-open #msgChatContent { display: flex !important; flex-direction: column !important; flex: 1 1 auto !important; min-height: 0 !important; }
+.msg-chat-area.thread-open #msgNoChatSelected { display: none !important; }
 .msg-chat-header {
-    padding: 10px 16px;
-    background: var(--msg-sidebar-bg);
+    padding: 10px 16px; background: var(--msg-sidebar-bg);
     border-bottom: 1px solid #e5e7eb;
-    display: flex; align-items: center; gap: 12px;
-    flex-shrink: 0;
+    display: flex; align-items: center; gap: 12px; flex-shrink: 0;
 }
 html[data-theme="dark"] .msg-chat-header { border-bottom-color: #2a3942; }
-.msg-chat-header-name { font-weight: 600; font-size: 0.95rem; color: #111; flex: 1; }
+.msg-chat-header-name { font-weight: 600; font-size: 0.95rem; color: #111; }
 html[data-theme="dark"] .msg-chat-header-name { color: #e2e8f0; }
 .msg-chat-header-sub { font-size: 0.75rem; color: #667781; }
 .msg-chat-back {
     display: none; background: none; border: none;
-    font-size: 1.2rem; color: var(--msg-primary); cursor: pointer;
-    padding: 4px 8px;
+    font-size: 1.2rem; color: var(--msg-primary); cursor: pointer; padding: 4px 8px;
 }
 .msg-messages-area {
-    flex: 1;
-    overflow-y: auto;
-    padding: 16px;
+    flex: 1; overflow-y: auto; padding: 16px;
     background: var(--msg-chat-bg);
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+    display: flex; flex-direction: column; gap: 4px;
 }
-.msg-date-separator {
-    text-align: center; margin: 12px 0;
-}
+.msg-date-separator { text-align: center; margin: 12px 0; }
 .msg-date-separator span {
     background: rgba(0,0,0,0.08); color: #54656f;
-    font-size: 0.72rem; padding: 4px 12px;
-    border-radius: 8px; font-weight: 500;
+    font-size: 0.72rem; padding: 4px 12px; border-radius: 8px; font-weight: 500;
 }
 html[data-theme="dark"] .msg-date-separator span { background: rgba(255,255,255,0.1); color: #8696a0; }
-.msg-bubble-row {
-    display: flex;
-    max-width: 75%;
-}
+.msg-bubble-row { display: flex; max-width: 75%; }
 .msg-bubble-row.out { align-self: flex-end; }
 .msg-bubble-row.in { align-self: flex-start; }
 .msg-bubble {
-    padding: 6px 10px 4px;
-    border-radius: 8px;
-    font-size: 0.88rem;
-    line-height: 1.45;
-    position: relative;
-    word-break: break-word;
-    white-space: pre-wrap;
+    padding: 6px 10px 4px; border-radius: 8px;
+    font-size: 0.88rem; line-height: 1.45;
+    word-break: break-word; white-space: pre-wrap;
     box-shadow: 0 1px 1px rgba(0,0,0,0.08);
 }
-.msg-bubble-row.out .msg-bubble {
-    background: var(--msg-bubble-out);
-    border-top-right-radius: 0;
-}
-.msg-bubble-row.in .msg-bubble {
-    background: var(--msg-bubble-in);
-    border-top-left-radius: 0;
-}
-.msg-bubble-time {
-    font-size: 0.65rem; color: #667781;
-    text-align: right; margin-top: 2px;
-}
+.msg-bubble-row.out .msg-bubble { background: var(--msg-bubble-out); border-top-right-radius: 0; }
+.msg-bubble-row.in .msg-bubble { background: var(--msg-bubble-in); border-top-left-radius: 0; }
+.msg-bubble-time { font-size: 0.65rem; color: #667781; text-align: right; margin-top: 2px; }
 .msg-input-area {
-    padding: 8px 12px;
-    background: var(--msg-sidebar-bg);
+    padding: 8px 12px; background: var(--msg-sidebar-bg);
     display: flex; align-items: flex-end; gap: 8px;
-    flex-shrink: 0;
-    border-top: 1px solid #e5e7eb;
+    flex-shrink: 0; border-top: 1px solid #e5e7eb;
 }
 html[data-theme="dark"] .msg-input-area { border-top-color: #2a3942; }
 .msg-input-area textarea {
     flex: 1; border: none; border-radius: 20px;
     padding: 10px 16px; font-size: 0.9rem;
     background: #f0f2f5; outline: none;
-    resize: none; max-height: 120px;
-    line-height: 1.4;
-    font-family: inherit;
+    resize: none; max-height: 120px; line-height: 1.4; font-family: inherit;
 }
 html[data-theme="dark"] .msg-input-area textarea { background: #2a3942; color: #e2e8f0; }
 .msg-send-btn {
@@ -194,24 +144,33 @@ html[data-theme="dark"] .msg-input-area textarea { background: #2a3942; color: #
     background: linear-gradient(135deg, var(--msg-primary), var(--msg-primary-dark));
     color: #fff; border: none; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
-    font-size: 1.1rem; flex-shrink: 0;
-    transition: transform 0.15s;
+    font-size: 1.1rem; flex-shrink: 0; transition: transform 0.15s;
 }
 .msg-send-btn:hover { transform: scale(1.08); }
+.msg-send-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 .msg-empty-state {
     flex: 1; display: flex; align-items: center; justify-content: center;
-    flex-direction: column; color: #8696a0; text-align: center;
-    padding: 40px;
+    flex-direction: column; color: #8696a0; text-align: center; padding: 40px;
 }
 .msg-empty-state i { font-size: 4rem; margin-bottom: 16px; opacity: 0.3; }
 .msg-empty-state h3 { font-size: 1.1rem; margin-bottom: 8px; }
 .msg-empty-state p { font-size: 0.85rem; }
+.msg-loading { text-align: center; padding: 20px; color: #8696a0; font-size: 0.85rem; }
+.msg-sending { opacity: 0.6; }
+.msg-error-toast {
+    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+    background: #ef4444; color: #fff; padding: 10px 20px; border-radius: 20px;
+    font-size: 0.85rem; z-index: 9999; animation: msgFadeIn 0.3s;
+}
+@keyframes msgFadeIn { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
 
-/* Mobile */
 @media (max-width: 768px) {
     .msg-app { height: calc(100vh - 60px); }
     .msg-sidebar { width: 100%; border-right: none; }
-    .msg-chat-area { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 100; background: var(--msg-bg); }
+    .msg-chat-area {
+        display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+        z-index: 100; background: var(--msg-bg);
+    }
     .msg-chat-area.mobile-open { display: flex; }
     .msg-chat-back { display: block; }
     .msg-bubble-row { max-width: 85%; }
@@ -222,8 +181,8 @@ html[data-theme="dark"] .msg-input-area textarea { background: #2a3942; color: #
 {% endblock %}
 
 {% block content %}
+{% csrf_token %}
 <div class="msg-app" id="msgApp">
-    <!-- Sidebar: Conversation List -->
     <div class="msg-sidebar" id="msgSidebar">
         <div class="msg-sidebar-header">
             <i class="fas fa-comments fa-lg"></i>
@@ -233,15 +192,21 @@ html[data-theme="dark"] .msg-input-area textarea { background: #2a3942; color: #
             <input type="text" id="msgSearchInput" placeholder="{% trans '搜索对话...' %}" oninput="filterConversations(this.value)">
         </div>
         <div class="msg-convo-list" id="msgConvoList">
-            <div class="msg-empty-state" id="msgListEmpty" style="padding:40px 20px;">
+            <div class="msg-loading" id="msgLoading">
+                <i class="fas fa-spinner fa-spin"></i> Loading...
+            </div>
+            <div class="msg-empty-state" id="msgListEmpty" style="display:none;padding:40px 20px;">
                 <i class="fas fa-comments"></i>
                 <p data-zh="暂无对话" data-en="No conversations yet" data-fr="Aucune conversation">暂无对话</p>
+                <p style="font-size:.75rem;margin-top:8px;" data-zh="浏览商品并点击「聊天」按钮开始对话" data-en="Browse products and tap Chat to start" data-fr="Parcourez les produits et appuyez sur Chat">浏览商品并点击「聊天」按钮开始对话</p>
+                <a href="{% url 'manager:public_books' %}" style="margin-top:12px;padding:8px 20px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-radius:20px;text-decoration:none;font-size:.85rem;font-weight:600;">
+                    <i class="fas fa-store me-1"></i><span data-zh="去逛逛" data-en="Browse" data-fr="Parcourir">去逛逛</span>
+                </a>
             </div>
         </div>
     </div>
 
-    <!-- Chat Area -->
-    <div class="msg-chat-area" id="msgChatArea">
+        <div class="msg-chat-area" id="msgChatArea" aria-live="polite">
         <div class="msg-empty-state" id="msgNoChatSelected">
             <i class="fas fa-comment-dots"></i>
             <h3 data-zh="选择一个对话" data-en="Select a conversation" data-fr="Sélectionnez une conversation">选择一个对话</h3>
@@ -255,11 +220,16 @@ html[data-theme="dark"] .msg-input-area textarea { background: #2a3942; color: #
                     <div class="msg-chat-header-name" id="chatHeaderName">Vendor</div>
                     <div class="msg-chat-header-sub" id="chatHeaderSub"></div>
                 </div>
+                <a id="chatShopLink" href="#" style="display:none;color:var(--msg-primary);font-size:0.8rem;text-decoration:none;font-weight:600;">
+                    <i class="fas fa-store me-1"></i><span data-zh="店铺" data-en="Shop" data-fr="Boutique">店铺</span>
+                </a>
             </div>
-            <div class="msg-messages-area" id="msgMessagesArea"></div>
+            <div class="msg-messages-area" id="msgMessagesArea">
+                <div class="msg-loading" id="msgChatLoading"><i class="fas fa-spinner fa-spin"></i></div>
+            </div>
             <div class="msg-input-area">
-                <textarea id="msgInput" rows="1" placeholder="{% trans '输入消息...' %}" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
-                <button class="msg-send-btn" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+                <textarea id="msgInput" rows="1" placeholder="{% trans '输入消息...' %}" onkeydown="handleInputKey(event)"></textarea>
+                <button class="msg-send-btn" id="msgSendBtn" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
             </div>
         </div>
     </div>
@@ -272,33 +242,77 @@ html[data-theme="dark"] .msg-input-area textarea { background: #2a3942; color: #
     var conversations = [];
     var activeConvoId = null;
     var pollTimer = null;
+    var sending = false;
     var CONVO_API = '/manager/api/conversations/';
     var SEND_API = '/manager/public/messages/send/';
 
+    function getCSRF() {
+        var el = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (el) return el.value;
+        var match = document.cookie.match('(^|;)\\s*csrftoken=([^;]*)');
+        return match ? decodeURIComponent(match[2]) : '';
+    }
+
+    function showError(msg) {
+        var toast = document.createElement('div');
+        toast.className = 'msg-error-toast';
+        toast.textContent = msg;
+        document.body.appendChild(toast);
+        setTimeout(function() { toast.remove(); }, 3000);
+    }
+
+    function conversationIdFromUrl() {
+        var raw = new URLSearchParams(window.location.search).get('conversation');
+        if (raw === null || raw === '') return null;
+        var n = parseInt(raw, 10);
+        return Number.isFinite(n) ? n : null;
+    }
+
+    function applyConversationDeepLink() {
+        var cid = conversationIdFromUrl();
+        if (cid === null) return;
+        var cur = activeConvoId != null ? Number(activeConvoId) : null;
+        if (cur === cid) return;
+        openChat(cid);
+    }
+
     function loadConversations() {
-        fetch(CONVO_API)
-            .then(function(r) { return r.json(); })
+        fetch(CONVO_API, { credentials: 'same-origin' })
+            .then(function(r) {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            })
             .then(function(data) {
+                if (data.error === 'not_logged_in') {
+                    document.getElementById('msgLoading').innerHTML = '<div style="padding:20px;text-align:center;"><i class="fas fa-lock" style="font-size:2rem;opacity:0.3;margin-bottom:8px;display:block;"></i><p style="font-size:0.85rem;color:#8696a0;">Please log in to view messages</p><a href="{% url "manager:user_login" %}" style="color:#667eea;text-decoration:none;font-weight:600;">Log in</a></div>';
+                    return;
+                }
                 conversations = data.conversations || [];
                 renderConvoList();
-                var urlConvo = new URLSearchParams(window.location.search).get('conversation');
-                if (urlConvo && !activeConvoId) openChat(parseInt(urlConvo));
+                applyConversationDeepLink();
+            })
+            .catch(function(e) {
+                document.getElementById('msgLoading').innerHTML = '<p style="color:#ef4444;">Failed to load conversations</p>';
             });
     }
 
     function renderConvoList() {
         var list = document.getElementById('msgConvoList');
         var empty = document.getElementById('msgListEmpty');
+        var loading = document.getElementById('msgLoading');
+        if (loading) loading.style.display = 'none';
+
         if (conversations.length === 0) {
             list.innerHTML = '';
             list.appendChild(empty);
             empty.style.display = 'flex';
+            applyConversationDeepLink();
             return;
         }
         empty.style.display = 'none';
         var html = '';
         conversations.forEach(function(c) {
-            html += '<div class="msg-convo-item' + (c.id === activeConvoId ? ' active' : '') + '" onclick="openChat(' + c.id + ')" data-search="' + escAttr(c.vendor_name + ' ' + c.subject) + '">';
+            html += '<div class="msg-convo-item' + (Number(c.id) === Number(activeConvoId) ? ' active' : '') + '" onclick="openChat(' + c.id + ')" data-search="' + escAttr(c.vendor_name + ' ' + c.subject) + '">';
             html += '<div class="msg-avatar">' + escHtml(c.vendor_avatar) + '</div>';
             html += '<div class="msg-convo-info">';
             html += '<div class="msg-convo-name">' + escHtml(c.vendor_name) + '</div>';
@@ -313,43 +327,72 @@ html[data-theme="dark"] .msg-input-area textarea { background: #2a3942; color: #
     }
 
     window.openChat = function(convoId) {
+        convoId = Number(convoId);
+        if (!Number.isFinite(convoId)) return;
         activeConvoId = convoId;
         renderConvoList();
         document.getElementById('msgNoChatSelected').style.display = 'none';
         var chatContent = document.getElementById('msgChatContent');
         chatContent.style.display = 'flex';
-        document.getElementById('msgChatArea').classList.add('mobile-open');
-        var convo = conversations.find(function(c) { return c.id === convoId; });
+        var chatArea = document.getElementById('msgChatArea');
+        chatArea.classList.add('mobile-open');
+        chatArea.classList.add('thread-open');
+        var convo = conversations.find(function(c) { return Number(c.id) === convoId; });
         if (convo) {
             document.getElementById('chatAvatar').textContent = convo.vendor_avatar;
             document.getElementById('chatHeaderName').textContent = convo.vendor_name;
             document.getElementById('chatHeaderSub').textContent = convo.subject;
+            var shopLink = document.getElementById('chatShopLink');
+            if (convo.vendor_id) {
+                shopLink.href = '/manager/public/shop/' + convo.vendor_id + '/';
+                shopLink.style.display = '';
+            } else {
+                shopLink.style.display = 'none';
+            }
         }
+        document.getElementById('msgMessagesArea').innerHTML = '<div class="msg-loading"><i class="fas fa-spinner fa-spin"></i></div>';
         loadMessages(convoId);
         if (pollTimer) clearInterval(pollTimer);
         pollTimer = setInterval(function() { loadMessages(convoId, true); }, 5000);
+        setTimeout(function() { document.getElementById('msgInput').focus(); }, 300);
     };
 
     window.closeMobileChat = function() {
-        document.getElementById('msgChatArea').classList.remove('mobile-open');
+        var chatArea = document.getElementById('msgChatArea');
+        chatArea.classList.remove('mobile-open');
+        chatArea.classList.remove('thread-open');
         activeConvoId = null;
+        document.getElementById('msgChatContent').style.display = 'none';
+        document.getElementById('msgNoChatSelected').style.display = 'flex';
         if (pollTimer) clearInterval(pollTimer);
         loadConversations();
     };
 
     function loadMessages(convoId, silent) {
-        fetch('/manager/api/conversations/' + convoId + '/messages/')
-            .then(function(r) { return r.json(); })
+        fetch('/manager/api/conversations/' + convoId + '/messages/', { credentials: 'same-origin' })
+            .then(function(r) {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            })
             .then(function(data) {
-                if (!silent || convoId === activeConvoId) {
+                if (!silent || Number(convoId) === Number(activeConvoId)) {
                     renderMessages(data.messages || []);
                 }
                 if (!silent) loadConversations();
+            })
+            .catch(function(e) {
+                if (!silent) {
+                    document.getElementById('msgMessagesArea').innerHTML = '<div class="msg-loading" style="color:#ef4444;">Failed to load messages</div>';
+                }
             });
     }
 
     function renderMessages(msgs) {
         var area = document.getElementById('msgMessagesArea');
+        if (msgs.length === 0) {
+            area.innerHTML = '<div style="text-align:center;padding:40px;color:#8696a0;font-size:0.85rem;"><i class="fas fa-hand-paper" style="font-size:2rem;opacity:0.3;display:block;margin-bottom:8px;"></i>Say hello to start the conversation!</div>';
+            return;
+        }
         var html = '';
         var lastDate = '';
         msgs.forEach(function(m) {
@@ -370,25 +413,63 @@ html[data-theme="dark"] .msg-input-area textarea { background: #2a3942; color: #
     }
 
     window.sendMessage = function() {
+        if (sending) return;
         var input = document.getElementById('msgInput');
         var text = input.value.trim();
         if (!text || !activeConvoId) return;
+
+        sending = true;
+        var btn = document.getElementById('msgSendBtn');
+        btn.disabled = true;
         input.value = '';
         input.style.height = 'auto';
-        var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
-        var csrf = csrfToken ? csrfToken.value : getCookie('csrftoken');
+
+        var area = document.getElementById('msgMessagesArea');
+        var tempBubble = document.createElement('div');
+        tempBubble.className = 'msg-bubble-row out msg-sending';
+        tempBubble.innerHTML = '<div class="msg-bubble">' + escHtml(text) + '<div class="msg-bubble-time"><i class="fas fa-clock" style="font-size:0.6rem;"></i></div></div>';
+        area.appendChild(tempBubble);
+        area.scrollTop = area.scrollHeight;
+
+        var csrf = getCSRF();
         var fd = new FormData();
         fd.append('conversation_id', activeConvoId);
         fd.append('content', text);
         fd.append('message', text);
-        fetch(SEND_API, { method: 'POST', body: fd, headers: { 'X-CSRFToken': csrf } })
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                if (data.success) {
-                    loadMessages(activeConvoId);
-                    loadConversations();
-                }
-            });
+
+        fetch(SEND_API, {
+            method: 'POST',
+            body: fd,
+            headers: { 'X-CSRFToken': csrf },
+            credentials: 'same-origin'
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            sending = false;
+            btn.disabled = false;
+            if (data.success) {
+                loadMessages(activeConvoId);
+                loadConversations();
+            } else {
+                tempBubble.remove();
+                input.value = text;
+                showError(data.message || 'Failed to send message');
+            }
+        })
+        .catch(function(e) {
+            sending = false;
+            btn.disabled = false;
+            tempBubble.remove();
+            input.value = text;
+            showError('Network error - please try again');
+        });
+    };
+
+    window.handleInputKey = function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
     };
 
     window.filterConversations = function(q) {
@@ -401,12 +482,12 @@ html[data-theme="dark"] .msg-input-area textarea { background: #2a3942; color: #
 
     function escHtml(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
     function escAttr(s) { return (s || '').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
-    function getCookie(name) {
-        var v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
-        return v ? v[2] : '';
-    }
 
+    window.addEventListener('pageshow', function() {
+        applyConversationDeepLink();
+    });
     loadConversations();
+    setTimeout(applyConversationDeepLink, 50);
 })();
 </script>
 {% endblock %}

@@ -1,0 +1,74 @@
+{% load i18n %}
+<div class="vs-info-stack">
+                <div class="vs-info-card">
+                    <h6><i class="fas fa-star" style="color:#f59e0b;"></i> <span data-zh="店铺评分" data-en="Shop Ratings" data-fr="Évaluations">{% trans "店铺评分" %}</span></h6>
+                    <div class="vs-score-grid">
+                        <div class="vs-score-item">
+                            <div class="vs-score-val">4.9</div>
+                            <div class="vs-score-lbl" data-zh="商品质量" data-en="Quality" data-fr="Qualité">{% trans "商品质量" %}</div>
+                        </div>
+                        <div class="vs-score-item">
+                            <div class="vs-score-val">4.8</div>
+                            <div class="vs-score-lbl" data-zh="配送速度" data-en="Delivery" data-fr="Livraison">{% trans "配送速度" %}</div>
+                        </div>
+                        <div class="vs-score-item">
+                            <div class="vs-score-val">4.9</div>
+                            <div class="vs-score-lbl" data-zh="服务态度" data-en="Service" data-fr="Service">{% trans "服务态度" %}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="vs-info-card">
+                    <h6><i class="fas fa-info-circle" style="color:#667eea;"></i> <span data-zh="店铺信息" data-en="Shop Info" data-fr="Infos Boutique">{% trans "店铺信息" %}</span></h6>
+                    <div class="vs-info-row">
+                        <span class="vs-info-lbl"><i class="fas fa-user me-1"></i> <span data-zh="联系人" data-en="Contact" data-fr="Contact">{% trans "联系人" %}</span></span>
+                        <span class="vs-info-val">{{ vendor.contact_name }}</span>
+                    </div>
+                    <div class="vs-info-row">
+                        <span class="vs-info-lbl"><i class="fas fa-calendar me-1"></i> <span data-zh="入驻时间" data-en="Joined" data-fr="Inscrit">{% trans "入驻时间" %}</span></span>
+                        <span class="vs-info-val">{{ vendor.created_at|date:"Y-m-d" }}</span>
+                    </div>
+                    <div class="vs-info-row">
+                        <span class="vs-info-lbl"><i class="fas fa-box me-1"></i> <span data-zh="商品数" data-en="Items" data-fr="Articles">{% trans "商品数" %}</span></span>
+                        <span class="vs-info-val">{{ total_items }}</span>
+                    </div>
+                    <div class="vs-info-row">
+                        <span class="vs-info-lbl"><i class="fas fa-users me-1"></i> <span data-zh="粉丝数" data-en="Followers" data-fr="Abonnés">{% trans "粉丝数" %}</span></span>
+                        <span class="vs-info-val">{{ follower_count }}</span>
+                    </div>
+                </div>
+
+                <div class="vs-info-card">
+                    <h6><i class="fas fa-headset" style="color:#10b981;"></i> <span data-zh="联系卖家" data-en="Contact Seller" data-fr="Contacter">{% trans "联系卖家" %}</span></h6>
+                    <a href="{% url 'manager:start_conversation' %}?vendor_id={{ vendor.id }}&subject={{ vendor.company_name|urlencode }}" class="vs-contact-btn mb-2">
+                        <i class="fas fa-comment-dots me-2"></i><span data-zh="发送消息" data-en="Send Message" data-fr="Envoyer un message">{% trans "发送消息" %}</span>
+                    </a>
+                    {% if vendor.phone %}
+                    <div class="text-center mt-2" style="font-size:0.82rem;color:var(--muted-text, #94a3b8);">
+                        <i class="fas fa-phone me-1"></i>{{ vendor.phone }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="vs-info-card">
+                    <h6><i class="fas fa-shield-alt" style="color:#3b82f6;"></i> <span data-zh="服务保障" data-en="Guarantees" data-fr="Garanties">{% trans "服务保障" %}</span></h6>
+                    <div class="d-flex flex-column gap-2" style="font-size:0.82rem;">
+                        <div class="d-flex align-items-center gap-2" style="color:var(--dark-text, #333);">
+                            <i class="fas fa-undo" style="color:#667eea; width:18px;"></i>
+                            <span data-zh="15天无理由退换" data-en="15-day easy returns" data-fr="Retour 15 jours">{% trans "15天无理由退换" %}</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2" style="color:var(--dark-text, #333);">
+                            <i class="fas fa-certificate" style="color:#10b981; width:18px;"></i>
+                            <span data-zh="正品保证" data-en="Authentic guarantee" data-fr="Garantie authenticité">{% trans "正品保证" %}</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2" style="color:var(--dark-text, #333);">
+                            <i class="fas fa-shipping-fast" style="color:#f59e0b; width:18px;"></i>
+                            <span data-zh="极速发货" data-en="Fast shipping" data-fr="Livraison rapide">{% trans "极速发货" %}</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2" style="color:var(--dark-text, #333);">
+                            <i class="fas fa-headset" style="color:#8b5cf6; width:18px;"></i>
+                            <span data-zh="专属客服" data-en="Dedicated support" data-fr="Support dédié">{% trans "专属客服" %}</span>
+                        </div>
+                    </div>
+                </div>
+</div>

@@ -1,0 +1,139 @@
+{% extends 'public/vendor_panel_base.html' %}
+{% load i18n %}
+
+{% block panel_title %}{% trans "图书订单" %} · {{ vendor.company_name }}{% endblock %}
+
+{% block panel_extra_css %}
+<style>
+    .vp-page-head {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        padding: 20px 22px;
+        border-radius: 15px;
+        margin-bottom: 18px;
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.28);
+    }
+    .vp-toolbar {
+        background: var(--card-bg, #fff);
+        border-radius: 14px;
+        padding: 16px;
+        margin-bottom: 16px;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+        border: 1px solid rgba(102,126,234,0.1);
+    }
+    .vp-table-card {
+        background: var(--card-bg, #fff);
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+    }
+    .vp-table-card thead th {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: #fff;
+        font-size: 0.82rem;
+        padding: 12px 14px;
+        border: none;
+    }
+    .vp-table-card tbody td { padding: 12px 14px; font-size: 0.88rem; vertical-align: middle; }
+    .stat-pill {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: rgba(102,126,234,0.1);
+        border-radius: 20px;
+        padding: 6px 14px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #667eea;
+    }
+</style>
+{% endblock %}
+
+{% block vendor_panel_content %}
+<div class="vp-page-head">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div>
+            <h4 class="mb-1 fw-bold"><i class="fas fa-shopping-bag me-2"></i>{% trans "图书订单" %}</h4>
+            <small class="opacity-90">{% trans "包含您店铺图书的订单" %}</small>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <span class="stat-pill"><i class="fas fa-list"></i> {{ total_orders }}</span>
+            <span class="stat-pill" style="background:rgba(245,158,11,0.15);color:#b45309;"><i class="fas fa-clock"></i> {% trans "待支付" %} {{ pending_pay }}</span>
+            <span class="stat-pill" style="background:rgba(16,185,129,0.15);color:#047857;"><i class="fas fa-check"></i> {% trans "已支付" %} {{ paid_completed }}</span>
+        </div>
+    </div>
+</div>
+
+<form method="get" class="vp-toolbar row g-2 align-items-end">
+    <div class="col-md-3">
+        <label class="form-label small text-muted mb-1">{% trans "订单状态" %}</label>
+        <select name="status" class="form-select form-select-sm rounded-3">
+            <option value="">{% trans "全部" %}</option>
+            {% for val,label in status_choices %}
+            <option value="{{ val }}" {% if current_status == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label class="form-label small text-muted mb-1">{% trans "支付状态" %}</label>
+        <select name="payment_status" class="form-select form-select-sm rounded-3">
+            <option value="">{% trans "全部" %}</option>
+            {% for val,label in payment_status_choices %}
+            <option value="{{ val }}" {% if current_payment_status == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-4">
+        <label class="form-label small text-muted mb-1">{% trans "搜索" %}</label>
+        <input type="text" name="search" class="form-control form-control-sm rounded-3" placeholder="{% trans '订单号、客户…' %}" value="{{ current_search }}">
+    </div>
+    <div class="col-md-2 d-flex gap-2">
+        <button type="submit" class="btn btn-sm flex-grow-1 rounded-3 fw-semibold text-white border-0" style="background:linear-gradient(135deg,#667eea,#764ba2);"><i class="fas fa-filter me-1"></i>{% trans "筛选" %}</button>
+        <a href="{% url 'manager:vendor_book_orders' %}" class="btn btn-sm btn-outline-secondary rounded-3">{% trans "重置" %}</a>
+    </div>
+</form>
+
+<div class="vp-table-card table-responsive">
+    <table class="table table-hover mb-0">
+        <thead><tr>
+            <th>{% trans "订单号" %}</th>
+            <th>{% trans "客户" %}</th>
+            <th>{% trans "金额" %}</th>
+            <th>{% trans "订单状态" %}</th>
+            <th>{% trans "支付" %}</th>
+            <th>{% trans "日期" %}</th>
+            <th></th>
+        </tr></thead>
+        <tbody>
+            {% for o in orders %}
+            <tr>
+                <td class="fw-bold font-monospace small">{{ o.order_number|truncatechars:18 }}</td>
+                <td>
+                    <div class="fw-semibold small">{{ o.customer_name }}</div>
+                    <small class="text-muted">{{ o.customer_email|truncatechars:28 }}</small>
+                </td>
+                <td class="fw-bold text-danger">¥{{ o.total_amount }}</td>
+                <td><span class="badge bg-{{ o.get_status_color }}">{{ o.get_status_display }}</span></td>
+                <td><span class="badge bg-{{ o.get_payment_status_color }}">{{ o.get_payment_status_display }}</span></td>
+                <td><small>{{ o.created_at|date:"Y-m-d H:i" }}</small></td>
+                <td><a href="{% url 'manager:vendor_book_order_detail' o.id %}" class="btn btn-sm btn-outline-primary rounded-pill">{% trans "详情" %}</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7" class="text-center py-5 text-muted">{% trans "暂无订单" %}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if orders.paginator.num_pages > 1 %}
+<nav class="mt-3">
+    <ul class="pagination justify-content-center pagination-sm">
+        {% if orders.has_previous %}
+        <li class="page-item"><a class="page-link rounded-pill mx-1" href="?page={{ orders.previous_page_number }}&status={{ current_status }}&payment_status={{ current_payment_status }}&search={{ current_search }}">«</a></li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link border-0 bg-transparent">{{ orders.number }} / {{ orders.paginator.num_pages }}</span></li>
+        {% if orders.has_next %}
+        <li class="page-item"><a class="page-link rounded-pill mx-1" href="?page={{ orders.next_page_number }}&status={{ current_status }}&payment_status={{ current_payment_status }}&search={{ current_search }}">»</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

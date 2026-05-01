@@ -3372,3 +3372,163 @@ msgstr "Origine"
 #: .\marketplace\templates\marketplace\supermarket_detail.html:127
 msgid "选择规格"
 msgstr "Choisir la spécification"
+
+# --- Panneau vendeur — hub commandes & tableau de bord (2026-05) ---
+msgid "订单中心"
+msgstr "Centre des commandes"
+
+msgid "图书、商城商品与课程订单统一管理"
+msgstr ""
+"Vue unifiée des commandes livres et marketplace (produits et cours)"
+
+msgid "待支付(图)"
+msgstr "En attente de paiement (livres)"
+
+msgid "待支付(商)"
+msgstr "En attente de paiement (boutique)"
+
+msgid "商城"
+msgstr "Marketplace"
+
+msgid "图书与商城共用相近状态键时可联合筛选"
+msgstr ""
+"Livres et boutique partagent des statuts proches — le filtre s’applique aux deux"
+
+msgid "图书订单专页"
+msgstr "Page commandes livres"
+
+msgid "商城订单专页"
+msgstr "Page commandes marketplace"
+
+msgid "类型"
+msgstr "Type"
+
+msgid "商品+课程"
+msgstr "Produits + cours"
+
+msgid "商品订单"
+msgstr "Commandes produits"
+
+msgid "课程订单"
+msgstr "Commandes cours"
+
+msgid "详情 / 管理"
+msgstr "Détails / gestion"
+
+msgid "一站式查看与管理图书、商城商品与课程订单；筛选类型、更新履约状态与客户地址。"
+msgstr ""
+"Tout voir au même endroit : livres et boutique ; filtrer, mettre à jour "
+"l’exécution et les coordonnées client."
+
+msgid "点击进入订单中心"
+msgstr "Cliquer pour ouvrir le centre des commandes"
+
+msgid "订单总数"
+msgstr "Nombre total de commandes"
+
+msgid "按图书筛选"
+msgstr "Filtrer par livres"
+
+msgid "商品与课程"
+msgstr "Produits et cours"
+
+msgid "仅实物商品"
+msgstr "Produits physiques uniquement"
+
+msgid "在线教育"
+msgstr "Formation en ligne"
+
+msgid "书目 CRUD"
+msgstr "Catalogue (CRUD)"
+
+msgid "课程货架"
+msgstr "Étagère cours"
+
+msgid "快速上架"
+msgstr "Mise en ligne rapide"
+
+msgid "查看订单中心"
+msgstr "Ouvrir le centre des commandes"
+
+msgid "点击查看订单"
+msgstr "Cliquer pour voir les commandes"
+
+msgid "订单与履约"
+msgstr "Commandes et exécution"
+
+msgid "管理书目"
+msgstr "Gérer les titres"
+
+msgid "打开货架"
+msgstr "Ouvrir l’étagère"
+
+msgid "提示：可在「订单中心」合并查看图书与商城订单。"
+msgstr ""
+"Astuce : le centre des commandes regroupe livres et boutique."
+
+msgid "打开订单中心"
+msgstr "Ouvrir le centre des commandes"
+
+msgid "提示：订单中心可合并筛选图书、商品与课程订单。"
+msgstr ""
+"Astuce : filtrez ensemble livres, produits et cours dans le centre des commandes."
+
+msgid "编辑客户与收货信息"
+msgstr "Modifier client et livraison"
+
+msgid "用于更正买家联系方式或配送地址（订单未取消 / 未退款时可编辑）。"
+msgstr ""
+"Corriger coordonnées ou adresse (modifiable sauf annulation/remboursement)."
+
+msgid "更正联系方式或收货地址（订单未取消 / 未退款时可编辑）。"
+msgstr ""
+"Corriger coordonnées ou adresse (modifiable sauf annulation/remboursement)."
+
+msgid "保存联系信息"
+msgstr "Enregistrer les coordonnées"
+
+msgid "客户姓名"
+msgstr "Nom du client"
+
+msgid "电话 / 微信"
+msgstr "Téléphone / WeChat"
+
+msgid "国家 / 地区"
+msgstr "Pays / région"
+
+msgid "收货地址"
+msgstr "Adresse de livraison"
+
+msgid "设置已保存 (功能开发中)"
+msgstr "Paramètres enregistrés (fonctionnalité en développement)"
+
+msgid "请以卖家身份登录"
+msgstr "Connectez-vous en tant que vendeur"
+
+msgid "无权操作此订单"
+msgstr "Vous ne pouvez pas gérer cette commande"
+
+msgid "订单已关闭，无法修改联系信息"
+msgstr ""
+"Commande clôturée — modification des coordonnées impossible"
+
+msgid "姓名与邮箱不能为空"
+msgstr "Le nom et l’e-mail sont obligatoires"
+
+msgid "客户信息已保存"
+msgstr "Informations client enregistrées"
+
+msgid "邮箱不能为空"
+msgstr "L’e-mail est obligatoire"
+
+msgid "客户与地址信息已保存"
+msgstr "Client et adresse enregistrés"
+
+msgid "商城货架"
+msgstr "Étagère marketplace"
+
+msgid "货架"
+msgstr "Étagère"
+
+msgid "链接已复制!"
+msgstr "Lien copié !"

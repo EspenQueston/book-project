@@ -999,62 +999,124 @@
             font-size: 16px;
         }
     }
-    /* ===== PWA: Best Deals horizontal scroll ===== */
-    .best-deals-section {
-        display: none;
+    /* ===== Best Deals Auto-Sliding Carousel ===== */
+    .bd-carousel-section {
+        background: #fff;
+        padding: 14px 0 8px;
+        margin-bottom: 6px;
+    }
+    html[data-theme="dark"] .bd-carousel-section { background: #1e293b; }
+    .bd-carousel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 0 10px;
+    }
+    .bd-carousel-header .bd-title {
+        font-size: 15px;
+        font-weight: 800;
+        color: #333;
+    }
+    html[data-theme="dark"] .bd-carousel-header .bd-title { color: #e2e8f0; }
+    .bd-carousel-header a {
+        font-size: 12px;
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    .bd-carousel-wrapper {
+        position: relative;
+        overflow: hidden;
+    }
+    .bd-carousel-track {
+        display: flex;
+        gap: 10px;
+        transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        will-change: transform;
+    }
+    .bd-carousel-slide {
+        flex: 0 0 calc(100% / 2.5 - 8px);
+        min-width: 0;
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #f0f0f0;
+        overflow: hidden;
+        text-decoration: none;
+        color: inherit;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        transition: transform 0.2s;
+    }
+    html[data-theme="dark"] .bd-carousel-slide { background: #0f172a; border-color: #334155; }
+    .bd-carousel-slide:hover { transform: translateY(-2px); }
+    .bd-carousel-slide img {
+        width: 100%;
+        height: 100px;
+        object-fit: cover;
+        background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+    }
+    .bd-carousel-body { padding: 8px 10px; }
+    .bd-carousel-name {
+        font-size: 12px;
+        font-weight: 600;
+        color: #333;
+        line-height: 1.3;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    html[data-theme="dark"] .bd-carousel-name { color: #e2e8f0; }
+    .bd-carousel-price { font-size: 15px; font-weight: 800; color: #E4393C; margin-top: 3px; }
+    .bd-carousel-type {
+        display: inline-block;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 6px;
+        margin-top: 4px;
+    }
+    .bd-carousel-tag {
+        display: inline-block;
+        font-size: 9px;
+        font-weight: 800;
+        padding: 2px 6px;
+        border-radius: 4px;
+        margin-left: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+    .bd-carousel-tag-hot { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #b45309; }
+    .bd-carousel-tag-deal { background: linear-gradient(135deg, #fecaca, #fca5a5); color: #991b1b; }
+    .bd-carousel-tag-new { background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: #1d4ed8; }
+    html[data-theme="dark"] .bd-carousel-tag-hot { background: rgba(245,158,11,0.2); color: #fcd34d; }
+    html[data-theme="dark"] .bd-carousel-tag-deal { background: rgba(239,68,68,0.2); color: #fca5a5; }
+    html[data-theme="dark"] .bd-carousel-tag-new { background: rgba(59,130,246,0.2); color: #93c5fd; }
+    @media (min-width: 769px) {
+        .bd-carousel-mobile-only { display: none !important; }
     }
     @media (max-width: 768px) {
-        .best-deals-section {
-            display: block;
-            background: #fff;
-            padding: 10px 0 6px;
-            margin-bottom: 6px;
+        .bd-carousel-mobile-only .bd-carousel-track.bd-marquee-rtl {
+            animation: bd-marquee-rtl 42s linear infinite;
+            transition: none !important;
         }
-        html[data-theme="dark"] .best-deals-section { background: #1e293b; }
-        .best-deals-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 12px 8px;
+        .bd-carousel-mobile-only .bd-carousel-wrapper:focus-within .bd-carousel-track.bd-marquee-rtl,
+        .bd-carousel-mobile-only .bd-carousel-wrapper:active .bd-carousel-track.bd-marquee-rtl {
+            animation-play-state: paused;
         }
-        .best-deals-header .bd-title {
-            font-size: 14px;
-            font-weight: 800;
-            color: #333;
+    }
+    @keyframes bd-marquee-rtl {
+        from { transform: translateX(0); }
+        to { transform: translateX(-50%); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .bd-carousel-mobile-only .bd-carousel-track.bd-marquee-rtl {
+            animation: none !important;
+            transform: none !important;
         }
-        html[data-theme="dark"] .best-deals-header .bd-title { color: #e2e8f0; }
-        .best-deals-header a {
-            font-size: 12px;
-            color: #667eea;
-            text-decoration: none;
-        }
-        .best-deals-scroll {
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            padding: 0 12px 8px;
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-        }
-        .best-deals-scroll::-webkit-scrollbar { display: none; }
-        .bd-card {
-            flex: 0 0 120px;
-            scroll-snap-align: start;
-            background: #fff;
-            border-radius: 10px;
-            border: 1px solid #f0f0f0;
-            overflow: hidden;
-            text-decoration: none;
-            color: inherit;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        }
-        html[data-theme="dark"] .bd-card { background: #0f172a; border-color: #334155; }
-        .bd-card img { width: 100%; height: 80px; object-fit: cover; background: #f3f4f6; }
-        .bd-card-body { padding: 6px 8px 8px; }
-        .bd-name { font-size: 11px; color: #333; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        html[data-theme="dark"] .bd-name { color: #e2e8f0; }
-        .bd-price { font-size: 14px; font-weight: 800; color: #E4393C; margin-top: 3px; }
+    }
+    @media (min-width: 769px) {
+        .bd-carousel-section { padding: 24px 0 16px; margin-bottom: 0; }
+        .bd-carousel-slide { flex: 0 0 calc(100% / 5 - 8px); }
+        .bd-carousel-slide img { height: 140px; }
     }
     .feed-title { font-size: 1rem; font-weight: 800; color: #1a1a2e; margin-bottom: 12px; }
     html[data-theme="dark"] .feed-title { color: #e2e8f0; }
@@ -1109,11 +1171,48 @@
         .feed-section { display: none; }
     }
 
+/* ===== New Arrivals Section ===== */
+.new-arrivals-section { padding: 80px 0; background: #fff; }
+.na-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.na-card { background: #f8fafc; border-radius: 16px; overflow: hidden; transition: all .3s; border: 1px solid #f1f5f9; }
+.na-card:hover { transform: translateY(-6px); box-shadow: 0 12px 35px rgba(102,126,234,.15); }
+.na-cover { height: 220px; background: linear-gradient(135deg, #f0f0ff, #e8e0ff); display: flex; align-items: center; justify-content: center; padding: 16px; overflow: hidden; }
+.na-cover img { max-width: 100%; max-height: 100%; object-fit: contain; transition: transform .4s; }
+.na-card:hover .na-cover img { transform: scale(1.08); }
+.na-body { padding: 16px; }
+.na-badge { font-size: .65rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; background: linear-gradient(135deg,#667eea,#764ba2); color: #fff; display: inline-block; margin-bottom: 8px; }
+.na-title { font-size: .95rem; font-weight: 700; color: #1e293b; margin-bottom: 6px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.na-pub { font-size: .8rem; color: #94a3b8; margin-bottom: 8px; }
+.na-footer { display: flex; justify-content: space-between; align-items: center; }
+.na-price { font-size: 1.15rem; font-weight: 800; color: #667eea; }
+.na-btn { background: linear-gradient(135deg,#667eea,#764ba2); color: #fff; border: none; border-radius: 8px; padding: 6px 14px; font-size: .8rem; font-weight: 600; cursor: pointer; text-decoration: none; transition: all .2s; }
+.na-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102,126,234,.4); color: #fff; }
+
+/* ===== Categories Showcase ===== */
+.categories-showcase { padding: 80px 0; background: linear-gradient(135deg, #f8fafc, #eef2ff); }
+.cat-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; }
+.cat-card { background: #fff; border-radius: 16px; padding: 28px 16px; text-align: center; text-decoration: none; color: #1e293b; transition: all .3s; border: 1px solid rgba(102,126,234,.08); }
+.cat-card:hover { transform: translateY(-6px); box-shadow: 0 12px 30px rgba(102,126,234,.12); color: #1e293b; }
+.cat-icon { width: 60px; height: 60px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 1.5rem; color: #fff; }
+.cat-card h6 { font-weight: 700; margin-bottom: 4px; font-size: .95rem; }
+.cat-card p { font-size: .8rem; color: #94a3b8; margin: 0; }
+
+/* ===== Stats Counter Section ===== */
+.stats-section { padding: 70px 0; background: var(--hero-gradient); position: relative; overflow: hidden; }
+.stats-section::before { content: ''; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23fff' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/svg%3E"); }
+.stat-item { text-align: center; position: relative; z-index: 1; }
+.stat-num { font-size: 2.8rem; font-weight: 900; color: #fff; line-height: 1; }
+.stat-label { font-size: .95rem; color: rgba(255,255,255,.75); margin-top: 8px; font-weight: 500; }
+.stat-icon { width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,.15); display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; font-size: 1.4rem; color: #fff; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,.2); }
+
 /* ===== MOBILE: Hide all sections after the feed ===== */
 @media (max-width: 768px) {
     .features-section,
     .search-section,
     .featured-section,
+    .new-arrivals-section,
+    .categories-showcase,
+    .stats-section,
     .cta-section {
         display: none !important;
     }
@@ -1195,32 +1294,42 @@
 })();
 </script>
 
-<!-- ===== PWA: Best Deals horizontal scroll (mobile only) ===== -->
-{% if featured_books or featured_products %}
-<section class="best-deals-section" id="bestDeals">
-    <div class="best-deals-header">
-        <span class="bd-title" data-zh="🔥 最优惠" data-en="🔥 Best Deals" data-fr="🔥 Meilleures Offres">🔥 Meilleures Offres</span>
-        <a href="{% url 'manager:public_books' %}" data-zh="查看全部" data-en="See all >" data-fr="Voir tout >">查看全部 &gt;</a>
-    </div>
-    <div class="best-deals-scroll">
-        {% for book in featured_books|slice:":8" %}
-        <a href="{% url 'manager:public_book_detail' book.id %}" class="bd-card">
-            <img src="{{ book.get_cover_url }}" alt="{{ book.name }}" loading="lazy" onerror="this.src='/static/img/default_cover.png'">
-            <div class="bd-card-body">
-                <div class="bd-name">{{ book.name|truncatechars:18 }}</div>
-                <div class="bd-price">&yen;{{ book.price }}</div>
+<!-- ===== Best Deals Auto-Sliding Carousel ===== -->
+{% if best_deals %}
+<section class="bd-carousel-section bd-carousel-mobile-only" id="bdCarousel">
+    <div class="container">
+        <div class="bd-carousel-header">
+            <span class="bd-title" data-zh="🔥 最优惠" data-en="🔥 Best Deals" data-fr="🔥 Meilleures Offres">🔥 Meilleures Offres</span>
+            <a href="{% url 'manager:public_books' %}" data-zh="查看全部 >" data-en="See all >" data-fr="Voir tout >">查看全部 &gt;</a>
+        </div>
+        <div class="bd-carousel-wrapper" id="bdCarouselWrapper">
+            <div class="bd-carousel-track" id="bdCarouselTrack">
+                {% for deal in best_deals %}
+                <a href="{{ deal.detail_url }}" class="bd-carousel-slide">
+                    <img src="{{ deal.image_url }}" alt="{{ deal.name }}" loading="lazy" onerror="this.src='/static/img/default_cover.png'">
+                    <div class="bd-carousel-body">
+                        <div class="bd-carousel-name">{{ deal.name|truncatechars:20 }}</div>
+                        <div class="bd-carousel-price">&yen;{{ deal.price }}</div>
+                        <span class="bd-carousel-type"
+                              style="{% if deal.item_type == 'book' %}background:#ede9fe;color:#7c3aed;{% elif deal.item_type == 'product' %}background:#fef3c7;color:#d97706;{% elif deal.item_type == 'course' %}background:#e0e7ff;color:#3730a3;{% else %}background:#d1fae5;color:#065f46;{% endif %}"
+                              data-zh="{% if deal.item_type == 'book' %}图书{% elif deal.item_type == 'product' %}商品{% elif deal.item_type == 'course' %}课程{% else %}超市{% endif %}"
+                              data-en="{% if deal.item_type == 'book' %}Book{% elif deal.item_type == 'product' %}Product{% elif deal.item_type == 'course' %}Course{% else %}Grocery{% endif %}"
+                              data-fr="{% if deal.item_type == 'book' %}Livre{% elif deal.item_type == 'product' %}Produit{% elif deal.item_type == 'course' %}Cours{% else %}Épicerie{% endif %}">
+                            {% if deal.item_type == 'book' %}图书{% elif deal.item_type == 'product' %}商品{% elif deal.item_type == 'course' %}课程{% else %}超市{% endif %}
+                        </span>
+                        {% if deal.tag %}
+                        <span class="bd-carousel-tag bd-carousel-tag-{{ deal.tag }}"
+                              data-zh="{% if deal.tag == 'hot' %}热销{% elif deal.tag == 'deal' %}特价{% else %}新品{% endif %}"
+                              data-en="{% if deal.tag == 'hot' %}Hot{% elif deal.tag == 'deal' %}Deal{% else %}New{% endif %}"
+                              data-fr="{% if deal.tag == 'hot' %}Top{% elif deal.tag == 'deal' %}Promo{% else %}Neuf{% endif %}">
+                            {% if deal.tag == 'hot' %}Hot{% elif deal.tag == 'deal' %}Deal{% else %}New{% endif %}
+                        </span>
+                        {% endif %}
+                    </div>
+                </a>
+                {% endfor %}
             </div>
-        </a>
-        {% endfor %}
-        {% for product in featured_products|slice:":6" %}
-        <a href="/marketplace/products/{{ product.slug }}/" class="bd-card">
-            <img src="{{ product.get_image_url }}" alt="{{ product.name }}" loading="lazy" onerror="this.src='/static/img/default_product.png'">
-            <div class="bd-card-body">
-                <div class="bd-name">{{ product.name|truncatechars:18 }}</div>
-                <div class="bd-price">&yen;{{ product.price }}</div>
-            </div>
-        </a>
-        {% endfor %}
+        </div>
     </div>
 </section>
 {% endif %}
@@ -1608,6 +1717,149 @@
     </div>
 </section>
 
+<!-- New Arrivals Section -->
+<section class="new-arrivals-section">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <h2 class="section-title"><span data-zh="新书上架" data-en="New Arrivals" data-fr="Nouveautés">新书上架</span></h2>
+            <p class="section-subtitle"><span data-zh="最新入库的精选图书，抢先阅读" data-en="Freshly stocked titles — be the first to read" data-fr="Titres fraîchement ajoutés — soyez le premier à lire">最新入库的精选图书，抢先阅读</span></p>
+        </div>
+        {% if recent_books %}
+        <div class="na-grid" data-aos="fade-up" data-aos-delay="100">
+            {% for book in recent_books|slice:":4" %}
+            <div class="na-card">
+                <div class="na-cover">
+                    {% if book.cover_image %}<img src="{{ book.cover_image.url }}" alt="{{ book.name }}">{% else %}<i class="fas fa-book" style="font-size:3rem;color:rgba(102,126,234,.3);"></i>{% endif %}
+                </div>
+                <div class="na-body">
+                    <span class="na-badge">{% if book.category %}{{ book.category.name }}{% else %}新书{% endif %}</span>
+                    <div class="na-title">{{ book.name }}</div>
+                    <div class="na-pub"><i class="fas fa-building me-1"></i>{{ book.publisher.publisher_name }}</div>
+                    <div class="na-footer">
+                        <span class="na-price">¥{{ book.price }}</span>
+                        <a href="{% url 'manager:public_book_detail' book.id %}" class="na-btn"><i class="fas fa-eye me-1"></i><span data-zh="查看" data-en="View" data-fr="Voir">查看</span></a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-4" data-aos="fade-up">
+            <a href="{% url 'manager:public_books' %}?sort=newest" class="btn btn-cta" style="background:var(--hero-gradient);color:white;padding:14px 36px;border-radius:50px;font-weight:700;">
+                <i class="fas fa-book-open me-2"></i><span data-zh="查看全部新书" data-en="View All New Books" data-fr="Voir toutes les nouveautés">查看全部新书</span>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Latest Blog Posts -->
+{% if latest_blogs %}
+<section style="padding:80px 0;background:linear-gradient(135deg,#f8fafc,#fff);">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <h2 class="section-title"><span data-zh="最新动态" data-en="Latest Posts" data-fr="Derniers articles">最新动态</span></h2>
+            <p class="section-subtitle"><span data-zh="来自我们团队的最新文章与资讯" data-en="Fresh articles and updates from our team" data-fr="Articles et actualités de notre équipe">来自我们团队的最新文章与资讯</span></p>
+        </div>
+        <div class="row g-4" data-aos="fade-up" data-aos-delay="100">
+            {% for blog in latest_blogs %}
+            <div class="col-lg-4">
+                <a href="{% url 'manager:public_blog_detail' blog.slug %}" style="text-decoration:none;color:inherit;">
+                <div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(102,126,234,.08);transition:all .3s;border:1px solid rgba(102,126,234,.06);height:100%;">
+                    <div style="height:200px;overflow:hidden;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;position:relative;">
+                        {% if blog.image %}<img src="{{ blog.image.url }}" alt="{{ blog.title }}" style="width:100%;height:100%;object-fit:cover;">{% else %}<i class="fas fa-newspaper" style="font-size:3rem;color:rgba(255,255,255,.4);"></i>{% endif %}
+                        {% if blog.category %}<span style="position:absolute;top:12px;left:12px;background:rgba(255,255,255,.9);color:#667eea;font-size:.7rem;font-weight:700;padding:4px 12px;border-radius:20px;">{{ blog.category.name }}</span>{% endif %}
+                    </div>
+                    <div style="padding:20px;">
+                        <h5 style="font-weight:700;font-size:1.05rem;color:#1e293b;margin-bottom:8px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ blog.title }}</h5>
+                        <p style="font-size:.85rem;color:#94a3b8;margin-bottom:12px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">{{ blog.content|striptags|truncatechars:120 }}</p>
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <span style="font-size:.75rem;color:#94a3b8;"><i class="fas fa-calendar me-1"></i>{{ blog.created_at|date:"Y-m-d" }}</span>
+                            <span style="font-size:.8rem;color:#667eea;font-weight:600;" data-zh="阅读更多 →" data-en="Read more →" data-fr="Lire plus →">阅读更多 →</span>
+                        </div>
+                    </div>
+                </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-4" data-aos="fade-up">
+            <a href="{% url 'manager:public_blog' %}" class="btn btn-cta" style="background:#fff;color:#667eea;font-weight:700;padding:14px 36px;border-radius:50px;box-shadow:0 4px 15px rgba(102,126,234,.15);border:2px solid rgba(102,126,234,.2);">
+                <i class="fas fa-newspaper me-2"></i><span data-zh="查看全部文章" data-en="View All Posts" data-fr="Voir tous les articles">查看全部文章</span>
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Categories Showcase -->
+<section class="categories-showcase">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <h2 class="section-title"><span data-zh="精选分类" data-en="Browse by Category" data-fr="Parcourir par catégorie">精选分类</span></h2>
+            <p class="section-subtitle"><span data-zh="按兴趣快速找到心仪的内容" data-en="Find what you love — organized by interest" data-fr="Trouvez ce que vous aimez — par intérêt">按兴趣快速找到心仪的内容</span></p>
+        </div>
+        <div class="cat-grid" data-aos="fade-up" data-aos-delay="100">
+            {% for cat in book_categories|slice:":10" %}
+            <a href="{% url 'manager:public_books' %}?category={{ cat.slug }}" class="cat-card">
+                <div class="cat-icon" style="background:{{ cat.color|default:'#667eea' }};"><i class="{{ cat.icon|default:'fas fa-book' }}"></i></div>
+                <h6>{{ cat.name }}</h6>
+                <p>{{ cat.name_en|default:cat.name }}</p>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Platform Stats -->
+<section class="stats-section">
+    <div class="container">
+        <div class="row g-4" data-aos="fade-up">
+            <div class="col-md-2 col-4">
+                <div class="stat-item">
+                    <div class="stat-icon"><i class="fas fa-book"></i></div>
+                    <div class="stat-num" data-count="{{ book_count }}">0</div>
+                    <div class="stat-label" data-zh="图书" data-en="Books" data-fr="Livres">图书</div>
+                </div>
+            </div>
+            <div class="col-md-2 col-4">
+                <div class="stat-item">
+                    <div class="stat-icon"><i class="fas fa-shopping-bag"></i></div>
+                    <div class="stat-num" data-count="{{ product_count }}">0</div>
+                    <div class="stat-label" data-zh="商品" data-en="Products" data-fr="Produits">商品</div>
+                </div>
+            </div>
+            <div class="col-md-2 col-4">
+                <div class="stat-item">
+                    <div class="stat-icon"><i class="fas fa-graduation-cap"></i></div>
+                    <div class="stat-num" data-count="{{ course_count }}">0</div>
+                    <div class="stat-label" data-zh="课程" data-en="Courses" data-fr="Cours">课程</div>
+                </div>
+            </div>
+            <div class="col-md-2 col-4">
+                <div class="stat-item">
+                    <div class="stat-icon"><i class="fas fa-user-edit"></i></div>
+                    <div class="stat-num" data-count="{{ author_count }}">0</div>
+                    <div class="stat-label" data-zh="作者" data-en="Authors" data-fr="Auteurs">作者</div>
+                </div>
+            </div>
+            <div class="col-md-2 col-4">
+                <div class="stat-item">
+                    <div class="stat-icon"><i class="fas fa-building"></i></div>
+                    <div class="stat-num" data-count="{{ publisher_count }}">0</div>
+                    <div class="stat-label" data-zh="出版社" data-en="Publishers" data-fr="Éditeurs">出版社</div>
+                </div>
+            </div>
+            <div class="col-md-2 col-4">
+                <div class="stat-item">
+                    <div class="stat-icon"><i class="fas fa-store"></i></div>
+                    <div class="stat-num" data-count="{{ vendor_count }}">0</div>
+                    <div class="stat-label" data-zh="卖家" data-en="Vendors" data-fr="Vendeurs">卖家</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- Call to Action Section -->
 <section class="cta-section">
     <div class="container">
@@ -1855,6 +2107,75 @@ function getCsrfToken() {
                 if (feedLoader) feedLoader.style.display = 'none';
             });
     }
+})();
+
+// Animated stat counters
+(function() {
+    var animated = false;
+    var counters = document.querySelectorAll('.stat-num[data-count]');
+    if (!counters.length) return;
+    function animateCounters() {
+        if (animated) return;
+        animated = true;
+        counters.forEach(function(el) {
+            var target = parseInt(el.dataset.count) || 0;
+            var duration = 1500;
+            var start = 0;
+            var startTime = null;
+            function step(ts) {
+                if (!startTime) startTime = ts;
+                var progress = Math.min((ts - startTime) / duration, 1);
+                var eased = 1 - Math.pow(1 - progress, 3);
+                el.textContent = Math.floor(eased * target);
+                if (progress < 1) requestAnimationFrame(step);
+                else el.textContent = target + '+';
+            }
+            requestAnimationFrame(step);
+        });
+    }
+    var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+            if (entry.isIntersecting) animateCounters();
+        });
+    }, { threshold: 0.3 });
+    var section = document.querySelector('.stats-section');
+    if (section) observer.observe(section);
+})();
+
+// ===== Best Deals — mobile-only continuous marquee (right → left) =====
+(function() {
+    function isMobileBd() {
+        return window.matchMedia('(max-width: 768px)').matches;
+    }
+    function setupBdMarquee() {
+        var section = document.getElementById('bdCarousel');
+        var track = document.getElementById('bdCarouselTrack');
+        if (!section || !track) return;
+
+        track.classList.remove('bd-marquee-rtl');
+        track.style.animation = 'none';
+
+        if (!isMobileBd()) {
+            track.style.transform = '';
+            return;
+        }
+        if (track.children.length < 1) return;
+
+        if (track.dataset.bdDup !== '1') {
+            var nodes = Array.from(track.children);
+            nodes.forEach(function(n) {
+                track.appendChild(n.cloneNode(true));
+            });
+            track.dataset.bdDup = '1';
+        }
+        track.classList.add('bd-marquee-rtl');
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setupBdMarquee);
+    } else {
+        setupBdMarquee();
+    }
+    window.addEventListener('resize', setupBdMarquee, { passive: true });
 })();
 </script>
 {% endblock %}

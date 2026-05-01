@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse, HttpResponse, HttpResponseNotAllowed, FileResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseNotAllowed, FileResponse, Http404
 from django.contrib import messages
 from django.db import transaction
 from django.views.decorators.http import require_http_methods, require_POST
@@ -25,6 +25,7 @@ from django.core.mail import send_mail
 from django.conf import settings as django_settings
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from django.core.cache import cache
+from django.utils.translation import gettext as _
 
 # Marketplace imports for unified cart
 from marketplace.models import (
@@ -489,6 +490,79 @@ def delete_author(request):
 
 # ====================   PUBLIC USER INTERFACE  ===========================
 
+
+def _build_best_deals_feed(max_items=24):
+    """Mobile Best Deals rail: interleave bestsellers (hot), low price (deal), and new arrivals (new) across types."""
+    buckets = {'hot': [], 'deal': [], 'new': []}
+    seen = set()
+
+    def push(item_type, pk, name, price, image_url, detail_url, tag):
+        key = (item_type, pk)
+        if key in seen:
+            return
+        if tag not in buckets:
+            tag = 'hot'
+        seen.add(key)
+        buckets[tag].append({
+            'item_type': item_type,
+            'name': name,
+            'price': str(price) if price is not None else '0',
+            'image_url': image_url or '/static/img/default_cover.png',
+            'detail_url': detail_url,
+            'tag': tag,
+        })
+
+    try:
+        from marketplace.models import Product, Course, SupermarketItem
+        for b in models.Book.objects.filter(is_active=True).order_by('-sale_num')[:8]:
+            push('book', b.id, b.name, b.price, b.get_cover_url(), f'/manager/public/books/{b.id}/', 'hot')
+        for b in models.Book.objects.filter(is_active=True, price__gt=0).order_by('price')[:8]:
+            push('book', b.id, b.name, b.price, b.get_cover_url(), f'/manager/public/books/{b.id}/', 'deal')
+        for b in models.Book.objects.filter(is_active=True).order_by('-id')[:8]:
+            push('book', b.id, b.name, b.price, b.get_cover_url(), f'/manager/public/books/{b.id}/', 'new')
+
+        for p in Product.objects.filter(is_active=True).order_by('-sales_count')[:8]:
+            push('product', p.id, p.name, p.price, p.get_image_url(), f'/marketplace/products/{p.slug}/', 'hot')
+        for p in Product.objects.filter(is_active=True, price__gt=0).order_by('price')[:8]:
+            push('product', p.id, p.name, p.price, p.get_image_url(), f'/marketplace/products/{p.slug}/', 'deal')
+        for p in Product.objects.filter(is_active=True).order_by('-id')[:6]:
+            push('product', p.id, p.name, p.price, p.get_image_url(), f'/marketplace/products/{p.slug}/', 'new')
+
+        for c in Course.objects.filter(is_active=True).order_by('-enrollment_count')[:8]:
+            push('course', c.id, c.title, c.price, c.get_image_url(), f'/marketplace/courses/{c.slug}/', 'hot')
+        for c in Course.objects.filter(is_active=True, price__gt=0).order_by('price')[:6]:
+            push('course', c.id, c.title, c.price, c.get_image_url(), f'/marketplace/courses/{c.slug}/', 'deal')
+        for c in Course.objects.filter(is_active=True).order_by('-id')[:8]:
+            push('course', c.id, c.title, c.price, c.get_image_url(), f'/marketplace/courses/{c.slug}/', 'new')
+
+        for si in SupermarketItem.objects.filter(is_active=True).order_by('-sales_count')[:6]:
+            push('supermarket', si.id, si.name, si.price, si.get_image_url(), f'/marketplace/supermarket/{si.slug}/', 'hot')
+        for si in SupermarketItem.objects.filter(is_active=True, price__gt=0).order_by('price')[:6]:
+            push('supermarket', si.id, si.name, si.price, si.get_image_url(), f'/marketplace/supermarket/{si.slug}/', 'deal')
+        for si in SupermarketItem.objects.filter(is_active=True).order_by('-id')[:6]:
+            push('supermarket', si.id, si.name, si.price, si.get_image_url(), f'/marketplace/supermarket/{si.slug}/', 'new')
+    except Exception:
+        pass
+
+    merged = []
+    ptr = {'hot': 0, 'deal': 0, 'new': 0}
+    order = ('hot', 'deal', 'new')
+    while len(merged) < max_items:
+        progressed = False
+        for tag in order:
+            lst = buckets[tag]
+            i = ptr[tag]
+            if i < len(lst):
+                merged.append(lst[i])
+                ptr[tag] = i + 1
+                progressed = True
+                if len(merged) >= max_items:
+                    break
+        if not progressed:
+            break
+    return merged
+
+
 def public_home(request):
     """Public homepage with platform statistics and featured content"""
     book_count = models.Book.objects.filter(is_active=True).count()
@@ -526,6 +600,11 @@ def public_home(request):
     recent_books = models.Book.objects.filter(is_active=True).select_related('publisher', 'category').order_by('-id')[:8]
     book_categories = models.BookCategory.objects.filter(is_active=True, parent__isnull=True)[:12]
     
+    # Latest blog posts
+    latest_blogs = models.BlogPost.objects.filter(status='published').order_by('-created_at')[:3]
+
+    best_deals = _build_best_deals_feed(24)
+
     context = {
         'book_count': book_count,
         'author_count': author_count,
@@ -540,10 +619,13 @@ def public_home(request):
         'book_categories': book_categories,
         'flash_sales': flash_sales,
         'flash_sale_end': flash_sale_end,
+        'latest_blogs': latest_blogs,
+        'best_deals': best_deals,
     }
     return render(request, 'public/home.html', context)
 
 
+@ensure_csrf_cookie
 def public_messages(request):
     """Messages page: buyer/vendor direct discussions plus support chatbot entries."""
     user_id = request.session.get('site_user_id')
@@ -596,6 +678,12 @@ def start_conversation(request):
     try:
         if request.GET.get('vendor_id'):
             vendor = models.Vendor.objects.filter(pk=request.GET.get('vendor_id'), is_active=True).first()
+        elif item_type == 'book':
+            book = models.Book.objects.filter(pk=item_id).first()
+            if book:
+                subject = subject or book.name
+                vb = models.VendorBook.objects.filter(book=book, is_active=True).select_related('vendor').first()
+                vendor = vb.vendor if vb else None
         elif item_type == 'product':
             from marketplace.models import Product
             item = Product.objects.select_related('vendor').filter(pk=item_id).first()
@@ -612,11 +700,16 @@ def start_conversation(request):
             subject = subject or (item.name if item else '')
     except Exception:
         vendor = None
-    conversation_type = 'buyer_seller' if vendor else 'support'
+
+    if not vendor:
+        referer = request.META.get('HTTP_REFERER', '/manager/public/')
+        separator = '&' if '?' in referer else '?'
+        return redirect(f"{referer}{separator}open_chatbot=1")
+
     conversation, _ = models.Conversation.objects.get_or_create(
         buyer=user,
         vendor=vendor,
-        conversation_type=conversation_type,
+        conversation_type='buyer_seller',
         ref_item_type=item_type,
         ref_item_id=item_id or None,
         defaults={'subject': subject[:200] or 'Support'}
@@ -795,13 +888,21 @@ def vendor_send_message(request):
         return JsonResponse({'success': False, 'message': 'Invalid method'})
     vendor_id = request.session.get('vendor_id')
     if not vendor_id:
-        return JsonResponse({'success': False, 'message': '请先登录'}, status=401)
+        return JsonResponse({'success': False, 'message': 'Please log in first'}, status=401)
     conversation_id = request.POST.get('conversation_id')
     content = request.POST.get('content', '').strip()
     if not content:
-        return JsonResponse({'success': False, 'message': '消息不能为空'})
-    convo = get_object_or_404(models.Conversation, pk=conversation_id, vendor_id=vendor_id)
-    vendor = get_object_or_404(models.Vendor, pk=vendor_id)
+        return JsonResponse({'success': False, 'message': 'Message cannot be empty'})
+    if not conversation_id:
+        return JsonResponse({'success': False, 'message': 'No conversation specified'})
+    try:
+        convo = models.Conversation.objects.get(pk=conversation_id, vendor_id=vendor_id)
+    except models.Conversation.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Conversation not found'}, status=404)
+    try:
+        vendor = models.Vendor.objects.get(pk=vendor_id)
+    except models.Vendor.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Vendor not found'}, status=404)
     msg = models.DirectMessage.objects.create(
         conversation=convo,
         sender_type='vendor',
@@ -822,6 +923,7 @@ def vendor_send_message(request):
     })
 
 
+@ensure_csrf_cookie
 def vendor_messages_page(request):
     """Vendor messaging dashboard page."""
     vendor_id = request.session.get('vendor_id')
@@ -858,11 +960,38 @@ def public_my_profile(request):
     # Wishlist books for feed
     from django.db.models import Q
     wishlist_books = models.Book.objects.filter(
-        wishlist_items__user=user
+        wishlist__user=user
     ).select_related('publisher')[:20]
 
-    # Recent books feed
-    feed_books = models.Book.objects.select_related('publisher').order_by('-id')[:20]
+    # Auto-follow admin vendor (first vendor or create placeholder)
+    admin_vendor = models.Vendor.objects.filter(is_active=True).order_by('id').first()
+    if admin_vendor and not models.UserFollowedVendor.objects.filter(user=user, vendor=admin_vendor).exists():
+        models.UserFollowedVendor.objects.create(user=user, vendor=admin_vendor)
+        followed_vendors = models.UserFollowedVendor.objects.filter(user=user).select_related('vendor')[:20]
+
+    # Mixed feed: books + marketplace items
+    feed_books = list(models.Book.objects.filter(is_active=True).select_related('publisher').order_by('-id')[:10])
+    feed_items = []
+    try:
+        from marketplace.models import Product, Course
+        feed_products = list(Product.objects.filter(is_active=True).order_by('-created_at')[:6])
+        feed_courses = list(Course.objects.filter(is_active=True).order_by('-created_at')[:4])
+        for p in feed_products:
+            feed_items.append({
+                'type': 'product', 'name': p.name, 'price': p.price,
+                'image_url': p.get_image_url(), 'url': f'/marketplace/products/{p.slug}/',
+            })
+        for c in feed_courses:
+            feed_items.append({
+                'type': 'course', 'name': c.title, 'price': c.price,
+                'image_url': c.get_image_url(), 'url': f'/marketplace/courses/{c.slug}/',
+            })
+    except Exception:
+        pass
+
+    # All publishers and vendors for discover
+    all_publishers = models.Publisher.objects.all()[:20]
+    all_vendors = models.Vendor.objects.filter(is_active=True)[:20]
 
     context = {
         'site_user': user,
@@ -873,6 +1002,9 @@ def public_my_profile(request):
         'following_count': len(followed_shops) + len(followed_vendors),
         'wishlist_books': wishlist_books,
         'feed_books': feed_books,
+        'feed_items': feed_items,
+        'all_publishers': all_publishers,
+        'all_vendors': all_vendors,
     }
     return render(request, 'public/my_profile.html', context)
 
@@ -941,8 +1073,9 @@ def public_books(request):
         books = books.filter(
             Q(name__icontains=search_query) |
             Q(description__icontains=search_query) |
-            Q(publisher__publisher_name__icontains=search_query)
-        )
+            Q(publisher__publisher_name__icontains=search_query) |
+            Q(author__name__icontains=search_query)
+        ).distinct()
     if category_slug:
         books = books.filter(category__slug=category_slug)
     if min_price:
@@ -981,11 +1114,16 @@ def public_books(request):
                 'price': str(book.price),
                 'cover_url': book.get_cover_url(),
                 'url': f'/manager/public/books/{book.id}/',
+                'publisher_name': book.publisher.publisher_name if book.publisher else '',
+                'inventory': getattr(book, 'inventory', 0),
+                'sale_num': book.sale_num,
+                'has_cover': bool(book.cover_image),
             })
         return JsonResponse({
             'books': data_books,
             'page': page_obj.number,
             'has_more': page_obj.has_next(),
+            'total_count': paginator.count,
         })
 
     context = {
@@ -1000,6 +1138,7 @@ def public_books(request):
         'active_category': category_slug,
         'min_price': min_price,
         'max_price': max_price,
+        'total_count': paginator.count,
     }
     return render(request, 'public/books.html', context)
 
@@ -1012,11 +1151,16 @@ def public_book_detail(request, book_id):
     related_books = models.Book.objects.filter(
         publisher=book.publisher
     ).exclude(id=book.id)[:4]
+
+    # Find the vendor selling this book (if any)
+    vendor_book = models.VendorBook.objects.filter(book=book, is_active=True).select_related('vendor').first()
+    book_vendor = vendor_book.vendor if vendor_book else None
     
     context = {
         'book': book,
         'authors': authors,
         'related_books': related_books,
+        'book_vendor': book_vendor,
     }
     return render(request, 'public/book_detail.html', context)
 
@@ -1705,7 +1849,53 @@ def track_order(request):
     mkt_order = None
     mkt_orders = None
     has_downloadable_books = False
-    
+
+    user_id = request.session.get('site_user_id')
+    if user_id and request.method == 'GET' and not request.GET.get('order_number'):
+        try:
+            site_user = models.SiteUser.objects.get(pk=user_id)
+            orders = models.Order.objects.filter(
+                customer_email=site_user.email
+            ).order_by('-created_at')
+            try:
+                mkt_orders = MarketplaceOrder.objects.filter(
+                    user_email=site_user.email
+                ).order_by('-created_at')
+                if not mkt_orders.exists():
+                    mkt_orders = None
+            except Exception:
+                mkt_orders = None
+            if orders.exists():
+                _accessible = request.session.get('accessible_orders', [])
+                for _o in orders:
+                    if str(_o.order_number) not in _accessible:
+                        _accessible.append(str(_o.order_number))
+                request.session['accessible_orders'] = _accessible
+            if not orders.exists():
+                orders = None
+        except models.SiteUser.DoesNotExist:
+            pass
+
+    if request.method == 'GET' and request.GET.get('order_number'):
+        order_number = request.GET.get('order_number').strip()
+        if order_number:
+            try:
+                order = models.Order.objects.get(order_number=order_number)
+                order.apply_ttl_rules()
+                _accessible = request.session.get('accessible_orders', [])
+                if str(order.order_number) not in _accessible:
+                    _accessible.append(str(order.order_number))
+                request.session['accessible_orders'] = _accessible
+                has_downloadable_books = any(
+                    item.book.has_download for item in order.orderitem_set.all()
+                )
+            except models.Order.DoesNotExist:
+                try:
+                    mkt_order = MarketplaceOrder.objects.get(order_number=order_number)
+                    mkt_order.apply_ttl_rules()
+                except MarketplaceOrder.DoesNotExist:
+                    messages.error(request, '订单号不存在')
+
     if request.method == 'POST':
         search_type = request.POST.get('search_type', 'order_number')
         
@@ -1747,9 +1937,7 @@ def track_order(request):
                 # Try book order first
                 try:
                     order = models.Order.objects.get(order_number=order_number)
-                    # Check if payment window expired and auto-cancel
-                    if order.status == 'payment_pending':
-                        order.auto_cancel_if_expired()
+                    order.apply_ttl_rules()
 
                     # Grant session access for order found by order_number
                     _accessible = request.session.get('accessible_orders', [])
@@ -1766,8 +1954,7 @@ def track_order(request):
                     # Try marketplace order
                     try:
                         mkt_order = MarketplaceOrder.objects.get(order_number=order_number)
-                        if mkt_order.status in ['pending', 'payment_pending']:
-                            mkt_order.auto_cancel_if_expired()
+                        mkt_order.apply_ttl_rules()
                     except MarketplaceOrder.DoesNotExist:
                         messages.error(request, '订单号不存在')
     
@@ -4433,6 +4620,17 @@ def resend_verification_pin(request):
     return JsonResponse({'success': True, 'message': '新验证码已发送'})
 
 
+def _is_likely_desktop_browser(request):
+    ua = (request.META.get('HTTP_USER_AGENT') or '').lower()
+    if not ua:
+        return True
+    mobile_markers = (
+        'mobile', 'android', 'iphone', 'ipad', 'ipod', 'blackberry',
+        'windows phone', 'webos',
+    )
+    return not any(m in ua for m in mobile_markers)
+
+
 def user_login(request):
     """Public user login"""
     if request.method == 'POST':
@@ -4452,7 +4650,13 @@ def user_login(request):
 
         request.session['site_user_id'] = user.id
         request.session['site_user_name'] = user.name
-        next_url = request.POST.get('next') or '/manager/public/my-profile/'
+        next_url = (request.POST.get('next') or '').strip()
+        if not next_url:
+            next_url = (
+                '/manager/public/my-profile/'
+                if _is_likely_desktop_browser(request)
+                else '/manager/public/'
+            )
         return JsonResponse({'success': True, 'message': '登录成功', 'redirect': next_url})
 
     return render(request, 'public/user_login.html')
@@ -4582,6 +4786,13 @@ def user_profile(request):
     except Exception:
         pass
 
+    followed_vendors = list(
+        models.UserFollowedVendor.objects.filter(user=user).select_related('vendor').order_by('-followed_at')
+    )
+    followed_publishers = list(
+        models.UserFollowedShop.objects.filter(user=user).select_related('publisher').order_by('-followed_at')
+    )
+
     context = {
         'site_user': user,
         'orders': book_orders,  # backward compat
@@ -4589,6 +4800,9 @@ def user_profile(request):
         'wishlists': wishlists,  # backward compat
         'wishlist_data': wishlist_data,
         'courses_progress': courses_progress,
+        'followed_vendors': followed_vendors,
+        'followed_publishers': followed_publishers,
+        'followed_total_count': len(followed_vendors) + len(followed_publishers),
     }
     # Loyalty / gamification
     try:
@@ -5031,6 +5245,192 @@ def _get_vendor(request):
         return None
 
 
+def public_vendor_shop(request, vendor_id):
+    """Public vendor storefront page - Taobao style."""
+    vendor = get_object_or_404(models.Vendor, pk=vendor_id, is_active=True)
+    vendor_books = models.VendorBook.objects.filter(vendor=vendor, is_active=True).select_related('book', 'book__publisher')
+    from marketplace.models import Product, Course
+    vendor_products = Product.objects.filter(vendor=vendor, is_active=True)
+    vendor_courses = Course.objects.filter(vendor=vendor, is_active=True)
+
+    is_following = False
+    follower_count = models.UserFollowedVendor.objects.filter(vendor=vendor).count()
+    user_id = request.session.get('site_user_id')
+    if user_id:
+        is_following = models.UserFollowedVendor.objects.filter(user_id=user_id, vendor=vendor).exists()
+
+    total_sales = sum(vb.book.sale_num for vb in vendor_books)
+    total_products = vendor_products.count()
+    total_courses = vendor_courses.count()
+    total_items = vendor_books.count() + total_products + total_courses
+
+    tab = request.GET.get('tab', 'all')
+    context = {
+        'vendor': vendor,
+        'vendor_books': vendor_books,
+        'vendor_products': vendor_products,
+        'vendor_courses': vendor_courses,
+        'is_following': is_following,
+        'follower_count': follower_count,
+        'active_tab': tab,
+        'total_sales': total_sales,
+        'total_products': total_products,
+        'total_courses': total_courses,
+        'total_items': total_items,
+    }
+    return render(request, 'public/vendor_shop.html', context)
+
+
+def _vendor_marketplace_insights_dict(vendor):
+    """Analytics formerly on marketplace vendor dashboard ('product center'); merged into seller hub."""
+    vendor_products = Product.objects.filter(vendor=vendor)
+    vendor_courses = Course.objects.filter(vendor=vendor)
+    vendor_supermarket = SupermarketItem.objects.filter(vendor=vendor)
+    product_count = vendor_products.count()
+    course_count = vendor_courses.count()
+    supermarket_count = vendor_supermarket.count()
+    active_products = vendor_products.filter(is_active=True).count()
+    active_courses = vendor_courses.filter(is_active=True).count()
+    active_supermarket = vendor_supermarket.filter(is_active=True).count()
+
+    total_product_sales = vendor_products.aggregate(s=Sum('sales_count'))['s'] or 0
+    total_enrollments = vendor_courses.aggregate(s=Sum('enrollment_count'))['s'] or 0
+    total_supermarket_sales = vendor_supermarket.aggregate(s=Sum('sales_count'))['s'] or 0
+
+    product_ids = list(vendor_products.values_list('id', flat=True))
+    course_ids = list(vendor_courses.values_list('id', flat=True))
+    supermarket_ids = list(vendor_supermarket.values_list('id', flat=True))
+
+    paid_statuses = ['paid', 'processing', 'shipped', 'delivered']
+
+    product_order_items = MarketplaceOrderItem.objects.filter(
+        item_type='product', item_id__in=product_ids,
+        order__status__in=paid_statuses,
+    ) if product_ids else MarketplaceOrderItem.objects.none()
+
+    course_order_items = MarketplaceOrderItem.objects.filter(
+        item_type='course', item_id__in=course_ids,
+        order__status__in=paid_statuses,
+    ) if course_ids else MarketplaceOrderItem.objects.none()
+
+    supermarket_order_items = MarketplaceOrderItem.objects.filter(
+        item_type='supermarket', item_id__in=supermarket_ids,
+        order__status__in=paid_statuses,
+    ) if supermarket_ids else MarketplaceOrderItem.objects.none()
+
+    product_rev_agg = product_order_items.aggregate(s=Sum('subtotal'))['s']
+    course_rev_agg = course_order_items.aggregate(s=Sum('subtotal'))['s']
+    sm_rev_agg = supermarket_order_items.aggregate(s=Sum('subtotal'))['s']
+    product_revenue_mk = product_rev_agg or 0
+    course_revenue_mk = course_rev_agg or 0
+    supermarket_revenue_mk = sm_rev_agg or 0
+    total_mk_revenue = product_revenue_mk + course_revenue_mk + supermarket_revenue_mk
+
+    daily_labels = []
+    daily_product_data = []
+    daily_course_data = []
+    daily_supermarket_data = []
+    for i in range(6, -1, -1):
+        day = (timezone.now() - timedelta(days=i)).date()
+        daily_labels.append(day.strftime('%m/%d'))
+        p_rev = product_order_items.filter(order__created_at__date=day).aggregate(s=Sum('subtotal'))['s'] or 0
+        c_rev = course_order_items.filter(order__created_at__date=day).aggregate(s=Sum('subtotal'))['s'] or 0
+        s_rev = supermarket_order_items.filter(order__created_at__date=day).aggregate(s=Sum('subtotal'))['s'] or 0
+        daily_product_data.append(float(p_rev))
+        daily_course_data.append(float(c_rev))
+        daily_supermarket_data.append(float(s_rev))
+
+    top_products = list(vendor_products.order_by('-sales_count')[:5])
+    recent_order_ids = []
+    item_q = None
+    if product_ids:
+        item_q = Q(item_type='product', item_id__in=product_ids)
+    if course_ids:
+        cq = Q(item_type='course', item_id__in=course_ids)
+        item_q = cq if item_q is None else (item_q | cq)
+    if supermarket_ids:
+        sq = Q(item_type='supermarket', item_id__in=supermarket_ids)
+        item_q = sq if item_q is None else (item_q | sq)
+    if item_q is not None:
+        recent_order_ids = list(
+            MarketplaceOrderItem.objects.filter(item_q).values_list('order_id', flat=True).distinct()[:20]
+        )
+
+    recent_orders = []
+    if recent_order_ids:
+        recent_orders = list(
+            MarketplaceOrder.objects.filter(id__in=recent_order_ids).order_by('-created_at')[:10]
+        )
+
+    cat_data = list(vendor_products.values('category__name').annotate(cnt=Count('id')).order_by('-cnt')[:6])
+    cat_labels = json.dumps([(c['category__name'] or '—') for c in cat_data])
+    cat_counts = json.dumps([c['cnt'] for c in cat_data])
+
+    return {
+        'vm_product_count': product_count,
+        'vm_course_count': course_count,
+        'vm_supermarket_count': supermarket_count,
+        'vm_active_products': active_products,
+        'vm_active_courses': active_courses,
+        'vm_active_supermarket': active_supermarket,
+        'vm_inactive_products': max(0, product_count - active_products),
+        'vm_inactive_courses': max(0, course_count - active_courses),
+        'vm_inactive_supermarket': max(0, supermarket_count - active_supermarket),
+        'vm_total_product_sales': total_product_sales,
+        'vm_total_enrollments': total_enrollments,
+        'vm_total_supermarket_sales': total_supermarket_sales,
+        'vm_mk_product_revenue': product_revenue_mk,
+        'vm_mk_course_revenue': course_revenue_mk,
+        'vm_mk_supermarket_revenue': supermarket_revenue_mk,
+        'vm_mk_total_revenue': total_mk_revenue,
+        'vm_daily_labels': json.dumps(daily_labels),
+        'vm_daily_product_data': json.dumps(daily_product_data),
+        'vm_daily_course_data': json.dumps(daily_course_data),
+        'vm_daily_supermarket_data': json.dumps(daily_supermarket_data),
+        'vm_top_products': top_products,
+        'vm_recent_orders': recent_orders,
+        'vm_cat_labels': cat_labels,
+        'vm_cat_counts': cat_counts,
+    }
+
+
+def _vendor_marketplace_order_ids_hub(vendor):
+    """Distinct marketplace order IDs that touch this vendor's products, courses, or supermarket SKUs."""
+    pids = list(Product.objects.filter(vendor=vendor).values_list('id', flat=True))
+    cids = list(Course.objects.filter(vendor=vendor).values_list('id', flat=True))
+    sids = list(SupermarketItem.objects.filter(vendor=vendor).values_list('id', flat=True))
+    if not pids and not cids and not sids:
+        return []
+    q = Q()
+    if pids:
+        q |= Q(item_type='product', item_id__in=pids)
+    if cids:
+        q |= Q(item_type='course', item_id__in=cids)
+    if sids:
+        q |= Q(item_type='supermarket', item_id__in=sids)
+    return list(
+        MarketplaceOrderItem.objects.filter(q).values_list('order_id', flat=True).distinct()
+    )
+
+
+def _vendor_classify_mkt_order(order, pids_set, cids_set, sids_set=None):
+    """Classify marketplace order lines relevant to this vendor: product / course / supermarket / mixed."""
+    sids_set = sids_set or set()
+    kinds = set()
+    for it in order.items.all():
+        if it.item_type == 'product' and it.item_id in pids_set:
+            kinds.add('product')
+        elif it.item_type == 'course' and it.item_id in cids_set:
+            kinds.add('course')
+        elif it.item_type == 'supermarket' and it.item_id in sids_set:
+            kinds.add('supermarket')
+    if not kinds:
+        return 'mixed'
+    if len(kinds) == 1:
+        return kinds.pop()
+    return 'mixed'
+
+
 def vendor_dashboard(request):
     """Vendor dashboard"""
     # Allow admin to access any vendor dashboard
@@ -5058,14 +5458,113 @@ def vendor_dashboard(request):
     total_revenue = sum(vb.vendor_price * vb.book.sale_num for vb in vendor_books)
     active_books = sum(1 for vb in vendor_books if vb.is_active)
     inactive_books = vendor_books.count() - active_books
-    avg_price = sum(vb.vendor_price for vb in vendor_books) / vendor_books.count() if vendor_books.count() > 0 else 0
-    best_seller = max(vendor_books, key=lambda vb: vb.book.sale_num) if vendor_books.exists() else None
     total_inventory = sum(vb.book.inventory for vb in vendor_books)
+
+    # --- Marketplace products, courses & supermarket ---
+    from marketplace.models import Product, Course, SupermarketItem, MarketplaceOrder, MarketplaceOrderItem
+    vendor_products = Product.objects.filter(vendor=vendor)
+    vendor_courses = Course.objects.filter(vendor=vendor)
+    vendor_supermarket = SupermarketItem.objects.filter(vendor=vendor)
+    active_products = vendor_products.filter(is_active=True).count()
+    active_courses = vendor_courses.filter(is_active=True).count()
+    active_supermarket_items = vendor_supermarket.filter(is_active=True).count()
+    product_revenue = sum(p.price * p.sales_count for p in vendor_products)
+    course_revenue = sum(c.price * c.enrollment_count for c in vendor_courses)
+    supermarket_revenue = sum(s.price * s.sales_count for s in vendor_supermarket)
+    combined_revenue = total_revenue + product_revenue + course_revenue + supermarket_revenue
+    total_product_sales = sum(p.sales_count for p in vendor_products)
+    total_course_enrollments = sum(c.enrollment_count for c in vendor_courses)
+    total_supermarket_sales_count = sum(s.sales_count for s in vendor_supermarket)
+    combined_sales = total_sales + total_product_sales + total_course_enrollments + total_supermarket_sales_count
+
+    price_samples = []
+    for vb in vendor_books:
+        price_samples.append(float(vb.vendor_price))
+    for p in vendor_products:
+        price_samples.append(float(p.price))
+    for c in vendor_courses:
+        price_samples.append(float(c.price))
+    for s in vendor_supermarket:
+        price_samples.append(float(s.price))
+    avg_price = (sum(price_samples) / len(price_samples)) if price_samples else 0
+
+    total_listings = vendor_books.count() + vendor_products.count() + vendor_courses.count() + vendor_supermarket.count()
+    active_listings = active_books + active_products + active_courses + active_supermarket_items
+    listing_activation_pct = int(round(100 * active_listings / total_listings)) if total_listings else 0
+
+    perf_top_items = []
+    if vendor_books.exists():
+        vb_top = max(vendor_books, key=lambda x: x.book.sale_num)
+        perf_top_items.append({
+            'kind': 'book',
+            'title': vb_top.book.name,
+            'image_url': vb_top.book.get_cover_url(),
+            'value': vb_top.book.sale_num,
+        })
+    if vendor_products.exists():
+        p_top = max(vendor_products, key=lambda x: x.sales_count)
+        perf_top_items.append({
+            'kind': 'product',
+            'title': p_top.name,
+            'image_url': p_top.get_image_url(),
+            'value': p_top.sales_count,
+        })
+    if vendor_courses.exists():
+        c_top = max(vendor_courses, key=lambda x: x.enrollment_count)
+        perf_top_items.append({
+            'kind': 'course',
+            'title': c_top.title,
+            'image_url': c_top.get_image_url(),
+            'value': c_top.enrollment_count,
+        })
+    if vendor_supermarket.exists():
+        s_top = max(vendor_supermarket, key=lambda x: x.sales_count)
+        perf_top_items.append({
+            'kind': 'supermarket',
+            'title': s_top.name,
+            'image_url': s_top.get_image_url(),
+            'value': s_top.sales_count,
+        })
+
+    best_seller = max(vendor_books, key=lambda vb: vb.book.sale_num) if vendor_books.exists() else None
+
+    follower_count = models.UserFollowedVendor.objects.filter(vendor=vendor).count()
+
+    # --- Marketplace orders for this vendor ---
+    vendor_product_ids = list(vendor_products.values_list('id', flat=True))
+    vendor_course_ids = list(vendor_courses.values_list('id', flat=True))
+    vendor_supermarket_ids = list(vendor_supermarket.values_list('id', flat=True))
+    marketplace_order_ids = set()
+    if vendor_product_ids or vendor_course_ids or vendor_supermarket_ids:
+        from django.db.models import Q
+        mq = Q()
+        if vendor_product_ids:
+            mq |= Q(item_type='product', item_id__in=vendor_product_ids)
+        if vendor_course_ids:
+            mq |= Q(item_type='course', item_id__in=vendor_course_ids)
+        if vendor_supermarket_ids:
+            mq |= Q(item_type='supermarket', item_id__in=vendor_supermarket_ids)
+        mkt_items_qs = MarketplaceOrderItem.objects.filter(mq).values_list('order_id', flat=True)
+        marketplace_order_ids = set(mkt_items_qs)
+
+    marketplace_orders = []
+    if marketplace_order_ids:
+        mkt_orders = MarketplaceOrder.objects.filter(
+            id__in=marketplace_order_ids
+        ).order_by('-created_at')[:30]
+        for mo in mkt_orders:
+            marketplace_orders.append({
+                'order_number': mo.order_number,
+                'user_name': mo.user_name or mo.user_email,
+                'total_amount': mo.total_amount,
+                'status': mo.get_status_display() if hasattr(mo, 'get_status_display') else mo.status,
+                'status_color': mo.get_status_color(),
+                'date': mo.created_at,
+            })
 
     # --- Customer behavior analytics ---
     vendor_book_ids = [vb.book_id for vb in vendor_books]
 
-    # Purchases: customers who bought vendor's books (from completed orders)
     purchase_data = []
     if vendor_book_ids:
         purchased_items = models.OrderItem.objects.filter(
@@ -5083,7 +5582,6 @@ def vendor_dashboard(request):
                 'status': item.order.get_status_display(),
             })
 
-    # Cart abandonment: items in cart for vendor's books
     cart_data = []
     if vendor_book_ids:
         cart_items = models.CartItem.objects.filter(
@@ -5098,7 +5596,6 @@ def vendor_dashboard(request):
                 'updated_at': ci.updated_at,
             })
 
-    # Wishlist/Favorites: users who favorited vendor's books
     wishlist_data = []
     if vendor_book_ids:
         wishlists = models.Wishlist.objects.filter(
@@ -5112,10 +5609,16 @@ def vendor_dashboard(request):
                 'added_at': w.created_at,
             })
 
-    # Summary counts
     total_purchases = len(purchase_data)
     total_cart_items = len(cart_data)
     total_wishlists = len(wishlist_data)
+
+    hub_book_ids = _vendor_book_order_ids(vendor)
+    hub_book_order_count = models.Order.objects.filter(id__in=hub_book_ids).count() if hub_book_ids else 0
+    hub_mkt_ids = _vendor_marketplace_order_ids_hub(vendor)
+    hub_mkt_order_count = MarketplaceOrder.objects.filter(id__in=hub_mkt_ids).count() if hub_mkt_ids else 0
+
+    total_supermarket_stock = vendor_supermarket.aggregate(s=Sum('stock'))['s'] or 0
 
     context = {
         'vendor': vendor,
@@ -5129,6 +5632,27 @@ def vendor_dashboard(request):
         'best_seller': best_seller,
         'total_inventory': total_inventory,
         'admin_access': admin_access,
+        # Marketplace
+        'vendor_products': vendor_products,
+        'vendor_courses': vendor_courses,
+        'vendor_supermarket': vendor_supermarket,
+        'active_products': active_products,
+        'active_courses': active_courses,
+        'active_supermarket_items': active_supermarket_items,
+        'product_revenue': product_revenue,
+        'course_revenue': course_revenue,
+        'supermarket_revenue': supermarket_revenue,
+        'combined_revenue': combined_revenue,
+        'combined_sales': combined_sales,
+        'total_product_sales': total_product_sales,
+        'total_course_enrollments': total_course_enrollments,
+        'total_supermarket_sales_count': total_supermarket_sales_count,
+        'total_supermarket_stock': total_supermarket_stock,
+        'listing_activation_pct': listing_activation_pct,
+        'total_listings': total_listings,
+        'perf_top_items': perf_top_items,
+        'follower_count': follower_count,
+        'marketplace_orders': marketplace_orders,
         # Customer behavior
         'purchase_data': purchase_data,
         'cart_data': cart_data,
@@ -5136,8 +5660,450 @@ def vendor_dashboard(request):
         'total_purchases': total_purchases,
         'total_cart_items': total_cart_items,
         'total_wishlists': total_wishlists,
+        'hub_book_order_count': hub_book_order_count,
+        'hub_mkt_order_count': hub_mkt_order_count,
+        'hub_orders_total': hub_book_order_count + hub_mkt_order_count,
     }
+    context.update(_vendor_marketplace_insights_dict(vendor))
     return render(request, 'public/vendor_dashboard.html', context)
+
+
+# ─── Vendor: books catalogue (full CRUD entry page) ───────────────────────────
+
+def vendor_books(request):
+    """Seller hub — list all vendor books with CRUD shortcuts."""
+    admin_access = request.session.get('name')
+    vendor = _get_vendor(request)
+    if not vendor and not admin_access:
+        return redirect('/manager/vendor/login/')
+    if admin_access and not vendor:
+        vid = request.GET.get('vendor_id')
+        if vid:
+            vendor = get_object_or_404(models.Vendor, id=vid)
+        else:
+            return redirect('/manager/vendor/dashboard/')
+
+    vendor_books_qs = models.VendorBook.objects.filter(vendor=vendor).select_related('book', 'book__publisher')
+    inactive_ct = vendor_books_qs.filter(is_active=False).count()
+    context = {
+        'vendor': vendor,
+        'admin_access': admin_access,
+        'vendor_books': vendor_books_qs,
+        'total_books': vendor_books_qs.count(),
+        'inactive_books': inactive_ct,
+    }
+    return render(request, 'public/vendor_books.html', context)
+
+
+def _vendor_book_order_ids(vendor):
+    book_ids = list(models.VendorBook.objects.filter(vendor=vendor).values_list('book_id', flat=True))
+    if not book_ids:
+        return []
+    return list(
+        models.OrderItem.objects.filter(book_id__in=book_ids)
+        .values_list('order_id', flat=True)
+        .distinct()
+    )
+
+
+def _vendor_book_order_can_update_fulfillment(order):
+    if order.status in ('cancelled', 'refunded'):
+        return False
+    return order.payment_status == 'completed'
+
+
+VENDOR_BOOK_ORDER_ALLOWED_STATUSES = frozenset({'confirmed', 'processing', 'shipped', 'delivered'})
+
+
+def _vendor_book_order_customer_editable(order):
+    return order.status not in ('cancelled', 'refunded')
+
+
+def vendor_book_orders(request):
+    """Orders that contain at least one book sold by this vendor."""
+    admin_access = request.session.get('name')
+    vendor = _get_vendor(request)
+    if not vendor and not admin_access:
+        return redirect('/manager/vendor/login/')
+    if admin_access and not vendor:
+        vid = request.GET.get('vendor_id')
+        if vid:
+            vendor = get_object_or_404(models.Vendor, id=vid)
+        else:
+            return redirect('/manager/vendor/dashboard/')
+
+    order_ids = _vendor_book_order_ids(vendor)
+    orders = models.Order.objects.filter(id__in=order_ids).order_by('-created_at')
+
+    status_filter = request.GET.get('status', '')
+    payment_filter = request.GET.get('payment_status', '')
+    search_q = request.GET.get('search', '').strip()
+    if status_filter:
+        orders = orders.filter(status=status_filter)
+    if payment_filter:
+        orders = orders.filter(payment_status=payment_filter)
+    if search_q:
+        orders = orders.filter(
+            Q(order_number__icontains=search_q)
+            | Q(customer_name__icontains=search_q)
+            | Q(customer_email__icontains=search_q)
+            | Q(customer_phone__icontains=search_q)
+        )
+
+    total_orders = models.Order.objects.filter(id__in=order_ids).count()
+    pending_pay = models.Order.objects.filter(id__in=order_ids, payment_status='pending').count()
+    paid_completed = models.Order.objects.filter(id__in=order_ids, payment_status='completed').count()
+
+    paginator = Paginator(orders, 20)
+    page = paginator.get_page(request.GET.get('page', 1))
+
+    context = {
+        'vendor': vendor,
+        'admin_access': admin_access,
+        'orders': page,
+        'status_choices': models.ORDER_STATUS_CHOICES,
+        'payment_status_choices': models.PAYMENT_STATUS_CHOICES,
+        'current_status': status_filter,
+        'current_payment_status': payment_filter,
+        'current_search': search_q,
+        'total_orders': total_orders,
+        'pending_pay': pending_pay,
+        'paid_completed': paid_completed,
+        'fulfillment_statuses': [(k, v) for k, v in models.ORDER_STATUS_CHOICES if k in VENDOR_BOOK_ORDER_ALLOWED_STATUSES],
+    }
+    return render(request, 'public/vendor_book_orders.html', context)
+
+
+def vendor_book_order_detail(request, order_id):
+    vendor = _get_vendor(request)
+    admin_access = request.session.get('name')
+    if not vendor and not admin_access:
+        return redirect('/manager/vendor/login/')
+    if admin_access and not vendor:
+        vid = request.GET.get('vendor_id')
+        if vid:
+            vendor = get_object_or_404(models.Vendor, id=vid)
+        else:
+            return redirect('/manager/vendor/dashboard/')
+
+    allowed = set(_vendor_book_order_ids(vendor))
+    order = get_object_or_404(models.Order, id=order_id)
+    if order.id not in allowed:
+        raise Http404('Order not found')
+
+    book_ids = set(models.VendorBook.objects.filter(vendor=vendor).values_list('book_id', flat=True))
+    order_items = list(
+        models.OrderItem.objects.filter(order=order, book_id__in=book_ids).select_related('book')
+    )
+    vendor_lines_total = sum((item.total_price for item in order_items), Decimal('0'))
+
+    context = {
+        'vendor': vendor,
+        'admin_access': admin_access,
+        'order': order,
+        'order_items': order_items,
+        'vendor_lines_total': vendor_lines_total,
+        'can_update_fulfillment': _vendor_book_order_can_update_fulfillment(order),
+        'fulfillment_statuses': [(k, v) for k, v in models.ORDER_STATUS_CHOICES if k in VENDOR_BOOK_ORDER_ALLOWED_STATUSES],
+        'status_choices': models.ORDER_STATUS_CHOICES,
+        'payment_status_choices': models.PAYMENT_STATUS_CHOICES,
+        'can_edit_customer': _vendor_book_order_customer_editable(order),
+    }
+    return render(request, 'public/vendor_book_order_detail.html', context)
+
+
+@require_POST
+def vendor_book_order_update_status(request):
+    vendor = _get_vendor(request)
+    if not vendor:
+        return JsonResponse({'success': False, 'message': '请以卖家身份登录'})
+
+    order_id = request.POST.get('order_id')
+    new_status = request.POST.get('status', '').strip()
+    note = request.POST.get('vendor_note', '').strip()
+
+    if new_status not in VENDOR_BOOK_ORDER_ALLOWED_STATUSES:
+        return JsonResponse({'success': False, 'message': '不允许的状态'})
+
+    allowed = set(_vendor_book_order_ids(vendor))
+    order = get_object_or_404(models.Order, id=order_id)
+    if order.id not in allowed:
+        return JsonResponse({'success': False, 'message': '无权操作此订单'})
+
+    if not _vendor_book_order_can_update_fulfillment(order):
+        return JsonResponse({'success': False, 'message': '订单尚未支付完成或已关闭，无法更新履约状态'})
+
+    old = order.status
+    order.status = new_status
+    if note:
+        prefix = '[Vendor %s] ' % vendor.company_name[:40]
+        order.admin_notes = (prefix + note + '\n' + (order.admin_notes or '')).strip()
+    order.save(update_fields=['status', 'admin_notes', 'updated_at'])
+
+    status_dict = dict(models.ORDER_STATUS_CHOICES)
+    return JsonResponse({
+        'success': True,
+        'message': '已更新',
+        'new_status': new_status,
+        'new_status_display': status_dict.get(new_status, new_status),
+        'new_status_color': order.get_status_color(),
+    })
+
+
+def vendor_orders_hub(request):
+    """Unified order list: books + marketplace (products/courses), with filters."""
+    from django.urls import reverse
+
+    admin_access = request.session.get('name')
+    vendor = _get_vendor(request)
+    if not vendor and not admin_access:
+        return redirect('/manager/vendor/login/')
+    if admin_access and not vendor:
+        vid = request.GET.get('vendor_id')
+        if vid:
+            vendor = get_object_or_404(models.Vendor, id=vid)
+        else:
+            return redirect('/manager/vendor/dashboard/')
+
+    book_ids = _vendor_book_order_ids(vendor)
+    mkt_ids = _vendor_marketplace_order_ids_hub(vendor)
+    pids_set = set(Product.objects.filter(vendor=vendor).values_list('id', flat=True))
+    cids_set = set(Course.objects.filter(vendor=vendor).values_list('id', flat=True))
+    sids_set = set(SupermarketItem.objects.filter(vendor=vendor).values_list('id', flat=True))
+
+    channel = request.GET.get('channel', 'all').strip()
+    status_filter = request.GET.get('status', '').strip()
+    payment_filter = request.GET.get('payment_status', '').strip()
+    search_q = request.GET.get('search', '').strip()
+
+    book_qs = models.Order.objects.filter(id__in=book_ids)
+    if status_filter:
+        book_qs = book_qs.filter(status=status_filter)
+    if payment_filter:
+        book_qs = book_qs.filter(payment_status=payment_filter)
+    if search_q:
+        book_qs = book_qs.filter(
+            Q(order_number__icontains=search_q)
+            | Q(customer_name__icontains=search_q)
+            | Q(customer_email__icontains=search_q)
+            | Q(customer_phone__icontains=search_q)
+        )
+
+    mkt_qs = MarketplaceOrder.objects.filter(id__in=mkt_ids)
+    if status_filter:
+        mkt_qs = mkt_qs.filter(status=status_filter)
+    if payment_filter:
+        mkt_qs = mkt_qs.filter(payment_status=payment_filter)
+    if search_q:
+        mkt_qs = mkt_qs.filter(
+            Q(order_number__icontains=search_q)
+            | Q(user_name__icontains=search_q)
+            | Q(user_email__icontains=search_q)
+            | Q(customer_phone__icontains=search_q)
+        )
+
+    MAX_EACH = 600
+    books_list = list(book_qs.order_by('-created_at')[:MAX_EACH])
+    mkts_prefetched = list(
+        mkt_qs.prefetch_related(
+            Prefetch('items', queryset=MarketplaceOrderItem.objects.only('item_type', 'item_id'))
+        ).order_by('-created_at')[:MAX_EACH]
+    )
+
+    for o in books_list:
+        o.apply_ttl_rules()
+    for o in mkts_prefetched:
+        o.apply_ttl_rules()
+
+    merged_rows = []
+    for o in books_list:
+        merged_rows.append({
+            'kind': 'book',
+            'created_at': o.created_at,
+            'order': o,
+            'detail_url': reverse('manager:vendor_book_order_detail', args=[o.id]),
+            'mkt_line_kind': None,
+        })
+    for o in mkts_prefetched:
+        line_kind = _vendor_classify_mkt_order(o, pids_set, cids_set, sids_set)
+        merged_rows.append({
+            'kind': 'marketplace',
+            'created_at': o.created_at,
+            'order': o,
+            'detail_url': reverse('marketplace:vendor_marketplace_order_detail', args=[o.id]),
+            'mkt_line_kind': line_kind,
+        })
+
+    merged_rows.sort(key=lambda r: r['created_at'], reverse=True)
+
+    if channel == 'books':
+        merged_rows = [r for r in merged_rows if r['kind'] == 'book']
+    elif channel == 'marketplace':
+        merged_rows = [r for r in merged_rows if r['kind'] == 'marketplace']
+    elif channel == 'products':
+        merged_rows = [
+            r for r in merged_rows
+            if r['kind'] == 'marketplace' and r['mkt_line_kind'] in ('product', 'mixed')
+        ]
+    elif channel == 'courses':
+        merged_rows = [
+            r for r in merged_rows
+            if r['kind'] == 'marketplace' and r['mkt_line_kind'] in ('course', 'mixed')
+        ]
+    elif channel == 'supermarket':
+        merged_rows = [
+            r for r in merged_rows
+            if r['kind'] == 'marketplace' and r['mkt_line_kind'] in ('supermarket', 'mixed')
+        ]
+
+    stats_book_total = models.Order.objects.filter(id__in=book_ids).count()
+    stats_mkt_total = MarketplaceOrder.objects.filter(id__in=mkt_ids).count()
+    stats_pending_pay_book = models.Order.objects.filter(id__in=book_ids, payment_status='pending').count()
+    stats_pending_pay_mkt = MarketplaceOrder.objects.filter(id__in=mkt_ids, payment_status='pending').count()
+    stats_orders_total = stats_book_total + stats_mkt_total
+    stats_pending_pay_total = stats_pending_pay_book + stats_pending_pay_mkt
+
+    paginator = Paginator(merged_rows, 20)
+    page = paginator.get_page(request.GET.get('page', 1))
+
+    context = {
+        'vendor': vendor,
+        'admin_access': admin_access,
+        'orders_page': page,
+        'channel': channel,
+        'current_status': status_filter,
+        'current_payment_status': payment_filter,
+        'current_search': search_q,
+        'stats_book_total': stats_book_total,
+        'stats_mkt_total': stats_mkt_total,
+        'stats_pending_pay_book': stats_pending_pay_book,
+        'stats_pending_pay_mkt': stats_pending_pay_mkt,
+        'stats_orders_total': stats_orders_total,
+        'stats_pending_pay_total': stats_pending_pay_total,
+        'book_status_choices': models.ORDER_STATUS_CHOICES,
+        'mkt_status_choices': MarketplaceOrder.STATUS_CHOICES,
+        'payment_status_choices': models.PAYMENT_STATUS_CHOICES,
+        'mkt_payment_status_choices': MarketplaceOrder.PAYMENT_STATUS_CHOICES,
+    }
+    return render(request, 'public/vendor_orders_hub.html', context)
+
+
+@require_POST
+def vendor_book_order_update_customer(request):
+    vendor = _get_vendor(request)
+    if not vendor:
+        return JsonResponse({'success': False, 'message': str(_('请以卖家身份登录'))}, status=403)
+
+    order_id = request.POST.get('order_id')
+    allowed = set(_vendor_book_order_ids(vendor))
+    order = get_object_or_404(models.Order, id=order_id)
+    if order.id not in allowed:
+        return JsonResponse({'success': False, 'message': str(_('无权操作此订单'))}, status=403)
+    if not _vendor_book_order_customer_editable(order):
+        return JsonResponse({'success': False, 'message': str(_('订单已关闭，无法修改联系信息'))})
+
+    name = request.POST.get('customer_name', '').strip()
+    email = request.POST.get('customer_email', '').strip()
+    phone = request.POST.get('customer_phone', '').strip()
+    country = request.POST.get('country', '').strip() or order.country
+    shipping_address = request.POST.get('shipping_address', '').strip()
+    customer_notes = request.POST.get('customer_notes', '').strip()
+
+    if not name or not email:
+        return JsonResponse({'success': False, 'message': str(_('姓名与邮箱不能为空'))})
+
+    order.customer_name = name[:100]
+    order.customer_email = email[:254]
+    order.customer_phone = phone[:20]
+    order.country = country[:50]
+    order.shipping_address = shipping_address
+    order.customer_notes = customer_notes
+    order.save(update_fields=[
+        'customer_name', 'customer_email', 'customer_phone', 'country',
+        'shipping_address', 'customer_notes', 'updated_at',
+    ])
+    return JsonResponse({'success': True, 'message': str(_('客户信息已保存'))})
+
+
+@require_POST
+def vendor_hub_order_update(request):
+    """Update order status and/or payment status from vendor order hub (owned orders only)."""
+    vendor = _get_vendor(request)
+    if not vendor:
+        return JsonResponse({'success': False, 'message': str(_('请以卖家身份登录'))}, status=403)
+
+    kind = request.POST.get('kind', '').strip()
+    order_id = request.POST.get('order_id')
+    new_status = request.POST.get('status', '').strip()
+    new_pay = request.POST.get('payment_status', '').strip()
+    vendor_note = request.POST.get('vendor_note', '').strip()
+
+    book_status_ok = dict(models.ORDER_STATUS_CHOICES)
+    book_pay_ok = dict(models.PAYMENT_STATUS_CHOICES)
+    mkt_status_ok = dict(MarketplaceOrder.STATUS_CHOICES)
+    mkt_pay_ok = dict(MarketplaceOrder.PAYMENT_STATUS_CHOICES)
+
+    if kind == 'book':
+        allowed = set(_vendor_book_order_ids(vendor))
+        order = get_object_or_404(models.Order, id=order_id)
+        if order.id not in allowed:
+            return JsonResponse({'success': False, 'message': str(_('无权操作此订单'))}, status=403)
+        uf = []
+        if new_status and new_status in book_status_ok:
+            order.status = new_status
+            uf.append('status')
+        if new_pay and new_pay in book_pay_ok:
+            order.payment_status = new_pay
+            uf.append('payment_status')
+            if new_pay == 'completed' and not order.payment_completed_at:
+                order.payment_completed_at = timezone.now()
+                uf.append('payment_completed_at')
+        if uf:
+            note_fields = []
+            if vendor_note:
+                prefix = '[Vendor %s] ' % vendor.company_name[:40]
+                order.admin_notes = (prefix + vendor_note + '\n' + (order.admin_notes or '')).strip()
+                note_fields.append('admin_notes')
+            order.save(update_fields=list(dict.fromkeys(uf + note_fields)) + ['updated_at'])
+        elif vendor_note:
+            prefix = '[Vendor %s] ' % vendor.company_name[:40]
+            order.admin_notes = (prefix + vendor_note + '\n' + (order.admin_notes or '')).strip()
+            order.save(update_fields=['admin_notes', 'updated_at'])
+        else:
+            return JsonResponse({'success': False, 'message': str(_('未更改'))}, status=400)
+        return JsonResponse({'success': True, 'message': str(_('已更新'))})
+
+    if kind == 'marketplace':
+        allowed_ids = set(_vendor_marketplace_order_ids_hub(vendor))
+        order = get_object_or_404(MarketplaceOrder, id=order_id)
+        if order.id not in allowed_ids:
+            return JsonResponse({'success': False, 'message': str(_('无权操作此订单'))}, status=403)
+        uf = []
+        if new_status and new_status in mkt_status_ok:
+            order.status = new_status
+            uf.append('status')
+        if new_pay and new_pay in mkt_pay_ok:
+            order.payment_status = new_pay
+            uf.append('payment_status')
+            if new_pay == 'completed' and not order.payment_completed_at:
+                order.payment_completed_at = timezone.now()
+                uf.append('payment_completed_at')
+        if uf:
+            note_fields = []
+            if vendor_note:
+                prefix = '[Vendor %s] ' % vendor.company_name[:40]
+                order.admin_notes = (prefix + vendor_note + '\n' + (order.admin_notes or '')).strip()
+                note_fields.append('admin_notes')
+            order.save(update_fields=list(dict.fromkeys(uf + note_fields)) + ['updated_at'])
+        elif vendor_note:
+            prefix = '[Vendor %s] ' % vendor.company_name[:40]
+            order.admin_notes = (prefix + vendor_note + '\n' + (order.admin_notes or '')).strip()
+            order.save(update_fields=['admin_notes', 'updated_at'])
+        else:
+            return JsonResponse({'success': False, 'message': str(_('未更改'))}, status=400)
+        return JsonResponse({'success': True, 'message': str(_('已更新'))})
+
+    return JsonResponse({'success': False, 'message': str(_('参数无效'))}, status=400)
 
 
 # ==========================================

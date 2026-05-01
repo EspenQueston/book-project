@@ -1,0 +1,163 @@
+{% load i18n %}
+<style>
+.vp-sidebar-inner {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 260px;
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 2px 0 15px rgba(102, 126, 234, 0.35);
+    z-index: 1040;
+    display: flex;
+    flex-direction: column;
+}
+@media (max-width: 991px) {
+    .vp-sidebar-inner { display: none; }
+}
+.vp-sidebar-inner::-webkit-scrollbar { width: 4px; }
+.vp-sidebar-inner::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.35);
+    border-radius: 4px;
+}
+.vp-sn-brand {
+    padding: 20px 18px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+}
+.vp-sn-brand .vp-sn-name {
+    font-weight: 800;
+    font-size: 0.98rem;
+    color: #fff;
+    line-height: 1.25;
+}
+.vp-sn-brand .vp-sn-sub {
+    font-size: 0.68rem;
+    color: rgba(255,255,255,0.55);
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+.vp-sn-scroll { flex: 1; padding: 12px 8px 24px; }
+.vp-sn-label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(255,255,255,0.45);
+    padding: 14px 14px 6px;
+}
+.vp-sn-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    margin: 4px 10px;
+    border-radius: 10px;
+    color: rgba(255,255,255,0.88);
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 600;
+    transition: background 0.2s, color 0.2s, transform 0.2s;
+}
+.vp-sn-link i { width: 22px; text-align: center; font-size: 0.95rem; opacity: 0.95; }
+.vp-sn-link:hover {
+    background: rgba(118, 75, 162, 0.55);
+    color: #fff;
+    transform: translateX(4px);
+}
+.vp-sn-link.nav-active {
+    background: rgba(118, 75, 162, 0.95);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+}
+.vp-sn-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.12);
+    margin: 12px 18px;
+}
+</style>
+
+{% with rn=request.resolver_match %}
+<aside class="vp-sidebar-inner" aria-label="{% trans '卖家导航' %}">
+    <div class="vp-sn-brand">
+        <div class="vp-sn-name">{{ vendor.company_name }}</div>
+        <div class="vp-sn-sub">{% trans "卖家中心" %}</div>
+    </div>
+    <nav class="vp-sn-scroll">
+        <div class="vp-sn-label">{% trans "概览" %}</div>
+        <a class="vp-sn-link {% if rn.namespace == 'manager' and rn.url_name == 'vendor_dashboard' %}nav-active{% endif %}"
+           href="{% url 'manager:vendor_dashboard' %}">
+            <i class="fas fa-chart-line"></i>{% trans "概览" %}
+        </a>
+        <a class="vp-sn-link" href="{% url 'manager:public_vendor_shop' vendor.id %}" target="_blank" rel="noopener">
+            <i class="fas fa-store"></i>{% trans "店铺前台" %}
+        </a>
+
+        <div class="vp-sn-label">{% trans "订单" %}</div>
+        <a class="vp-sn-link {% if rn.namespace == 'manager' and rn.url_name == 'vendor_orders_hub' or rn.namespace == 'manager' and rn.url_name == 'vendor_book_order_detail' or rn.namespace == 'marketplace' and rn.url_name == 'vendor_marketplace_orders' or rn.namespace == 'marketplace' and rn.url_name == 'vendor_marketplace_order_detail' %}nav-active{% endif %}"
+           href="{% url 'manager:vendor_orders_hub' %}">
+            <i class="fas fa-layer-group"></i>{% trans "订单中心" %}
+        </a>
+
+        <div class="vp-sn-label">{% trans "图书" %}</div>
+        <a class="vp-sn-link {% if rn.namespace == 'manager' and rn.url_name == 'vendor_books' or rn.namespace == 'manager' and rn.url_name == 'vendor_edit_book' %}nav-active{% endif %}"
+           href="{% url 'manager:vendor_books' %}">
+            <i class="fas fa-book-open"></i>{% trans "图书管理" %}
+        </a>
+        <a class="vp-sn-link {% if rn.namespace == 'manager' and rn.url_name == 'vendor_add_book' %}nav-active{% endif %}"
+           href="{% url 'manager:vendor_add_book' %}">
+            <i class="fas fa-plus-circle"></i>{% trans "上架图书" %}
+        </a>
+
+        <div class="vp-sn-label">{% trans "商品" %}</div>
+        <a class="vp-sn-link {% if rn.namespace == 'marketplace' and rn.url_name == 'vendor_products' %}nav-active{% endif %}"
+           href="{% url 'marketplace:vendor_products' %}">
+            <i class="fas fa-shopping-bag"></i>{% trans "商品列表" %}
+        </a>
+        <a class="vp-sn-link {% if rn.namespace == 'marketplace' and rn.url_name == 'vendor_product_add' %}nav-active{% endif %}"
+           href="{% url 'marketplace:vendor_product_add' %}">
+            <i class="fas fa-plus"></i>{% trans "添加商品" %}
+        </a>
+
+        <div class="vp-sn-label">{% trans "课程" %}</div>
+        <a class="vp-sn-link {% if rn.namespace == 'marketplace' and rn.url_name == 'vendor_courses' %}nav-active{% endif %}"
+           href="{% url 'marketplace:vendor_courses' %}">
+            <i class="fas fa-graduation-cap"></i>{% trans "课程列表" %}
+        </a>
+        <a class="vp-sn-link {% if rn.namespace == 'marketplace' and rn.url_name == 'vendor_course_add' %}nav-active{% endif %}"
+           href="{% url 'marketplace:vendor_course_add' %}">
+            <i class="fas fa-chalkboard-teacher"></i>{% trans "添加课程" %}
+        </a>
+
+        <div class="vp-sn-label">{% trans "超市" %}</div>
+        <a class="vp-sn-link {% if rn.namespace == 'marketplace' and rn.url_name == 'vendor_supermarket' %}nav-active{% endif %}"
+           href="{% url 'marketplace:vendor_supermarket' %}">
+            <i class="fas fa-apple-alt"></i>{% trans "超市商品" %}
+        </a>
+        <a class="vp-sn-link {% if rn.namespace == 'marketplace' and rn.url_name == 'vendor_supermarket_add' or rn.namespace == 'marketplace' and rn.url_name == 'vendor_supermarket_edit' %}nav-active{% endif %}"
+           href="{% url 'marketplace:vendor_supermarket_add' %}">
+            <i class="fas fa-plus"></i>{% trans "添加超市商品" %}
+        </a>
+
+        <div class="vp-sn-divider"></div>
+        <div class="vp-sn-label">{% trans "客户" %}</div>
+        <a class="vp-sn-link {% if rn.namespace == 'manager' and rn.url_name == 'vendor_messages' %}nav-active{% endif %}"
+           href="{% url 'manager:vendor_messages' %}">
+            <i class="fas fa-comments"></i>{% trans "客户消息" %}
+        </a>
+        <a class="vp-sn-link" href="{% url 'marketplace:home' %}" target="_blank" rel="noopener">
+            <i class="fas fa-globe"></i>{% trans "浏览市场" %}
+        </a>
+
+        <div class="vp-sn-divider"></div>
+        <a class="vp-sn-link text-warning" href="{% url 'manager:public_home' %}" target="_blank" rel="noopener" style="color:#fef08a !important;">
+            <i class="fas fa-home"></i>{% trans "Website home" %}
+        </a>
+        <a class="vp-sn-link" href="{% url 'manager:vendor_logout' %}">
+            <i class="fas fa-sign-out-alt"></i>{% trans "退出登录" %}
+        </a>
+    </nav>
+</aside>
+{% endwith %}

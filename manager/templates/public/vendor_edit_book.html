@@ -1,24 +1,24 @@
-{% extends 'public/base.html' %}
+{% extends 'public/vendor_panel_base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans "编辑图书" %} - {% trans "DUNO 360" %}{% endblock %}
+{% block panel_title %}{% trans "编辑图书" %} · {% trans "卖家中心" %}{% endblock %}
 
-{% block extra_css %}
+{% block panel_extra_css %}
 <style>
-    .add-hero {
+    .vp-page-welcome {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 80px 0 60px;
-        position: relative; overflow: hidden;
+        color: #fff;
+        padding: 20px;
+        border-radius: 15px;
+        margin-bottom: 22px;
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
     }
-    .add-hero::before {
-        content: ''; position: absolute; top: -50%; right: -10%;
-        width: 500px; height: 500px; background: rgba(255,255,255,0.05);
-        border-radius: 50%;
-    }
+    .vp-page-welcome h2 { font-size: 1.35rem; font-weight: 700; margin: 0 0 6px 0; }
+    .vp-page-welcome p { margin: 0; opacity: 0.88; font-size: 0.9rem; }
     .add-card {
         background: var(--card-bg, #fff); border-radius: 24px;
         box-shadow: 0 20px 60px rgba(0,0,0,0.08);
-        padding: 40px; margin-top: -40px;
+        padding: 40px;
         position: relative; z-index: 2;
     }
     .add-card .form-control, .add-card .form-select {
@@ -55,19 +55,13 @@
 </style>
 {% endblock %}
 
-{% block content %}
-<section class="add-hero text-white">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-6 text-center">
-                <h1 class="display-5 fw-bold mb-3" data-aos="fade-up"><i class="fas fa-edit me-2"></i>{% trans "编辑图书" %}</h1>
-                <p class="lead" style="opacity:0.9;" data-aos="fade-up" data-aos-delay="100">{{ book.name }}</p>
-            </div>
-        </div>
-    </div>
-</section>
+{% block vendor_panel_content %}
+<div class="vp-page-welcome">
+    <h2><i class="fas fa-edit me-2"></i>{% trans "编辑图书" %}</h2>
+    <p>{{ book.name }}</p>
+</div>
 
-<section class="container pb-5">
+<section class="container-fluid px-0 pb-4">
     <div class="row justify-content-center">
         <div class="col-lg-7 col-md-9">
             <div class="add-card" data-aos="fade-up">
@@ -176,7 +170,7 @@
 </section>
 {% endblock %}
 
-{% block extra_js %}
+{% block panel_extra_js %}
 <script>
 function submitEdit(e) {
     e.preventDefault();

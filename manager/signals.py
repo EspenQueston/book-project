@@ -14,18 +14,25 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# Debug print to confirm signals are loaded
-print("Order management signals loaded successfully!")
+# Debug logging only — avoid non-ASCII in print() (Windows cp1252 consoles raise UnicodeEncodeError).
+logger.debug("Order management signals module loaded")
 
 @receiver(pre_save, sender=Order)
 def track_payment_status_change(sender, instance, **kwargs):
     """Track payment status changes before saving"""
-    print(f"🔍 Pre-save signal triggered for order: {instance.order_number if hasattr(instance, 'order_number') else 'NEW'}")
+    logger.debug(
+        "Order pre_save: %s",
+        instance.order_number if hasattr(instance, "order_number") else "NEW",
+    )
     if instance.pk:  # Only for existing orders
         try:
             old_order = Order.objects.get(pk=instance.pk)
             instance._old_payment_status = old_order.payment_status
-            print(f"🔍 Old payment status: {old_order.payment_status}, New: {instance.payment_status}")
+            logger.debug(
+                "Order payment status change: %s -> %s",
+                old_order.payment_status,
+                instance.payment_status,
+            )
         except Order.DoesNotExist:
             instance._old_payment_status = None
     else:
@@ -35,23 +42,25 @@ def track_payment_status_change(sender, instance, **kwargs):
 @receiver(post_save, sender=Order)
 def handle_payment_status_change(sender, instance, created, **kwargs):
     """Handle payment status changes and send notifications"""
-    print(f"💾 Post-save signal triggered for order: {instance.order_number}, created: {created}")
+    logger.debug(
+        "Order post_save: %s, created=%s",
+        instance.order_number,
+        created,
+    )
     
     # Skip if this is a new order creation
     if created:
         logger.info(f"New order created: {instance.order_number}")
-        print(f"📝 New order created: {instance.order_number}")
         return
     
     # Check if payment status changed
     old_status = getattr(instance, '_old_payment_status', None)
     current_status = instance.payment_status
-    
-    print(f"🔄 Checking status change: {old_status} -> {current_status}")
-    
+
+    logger.debug("Order payment check: %s -> %s", old_status, current_status)
+
     if old_status and old_status != current_status:
         logger.info(f"Payment status changed for order {instance.order_number}: {old_status} -> {current_status}")
-        print(f"✅ Payment status changed for order {instance.order_number}: {old_status} -> {current_status}")
         
         # Create notification record
         create_payment_notification(instance, old_status, current_status)
@@ -64,7 +73,11 @@ def handle_payment_status_change(sender, instance, created, **kwargs):
         elif current_status == 'refunded':
             send_refund_notification(instance)
     else:
-        print(f"❌ No payment status change detected or old_status is None")
+        logger.debug(
+            "No payment status change for order %s (old=%s)",
+            instance.order_number,
+            old_status,
+        )
 
 
 def create_payment_notification(order, old_status, new_status):

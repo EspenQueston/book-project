@@ -148,10 +148,10 @@
         html[data-theme="dark"] .bft-item { color: #94a3b8; }
         .bft-item.active { color: #FF6000; border-bottom-color: #FF6000; }
 
-        /* Books King Kong zone */
+        /* Books King Kong zone — 2 rows × 5 columns */
         .books-king-kong {
             display: grid !important;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 0;
             background: #fff;
             padding: 10px 6px;
@@ -164,9 +164,9 @@
         }
         html[data-theme="dark"] .bkk-item { color: #e2e8f0; }
         .bkk-icon {
-            width: 48px; height: 48px; border-radius: 12px;
+            width: 44px; height: 44px; border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 20px; color: #fff;
+            font-size: 18px; color: #fff;
         }
         .bkk-item span { font-size: 10px; font-weight: 600; text-align: center; }
 
@@ -241,28 +241,12 @@
     <a href="/marketplace/courses/" class="bft-item" data-zh="课程" data-en="Courses" data-fr="Cours">课程</a>
 </div>
 
-<!-- ===== MOBILE ONLY: Books King Kong Zone (2×4) ===== -->
+<!-- ===== MOBILE ONLY: Books King Kong Zone (2×5) ===== -->
 <div class="books-king-kong" style="display:none;">
-    <a href="{% url 'manager:public_books' %}?sort=newest" class="bkk-item">
-        <div class="bkk-icon" style="background:linear-gradient(135deg,#667eea,#764ba2)"><i class="fas fa-certificate"></i></div>
-        <span data-zh="新书" data-en="New" data-fr="Nouveautés">新书</span>
-    </a>
-    <a href="{% url 'manager:public_books' %}?sort=popular" class="bkk-item">
-        <div class="bkk-icon" style="background:linear-gradient(135deg,#ef4444,#dc2626)"><i class="fas fa-fire"></i></div>
-        <span data-zh="畅销" data-en="Best" data-fr="Meilleures">畅销</span>
-    </a>
-    <a href="/marketplace/courses/" class="bkk-item">
-        <div class="bkk-icon" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed)"><i class="fas fa-video"></i></div>
-        <span data-zh="视频" data-en="Vidéo" data-fr="Vidéo">视频</span>
-    </a>
-    <a href="#flash-sales" class="bkk-item">
-        <div class="bkk-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706)"><i class="fas fa-bolt"></i></div>
-        <span data-zh="特价" data-en="Deals" data-fr="Offres">特价</span>
-    </a>
-    {% for cat in categories|slice:":4" %}
+    {% for cat in categories|slice:":10" %}
     <a href="{% url 'manager:public_books' %}?category={{ cat.slug }}" class="bkk-item">
         <div class="bkk-icon" style="background:{{ cat.color|default:'#667eea' }}"><i class="{{ cat.icon|default:'fas fa-book' }}"></i></div>
-        <span data-zh="{{ cat.name }}" data-en="{{ cat.name }}" data-fr="{{ cat.name }}">{{ cat.name }}</span>
+        <span data-zh="{{ cat.name }}" data-en="{{ cat.name_en|default:cat.name }}" data-fr="{{ cat.name_fr|default:cat.name }}">{{ cat.name }}</span>
     </a>
     {% endfor %}
 </div>
@@ -332,7 +316,7 @@
                 </form>
             </div>
             <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-                <span class="text-muted">{% blocktrans with count=books.count %}共找到 {{ count }} 本图书{% endblocktrans %}</span>
+                <span class="text-muted">{% blocktrans with count=total_count %}共找到 {{ count }} 本图书{% endblocktrans %}</span>
             </div>
         </div>
     </div>
@@ -342,7 +326,7 @@
 <section class="books-desktop-grid py-5">
     <div class="container">
         {% if books %}
-        <div class="row">
+        <div class="row" id="booksDesktopRow">
             {% for book in books %}
             <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:100 }}">
                 <div class="card h-100" style="border-radius: 15px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: none; transition: all 0.3s ease;">
@@ -411,6 +395,14 @@
             </div>
             {% endfor %}
         </div>
+        <div id="booksDesktopLoader" class="text-center py-4" style="display:none;">
+            <span class="spinner-border text-primary" role="status" aria-hidden="true"></span>
+            <p class="text-muted small mb-0 mt-2">{% trans "加载更多图书…" %}</p>
+        </div>
+        <div id="booksDesktopSentinel" style="height: 4px;" aria-hidden="true"></div>
+        <p id="booksDesktopEnd" class="text-center text-muted py-3 small" style="display:none;">
+            {% trans "已显示全部图书" %}
+        </p>
         {% else %}
         <!-- Empty State -->
         <div class="text-center py-5" data-aos="zoom-in">
@@ -620,6 +612,94 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (loader) loader.style.display = 'none';
             })
             .catch(function() { loading = false; if (loader) loader.style.display = 'none'; });
+    }
+})();
+
+// ===== Desktop books: load next pages while scrolling (bounded pagination) =====
+(function() {
+    if (window.innerWidth <= 768) return;
+    var grid = document.getElementById('booksDesktopRow');
+    var sentinel = document.getElementById('booksDesktopSentinel');
+    var loader = document.getElementById('booksDesktopLoader');
+    var endMsg = document.getElementById('booksDesktopEnd');
+    if (!grid || !sentinel) return;
+
+    var currentPage = {{ page_obj.number }};
+    var hasMore = {{ page_obj.has_next|yesno:"true,false" }};
+    var loading = false;
+
+    if (!hasMore) { sentinel.style.display = 'none'; if (endMsg) endMsg.style.display = 'block'; }
+
+    function escHtml(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+    function buildBookCard(book) {
+        var coverHtml = book.has_cover
+            ? '<img src="' + book.cover_url + '" alt="' + escHtml(book.name) + '">'
+            : '<div class="book-cover-no-image"><i class="fas fa-book" style="font-size:2.5rem;margin-bottom:6px;"></i><small>暂无封面</small></div>';
+        var invBadge = '';
+        if (book.inventory === 0) invBadge = '<span style="position:absolute;bottom:12px;left:12px;background:#ef4444;color:white;padding:4px 10px;border-radius:15px;font-size:0.75rem;font-weight:600;">缺货</span>';
+        else if (book.inventory <= 5) invBadge = '<span style="position:absolute;bottom:12px;left:12px;background:#f59e0b;color:white;padding:4px 10px;border-radius:15px;font-size:0.75rem;font-weight:600;">仅剩' + book.inventory + '本</span>';
+        var buyBtns = book.inventory > 0
+            ? '<form method="post" action="/manager/buy_now/' + book.id + '/" class="flex-fill"><input type="hidden" name="csrfmiddlewaretoken" value="' + getCsrfToken() + '"><button type="submit" class="btn btn-success btn-sm w-100" style="border-radius:8px;"><i class="fas fa-bolt me-1"></i> 立即购买</button></form><button onclick="addToCartQuick(' + book.id + ')" class="btn btn-primary btn-sm" style="border-radius:8px;" title="加入购物车"><i class="fas fa-cart-plus"></i></button>'
+            : '<button class="btn btn-secondary btn-sm w-100" disabled style="border-radius:8px;"><i class="fas fa-times"></i> 缺货</button>';
+        return '<div class="col-lg-4 col-md-6 mb-4">'
+            + '<div class="card h-100" style="border-radius:15px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.1);border:none;transition:all 0.3s ease;">'
+            + '<a href="' + book.url + '" style="text-decoration:none;"><div class="book-cover-container">'
+            + '<button class="wish-btn" data-book-id="' + book.id + '" onclick="event.preventDefault();event.stopPropagation();toggleWish(this,' + book.id + ')" title="收藏"><i class="far fa-heart"></i></button>'
+            + '<div class="book-cover-frame">' + coverHtml + '</div>'
+            + '<span style="position:absolute;top:12px;right:12px;background:rgba(255,255,255,0.2);backdrop-filter:blur(10px);color:white;padding:5px 14px;border-radius:20px;font-weight:700;font-size:0.95rem;border:1px solid rgba(255,255,255,0.3);">¥' + book.price + '</span>'
+            + invBadge + '</div></a>'
+            + '<div class="card-body d-flex flex-column" style="padding:18px;">'
+            + '<h5 class="card-title fw-bold mb-2" style="font-size:1.05rem;line-height:1.4;min-height:42px;">' + escHtml(book.name) + '</h5>'
+            + '<p class="text-muted mb-2" style="font-size:0.88rem;"><i class="fas fa-building" style="color:#667eea;"></i> ' + escHtml(book.publisher_name) + '</p>'
+            + '<div class="d-flex gap-2 mb-3"><span class="badge bg-light text-success" style="font-size:0.8rem;"><i class="fas fa-boxes me-1"></i>库存 ' + book.inventory + '</span>'
+            + '<span class="badge bg-light text-warning" style="font-size:0.8rem;"><i class="fas fa-fire me-1"></i>销量 ' + book.sale_num + '</span></div>'
+            + '<div class="mt-auto"><div class="d-flex gap-2 mb-2">' + buyBtns + '</div>'
+            + '<a href="' + book.url + '" class="btn btn-sm w-100" style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border-radius:8px;"><i class="fas fa-info-circle"></i> 查看详情</a>'
+            + '</div></div></div></div>';
+    }
+
+    var observer = new IntersectionObserver(function(entries) {
+        if (entries[0].isIntersecting && !loading && hasMore) loadNextPage();
+    }, { rootMargin: '300px' });
+    observer.observe(sentinel);
+
+    function loadNextPage() {
+        loading = true;
+        if (loader) loader.style.display = 'block';
+        var params = new URLSearchParams(window.location.search);
+        params.set('page', currentPage + 1);
+        params.set('format', 'json');
+        fetch(window.location.pathname + '?' + params.toString())
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var books = data.books || [];
+                if (!books.length) {
+                    hasMore = false;
+                    sentinel.style.display = 'none';
+                    if (endMsg) endMsg.style.display = 'block';
+                    loading = false;
+                    if (loader) loader.style.display = 'none';
+                    return;
+                }
+                books.forEach(function(book) {
+                    var tmp = document.createElement('div');
+                    tmp.innerHTML = buildBookCard(book);
+                    grid.appendChild(tmp.firstElementChild);
+                });
+                currentPage = data.page;
+                hasMore = data.has_more;
+                loading = false;
+                if (loader) loader.style.display = 'none';
+                if (!hasMore) {
+                    sentinel.style.display = 'none';
+                    if (endMsg) endMsg.style.display = 'block';
+                }
+            })
+            .catch(function() {
+                loading = false;
+                if (loader) loader.style.display = 'none';
+            });
     }
 })();
 </script>

@@ -3,9 +3,49 @@
 
 {% block title %}{% trans "购物车" %} - {% trans "DUNO 360" %}{% endblock %}
 
+{% block extra_css %}
+<style>
+@media (max-width: 768px) {
+    .cart-desktop-header { display: none !important; }
+    .cart-desktop-content .card-modern { border-radius: 0 !important; box-shadow: none !important; border: none !important; }
+    .cart-desktop-content .card-header { display: none !important; }
+    .cart-desktop-content .container { padding: 0 !important; }
+    .cart-desktop-content section.py-5 { padding: 0 !important; }
+    .cart-desktop-content .col-lg-4 { position: fixed; bottom: 60px; left: 0; right: 0; z-index: 900; padding: 0 !important; }
+    .cart-desktop-content .col-lg-4 .card-modern { border-radius: 0 !important; margin: 0 !important; }
+    .cart-desktop-content .col-lg-4 .card-header { display: none !important; }
+    .cart-desktop-content .col-lg-4 .card-body { padding: 10px 14px !important; }
+    .cart-desktop-content .col-lg-4 .summary-row { margin-bottom: 0 !important; }
+    .cart-desktop-content .col-lg-4 hr { display: none; }
+    .cart-desktop-content .col-lg-4 .btn-lg { padding: 10px !important; font-size: .95rem !important; border-radius: 22px !important; }
+    .cart-desktop-content .col-lg-4 .card-modern.mt-4 { display: none !important; }
+    .cart-desktop-content .col-lg-4 .d-flex.justify-content-between.mb-3:first-child { display: none !important; }
+    .cart-desktop-content .col-lg-8 { padding-bottom: 140px; }
+
+    .cart-item .row { flex-wrap: nowrap !important; }
+    .cart-item .col-md-6 { flex: 1; min-width: 0; }
+    .cart-item .col-md-3, .cart-item .col-md-2, .cart-item .col-md-1 { flex: 0 0 auto; width: auto; }
+    .cart-item .d-flex.align-items-center { gap: 8px !important; }
+    .cart-item .item-cover img, .cart-item .item-cover > div { width: 50px !important; height: 60px !important; }
+    .cart-item h6 { font-size: .85rem !important; margin: 0 !important; }
+    .cart-item .price-info p { font-size: .8rem !important; margin: 0 !important; }
+    .cart-item .input-group { max-width: 100px; }
+    .cart-item .input-group .btn { padding: 2px 8px !important; }
+    .cart-item .quantity-input { max-width: 35px !important; font-size: .8rem !important; }
+    .cart-item .text-muted.small { display: none; }
+    .cart-item .badge { font-size: .55rem !important; }
+    .cart-item { padding: 10px 12px !important; }
+    .cart-item .col-md-1 .btn { padding: 4px 8px !important; }
+    .cart-item .quantity-controls label { display: none; }
+    .cart-item .mt-4.d-flex { padding: 10px 12px; }
+    .cart-item .mt-4.d-flex .btn { font-size: .8rem; padding: 6px 12px; }
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <!-- Cart Header -->
-<section class="py-4 bg-primary text-white">
+<section class="py-4 bg-primary text-white cart-desktop-header">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-md-8">
@@ -22,6 +62,7 @@
 </section>
 
 <!-- Cart Content -->
+<div class="cart-desktop-content">
 <section class="py-5">
     <div class="container">
         {% if cart_items %}
@@ -211,6 +252,7 @@
         {% endif %}
     </div>
 </section>
+</div><!-- /.cart-desktop-content -->
 {% endblock content %}
 
 {% block extra_js %}

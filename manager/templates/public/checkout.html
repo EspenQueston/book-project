@@ -5,461 +5,476 @@
 
 {% block content %}
 <style>
-    .checkout-container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 20px;
-    }
-    
-    .step-indicator {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 30px;
-    }
-    
-    .step {
-        display: flex;
-        align-items: center;
-        margin: 0 15px;
-    }
-    
-    .step-number {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: #6c757d;
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 10px;
-        font-weight: bold;
-    }
-    
-    .step.active .step-number {
-        background: #667eea;
-    }
-    
-    .step.completed .step-number {
-        background: #28a745;
-    }
-    
-    .form-section {
-        background: white;
-        border-radius: 10px;
-        padding: 25px;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    
-    .payment-methods {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 15px;
-        margin-top: 15px;
-    }
-    
-    .payment-option {
-        border: 2px solid #e9ecef;
-        border-radius: 10px;
-        padding: 15px;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-    
-    .payment-option:hover {
-        border-color: #667eea;
-        background: #f8f9fa;
-    }
-    
-    .payment-option.selected {
-        border-color: #667eea;
-        background: #e8ecff;
-    }
-    
-    .payment-icon {
-        font-size: 2rem;
-        margin-bottom: 10px;
-        color: #6c757d;
-    }
-    
-    .payment-option.selected .payment-icon {
-        color: #667eea;
-    }
-    
-    .order-summary {
-        background: #f8f9fa;
-        border-radius: 10px;
-        padding: 20px;
-        position: sticky;
-        top: 20px;
-    }
-    
-    .summary-item {
-        display: flex;
-        justify-content: between;
-        align-items: center;
-        padding: 10px 0;
-        border-bottom: 1px solid #dee2e6;
-    }
-    
-    .summary-item:last-child {
-        border-bottom: none;
-        font-weight: bold;
-        font-size: 1.2rem;
-    }
-    
-    .book-item {
-        display: flex;
-        align-items: center;
-        padding: 15px;
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
-        margin-bottom: 10px;
-    }
-    
-    .book-info {
-        flex: 1;
-        margin-left: 15px;
-    }
-    
-    .form-group {
-        margin-bottom: 20px;
-    }
-    
-    .form-control {
-        border-radius: 8px;
-        border: 1px solid #ced4da;
-        padding: 12px 15px;
-    }
-    
-    .form-control:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 0.2rem rgba(102,126,234,.25);
-    }
-    
-    .btn-checkout {
-        background: linear-gradient(135deg, #28a745, #20c997);
-        border: none;
-        padding: 15px 40px;
-        font-size: 1.1rem;
-        font-weight: bold;
-        border-radius: 8px;
-        width: 100%;
-        transition: all 0.3s ease;
-    }
-    
-    .btn-checkout:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(40,167,69,0.3);
-    }
-    
-    .item-type-badge {
-        font-size: 0.65rem;
-        padding: 2px 8px;
-        border-radius: 10px;
-    }
-
-/* ===== MOBILE CHECKOUT (Taobao style) ===== */
-@media (max-width: 768px) {
-    .checkout-container { display: none !important; }
-    .checkout-mobile { display: block !important; }
+/* ===== Base / Desktop Styles ===== */
+:root {
+    --ck-primary: #667eea;
+    --ck-primary-end: #764ba2;
+    --ck-accent: #E4393C;
+    --ck-green: #28a745;
+    --ck-bg: #ffffff;
+    --ck-bg-page: #f8f9fa;
+    --ck-bg-summary: #f8f9fa;
+    --ck-border: #dee2e6;
+    --ck-border-light: #e9ecef;
+    --ck-text: #333333;
+    --ck-text-muted: #6c757d;
+    --ck-shadow: rgba(0,0,0,0.1);
+    --ck-input-bg: #ffffff;
+    --ck-input-border: #ced4da;
 }
-@media (min-width: 769px) {
-    .checkout-mobile { display: none !important; }
+html[data-theme="dark"] {
+    --ck-bg: #1e1e2f;
+    --ck-bg-page: #141422;
+    --ck-bg-summary: #252540;
+    --ck-border: #3a3a5c;
+    --ck-border-light: #2e2e4a;
+    --ck-text: #e0e0e0;
+    --ck-text-muted: #9a9ab0;
+    --ck-shadow: rgba(0,0,0,0.3);
+    --ck-input-bg: #252540;
+    --ck-input-border: #3a3a5c;
 }
 
-.checkout-mobile {
-    background: #F5F5F5;
-    min-height: 100vh;
-    padding-bottom: 90px;
+.checkout-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
 }
-/* Address header */
-.cko-address-bar {
-    background: #fff;
-    display: flex; align-items: center;
-    padding: 12px 14px;
-    gap: 10px;
-    margin-bottom: 6px;
-    border-bottom: 1px solid #f0f0f0;
+
+.step-indicator {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
 }
-.cko-address-bar i { color: #E4393C; font-size: 16px; flex-shrink: 0; }
-.cko-address-info { flex: 1; min-width: 0; }
-.cko-address-title { font-size: 13px; font-weight: 700; color: #333; }
-.cko-address-sub { font-size: 12px; color: #999; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.cko-address-edit { color: #667eea; font-size: 13px; font-weight: 600; text-decoration: none; flex-shrink: 0; }
+.step {
+    display: flex;
+    align-items: center;
+    margin: 0 15px;
+}
+.step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--ck-text-muted);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    font-weight: bold;
+}
+.step-label {
+    color: var(--ck-text);
+}
+.step.active .step-number {
+    background: var(--ck-primary);
+}
+.step.completed .step-number {
+    background: var(--ck-green);
+}
+.step-connector {
+    width: 40px;
+    height: 2px;
+    background: var(--ck-border);
+    align-self: center;
+}
+
+.form-section {
+    background: var(--ck-bg);
+    border-radius: 10px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px var(--ck-shadow);
+}
+.form-section h4 {
+    color: var(--ck-text);
+}
+
+.payment-methods {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+.payment-option {
+    border: 2px solid var(--ck-border-light);
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--ck-bg);
+}
+.payment-option:hover {
+    border-color: var(--ck-primary);
+    background: var(--ck-bg-summary);
+}
+.payment-option.selected {
+    border-color: var(--ck-primary);
+    background: #e8ecff;
+}
+html[data-theme="dark"] .payment-option.selected {
+    background: #2a2a50;
+}
+.payment-icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    color: var(--ck-text-muted);
+}
+.payment-option.selected .payment-icon {
+    color: var(--ck-primary);
+}
+
+.order-summary {
+    background: var(--ck-bg-summary);
+    border-radius: 10px;
+    padding: 20px;
+    position: sticky;
+    top: 20px;
+}
+.order-summary h4 {
+    color: var(--ck-text);
+}
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--ck-border);
+    color: var(--ck-text);
+}
+.summary-item:last-child {
+    border-bottom: none;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.book-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border: 1px solid var(--ck-border);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    background: var(--ck-bg);
+}
+.book-info {
+    flex: 1;
+    margin-left: 15px;
+    color: var(--ck-text);
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+.form-label {
+    color: var(--ck-text);
+}
+.form-control {
+    border-radius: 8px;
+    border: 1px solid var(--ck-input-border);
+    padding: 12px 15px;
+    background: var(--ck-input-bg);
+    color: var(--ck-text);
+}
+.form-control:focus {
+    border-color: var(--ck-primary);
+    box-shadow: 0 0 0 0.2rem rgba(102,126,234,.25);
+}
+
+.btn-checkout {
+    background: linear-gradient(135deg, var(--ck-green), #20c997);
+    border: none;
+    padding: 15px 40px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 8px;
+    width: 100%;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.btn-checkout:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(40,167,69,0.3);
+    color: #fff;
+}
+
+.item-type-badge {
+    font-size: 0.65rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
 
 /* Guarantee banner */
-.cko-guarantee-banner {
+.ck-guarantee-banner {
     background: #f0fdf4;
     border: 1px solid #bbf7d0;
-    padding: 8px 14px;
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 6px;
-    font-size: 12px; color: #065f46;
+    border-radius: 10px;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    font-size: 0.85rem;
+    color: #065f46;
 }
-.cko-guarantee-close { color: #999; font-size: 14px; cursor: pointer; background: none; border: none; }
-
-/* Cart items section */
-.cko-items-section {
-    background: #fff;
-    margin-bottom: 6px;
+html[data-theme="dark"] .ck-guarantee-banner {
+    background: #1a2e1a;
+    border-color: #2d5a2d;
+    color: #86efac;
 }
-.cko-item {
-    display: flex; gap: 10px;
-    padding: 12px 14px;
-    border-bottom: 1px solid #fafafa;
-}
-.cko-item:last-child { border-bottom: none; }
-.cko-item-img {
-    width: 64px; height: 80px;
-    border-radius: 8px; object-fit: cover;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
-    color: rgba(255,255,255,.7); font-size: 1.5rem;
-}
-.cko-item-img img { width: 100%; height: 100%; border-radius: 8px; object-fit: cover; }
-.cko-item-body { flex: 1; min-width: 0; }
-.cko-item-name { font-size: 13px; font-weight: 600; color: #333; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.cko-item-type { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; margin-top: 4px; display: inline-block; }
-.cko-item-prices { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
-.cko-item-price { font-size: 16px; font-weight: 900; color: #E4393C; }
-.cko-item-price small { font-size: 11px; }
-.cko-item-original { font-size: 12px; color: #999; text-decoration: line-through; }
-.cko-savings-badge { font-size: 10px; font-weight: 700; padding: 2px 7px; background: #fde68a; color: #92400e; border-radius: 4px; }
-.cko-qty-row { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
-.cko-qty-control { display: flex; align-items: center; gap: 0; background: #f5f5f5; border-radius: 6px; overflow: hidden; border: 1px solid #eee; }
-.cko-qty-btn { width: 28px; height: 28px; border: none; background: none; font-size: 15px; font-weight: 700; color: #667eea; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.cko-qty-val { width: 32px; text-align: center; font-size: 13px; font-weight: 700; color: #333; }
-
-/* Contact form section */
-.cko-form-section {
-    background: #fff;
-    padding: 12px 14px;
-    margin-bottom: 6px;
-}
-.cko-form-title { font-size: 13px; font-weight: 700; color: #333; margin-bottom: 10px; }
-.cko-input-row { margin-bottom: 10px; }
-.cko-input-label { font-size: 11px; color: #999; margin-bottom: 3px; }
-.cko-input {
-    width: 100%;
-    border: 1px solid #eee;
-    border-radius: 8px;
-    padding: 9px 12px;
-    font-size: 13px;
-    color: #333;
-    background: #fafafa;
-    outline: none;
-}
-.cko-input:focus { border-color: #667eea; background: #fff; }
-.cko-select {
-    width: 100%;
-    border: 1px solid #eee;
-    border-radius: 8px;
-    padding: 9px 12px;
-    font-size: 13px;
-    color: #333;
-    background: #fafafa;
-    outline: none;
-    appearance: none;
+.ck-guarantee-close {
+    color: #999;
+    font-size: 16px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0 4px;
 }
 
-/* Payment section */
-.cko-payment-section {
-    background: #fff;
-    padding: 12px 14px;
-    margin-bottom: 6px;
+/* Mobile sticky pay bar - hidden on desktop */
+.ck-mobile-pay-bar {
+    display: none;
 }
-.cko-payment-title { font-size: 13px; font-weight: 700; color: #333; margin-bottom: 10px; }
-.cko-payment-options { display: flex; flex-direction: column; gap: 8px; }
-.cko-payment-option {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 12px; border-radius: 10px;
-    border: 2px solid #eee; cursor: pointer; transition: all .15s;
-}
-.cko-payment-option.selected { border-color: #FF6000; background: #fff7f0; }
-.cko-payment-option input[type=radio] { accent-color: #FF6000; }
-.cko-payment-option-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #fff; flex-shrink: 0; }
-.cko-payment-option-name { font-size: 13px; font-weight: 600; color: #333; }
-.cko-payment-option-sub { font-size: 11px; color: #999; }
 
-/* Summary section */
-.cko-summary {
-    background: #fff;
-    padding: 12px 14px;
-    margin-bottom: 6px;
-}
-.cko-summary-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 13px; color: #666; }
-.cko-summary-row.total { font-weight: 800; font-size: 15px; color: #333; border-top: 1px solid #f0f0f0; padding-top: 10px; margin-top: 4px; }
-.cko-summary-row.total span:last-child { color: #E4393C; font-size: 18px; }
+/* ===== Responsive / Mobile ===== */
+@media (max-width: 768px) {
+    .checkout-container {
+        padding: 0;
+        background: var(--ck-bg-page);
+        padding-bottom: 80px;
+    }
 
-/* Sticky pay button */
-.cko-pay-bar {
-    position: fixed; bottom: 60px; left: 0; right: 0;
-    background: #fff; border-top: 1px solid #f0f0f0;
-    padding: 8px 14px; z-index: 900;
+    /* Compact step indicator */
+    .step-indicator {
+        margin-bottom: 0;
+        padding: 10px 14px;
+        background: var(--ck-bg);
+        border-bottom: 1px solid var(--ck-border-light);
+        justify-content: center;
+        gap: 0;
+    }
+    .step {
+        margin: 0 6px;
+    }
+    .step-number {
+        width: 28px;
+        height: 28px;
+        font-size: 0.75rem;
+        margin-right: 5px;
+    }
+    .step-label {
+        font-size: 0.75rem;
+    }
+    .step-connector {
+        width: 20px;
+    }
+
+    /* Card sections */
+    .form-section {
+        border-radius: 0;
+        margin-bottom: 6px;
+        padding: 14px;
+        box-shadow: none;
+        border-bottom: 1px solid var(--ck-border-light);
+    }
+    .form-section h4 {
+        font-size: 0.9rem;
+        margin-bottom: 12px !important;
+    }
+
+    /* Stack columns */
+    .row {
+        flex-direction: column;
+    }
+    .col-lg-8, .col-lg-4,
+    .col-md-6 {
+        width: 100% !important;
+        flex: none;
+        max-width: 100%;
+    }
+
+    /* Inputs full-width */
+    .form-control {
+        padding: 10px 12px;
+        font-size: 0.85rem;
+        background: #fafafa;
+        border-color: #eee;
+        border-radius: 8px;
+    }
+    html[data-theme="dark"] .form-control {
+        background: var(--ck-input-bg);
+        border-color: var(--ck-input-border);
+    }
+    .form-control:focus {
+        background: var(--ck-bg);
+    }
+    .form-group {
+        margin-bottom: 12px;
+    }
+    .form-label {
+        font-size: 0.8rem;
+        color: var(--ck-text-muted);
+        margin-bottom: 3px;
+    }
+
+    /* Payment options: stack vertically */
+    .payment-methods {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    .payment-option {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-align: left;
+        padding: 12px;
+        border-radius: 10px;
+    }
+    .payment-icon {
+        font-size: 1.4rem;
+        margin-bottom: 0;
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .payment-option .payment-name {
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    .payment-option small {
+        font-size: 0.72rem;
+    }
+
+    /* Order summary */
+    .order-summary {
+        border-radius: 0;
+        padding: 14px;
+        position: static;
+        margin-bottom: 6px;
+    }
+    .book-item {
+        padding: 10px;
+        border-radius: 8px;
+        gap: 10px;
+    }
+    .book-item img,
+    .book-cover > div {
+        width: 52px !important;
+        height: 66px !important;
+    }
+    .book-info {
+        margin-left: 10px;
+    }
+    .book-info h6 {
+        font-size: 0.82rem;
+        margin-bottom: 4px !important;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .summary-item {
+        font-size: 0.85rem;
+        padding: 8px 0;
+    }
+    .summary-item:last-child {
+        font-size: 1rem;
+    }
+    .summary-item:last-child .text-primary {
+        color: var(--ck-accent) !important;
+        font-weight: 900;
+    }
+
+    /* Price highlight (Taobao-style) */
+    .book-info strong {
+        color: var(--ck-accent);
+        font-weight: 800;
+    }
+
+    /* Hide desktop checkout button on mobile, show sticky bar instead */
+    .btn-checkout {
+        display: none;
+    }
+    .checkout-security-notice {
+        display: none;
+    }
+
+    /* Show mobile sticky pay bar */
+    .ck-mobile-pay-bar {
+        display: block;
+        position: fixed;
+        bottom: 60px;
+        left: 0;
+        right: 0;
+        background: var(--ck-bg);
+        border-top: 1px solid var(--ck-border-light);
+        padding: 8px 14px;
+        z-index: 900;
+    }
+    .ck-pay-btn {
+        width: 100%;
+        background: linear-gradient(135deg, #FF6000, var(--ck-accent));
+        color: #fff;
+        border: none;
+        border-radius: 22px;
+        padding: 13px 0;
+        font-size: 0.95rem;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    .ck-pay-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 16px rgba(228,57,60,.35);
+    }
+
+    /* Guarantee banner */
+    .ck-guarantee-banner {
+        border-radius: 0;
+        margin-bottom: 6px;
+        font-size: 0.75rem;
+        padding: 8px 14px;
+    }
 }
-.cko-pay-btn {
-    width: 100%;
-    background: linear-gradient(135deg, #FF6000, #E4393C);
-    color: #fff; border: none; border-radius: 22px;
-    padding: 13px 0; font-size: 15px; font-weight: 800;
-    cursor: pointer; transition: all .2s;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-}
-.cko-pay-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(228,57,60,.35); }
 </style>
 
-<!-- ===== MOBILE CHECKOUT (Taobao style) ===== -->
-<div class="checkout-mobile" style="display:none;">
-    <!-- Address bar -->
-    <div class="cko-address-bar">
-        <i class="fas fa-map-marker-alt"></i>
-        <div class="cko-address-info">
-            <div class="cko-address-title" data-zh="配送地址" data-en="Delivery Address" data-fr="Adresse de livraison">配送地址</div>
-            <div class="cko-address-sub" id="ckoAddressDisplay" data-zh="点击填写收货地址" data-en="Click to add delivery address" data-fr="Cliquer pour ajouter une adresse">点击填写收货地址</div>
-        </div>
-        <a href="#ckoFormSection" class="cko-address-edit" data-zh="修改" data-en="Edit" data-fr="Modifier">修改 ></a>
-    </div>
-
-    <!-- Guarantee banner -->
-    <div class="cko-guarantee-banner" id="ckoGuaranteeBanner">
-        <span><i class="fas fa-shield-alt me-2"></i><span data-zh="平台保障：7天无理由退货 · 极速退款 · 正品保证" data-en="Platform guarantee: 7-day returns · Fast refunds · Authentic" data-fr="Garantie plateforme : 7j retour · Remboursement express · Authentique">平台保障：7天无理由退货 · 极速退款 · 正品保证</span></span>
-        <button class="cko-guarantee-close" onclick="document.getElementById('ckoGuaranteeBanner').style.display='none';">×</button>
-    </div>
-
-    <!-- Cart Items -->
-    <div class="cko-items-section">
-        {% for item in cart_items %}
-        <div class="cko-item">
-            <div class="cko-item-img">
-                {% if item.image_url %}<img src="{{ item.image_url }}" alt="{{ item.name }}">{% else %}<i class="fas fa-book"></i>{% endif %}
-            </div>
-            <div class="cko-item-body">
-                <div class="cko-item-name">{{ item.name }}</div>
-                <span class="cko-item-type {% if item.item_type == 'book' %}bg-primary text-white{% elif item.item_type == 'course' %}bg-info text-white{% elif item.item_type == 'product' %}bg-success text-white{% else %}bg-warning text-dark{% endif %}">{{ item.item_type|capfirst }}</span>
-                <div class="cko-item-prices">
-                    <span class="cko-item-price"><small>¥</small>{{ item.price }}</span>
-                    <span class="cko-item-original">¥{{ item.price|floatformat:0|add:"30" }}</span>
-                    <span class="cko-savings-badge">共减¥30</span>
-                </div>
-                <div class="cko-qty-row">
-                    <span style="font-size:11px;color:#999;">x{{ item.quantity }}</span>
-                    <div class="cko-qty-control">
-                        <button class="cko-qty-btn" onclick="ckoAdjustQty(this,-1)">−</button>
-                        <span class="cko-qty-val">{{ item.quantity }}</span>
-                        <button class="cko-qty-btn" onclick="ckoAdjustQty(this,1)">+</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-
-    <!-- Contact form (mobile version) -->
-    <div class="cko-form-section" id="ckoFormSection">
-        <div class="cko-form-title"><i class="fas fa-user me-2" style="color:#667eea;"></i><span data-zh="收货信息" data-en="Contact Info" data-fr="Infos de livraison">收货信息</span></div>
-        <div class="cko-input-row">
-            <div class="cko-input-label" data-zh="姓名 *" data-en="Name *" data-fr="Nom *">姓名 *</div>
-            <input type="text" class="cko-input" id="ckoName" placeholder="请输入姓名" oninput="updateAddressDisplay()">
-        </div>
-        <div class="cko-input-row">
-            <div class="cko-input-label" data-zh="邮箱 *" data-en="Email *" data-fr="Email *">邮箱 *</div>
-            <input type="email" class="cko-input" id="ckoEmail" placeholder="订单确认邮件" oninput="updateAddressDisplay()">
-        </div>
-        <div class="cko-input-row">
-            <div class="cko-input-label" data-zh="电话/微信 *" data-en="Phone/WeChat *" data-fr="Téléphone/WeChat *">电话/微信 *</div>
-            <input type="tel" class="cko-input" id="ckoPhone" placeholder="微信号或电话号码">
-        </div>
-        <div class="cko-input-row">
-            <div class="cko-input-label" data-zh="国家/地区 *" data-en="Country *" data-fr="Pays *">国家/地区 *</div>
-            <select class="cko-select" id="ckoCountry" onchange="loadPaymentOptions()">
-                <option value="">选择国家 / Select Country</option>
-                <optgroup label="West Africa">
-                    <option value="Senegal">Senegal / 塞内加尔</option>
-                    <option value="Côte d'Ivoire">Côte d'Ivoire</option>
-                    <option value="Ghana">Ghana</option>
-                    <option value="Nigeria">Nigeria</option>
-                    <option value="Benin">Benin</option>
-                    <option value="Mali">Mali</option>
-                    <option value="Cameroon">Cameroon</option>
-                    <option value="Togo">Togo</option>
-                </optgroup>
-                <optgroup label="Asia">
-                    <option value="China">China / 中国</option>
-                    <option value="Hong Kong">Hong Kong</option>
-                </optgroup>
-                <option value="Other">Other / 其他</option>
-            </select>
-        </div>
-        <div class="cko-input-row">
-            <div class="cko-input-label" data-zh="备注（可选）" data-en="Notes (optional)" data-fr="Notes (optionnel)">备注（可选）</div>
-            <input type="text" class="cko-input" id="ckoNotes" placeholder="特殊要求（可选）">
-        </div>
-    </div>
-
-    <!-- Payment options -->
-    <div class="cko-payment-section">
-        <div class="cko-payment-title"><i class="fas fa-credit-card me-2" style="color:#667eea;"></i><span data-zh="支付方式" data-en="Payment Method" data-fr="Mode de paiement">支付方式</span></div>
-        <div class="cko-payment-options" id="ckoPaymentOptions">
-            <label class="cko-payment-option">
-                <input type="radio" name="cko_payment" value="wechat" onchange="selectPayment(this)">
-                <div class="cko-payment-option-icon" style="background:#07c160;"><i class="fab fa-weixin"></i></div>
-                <div><div class="cko-payment-option-name">WeChat Pay</div><div class="cko-payment-option-sub">微信支付</div></div>
-            </label>
-            <label class="cko-payment-option">
-                <input type="radio" name="cko_payment" value="orange_money" onchange="selectPayment(this)">
-                <div class="cko-payment-option-icon" style="background:#FF6000;"><i class="fas fa-mobile-alt"></i></div>
-                <div><div class="cko-payment-option-name">Orange Money</div><div class="cko-payment-option-sub">Afrique de l'Ouest</div></div>
-            </label>
-            <label class="cko-payment-option">
-                <input type="radio" name="cko_payment" value="wave" onchange="selectPayment(this)">
-                <div class="cko-payment-option-icon" style="background:#1BA9DB;"><i class="fas fa-wave-square"></i></div>
-                <div><div class="cko-payment-option-name">Wave</div><div class="cko-payment-option-sub">Sénégal · CI</div></div>
-            </label>
-            <label class="cko-payment-option">
-                <input type="radio" name="cko_payment" value="bank" onchange="selectPayment(this)">
-                <div class="cko-payment-option-icon" style="background:#667eea;"><i class="fas fa-university"></i></div>
-                <div><div class="cko-payment-option-name" data-zh="银行转账" data-en="Bank Transfer" data-fr="Virement">银行转账</div><div class="cko-payment-option-sub">International</div></div>
-            </label>
-        </div>
-    </div>
-
-    <!-- Order summary -->
-    <div class="cko-summary">
-        {% with total=cart_total|default:"0" %}
-        <div class="cko-summary-row"><span data-zh="商品总价" data-en="Subtotal" data-fr="Sous-total">商品总价</span><span>¥{{ total }}</span></div>
-        <div class="cko-summary-row"><span data-zh="优惠券" data-en="Coupon" data-fr="Coupon">优惠 (-¥0)</span><span style="color:#10b981;">-¥0</span></div>
-        <div class="cko-summary-row"><span data-zh="运费" data-en="Shipping" data-fr="Livraison">运费</span><span style="color:#10b981;" data-zh="免运费" data-en="Free" data-fr="Gratuit">免运费</span></div>
-        <div class="cko-summary-row total"><span data-zh="实付款" data-en="Total to pay" data-fr="Total à payer">实付款</span><span>¥{{ total }}</span></div>
-        {% endwith %}
-    </div>
-
-    <!-- Sticky Pay button -->
-    <div class="cko-pay-bar">
-        <button class="cko-pay-btn" onclick="submitMobileCheckout()">
-            <i class="fas fa-lock"></i>
-            <span data-zh="立即付款" data-en="Pay now" data-fr="Payer maintenant">立即付款</span>
-            &nbsp;— ¥<span id="ckoPayTotal">{{ cart_total|default:"0" }}</span>
-        </button>
-    </div>
-</div><!-- /.checkout-mobile -->
-
 <div class="checkout-container">
+    <!-- Guarantee Banner -->
+    <div class="ck-guarantee-banner" id="ckGuaranteeBanner">
+        <span>
+            <i class="fas fa-shield-alt me-2"></i>
+            <span data-zh="平台保障：7天无理由退货 · 极速退款 · 正品保证" data-en="Platform guarantee: 7-day returns · Fast refunds · Authentic" data-fr="Garantie plateforme : 7j retour · Remboursement express · Authentique">
+                {% trans "平台保障：7天无理由退货 · 极速退款 · 正品保证" %}
+            </span>
+        </span>
+        <button class="ck-guarantee-close" onclick="document.getElementById('ckGuaranteeBanner').style.display='none';">&times;</button>
+    </div>
+
     <!-- Step Indicator -->
     <div class="step-indicator">
         <div class="step completed">
             <div class="step-number">1</div>
-            <span>{% trans "选择商品" %}</span>
+            <span class="step-label" data-zh="选择商品" data-en="Cart" data-fr="Panier">{% trans "选择商品" %}</span>
         </div>
+        <div class="step-connector"></div>
         <div class="step active">
             <div class="step-number">2</div>
-            <span>{% trans "填写信息" %}</span>
+            <span class="step-label" data-zh="填写信息" data-en="Details" data-fr="Détails">{% trans "填写信息" %}</span>
         </div>
+        <div class="step-connector"></div>
         <div class="step">
             <div class="step-number">3</div>
-            <span>{% trans "完成订单" %}</span>
+            <span class="step-label" data-zh="完成订单" data-en="Confirm" data-fr="Confirmer">{% trans "完成订单" %}</span>
         </div>
     </div>
 
@@ -470,18 +485,21 @@
             <div class="col-lg-8">
                 <!-- Customer Information -->
                 <div class="form-section">
-                    <h4 class="mb-3"><i class="fas fa-user"></i> {% trans "客户信息" %}</h4>
+                    <h4 class="mb-3">
+                        <i class="fas fa-user" style="color:var(--ck-primary);"></i>
+                        <span data-zh="客户信息" data-en="Contact Info" data-fr="Infos de contact">{% trans "客户信息" %}</span>
+                    </h4>
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label class="form-label">{% trans "姓名" %} *</label>
-                                <input type="text" name="customer_name" class="form-control" required 
+                                <label class="form-label" data-zh="姓名 *" data-en="Name *" data-fr="Nom *">{% trans "姓名" %} *</label>
+                                <input type="text" name="customer_name" class="form-control" required
                                        placeholder="{% trans "请输入您的姓名" %}">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label class="form-label">{% trans "邮箱" %} *</label>
+                                <label class="form-label" data-zh="邮箱 *" data-en="Email *" data-fr="Email *">{% trans "邮箱" %} *</label>
                                 <input type="email" name="customer_email" class="form-control" required
                                        placeholder="{% trans "用于接收订单信息" %}">
                             </div>
@@ -490,14 +508,14 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label class="form-label">{% trans "微信/电话号码" %} *</label>
+                                <label class="form-label" data-zh="微信/电话号码 *" data-en="Phone/WeChat *" data-fr="Téléphone/WeChat *">{% trans "微信/电话号码" %} *</label>
                                 <input type="tel" name="customer_phone" class="form-control" required
                                        placeholder="{% trans "微信号或电话号码" %}">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label class="form-label">{% trans "国家" %} *</label>
+                                <label class="form-label" data-zh="国家 *" data-en="Country *" data-fr="Pays *">{% trans "国家" %} *</label>
                                 <select name="country" class="form-control" required>
                                     <option value="">{% trans "请选择国家" %} / Select Country</option>
                                     <optgroup label="West Africa / 西非">
@@ -546,21 +564,29 @@
 
                 <!-- Payment Methods -->
                 <div class="form-section">
-                    <h4 class="mb-3"><i class="fas fa-credit-card"></i> {% trans "支付方式" %}</h4>
+                    <h4 class="mb-3">
+                        <i class="fas fa-credit-card" style="color:var(--ck-primary);"></i>
+                        <span data-zh="支付方式" data-en="Payment Method" data-fr="Mode de paiement">{% trans "支付方式" %}</span>
+                    </h4>
                     <input type="hidden" name="payment_method" id="selectedPaymentMethod" required>
                     <input type="hidden" name="payment_confirmed" id="paymentConfirmed" value="no">
-                    
+
                     <div class="payment-methods" id="paymentMethodsContainer">
-                        <p class="text-muted text-center">{% trans "请先选择国家以显示可用的支付方式" %}</p>
+                        <p class="text-muted text-center" data-zh="请先选择国家以显示可用的支付方式" data-en="Please select a country to see available payment methods" data-fr="Veuillez sélectionner un pays pour voir les modes de paiement">
+                            {% trans "请先选择国家以显示可用的支付方式" %}
+                        </p>
                     </div>
                 </div>
 
                 <!-- Customer Notes -->
                 <div class="form-section">
-                    <h4 class="mb-3"><i class="fas fa-comment"></i> {% trans "备注信息" %}</h4>
+                    <h4 class="mb-3">
+                        <i class="fas fa-comment" style="color:var(--ck-primary);"></i>
+                        <span data-zh="备注信息" data-en="Notes" data-fr="Remarques">{% trans "备注信息" %}</span>
+                    </h4>
                     <div class="form-group">
-                        <label class="form-label">{% trans "订单备注" %}</label>
-                        <textarea name="customer_notes" class="form-control" rows="3" 
+                        <label class="form-label" data-zh="订单备注" data-en="Order notes" data-fr="Notes de commande">{% trans "订单备注" %}</label>
+                        <textarea name="customer_notes" class="form-control" rows="3"
                                   placeholder="{% trans "如有特殊要求，请在此说明（可选）" %}"></textarea>
                     </div>
                 </div>
@@ -569,25 +595,28 @@
             <!-- Right Column - Order Summary -->
             <div class="col-lg-4">
                 <div class="order-summary">
-                    <h4 class="mb-3"><i class="fas fa-receipt"></i> {% trans "订单摘要" %}</h4>
-                    
+                    <h4 class="mb-3">
+                        <i class="fas fa-receipt" style="color:var(--ck-primary);"></i>
+                        <span data-zh="订单摘要" data-en="Order Summary" data-fr="Récapitulatif">{% trans "订单摘要" %}</span>
+                    </h4>
+
                     <!-- Cart Items -->
                     <div class="cart-items mb-3">
                         {% for item in cart_items %}
                         <div class="book-item">
                             <div class="book-cover">
                                 {% if item.image_url %}
-                                    <img src="{{ item.image_url }}" alt="{{ item.name }}" 
+                                    <img src="{{ item.image_url }}" alt="{{ item.name }}"
                                          style="width: 60px; height: 80px; object-fit: cover; border-radius: 5px;">
                                 {% else %}
-                                    <div style="width: 60px; height: 80px; background: #f8f9fa; border-radius: 5px; 
-                                                display: flex; align-items: center; justify-content: center;">
+                                    <div style="width: 60px; height: 80px; background: linear-gradient(135deg, var(--ck-primary), var(--ck-primary-end)); border-radius: 5px;
+                                                display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,.7);">
                                         {% if item.item_type == 'book' %}
-                                            <i class="fas fa-book text-muted"></i>
+                                            <i class="fas fa-book"></i>
                                         {% elif item.item_type == 'course' %}
-                                            <i class="fas fa-graduation-cap text-muted"></i>
+                                            <i class="fas fa-graduation-cap"></i>
                                         {% else %}
-                                            <i class="fas fa-box text-muted"></i>
+                                            <i class="fas fa-box"></i>
                                         {% endif %}
                                     </div>
                                 {% endif %}
@@ -605,44 +634,56 @@
                                 </div>
                                 {% endif %}
                                 <div class="d-flex justify-content-between mt-1">
-                                    <span>¥{{ item.price }} × {{ item.quantity }}</span>
+                                    <span style="color:var(--ck-text-muted);">¥{{ item.price }} &times; {{ item.quantity }}</span>
                                     <strong>¥{{ item.total_price }}</strong>
                                 </div>
                             </div>
                         </div>
                         {% endfor %}
                     </div>
-                    
+
                     <!-- Summary -->
                     <div class="summary-details">
                         <div class="summary-item">
-                            <span>{% trans "商品总计" %}:</span>
+                            <span data-zh="商品总计" data-en="Subtotal" data-fr="Sous-total">{% trans "商品总计" %}:</span>
                             <span>¥{{ total_amount }}</span>
                         </div>
                         <div class="summary-item">
-                            <span>{% trans "运费" %}:</span>
-                            <span class="text-success">{% trans "免费" %}</span>
+                            <span data-zh="运费" data-en="Shipping" data-fr="Livraison">{% trans "运费" %}:</span>
+                            <span class="text-success" data-zh="免费" data-en="Free" data-fr="Gratuit">{% trans "免费" %}</span>
                         </div>
                         <div class="summary-item">
-                            <span>{% trans "订单总额" %}:</span>
+                            <span data-zh="订单总额" data-en="Total" data-fr="Total">{% trans "订单总额" %}:</span>
                             <span class="text-primary">¥{{ total_amount }}</span>
                         </div>
                     </div>
-                    
-                    <!-- Checkout Button -->
+
+                    <!-- Desktop Checkout Button -->
                     <button type="submit" class="btn btn-success btn-checkout mt-3">
-                        <i class="fas fa-lock"></i> {% trans "确认订单并支付" %}
+                        <i class="fas fa-lock"></i>
+                        <span data-zh="确认订单并支付" data-en="Confirm & Pay" data-fr="Confirmer et payer">{% trans "确认订单并支付" %}</span>
                     </button>
-                    
+
                     <!-- Security Notice -->
-                    <div class="text-center mt-3">
-                        <small class="text-muted">
-                            <i class="fas fa-shield-alt"></i> 
-                            {% trans "您的支付信息经过安全加密保护" %}
+                    <div class="text-center mt-3 checkout-security-notice">
+                        <small style="color:var(--ck-text-muted);">
+                            <i class="fas fa-shield-alt"></i>
+                            <span data-zh="您的支付信息经过安全加密保护" data-en="Your payment is secured with encryption" data-fr="Votre paiement est sécurisé">
+                                {% trans "您的支付信息经过安全加密保护" %}
+                            </span>
                         </small>
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Mobile Sticky Pay Bar -->
+        <div class="ck-mobile-pay-bar">
+            <button type="submit" class="ck-pay-btn">
+                <i class="fas fa-lock"></i>
+                <span data-zh="立即付款" data-en="Pay now" data-fr="Payer maintenant">{% trans "立即付款" %}</span>
+                &nbsp;&mdash; ¥<span id="ckPayTotal">{{ total_amount }}</span>
+            </button>
         </div>
     </form>
 </div>
@@ -651,9 +692,9 @@
 
 <script>
 const africanCountries = [
-    'Benin', 'Burkina Faso', 'Cape Verde', 'Côte d\'Ivoire', 'Gambia', 'Ghana', 'Guinea', 
-    'Guinea-Bissau', 'Liberia', 'Mali', 'Mauritania', 'Niger', 'Nigeria', 'Senegal', 
-    'Sierra Leone', 'Togo', 'Angola', 'Cameroon', 'Central African Republic', 'Chad', 
+    'Benin', 'Burkina Faso', 'Cape Verde', 'Côte d\'Ivoire', 'Gambia', 'Ghana', 'Guinea',
+    'Guinea-Bissau', 'Liberia', 'Mali', 'Mauritania', 'Niger', 'Nigeria', 'Senegal',
+    'Sierra Leone', 'Togo', 'Angola', 'Cameroon', 'Central African Republic', 'Chad',
     'Congo', 'Democratic Republic of the Congo', 'Equatorial Guinea', 'Gabon', 'São Tomé and Príncipe'
 ];
 
@@ -662,12 +703,12 @@ const paymentMethodsByRegion = JSON.parse(document.getElementById('payment-metho
 function updatePaymentMethods(country) {
     const container = document.getElementById('paymentMethodsContainer');
     let methods = [];
-    
+
     if (!country) {
         container.innerHTML = '<p class="text-muted text-center">{% trans "请先选择国家以显示可用的支付方式" %}</p>';
         return;
     }
-    
+
     if (africanCountries.includes(country)) {
         methods = paymentMethodsByRegion.africa;
     } else if (country === 'China' || country === 'Hong Kong' || country === 'Taiwan') {
@@ -675,7 +716,7 @@ function updatePaymentMethods(country) {
     } else {
         methods = paymentMethodsByRegion.others;
     }
-    
+
     let html = '<div class="row g-3">';
     methods.forEach(pm => {
         html += `
@@ -692,7 +733,7 @@ function updatePaymentMethods(country) {
         `;
     });
     html += '</div>';
-    
+
     container.innerHTML = html;
     attachPaymentOptionListeners();
 }
@@ -714,13 +755,14 @@ document.querySelector('[name="country"]').addEventListener('change', function()
 
 document.getElementById('checkoutForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    
+
     const paymentMethod = document.getElementById('selectedPaymentMethod').value;
     if (!paymentMethod) {
-        gToast('{% trans "请选择支付方式" %}', 'warning');
+        if (typeof gToast === 'function') gToast('{% trans "请选择支付方式" %}', 'warning');
+        else alert('{% trans "请选择支付方式" %}');
         return false;
     }
-    
+
     if (paymentMethod === 'wechat_pay' || paymentMethod === 'alipay') {
         showQRCodeModal(paymentMethod);
     } else {
@@ -735,7 +777,7 @@ function showQRCodeModal(method) {
     const paymentTitle = document.getElementById('paymentMethodTitle');
     const timerElement = document.getElementById('qrTimer');
     const confirmButtons = document.getElementById('confirmButtons');
-    
+
     if (method === 'wechat_pay') {
         qrImage.src = '{% static "payment_qr/wechat_qr.jpg" %}';
         paymentTitle.textContent = '{% trans "微信支付" %}';
@@ -743,13 +785,14 @@ function showQRCodeModal(method) {
         qrImage.src = '{% static "payment_qr/alipay_qr.jpg" %}';
         paymentTitle.textContent = '{% trans "支付宝" %}';
     }
-    
+
     modal.style.display = 'block';
     confirmButtons.style.display = 'none';
-    
+
     let timeLeft = 60;
     timerElement.textContent = `${timeLeft}秒后显示确认按钮...`;
-    
+    timerElement.style.display = '';
+
     const timer = setInterval(() => {
         timeLeft--;
         if (timeLeft > 0) {
@@ -779,32 +822,32 @@ function closeQRModal() {
 
 <!-- QR Code Payment Modal -->
 <div id="qrCodeModal" style="display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); overflow-y: auto;">
-    <div style="position: relative; margin: 3% auto; padding: 20px; background-color: white; width: 90%; max-width: 550px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+    <div style="position: relative; margin: 3% auto; padding: 20px; background-color: var(--ck-bg, white); width: 90%; max-width: 550px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
         <button onclick="closeQRModal()" style="position: absolute; right: 15px; top: 15px; border: none; background: transparent; font-size: 24px; cursor: pointer; color: #999;">&times;</button>
-        
+
         <div style="text-align: center;">
-            <h3 id="paymentMethodTitle" style="margin-bottom: 15px; color: #333; font-size: 24px;">{% trans "微信支付" %}</h3>
-            
-            <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+            <h3 id="paymentMethodTitle" style="margin-bottom: 15px; color: var(--ck-text, #333); font-size: 24px;">{% trans "微信支付" %}</h3>
+
+            <div style="background: var(--ck-bg-summary, #f8f9fa); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
                 <img id="qrCodeImage" src="" alt="Payment QR Code" style="width: 100%; max-width: 380px; height: auto; border-radius: 10px;">
             </div>
-            
-            <p style="color: #666; margin-bottom: 15px;">
+
+            <p style="color: var(--ck-text-muted, #666); margin-bottom: 15px;">
                 <i class="fas fa-mobile-alt"></i> {% trans "请使用手机扫描二维码完成支付" %}<br>
                 <strong style="color: #e74c3c;">{% trans "金额" %}：¥{{ total_amount }}</strong>
             </p>
-            
-            <div id="qrTimer" style="color: #667eea; font-weight: bold; margin-bottom: 20px;">
+
+            <div id="qrTimer" style="color: var(--ck-primary, #667eea); font-weight: bold; margin-bottom: 20px;">
                 60秒后显示确认按钮...
             </div>
-            
+
             <div id="confirmButtons" style="display: none;">
-                <p style="margin-bottom: 15px; color: #333;">{% trans "请确认您的支付状态" %}：</p>
-                <div style="display: flex; gap: 10px; justify-content: center;">
-                    <button onclick="handleAlreadyPaid()" style="flex: 1; background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                <p style="margin-bottom: 15px; color: var(--ck-text, #333);">{% trans "请确认您的支付状态" %}：</p>
+                <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                    <button onclick="handleAlreadyPaid()" style="flex: 1; min-width: 140px; background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer;">
                         <i class="fas fa-check-circle"></i> {% trans "已完成支付" %}
                     </button>
-                    <button onclick="handleNotPaid()" style="flex: 1; background: linear-gradient(135deg, #dc3545, #c82333); color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                    <button onclick="handleNotPaid()" style="flex: 1; min-width: 140px; background: linear-gradient(135deg, #dc3545, #c82333); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer;">
                         <i class="fas fa-times-circle"></i> {% trans "尚未支付" %}
                     </button>
                 </div>
@@ -812,78 +855,4 @@ function closeQRModal() {
         </div>
     </div>
 </div>
-
-<script>
-// ===== Mobile Checkout JS =====
-function updateAddressDisplay() {
-    var name = (document.getElementById('ckoName')||{}).value || '';
-    var email = (document.getElementById('ckoEmail')||{}).value || '';
-    var display = document.getElementById('ckoAddressDisplay');
-    if (!display) return;
-    if (name || email) {
-        display.textContent = (name ? name + ' · ' : '') + email;
-    }
-}
-function selectPayment(radio) {
-    document.querySelectorAll('.cko-payment-option').forEach(function(el) {
-        el.classList.remove('selected');
-    });
-    if (radio.closest('.cko-payment-option')) {
-        radio.closest('.cko-payment-option').classList.add('selected');
-    }
-}
-function ckoAdjustQty(btn, delta) {
-    var qtyVal = btn.parentElement.querySelector('.cko-qty-val');
-    if (!qtyVal) return;
-    var v = parseInt(qtyVal.textContent) + delta;
-    if (v < 1) v = 1;
-    qtyVal.textContent = v;
-}
-function submitMobileCheckout() {
-    var name = (document.getElementById('ckoName')||{}).value || '';
-    var email = (document.getElementById('ckoEmail')||{}).value || '';
-    var phone = (document.getElementById('ckoPhone')||{}).value || '';
-    var country = (document.getElementById('ckoCountry')||{}).value || '';
-    var payment = (document.querySelector('[name=cko_payment]:checked')||{}).value || '';
-    var notes = (document.getElementById('ckoNotes')||{}).value || '';
-
-    if (!name || !email || !phone || !country) {
-        if (typeof gToast === 'function') gToast('请填写所有必填项', 'error');
-        else alert('请填写所有必填项');
-        return;
-    }
-    if (!payment) {
-        if (typeof gToast === 'function') gToast('请选择支付方式', 'error');
-        else alert('请选择支付方式');
-        return;
-    }
-
-    // Fill the desktop form and submit it
-    var fn = document.querySelector('[name=customer_name]');
-    var fe = document.querySelector('[name=customer_email]');
-    var fp = document.querySelector('[name=customer_phone]');
-    var fc = document.querySelector('[name=country]');
-    var fpm = document.getElementById('selectedPaymentMethod');
-    var fnotes = document.querySelector('[name=customer_notes]');
-    if (fn) fn.value = name;
-    if (fe) fe.value = email;
-    if (fp) fp.value = phone;
-    if (fc) {
-        var opt = fc.querySelector('[value="'+country+'"]');
-        if (!opt) {
-            var newOpt = document.createElement('option');
-            newOpt.value = country; newOpt.textContent = country; fc.appendChild(newOpt);
-        }
-        fc.value = country;
-        fc.dispatchEvent(new Event('change'));
-    }
-    if (fpm) fpm.value = payment;
-    if (fnotes) fnotes.value = notes;
-
-    setTimeout(function() {
-        var form = document.getElementById('checkoutForm');
-        if (form) form.requestSubmit ? form.requestSubmit() : form.submit();
-    }, 350);
-}
-</script>
 {% endblock %}

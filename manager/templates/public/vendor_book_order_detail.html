@@ -1,0 +1,274 @@
+{% extends 'public/vendor_panel_base.html' %}
+{% load i18n %}
+
+{% block panel_title %}{% trans "订单详情" %} #{{ order.order_number }}{% endblock %}
+
+{% block panel_extra_css %}
+<style>
+    .vo-wrap { max-width: 1180px; margin: 0 auto; }
+    .vo-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        padding: 24px 26px;
+        border-radius: 18px;
+        margin-bottom: 22px;
+        box-shadow: 0 14px 40px rgba(102, 126, 234, 0.35);
+    }
+    .vo-hero .vo-meta { opacity: 0.88; font-size: 0.82rem; }
+    .vo-pill {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 8px 14px; border-radius: 999px;
+        background: rgba(255,255,255,0.14); font-weight: 600; font-size: 0.82rem;
+    }
+    .vo-card {
+        background: var(--card-bg, #fff);
+        border-radius: 16px;
+        padding: 22px;
+        margin-bottom: 18px;
+        box-shadow: 0 6px 28px rgba(15, 23, 42, 0.06);
+        border: 1px solid var(--card-border, rgba(15,23,42,0.06));
+    }
+    html[data-theme="dark"] .vo-card { border-color: #334155; }
+    .vo-card h6 {
+        font-weight: 700;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #64748b;
+        margin-bottom: 16px;
+    }
+    .vo-line-item {
+        display: grid;
+        grid-template-columns: 56px 1fr auto auto auto;
+        gap: 14px;
+        align-items: center;
+        padding: 14px 0;
+        border-bottom: 1px solid rgba(15,23,42,0.06);
+    }
+    .vo-line-item:last-child { border-bottom: none; }
+    @media (max-width: 767px) {
+        .vo-line-item {
+            grid-template-columns: 48px 1fr;
+            grid-template-rows: auto auto;
+        }
+        .vo-line-item .vo-li-price,
+        .vo-line-item .vo-li-qty,
+        .vo-line-item .vo-li-sub {
+            grid-column: 2;
+        }
+    }
+    .vo-thumb {
+        width: 56px; height: 72px; border-radius: 10px;
+        object-fit: cover;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+    .vo-status-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+    .vo-status-box {
+        border-radius: 14px;
+        padding: 14px 16px;
+        background: linear-gradient(145deg, rgba(102,126,234,0.08), rgba(118,75,162,0.04));
+        border: 1px solid rgba(102,126,234,0.12);
+    }
+    .vo-status-box .lbl { font-size: 0.72rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+    .vo-status-box .val { margin-top: 6px; font-weight: 700; font-size: 0.95rem; }
+</style>
+{% endblock %}
+
+{% block vendor_panel_content %}
+<div class="vo-wrap">
+    <div class="vo-hero">
+        <div class="d-flex flex-wrap justify-content-between gap-3 align-items-start">
+            <div>
+                <div class="vo-meta mb-2">
+                    <a href="{% url 'manager:vendor_orders_hub' %}" class="text-white text-decoration-none"><i class="fas fa-arrow-left me-1"></i>{% trans "订单中心" %}</a>
+                </div>
+                <h4 class="fw-bold mb-2"><i class="fas fa-receipt me-2"></i>{{ order.order_number }}</h4>
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <span class="vo-pill"><i class="far fa-clock"></i> {{ order.created_at|date:"Y-m-d H:i" }}</span>
+                    <span class="vo-pill"><i class="fas fa-credit-card"></i> {{ order.get_payment_method_display }}</span>
+                </div>
+            </div>
+            <div class="text-end">
+                <div class="display-6 fw-bold lh-1">¥{{ order.total_amount }}</div>
+                <div class="small mt-2 opacity-90">{% trans "您的商品小计" %} · <strong>¥{{ vendor_lines_total }}</strong></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-7">
+            <div class="vo-card">
+                <h6><i class="fas fa-sliders-h me-2 text-primary"></i>{% trans "状态" %}</h6>
+                <div class="vo-status-grid">
+                    <div class="vo-status-box">
+                        <div class="lbl">{% trans "订单状态" %}</div>
+                        <div class="val"><span class="badge bg-{{ order.get_status_color }} rounded-pill px-3">{{ order.get_status_display }}</span></div>
+                    </div>
+                    <div class="vo-status-box">
+                        <div class="lbl">{% trans "支付状态" %}</div>
+                        <div class="val"><span class="badge bg-{{ order.get_payment_status_color }} rounded-pill px-3">{{ order.get_payment_status_display }}</span></div>
+                    </div>
+                </div>
+                {% if can_update_fulfillment %}
+                <p class="small text-muted mb-3">{% trans "更新订单与支付状态（将同步到订单中心）。可选填写内部备注。" %}</p>
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">{% trans "订单状态" %}</label>
+                        <select id="vbHubStatus" class="form-select rounded-3">
+                            {% for val,label in fulfillment_statuses %}
+                            <option value="{{ val }}" {% if order.status == val %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">{% trans "支付状态" %}</label>
+                        <select id="vbHubPay" class="form-select rounded-3">
+                            {% for val,label in payment_status_choices %}
+                            <option value="{{ val }}" {% if order.payment_status == val %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold">{% trans "备注（可选）" %}</label>
+                        <textarea id="vbHubNote" class="form-control rounded-3" rows="2" placeholder="{% trans '内部备注' %}"></textarea>
+                    </div>
+                    <div class="col-12 mt-2">
+                        <button type="button" class="btn text-white fw-semibold rounded-pill px-4" style="background:linear-gradient(135deg,#667eea,#764ba2);" onclick="vbHubSave()">
+                            {% trans "保存状态" %}
+                        </button>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-muted small mb-0"><i class="fas fa-lock me-1"></i>{% trans "订单未支付完成或已关闭时，无法修改状态。" %}</p>
+                {% endif %}
+            </div>
+
+            <div class="vo-card">
+                <h6><i class="fas fa-user me-2 text-primary"></i>{% trans "客户" %}</h6>
+                <p class="fw-bold mb-1">{{ order.customer_name }}</p>
+                <p class="small text-muted mb-1">{{ order.customer_email }}</p>
+                <p class="small mb-0">{{ order.customer_phone }}</p>
+                {% if order.customer_notes %}
+                <div class="alert alert-light border rounded-3 mt-3 mb-0 small"><strong>{% trans "备注" %}:</strong> {{ order.customer_notes }}</div>
+                {% endif %}
+                {% if order.shipping_address %}
+                <div class="mt-3 small"><span class="text-muted">{% trans "收货地址" %}</span><br>{{ order.shipping_address }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            {% if can_edit_customer %}
+            <div class="vo-card">
+                <h6><i class="fas fa-address-card me-2 text-primary"></i>{% trans "编辑客户与收货信息" %}</h6>
+                <p class="small text-muted mb-3">{% trans "用于更正买家联系方式或配送地址（订单未取消 / 未退款时可编辑）。" %}</p>
+                <div class="mb-2">
+                    <label class="form-label small">{% trans "客户姓名" %}</label>
+                    <input type="text" id="vbCustName" class="form-control form-control-sm rounded-3" value="{{ order.customer_name }}">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small">{% trans "邮箱" %}</label>
+                    <input type="email" id="vbCustEmail" class="form-control form-control-sm rounded-3" value="{{ order.customer_email }}">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small">{% trans "电话 / 微信" %}</label>
+                    <input type="text" id="vbCustPhone" class="form-control form-control-sm rounded-3" value="{{ order.customer_phone }}">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small">{% trans "国家 / 地区" %}</label>
+                    <input type="text" id="vbCustCountry" class="form-control form-control-sm rounded-3" value="{{ order.country }}">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small">{% trans "收货地址" %}</label>
+                    <textarea id="vbCustAddr" class="form-control form-control-sm rounded-3" rows="3">{{ order.shipping_address }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small">{% trans "客户备注" %}</label>
+                    <textarea id="vbCustNotes" class="form-control form-control-sm rounded-3" rows="2">{{ order.customer_notes }}</textarea>
+                </div>
+                <button type="button" class="btn btn-outline-primary rounded-pill px-4" onclick="vbSaveCustomer()">{% trans "保存联系信息" %}</button>
+            </div>
+            {% endif %}
+
+            {% if order.admin_notes %}
+            <div class="vo-card">
+                <h6><i class="fas fa-sticky-note me-2 text-primary"></i>{% trans "备注记录" %}</h6>
+                <pre class="small mb-0 text-muted" style="white-space:pre-wrap;">{{ order.admin_notes }}</pre>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="vo-card">
+        <h6><i class="fas fa-book me-2 text-primary"></i>{% trans "您店铺的图书明细" %}</h6>
+        {% for item in order_items %}
+        <div class="vo-line-item">
+            <img class="vo-thumb" src="{{ item.book.get_cover_url }}" alt="">
+            <div>
+                <div class="fw-bold small">{{ item.book.name }}</div>
+                <div class="text-muted small">{% trans "单价" %} ¥{{ item.unit_price }}</div>
+            </div>
+            <div class="vo-li-qty text-muted small">× {{ item.quantity }}</div>
+            <div class="vo-li-sub fw-bold">¥{{ item.total_price }}</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block panel_extra_js %}
+<script>
+function vbSaveCustomer() {
+    var body = new URLSearchParams();
+    body.append('order_id', '{{ order.id }}');
+    body.append('customer_name', document.getElementById('vbCustName').value.trim());
+    body.append('customer_email', document.getElementById('vbCustEmail').value.trim());
+    body.append('customer_phone', document.getElementById('vbCustPhone').value.trim());
+    body.append('country', document.getElementById('vbCustCountry').value.trim());
+    body.append('shipping_address', document.getElementById('vbCustAddr').value.trim());
+    body.append('customer_notes', document.getElementById('vbCustNotes').value.trim());
+    body.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    fetch('{% url "manager:vendor_book_order_update_customer" %}', {
+        method: 'POST',
+        headers: {'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/x-www-form-urlencoded'},
+        body: body.toString()
+    }).then(function(r){ return r.json(); }).then(function(d){
+        if (d.success) {
+            if (typeof gToast === 'function') gToast(d.message || 'OK', 'success');
+            location.reload();
+        } else {
+            if (typeof gToast === 'function') gToast(d.message || 'Error', 'error');
+            else alert(d.message || 'Error');
+        }
+    });
+}
+
+function vbHubSave() {
+    var fd = new URLSearchParams();
+    fd.append('kind', 'book');
+    fd.append('order_id', '{{ order.id }}');
+    fd.append('status', document.getElementById('vbHubStatus').value);
+    fd.append('payment_status', document.getElementById('vbHubPay').value);
+    fd.append('vendor_note', document.getElementById('vbHubNote').value.trim());
+    fd.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    fetch('{% url "manager:vendor_hub_order_update" %}', {
+        method: 'POST',
+        headers: {'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/x-www-form-urlencoded'},
+        body: fd.toString()
+    }).then(function(r){ return r.json(); }).then(function(d){
+        if (d.success) {
+            if (typeof gToast === 'function') gToast(d.message || 'OK', 'success');
+            location.reload();
+        } else {
+            if (typeof gToast === 'function') gToast(d.message || 'Error', 'error');
+            else alert(d.message || 'Error');
+        }
+    }).catch(function(){ alert('Network error'); });
+}
+</script>
+{% endblock %}

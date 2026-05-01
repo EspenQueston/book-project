@@ -1,0 +1,139 @@
+{% load i18n %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'zh-hans' }}" {% if request.COOKIES.theme %}data-theme="{{ request.COOKIES.theme }}"{% endif %}>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block panel_title %}{% trans "卖家中心" %}{% endblock %} · {% trans "DUNO 360" %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    {% block panel_head_extra %}{% endblock %}
+    <style>
+        :root {
+            --vp-primary: #667eea;
+            --vp-secondary: #764ba2;
+            --vp-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        body.vp-body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            overflow-x: hidden;
+        }
+        html[data-theme="dark"] body.vp-body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+        .vp-layout { display: flex; min-height: 100vh; align-items: stretch; }
+        .vp-sidebar-host {
+            width: 260px;
+            flex-shrink: 0;
+        }
+        .vp-main {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .vp-scroll {
+            flex: 1;
+            overflow-x: hidden;
+            overflow-y: auto;
+            padding: 18px 22px 48px;
+        }
+        @media (max-width: 991px) {
+            .vp-sidebar-host { display: none; width: 0; }
+            .vp-scroll { padding: 14px 14px 40px; }
+        }
+        .vp-scroll::-webkit-scrollbar { width: 6px; }
+        .vp-scroll::-webkit-scrollbar-thumb {
+            background: var(--vp-secondary);
+            border-radius: 6px;
+        }
+        /* Shared vendor stat cards (dashboard, orders hub, includes) */
+        .vp-glow-card {
+            border: 1px solid rgba(255,255,255,0.92) !important;
+            box-shadow: 0 14px 36px rgba(79, 70, 229, 0.14), inset 0 1px 0 rgba(255,255,255,0.65) !important;
+        }
+        .vp-stat-label {
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.055em;
+            text-transform: uppercase;
+            color: #475569;
+            margin-bottom: 0.4rem;
+            line-height: 1.25;
+        }
+    </style>
+    {% block panel_extra_css %}{% endblock %}
+</head>
+<body class="vp-body">
+<div class="vp-layout">
+    <div class="vp-sidebar-host" aria-hidden="false">
+        {% include 'public/_vendor_seller_nav.html' %}
+    </div>
+    <div class="vp-main">
+        {% include 'public/_vendor_seller_mobile_nav.html' %}
+        <div class="vp-scroll">
+            {% get_current_language as CURRENT_LANG %}
+            <!-- Same pattern as public base.html: Django session locale + admin_i18n.js client dictionary -->
+            <div class="d-flex justify-content-end mb-3 vp-lang-bar">
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-white bg-white border shadow-sm dropdown-toggle d-flex align-items-center gap-2 rounded-pill px-3 fw-semibold text-dark" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="vpLanguageDropdown">
+                        <i class="fas fa-globe text-primary"></i>
+                        {% if CURRENT_LANG == 'zh-hans' %}中文{% elif CURRENT_LANG == 'en' %}EN{% else %}FR{% endif %}
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 py-2" style="min-width: 188px;">
+                        {% get_available_languages as DJANGO_LANGUAGES %}
+                        {% for lang_code, lang_name in DJANGO_LANGUAGES %}
+                        <li>
+                            <form action="{% url 'set_language' %}" method="post" class="m-0">
+                                {% csrf_token %}
+                                <input type="hidden" name="language" value="{{ lang_code }}">
+                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                <button type="submit" class="dropdown-item d-flex align-items-center gap-2 rounded-2 {% if lang_code == CURRENT_LANG %}active fw-semibold{% endif %}" style="padding: 8px 14px;">
+                                    {% if lang_code == 'zh-hans' %}🇨🇳{% elif lang_code == 'en' %}🇬🇧{% else %}🇫🇷{% endif %}
+                                    {{ lang_name }}
+                                </button>
+                            </form>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show mb-3" role="alert" style="border-radius:12px;">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% block vendor_panel_content %}{% endblock %}
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'js/admin_i18n.js' %}"></script>
+<script>
+(function() {
+    var djangoLang = '{{ LANGUAGE_CODE|default:"zh-hans" }}';
+    var jsLang = djangoLang === 'zh-hans' ? 'zh' : djangoLang;
+    var storedLang = localStorage.getItem('adminLang');
+    if (storedLang && storedLang !== jsLang) {
+        localStorage.setItem('adminLang', jsLang);
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.adminI18n && typeof window.adminI18n.setLang === 'function') {
+            window.adminI18n.setLang(jsLang);
+        }
+        var floatBtn = document.getElementById('adminLangToggle');
+        if (floatBtn) floatBtn.style.display = 'none';
+    });
+})();
+</script>
+{% block panel_extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,56 @@
+{% load i18n %}
+<div class="vendor-mobile-nav d-lg-none">
+    <label class="visually-hidden" for="vendorMobileJump">{% trans "卖家菜单" %}</label>
+    <select id="vendorMobileJump" class="form-select form-select-sm" onchange="if (this.value) { location.href = this.value; }">
+        <option value="">{% trans "— 卖家菜单 —" %}</option>
+        <optgroup label="{% trans '概览' %}">
+            <option value="{% url 'manager:vendor_dashboard' %}">{% trans "概览" %}</option>
+            <option value="{% url 'manager:public_vendor_shop' vendor.id %}">{% trans "店铺前台" %}</option>
+        </optgroup>
+        <optgroup label="{% trans '订单' %}">
+            <option value="{% url 'manager:vendor_orders_hub' %}">{% trans "订单中心" %}</option>
+        </optgroup>
+        <optgroup label="{% trans '图书' %}">
+            <option value="{% url 'manager:vendor_books' %}">{% trans "图书管理" %}</option>
+            <option value="{% url 'manager:vendor_add_book' %}">{% trans "上架图书" %}</option>
+        </optgroup>
+        <optgroup label="{% trans '商品' %}">
+            <option value="{% url 'marketplace:vendor_products' %}">{% trans "商品列表" %}</option>
+            <option value="{% url 'marketplace:vendor_product_add' %}">{% trans "添加商品" %}</option>
+        </optgroup>
+        <optgroup label="{% trans '课程' %}">
+            <option value="{% url 'marketplace:vendor_courses' %}">{% trans "课程列表" %}</option>
+            <option value="{% url 'marketplace:vendor_course_add' %}">{% trans "添加课程" %}</option>
+        </optgroup>
+        <optgroup label="{% trans '超市' %}">
+            <option value="{% url 'marketplace:vendor_supermarket' %}">{% trans "超市商品" %}</option>
+            <option value="{% url 'marketplace:vendor_supermarket_add' %}">{% trans "添加超市商品" %}</option>
+        </optgroup>
+        <optgroup label="{% trans '客户' %}">
+            <option value="{% url 'manager:vendor_messages' %}">{% trans "客户消息" %}</option>
+            <option value="{% url 'marketplace:home' %}">{% trans "浏览市场" %}</option>
+        </optgroup>
+        <optgroup label="{% trans '账户' %}">
+            <option value="{% url 'manager:vendor_logout' %}">{% trans "退出登录" %}</option>
+        </optgroup>
+    </select>
+</div>
+<style>
+.vendor-mobile-nav {
+    display: none;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.96);
+    border-bottom: 1px solid rgba(102,126,234,0.15);
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+}
+html[data-theme="dark"] .vendor-mobile-nav {
+    background: rgba(30,41,59,0.96);
+    border-bottom-color: #334155;
+}
+@media (max-width: 991px) {
+    .vendor-mobile-nav { display: block; }
+}
+.vendor-mobile-nav select { border-radius: 12px !important; font-weight: 600; }
+</style>
