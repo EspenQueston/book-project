@@ -68,9 +68,19 @@ INSTALLED_APPS = [
     # 新加入的程序模块放这里
 ]
 
+# --- WhiteNoise (serve static files via gunicorn in production) ---
+# Injected here so it runs even if whitenoise is absent in dev
+try:
+    import whitenoise  # noqa: F401
+    _whitenoise_available = True
+except ImportError:
+    _whitenoise_available = False
+
 # 中间件
+_whitenoise_middleware = ['whitenoise.middleware.WhiteNoiseMiddleware'] if _whitenoise_available else []
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+] + _whitenoise_middleware + [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -109,21 +119,42 @@ WSGI_APPLICATION = 'book_Project.wsgi.application'
 
 
 # Database configuration for PostgreSQL
-# Uses environment variables for production security
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME', 'db_book'),
-        'USER': os.environ.get('DB_USER', 'bookuser'),
-        'PASSWORD': _required_env('DB_PASSWORD'),
-        'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
-        'PORT': os.environ.get('DB_PORT', '5432'),
-        'OPTIONS': {
-            'client_encoding': 'UTF8',
+# Supports DATABASE_URL (Supabase/Render) or individual DB_* vars
+_database_url = os.environ.get('DATABASE_URL', '')
+if _database_url:
+    import re as _re
+    _m = _re.match(
+        r'postgresql://(?P<user>[^:]+):(?P<password>[^@]+)@(?P<host>[^:/]+):?(?P<port>\d*)/(?P<name>.+)',
+        _database_url,
+    )
+    if _m:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': _m.group('name'),
+                'USER': _m.group('user'),
+                'PASSWORD': _m.group('password'),
+                'HOST': _m.group('host'),
+                'PORT': _m.group('port') or '5432',
+                'OPTIONS': {'client_encoding': 'UTF8', 'sslmode': 'require'},
+                'CONN_MAX_AGE': 60,
+            }
+        }
+    else:
+        raise EnvironmentError(f'Invalid DATABASE_URL format: {_database_url}')
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('DB_NAME', 'db_book'),
+            'USER': os.environ.get('DB_USER', 'bookuser'),
+            'PASSWORD': _required_env('DB_PASSWORD'),
+            'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
+            'PORT': os.environ.get('DB_PORT', '5432'),
+            'OPTIONS': {'client_encoding': 'UTF8'},
+            'CONN_MAX_AGE': 60,
         },
-        'CONN_MAX_AGE': 60,  # keep connections alive for 60 s
-    },
-}
+    }
 
 # No database router needed - single unified database
 
@@ -185,6 +216,13 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # For collectstatic
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ] if os.path.exists(os.path.join(BASE_DIR, 'static')) else []
+
+# WhiteNoise compressed static files storage
+if _whitenoise_available:
+    STORAGES = {
+        'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+        'staticfiles': {'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage'},
+    }
 
 # Media files configuration for file uploads (图片上传配置)
 MEDIA_URL = '/media/'

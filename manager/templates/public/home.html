@@ -1002,110 +1002,143 @@
     /* ===== Best Deals Auto-Sliding Carousel ===== */
     .bd-carousel-section {
         background: #fff;
-        padding: 14px 0 8px;
-        margin-bottom: 6px;
+        padding: 14px 0 10px;
+        margin-bottom: 8px;
     }
     html[data-theme="dark"] .bd-carousel-section { background: #1e293b; }
     .bd-carousel-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        gap: 10px;
         padding: 0 0 10px;
     }
+    .bd-title-wrap { display: flex; flex-direction: column; min-width: 0; }
     .bd-carousel-header .bd-title {
         font-size: 15px;
-        font-weight: 800;
-        color: #333;
+        font-weight: 900;
+        color: #111827;
+        line-height: 1.15;
     }
-    html[data-theme="dark"] .bd-carousel-header .bd-title { color: #e2e8f0; }
+    .bd-subtitle {
+        font-size: 11px;
+        color: #64748b;
+        font-weight: 600;
+        margin-top: 3px;
+    }
+    html[data-theme="dark"] .bd-carousel-header .bd-title { color: #f8fafc; }
+    html[data-theme="dark"] .bd-subtitle { color: #94a3b8; }
     .bd-carousel-header a {
         font-size: 12px;
-        color: #667eea;
+        color: #6366f1;
         text-decoration: none;
-        font-weight: 600;
+        font-weight: 700;
+        white-space: nowrap;
     }
     .bd-carousel-wrapper {
         position: relative;
         overflow: hidden;
+        border-radius: 16px;
+        mask-image: linear-gradient(to right, transparent 0, black 14px, black calc(100% - 14px), transparent 100%);
     }
     .bd-carousel-track {
         display: flex;
-        gap: 10px;
-        transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        gap: 12px;
         will-change: transform;
     }
     .bd-carousel-slide {
-        flex: 0 0 calc(100% / 2.5 - 8px);
+        flex: 0 0 min(190px, 56vw);
         min-width: 0;
-        background: #fff;
-        border-radius: 12px;
-        border: 1px solid #f0f0f0;
+        border-radius: 14px;
         overflow: hidden;
         text-decoration: none;
         color: inherit;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-        transition: transform 0.2s;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        background: linear-gradient(180deg, #ffffff, #f8fafc);
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
     }
-    html[data-theme="dark"] .bd-carousel-slide { background: #0f172a; border-color: #334155; }
-    .bd-carousel-slide:hover { transform: translateY(-2px); }
-    .bd-carousel-slide img {
+    .bd-carousel-slide:hover { transform: translateY(-3px); box-shadow: 0 14px 28px rgba(15, 23, 42, 0.14); }
+    html[data-theme="dark"] .bd-carousel-slide {
+        background: linear-gradient(180deg, #0f172a, #111827);
+        border-color: #334155;
+        box-shadow: 0 8px 20px rgba(2,6,23,0.5);
+    }
+    .bd-media {
+        position: relative;
         width: 100%;
-        height: 100px;
+        height: 112px;
+        background: radial-gradient(circle at top, rgba(99,102,241,.16), rgba(99,102,241,0) 60%), #f3f4f6;
+    }
+    .bd-media img {
+        width: 100%;
+        height: 100%;
         object-fit: cover;
         background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
     }
-    .bd-carousel-body { padding: 8px 10px; }
+    .bd-tag-pill {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        font-size: 9px;
+        font-weight: 900;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        border-radius: 999px;
+        padding: 3px 8px;
+    }
+    .bd-tag-pill.bd-carousel-tag-hot { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #b45309; }
+    .bd-tag-pill.bd-carousel-tag-deal { background: linear-gradient(135deg, #fecaca, #fca5a5); color: #991b1b; }
+    .bd-tag-pill.bd-carousel-tag-new { background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: #1d4ed8; }
+    html[data-theme="dark"] .bd-tag-pill.bd-carousel-tag-hot { background: rgba(245,158,11,0.2); color: #fcd34d; }
+    html[data-theme="dark"] .bd-tag-pill.bd-carousel-tag-deal { background: rgba(239,68,68,0.2); color: #fca5a5; }
+    html[data-theme="dark"] .bd-tag-pill.bd-carousel-tag-new { background: rgba(59,130,246,0.2); color: #93c5fd; }
+    .bd-carousel-body { padding: 9px 10px 10px; }
     .bd-carousel-name {
         font-size: 12px;
-        font-weight: 600;
-        color: #333;
+        font-weight: 700;
+        color: #111827;
         line-height: 1.3;
-        white-space: nowrap;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
         overflow: hidden;
-        text-overflow: ellipsis;
+        min-height: 30px;
     }
     html[data-theme="dark"] .bd-carousel-name { color: #e2e8f0; }
-    .bd-carousel-price { font-size: 15px; font-weight: 800; color: #E4393C; margin-top: 3px; }
+    .bd-carousel-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 7px;
+        gap: 6px;
+    }
+    .bd-carousel-price { font-size: 16px; font-weight: 900; color: #E11D48; line-height: 1; }
     .bd-carousel-type {
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
         font-size: 10px;
-        font-weight: 700;
-        padding: 2px 7px;
-        border-radius: 6px;
-        margin-top: 4px;
-    }
-    .bd-carousel-tag {
-        display: inline-block;
-        font-size: 9px;
         font-weight: 800;
-        padding: 2px 6px;
-        border-radius: 4px;
-        margin-left: 4px;
-        text-transform: uppercase;
-        letter-spacing: 0.02em;
+        padding: 3px 8px;
+        border-radius: 999px;
     }
-    .bd-carousel-tag-hot { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #b45309; }
-    .bd-carousel-tag-deal { background: linear-gradient(135deg, #fecaca, #fca5a5); color: #991b1b; }
-    .bd-carousel-tag-new { background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: #1d4ed8; }
-    html[data-theme="dark"] .bd-carousel-tag-hot { background: rgba(245,158,11,0.2); color: #fcd34d; }
-    html[data-theme="dark"] .bd-carousel-tag-deal { background: rgba(239,68,68,0.2); color: #fca5a5; }
-    html[data-theme="dark"] .bd-carousel-tag-new { background: rgba(59,130,246,0.2); color: #93c5fd; }
     @media (min-width: 769px) {
         .bd-carousel-mobile-only { display: none !important; }
     }
     @media (max-width: 768px) {
         .bd-carousel-mobile-only .bd-carousel-track.bd-marquee-rtl {
-            animation: bd-marquee-rtl 42s linear infinite;
-            transition: none !important;
+            animation-name: bd-marquee-rtl;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+            animation-play-state: running;
         }
-        .bd-carousel-mobile-only .bd-carousel-wrapper:focus-within .bd-carousel-track.bd-marquee-rtl,
-        .bd-carousel-mobile-only .bd-carousel-wrapper:active .bd-carousel-track.bd-marquee-rtl {
+        .bd-carousel-mobile-only .bd-carousel-wrapper.bd-paused .bd-carousel-track.bd-marquee-rtl {
             animation-play-state: paused;
         }
     }
     @keyframes bd-marquee-rtl {
         from { transform: translateX(0); }
-        to { transform: translateX(-50%); }
+        to { transform: translateX(var(--bd-loop-shift, -50%)); }
     }
     @media (prefers-reduced-motion: reduce) {
         .bd-carousel-mobile-only .bd-carousel-track.bd-marquee-rtl {
@@ -1115,8 +1148,8 @@
     }
     @media (min-width: 769px) {
         .bd-carousel-section { padding: 24px 0 16px; margin-bottom: 0; }
-        .bd-carousel-slide { flex: 0 0 calc(100% / 5 - 8px); }
-        .bd-carousel-slide img { height: 140px; }
+        .bd-carousel-slide { flex: 0 0 calc(100% / 5 - 10px); }
+        .bd-media { height: 142px; }
     }
     .feed-title { font-size: 1rem; font-weight: 800; color: #1a1a2e; margin-bottom: 12px; }
     html[data-theme="dark"] .feed-title { color: #e2e8f0; }
@@ -1299,32 +1332,39 @@
 <section class="bd-carousel-section bd-carousel-mobile-only" id="bdCarousel">
     <div class="container">
         <div class="bd-carousel-header">
-            <span class="bd-title" data-zh="🔥 最优惠" data-en="🔥 Best Deals" data-fr="🔥 Meilleures Offres">🔥 Meilleures Offres</span>
+            <div class="bd-title-wrap">
+                <span class="bd-title" data-zh="🔥 最优惠" data-en="🔥 Best Deals" data-fr="🔥 Meilleures Offres">🔥 Meilleures Offres</span>
+                <span class="bd-subtitle" data-zh="热销 · 低价 · 新品自动轮播" data-en="Top sellers · Best prices · New arrivals" data-fr="Top ventes · Meilleurs prix · Nouveautés">Top ventes · Meilleurs prix · Nouveautés</span>
+            </div>
             <a href="{% url 'manager:public_books' %}" data-zh="查看全部 >" data-en="See all >" data-fr="Voir tout >">查看全部 &gt;</a>
         </div>
         <div class="bd-carousel-wrapper" id="bdCarouselWrapper">
             <div class="bd-carousel-track" id="bdCarouselTrack">
                 {% for deal in best_deals %}
                 <a href="{{ deal.detail_url }}" class="bd-carousel-slide">
-                    <img src="{{ deal.image_url }}" alt="{{ deal.name }}" loading="lazy" onerror="this.src='/static/img/default_cover.png'">
-                    <div class="bd-carousel-body">
-                        <div class="bd-carousel-name">{{ deal.name|truncatechars:20 }}</div>
-                        <div class="bd-carousel-price">&yen;{{ deal.price }}</div>
-                        <span class="bd-carousel-type"
-                              style="{% if deal.item_type == 'book' %}background:#ede9fe;color:#7c3aed;{% elif deal.item_type == 'product' %}background:#fef3c7;color:#d97706;{% elif deal.item_type == 'course' %}background:#e0e7ff;color:#3730a3;{% else %}background:#d1fae5;color:#065f46;{% endif %}"
-                              data-zh="{% if deal.item_type == 'book' %}图书{% elif deal.item_type == 'product' %}商品{% elif deal.item_type == 'course' %}课程{% else %}超市{% endif %}"
-                              data-en="{% if deal.item_type == 'book' %}Book{% elif deal.item_type == 'product' %}Product{% elif deal.item_type == 'course' %}Course{% else %}Grocery{% endif %}"
-                              data-fr="{% if deal.item_type == 'book' %}Livre{% elif deal.item_type == 'product' %}Produit{% elif deal.item_type == 'course' %}Cours{% else %}Épicerie{% endif %}">
-                            {% if deal.item_type == 'book' %}图书{% elif deal.item_type == 'product' %}商品{% elif deal.item_type == 'course' %}课程{% else %}超市{% endif %}
-                        </span>
+                    <div class="bd-media">
+                        <img src="{{ deal.image_url }}" alt="{{ deal.name }}" loading="lazy" onerror="this.src='/static/img/default_cover.png'">
                         {% if deal.tag %}
-                        <span class="bd-carousel-tag bd-carousel-tag-{{ deal.tag }}"
+                        <span class="bd-tag-pill bd-carousel-tag-{{ deal.tag }}"
                               data-zh="{% if deal.tag == 'hot' %}热销{% elif deal.tag == 'deal' %}特价{% else %}新品{% endif %}"
                               data-en="{% if deal.tag == 'hot' %}Hot{% elif deal.tag == 'deal' %}Deal{% else %}New{% endif %}"
                               data-fr="{% if deal.tag == 'hot' %}Top{% elif deal.tag == 'deal' %}Promo{% else %}Neuf{% endif %}">
                             {% if deal.tag == 'hot' %}Hot{% elif deal.tag == 'deal' %}Deal{% else %}New{% endif %}
                         </span>
                         {% endif %}
+                    </div>
+                    <div class="bd-carousel-body">
+                        <div class="bd-carousel-name">{{ deal.name|truncatechars:28 }}</div>
+                        <div class="bd-carousel-meta">
+                            <div class="bd-carousel-price">&yen;{{ deal.price }}</div>
+                            <span class="bd-carousel-type"
+                                  style="{% if deal.item_type == 'book' %}background:#ede9fe;color:#7c3aed;{% elif deal.item_type == 'product' %}background:#fef3c7;color:#d97706;{% elif deal.item_type == 'course' %}background:#e0e7ff;color:#3730a3;{% else %}background:#d1fae5;color:#065f46;{% endif %}"
+                                  data-zh="{% if deal.item_type == 'book' %}图书{% elif deal.item_type == 'product' %}商品{% elif deal.item_type == 'course' %}课程{% else %}超市{% endif %}"
+                                  data-en="{% if deal.item_type == 'book' %}Book{% elif deal.item_type == 'product' %}Product{% elif deal.item_type == 'course' %}Course{% else %}Grocery{% endif %}"
+                                  data-fr="{% if deal.item_type == 'book' %}Livre{% elif deal.item_type == 'product' %}Produit{% elif deal.item_type == 'course' %}Cours{% else %}Épicerie{% endif %}">
+                                {% if deal.item_type == 'book' %}图书{% elif deal.item_type == 'product' %}商品{% elif deal.item_type == 'course' %}课程{% else %}超市{% endif %}
+                            </span>
+                        </div>
                     </div>
                 </a>
                 {% endfor %}
@@ -2144,37 +2184,67 @@ function getCsrfToken() {
 
 // ===== Best Deals — mobile-only continuous marquee (right → left) =====
 (function() {
-    function isMobileBd() {
-        return window.matchMedia('(max-width: 768px)').matches;
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function isMobileBd() { return window.matchMedia('(max-width: 768px)').matches; }
+
+    function setPaused(wrapper, paused) {
+        if (!wrapper) return;
+        wrapper.classList.toggle('bd-paused', !!paused);
     }
+
     function setupBdMarquee() {
         var section = document.getElementById('bdCarousel');
+        var wrapper = document.getElementById('bdCarouselWrapper');
         var track = document.getElementById('bdCarouselTrack');
-        if (!section || !track) return;
+        if (!section || !wrapper || !track) return;
 
         track.classList.remove('bd-marquee-rtl');
-        track.style.animation = 'none';
+        track.style.animationDuration = '';
+        wrapper.classList.remove('bd-paused');
 
-        if (!isMobileBd()) {
+        if (!isMobileBd() || reduceMotion) {
             track.style.transform = '';
             return;
         }
-        if (track.children.length < 1) return;
+        if (track.children.length < 2) return;
 
-        if (track.dataset.bdDup !== '1') {
-            var nodes = Array.from(track.children);
-            nodes.forEach(function(n) {
-                track.appendChild(n.cloneNode(true));
-            });
-            track.dataset.bdDup = '1';
+        // Keep a base count to compute speed independently from duplicated nodes.
+        if (!track.dataset.bdBaseCount) {
+            track.dataset.bdBaseCount = String(track.children.length);
         }
+        var baseCount = Math.max(1, parseInt(track.dataset.bdBaseCount, 10) || 1);
+
+        // Duplicate to 3 sets so one loop can traverse 2 "pages" seamlessly.
+        if (track.dataset.bdDup !== '2') {
+            var baseNodes = Array.from(track.children);
+            baseNodes.forEach(function(node) {
+                track.appendChild(node.cloneNode(true));
+            });
+            baseNodes.forEach(function(node) {
+                track.appendChild(node.cloneNode(true));
+            });
+            track.dataset.bdDup = '2';
+        }
+
+        // Faster and more attractive: complete two pages per cycle.
+        track.style.setProperty('--bd-loop-shift', '-66.6667%');
+        // Slightly faster while keeping smooth readability.
+        var seconds = Math.min(20, Math.max(7, Math.round(baseCount * 0.72)));
+        track.style.animationDuration = seconds + 's';
         track.classList.add('bd-marquee-rtl');
+
+        if (!wrapper.dataset.bdEventsBound) {
+            wrapper.addEventListener('mouseenter', function() { setPaused(wrapper, true); });
+            wrapper.addEventListener('mouseleave', function() { setPaused(wrapper, false); });
+            wrapper.addEventListener('touchstart', function() { setPaused(wrapper, true); }, { passive: true });
+            wrapper.addEventListener('touchend', function() { setPaused(wrapper, false); }, { passive: true });
+            wrapper.addEventListener('touchcancel', function() { setPaused(wrapper, false); }, { passive: true });
+            wrapper.dataset.bdEventsBound = '1';
+        }
     }
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', setupBdMarquee);
-    } else {
-        setupBdMarquee();
-    }
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setupBdMarquee);
+    else setupBdMarquee();
     window.addEventListener('resize', setupBdMarquee, { passive: true });
 })();
 </script>

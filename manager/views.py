@@ -492,11 +492,25 @@ def delete_author(request):
 
 
 def _build_best_deals_feed(max_items=24):
-    """Mobile Best Deals rail: interleave bestsellers (hot), low price (deal), and new arrivals (new) across types."""
+    """Build a balanced mobile rail: best sellers, best prices, and newest items."""
+    cache_key = f'home:best_deals:v2:{max_items}'
+    cached = cache.get(cache_key)
+    if cached:
+        return cached
+
     buckets = {'hot': [], 'deal': [], 'new': []}
     seen = set()
 
-    def push(item_type, pk, name, price, image_url, detail_url, tag):
+    def _latest_order(qs):
+        for field in ('created_at', 'created', 'published_at', 'id'):
+            try:
+                qs.model._meta.get_field(field)
+                return qs.order_by(f'-{field}')
+            except Exception:
+                continue
+        return qs.order_by('-pk')
+
+    def push(item_type, pk, name, price, image_url, detail_url, tag, rank_score=0):
         key = (item_type, pk)
         if key in seen:
             return
@@ -510,43 +524,50 @@ def _build_best_deals_feed(max_items=24):
             'image_url': image_url or '/static/img/default_cover.png',
             'detail_url': detail_url,
             'tag': tag,
+            'rank_score': int(rank_score or 0),
         })
 
     try:
         from marketplace.models import Product, Course, SupermarketItem
-        for b in models.Book.objects.filter(is_active=True).order_by('-sale_num')[:8]:
-            push('book', b.id, b.name, b.price, b.get_cover_url(), f'/manager/public/books/{b.id}/', 'hot')
-        for b in models.Book.objects.filter(is_active=True, price__gt=0).order_by('price')[:8]:
+
+        # HOT: most sold / most enrolled.
+        for b in models.Book.objects.filter(is_active=True).order_by('-sale_num')[:14]:
+            push('book', b.id, b.name, b.price, b.get_cover_url(), f'/manager/public/books/{b.id}/', 'hot', b.sale_num)
+        for p in Product.objects.filter(is_active=True).order_by('-sales_count')[:14]:
+            push('product', p.id, p.name, p.price, p.get_image_url(), f'/marketplace/products/{p.slug}/', 'hot', p.sales_count)
+        for c in Course.objects.filter(is_active=True).order_by('-enrollment_count')[:14]:
+            push('course', c.id, c.title, c.price, c.get_image_url(), f'/marketplace/courses/{c.slug}/', 'hot', c.enrollment_count)
+        for si in SupermarketItem.objects.filter(is_active=True).order_by('-sales_count')[:14]:
+            push('supermarket', si.id, si.name, si.price, si.get_image_url(), f'/marketplace/supermarket/{si.slug}/', 'hot', si.sales_count)
+
+        # DEAL: lowest prices, but keep only active purchasable items.
+        for b in models.Book.objects.filter(is_active=True, price__gt=0).order_by('price')[:14]:
             push('book', b.id, b.name, b.price, b.get_cover_url(), f'/manager/public/books/{b.id}/', 'deal')
-        for b in models.Book.objects.filter(is_active=True).order_by('-id')[:8]:
-            push('book', b.id, b.name, b.price, b.get_cover_url(), f'/manager/public/books/{b.id}/', 'new')
-
-        for p in Product.objects.filter(is_active=True).order_by('-sales_count')[:8]:
-            push('product', p.id, p.name, p.price, p.get_image_url(), f'/marketplace/products/{p.slug}/', 'hot')
-        for p in Product.objects.filter(is_active=True, price__gt=0).order_by('price')[:8]:
+        for p in Product.objects.filter(is_active=True, price__gt=0).order_by('price')[:14]:
             push('product', p.id, p.name, p.price, p.get_image_url(), f'/marketplace/products/{p.slug}/', 'deal')
-        for p in Product.objects.filter(is_active=True).order_by('-id')[:6]:
-            push('product', p.id, p.name, p.price, p.get_image_url(), f'/marketplace/products/{p.slug}/', 'new')
-
-        for c in Course.objects.filter(is_active=True).order_by('-enrollment_count')[:8]:
-            push('course', c.id, c.title, c.price, c.get_image_url(), f'/marketplace/courses/{c.slug}/', 'hot')
-        for c in Course.objects.filter(is_active=True, price__gt=0).order_by('price')[:6]:
+        for c in Course.objects.filter(is_active=True, price__gt=0).order_by('price')[:14]:
             push('course', c.id, c.title, c.price, c.get_image_url(), f'/marketplace/courses/{c.slug}/', 'deal')
-        for c in Course.objects.filter(is_active=True).order_by('-id')[:8]:
-            push('course', c.id, c.title, c.price, c.get_image_url(), f'/marketplace/courses/{c.slug}/', 'new')
-
-        for si in SupermarketItem.objects.filter(is_active=True).order_by('-sales_count')[:6]:
-            push('supermarket', si.id, si.name, si.price, si.get_image_url(), f'/marketplace/supermarket/{si.slug}/', 'hot')
-        for si in SupermarketItem.objects.filter(is_active=True, price__gt=0).order_by('price')[:6]:
+        for si in SupermarketItem.objects.filter(is_active=True, price__gt=0).order_by('price')[:14]:
             push('supermarket', si.id, si.name, si.price, si.get_image_url(), f'/marketplace/supermarket/{si.slug}/', 'deal')
-        for si in SupermarketItem.objects.filter(is_active=True).order_by('-id')[:6]:
+
+        # NEW: recent inventory additions.
+        for b in _latest_order(models.Book.objects.filter(is_active=True))[:14]:
+            push('book', b.id, b.name, b.price, b.get_cover_url(), f'/manager/public/books/{b.id}/', 'new')
+        for p in _latest_order(Product.objects.filter(is_active=True))[:14]:
+            push('product', p.id, p.name, p.price, p.get_image_url(), f'/marketplace/products/{p.slug}/', 'new')
+        for c in _latest_order(Course.objects.filter(is_active=True))[:14]:
+            push('course', c.id, c.title, c.price, c.get_image_url(), f'/marketplace/courses/{c.slug}/', 'new')
+        for si in _latest_order(SupermarketItem.objects.filter(is_active=True))[:14]:
             push('supermarket', si.id, si.name, si.price, si.get_image_url(), f'/marketplace/supermarket/{si.slug}/', 'new')
     except Exception:
         pass
 
+    # Keep each bucket internally sorted (hot by score desc, deal/new keep query order).
+    buckets['hot'].sort(key=lambda x: x.get('rank_score', 0), reverse=True)
+
     merged = []
     ptr = {'hot': 0, 'deal': 0, 'new': 0}
-    order = ('hot', 'deal', 'new')
+    order = ('hot', 'deal', 'new', 'hot', 'new', 'deal')
     while len(merged) < max_items:
         progressed = False
         for tag in order:
@@ -560,6 +581,8 @@ def _build_best_deals_feed(max_items=24):
                     break
         if not progressed:
             break
+
+    cache.set(cache_key, merged, 300)
     return merged
 
 
@@ -2152,45 +2175,107 @@ def api_home_feed(request):
     offset = (page - 1) * PER_PAGE
 
     items = []
+    feed_type = feed_type if feed_type in ('mixed', 'books', 'products', 'courses', 'supermarket') else 'mixed'
+
+    def _slice_wrap(qs, count, limit):
+        if not count or limit <= 0:
+            return []
+        safe_offset = offset % count
+        rows = list(qs[safe_offset:safe_offset + limit])
+        if len(rows) < limit:
+            rows += list(qs[:limit - len(rows)])
+        return rows
+
+    sources = []
     # Books
-    book_limit = PER_PAGE if feed_type == 'books' else PER_PAGE // 2
-    book_count = models.Book.objects.filter(is_active=True).count()
-    book_offset = offset % book_count if book_count else 0
     books_qs = models.Book.objects.filter(is_active=True).select_related('publisher').order_by('-sale_num')
-    books = list(books_qs[book_offset:book_offset + book_limit])
-    if book_count and len(books) < book_limit:
-        books += list(books_qs[:book_limit - len(books)])
-    for b in books:
-        items.append({
+    sources.append({
+        'type': 'book',
+        'label': '图书',
+        'qs': books_qs,
+        'count': books_qs.count(),
+        'to_item': lambda b: {
             'type': 'book',
             'type_label': '图书',
             'name': b.name[:30],
             'price': str(b.price),
             'image': b.get_cover_url(),
             'url': f'/manager/public/books/{b.id}/',
-        })
+        }
+    })
 
-    if feed_type != 'books':
-        try:
-            from marketplace.models import Product
-            product_limit = PER_PAGE // 2
-            product_qs = Product.objects.filter(is_active=True).order_by('-sales_count')
-            product_count = product_qs.count()
-            product_offset = offset % product_count if product_count else 0
-            products = list(product_qs[product_offset:product_offset + product_limit])
-            if product_count and len(products) < product_limit:
-                products += list(product_qs[:product_limit - len(products)])
-            for p in products:
-                items.append({
+    try:
+        from marketplace.models import Product, Course, SupermarketItem
+        p_qs = Product.objects.filter(is_active=True).order_by('-sales_count')
+        c_qs = Course.objects.filter(is_active=True).order_by('-enrollment_count')
+        s_qs = SupermarketItem.objects.filter(is_active=True).order_by('-sales_count')
+        sources += [
+            {
+                'type': 'product',
+                'label': '商品',
+                'qs': p_qs,
+                'count': p_qs.count(),
+                'to_item': lambda p: {
                     'type': 'product',
                     'type_label': '商品',
                     'name': p.name[:30],
                     'price': str(p.price),
                     'image': p.get_image_url(),
                     'url': f'/marketplace/products/{p.slug}/',
-                })
-        except Exception:
-            pass
+                }
+            },
+            {
+                'type': 'course',
+                'label': '课程',
+                'qs': c_qs,
+                'count': c_qs.count(),
+                'to_item': lambda c: {
+                    'type': 'course',
+                    'type_label': '课程',
+                    'name': c.title[:30],
+                    'price': str(c.price),
+                    'image': c.get_image_url(),
+                    'url': f'/marketplace/courses/{c.slug}/',
+                }
+            },
+            {
+                'type': 'supermarket',
+                'label': '超市',
+                'qs': s_qs,
+                'count': s_qs.count(),
+                'to_item': lambda s: {
+                    'type': 'supermarket',
+                    'type_label': '超市',
+                    'name': s.name[:30],
+                    'price': str(s.price),
+                    'image': s.get_image_url(),
+                    'url': f'/marketplace/supermarket/{s.slug}/',
+                }
+            },
+        ]
+    except Exception:
+        pass
+
+    if feed_type == 'mixed':
+        active_sources = [s for s in sources if s['count'] > 0]
+        if active_sources:
+            each = max(1, PER_PAGE // len(active_sources))
+            for src in active_sources:
+                for row in _slice_wrap(src['qs'], src['count'], each):
+                    items.append(src['to_item'](row))
+            # Fill remainder from the largest source.
+            remainder = PER_PAGE - len(items)
+            if remainder > 0:
+                largest = max(active_sources, key=lambda s: s['count'])
+                for row in _slice_wrap(largest['qs'], largest['count'], remainder):
+                    items.append(largest['to_item'](row))
+    else:
+        src = next((s for s in sources if s['type'] == feed_type.rstrip('s')), None)
+        if src is None:
+            src = next((s for s in sources if s['type'] == feed_type), None)
+        if src:
+            for row in _slice_wrap(src['qs'], src['count'], PER_PAGE):
+                items.append(src['to_item'](row))
 
     return JsonResponse({'items': items, 'page': page, 'has_more': len(items) > 0})
 
