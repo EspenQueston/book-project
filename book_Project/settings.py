@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from urllib.parse import urlparse, unquote, parse_qs
 from django.utils.translation import gettext_lazy as _
 
 # Build paths inside the project
@@ -120,28 +121,38 @@ WSGI_APPLICATION = 'book_Project.wsgi.application'
 
 # Database configuration for PostgreSQL
 # Supports DATABASE_URL (Supabase/Render) or individual DB_* vars
-_database_url = os.environ.get('DATABASE_URL', '')
+_database_url = os.environ.get('DATABASE_URL', '').strip()
 if _database_url:
-    import re as _re
-    _m = _re.match(
-        r'postgresql://(?P<user>[^:]+):(?P<password>[^@]+)@(?P<host>[^:/]+):?(?P<port>\d*)/(?P<name>.+)',
-        _database_url,
+    _parsed = urlparse(_database_url)
+    if _parsed.scheme not in ('postgresql', 'postgres'):
+        raise EnvironmentError(f'Unsupported DATABASE_URL scheme: {_parsed.scheme}')
+    if not _parsed.hostname or not _parsed.path:
+        raise EnvironmentError('Invalid DATABASE_URL: missing host or database name')
+
+    _db_name = _parsed.path.lstrip('/')
+    _query = parse_qs(_parsed.query)
+    _sslmode = (
+        os.environ.get('DATABASE_SSLMODE')
+        or (_query.get('sslmode', [None])[0])
+        or ('require' if 'supabase.co' in (_parsed.hostname or '') else None)
     )
-    if _m:
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.postgresql',
-                'NAME': _m.group('name'),
-                'USER': _m.group('user'),
-                'PASSWORD': _m.group('password'),
-                'HOST': _m.group('host'),
-                'PORT': _m.group('port') or '5432',
-                'OPTIONS': {'client_encoding': 'UTF8', 'sslmode': 'require'},
-                'CONN_MAX_AGE': 60,
-            }
+    _db_options = {'client_encoding': 'UTF8'}
+    if _sslmode:
+        _db_options['sslmode'] = _sslmode
+
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': unquote(_db_name),
+            'USER': unquote(_parsed.username or ''),
+            'PASSWORD': unquote(_parsed.password or ''),
+            'HOST': _parsed.hostname,
+            'PORT': str(_parsed.port or '5432'),
+            'OPTIONS': _db_options,
+            'CONN_MAX_AGE': int(os.environ.get('DB_CONN_MAX_AGE', '120')),
+            'CONN_HEALTH_CHECKS': True,
         }
-    else:
-        raise EnvironmentError(f'Invalid DATABASE_URL format: {_database_url}')
+    }
 else:
     DATABASES = {
         'default': {
@@ -152,7 +163,8 @@ else:
             'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
             'PORT': os.environ.get('DB_PORT', '5432'),
             'OPTIONS': {'client_encoding': 'UTF8'},
-            'CONN_MAX_AGE': 60,
+            'CONN_MAX_AGE': int(os.environ.get('DB_CONN_MAX_AGE', '120')),
+            'CONN_HEALTH_CHECKS': True,
         },
     }
 
@@ -270,12 +282,17 @@ if not DEBUG:
     
     # Additional security
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+    SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin'
+    USE_X_FORWARDED_HOST = True
 
 # Session security — expire sessions after 1 hour of inactivity and on browser close
 SESSION_COOKIE_AGE = 3600          # 1 hour (seconds)
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_HTTPONLY = True     # JS cannot read the session cookie
 SESSION_SAVE_EVERY_REQUEST = True  # Slide the expiry window on each request
+SESSION_COOKIE_SAMESITE = os.environ.get('SESSION_COOKIE_SAMESITE', 'Lax')
+CSRF_COOKIE_SAMESITE = os.environ.get('CSRF_COOKIE_SAMESITE', 'Lax')
 
 # Rosetta translation UI — restrict access to admin sessions only
 ROSETTA_REQUIRES_AUTH = True
@@ -317,6 +334,7 @@ NGROK_AUTH_TOKEN = os.environ.get('NGROK_AUTH_TOKEN', '')
 NGROK_ENABLED = os.environ.get('NGROK_ENABLED', 'False') == 'True'
 
 # Logging configuration for payment callbacks
+os.makedirs(os.path.join(BASE_DIR, 'logs'), exist_ok=True)
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

@@ -81,6 +81,35 @@ python manage.py seed_book_categories
 
 - Main branch: `main`
 - This repository is configured for cPanel-style deployment assets (`.cpanel.yml`, `passenger_wsgi.py`)
+- DigitalOcean production bootstrap script: `deploy/setup_digitalocean.sh`
+- Production env template: `deploy/production.env.example`
+
+## Production (DigitalOcean + Supabase)
+
+1. Provision an Ubuntu VPS and point your domain A-record to the server IP.
+2. Clone this repository to `/opt/duno360/app`.
+3. Run:
+
+```bash
+sudo bash deploy/setup_digitalocean.sh
+```
+
+4. Fill `/opt/duno360/.env` (from `deploy/production.env.example`) with **real secret values**.
+5. Restart services:
+
+```bash
+sudo systemctl restart duno360
+sudo systemctl restart nginx
+```
+
+6. Enable HTTPS (recommended: Certbot), then keep `DEBUG=False`.
+
+### Supabase database notes
+
+- Use `DATABASE_URL` with `sslmode=require`.
+- URL-encode passwords if they contain special characters.
+- Keep database passwords and admin credentials out of git.
+- Never expose service-role or private keys in frontend code.
 
 ## Maintenance Checklist
 
