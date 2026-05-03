@@ -267,18 +267,21 @@ CONTACT_EMAIL = 'espen@profitexb2b.com'
 
 # Security settings for production
 if not DEBUG:
+    _force_https = os.environ.get('FORCE_HTTPS', 'True') == 'True'
+
     # SSL/HTTPS Settings
-    SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = _force_https
+    SESSION_COOKIE_SECURE = _force_https
+    CSRF_COOKIE_SECURE = _force_https
     
     # Security Headers
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = 'DENY'
-    SECURE_HSTS_SECONDS = 31536000  # 1 year
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
+    if _force_https:
+        SECURE_HSTS_SECONDS = 31536000  # 1 year
+        SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+        SECURE_HSTS_PRELOAD = True
     
     # Additional security
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
