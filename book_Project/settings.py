@@ -231,9 +231,16 @@ STATICFILES_DIRS = [
 
 # WhiteNoise compressed static files storage
 if _whitenoise_available:
+    _use_manifest_storage = os.environ.get('STATICFILES_USE_MANIFEST', 'True') == 'True'
     STORAGES = {
         'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
-        'staticfiles': {'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage'},
+        'staticfiles': {
+            'BACKEND': (
+                'whitenoise.storage.CompressedManifestStaticFilesStorage'
+                if _use_manifest_storage
+                else 'whitenoise.storage.CompressedStaticFilesStorage'
+            )
+        },
     }
 
 # Media files configuration for file uploads (图片上传配置)
