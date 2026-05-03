@@ -86,6 +86,23 @@
     .pmp-action-btn { flex: 1; height: 40px; border-radius: 20px; font-weight: 700; color: #fff; border: none; margin-left: 8px; }
     .pmp-cart { background: linear-gradient(135deg, #f59e0b, #f97316); }
     .pmp-buy { background: linear-gradient(135deg, #ef4444, #ec4899); }
+    @media (max-width: 768px) {
+        .product-mobile-page {
+            background:
+                radial-gradient(circle at top right, rgba(79,172,254,0.16), transparent 34%),
+                #f0f9ff;
+        }
+        .product-mobile-page > div:not(.pmp-bottom-bar):not(.pmp-gallery) {
+            border-radius: 14px;
+            margin: 8px 8px 0;
+            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+            border: 1px solid rgba(56, 189, 248, 0.18);
+        }
+        .pmp-bottom-bar {
+            box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.12);
+            border-top: 1px solid rgba(56, 189, 248, 0.2);
+        }
+    }
 </style>
 {% endblock %}
 
@@ -100,7 +117,14 @@
         <div class="pmp-price">¥{{ item.price }}</div>
         <h1 class="pmp-title">{{ item.name }}</h1>
         <div class="pmp-seller-row">
-            <span><i class="fas fa-store me-1"></i>DUNO 360</span>
+            <span>
+                <i class="fas fa-store me-1"></i>
+                {% if item.vendor %}
+                <a href="{% url 'manager:start_conversation' %}?vendor_id={{ item.vendor.id }}&subject={{ item.name|urlencode }}" style="text-decoration:none;color:inherit;font-weight:700;">{{ item.vendor.company_name }}</a>
+                {% else %}
+                DUNO 360
+                {% endif %}
+            </span>
             <span>{% trans "Support admin" %}</span>
         </div>
     </div>

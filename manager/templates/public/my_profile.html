@@ -66,6 +66,34 @@
 .mypro-action-btn i { font-size: 20px; }
 .mypro-action-btn:active { transform: scale(.97); }
 
+/* Wishlist list */
+.mypro-wishlist-section { background: #fff; margin: 0 0 8px; }
+.mypro-wishlist-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 14px 8px; font-size: 13px; font-weight: 700; color: #333;
+}
+.mypro-wishlist-header .count {
+    font-size: 11px; font-weight: 700; color: #667eea; background: #eef2ff;
+    border-radius: 10px; padding: 2px 8px;
+}
+.mypro-wishlist-list { padding: 0 12px 12px; display: grid; gap: 8px; }
+.mypro-wishlist-item {
+    display: flex; gap: 10px; align-items: center; background: #fafbff; border: 1px solid #eef2ff;
+    border-radius: 12px; text-decoration: none; color: #222; padding: 8px;
+}
+.mypro-wishlist-thumb {
+    width: 56px; height: 56px; border-radius: 10px; object-fit: cover; background: #f0f2f8;
+    display: flex; align-items: center; justify-content: center; color: #8b93b3; flex-shrink: 0;
+}
+.mypro-wishlist-main { min-width: 0; flex: 1; }
+.mypro-wishlist-name { font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mypro-wishlist-meta { margin-top: 3px; display: flex; align-items: center; gap: 6px; }
+.mypro-wishlist-tag {
+    font-size: 9px; font-weight: 700; color: #fff; background: linear-gradient(135deg,#667eea,#764ba2);
+    border-radius: 8px; padding: 1px 6px;
+}
+.mypro-wishlist-price { font-size: 12px; font-weight: 800; color: #E4393C; }
+
 /* Followed shops */
 .mypro-shops-section { background: #fff; margin: 0 0 8px; }
 .mypro-shops-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px 8px; font-size: 13px; font-weight: 700; color: #333; }
@@ -209,7 +237,7 @@
 
 <!-- Quick actions -->
 <div class="mypro-actions">
-    <a href="{% url 'manager:user_profile' %}#wishlist" class="mypro-action-btn" style="color:#E4393C;">
+    <a href="{% url 'manager:public_wishlist' %}" class="mypro-action-btn" style="color:#E4393C;">
         <i class="fas fa-heart"></i>
         <span data-zh="我的收藏" data-en="Wishlist" data-fr="Favoris">我的收藏</span>
     </a>

@@ -25,7 +25,11 @@ echo "[2/8] Preparing app directories..."
 id -u "${APP_USER}" >/dev/null 2>&1 || useradd --system --create-home --shell /usr/sbin/nologin "${APP_USER}"
 mkdir -p /opt/duno360
 mkdir -p "${APP_DIR}"
+mkdir -p /var/log/duno360
+touch /var/log/duno360/gunicorn-access.log /var/log/duno360/gunicorn-error.log
 chown -R "${APP_USER}:${APP_GROUP}" /opt/duno360
+chown -R "${APP_USER}:${APP_GROUP}" /var/log/duno360
+chmod -R 775 /var/log/duno360
 
 if [[ ! -f "${APP_DIR}/manage.py" ]]; then
   echo "Clone your repository into ${APP_DIR} before continuing."
@@ -61,8 +65,9 @@ After=network.target
 User=${APP_USER}
 Group=${APP_GROUP}
 WorkingDirectory=${APP_DIR}
+Environment=HOME=/opt/duno360
 EnvironmentFile=${ENV_FILE}
-ExecStart=${APP_DIR}/.venv/bin/gunicorn book_Project.wsgi:application --bind 127.0.0.1:8000 --workers 3 --timeout 120
+ExecStart=${APP_DIR}/.venv/bin/gunicorn book_Project.wsgi:application --bind 127.0.0.1:8000 --workers 3 --timeout 120 --access-logfile /var/log/duno360/gunicorn-access.log --error-logfile /var/log/duno360/gunicorn-error.log
 Restart=always
 RestartSec=5
 KillSignal=SIGQUIT
@@ -70,7 +75,7 @@ PrivateTmp=true
 ProtectSystem=full
 ProtectHome=true
 NoNewPrivileges=true
-ReadWritePaths=${APP_DIR} /opt/duno360 /tmp
+ReadWritePaths=${APP_DIR} /opt/duno360 /tmp /var/log/duno360
 
 [Install]
 WantedBy=multi-user.target

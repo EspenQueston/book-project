@@ -80,6 +80,30 @@
         color: #94a3b8;
     }
     .empty-state i { font-size: 4rem; margin-bottom: 20px; opacity: 0.3; }
+
+    @media (max-width: 768px) {
+        .page-header { padding: 28px 0 22px; }
+        .page-header h1 { font-size: 1.45rem; }
+        .filter-bar {
+            margin-top: -14px;
+            border-radius: 14px;
+            padding: 12px;
+            position: sticky;
+            top: 62px;
+            z-index: 50;
+        }
+        .filter-bar .form-label { font-size: 11px; margin-bottom: 3px; }
+        .filter-bar .form-control,
+        .filter-bar .form-select { font-size: 12px; min-height: 36px; }
+        .btn-filter { min-height: 36px; padding: 6px 12px; font-size: 12px; }
+        .product-card { border-radius: 12px; }
+        .product-card-img { height: 150px; }
+        .product-card-body { padding: 10px; }
+        .product-card-body h5 { font-size: 0.84rem; }
+        .product-price { font-size: 1.06rem; }
+        #productsGrid > div { margin-bottom: 0; }
+        .pagination { display: none !important; }
+    }
 </style>
 {% endblock %}
 
@@ -126,7 +150,7 @@
 
     <!-- Product Grid -->
     {% if products %}
-    <div class="row g-4">
+    <div class="row g-3" id="productsGrid">
         {% for product in products %}
         <div class="col-sm-6 col-md-4 col-lg-3" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:0 }}0">
             <a href="{% url 'marketplace:product_detail' product.slug %}" style="text-decoration:none; color:inherit;">
@@ -168,6 +192,11 @@
         {% endfor %}
     </div>
 
+    <div id="productsFeedLoader" class="text-center py-3 small text-muted" style="display:none;">
+        <i class="fas fa-spinner fa-spin"></i> {% trans "加载中..." %}
+    </div>
+    <div id="productsFeedSentinel" style="height:1px;"></div>
+
     <!-- Pagination -->
     {% if products.has_other_pages %}
     <nav class="mt-5">
@@ -196,4 +225,79 @@
     </div>
     {% endif %}
 </div>
+<script>
+(function() {
+    if (window.innerWidth > 768) return;
+    var grid = document.getElementById('productsGrid');
+    var loader = document.getElementById('productsFeedLoader');
+    var sentinel = document.getElementById('productsFeedSentinel');
+    if (!grid || !sentinel) return;
+
+    var page = {{ products.number|default:1 }} + 1;
+    var hasMore = {{ products.has_next|yesno:"true,false" }};
+    var loading = false;
+
+    function escHtml(str) {
+        var d = document.createElement('div');
+        d.textContent = str || '';
+        return d.innerHTML;
+    }
+
+    function buildCard(item) {
+        return '<div class="col-6">'
+            + '<a href="' + item.url + '" style="text-decoration:none; color:inherit;">'
+            + '<div class="product-card">'
+            + '<div style="position:relative;"><img src="' + item.image + '" alt="' + escHtml(item.name) + '" class="product-card-img"></div>'
+            + '<div class="product-card-body">'
+            + '<h5>' + escHtml(item.name) + '</h5>'
+            + '<div class="d-flex align-items-center justify-content-between mt-2"><span class="product-price">¥' + item.price + '</span>'
+            + '<span class="badge ' + (item.stock_text === '有货' ? 'bg-success' : 'bg-secondary') + ' stock-badge">' + item.stock_text + '</span></div>'
+            + '</div></div></a></div>';
+    }
+
+    function loadMore() {
+        if (!hasMore || loading) return;
+        loading = true;
+        if (loader) loader.style.display = 'block';
+        var params = new URLSearchParams(window.location.search);
+        params.set('format', 'json');
+        params.set('page', page);
+        fetch(window.location.pathname + '?' + params.toString())
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var items = data.items || [];
+                if (!items.length) {
+                    if (page > 1) {
+                        page = 1;
+                        hasMore = true;
+                    } else {
+                        hasMore = false;
+                    }
+                    loading = false;
+                    if (loader) loader.style.display = 'none';
+                    return;
+                }
+                items.forEach(function(item) {
+                    var tmp = document.createElement('div');
+                    tmp.innerHTML = buildCard(item);
+                    grid.appendChild(tmp.firstElementChild);
+                });
+                hasMore = !!data.has_more;
+                page = hasMore ? page + 1 : 1;
+                if (!hasMore) hasMore = true;
+                loading = false;
+                if (loader) loader.style.display = 'none';
+            })
+            .catch(function() {
+                loading = false;
+                if (loader) loader.style.display = 'none';
+            });
+    }
+
+    var observer = new IntersectionObserver(function(entries) {
+        if (entries[0].isIntersecting) loadMore();
+    }, { rootMargin: '180px' });
+    observer.observe(sentinel);
+})();
+</script>
 {% endblock %}

@@ -587,65 +587,63 @@ def _build_best_deals_feed(max_items=24):
 
 
 def public_home(request):
-    """Public homepage with platform statistics and featured content"""
-    book_count = models.Book.objects.filter(is_active=True).count()
-    author_count = models.Author.objects.count()
-    publisher_count = models.Publisher.objects.count()
-    
-    # Marketplace stats & featured content
-    featured_products = []
-    featured_courses = []
-    flash_sales = []
-    flash_sale_end = None
-    try:
-        from marketplace.models import Product, Course, SupermarketItem, FlashSale
-        from django.utils import timezone as tz
-        product_count = Product.objects.filter(is_active=True).count()
-        course_count = Course.objects.filter(is_active=True).count()
-        vendor_count = models.Vendor.objects.filter(is_active=True).count()
-        featured_products = list(Product.objects.filter(is_active=True).select_related('category').order_by('-sales_count')[:6])
-        featured_courses = list(Course.objects.filter(is_active=True).order_by('-enrollment_count')[:6])
-        now = tz.now()
-        flash_sales = list(FlashSale.objects.filter(
-            is_active=True, start_time__lte=now, end_time__gte=now
-        ).select_related('product', 'course', 'supermarket_item').order_by('end_time')[:10])
-        if flash_sales:
-            flash_sale_end = flash_sales[0].end_time
-    except Exception:
-        product_count = 0
-        course_count = 0
-        vendor_count = 0
-    
-    # Get featured books (top 6 by sales)
-    featured_books = models.Book.objects.filter(is_active=True).select_related('publisher', 'category').order_by('-sale_num')[:6]
-    
-    # Recent books (last 8 added)
-    recent_books = models.Book.objects.filter(is_active=True).select_related('publisher', 'category').order_by('-id')[:8]
-    book_categories = models.BookCategory.objects.filter(is_active=True, parent__isnull=True)[:12]
-    
-    # Latest blog posts
-    latest_blogs = models.BlogPost.objects.filter(status='published').order_by('-created_at')[:3]
+    """Public homepage with platform statistics and featured content."""
+    cache_key = 'public_home:ctx:v3'
+    ctx = cache.get(cache_key)
+    if ctx is None:
+        book_count = models.Book.objects.filter(is_active=True).count()
+        author_count = models.Author.objects.count()
+        publisher_count = models.Publisher.objects.count()
 
-    best_deals = _build_best_deals_feed(24)
+        featured_products = []
+        featured_courses = []
+        flash_sales = []
+        flash_sale_end = None
+        try:
+            from marketplace.models import Product, Course, SupermarketItem, FlashSale
+            from django.utils import timezone as tz
+            product_count = Product.objects.filter(is_active=True).count()
+            course_count = Course.objects.filter(is_active=True).count()
+            vendor_count = models.Vendor.objects.filter(is_active=True).count()
+            featured_products = list(Product.objects.filter(is_active=True).select_related('category').order_by('-sales_count')[:6])
+            featured_courses = list(Course.objects.filter(is_active=True).order_by('-enrollment_count')[:6])
+            now = tz.now()
+            flash_sales = list(FlashSale.objects.filter(
+                is_active=True, start_time__lte=now, end_time__gte=now
+            ).select_related('product', 'course', 'supermarket_item').order_by('end_time')[:10])
+            if flash_sales:
+                flash_sale_end = flash_sales[0].end_time
+        except Exception:
+            product_count = 0
+            course_count = 0
+            vendor_count = 0
 
-    context = {
-        'book_count': book_count,
-        'author_count': author_count,
-        'publisher_count': publisher_count,
-        'product_count': product_count,
-        'course_count': course_count,
-        'vendor_count': vendor_count,
-        'featured_books': featured_books,
-        'featured_products': featured_products,
-        'featured_courses': featured_courses,
-        'recent_books': recent_books,
-        'book_categories': book_categories,
-        'flash_sales': flash_sales,
-        'flash_sale_end': flash_sale_end,
-        'latest_blogs': latest_blogs,
-        'best_deals': best_deals,
-    }
-    return render(request, 'public/home.html', context)
+        featured_books = list(models.Book.objects.filter(is_active=True).select_related('publisher', 'category').order_by('-sale_num')[:6])
+        recent_books = list(models.Book.objects.filter(is_active=True).select_related('publisher', 'category').order_by('-id')[:8])
+        book_categories = list(models.BookCategory.objects.filter(is_active=True, parent__isnull=True)[:12])
+        latest_blogs = list(models.BlogPost.objects.filter(status='published').order_by('-created_at')[:3])
+        best_deals = _build_best_deals_feed(24)
+
+        ctx = {
+            'book_count': book_count,
+            'author_count': author_count,
+            'publisher_count': publisher_count,
+            'product_count': product_count,
+            'course_count': course_count,
+            'vendor_count': vendor_count,
+            'featured_books': featured_books,
+            'featured_products': featured_products,
+            'featured_courses': featured_courses,
+            'recent_books': recent_books,
+            'book_categories': book_categories,
+            'flash_sales': flash_sales,
+            'flash_sale_end': flash_sale_end,
+            'latest_blogs': latest_blogs,
+            'best_deals': best_deals,
+        }
+        cache.set(cache_key, ctx, 600)
+
+    return render(request, 'public/home.html', ctx)
 
 
 @ensure_csrf_cookie
@@ -719,7 +717,8 @@ def start_conversation(request):
             subject = subject or (item.title if item else '')
         elif item_type == 'supermarket':
             from marketplace.models import SupermarketItem
-            item = SupermarketItem.objects.filter(pk=item_id).first()
+            item = SupermarketItem.objects.select_related('vendor').filter(pk=item_id).first()
+            vendor = item.vendor if item else None
             subject = subject or (item.name if item else '')
     except Exception:
         vendor = None
@@ -740,6 +739,62 @@ def start_conversation(request):
     return redirect(f"{request.build_absolute_uri('/manager/public/messages/')}?conversation={conversation.id}")
 
 
+def _conversation_ref_item_payload(conversation):
+    """Build a normalized product preview payload for chat UIs."""
+    if not conversation or not conversation.ref_item_type or not conversation.ref_item_id:
+        return None
+    item_type = conversation.ref_item_type
+    item_id = conversation.ref_item_id
+    try:
+        if item_type == 'book':
+            book = models.Book.objects.filter(pk=item_id, is_active=True).first()
+            if not book:
+                return None
+            return {
+                'type': 'book',
+                'name': book.name,
+                'price': str(book.price),
+                'image': book.get_cover_url(),
+                'url': f'/manager/public/books/{book.id}/',
+            }
+        if item_type == 'product':
+            item = Product.objects.filter(pk=item_id, is_active=True).first()
+            if not item:
+                return None
+            return {
+                'type': 'product',
+                'name': item.name,
+                'price': str(item.price),
+                'image': item.get_image_url(),
+                'url': f'/marketplace/products/{item.slug}/',
+            }
+        if item_type == 'course':
+            item = Course.objects.filter(pk=item_id, is_active=True).first()
+            if not item:
+                return None
+            return {
+                'type': 'course',
+                'name': item.title,
+                'price': str(item.price),
+                'image': item.get_image_url(),
+                'url': f'/marketplace/courses/{item.slug}/',
+            }
+        if item_type == 'supermarket':
+            item = SupermarketItem.objects.filter(pk=item_id, is_active=True).first()
+            if not item:
+                return None
+            return {
+                'type': 'supermarket',
+                'name': item.name,
+                'price': str(item.price),
+                'image': item.get_image_url(),
+                'url': f'/marketplace/supermarket/{item.slug}/',
+            }
+    except Exception:
+        return None
+    return None
+
+
 def public_send_message(request):
     """AJAX: send a support or direct message from the messages page."""
     from django.http import JsonResponse
@@ -754,13 +809,24 @@ def public_send_message(request):
         if not user_id:
             return JsonResponse({'success': False, 'message': '请先登录'}, status=401)
         conversation = get_object_or_404(models.Conversation, pk=conversation_id, buyer_id=user_id)
+        sender_name = request.session.get('site_user_name', '')
         models.DirectMessage.objects.create(
             conversation=conversation,
             sender_type='buyer',
-            sender_name=request.session.get('site_user_name', ''),
+            sender_name=sender_name,
             content=message_text
         )
         conversation.save(update_fields=['updated_at'])
+        if conversation.vendor_id:
+            create_vendor_notification(
+                conversation.vendor_id, 'new_message',
+                f'New message from {sender_name or "Customer"}',
+                message_text[:100],
+                icon='fas fa-comment-dots',
+                color='#3b82f6',
+                link=f'/manager/vendor/messages/?conversation={conversation.id}',
+                related_id=conversation.id,
+            )
         return JsonResponse({'success': True, 'message': '消息已发送'})
     try:
         user = models.SiteUser.objects.get(pk=user_id) if user_id else None
@@ -809,6 +875,7 @@ def api_conversations(request):
             'last_date': last_msg.created_at.strftime('%Y-%m-%d') if last_msg else '',
             'unread': unread,
             'is_closed': c.is_closed,
+            'ref_item': _conversation_ref_item_payload(c),
         })
     return JsonResponse({'conversations': result})
 
@@ -841,6 +908,7 @@ def api_conversation_messages(request, conversation_id):
             'subject': convo.subject,
             'type': convo.conversation_type,
             'is_closed': convo.is_closed,
+            'ref_item': _conversation_ref_item_payload(convo),
         }
     })
 
@@ -905,6 +973,43 @@ def api_vendor_conversation_messages(request, conversation_id):
     })
 
 
+def vendor_create_conversation(request):
+    """Vendor starts a new conversation with a buyer by email."""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Invalid method'})
+    vendor_id = request.session.get('vendor_id')
+    if not vendor_id:
+        return JsonResponse({'success': False, 'message': 'Not logged in'}, status=401)
+    vendor = get_object_or_404(models.Vendor, pk=vendor_id)
+    buyer_email = request.POST.get('buyer_email', '').strip()
+    subject = request.POST.get('subject', '').strip() or 'Message from vendor'
+    message_text = request.POST.get('message', '').strip()
+    if not buyer_email or not message_text:
+        return JsonResponse({'success': False, 'message': 'Email and message are required'})
+    buyer = models.SiteUser.objects.filter(email__iexact=buyer_email).first()
+    if not buyer:
+        return JsonResponse({'success': False, 'message': f'No customer found with email: {buyer_email}'})
+    convo, created = models.Conversation.objects.get_or_create(
+        buyer=buyer,
+        vendor=vendor,
+        defaults={
+            'conversation_type': 'buyer_seller',
+            'subject': subject,
+        }
+    )
+    if not created and subject:
+        convo.subject = subject
+        convo.save(update_fields=['subject', 'updated_at'])
+    models.DirectMessage.objects.create(
+        conversation=convo,
+        sender_type='vendor',
+        sender_name=vendor.company_name,
+        content=message_text,
+    )
+    convo.save(update_fields=['updated_at'])
+    return JsonResponse({'success': True, 'conversation_id': convo.id})
+
+
 def vendor_send_message(request):
     """Vendor sends a message in a conversation."""
     if request.method != 'POST':
@@ -956,6 +1061,36 @@ def vendor_messages_page(request):
     return render(request, 'public/vendor_messages.html', {'vendor': vendor})
 
 
+def _build_user_wishlist_items(user):
+    """Return normalized wishlist entries for profile/wishlist pages."""
+    wishlist_entries = models.Wishlist.objects.filter(user=user).select_related('book').order_by('-created_at')
+    wishlist_items = []
+    for wish in wishlist_entries:
+        item = wish.get_item()
+        item_type = wish.item_type
+        item_url = '#'
+        if item_type == 'book' and wish.book_id:
+            item_url = f'/manager/public/books/{wish.book_id}/'
+        elif item and getattr(item, 'slug', None):
+            if item_type == 'product':
+                item_url = f'/marketplace/products/{item.slug}/'
+            elif item_type == 'course':
+                item_url = f'/marketplace/courses/{item.slug}/'
+            elif item_type == 'supermarket':
+                item_url = f'/marketplace/supermarket/{item.slug}/'
+        wishlist_items.append({
+            'type': item_type,
+            'type_label': wish.get_item_type_display(),
+            'item_id': wish.book_id if item_type == 'book' else wish.item_id,
+            'name': wish.get_item_name(),
+            'price': wish.get_item_price(),
+            'image_url': wish.get_item_image_url(),
+            'url': item_url,
+            'created_at': wish.created_at,
+        })
+    return wishlist_items
+
+
 def public_my_profile(request):
     """PWA 'My' tab — shows login prompt if not logged in, else full profile."""
     from django.db.models import Sum, Count
@@ -980,11 +1115,12 @@ def public_my_profile(request):
     followed_shops = models.UserFollowedShop.objects.filter(user=user).select_related('publisher')[:20]
     followed_vendors = models.UserFollowedVendor.objects.filter(user=user).select_related('vendor')[:20]
 
-    # Wishlist books for feed
+    # Wishlist: include books + marketplace items for the "Me" page.
     from django.db.models import Q
     wishlist_books = models.Book.objects.filter(
         wishlist__user=user
     ).select_related('publisher')[:20]
+    wishlist_items = _build_user_wishlist_items(user)
 
     # Auto-follow admin vendor (first vendor or create placeholder)
     admin_vendor = models.Vendor.objects.filter(is_active=True).order_by('id').first()
@@ -1024,12 +1160,29 @@ def public_my_profile(request):
         'followed_vendors': followed_vendors,
         'following_count': len(followed_shops) + len(followed_vendors),
         'wishlist_books': wishlist_books,
+        'wishlist_items': wishlist_items,
+        'wishlist_count': len(wishlist_items),
         'feed_books': feed_books,
         'feed_items': feed_items,
         'all_publishers': all_publishers,
         'all_vendors': all_vendors,
     }
     return render(request, 'public/my_profile.html', context)
+
+
+@ensure_csrf_cookie
+def public_wishlist(request):
+    """Dedicated wishlist page for mobile/desktop."""
+    user_id = request.session.get('site_user_id')
+    if not user_id:
+        return redirect('manager:user_login')
+    user = get_object_or_404(models.SiteUser, pk=user_id)
+    wishlist_items = _build_user_wishlist_items(user)
+    return render(request, 'public/wishlist.html', {
+        'site_user': user,
+        'wishlist_items': wishlist_items,
+        'wishlist_count': len(wishlist_items),
+    })
 
 
 def follow_publisher(request, publisher_id):
@@ -1128,7 +1281,28 @@ def public_books(request):
     page_obj = paginator.get_page(page_number)
     categories = models.BookCategory.objects.filter(is_active=True, parent__isnull=True)
 
-    if request.GET.get('format') == 'json':
+    response_format = request.GET.get('format')
+
+    if response_format == 'suggest':
+        suggest_q = request.GET.get('q', search_query).strip()
+        suggestions = []
+        if suggest_q:
+            suggest_books = models.Book.objects.filter(
+                is_active=True,
+                name__icontains=suggest_q
+            ).order_by('-sale_num')[:8]
+            for sbook in suggest_books:
+                suggestions.append({
+                    'id': sbook.id,
+                    'name': sbook.name,
+                    'price': str(sbook.price),
+                    'image': sbook.get_cover_url(),
+                    'url': f'/manager/public/books/{sbook.id}/',
+                    'publisher': sbook.publisher.publisher_name if sbook.publisher else '',
+                })
+        return JsonResponse({'results': suggestions, 'query': suggest_q})
+
+    if response_format == 'json':
         data_books = []
         for book in page_obj:
             data_books.append({
@@ -1350,7 +1524,7 @@ def _build_unified_cart(session_key):
                 'name': ci.get_item_name(),
                 'price': ci.get_item_price(),
                 'quantity': ci.quantity,
-                'image_url': ci.get_item_image_url(),
+                'image_url': ci.get_item_image_url() or '/static/img/default_product.png',
                 'total_price': ci.get_total_price(),
                 'publisher': getattr(item, 'brand', '') or '',
                 'inventory': getattr(item, 'stock', 999),
@@ -1873,21 +2047,38 @@ def track_order(request):
     mkt_orders = None
     has_downloadable_books = False
 
+    status_filter = (request.GET.get('status') or '').strip().lower()
     user_id = request.session.get('site_user_id')
+    site_user = None
+    all_orders = None
+    all_mkt_orders = None
     if user_id and request.method == 'GET' and not request.GET.get('order_number'):
         try:
             site_user = models.SiteUser.objects.get(pk=user_id)
-            orders = models.Order.objects.filter(
+            all_orders = models.Order.objects.filter(
                 customer_email=site_user.email
             ).order_by('-created_at')
+            orders = all_orders
             try:
-                mkt_orders = MarketplaceOrder.objects.filter(
+                all_mkt_orders = MarketplaceOrder.objects.filter(
                     user_email=site_user.email
                 ).order_by('-created_at')
-                if not mkt_orders.exists():
+                mkt_orders = all_mkt_orders
+                if not all_mkt_orders.exists():
                     mkt_orders = None
             except Exception:
                 mkt_orders = None
+                all_mkt_orders = None
+
+            if status_filter:
+                if status_filter == 'pending':
+                    pending_codes = ['pending', 'payment_pending']
+                    orders = all_orders.filter(status__in=pending_codes)
+                    mkt_orders = all_mkt_orders.filter(status__in=pending_codes) if all_mkt_orders is not None else None
+                else:
+                    orders = all_orders.filter(status=status_filter)
+                    mkt_orders = all_mkt_orders.filter(status=status_filter) if all_mkt_orders is not None else None
+
             if orders.exists():
                 _accessible = request.session.get('accessible_orders', [])
                 for _o in orders:
@@ -1896,6 +2087,8 @@ def track_order(request):
                 request.session['accessible_orders'] = _accessible
             if not orders.exists():
                 orders = None
+            if mkt_orders is not None and not mkt_orders.exists():
+                mkt_orders = None
         except models.SiteUser.DoesNotExist:
             pass
 
@@ -1981,12 +2174,77 @@ def track_order(request):
                     except MarketplaceOrder.DoesNotExist:
                         messages.error(request, '订单号不存在')
     
+    # Desktop unified overview rows (better visibility for logged-in users).
+    desktop_order_rows = []
+    status_counts = {
+        'all': 0,
+        'pending': 0,
+        'processing': 0,
+        'shipped': 0,
+        'delivered': 0,
+        'cancelled': 0,
+    }
+    source_orders = all_orders if all_orders is not None else orders
+    source_mkt_orders = all_mkt_orders if all_mkt_orders is not None else mkt_orders
+    for o in (source_orders or []):
+        normalized = 'pending' if o.status in ['pending', 'payment_pending'] else o.status
+        if normalized in status_counts:
+            status_counts[normalized] += 1
+        status_counts['all'] += 1
+        desktop_order_rows.append({
+            'kind': 'book',
+            'channel_label': '图书',
+            'channel_icon': 'fas fa-book',
+            'order_number': o.order_number,
+            'created_at': o.created_at,
+            'status': o.status,
+            'status_display': o.get_status_display(),
+            'payment_status': o.payment_status,
+            'payment_status_display': o.get_payment_status_display(),
+            'total_amount': o.total_amount,
+            'item_count': o.orderitem_set.count(),
+            'detail_url': f'/manager/order-confirmation/{o.order_number}/',
+        })
+    for o in (source_mkt_orders or []):
+        normalized = 'pending' if o.status in ['pending', 'payment_pending'] else o.status
+        if normalized in status_counts:
+            status_counts[normalized] += 1
+        status_counts['all'] += 1
+        desktop_order_rows.append({
+            'kind': 'marketplace',
+            'channel_label': '市场',
+            'channel_icon': 'fas fa-store',
+            'order_number': o.order_number,
+            'created_at': o.created_at,
+            'status': o.status,
+            'status_display': o.get_status_display(),
+            'payment_status': o.payment_status,
+            'payment_status_display': o.get_payment_status_display(),
+            'total_amount': o.total_amount,
+            'item_count': o.items.count(),
+            'detail_url': f'/manager/order-confirmation/{o.order_number}/',
+        })
+    desktop_order_rows.sort(key=lambda x: x['created_at'], reverse=True)
+    if status_filter:
+        if status_filter == 'pending':
+            desktop_order_rows = [
+                r for r in desktop_order_rows
+                if r['status'] in ['pending', 'payment_pending']
+            ]
+        else:
+            desktop_order_rows = [r for r in desktop_order_rows if r['status'] == status_filter]
+
     context = {
         'order': order,
         'orders': orders,
         'mkt_order': mkt_order,
         'mkt_orders': mkt_orders,
-        'has_downloadable_books': has_downloadable_books
+        'has_downloadable_books': has_downloadable_books,
+        'site_user': site_user,
+        'desktop_order_rows': desktop_order_rows,
+        'desktop_status_counts': status_counts,
+        'status_filter': status_filter,
+        'show_legacy_order_results': bool((orders or mkt_orders) and not desktop_order_rows),
     }
     return render(request, 'public/track_order.html', context)
 
@@ -7353,6 +7611,142 @@ def admin_delete_vendor_item(request):
 # Notification System
 # ==========================================
 
+def create_vendor_notification(vendor_id, ntype, title, message, icon='fas fa-bell', color='#10b981', link='', related_id=None):
+    """Create a notification for a specific vendor."""
+    if not vendor_id:
+        return
+    already = models.VendorNotification.objects.filter(
+        vendor_id=vendor_id,
+        notification_type=ntype,
+        related_id=related_id,
+    ).exists() if related_id else False
+    if already:
+        return
+    models.VendorNotification.objects.create(
+        vendor_id=vendor_id,
+        notification_type=ntype,
+        title=title,
+        message=message,
+        icon=icon,
+        color=color,
+        link=link,
+        related_id=related_id,
+    )
+
+
+def _check_vendor_notifications(vendor_id):
+    """Generate pending notifications for a vendor (new orders, messages)."""
+    now = timezone.now()
+    vendor = models.Vendor.objects.filter(pk=vendor_id).first()
+    if not vendor:
+        return
+
+    # 1. Unread messages from buyers
+    unread_convos = models.Conversation.objects.filter(
+        vendor_id=vendor_id,
+        direct_messages__is_read=False,
+    ).exclude(
+        direct_messages__sender_type='vendor',
+    ).distinct()
+    for convo in unread_convos[:10]:
+        unread_count = convo.direct_messages.filter(is_read=False).exclude(sender_type='vendor').count()
+        if unread_count > 0:
+            buyer_name = convo.buyer.name if convo.buyer else 'Customer'
+            create_vendor_notification(
+                vendor_id, 'new_message',
+                f'{buyer_name} sent you a message',
+                f'{unread_count} unread message(s) about: {convo.subject or "General"}',
+                icon='fas fa-comment-dots',
+                color='#3b82f6',
+                link=f'/manager/vendor/messages/?conversation={convo.id}',
+                related_id=convo.id,
+            )
+
+    # 2. New book orders (last 24h, not yet notified)
+    from datetime import timedelta
+    recent_cutoff = now - timedelta(hours=24)
+    vendor_books = models.VendorBook.objects.filter(vendor=vendor, is_active=True).values_list('book_id', flat=True)
+    if vendor_books:
+        new_book_orders = models.OrderItem.objects.filter(
+            book_id__in=vendor_books,
+            order__created_at__gte=recent_cutoff,
+        ).select_related('order').values_list('order_id', flat=True).distinct()
+        for oid in new_book_orders[:20]:
+            create_vendor_notification(
+                vendor_id, 'new_order',
+                'New book order received',
+                f'Order #{oid} contains your books',
+                icon='fas fa-shopping-bag',
+                color='#f59e0b',
+                link=f'/manager/vendor/orders/books/{oid}/',
+                related_id=oid,
+            )
+
+    # 3. New marketplace orders (last 24h)
+    try:
+        mkt_orders = MarketplaceOrderItem.objects.filter(
+            product__vendor=vendor,
+            order__created_at__gte=recent_cutoff,
+        ).values_list('order_id', flat=True).distinct()
+        for oid in mkt_orders[:20]:
+            create_vendor_notification(
+                vendor_id, 'new_order',
+                'New marketplace order',
+                f'Marketplace order #{oid}',
+                icon='fas fa-store',
+                color='#f59e0b',
+                link='/manager/vendor/orders/',
+                related_id=oid,
+            )
+    except Exception:
+        pass
+
+
+@ensure_csrf_cookie
+def vendor_notifications_api(request):
+    """API endpoint for vendor notifications (GET list, POST actions)."""
+    vendor_id = request.session.get('vendor_id')
+    if not vendor_id:
+        return JsonResponse({'success': False, 'message': 'Not logged in'}, status=401)
+
+    if request.method == 'GET':
+        _check_vendor_notifications(vendor_id)
+        notifs = models.VendorNotification.objects.filter(vendor_id=vendor_id).order_by('-created_at')[:50]
+        unread_count = models.VendorNotification.objects.filter(vendor_id=vendor_id, is_read=False).count()
+        data = [{
+            'id': n.id,
+            'type': n.notification_type,
+            'title': n.title,
+            'message': n.message,
+            'icon': n.icon,
+            'color': n.color,
+            'link': n.link,
+            'is_read': n.is_read,
+            'time': n.created_at.strftime('%Y-%m-%d %H:%M'),
+        } for n in notifs]
+        return JsonResponse({'success': True, 'notifications': data, 'unread_count': unread_count})
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'mark_read':
+            nid = request.POST.get('id')
+            if nid:
+                models.VendorNotification.objects.filter(id=nid, vendor_id=vendor_id).update(is_read=True)
+            return JsonResponse({'success': True})
+        elif action == 'mark_all_read':
+            models.VendorNotification.objects.filter(vendor_id=vendor_id, is_read=False).update(is_read=True)
+            return JsonResponse({'success': True})
+        elif action == 'delete':
+            nid = request.POST.get('id')
+            if nid:
+                models.VendorNotification.objects.filter(id=nid, vendor_id=vendor_id).delete()
+            return JsonResponse({'success': True})
+        elif action == 'clear_all':
+            models.VendorNotification.objects.filter(vendor_id=vendor_id, is_read=True).delete()
+            return JsonResponse({'success': True})
+    return JsonResponse({'success': False})
+
+
 def create_notification(ntype, title, message, icon='fas fa-bell', color='#667eea', link='', related_id=None):
     """Helper to create an admin notification"""
     models.AdminNotification.objects.create(
@@ -7392,19 +7786,23 @@ def check_and_create_notifications(request):
                 related_id=reg.id,
             )
 
-    # 2. Abandoned carts (items in cart for > 30 minutes, no order)
+    # 2. Abandoned carts: only recent carts (30min–6h old) that haven't
+    #    already been notified. Carts older than 6h are likely bots/stale.
+    cart_min_age = now - timedelta(hours=6)
     cart_cutoff = now - timedelta(minutes=30)
     stale_carts = models.CartItem.objects.filter(
         updated_at__lt=cart_cutoff,
+        updated_at__gte=cart_min_age,
     ).values('session_key').annotate(
         item_count=Count('id'),
         latest=Max('updated_at'),
     )
     for cart in stale_carts:
+        sk_prefix = cart['session_key'][:16]
         exists = models.AdminNotification.objects.filter(
             notification_type='abandoned_cart',
-            message__contains=cart['session_key'][:16],
-            created_at__gte=now - timedelta(hours=2),
+            message__contains=sk_prefix,
+            created_at__gte=now - timedelta(hours=24),
         ).exists()
         if not exists:
             items = models.CartItem.objects.filter(session_key=cart['session_key']).select_related('book')
@@ -7412,7 +7810,7 @@ def check_and_create_notifications(request):
             create_notification(
                 'abandoned_cart',
                 f'有顾客可能要下单（{cart["item_count"]}件商品）',
-                f'购物车包含: {book_names}... 会话: {cart["session_key"][:16]}',
+                f'购物车包含: {book_names}... 会话: {sk_prefix}',
                 icon='fas fa-shopping-cart',
                 color='#06b6d4',
                 link='/manager/order_list/',

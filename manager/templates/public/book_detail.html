@@ -372,6 +372,26 @@
 .bmp-qa-q::before { content: 'Q: '; color: #E4393C; }
 .bmp-qa-a { font-size: 12px; color: #666; margin-top: 3px; }
 .bmp-qa-a::before { content: 'A: '; color: #10b981; font-weight: 600; }
+
+/* Mobile polish */
+@media (max-width: 768px) {
+    .book-mobile-page {
+        background:
+            radial-gradient(circle at top right, rgba(102,126,234,0.12), transparent 35%),
+            #f4f7ff;
+    }
+    .book-mobile-page > div:not(.bmp-bottom-bar):not(.bmp-gallery) {
+        border-radius: 14px;
+        margin: 8px 8px 0;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+        border: 1px solid rgba(99, 102, 241, 0.08);
+    }
+    .bmp-bottom-bar {
+        box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.12);
+        border-top: 1px solid rgba(102,126,234,0.12);
+    }
+    .bmp-title { font-size: 16px; letter-spacing: 0.1px; }
+}
 </style>
 {% endblock %}
 
@@ -483,7 +503,7 @@
                 {% if book_vendor.get_logo_url %}<img src="{{ book_vendor.get_logo_url }}" style="width:100%;height:100%;object-fit:cover;">{% else %}<i class="fas fa-store"></i>{% endif %}
             </div>
             <div>
-                <div class="bmp-seller-name">{{ book_vendor.company_name }}</div>
+                <a class="bmp-seller-name" style="text-decoration:none;color:#333;" href="{% url 'manager:start_conversation' %}?vendor_id={{ book_vendor.id }}&subject={{ book.name|urlencode }}">{{ book_vendor.company_name }}</a>
                 <div class="bmp-seller-meta">
                     <i class="fas fa-star" style="color:#f59e0b;"></i> 4.9 · <span data-zh="认证商家" data-en="Verified Seller" data-fr="Vendeur Vérifié">认证商家</span>
                 </div>

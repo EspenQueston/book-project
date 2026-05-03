@@ -41,6 +41,20 @@ html[data-theme="dark"] .msg-sidebar { border-right-color: #2a3942; }
     display: flex; align-items: center; gap: 12px; flex-shrink: 0;
 }
 .msg-sidebar-header h3 { font-size: 1.1rem; font-weight: 700; margin: 0; flex: 1; }
+.msg-new-chat-btn {
+    border: 1px solid rgba(255,255,255,0.35);
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 5px 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.12);
+}
+.msg-new-chat-btn:hover { background: rgba(255,255,255,0.2); color: #fff; }
 .msg-search-box {
     padding: 8px 12px; background: var(--msg-sidebar-bg); flex-shrink: 0;
 }
@@ -72,10 +86,47 @@ html[data-theme="dark"] .msg-convo-item.active { background: #2a3942; }
     font-weight: 600; font-size: 0.9rem; color: #111;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+.msg-convo-name-btn {
+    border: none;
+    background: none;
+    padding: 0;
+    margin: 0;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #111;
+    text-align: left;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+}
+.msg-convo-name-btn:hover { color: var(--msg-primary); }
+.msg-convo-name-link {
+    display: inline-block;
+    max-width: 100%;
+    color: inherit;
+    text-decoration: none;
+}
+.msg-convo-name-link:hover { color: var(--msg-primary); text-decoration: underline; }
 html[data-theme="dark"] .msg-convo-name { color: #e2e8f0; }
+html[data-theme="dark"] .msg-convo-name-btn { color: #e2e8f0; }
+html[data-theme="dark"] .msg-convo-name-btn:hover { color: #a5b4fc; }
+html[data-theme="dark"] .msg-convo-name-link { color: #e2e8f0; }
+html[data-theme="dark"] .msg-convo-name-link:hover { color: #a5b4fc; }
 .msg-convo-preview {
     font-size: 0.8rem; color: #667781; margin-top: 2px;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.msg-convo-ref {
+    margin-top: 4px;
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #f97316;
+    background: rgba(249, 115, 22, 0.12);
+    border-radius: 8px;
+    padding: 2px 7px;
 }
 .msg-convo-meta {
     display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;
@@ -99,6 +150,47 @@ html[data-theme="dark"] .msg-chat-header { border-bottom-color: #2a3942; }
 .msg-chat-header-name { font-weight: 600; font-size: 0.95rem; color: #111; }
 html[data-theme="dark"] .msg-chat-header-name { color: #e2e8f0; }
 .msg-chat-header-sub { font-size: 0.75rem; color: #667781; }
+.msg-product-strip {
+    display: none;
+    background: var(--msg-sidebar-bg);
+    border-bottom: 1px solid #e5e7eb;
+    padding: 8px 10px;
+    gap: 10px;
+    align-items: center;
+}
+html[data-theme="dark"] .msg-product-strip { border-bottom-color: #2a3942; }
+.msg-product-strip.show { display: flex; }
+.msg-product-media {
+    width: 42px;
+    height: 52px;
+    border-radius: 8px;
+    object-fit: cover;
+    background: #e2e8f0;
+    flex-shrink: 0;
+}
+.msg-product-name {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #111;
+    line-height: 1.25;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+html[data-theme="dark"] .msg-product-name { color: #e2e8f0; }
+.msg-product-price { font-size: 0.78rem; font-weight: 800; color: #dc2626; margin-top: 2px; }
+.msg-product-btn {
+    border: none;
+    background: linear-gradient(135deg, #fb923c, #f97316);
+    color: #fff;
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+}
 .msg-chat-back {
     display: none; background: none; border: none;
     font-size: 1.2rem; color: var(--msg-primary); cursor: pointer; padding: 4px 8px;
@@ -112,6 +204,13 @@ html[data-theme="dark"] .msg-chat-header-name { color: #e2e8f0; }
 .msg-date-separator span {
     background: rgba(0,0,0,0.08); color: #54656f;
     font-size: 0.72rem; padding: 4px 12px; border-radius: 8px; font-weight: 500;
+}
+.msg-unread-separator {
+    align-self: center;
+    font-size: 0.7rem;
+    color: #f59e0b;
+    font-weight: 700;
+    margin: 8px 0 2px;
 }
 html[data-theme="dark"] .msg-date-separator span { background: rgba(255,255,255,0.1); color: #8696a0; }
 .msg-bubble-row { display: flex; max-width: 75%; }
@@ -130,6 +229,31 @@ html[data-theme="dark"] .msg-date-separator span { background: rgba(255,255,255,
     padding: 8px 12px; background: var(--msg-sidebar-bg);
     display: flex; align-items: flex-end; gap: 8px;
     flex-shrink: 0; border-top: 1px solid #e5e7eb;
+}
+.msg-quick-actions {
+    padding: 8px 10px 0;
+    background: var(--msg-sidebar-bg);
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-top: 1px solid rgba(0,0,0,0.03);
+}
+.msg-quick-actions::-webkit-scrollbar { display: none; }
+.msg-qa-btn {
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    color: #475569;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 6px 10px;
+    white-space: nowrap;
+}
+html[data-theme="dark"] .msg-qa-btn {
+    background: #1f2c34;
+    border-color: #334155;
+    color: #cbd5e1;
 }
 html[data-theme="dark"] .msg-input-area { border-top-color: #2a3942; }
 .msg-input-area textarea {
@@ -176,6 +300,13 @@ html[data-theme="dark"] .msg-input-area textarea { background: #2a3942; color: #
     .msg-bubble-row { max-width: 85%; }
     .msg-app { position: relative; }
     .msg-input-area { padding-bottom: 72px; }
+    .msg-chat-header { padding: 8px 10px; }
+    .msg-chat-header-name { font-size: 0.88rem; }
+    .msg-chat-header-sub { font-size: 0.7rem; }
+    .msg-product-strip { padding: 7px 8px; }
+    .msg-product-media { width: 36px; height: 44px; }
+    .msg-quick-actions { padding: 6px 8px 0; }
+    .msg-qa-btn { font-size: 0.68rem; padding: 5px 9px; }
 }
 </style>
 {% endblock %}
@@ -187,6 +318,9 @@ html[data-theme="dark"] .msg-input-area textarea { background: #2a3942; color: #
         <div class="msg-sidebar-header">
             <i class="fas fa-comments fa-lg"></i>
             <h3 data-zh="消息" data-en="Messages" data-fr="Messages">消息</h3>
+            <a class="msg-new-chat-btn" href="{% url 'manager:public_books' %}">
+                <i class="fas fa-pen"></i><span data-zh="新建" data-en="New" data-fr="Nouveau">新建</span>
+            </a>
         </div>
         <div class="msg-search-box">
             <input type="text" id="msgSearchInput" placeholder="{% trans '搜索对话...' %}" oninput="filterConversations(this.value)">
@@ -217,15 +351,30 @@ html[data-theme="dark"] .msg-input-area textarea { background: #2a3942; color: #
                 <button class="msg-chat-back" onclick="closeMobileChat()"><i class="fas fa-arrow-left"></i></button>
                 <div class="msg-avatar" id="chatAvatar">V</div>
                 <div style="flex:1;min-width:0;">
-                    <div class="msg-chat-header-name" id="chatHeaderName">Vendor</div>
+                    <a class="msg-chat-header-name" id="chatHeaderName" href="#" style="text-decoration:none;">Vendor</a>
                     <div class="msg-chat-header-sub" id="chatHeaderSub"></div>
                 </div>
                 <a id="chatShopLink" href="#" style="display:none;color:var(--msg-primary);font-size:0.8rem;text-decoration:none;font-weight:600;">
                     <i class="fas fa-store me-1"></i><span data-zh="店铺" data-en="Shop" data-fr="Boutique">店铺</span>
                 </a>
             </div>
+            <div class="msg-product-strip" id="msgProductStrip">
+                <img id="msgProductMedia" class="msg-product-media" src="/static/img/default_product.png" alt="">
+                <div style="min-width:0;flex:1;">
+                    <div class="msg-product-name" id="msgProductName"></div>
+                    <div class="msg-product-price" id="msgProductPrice"></div>
+                </div>
+                <a id="msgProductBtn" class="msg-product-btn" href="#" target="_self" data-zh="查看" data-en="View" data-fr="Voir">查看</a>
+            </div>
             <div class="msg-messages-area" id="msgMessagesArea">
                 <div class="msg-loading" id="msgChatLoading"><i class="fas fa-spinner fa-spin"></i></div>
+            </div>
+            <div class="msg-quick-actions" id="msgQuickActions">
+                <button class="msg-qa-btn" type="button" onclick="insertQuickReply('{% trans "你好，我正在看这个商品" %}')">{% trans "打招呼" %}</button>
+                <button class="msg-qa-btn" type="button" onclick="insertQuickReply('{% trans "这个商品还有库存吗？" %}')">{% trans "问库存" %}</button>
+                <button class="msg-qa-btn" type="button" onclick="insertQuickReply('{% trans "可以给我一个优惠价吗？" %}')">{% trans "问价格" %}</button>
+                <button class="msg-qa-btn" type="button" onclick="insertQuickReply('{% trans "多久可以发货？" %}')">{% trans "问发货" %}</button>
+                <button class="msg-qa-btn" type="button" onclick="insertQuickReply('{% trans "请把商品链接发给我" %}')">{% trans "要链接" %}</button>
             </div>
             <div class="msg-input-area">
                 <textarea id="msgInput" rows="1" placeholder="{% trans '输入消息...' %}" onkeydown="handleInputKey(event)"></textarea>
@@ -243,6 +392,7 @@ html[data-theme="dark"] .msg-input-area textarea { background: #2a3942; color: #
     var activeConvoId = null;
     var pollTimer = null;
     var sending = false;
+    var activeUnreadCount = 0;
     var CONVO_API = '/manager/api/conversations/';
     var SEND_API = '/manager/public/messages/send/';
 
@@ -312,11 +462,17 @@ html[data-theme="dark"] .msg-input-area textarea { background: #2a3942; color: #
         empty.style.display = 'none';
         var html = '';
         conversations.forEach(function(c) {
+            var quickStart = c.vendor_id
+                ? '/manager/public/messages/start/?vendor_id=' + c.vendor_id + '&subject=' + encodeURIComponent(c.subject || c.vendor_name || '')
+                : '#';
             html += '<div class="msg-convo-item' + (Number(c.id) === Number(activeConvoId) ? ' active' : '') + '" onclick="openChat(' + c.id + ')" data-search="' + escAttr(c.vendor_name + ' ' + c.subject) + '">';
             html += '<div class="msg-avatar">' + escHtml(c.vendor_avatar) + '</div>';
             html += '<div class="msg-convo-info">';
-            html += '<div class="msg-convo-name">' + escHtml(c.vendor_name) + '</div>';
+            html += '<a class="msg-convo-name-link" href="' + quickStart + '" onclick="event.stopPropagation();">' + escHtml(c.vendor_name) + '</a>';
             html += '<div class="msg-convo-preview">' + escHtml(c.last_message || c.subject) + '</div>';
+            if (c.ref_item && c.ref_item.name) {
+                html += '<span class="msg-convo-ref">' + escHtml(c.ref_item.name) + '</span>';
+            }
             html += '</div>';
             html += '<div class="msg-convo-meta">';
             html += '<span class="msg-convo-time">' + (c.last_time || '') + '</span>';
@@ -324,6 +480,20 @@ html[data-theme="dark"] .msg-input-area textarea { background: #2a3942; color: #
             html += '</div></div>';
         });
         list.innerHTML = html;
+    }
+
+    function renderRefItem(refItem) {
+        var strip = document.getElementById('msgProductStrip');
+        if (!strip) return;
+        if (!refItem) {
+            strip.classList.remove('show');
+            return;
+        }
+        document.getElementById('msgProductMedia').src = refItem.image || '/static/img/default_product.png';
+        document.getElementById('msgProductName').textContent = refItem.name || '';
+        document.getElementById('msgProductPrice').textContent = refItem.price ? ('¥' + refItem.price) : '';
+        document.getElementById('msgProductBtn').href = refItem.url || '#';
+        strip.classList.add('show');
     }
 
     window.openChat = function(convoId) {
@@ -339,8 +509,17 @@ html[data-theme="dark"] .msg-input-area textarea { background: #2a3942; color: #
         chatArea.classList.add('thread-open');
         var convo = conversations.find(function(c) { return Number(c.id) === convoId; });
         if (convo) {
+            activeUnreadCount = parseInt(convo.unread || 0, 10) || 0;
             document.getElementById('chatAvatar').textContent = convo.vendor_avatar;
-            document.getElementById('chatHeaderName').textContent = convo.vendor_name;
+            var headerName = document.getElementById('chatHeaderName');
+            headerName.textContent = convo.vendor_name;
+            if (convo.vendor_id) {
+                headerName.href = '/manager/public/messages/start/?vendor_id=' + convo.vendor_id + '&subject=' + encodeURIComponent(convo.subject || convo.vendor_name || '');
+                headerName.style.pointerEvents = 'auto';
+            } else {
+                headerName.href = '#';
+                headerName.style.pointerEvents = 'none';
+            }
             document.getElementById('chatHeaderSub').textContent = convo.subject;
             var shopLink = document.getElementById('chatShopLink');
             if (convo.vendor_id) {
@@ -349,6 +528,9 @@ html[data-theme="dark"] .msg-input-area textarea { background: #2a3942; color: #
             } else {
                 shopLink.style.display = 'none';
             }
+            renderRefItem(convo.ref_item || null);
+        } else {
+            renderRefItem(null);
         }
         document.getElementById('msgMessagesArea').innerHTML = '<div class="msg-loading"><i class="fas fa-spinner fa-spin"></i></div>';
         loadMessages(convoId);
@@ -362,8 +544,10 @@ html[data-theme="dark"] .msg-input-area textarea { background: #2a3942; color: #
         chatArea.classList.remove('mobile-open');
         chatArea.classList.remove('thread-open');
         activeConvoId = null;
+        activeUnreadCount = 0;
         document.getElementById('msgChatContent').style.display = 'none';
         document.getElementById('msgNoChatSelected').style.display = 'flex';
+        renderRefItem(null);
         if (pollTimer) clearInterval(pollTimer);
         loadConversations();
     };
@@ -377,6 +561,9 @@ html[data-theme="dark"] .msg-input-area textarea { background: #2a3942; color: #
             .then(function(data) {
                 if (!silent || Number(convoId) === Number(activeConvoId)) {
                     renderMessages(data.messages || []);
+                    if (data.conversation) {
+                        renderRefItem(data.conversation.ref_item || null);
+                    }
                 }
                 if (!silent) loadConversations();
             })
@@ -395,7 +582,24 @@ html[data-theme="dark"] .msg-input-area textarea { background: #2a3942; color: #
         }
         var html = '';
         var lastDate = '';
-        msgs.forEach(function(m) {
+        var unreadIncoming = Math.max(0, parseInt(activeUnreadCount || 0, 10));
+        var incomingSeenFromEnd = 0;
+        var unreadInsertAt = -1;
+        if (unreadIncoming > 0) {
+            for (var i = msgs.length - 1; i >= 0; i--) {
+                if (msgs[i].sender_type !== 'buyer') {
+                    incomingSeenFromEnd += 1;
+                    if (incomingSeenFromEnd === unreadIncoming) {
+                        unreadInsertAt = i;
+                        break;
+                    }
+                }
+            }
+        }
+        msgs.forEach(function(m, idx) {
+            if (unreadInsertAt >= 0 && idx === unreadInsertAt) {
+                html += '<div class="msg-unread-separator">{% trans "未读消息" %}</div>';
+            }
             if (m.date !== lastDate) {
                 html += '<div class="msg-date-separator"><span>' + m.date + '</span></div>';
                 lastDate = m.date;
@@ -410,6 +614,7 @@ html[data-theme="dark"] .msg-input-area textarea { background: #2a3942; color: #
         });
         area.innerHTML = html;
         area.scrollTop = area.scrollHeight;
+        activeUnreadCount = 0;
     }
 
     window.sendMessage = function() {
@@ -470,6 +675,13 @@ html[data-theme="dark"] .msg-input-area textarea { background: #2a3942; color: #
             e.preventDefault();
             sendMessage();
         }
+    };
+
+    window.insertQuickReply = function(text) {
+        var input = document.getElementById('msgInput');
+        if (!input) return;
+        input.value = text || '';
+        input.focus();
     };
 
     window.filterConversations = function(q) {

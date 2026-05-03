@@ -356,9 +356,10 @@
         font-family: inherit;
     }
     .cs-name-input:focus { border-color: #10b981; }
-    @media (max-width: 480px) {
-        #ai-chat-window { width: calc(100vw - 32px); right: 16px; bottom: 90px; }
-        #ai-chat-toggle { right: 16px; bottom: 24px; }
+    @media (max-width: 768px) {
+        /* Keep chatbot above bottom "Me" tab bar on mobile */
+        #ai-chat-window { width: calc(100vw - 32px); right: 16px; bottom: 164px; max-height: 62vh; }
+        #ai-chat-toggle { right: 16px; bottom: 96px; }
     }
     `;
 

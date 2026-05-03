@@ -950,6 +950,43 @@ class AdminNotification(models.Model):
 
 
 # ==========================================
+# Vendor Notification System
+# ==========================================
+
+VENDOR_NOTIFICATION_TYPE_CHOICES = [
+    ('new_order', '新订单'),
+    ('new_message', '新消息'),
+    ('order_paid', '订单已付款'),
+    ('order_shipped', '订单已发货'),
+    ('low_stock', '库存不足'),
+    ('new_review', '新评价'),
+    ('system', '系统通知'),
+]
+
+
+class VendorNotification(models.Model):
+    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='notifications', verbose_name='卖家')
+    notification_type = models.CharField(max_length=30, choices=VENDOR_NOTIFICATION_TYPE_CHOICES, verbose_name='类型')
+    title = models.CharField(max_length=200, verbose_name='标题')
+    message = models.TextField(verbose_name='内容')
+    icon = models.CharField(max_length=50, default='fas fa-bell', verbose_name='图标')
+    color = models.CharField(max_length=20, default='#10b981', verbose_name='颜色')
+    link = models.CharField(max_length=500, blank=True, default='', verbose_name='链接')
+    is_read = models.BooleanField(default=False, verbose_name='已读')
+    related_id = models.IntegerField(null=True, blank=True, verbose_name='关联ID')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+
+    class Meta:
+        db_table = 'vendor_notification'
+        ordering = ['-created_at']
+        verbose_name = '卖家通知'
+        verbose_name_plural = '卖家通知'
+
+    def __str__(self):
+        return f'[{self.vendor.company_name}] {self.title}'
+
+
+# ==========================================
 # AI Chatbot System
 # ==========================================
 

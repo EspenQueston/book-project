@@ -103,6 +103,28 @@
                     </ul>
                 </div>
             </div>
+            <!-- Vendor notification bell -->
+            <div class="d-flex align-items-center justify-content-end mb-2 gap-3" style="margin-top:-8px;">
+                <div class="position-relative" id="vpNotifHost">
+                    <button class="btn btn-sm btn-white bg-white border shadow-sm rounded-pill px-3 py-1 d-flex align-items-center gap-2"
+                            onclick="toggleVpNotifDropdown()" id="vpNotifBtn" type="button">
+                        <i class="fas fa-bell text-warning"></i>
+                        <span id="vpNotifBadge" class="badge bg-danger rounded-pill" style="display:none;font-size:0.65rem;">0</span>
+                    </button>
+                    <div id="vpNotifDropdown" class="shadow border-0 rounded-3 bg-white position-absolute end-0"
+                         style="display:none;width:360px;max-height:420px;overflow-y:auto;z-index:1050;top:42px;">
+                        <div class="p-2 border-bottom d-flex justify-content-between align-items-center" style="background:linear-gradient(135deg,#10b981,#059669);border-radius:12px 12px 0 0;">
+                            <span class="fw-bold text-white" style="font-size:0.85rem;"><i class="fas fa-bell me-1"></i> Notifications</span>
+                            <button class="btn btn-sm text-white" onclick="vpNotifMarkAllRead()" style="font-size:0.72rem;opacity:0.85;">Mark all read</button>
+                        </div>
+                        <div id="vpNotifList" style="font-size:0.82rem;"></div>
+                        <div id="vpNotifEmpty" class="text-center text-muted p-3" style="display:none;font-size:0.8rem;">
+                            <i class="fas fa-check-circle text-success d-block mb-1" style="font-size:1.5rem;opacity:0.4;"></i>
+                            No new notifications
+                        </div>
+                    </div>
+                </div>
+            </div>
             {% if messages %}
             {% for message in messages %}
             <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show mb-3" role="alert" style="border-radius:12px;">
@@ -132,6 +154,90 @@
         var floatBtn = document.getElementById('adminLangToggle');
         if (floatBtn) floatBtn.style.display = 'none';
     });
+})();
+</script>
+<!-- Vendor notifications JS -->
+<script>
+(function(){
+    var vpNotifOpen = false;
+    function getCSRF() {
+        var el = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (el) return el.value;
+        var m = document.cookie.match('(^|;)\\s*csrftoken=([^;]*)');
+        return m ? decodeURIComponent(m[2]) : '';
+    }
+    window.toggleVpNotifDropdown = function() {
+        var dd = document.getElementById('vpNotifDropdown');
+        vpNotifOpen = !vpNotifOpen;
+        dd.style.display = vpNotifOpen ? 'block' : 'none';
+        if (vpNotifOpen) loadVpNotifs();
+    };
+    document.addEventListener('click', function(e) {
+        if (!document.getElementById('vpNotifHost').contains(e.target)) {
+            document.getElementById('vpNotifDropdown').style.display = 'none';
+            vpNotifOpen = false;
+        }
+    });
+    function loadVpNotifs() {
+        fetch('/manager/api/vendor/notifications/', { credentials: 'same-origin' })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (!data.success) return;
+                var badge = document.getElementById('vpNotifBadge');
+                if (data.unread_count > 0) {
+                    badge.textContent = data.unread_count;
+                    badge.style.display = '';
+                } else {
+                    badge.style.display = 'none';
+                }
+                var list = document.getElementById('vpNotifList');
+                var empty = document.getElementById('vpNotifEmpty');
+                if (!data.notifications || data.notifications.length === 0) {
+                    list.innerHTML = '';
+                    empty.style.display = 'block';
+                    return;
+                }
+                empty.style.display = 'none';
+                list.innerHTML = data.notifications.map(function(n) {
+                    var bg = n.is_read ? '#fff' : '#f0fdf4';
+                    return '<div class="d-flex gap-2 p-2 border-bottom align-items-start" style="background:' + bg + ';cursor:pointer;" onclick="vpNotifClick(' + n.id + ',\'' + (n.link || '') + '\')">'
+                        + '<i class="' + (n.icon || 'fas fa-bell') + ' mt-1" style="color:' + (n.color || '#10b981') + ';font-size:0.9rem;flex-shrink:0;"></i>'
+                        + '<div style="min-width:0;flex:1;">'
+                        + '<div style="font-weight:700;font-size:0.8rem;">' + (n.title || '') + '</div>'
+                        + '<div style="font-size:0.72rem;color:#64748b;margin-top:1px;">' + (n.message || '') + '</div>'
+                        + '<div style="font-size:0.65rem;color:#94a3b8;margin-top:2px;">' + (n.time || '') + '</div>'
+                        + '</div>'
+                        + '<button class="btn btn-sm p-0 text-muted" onclick="event.stopPropagation();vpNotifDelete(' + n.id + ')" style="font-size:0.7rem;"><i class="fas fa-times"></i></button>'
+                        + '</div>';
+                }).join('');
+            });
+    }
+    window.vpNotifClick = function(id, link) {
+        fetch('/manager/api/vendor/notifications/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCSRF() },
+            body: 'action=mark_read&id=' + id,
+            credentials: 'same-origin'
+        }).then(function() { if (link) window.location.href = link; else loadVpNotifs(); });
+    };
+    window.vpNotifMarkAllRead = function() {
+        fetch('/manager/api/vendor/notifications/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCSRF() },
+            body: 'action=mark_all_read',
+            credentials: 'same-origin'
+        }).then(function() { loadVpNotifs(); });
+    };
+    window.vpNotifDelete = function(id) {
+        fetch('/manager/api/vendor/notifications/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCSRF() },
+            body: 'action=delete&id=' + id,
+            credentials: 'same-origin'
+        }).then(function() { loadVpNotifs(); });
+    };
+    loadVpNotifs();
+    setInterval(loadVpNotifs, 30000);
 })();
 </script>
 {% block panel_extra_js %}{% endblock %}

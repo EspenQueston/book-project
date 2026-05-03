@@ -83,6 +83,24 @@ def product_list(request):
     paginator = Paginator(products, 12)
     page = paginator.get_page(request.GET.get('page', 1))
 
+    if request.GET.get('format') == 'json':
+        data_products = []
+        for product in page:
+            data_products.append({
+                'id': product.id,
+                'name': product.name,
+                'price': str(product.price),
+                'image': product.get_image_url(),
+                'url': reverse('marketplace:product_detail', args=[product.slug]),
+                'badge': _('商品'),
+                'stock_text': _('有货') if product.in_stock else _('缺货'),
+            })
+        return JsonResponse({
+            'items': data_products,
+            'page': page.number,
+            'has_more': page.has_next(),
+        })
+
     context = {
         'products': page,
         'categories': categories,
@@ -133,6 +151,24 @@ def course_list(request):
 
     paginator = Paginator(courses, 12)
     page = paginator.get_page(request.GET.get('page', 1))
+
+    if request.GET.get('format') == 'json':
+        data_courses = []
+        for course in page:
+            data_courses.append({
+                'id': course.id,
+                'name': course.title,
+                'price': str(course.price),
+                'image': course.get_image_url(),
+                'url': reverse('marketplace:course_detail', args=[course.slug]),
+                'badge': _('课程'),
+                'meta': f"{course.duration_hours}h · {course.lessons_count} {_('课时')}",
+            })
+        return JsonResponse({
+            'items': data_courses,
+            'page': page.number,
+            'has_more': page.has_next(),
+        })
 
     context = {
         'courses': page,
@@ -221,6 +257,25 @@ def supermarket_list(request):
 
     paginator = Paginator(items, 16)
     page = paginator.get_page(request.GET.get('page', 1))
+
+    if request.GET.get('format') == 'json':
+        data_items = []
+        for item in page:
+            data_items.append({
+                'id': item.id,
+                'name': item.name,
+                'price': str(item.price),
+                'image': item.get_image_url(),
+                'url': reverse('marketplace:supermarket_detail', args=[item.slug]),
+                'badge': _('超市'),
+                'unit': item.get_unit_display(),
+                'stock_text': _('有货') if item.in_stock else _('缺货'),
+            })
+        return JsonResponse({
+            'items': data_items,
+            'page': page.number,
+            'has_more': page.has_next(),
+        })
 
     context = {
         'items': page,

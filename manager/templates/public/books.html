@@ -88,12 +88,12 @@
         /* Hide desktop hero and search section */
         .books-desktop-hero, .books-desktop-search { display: none !important; }
 
-        /* Mobile search bar - orange style */
+        /* Mobile search bar - themed style */
         .books-mobile-search {
             display: flex !important;
             align-items: center;
             gap: 8px;
-            background: #FF6000;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             padding: 10px 12px;
             position: sticky;
             top: 56px;
@@ -104,21 +104,74 @@
             display: flex;
             align-items: center;
             background: #fff;
-            border-radius: 20px;
+            border-radius: 16px;
             padding: 0 12px;
-            height: 38px;
+            height: 42px;
             gap: 6px;
         }
-        .books-search-inner i { color: #999; font-size: 14px; }
+        .books-search-inner i { color: #667eea; font-size: 14px; }
         .books-search-inner input {
             flex: 1; border: none; background: transparent;
-            font-size: 13px; outline: none; color: #333; padding: 0;
+            font-size: 13px; outline: none; color: #334155; padding: 0;
         }
         .books-search-btn {
-            background: #fff; color: #FF6000;
+            background: #fff; color: #667eea;
             border: none; border-radius: 18px;
             padding: 6px 14px; font-size: 12px; font-weight: 700;
             white-space: nowrap;
+        }
+        .books-search-suggest {
+            position: absolute;
+            left: 12px;
+            right: 12px;
+            top: calc(100% + 6px);
+            border-radius: 14px;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: 0 14px 40px rgba(15, 23, 42, 0.16);
+            border: 1px solid rgba(102, 126, 234, 0.15);
+            display: none;
+            max-height: 58vh;
+            overflow-y: auto;
+        }
+        .bss-item {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding: 10px 12px;
+            text-decoration: none;
+            border-bottom: 1px solid #eef2ff;
+            color: inherit;
+            background: #fff;
+        }
+        .bss-item:last-child { border-bottom: none; }
+        .bss-item:hover { background: #f8faff; }
+        .bss-thumb {
+            width: 40px;
+            height: 52px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: linear-gradient(135deg, #dbeafe, #ede9fe);
+            flex-shrink: 0;
+        }
+        .bss-name {
+            font-size: 12px;
+            font-weight: 700;
+            color: #1e293b;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .bss-meta { font-size: 11px; color: #64748b; margin-top: 2px; }
+        .bss-price { font-size: 12px; color: #dc2626; font-weight: 800; margin-top: 2px; }
+        .bss-empty {
+            padding: 12px;
+            text-align: center;
+            font-size: 12px;
+            color: #64748b;
+            background: #fff;
         }
 
         /* Filter tabs */
@@ -226,10 +279,10 @@
 <div class="books-mobile-search" style="display:none;">
     <form class="books-search-inner" action="{% url 'manager:public_books' %}" method="get" id="booksMobileForm">
         <i class="fas fa-search"></i>
-        <input type="text" name="search" placeholder="{% trans '搜索图书、课程...' %}" value="{{ search_query }}">
-        <i class="fas fa-qrcode" style="cursor:pointer;color:#FF6000;"></i>
+        <input type="text" name="search" id="booksMobileSearchInput" placeholder="{% trans '搜索图书、作者、出版社...' %}" value="{{ search_query }}" autocomplete="off">
     </form>
     <button class="books-search-btn" onclick="document.getElementById('booksMobileForm').submit()">{% trans "搜索" %}</button>
+    <div id="booksSearchSuggest" class="books-search-suggest"></div>
 </div>
 
 <!-- ===== MOBILE ONLY: Filter tabs ===== -->
@@ -701,6 +754,73 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (loader) loader.style.display = 'none';
             });
     }
+})();
+
+// ===== Mobile books live search suggestions =====
+(function() {
+    if (window.innerWidth > 768) return;
+    var input = document.getElementById('booksMobileSearchInput');
+    var suggest = document.getElementById('booksSearchSuggest');
+    var form = document.getElementById('booksMobileForm');
+    if (!input || !suggest || !form) return;
+    var timer = null;
+
+    function hideSuggest() {
+        suggest.style.display = 'none';
+        suggest.innerHTML = '';
+    }
+
+    function renderResults(results) {
+        if (!results.length) {
+            suggest.innerHTML = '<div class="bss-empty">{% trans "没有找到相关图书" %}</div>';
+            suggest.style.display = 'block';
+            return;
+        }
+        suggest.innerHTML = results.map(function(item) {
+            var price = parseFloat(item.price || '0') <= 0 ? '{% trans "免费" %}' : '¥' + item.price;
+            var image = item.image || '/static/img/default_cover.png';
+            return '<a class="bss-item" href="' + item.url + '">'
+                + '<img class="bss-thumb" src="' + image + '" alt="' + (item.name || '') + '" loading="lazy">'
+                + '<div style="min-width:0;">'
+                + '<div class="bss-name">' + (item.name || '') + '</div>'
+                + '<div class="bss-meta">' + (item.publisher || '') + '</div>'
+                + '<div class="bss-price">' + price + '</div>'
+                + '</div>'
+                + '</a>';
+        }).join('');
+        suggest.style.display = 'block';
+    }
+
+    input.addEventListener('input', function() {
+        var q = input.value.trim();
+        if (timer) clearTimeout(timer);
+        if (q.length < 1) {
+            hideSuggest();
+            return;
+        }
+        timer = setTimeout(function() {
+            fetch('/manager/public/books/?format=suggest&q=' + encodeURIComponent(q))
+                .then(function(r) { return r.json(); })
+                .then(function(data) { renderResults(data.results || []); })
+                .catch(function() { hideSuggest(); });
+        }, 180);
+    });
+
+    input.addEventListener('focus', function() {
+        if (input.value.trim().length > 0 && suggest.innerHTML.trim()) {
+            suggest.style.display = 'block';
+        }
+    });
+
+    document.addEventListener('click', function(ev) {
+        if (!suggest.contains(ev.target) && ev.target !== input) {
+            hideSuggest();
+        }
+    });
+
+    form.addEventListener('submit', function() {
+        hideSuggest();
+    });
 })();
 </script>
 {% endblock %}

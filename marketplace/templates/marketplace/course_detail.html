@@ -219,6 +219,23 @@
     @media(max-width:991px) {
         .playlist-panel { max-height: 400px; margin-top: 20px; }
     }
+    @media (max-width: 768px) {
+        .course-mobile-page {
+            background:
+                radial-gradient(circle at top right, rgba(245,87,108,0.14), transparent 34%),
+                #fff5fb;
+        }
+        .course-mobile-page > div:not(.bmp-bottom-bar):not(.bmp-gallery) {
+            border-radius: 14px;
+            margin: 8px 8px 0;
+            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+            border: 1px solid rgba(244, 114, 182, 0.11);
+        }
+        .bmp-bottom-bar {
+            box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.12);
+            border-top: 1px solid rgba(244, 114, 182, 0.2);
+        }
+    }
 </style>
 {% endblock %}
 
@@ -316,7 +333,7 @@
             <div class="bmp-seller-logo"><i class="fas fa-chalkboard-teacher"></i></div>
             <div>
                 <div class="bmp-seller-name">{{ course.instructor }}</div>
-                <div class="bmp-seller-meta"><i class="fas fa-star" style="color:#f59e0b;"></i> {% if course.vendor %}{{ course.vendor.company_name }}{% else %}DUNO 360{% endif %}</div>
+                <div class="bmp-seller-meta"><i class="fas fa-star" style="color:#f59e0b;"></i> {% if course.vendor %}<a href="{% url 'manager:start_conversation' %}?vendor_id={{ course.vendor.id }}&subject={{ course.title|urlencode }}" style="color:inherit;text-decoration:none;font-weight:700;">{{ course.vendor.company_name }}</a>{% else %}DUNO 360{% endif %}</div>
             </div>
             {% if course.vendor %}
             <button class="bmp-seller-btn follow ms-auto" style="flex:0 0 auto;background:linear-gradient(135deg,#f093fb,#f5576c);border-color:transparent;" onclick="toggleVendorFollow({{ course.vendor.id }}, this)">

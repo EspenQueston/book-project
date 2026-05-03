@@ -229,8 +229,77 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ] if os.path.exists(os.path.join(BASE_DIR, 'static')) else []
 
-# WhiteNoise compressed static files storage
-if _whitenoise_available:
+# Media files configuration for file uploads (图片上传配置)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Supabase Storage (S3 compatible) for static/media
+_supabase_storage_enabled = os.environ.get('SUPABASE_STORAGE_ENABLED', 'False') == 'True'
+_supabase_bucket = os.environ.get('SUPABASE_STORAGE_BUCKET', 'duno360_bucket')
+_supabase_s3_key = os.environ.get('SUPABASE_S3_ACCESS_KEY_ID', '')
+_supabase_s3_secret = os.environ.get('SUPABASE_S3_SECRET_ACCESS_KEY', '')
+_supabase_s3_region = os.environ.get('SUPABASE_S3_REGION', 'us-east-1')
+
+_supabase_project_url = os.environ.get('SUPABASE_PROJECT_URL', '').rstrip('/')
+_supabase_storage_endpoint = os.environ.get('SUPABASE_S3_ENDPOINT', '').strip()
+if not _supabase_storage_endpoint and _supabase_project_url:
+    _project_host = urlparse(_supabase_project_url).netloc
+    if _project_host:
+        _project_ref = _project_host.split('.')[0]
+        _supabase_storage_endpoint = f'https://{_project_ref}.storage.supabase.co/storage/v1/s3'
+
+_supabase_public_base = os.environ.get('SUPABASE_STORAGE_PUBLIC_BASE_URL', '').strip()
+if not _supabase_public_base and _supabase_project_url:
+    _supabase_public_base = f'{_supabase_project_url}/storage/v1/object/public/{_supabase_bucket}'
+_supabase_public_base = _supabase_public_base.rstrip('/')
+
+_supabase_ready = all([
+    _supabase_storage_enabled,
+    _supabase_storage_endpoint,
+    _supabase_s3_key,
+    _supabase_s3_secret,
+])
+
+if _supabase_ready:
+    STORAGES = {
+        'default': {
+            'BACKEND': 'storages.backends.s3.S3Storage',
+            'OPTIONS': {
+                'bucket_name': _supabase_bucket,
+                'location': 'media',
+                'access_key': _supabase_s3_key,
+                'secret_key': _supabase_s3_secret,
+                'region_name': _supabase_s3_region,
+                'endpoint_url': _supabase_storage_endpoint,
+                'default_acl': None,
+                'querystring_auth': False,
+                'file_overwrite': False,
+                'addressing_style': 'path',
+                'signature_version': 's3v4',
+            },
+        },
+        'staticfiles': {
+            'BACKEND': 'storages.backends.s3.S3Storage',
+            'OPTIONS': {
+                'bucket_name': _supabase_bucket,
+                'location': 'static',
+                'access_key': _supabase_s3_key,
+                'secret_key': _supabase_s3_secret,
+                'region_name': _supabase_s3_region,
+                'endpoint_url': _supabase_storage_endpoint,
+                'default_acl': None,
+                'querystring_auth': False,
+                'file_overwrite': True,
+                'addressing_style': 'path',
+                'signature_version': 's3v4',
+            },
+        },
+    }
+    if _supabase_public_base:
+        MEDIA_URL = f'{_supabase_public_base}/media/'
+        STATIC_URL = f'{_supabase_public_base}/static/'
+elif _whitenoise_available:
+    # WhiteNoise compressed static files storage
     _use_manifest_storage = os.environ.get('STATICFILES_USE_MANIFEST', 'True') == 'True'
     STORAGES = {
         'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
@@ -242,10 +311,6 @@ if _whitenoise_available:
             )
         },
     }
-
-# Media files configuration for file uploads (图片上传配置)
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # File upload settings
 FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880   # 5 MB

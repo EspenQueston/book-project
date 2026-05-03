@@ -155,6 +155,29 @@
             font-weight: bold;
             font-size: 1.5rem;
         }
+        .duno-brand {
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .duno-brand i {
+            font-size: 1.25rem;
+            color: #fff;
+        }
+        .duno-brand-text {
+            background: linear-gradient(90deg, #ffffff, #dbeafe);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            font-size: 1.38rem;
+            line-height: 1;
+            font-family: "Cinzel", "Georgia", "Times New Roman", serif;
+            font-weight: 800;
+            text-shadow: 0 1px 10px rgba(255, 255, 255, 0.12);
+        }
         
         .hero-section {
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
@@ -689,9 +712,9 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="{% url 'manager:public_home' %}" style="font-weight: 700; font-size: 1.2rem;">
-                <i class="fas fa-globe" style="margin-right: 8px; font-size: 1.3rem; color: #fff;"></i>
-                <span style="background: linear-gradient(90deg, #fff, #e0f2ff); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: transparent;">DUNO 360</span>
+            <a class="navbar-brand duno-brand" href="{% url 'manager:public_home' %}">
+                <i class="fas fa-globe"></i>
+                <span class="duno-brand-text">DUNO 360</span>
             </a>
             
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" style="padding: 8px 12px;">
@@ -900,6 +923,12 @@
         
         /* Mobile Responsive */
         @media (max-width: 991px) {
+            .duno-brand i { font-size: 1.35rem; }
+            .duno-brand-text {
+                font-size: 1.85rem;
+                letter-spacing: 0.9px;
+                font-weight: 900;
+            }
             .navbar-nav {
                 margin-top: 1rem;
                 padding-top: 1rem;
@@ -1356,9 +1385,13 @@
         padding: 6px 2px 4px;
     }
     .pwa-tab i { font-size: 1.2rem; }
-    .pwa-tab.active, .pwa-tab:hover { color: #667eea; }
+    .pwa-tab.active { color: #667eea; }
     html[data-theme="dark"] .pwa-tab { color: #6b7280; }
-    html[data-theme="dark"] .pwa-tab.active, html[data-theme="dark"] .pwa-tab:hover { color: #818cf8; }
+    html[data-theme="dark"] .pwa-tab.active { color: #818cf8; }
+    @media (hover: hover) {
+        .pwa-tab:hover { color: #667eea; }
+        html[data-theme="dark"] .pwa-tab:hover { color: #818cf8; }
+    }
     .pwa-tab-badge {
         position: absolute;
         top: 4px;
@@ -1421,20 +1454,32 @@
     // Highlight active tab
     (function() {
         var path = window.location.pathname;
-        var tabs = {
-            pwaTabHome: ['/', '/manager/public/', '/manager/public'],
-            pwaTabBooks: ['/manager/public/books/'],
-            pwaTabMessages: ['/manager/public/messages/'],
-            pwaTabOrders: ['/manager/track-order/', '/manager/public/orders/'],
-            pwaTabProfile: ['/manager/public/user/profile/', '/manager/public/user/login/', '/manager/public/my-profile/'],
-        };
-        Object.keys(tabs).forEach(function(id) {
-            var el = document.getElementById(id);
-            if (!el) return;
-            tabs[id].forEach(function(p) {
-                if (path === p || path.startsWith(p) && p !== '/') el.classList.add('active');
-            });
+        var tabs = [
+            { id: 'pwaTabMessages', prefixes: ['/manager/public/messages/'] },
+            { id: 'pwaTabOrders', prefixes: ['/manager/track-order/', '/manager/public/orders/'] },
+            { id: 'pwaTabProfile', prefixes: ['/manager/public/user/profile/', '/manager/public/user/login/', '/manager/public/my-profile/'] },
+            { id: 'pwaTabBooks', prefixes: ['/manager/public/books/'] },
+            { id: 'pwaTabHome', exact: ['/', '/manager/public/', '/manager/public'] }
+        ];
+
+        var matchedTabId = null;
+        tabs.some(function(tab) {
+            if (tab.exact && tab.exact.indexOf(path) !== -1) {
+                matchedTabId = tab.id;
+                return true;
+            }
+            if (tab.prefixes && tab.prefixes.some(function(prefix) { return path.indexOf(prefix) === 0; })) {
+                matchedTabId = tab.id;
+                return true;
+            }
+            return false;
         });
+
+        if (matchedTabId) {
+            document.querySelectorAll('.pwa-tab.active').forEach(function(el) { el.classList.remove('active'); });
+            var targetTab = document.getElementById(matchedTabId);
+            if (targetTab) targetTab.classList.add('active');
+        }
         // Sync cart badge with main badge
         var mainBadge = document.getElementById('cart-badge');
         var pwaBadge = document.getElementById('pwaCartBadge');

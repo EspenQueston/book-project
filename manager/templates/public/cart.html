@@ -37,20 +37,28 @@
         padding: 12px !important;
     }
     .cart-item .row {
-        display: grid !important;
-        grid-template-columns: 58px 1fr auto;
-        grid-template-areas:
-            "info media remove"
-            "qty qty price";
-        gap: 8px 10px;
-        align-items: start !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: flex-start !important;
+        gap: 8px 0;
     }
-    .cart-item .col-md-6 { grid-area: info; width: auto !important; }
-    .cart-item .col-md-3 { grid-area: qty; width: auto !important; }
-    .cart-item .col-md-2 { grid-area: price; width: auto !important; text-align: right !important; align-self: end; }
-    .cart-item .col-md-1 { grid-area: remove; width: auto !important; text-align: right !important; }
+    .cart-item .col-md-6 { width: 100% !important; }
+    .cart-item .col-md-3 { width: 52% !important; }
+    .cart-item .col-md-2 { width: 30% !important; text-align: right !important; align-self: end; }
+    .cart-item .col-md-1 { width: 18% !important; text-align: right !important; align-self: start; }
 
     .cart-item .d-flex.align-items-center { align-items: flex-start !important; gap: 10px !important; }
+    .cart-item .item-cover {
+        width: 58px;
+        min-width: 58px;
+        height: 72px;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #eef2ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
     .cart-item .item-cover img,
     .cart-item .item-cover > div {
         width: 58px !important;
@@ -78,14 +86,24 @@
 
     .cart-continue-actions {
         padding: 8px 2px 2px !important;
-        display: flex !important;
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 8px !important;
-        flex-wrap: wrap;
+        justify-items: center !important;
+        align-items: center !important;
+        width: 100%;
     }
     .cart-continue-actions .btn {
         font-size: 0.82rem !important;
-        padding: 8px 12px !important;
+        padding: 8px 10px !important;
         border-radius: 999px !important;
+        min-width: 0;
+        width: 100%;
+        text-align: center;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 4px;
     }
 
     .cart-desktop-content .col-lg-4 {
@@ -169,10 +187,21 @@
                                     <div class="d-flex align-items-center">
                                         <div class="item-cover me-3">
                                             {% if item.image_url %}
-                                                <img src="{{ item.image_url }}" 
+                                                <img src="{{ item.image_url|default:'/static/img/default_product.png' }}" 
                                                      alt="{{ item.name }}" 
                                                      class="img-fluid" 
+                                                     onerror="this.onerror=null;this.src='/static/img/default_product.png';"
                                                      style="width: 60px; height: 75px; object-fit: cover; border-radius: 5px;">
+                                                <div class="bg-light d-none align-items-center justify-content-center text-muted"
+                                                     style="width: 60px; height: 75px; border-radius: 5px; display:none;">
+                                                    {% if item.item_type == 'book' %}
+                                                        <i class="fas fa-book"></i>
+                                                    {% elif item.item_type == 'course' %}
+                                                        <i class="fas fa-graduation-cap"></i>
+                                                    {% else %}
+                                                        <i class="fas fa-box"></i>
+                                                    {% endif %}
+                                                </div>
                                             {% else %}
                                                 <div class="bg-light d-flex align-items-center justify-content-center text-muted"
                                                      style="width: 60px; height: 75px; border-radius: 5px;">

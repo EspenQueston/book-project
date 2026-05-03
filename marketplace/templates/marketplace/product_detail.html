@@ -208,6 +208,21 @@
         .product-info { padding-left: 0; margin-top: 20px; }
         .main-img { height: 280px; }
         .product-title { font-size: 1.3rem; }
+        .product-mobile-page {
+            background:
+                radial-gradient(circle at top right, rgba(102,126,234,0.14), transparent 34%),
+                #f5f7ff;
+        }
+        .product-mobile-page > div:not(.bmp-bottom-bar):not(.bmp-gallery) {
+            border-radius: 14px;
+            margin: 8px 8px 0;
+            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+            border: 1px solid rgba(99, 102, 241, 0.08);
+        }
+        .bmp-bottom-bar {
+            box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.12);
+            border-top: 1px solid rgba(102,126,234,0.12);
+        }
     }
 </style>
 {% endblock %}
@@ -307,7 +322,11 @@
         <div class="bmp-seller-header">
             <div class="bmp-seller-logo"><i class="fas fa-store"></i></div>
             <div>
-                <div class="bmp-seller-name">{% if product.vendor %}{{ product.vendor.company_name }}{% else %}DUNO 360{% endif %}</div>
+                {% if product.vendor %}
+                <a class="bmp-seller-name" style="text-decoration:none;color:#333;" href="{% url 'manager:start_conversation' %}?vendor_id={{ product.vendor.id }}&subject={{ product.name|urlencode }}">{{ product.vendor.company_name }}</a>
+                {% else %}
+                <div class="bmp-seller-name">DUNO 360</div>
+                {% endif %}
                 <div class="bmp-seller-meta"><i class="fas fa-star" style="color:#f59e0b;"></i> 4.9 · 认证商家</div>
             </div>
             {% if product.vendor %}

@@ -1,0 +1,156 @@
+{% extends "public/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "我的收藏" %} - DUNO 360{% endblock %}
+
+{% block extra_css %}
+<style>
+.wl-page { background: #f5f7ff; min-height: calc(100vh - 76px); padding: 10px 10px 90px; }
+.wl-header {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 16px;
+    padding: 14px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+.wl-title { font-size: 1rem; font-weight: 800; }
+.wl-count { font-size: 0.78rem; font-weight: 700; background: rgba(255,255,255,0.2); border-radius: 999px; padding: 4px 10px; }
+.wl-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.wl-card {
+    background: #fff;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(15,23,42,0.08);
+    border: 1px solid rgba(99,102,241,0.08);
+}
+.wl-media { position: relative; aspect-ratio: 4/5; background: #eef2ff; }
+.wl-media img { width: 100%; height: 100%; object-fit: cover; }
+.wl-remove {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    color: #fff;
+    background: rgba(239,68,68,0.92);
+    font-size: 0.8rem;
+}
+.wl-body { padding: 8px; }
+.wl-name {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #0f172a;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 34px;
+}
+.wl-meta { margin-top: 5px; display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.wl-tag { font-size: 0.64rem; font-weight: 700; color: #6366f1; background: #eef2ff; border-radius: 999px; padding: 2px 8px; }
+.wl-price { font-size: 0.86rem; font-weight: 800; color: #dc2626; }
+.wl-open {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+.wl-empty {
+    text-align: center;
+    padding: 52px 20px;
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+}
+.wl-empty i { font-size: 2.4rem; color: #94a3b8; }
+.wl-empty p { margin: 12px 0; color: #64748b; }
+.wl-empty a {
+    display: inline-block;
+    text-decoration: none;
+    color: #fff;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 999px;
+    padding: 10px 16px;
+    font-weight: 700;
+    font-size: 0.82rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wl-page">
+    <div class="wl-header">
+        <div class="wl-title"><i class="fas fa-heart me-1"></i>{% trans "我的收藏" %}</div>
+        <div class="wl-count">{{ wishlist_count }}</div>
+    </div>
+
+    {% if wishlist_items %}
+    <div class="wl-grid">
+        {% for item in wishlist_items %}
+        <div class="wl-card" data-type="{{ item.type }}" data-item-url="{{ item.url }}">
+            <a class="wl-open" href="{{ item.url }}">
+                <div class="wl-media">
+                    {% if item.image_url %}
+                    <img src="{{ item.image_url }}" alt="{{ item.name }}" loading="lazy" onerror="this.onerror=null;this.src='/static/img/default_product.png';">
+                    {% else %}
+                    <img src="/static/img/default_product.png" alt="{{ item.name }}" loading="lazy">
+                    {% endif %}
+                    <button class="wl-remove" type="button" onclick="event.preventDefault();event.stopPropagation();removeWish(this,'{{ item.type }}','{{ item.item_id }}');">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="wl-body">
+                    <div class="wl-name">{{ item.name }}</div>
+                    <div class="wl-meta">
+                        <span class="wl-tag">{{ item.type_label }}</span>
+                        {% if item.price %}<span class="wl-price">¥{{ item.price }}</span>{% endif %}
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="wl-empty">
+        <i class="fas fa-heart-broken"></i>
+        <p>{% trans "收藏夹还是空的，去逛逛吧" %}</p>
+        <a href="{% url 'manager:public_books' %}"><i class="fas fa-store me-1"></i>{% trans "去逛逛" %}</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function removeWish(btn, itemType, itemId) {
+    var csrf = document.querySelector('[name=csrfmiddlewaretoken]');
+    var fd = new URLSearchParams();
+    fd.append('item_type', itemType);
+    if (itemType === 'book') {
+        fd.append('book_id', itemId);
+    } else {
+        fd.append('item_id', itemId);
+    }
+    fetch('{% url "manager:user_toggle_wishlist" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrf ? csrf.value : ''
+        },
+        body: fd.toString()
+    }).then(function(r){ return r.json(); }).then(function(d) {
+        if (d.login_required) { window.location.href = '{% url "manager:user_login" %}'; return; }
+        if (!d.success) return;
+        var card = btn.closest('.wl-card');
+        if (card) {
+            card.style.opacity = '0';
+            setTimeout(function() { card.remove(); }, 200);
+        }
+    });
+}
+</script>
+{% endblock %}

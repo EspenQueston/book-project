@@ -206,6 +206,58 @@
         color: #dee2e6;
     }
 
+    .desk-auto-wrap {
+        background: #fff;
+        border-radius: 15px;
+        padding: 26px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        margin-bottom: 22px;
+    }
+    .desk-auto-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+    .desk-auto-kpi {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(120px, 1fr));
+        gap: 10px;
+        margin-bottom: 14px;
+    }
+    .desk-kpi-card {
+        background: linear-gradient(135deg, #f8f9ff, #f4f0ff);
+        border: 1px solid #ecebff;
+        border-radius: 12px;
+        padding: 12px 10px;
+    }
+    .desk-kpi-num { font-size: 20px; font-weight: 800; color: #4c51bf; line-height: 1; }
+    .desk-kpi-lbl { font-size: 11px; color: #6b7280; margin-top: 4px; }
+    .desk-filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    .desk-filter-chip {
+        border-radius: 999px; padding: 6px 12px; border: 1px solid #e3e7f1;
+        text-decoration: none; color: #4b5563; font-size: 12px; font-weight: 700; background: #fff;
+    }
+    .desk-filter-chip.active { background: linear-gradient(135deg,#667eea,#764ba2); border-color: transparent; color: #fff; }
+    .desk-order-table th { font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: .3px; }
+    .desk-order-table td { vertical-align: middle; }
+    .desk-channel-tag {
+        display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700;
+        padding: 4px 10px; border-radius: 999px; background: #f3f4f6; color: #374151;
+    }
+    .desk-status-pill {
+        display: inline-block; border-radius: 999px; padding: 4px 10px; font-size: 11px; font-weight: 700;
+    }
+    .desk-status-pending { background: #fff7e5; color: #b45309; }
+    .desk-status-processing { background: #eaf1ff; color: #1d4ed8; }
+    .desk-status-shipped { background: #e8f9ef; color: #047857; }
+    .desk-status-delivered { background: #d1fae5; color: #065f46; }
+    .desk-status-cancelled { background: #fee2e2; color: #b91c1c; }
+    @media (max-width: 992px) {
+        .desk-auto-kpi { grid-template-columns: repeat(2, minmax(120px, 1fr)); }
+    }
+
 /* ===========================
    MOBILE PWA STYLES (@max-width:768px)
    =========================== */
@@ -605,8 +657,87 @@
         {% endfor %}
     {% endif %}
 
+    {% if site_user and desktop_order_rows %}
+    <div class="desk-auto-wrap">
+        <div class="desk-auto-top">
+            <div>
+                <h4 class="mb-1"><i class="fas fa-layer-group me-2"></i>{% trans "我的订单总览" %}</h4>
+                <div class="text-muted" style="font-size:13px;">
+                    {% trans "自动汇总您的图书与市场订单，实时查看各状态进度。" %}
+                </div>
+            </div>
+            <a href="{% url 'manager:public_my_profile' %}" class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-user me-1"></i>{% trans "返回我的" %}
+            </a>
+        </div>
+
+        <div class="desk-auto-kpi">
+            <div class="desk-kpi-card"><div class="desk-kpi-num">{{ desktop_status_counts.all }}</div><div class="desk-kpi-lbl">{% trans "全部订单" %}</div></div>
+            <div class="desk-kpi-card"><div class="desk-kpi-num">{{ desktop_status_counts.pending }}</div><div class="desk-kpi-lbl">{% trans "待处理/待付款" %}</div></div>
+            <div class="desk-kpi-card"><div class="desk-kpi-num">{{ desktop_status_counts.shipped }}</div><div class="desk-kpi-lbl">{% trans "运输中" %}</div></div>
+            <div class="desk-kpi-card"><div class="desk-kpi-num">{{ desktop_status_counts.delivered }}</div><div class="desk-kpi-lbl">{% trans "已完成" %}</div></div>
+        </div>
+
+        <div class="desk-filter-row">
+            <a class="desk-filter-chip {% if not status_filter %}active{% endif %}" href="{% url 'manager:track_order' %}">{% trans "全部" %}</a>
+            <a class="desk-filter-chip {% if status_filter == 'pending' %}active{% endif %}" href="{% url 'manager:track_order' %}?status=pending">{% trans "待付款" %}</a>
+            <a class="desk-filter-chip {% if status_filter == 'processing' %}active{% endif %}" href="{% url 'manager:track_order' %}?status=processing">{% trans "处理中" %}</a>
+            <a class="desk-filter-chip {% if status_filter == 'shipped' %}active{% endif %}" href="{% url 'manager:track_order' %}?status=shipped">{% trans "已发货" %}</a>
+            <a class="desk-filter-chip {% if status_filter == 'delivered' %}active{% endif %}" href="{% url 'manager:track_order' %}?status=delivered">{% trans "已完成" %}</a>
+            <a class="desk-filter-chip {% if status_filter == 'cancelled' %}active{% endif %}" href="{% url 'manager:track_order' %}?status=cancelled">{% trans "已取消" %}</a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover desk-order-table align-middle">
+                <thead>
+                    <tr>
+                        <th>{% trans "订单号" %}</th>
+                        <th>{% trans "渠道" %}</th>
+                        <th>{% trans "状态" %}</th>
+                        <th>{% trans "支付" %}</th>
+                        <th>{% trans "金额" %}</th>
+                        <th>{% trans "商品数" %}</th>
+                        <th>{% trans "时间" %}</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in desktop_order_rows %}
+                    <tr>
+                        <td><strong>{{ row.order_number }}</strong></td>
+                        <td>
+                            <span class="desk-channel-tag">
+                                <i class="{{ row.channel_icon }}"></i>{{ row.channel_label }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="desk-status-pill {% if row.status == 'pending' or row.status == 'payment_pending' %}desk-status-pending{% elif row.status == 'processing' or row.status == 'paid' %}desk-status-processing{% elif row.status == 'shipped' %}desk-status-shipped{% elif row.status == 'delivered' %}desk-status-delivered{% else %}desk-status-cancelled{% endif %}">
+                                {{ row.status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge {% if row.payment_status == 'completed' %}bg-success{% elif row.payment_status == 'pending' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                                {{ row.payment_status_display }}
+                            </span>
+                        </td>
+                        <td><strong>¥{{ row.total_amount }}</strong></td>
+                        <td>{{ row.item_count }}</td>
+                        <td>{{ row.created_at|date:"Y-m-d H:i" }}</td>
+                        <td class="text-end">
+                            <a href="{{ row.detail_url }}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-eye me-1"></i>{% trans "查看详情" %}
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Multiple Orders Result (Email Search) -->
-    {% if orders or mkt_orders %}
+    {% if show_legacy_order_results %}
     <div class="order-result">
         <h4 class="mb-4">
             <i class="fas fa-list"></i> {% trans "查找到的订单" %}
