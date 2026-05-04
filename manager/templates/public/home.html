@@ -718,7 +718,27 @@
             line-height: 1.5;
             opacity: 0.92;
         }
-        .hero-stats { display: none; }
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 16px;
+            justify-content: unset;
+        }
+        .hero-stat {
+            padding: 14px 10px;
+            border-radius: 14px;
+            text-align: center;
+        }
+        .hero-stat-number {
+            font-size: 1.6rem;
+            margin-bottom: 2px;
+        }
+        .hero-stat-label {
+            font-size: 0.72rem;
+            letter-spacing: 0.3px;
+            text-transform: none;
+        }
         .cta-buttons {
             flex-direction: row;
             flex-wrap: nowrap;
