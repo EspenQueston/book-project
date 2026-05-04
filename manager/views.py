@@ -861,21 +861,41 @@ def api_conversations(request):
     for c in convos:
         last_msg = c.direct_messages.order_by('-created_at').first()
         unread = c.direct_messages.filter(is_read=False).exclude(sender_type='buyer').count()
-        vendor_name = c.vendor.company_name if c.vendor else 'Support'
-        vendor_avatar = c.vendor.company_name[0].upper() if c.vendor and c.vendor.company_name else 'S'
+        vendor_name = c.vendor.company_name if c.vendor else (c.subject or 'Support')
+        vendor_avatar = vendor_name[0].upper() if vendor_name else 'S'
+        ref = _conversation_ref_item_payload(c)
+        last_time_str = ''
+        last_date_str = ''
+        if last_msg:
+            _now = timezone.localtime()
+            _lm = timezone.localtime(last_msg.created_at)
+            if _lm.date() == _now.date():
+                last_time_str = _lm.strftime('%H:%M')
+            elif (_now.date() - _lm.date()).days == 1:
+                last_time_str = '昨天'
+            else:
+                last_time_str = _lm.strftime('%m/%d')
+            last_date_str = _lm.strftime('%Y-%m-%d')
         result.append({
             'id': c.id,
             'type': c.conversation_type,
             'vendor_name': vendor_name,
             'vendor_avatar': vendor_avatar,
             'vendor_id': c.vendor_id,
-            'subject': c.subject,
+            'subject': c.subject or '',
             'last_message': last_msg.content[:80] if last_msg else '',
-            'last_time': last_msg.created_at.strftime('%H:%M') if last_msg else '',
-            'last_date': last_msg.created_at.strftime('%Y-%m-%d') if last_msg else '',
-            'unread': unread,
+            'last_sender_type': last_msg.sender_type if last_msg else '',
+            'last_time': last_time_str,
+            'last_date': last_date_str,
+            'unread_count': unread,
+            'unread': unread,  # keep backward compat
             'is_closed': c.is_closed,
-            'ref_item': _conversation_ref_item_payload(c),
+            'ref_item': ref,
+            # flatten ref_item fields for quick access in UI
+            'ref_item_name': ref.get('name', '') if ref else '',
+            'ref_item_price': ref.get('price', '') if ref else '',
+            'ref_item_image': ref.get('image_url', '') if ref else '',
+            'ref_item_url': ref.get('url', '') if ref else '',
         })
     return JsonResponse({'conversations': result})
 
@@ -886,8 +906,24 @@ def api_conversation_messages(request, conversation_id):
     if not user_id:
         return JsonResponse({'messages': [], 'error': 'not_logged_in'})
     convo = get_object_or_404(models.Conversation, pk=conversation_id, buyer_id=user_id)
-    msgs = convo.direct_messages.order_by('created_at')
-    msgs.filter(is_read=False).exclude(sender_type='buyer').update(is_read=True)
+    # Mark vendor messages as read (whole thread)
+    convo.direct_messages.filter(is_read=False).exclude(sender_type='buyer').update(is_read=True)
+    all_msgs = convo.direct_messages.order_by('created_at')
+    total = all_msgs.count()
+    # Pagination: page 1 = newest window; higher pages = older windows (no overlap)
+    try:
+        page = max(1, int(request.GET.get('page', 1)))
+    except (TypeError, ValueError):
+        page = 1
+    page_size = 50
+    end_idx = total - (page - 1) * page_size
+    if end_idx <= 0:
+        msgs = []
+        has_more = False
+    else:
+        start_idx = max(0, end_idx - page_size)
+        msgs = list(all_msgs[start_idx:end_idx])
+        has_more = start_idx > 0
     result = []
     for m in msgs:
         result.append({
@@ -899,16 +935,22 @@ def api_conversation_messages(request, conversation_id):
             'date': m.created_at.strftime('%Y-%m-%d'),
             'is_read': m.is_read,
         })
-    vendor_name = convo.vendor.company_name if convo.vendor else 'Support'
+    vendor_name = convo.vendor.company_name if convo.vendor else (convo.subject or 'Support')
+    ref = _conversation_ref_item_payload(convo)
     return JsonResponse({
         'messages': result,
+        'has_more': has_more,
         'conversation': {
             'id': convo.id,
             'vendor_name': vendor_name,
-            'subject': convo.subject,
+            'subject': convo.subject or '',
             'type': convo.conversation_type,
             'is_closed': convo.is_closed,
-            'ref_item': _conversation_ref_item_payload(convo),
+            'ref_item': ref,
+            'ref_item_name': ref.get('name', '') if ref else '',
+            'ref_item_price': ref.get('price', '') if ref else '',
+            'ref_item_image': ref.get('image_url', '') if ref else '',
+            'ref_item_url': ref.get('url', '') if ref else '',
         }
     })
 

@@ -5,701 +5,1157 @@
 
 {% block extra_css %}
 <style>
+/* =========================================================
+   MESSAGES APP  –  Modern WhatsApp/iMessage inspired design
+   ========================================================= */
 :root {
-    --msg-primary: #667eea;
-    --msg-primary-dark: #764ba2;
-    --msg-bg: #f0f2f5;
-    --msg-sidebar-bg: #fff;
-    --msg-chat-bg: #e5ddd5;
-    --msg-bubble-out: #d9fdd3;
-    --msg-bubble-in: #fff;
+    --mx-primary:       #667eea;
+    --mx-primary-dark:  #764ba2;
+    --mx-bg:            #f0f2f5;
+    --mx-panel-bg:      #ffffff;
+    --mx-chat-bg:       #eef0f3;
+    --mx-border:        rgba(0,0,0,0.06);
+    --mx-text:          #111827;
+    --mx-muted:         #6b7280;
+    --mx-online:        #10b981;
+    --mx-bubble-out-a:  #667eea;
+    --mx-bubble-out-b:  #764ba2;
+    --mx-bubble-in:     #ffffff;
+    --mx-bubble-in-text:#111827;
+    --mx-read-tick:     #53bdeb;
+    --mx-radius:        18px;
 }
 html[data-theme="dark"] {
-    --msg-bg: #111b21;
-    --msg-sidebar-bg: #1f2c34;
-    --msg-chat-bg: #0b141a;
-    --msg-bubble-out: #005c4b;
-    --msg-bubble-in: #1f2c34;
+    --mx-bg:            #0d1117;
+    --mx-panel-bg:      #161b22;
+    --mx-chat-bg:       #0a0f14;
+    --mx-border:        rgba(255,255,255,0.06);
+    --mx-text:          #e6edf3;
+    --mx-muted:         #8b949e;
+    --mx-bubble-in:     #21262d;
+    --mx-bubble-in-text:#e6edf3;
 }
-.msg-app {
+
+/* App shell */
+.mx-app {
     display: flex;
-    height: calc(100vh - 80px);
-    background: var(--msg-bg);
+    height: calc(100dvh - 76px);
+    background: var(--mx-bg);
     overflow: hidden;
+    position: relative;
 }
-.msg-sidebar {
-    width: 360px; min-width: 300px;
-    background: var(--msg-sidebar-bg);
-    border-right: 1px solid #e5e7eb;
-    display: flex; flex-direction: column; flex-shrink: 0;
+
+/* ── Sidebar ─────────────────────────────────────────── */
+.mx-sidebar {
+    width: 340px;
+    min-width: 260px;
+    background: var(--mx-panel-bg);
+    border-right: 1px solid var(--mx-border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    z-index: 10;
+    transition: transform 0.28s cubic-bezier(.4,0,.2,1);
 }
-html[data-theme="dark"] .msg-sidebar { border-right-color: #2a3942; }
-.msg-sidebar-header {
-    padding: 14px 16px;
-    background: linear-gradient(135deg, var(--msg-primary), var(--msg-primary-dark));
-    color: #fff;
-    display: flex; align-items: center; gap: 12px; flex-shrink: 0;
-}
-.msg-sidebar-header h3 { font-size: 1.1rem; font-weight: 700; margin: 0; flex: 1; }
-.msg-new-chat-btn {
-    border: 1px solid rgba(255,255,255,0.35);
-    color: #fff;
-    text-decoration: none;
-    font-size: 0.75rem;
-    font-weight: 700;
-    border-radius: 999px;
-    padding: 5px 10px;
-    display: inline-flex;
+.mx-sidebar-header {
+    background: linear-gradient(135deg, var(--mx-primary) 0%, var(--mx-primary-dark) 100%);
+    padding: 16px 16px 14px;
+    display: flex;
     align-items: center;
-    gap: 6px;
-    background: rgba(255,255,255,0.12);
-}
-.msg-new-chat-btn:hover { background: rgba(255,255,255,0.2); color: #fff; }
-.msg-search-box {
-    padding: 8px 12px; background: var(--msg-sidebar-bg); flex-shrink: 0;
-}
-.msg-search-box input {
-    width: 100%; border: none; border-radius: 20px;
-    padding: 8px 16px; font-size: 0.85rem;
-    background: #f0f2f5; outline: none;
-}
-html[data-theme="dark"] .msg-search-box input { background: #2a3942; color: #e2e8f0; }
-.msg-convo-list { flex: 1; overflow-y: auto; scrollbar-width: thin; }
-.msg-convo-item {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px 16px; cursor: pointer;
-    transition: background 0.15s;
-    border-bottom: 1px solid #f0f2f5;
-}
-html[data-theme="dark"] .msg-convo-item { border-bottom-color: #2a3942; }
-.msg-convo-item:hover, .msg-convo-item.active { background: #f0f2f5; }
-html[data-theme="dark"] .msg-convo-item:hover,
-html[data-theme="dark"] .msg-convo-item.active { background: #2a3942; }
-.msg-avatar {
-    width: 48px; height: 48px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--msg-primary), var(--msg-primary-dark));
-    color: #fff; display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 1.1rem; flex-shrink: 0;
-}
-.msg-convo-info { flex: 1; min-width: 0; }
-.msg-convo-name {
-    font-weight: 600; font-size: 0.9rem; color: #111;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.msg-convo-name-btn {
-    border: none;
-    background: none;
-    padding: 0;
-    margin: 0;
-    font-weight: 700;
-    font-size: 0.9rem;
-    color: #111;
-    text-align: left;
-    max-width: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    cursor: pointer;
-}
-.msg-convo-name-btn:hover { color: var(--msg-primary); }
-.msg-convo-name-link {
-    display: inline-block;
-    max-width: 100%;
-    color: inherit;
-    text-decoration: none;
-}
-.msg-convo-name-link:hover { color: var(--msg-primary); text-decoration: underline; }
-html[data-theme="dark"] .msg-convo-name { color: #e2e8f0; }
-html[data-theme="dark"] .msg-convo-name-btn { color: #e2e8f0; }
-html[data-theme="dark"] .msg-convo-name-btn:hover { color: #a5b4fc; }
-html[data-theme="dark"] .msg-convo-name-link { color: #e2e8f0; }
-html[data-theme="dark"] .msg-convo-name-link:hover { color: #a5b4fc; }
-.msg-convo-preview {
-    font-size: 0.8rem; color: #667781; margin-top: 2px;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.msg-convo-ref {
-    margin-top: 4px;
-    display: inline-block;
-    font-size: 0.68rem;
-    font-weight: 700;
-    color: #f97316;
-    background: rgba(249, 115, 22, 0.12);
-    border-radius: 8px;
-    padding: 2px 7px;
-}
-.msg-convo-meta {
-    display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;
-}
-.msg-convo-time { font-size: 0.7rem; color: #667781; }
-.msg-unread-badge {
-    background: #25d366; color: #fff; font-size: 0.65rem;
-    font-weight: 700; min-width: 20px; height: 20px;
-    border-radius: 50%; display: flex; align-items: center;
-    justify-content: center; padding: 0 4px;
-}
-.msg-chat-area { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; position: relative; }
-.msg-chat-area.thread-open #msgChatContent { display: flex !important; flex-direction: column !important; flex: 1 1 auto !important; min-height: 0 !important; }
-.msg-chat-area.thread-open #msgNoChatSelected { display: none !important; }
-.msg-chat-header {
-    padding: 10px 16px; background: var(--msg-sidebar-bg);
-    border-bottom: 1px solid #e5e7eb;
-    display: flex; align-items: center; gap: 12px; flex-shrink: 0;
-}
-html[data-theme="dark"] .msg-chat-header { border-bottom-color: #2a3942; }
-.msg-chat-header-name { font-weight: 600; font-size: 0.95rem; color: #111; }
-html[data-theme="dark"] .msg-chat-header-name { color: #e2e8f0; }
-.msg-chat-header-sub { font-size: 0.75rem; color: #667781; }
-.msg-product-strip {
-    display: none;
-    background: var(--msg-sidebar-bg);
-    border-bottom: 1px solid #e5e7eb;
-    padding: 8px 10px;
-    gap: 10px;
-    align-items: center;
-}
-html[data-theme="dark"] .msg-product-strip { border-bottom-color: #2a3942; }
-.msg-product-strip.show { display: flex; }
-.msg-product-media {
-    width: 42px;
-    height: 52px;
-    border-radius: 8px;
-    object-fit: cover;
-    background: #e2e8f0;
+    gap: 12px;
     flex-shrink: 0;
 }
-.msg-product-name {
-    font-size: 0.82rem;
-    font-weight: 700;
-    color: #111;
-    line-height: 1.25;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-html[data-theme="dark"] .msg-product-name { color: #e2e8f0; }
-.msg-product-price { font-size: 0.78rem; font-weight: 800; color: #dc2626; margin-top: 2px; }
-.msg-product-btn {
-    border: none;
-    background: linear-gradient(135deg, #fb923c, #f97316);
+.mx-sidebar-title {
+    font-size: 1.1rem;
+    font-weight: 800;
     color: #fff;
-    border-radius: 999px;
-    padding: 6px 10px;
-    font-size: 0.72rem;
-    font-weight: 700;
+    margin: 0;
+    flex: 1;
+    letter-spacing: 0.2px;
+}
+.mx-compose-btn {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
     text-decoration: none;
-    white-space: nowrap;
+    font-size: 0.9rem;
+    transition: background 0.2s;
 }
-.msg-chat-back {
-    display: none; background: none; border: none;
-    font-size: 1.2rem; color: var(--msg-primary); cursor: pointer; padding: 4px 8px;
+.mx-compose-btn:hover { background: rgba(255,255,255,0.3); color: #fff; }
+
+/* Search */
+.mx-search-wrap {
+    padding: 10px 12px 8px;
+    background: var(--mx-panel-bg);
+    border-bottom: 1px solid var(--mx-border);
+    flex-shrink: 0;
 }
-.msg-messages-area {
-    flex: 1; overflow-y: auto; padding: 16px;
-    background: var(--msg-chat-bg);
-    display: flex; flex-direction: column; gap: 4px;
-}
-.msg-date-separator { text-align: center; margin: 12px 0; }
-.msg-date-separator span {
-    background: rgba(0,0,0,0.08); color: #54656f;
-    font-size: 0.72rem; padding: 4px 12px; border-radius: 8px; font-weight: 500;
-}
-.msg-unread-separator {
-    align-self: center;
-    font-size: 0.7rem;
-    color: #f59e0b;
-    font-weight: 700;
-    margin: 8px 0 2px;
-}
-html[data-theme="dark"] .msg-date-separator span { background: rgba(255,255,255,0.1); color: #8696a0; }
-.msg-bubble-row { display: flex; max-width: 75%; }
-.msg-bubble-row.out { align-self: flex-end; }
-.msg-bubble-row.in { align-self: flex-start; }
-.msg-bubble {
-    padding: 6px 10px 4px; border-radius: 8px;
-    font-size: 0.88rem; line-height: 1.45;
-    word-break: break-word; white-space: pre-wrap;
-    box-shadow: 0 1px 1px rgba(0,0,0,0.08);
-}
-.msg-bubble-row.out .msg-bubble { background: var(--msg-bubble-out); border-top-right-radius: 0; }
-.msg-bubble-row.in .msg-bubble { background: var(--msg-bubble-in); border-top-left-radius: 0; }
-.msg-bubble-time { font-size: 0.65rem; color: #667781; text-align: right; margin-top: 2px; }
-.msg-input-area {
-    padding: 8px 12px; background: var(--msg-sidebar-bg);
-    display: flex; align-items: flex-end; gap: 8px;
-    flex-shrink: 0; border-top: 1px solid #e5e7eb;
-}
-.msg-quick-actions {
-    padding: 8px 10px 0;
-    background: var(--msg-sidebar-bg);
+.mx-search-inner {
     display: flex;
+    align-items: center;
+    background: var(--mx-bg);
+    border-radius: 22px;
+    padding: 0 14px;
+    height: 38px;
     gap: 8px;
+}
+html[data-theme="dark"] .mx-search-inner { background: #0d1117; }
+.mx-search-inner i { color: var(--mx-muted); font-size: 13px; flex-shrink: 0; }
+.mx-search-inner input {
+    flex: 1; border: none; background: transparent; font-size: 0.85rem;
+    outline: none; color: var(--mx-text); padding: 0;
+}
+
+/* Filter tabs */
+.mx-filter-tabs {
+    display: flex;
+    padding: 0 12px 8px;
+    gap: 6px;
+    background: var(--mx-panel-bg);
     overflow-x: auto;
     scrollbar-width: none;
-    border-top: 1px solid rgba(0,0,0,0.03);
+    flex-shrink: 0;
 }
-.msg-quick-actions::-webkit-scrollbar { display: none; }
-.msg-qa-btn {
-    border: 1px solid #e2e8f0;
-    background: #fff;
-    color: #475569;
+.mx-filter-tabs::-webkit-scrollbar { display: none; }
+.mx-filter-tab {
+    border: none;
     border-radius: 999px;
-    font-size: 0.72rem;
+    padding: 5px 14px;
+    font-size: 0.75rem;
     font-weight: 700;
-    padding: 6px 10px;
+    background: var(--mx-bg);
+    color: var(--mx-muted);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.18s;
+}
+.mx-filter-tab.active {
+    background: linear-gradient(135deg, var(--mx-primary), var(--mx-primary-dark));
+    color: #fff;
+    box-shadow: 0 3px 12px rgba(102,126,234,0.3);
+}
+
+/* Conversation list */
+.mx-convo-list {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(102,126,234,0.2) transparent;
+}
+.mx-convo-list::-webkit-scrollbar { width: 4px; }
+.mx-convo-list::-webkit-scrollbar-thumb { background: rgba(102,126,234,0.2); border-radius: 2px; }
+
+.mx-convo-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 16px;
+    cursor: pointer;
+    transition: background 0.15s;
+    border-bottom: 1px solid var(--mx-border);
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
+}
+.mx-convo-item:hover, .mx-convo-item.active {
+    background: rgba(102,126,234,0.06);
+}
+.mx-convo-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: linear-gradient(var(--mx-primary), var(--mx-primary-dark));
+    border-radius: 0 2px 2px 0;
+}
+html[data-theme="dark"] .mx-convo-item:hover,
+html[data-theme="dark"] .mx-convo-item.active { background: rgba(102,126,234,0.08); }
+
+/* Avatar */
+.mx-avatar {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 1.05rem; color: #fff;
+    flex-shrink: 0;
+    position: relative;
+    background: linear-gradient(135deg, var(--mx-primary), var(--mx-primary-dark));
+    box-shadow: 0 2px 8px rgba(102,126,234,0.3);
+    overflow: hidden;
+}
+.mx-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.mx-online-dot {
+    position: absolute; bottom: 1px; right: 1px;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--mx-online);
+    border: 2px solid var(--mx-panel-bg);
+}
+.mx-online-dot.pulse::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    background: var(--mx-online);
+    opacity: 0.4;
+    animation: mxPulse 1.8s infinite;
+}
+@keyframes mxPulse { 0%,100%{transform:scale(1);opacity:.4} 50%{transform:scale(1.5);opacity:0} }
+
+/* Convo info */
+.mx-convo-info { flex: 1; min-width: 0; }
+.mx-convo-name {
+    font-weight: 700; font-size: 0.88rem; color: var(--mx-text);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    line-height: 1.3;
+}
+.mx-convo-preview {
+    font-size: 0.77rem; color: var(--mx-muted); margin-top: 2px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    display: flex; align-items: center; gap: 4px;
+}
+.mx-convo-ref-pill {
+    display: inline-block;
+    font-size: 0.65rem; font-weight: 700;
+    color: #f97316;
+    background: rgba(249,115,22,0.1);
+    border-radius: 6px;
+    padding: 1px 6px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.mx-convo-meta {
+    display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0;
+}
+.mx-convo-time { font-size: 0.68rem; color: var(--mx-muted); white-space: nowrap; }
+.mx-unread-badge {
+    min-width: 20px; height: 20px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--mx-primary), var(--mx-primary-dark));
+    color: #fff; font-size: 0.62rem; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 5px;
+    box-shadow: 0 2px 6px rgba(102,126,234,0.4);
+}
+
+/* ── Main Chat Area ───────────────────────────────────── */
+.mx-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    position: relative;
+    background: var(--mx-chat-bg);
+}
+
+/* Chat header */
+.mx-chat-header {
+    background: var(--mx-panel-bg);
+    border-bottom: 1px solid var(--mx-border);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    z-index: 5;
+}
+.mx-back-btn {
+    display: none;
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: var(--mx-bg);
+    border: none;
+    color: var(--mx-text);
+    align-items: center; justify-content: center;
+    font-size: 1rem;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.mx-chat-title { font-weight: 700; font-size: 0.95rem; color: var(--mx-text); line-height: 1.2; }
+.mx-chat-status { font-size: 0.72rem; color: var(--mx-muted); display: flex; align-items: center; gap: 4px; }
+.mx-chat-status.online { color: var(--mx-online); }
+.mx-online-indicator { width: 7px; height: 7px; border-radius: 50%; background: var(--mx-online); display: inline-block; }
+.mx-header-actions { margin-left: auto; display: flex; gap: 6px; }
+.mx-header-btn {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1px solid var(--mx-border);
+    color: var(--mx-muted);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.18s;
+}
+.mx-header-btn:hover { background: var(--mx-bg); color: var(--mx-primary); border-color: var(--mx-primary); }
+
+/* Product strip */
+.mx-product-strip {
+    display: none;
+    background: var(--mx-panel-bg);
+    border-bottom: 1px solid var(--mx-border);
+    padding: 10px 16px;
+    gap: 12px;
+    align-items: center;
+    animation: mxFadeSlideDown 0.25s ease;
+}
+.mx-product-strip.show { display: flex; }
+@keyframes mxFadeSlideDown { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+.mx-product-img {
+    width: 44px; height: 54px;
+    border-radius: 8px; object-fit: cover;
+    background: var(--mx-bg); flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.mx-product-info { flex: 1; min-width: 0; }
+.mx-product-name {
+    font-size: 0.83rem; font-weight: 700; color: var(--mx-text);
+    line-height: 1.3; display: -webkit-box;
+    -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.mx-product-price { font-size: 0.9rem; font-weight: 900; color: #E11D48; margin-top: 2px; }
+.mx-product-cta {
+    background: linear-gradient(135deg, var(--mx-primary), var(--mx-primary-dark));
+    color: #fff; border: none; border-radius: 20px;
+    padding: 7px 14px; font-size: 0.75rem; font-weight: 700;
+    cursor: pointer; white-space: nowrap; flex-shrink: 0;
+    text-decoration: none; display: inline-block;
+    transition: opacity 0.2s;
+}
+.mx-product-cta:hover { opacity: 0.88; color: #fff; }
+.mx-product-strip-close {
+    color: var(--mx-muted); background: none; border: none;
+    cursor: pointer; font-size: 0.85rem; flex-shrink: 0; padding: 4px;
+}
+
+/* Messages area */
+.mx-messages-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(102,126,234,0.15) transparent;
+    background: var(--mx-chat-bg);
+    background-image: radial-gradient(circle at 20% 20%, rgba(102,126,234,0.03) 0%, transparent 60%);
+}
+.mx-messages-area::-webkit-scrollbar { width: 4px; }
+.mx-messages-area::-webkit-scrollbar-thumb { background: rgba(102,126,234,0.15); border-radius: 2px; }
+
+/* Date separator */
+.mx-date-sep {
+    text-align: center; margin: 10px 0 6px; display: flex; align-items: center; gap: 10px;
+}
+.mx-date-sep::before, .mx-date-sep::after {
+    content: ''; flex: 1; height: 1px; background: var(--mx-border);
+}
+.mx-date-sep span {
+    font-size: 0.7rem; color: var(--mx-muted); font-weight: 600;
+    background: var(--mx-panel-bg);
+    border-radius: 12px; padding: 3px 10px;
+    border: 1px solid var(--mx-border);
+}
+
+/* Unread separator */
+.mx-unread-sep {
+    text-align: center; margin: 6px 0;
+    font-size: 0.7rem; font-weight: 700; color: var(--mx-primary);
+    display: flex; align-items: center; gap: 8px;
+}
+.mx-unread-sep::before, .mx-unread-sep::after {
+    content: ''; flex: 1; height: 1px; background: rgba(102,126,234,0.25);
+}
+
+/* Bubble rows */
+.mx-row {
+    display: flex;
+    max-width: 72%;
+    margin-bottom: 2px;
+    animation: mxBubbleIn 0.22s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes mxBubbleIn { from{opacity:0;transform:scale(0.85) translateY(8px)} to{opacity:1;transform:scale(1) translateY(0)} }
+.mx-row.out { margin-left: auto; flex-direction: row-reverse; }
+.mx-row.in  { margin-right: auto; }
+
+.mx-bubble {
+    padding: 9px 13px 7px;
+    border-radius: var(--mx-radius);
+    font-size: 0.87rem;
+    line-height: 1.5;
+    word-break: break-word;
+    position: relative;
+    max-width: 100%;
+}
+.mx-row.out .mx-bubble {
+    background: linear-gradient(135deg, var(--mx-bubble-out-a), var(--mx-bubble-out-b));
+    color: #fff;
+    border-bottom-right-radius: 5px;
+    box-shadow: 0 2px 10px rgba(102,126,234,0.3);
+}
+.mx-row.in .mx-bubble {
+    background: var(--mx-bubble-in);
+    color: var(--mx-bubble-in-text);
+    border-bottom-left-radius: 5px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+}
+html[data-theme="dark"] .mx-row.in .mx-bubble { box-shadow: 0 1px 6px rgba(0,0,0,0.3); }
+
+.mx-bubble-meta {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    margin-top: 3px;
+    opacity: 0.7;
+}
+.mx-bubble-meta .mx-time { font-size: 0.62rem; }
+.mx-row.out .mx-bubble-meta { color: rgba(255,255,255,0.85); }
+.mx-row.in  .mx-bubble-meta { color: var(--mx-muted); }
+.mx-tick i { font-size: 0.6rem; }
+.mx-tick.read i { color: var(--mx-read-tick); }
+
+/* Group bubble tails (first/last in sequence) */
+.mx-row.out.tail .mx-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: 0; right: -7px;
+    width: 0; height: 0;
+    border-style: solid;
+    border-width: 8px 0 0 10px;
+    border-color: transparent transparent transparent var(--mx-primary-dark);
+}
+.mx-row.in.tail .mx-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: -7px;
+    width: 0; height: 0;
+    border-style: solid;
+    border-width: 8px 10px 0 0;
+    border-color: transparent var(--mx-bubble-in) transparent transparent;
+}
+
+/* Sending state */
+.mx-row.sending .mx-bubble { opacity: 0.6; }
+.mx-row.sending .mx-tick i { color: rgba(255,255,255,0.5); }
+
+/* Typing indicator */
+.mx-typing {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0 2px 4px;
+    animation: mxFadeSlideDown 0.2s ease;
+}
+.mx-typing.show { display: flex; }
+.mx-typing-bubble {
+    background: var(--mx-bubble-in);
+    border-radius: var(--mx-radius);
+    border-bottom-left-radius: 5px;
+    padding: 10px 14px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+    display: flex; gap: 4px; align-items: center;
+}
+.mx-typing-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--mx-muted);
+    animation: mxTyping 1.2s infinite;
+}
+.mx-typing-dot:nth-child(2) { animation-delay: 0.18s; }
+.mx-typing-dot:nth-child(3) { animation-delay: 0.36s; }
+@keyframes mxTyping { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+
+/* Quick replies */
+.mx-quick-wrap {
+    padding: 8px 12px 4px;
+    background: var(--mx-panel-bg);
+    border-top: 1px solid var(--mx-border);
+    display: flex; gap: 6px; overflow-x: auto;
+    scrollbar-width: none; flex-shrink: 0;
+}
+.mx-quick-wrap::-webkit-scrollbar { display: none; }
+.mx-quick-chip {
+    border: 1px solid rgba(102,126,234,0.3);
+    border-radius: 999px;
+    padding: 5px 12px;
+    font-size: 0.75rem; font-weight: 700;
+    color: var(--mx-primary); background: rgba(102,126,234,0.06);
+    white-space: nowrap; cursor: pointer;
+    transition: all 0.18s;
+    flex-shrink: 0;
+}
+.mx-quick-chip:hover { background: var(--mx-primary); color: #fff; border-color: var(--mx-primary); }
+
+/* Input area */
+.mx-input-area {
+    background: var(--mx-panel-bg);
+    border-top: 1px solid var(--mx-border);
+    padding: 10px 12px;
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+    box-shadow: 0 -2px 12px rgba(0,0,0,0.04);
+}
+.mx-action-btn {
+    width: 38px; height: 38px;
+    border-radius: 50%; border: none;
+    background: var(--mx-bg);
+    color: var(--mx-muted); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.05rem; flex-shrink: 0;
+    transition: all 0.18s;
+}
+.mx-action-btn:hover { background: rgba(102,126,234,0.1); color: var(--mx-primary); }
+.mx-textarea-wrap {
+    flex: 1;
+    background: var(--mx-bg);
+    border-radius: 22px;
+    padding: 8px 14px;
+    display: flex; align-items: flex-end;
+}
+html[data-theme="dark"] .mx-textarea-wrap { background: #0d1117; }
+#msgInput {
+    flex: 1; border: none; background: transparent; outline: none;
+    font-size: 0.88rem; color: var(--mx-text); resize: none;
+    min-height: 22px; max-height: 120px; line-height: 1.5;
+    font-family: inherit; overflow-y: auto; scrollbar-width: none;
+}
+#msgInput::placeholder { color: var(--mx-muted); }
+.mx-send-btn {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--mx-primary), var(--mx-primary-dark));
+    border: none; color: #fff; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; flex-shrink: 0;
+    box-shadow: 0 4px 14px rgba(102,126,234,0.4);
+    transition: transform 0.18s cubic-bezier(.34,1.56,.64,1), box-shadow 0.18s;
+}
+.mx-send-btn:hover { transform: scale(1.08); box-shadow: 0 6px 18px rgba(102,126,234,0.5); }
+.mx-send-btn:active { transform: scale(0.92); }
+.mx-send-btn:disabled { opacity: 0.5; transform: none; cursor: not-allowed; }
+
+/* Empty/idle states */
+.mx-idle-state {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 14px; padding: 40px 24px; text-align: center;
+}
+.mx-idle-icon {
+    width: 96px; height: 96px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(102,126,234,0.12), rgba(118,75,162,0.1));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.5rem; color: var(--mx-primary);
+    animation: mxIdleFloat 3s ease-in-out infinite;
+}
+@keyframes mxIdleFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+.mx-idle-title { font-size: 1.05rem; font-weight: 700; color: var(--mx-text); }
+.mx-idle-sub { font-size: 0.82rem; color: var(--mx-muted); line-height: 1.6; max-width: 260px; }
+.mx-idle-cta {
+    background: linear-gradient(135deg, var(--mx-primary), var(--mx-primary-dark));
+    color: #fff; border: none; border-radius: 999px;
+    padding: 10px 28px; font-size: 0.85rem; font-weight: 700;
+    cursor: pointer; text-decoration: none; display: inline-block;
+    box-shadow: 0 4px 14px rgba(102,126,234,0.35);
+    transition: opacity 0.2s;
+}
+.mx-idle-cta:hover { opacity: 0.88; color: #fff; }
+
+/* Sidebar empty state */
+.mx-list-empty {
+    display: none; padding: 48px 20px;
+    text-align: center; flex-direction: column; align-items: center; gap: 12px;
+}
+.mx-list-empty.show { display: flex; }
+.mx-list-empty-icon { font-size: 2.8rem; color: rgba(102,126,234,0.3); }
+.mx-list-empty-text { font-size: 0.85rem; color: var(--mx-muted); line-height: 1.5; }
+
+/* Loading */
+.mx-loading { text-align: center; padding: 20px; color: var(--mx-muted); font-size: 0.85rem; }
+
+/* Error toast */
+.mx-toast {
+    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+    background: #ef4444; color: #fff; padding: 10px 22px; border-radius: 999px;
+    font-size: 0.83rem; font-weight: 600; z-index: 9999;
+    animation: mxFadeSlideDown 0.25s ease; box-shadow: 0 4px 16px rgba(239,68,68,0.4);
     white-space: nowrap;
 }
-html[data-theme="dark"] .msg-qa-btn {
-    background: #1f2c34;
-    border-color: #334155;
-    color: #cbd5e1;
-}
-html[data-theme="dark"] .msg-input-area { border-top-color: #2a3942; }
-.msg-input-area textarea {
-    flex: 1; border: none; border-radius: 20px;
-    padding: 10px 16px; font-size: 0.9rem;
-    background: #f0f2f5; outline: none;
-    resize: none; max-height: 120px; line-height: 1.4; font-family: inherit;
-}
-html[data-theme="dark"] .msg-input-area textarea { background: #2a3942; color: #e2e8f0; }
-.msg-send-btn {
-    width: 44px; height: 44px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--msg-primary), var(--msg-primary-dark));
-    color: #fff; border: none; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.1rem; flex-shrink: 0; transition: transform 0.15s;
-}
-.msg-send-btn:hover { transform: scale(1.08); }
-.msg-send-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-.msg-empty-state {
-    flex: 1; display: flex; align-items: center; justify-content: center;
-    flex-direction: column; color: #8696a0; text-align: center; padding: 40px;
-}
-.msg-empty-state i { font-size: 4rem; margin-bottom: 16px; opacity: 0.3; }
-.msg-empty-state h3 { font-size: 1.1rem; margin-bottom: 8px; }
-.msg-empty-state p { font-size: 0.85rem; }
-.msg-loading { text-align: center; padding: 20px; color: #8696a0; font-size: 0.85rem; }
-.msg-sending { opacity: 0.6; }
-.msg-error-toast {
-    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
-    background: #ef4444; color: #fff; padding: 10px 20px; border-radius: 20px;
-    font-size: 0.85rem; z-index: 9999; animation: msgFadeIn 0.3s;
-}
-@keyframes msgFadeIn { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
 
+/* ── Mobile Responsive ───────────────────────────────── */
 @media (max-width: 768px) {
-    .msg-app { height: calc(100vh - 60px); }
-    .msg-sidebar { width: 100%; border-right: none; }
-    .msg-chat-area {
-        display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-        z-index: 100; background: var(--msg-bg);
+    body { overflow: hidden; }
+    .mx-app { height: calc(100dvh - 56px); }
+
+    .mx-sidebar {
+        position: absolute; top: 0; left: 0; bottom: 0;
+        width: 100%; z-index: 20;
+        transition: transform 0.3s cubic-bezier(.4,0,.2,1);
     }
-    .msg-chat-area.mobile-open { display: flex; }
-    .msg-chat-back { display: block; }
-    .msg-bubble-row { max-width: 85%; }
-    .msg-app { position: relative; }
-    .msg-input-area { padding-bottom: 72px; }
-    .msg-chat-header { padding: 8px 10px; }
-    .msg-chat-header-name { font-size: 0.88rem; }
-    .msg-chat-header-sub { font-size: 0.7rem; }
-    .msg-product-strip { padding: 7px 8px; }
-    .msg-product-media { width: 36px; height: 44px; }
-    .msg-quick-actions { padding: 6px 8px 0; }
-    .msg-qa-btn { font-size: 0.68rem; padding: 5px 9px; }
+    .mx-sidebar.hidden {
+        transform: translateX(-100%);
+        pointer-events: none;
+    }
+
+    .mx-main {
+        position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+        z-index: 15;
+        transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+        transform: translateX(100%);
+    }
+    .mx-main.open { transform: translateX(0); }
+
+    .mx-back-btn { display: flex; }
+    .mx-bubble-row, .mx-row { max-width: 88%; }
+
+    .mx-idle-state { padding: 30px 20px; }
+    .mx-idle-icon { width: 80px; height: 80px; font-size: 2rem; }
+
+    .mx-quick-wrap { padding: 6px 10px 4px; }
+    .mx-input-area { padding: 8px 10px; padding-bottom: calc(8px + env(safe-area-inset-bottom)); }
+    .mx-messages-area { padding: 12px 10px; }
 }
+
+/* ── Scroll to bottom button ─────────────────────────── */
+.mx-scroll-down {
+    position: absolute; bottom: 90px; right: 16px;
+    width: 38px; height: 38px;
+    border-radius: 50%; border: 1px solid var(--mx-border);
+    background: var(--mx-panel-bg); color: var(--mx-text);
+    display: none; align-items: center; justify-content: center;
+    font-size: 0.9rem; cursor: pointer;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.12);
+    z-index: 5; transition: opacity 0.2s;
+}
+.mx-scroll-down.show { display: flex; }
 </style>
 {% endblock %}
 
 {% block content %}
 {% csrf_token %}
-<div class="msg-app" id="msgApp">
-    <div class="msg-sidebar" id="msgSidebar">
-        <div class="msg-sidebar-header">
-            <i class="fas fa-comments fa-lg"></i>
-            <h3 data-zh="消息" data-en="Messages" data-fr="Messages">消息</h3>
-            <a class="msg-new-chat-btn" href="{% url 'manager:public_books' %}">
-                <i class="fas fa-pen"></i><span data-zh="新建" data-en="New" data-fr="Nouveau">新建</span>
+
+<div class="mx-app" id="mxApp">
+
+    <!-- ── Sidebar ── -->
+    <aside class="mx-sidebar" id="mxSidebar">
+        <div class="mx-sidebar-header">
+            <i class="fas fa-comment-dots" style="font-size:1.25rem;opacity:.9;"></i>
+            <h2 class="mx-sidebar-title" data-zh="消息" data-en="Messages" data-fr="Messages">消息</h2>
+            <a class="mx-compose-btn" href="{% url 'manager:public_books' %}" title="New conversation">
+                <i class="fas fa-pen-nib"></i>
             </a>
         </div>
-        <div class="msg-search-box">
-            <input type="text" id="msgSearchInput" placeholder="{% trans '搜索对话...' %}" oninput="filterConversations(this.value)">
-        </div>
-        <div class="msg-convo-list" id="msgConvoList">
-            <div class="msg-loading" id="msgLoading">
-                <i class="fas fa-spinner fa-spin"></i> Loading...
+
+        <div class="mx-search-wrap">
+            <div class="mx-search-inner">
+                <i class="fas fa-search"></i>
+                <input type="text" id="mxSearchInput" placeholder="{% trans '搜索对话...' %}"
+                       oninput="mxFilterConvos(this.value)" autocomplete="off">
             </div>
-            <div class="msg-empty-state" id="msgListEmpty" style="display:none;padding:40px 20px;">
-                <i class="fas fa-comments"></i>
-                <p data-zh="暂无对话" data-en="No conversations yet" data-fr="Aucune conversation">暂无对话</p>
-                <p style="font-size:.75rem;margin-top:8px;" data-zh="浏览商品并点击「聊天」按钮开始对话" data-en="Browse products and tap Chat to start" data-fr="Parcourez les produits et appuyez sur Chat">浏览商品并点击「聊天」按钮开始对话</p>
-                <a href="{% url 'manager:public_books' %}" style="margin-top:12px;padding:8px 20px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-radius:20px;text-decoration:none;font-size:.85rem;font-weight:600;">
-                    <i class="fas fa-store me-1"></i><span data-zh="去逛逛" data-en="Browse" data-fr="Parcourir">去逛逛</span>
+        </div>
+
+        <div class="mx-filter-tabs" id="mxFilterTabs">
+            <button class="mx-filter-tab active" data-filter="all" onclick="mxSetFilter('all',this)">
+                {% trans "全部" %}
+            </button>
+            <button class="mx-filter-tab" data-filter="unread" onclick="mxSetFilter('unread',this)">
+                {% trans "未读" %}
+            </button>
+            <button class="mx-filter-tab" data-filter="vendor" onclick="mxSetFilter('vendor',this)">
+                {% trans "商家" %}
+            </button>
+        </div>
+
+        <div class="mx-convo-list" id="mxConvoList">
+            <div class="mx-loading" id="mxListLoading">
+                <i class="fas fa-spinner fa-spin me-2"></i>{% trans "加载中..." %}
+            </div>
+            <div class="mx-list-empty" id="mxListEmpty">
+                <div class="mx-list-empty-icon"><i class="fas fa-comments"></i></div>
+                <p class="mx-list-empty-text" data-zh="暂无对话&#10;浏览商品并点击「聊天」" data-en="No conversations yet&#10;Browse products and tap Chat" data-fr="Aucune conversation&#10;Parcourez les produits">
+                    {% trans "暂无对话" %}<br>
+                    <span style="font-size:.75rem">{% trans "浏览商品并点击「聊天」按钮" %}</span>
+                </p>
+                <a href="{% url 'manager:public_books' %}" class="mx-idle-cta" style="margin-top:4px;font-size:.78rem;padding:8px 20px;">
+                    <i class="fas fa-store me-1"></i>{% trans "去逛逛" %}
                 </a>
             </div>
         </div>
-    </div>
+    </aside>
 
-        <div class="msg-chat-area" id="msgChatArea" aria-live="polite">
-        <div class="msg-empty-state" id="msgNoChatSelected">
-            <i class="fas fa-comment-dots"></i>
-            <h3 data-zh="选择一个对话" data-en="Select a conversation" data-fr="Sélectionnez une conversation">选择一个对话</h3>
-            <p data-zh="从左侧选择一个对话开始聊天" data-en="Choose a conversation from the left to start chatting" data-fr="Choisissez une conversation à gauche">从左侧选择一个对话开始聊天</p>
+    <!-- ── Main chat panel ── -->
+    <main class="mx-main" id="mxMain">
+
+        <!-- Idle: no convo selected -->
+        <div class="mx-idle-state" id="mxIdle">
+            <div class="mx-idle-icon"><i class="fas fa-comment-smile"></i></div>
+            <p class="mx-idle-title" data-zh="选择一个对话" data-en="Select a conversation" data-fr="Sélectionnez une conversation">{% trans "选择一个对话" %}</p>
+            <p class="mx-idle-sub" data-zh="从左侧列表选择一个对话，或点击任意商品页的「聊天」按钮开始新对话。" data-en="Choose a conversation from the list, or tap Chat on any product page to start a new one." data-fr="Choisissez une conversation dans la liste ou appuyez sur Chat sur une page produit.">
+                {% trans "从左侧列表选择一个对话，或点击任意商品页的「聊天」按钮开始新对话。" %}
+            </p>
+            <a href="{% url 'manager:public_books' %}" class="mx-idle-cta">
+                <i class="fas fa-store me-1"></i>{% trans "浏览商品" %}
+            </a>
         </div>
-        <div id="msgChatContent" style="display:none;flex-direction:column;flex:1;min-height:0;">
-            <div class="msg-chat-header">
-                <button class="msg-chat-back" onclick="closeMobileChat()"><i class="fas fa-arrow-left"></i></button>
-                <div class="msg-avatar" id="chatAvatar">V</div>
+
+        <!-- Active chat: shown when convo is selected -->
+        <div id="mxChatPanel" style="display:none;flex-direction:column;flex:1;min-height:0;height:100%;">
+
+            <!-- Chat header -->
+            <div class="mx-chat-header" id="mxChatHeader">
+                <button class="mx-back-btn" id="mxBackBtn" onclick="mxGoBack()" aria-label="Back">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <div class="mx-avatar" id="mxHeaderAvatar" style="width:38px;height:38px;font-size:.85rem;"></div>
                 <div style="flex:1;min-width:0;">
-                    <a class="msg-chat-header-name" id="chatHeaderName" href="#" style="text-decoration:none;">Vendor</a>
-                    <div class="msg-chat-header-sub" id="chatHeaderSub"></div>
+                    <div class="mx-chat-title" id="mxChatTitle">—</div>
+                    <div class="mx-chat-status" id="mxChatStatus">
+                        <span id="mxStatusText">{% trans "点击查看详情" %}</span>
+                    </div>
                 </div>
-                <a id="chatShopLink" href="#" style="display:none;color:var(--msg-primary);font-size:0.8rem;text-decoration:none;font-weight:600;">
-                    <i class="fas fa-store me-1"></i><span data-zh="店铺" data-en="Shop" data-fr="Boutique">店铺</span>
-                </a>
-            </div>
-            <div class="msg-product-strip" id="msgProductStrip">
-                <img id="msgProductMedia" class="msg-product-media" src="/static/img/default_product.png" alt="">
-                <div style="min-width:0;flex:1;">
-                    <div class="msg-product-name" id="msgProductName"></div>
-                    <div class="msg-product-price" id="msgProductPrice"></div>
+                <div class="mx-header-actions">
+                    <button class="mx-header-btn" onclick="mxToggleProductStrip()" title="{% trans '查看商品' %}">
+                        <i class="fas fa-tag"></i>
+                    </button>
+                    <button class="mx-header-btn" onclick="mxClearChat()" title="{% trans '清除聊天' %}">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
                 </div>
-                <a id="msgProductBtn" class="msg-product-btn" href="#" target="_self" data-zh="查看" data-en="View" data-fr="Voir">查看</a>
             </div>
-            <div class="msg-messages-area" id="msgMessagesArea">
-                <div class="msg-loading" id="msgChatLoading"><i class="fas fa-spinner fa-spin"></i></div>
-            </div>
-            <div class="msg-quick-actions" id="msgQuickActions">
-                <button class="msg-qa-btn" type="button" onclick="insertQuickReply('{% trans "你好，我正在看这个商品" %}')">{% trans "打招呼" %}</button>
-                <button class="msg-qa-btn" type="button" onclick="insertQuickReply('{% trans "这个商品还有库存吗？" %}')">{% trans "问库存" %}</button>
-                <button class="msg-qa-btn" type="button" onclick="insertQuickReply('{% trans "可以给我一个优惠价吗？" %}')">{% trans "问价格" %}</button>
-                <button class="msg-qa-btn" type="button" onclick="insertQuickReply('{% trans "多久可以发货？" %}')">{% trans "问发货" %}</button>
-                <button class="msg-qa-btn" type="button" onclick="insertQuickReply('{% trans "请把商品链接发给我" %}')">{% trans "要链接" %}</button>
-            </div>
-            <div class="msg-input-area">
-                <textarea id="msgInput" rows="1" placeholder="{% trans '输入消息...' %}" onkeydown="handleInputKey(event)"></textarea>
-                <button class="msg-send-btn" id="msgSendBtn" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
 
-{% block extra_js %}
+            <!-- Product strip -->
+            <div class="mx-product-strip" id="mxProductStrip">
+                <img class="mx-product-img" id="mxProductImg" src="" alt="">
+                <div class="mx-product-info">
+                    <div class="mx-product-name" id="mxProductName"></div>
+                    <div class="mx-product-price" id="mxProductPrice"></div>
+                </div>
+                <a class="mx-product-cta" id="mxProductLink" href="#" target="_blank" data-zh="查看" data-en="View" data-fr="Voir">{% trans "查看" %}</a>
+                <button class="mx-product-strip-close" onclick="document.getElementById('mxProductStrip').classList.remove('show')" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Messages -->
+            <div class="mx-messages-area" id="mxMessages" onscroll="mxOnScroll()">
+                <!-- bubbles injected by JS -->
+            </div>
+
+            <!-- Scroll to bottom -->
+            <button class="mx-scroll-down" id="mxScrollDownBtn" onclick="mxScrollBottom()" aria-label="Scroll to bottom">
+                <i class="fas fa-chevron-down"></i>
+            </button>
+
+            <!-- Typing indicator -->
+            <div class="mx-typing" id="mxTyping" style="padding:0 14px 4px;">
+                <div class="mx-avatar" style="width:30px;height:30px;font-size:.7rem;" id="mxTypingAvatar"></div>
+                <div class="mx-typing-bubble">
+                    <span class="mx-typing-dot"></span>
+                    <span class="mx-typing-dot"></span>
+                    <span class="mx-typing-dot"></span>
+                </div>
+            </div>
+
+            <!-- Quick replies -->
+            <div class="mx-quick-wrap" id="mxQuickReplies">
+                <button class="mx-quick-chip" onclick="mxQuickReply(this.textContent)">👋 {% trans "你好" %}</button>
+                <button class="mx-quick-chip" onclick="mxQuickReply(this.textContent)">📦 {% trans "还有库存吗？" %}</button>
+                <button class="mx-quick-chip" onclick="mxQuickReply(this.textContent)">💰 {% trans "可以优惠吗？" %}</button>
+                <button class="mx-quick-chip" onclick="mxQuickReply(this.textContent)">🚚 {% trans "多久能发货？" %}</button>
+                <button class="mx-quick-chip" onclick="mxQuickReply(this.textContent)">✅ {% trans "好的，谢谢！" %}</button>
+            </div>
+
+            <!-- Input area -->
+            <div class="mx-input-area">
+                <button class="mx-action-btn" onclick="mxToggleEmoji()" aria-label="Emoji" title="Emoji">
+                    <i class="far fa-smile"></i>
+                </button>
+                <div class="mx-textarea-wrap">
+                    <textarea id="msgInput" rows="1"
+                              placeholder="{% trans '输入消息...' %}"
+                              onkeydown="mxKeyDown(event)"
+                              oninput="mxAutoResize(this)"></textarea>
+                </div>
+                <button class="mx-action-btn" onclick="mxPickFile()" aria-label="Attach" title="Attach">
+                    <i class="fas fa-paperclip"></i>
+                </button>
+                <button class="mx-send-btn" id="msgSendBtn" onclick="mxSendMessage()" aria-label="Send">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div><!-- /mxChatPanel -->
+    </main><!-- /mx-main -->
+</div><!-- /mx-app -->
+
 <script>
 (function() {
-    var conversations = [];
-    var activeConvoId = null;
-    var pollTimer = null;
-    var sending = false;
-    var activeUnreadCount = 0;
-    var CONVO_API = '/manager/api/conversations/';
-    var SEND_API = '/manager/public/messages/send/';
+'use strict';
 
-    function getCSRF() {
-        var el = document.querySelector('[name=csrfmiddlewaretoken]');
-        if (el) return el.value;
-        var match = document.cookie.match('(^|;)\\s*csrftoken=([^;]*)');
-        return match ? decodeURIComponent(match[2]) : '';
-    }
+var CONVOS_API = "{% url 'manager:api_conversations' %}";
+var MESSAGES_API_BASE = "/manager/api/conversations/";
+var SEND_API = "{% url 'manager:public_send_message' %}";
 
-    function showError(msg) {
-        var toast = document.createElement('div');
-        toast.className = 'msg-error-toast';
-        toast.textContent = msg;
-        document.body.appendChild(toast);
-        setTimeout(function() { toast.remove(); }, 3000);
-    }
+var activeConvoId = null;
+var activeConvoName = '';
+var sending = false;
+var pollTimer = null;
+var currentFilter = 'all';
+var _convos = [];
 
-    function conversationIdFromUrl() {
-        var raw = new URLSearchParams(window.location.search).get('conversation');
-        if (raw === null || raw === '') return null;
-        var n = parseInt(raw, 10);
-        return Number.isFinite(n) ? n : null;
-    }
+// ── Utils ──────────────────────────────────────────────
+function esc(s) { var d = document.createElement('div'); d.textContent = s||''; return d.innerHTML; }
+function csrf() { return (document.querySelector('[name=csrfmiddlewaretoken]')||{}).value || ''; }
+function pad(n) { return n<10?'0'+n:''+n; }
+function avatarColor(name) {
+    var colors = [
+        ['#667eea','#764ba2'],['#f97316','#ea580c'],['#10b981','#059669'],
+        ['#ec4899','#db2777'],['#8b5cf6','#7c3aed'],['#06b6d4','#0891b2'],
+        ['#ef4444','#dc2626'],['#f59e0b','#d97706']
+    ];
+    var idx = (name||'').charCodeAt(0) % colors.length;
+    return colors[idx];
+}
+function avatarInitials(name) {
+    name = (name||'?').trim();
+    return name.charAt(0).toUpperCase();
+}
+function setAvatar(el, name) {
+    if (!el) return;
+    var c = avatarColor(name);
+    el.style.background = 'linear-gradient(135deg,'+c[0]+','+c[1]+')';
+    el.textContent = avatarInitials(name);
+}
+function toast(msg, type) {
+    var t = document.createElement('div');
+    t.className = 'mx-toast';
+    t.style.background = type === 'success' ? '#10b981' : '#ef4444';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(function() { if(t.parentNode) t.remove(); }, 3500);
+}
 
-    function applyConversationDeepLink() {
-        var cid = conversationIdFromUrl();
-        if (cid === null) return;
-        var cur = activeConvoId != null ? Number(activeConvoId) : null;
-        if (cur === cid) return;
-        openChat(cid);
-    }
-
-    function loadConversations() {
-        fetch(CONVO_API, { credentials: 'same-origin' })
-            .then(function(r) {
-                if (!r.ok) throw new Error('HTTP ' + r.status);
-                return r.json();
-            })
-            .then(function(data) {
-                if (data.error === 'not_logged_in') {
-                    document.getElementById('msgLoading').innerHTML = '<div style="padding:20px;text-align:center;"><i class="fas fa-lock" style="font-size:2rem;opacity:0.3;margin-bottom:8px;display:block;"></i><p style="font-size:0.85rem;color:#8696a0;">Please log in to view messages</p><a href="{% url "manager:user_login" %}" style="color:#667eea;text-decoration:none;font-weight:600;">Log in</a></div>';
-                    return;
-                }
-                conversations = data.conversations || [];
-                renderConvoList();
-                applyConversationDeepLink();
-            })
-            .catch(function(e) {
-                document.getElementById('msgLoading').innerHTML = '<p style="color:#ef4444;">Failed to load conversations</p>';
-            });
-    }
-
-    function renderConvoList() {
-        var list = document.getElementById('msgConvoList');
-        var empty = document.getElementById('msgListEmpty');
-        var loading = document.getElementById('msgLoading');
-        if (loading) loading.style.display = 'none';
-
-        if (conversations.length === 0) {
-            list.innerHTML = '';
-            list.appendChild(empty);
-            empty.style.display = 'flex';
-            applyConversationDeepLink();
-            return;
-        }
-        empty.style.display = 'none';
-        var html = '';
-        conversations.forEach(function(c) {
-            var quickStart = c.vendor_id
-                ? '/manager/public/messages/start/?vendor_id=' + c.vendor_id + '&subject=' + encodeURIComponent(c.subject || c.vendor_name || '')
-                : '#';
-            html += '<div class="msg-convo-item' + (Number(c.id) === Number(activeConvoId) ? ' active' : '') + '" onclick="openChat(' + c.id + ')" data-search="' + escAttr(c.vendor_name + ' ' + c.subject) + '">';
-            html += '<div class="msg-avatar">' + escHtml(c.vendor_avatar) + '</div>';
-            html += '<div class="msg-convo-info">';
-            html += '<a class="msg-convo-name-link" href="' + quickStart + '" onclick="event.stopPropagation();">' + escHtml(c.vendor_name) + '</a>';
-            html += '<div class="msg-convo-preview">' + escHtml(c.last_message || c.subject) + '</div>';
-            if (c.ref_item && c.ref_item.name) {
-                html += '<span class="msg-convo-ref">' + escHtml(c.ref_item.name) + '</span>';
-            }
-            html += '</div>';
-            html += '<div class="msg-convo-meta">';
-            html += '<span class="msg-convo-time">' + (c.last_time || '') + '</span>';
-            if (c.unread > 0) html += '<span class="msg-unread-badge">' + c.unread + '</span>';
-            html += '</div></div>';
-        });
-        list.innerHTML = html;
-    }
-
-    function renderRefItem(refItem) {
-        var strip = document.getElementById('msgProductStrip');
-        if (!strip) return;
-        if (!refItem) {
-            strip.classList.remove('show');
-            return;
-        }
-        document.getElementById('msgProductMedia').src = refItem.image || '/static/img/default_product.png';
-        document.getElementById('msgProductName').textContent = refItem.name || '';
-        document.getElementById('msgProductPrice').textContent = refItem.price ? ('¥' + refItem.price) : '';
-        document.getElementById('msgProductBtn').href = refItem.url || '#';
-        strip.classList.add('show');
-    }
-
-    window.openChat = function(convoId) {
-        convoId = Number(convoId);
-        if (!Number.isFinite(convoId)) return;
-        activeConvoId = convoId;
-        renderConvoList();
-        document.getElementById('msgNoChatSelected').style.display = 'none';
-        var chatContent = document.getElementById('msgChatContent');
-        chatContent.style.display = 'flex';
-        var chatArea = document.getElementById('msgChatArea');
-        chatArea.classList.add('mobile-open');
-        chatArea.classList.add('thread-open');
-        var convo = conversations.find(function(c) { return Number(c.id) === convoId; });
-        if (convo) {
-            activeUnreadCount = parseInt(convo.unread || 0, 10) || 0;
-            document.getElementById('chatAvatar').textContent = convo.vendor_avatar;
-            var headerName = document.getElementById('chatHeaderName');
-            headerName.textContent = convo.vendor_name;
-            if (convo.vendor_id) {
-                headerName.href = '/manager/public/messages/start/?vendor_id=' + convo.vendor_id + '&subject=' + encodeURIComponent(convo.subject || convo.vendor_name || '');
-                headerName.style.pointerEvents = 'auto';
-            } else {
-                headerName.href = '#';
-                headerName.style.pointerEvents = 'none';
-            }
-            document.getElementById('chatHeaderSub').textContent = convo.subject;
-            var shopLink = document.getElementById('chatShopLink');
-            if (convo.vendor_id) {
-                shopLink.href = '/manager/public/shop/' + convo.vendor_id + '/';
-                shopLink.style.display = '';
-            } else {
-                shopLink.style.display = 'none';
-            }
-            renderRefItem(convo.ref_item || null);
-        } else {
-            renderRefItem(null);
-        }
-        document.getElementById('msgMessagesArea').innerHTML = '<div class="msg-loading"><i class="fas fa-spinner fa-spin"></i></div>';
-        loadMessages(convoId);
-        if (pollTimer) clearInterval(pollTimer);
-        pollTimer = setInterval(function() { loadMessages(convoId, true); }, 5000);
-        setTimeout(function() { document.getElementById('msgInput').focus(); }, 300);
-    };
-
-    window.closeMobileChat = function() {
-        var chatArea = document.getElementById('msgChatArea');
-        chatArea.classList.remove('mobile-open');
-        chatArea.classList.remove('thread-open');
-        activeConvoId = null;
-        activeUnreadCount = 0;
-        document.getElementById('msgChatContent').style.display = 'none';
-        document.getElementById('msgNoChatSelected').style.display = 'flex';
-        renderRefItem(null);
-        if (pollTimer) clearInterval(pollTimer);
-        loadConversations();
-    };
-
-    function loadMessages(convoId, silent) {
-        fetch('/manager/api/conversations/' + convoId + '/messages/', { credentials: 'same-origin' })
-            .then(function(r) {
-                if (!r.ok) throw new Error('HTTP ' + r.status);
-                return r.json();
-            })
-            .then(function(data) {
-                if (!silent || Number(convoId) === Number(activeConvoId)) {
-                    renderMessages(data.messages || []);
-                    if (data.conversation) {
-                        renderRefItem(data.conversation.ref_item || null);
-                    }
-                }
-                if (!silent) loadConversations();
-            })
-            .catch(function(e) {
-                if (!silent) {
-                    document.getElementById('msgMessagesArea').innerHTML = '<div class="msg-loading" style="color:#ef4444;">Failed to load messages</div>';
-                }
-            });
-    }
-
-    function renderMessages(msgs) {
-        var area = document.getElementById('msgMessagesArea');
-        if (msgs.length === 0) {
-            area.innerHTML = '<div style="text-align:center;padding:40px;color:#8696a0;font-size:0.85rem;"><i class="fas fa-hand-paper" style="font-size:2rem;opacity:0.3;display:block;margin-bottom:8px;"></i>Say hello to start the conversation!</div>';
-            return;
-        }
-        var html = '';
-        var lastDate = '';
-        var unreadIncoming = Math.max(0, parseInt(activeUnreadCount || 0, 10));
-        var incomingSeenFromEnd = 0;
-        var unreadInsertAt = -1;
-        if (unreadIncoming > 0) {
-            for (var i = msgs.length - 1; i >= 0; i--) {
-                if (msgs[i].sender_type !== 'buyer') {
-                    incomingSeenFromEnd += 1;
-                    if (incomingSeenFromEnd === unreadIncoming) {
-                        unreadInsertAt = i;
-                        break;
-                    }
-                }
-            }
-        }
-        msgs.forEach(function(m, idx) {
-            if (unreadInsertAt >= 0 && idx === unreadInsertAt) {
-                html += '<div class="msg-unread-separator">{% trans "未读消息" %}</div>';
-            }
-            if (m.date !== lastDate) {
-                html += '<div class="msg-date-separator"><span>' + m.date + '</span></div>';
-                lastDate = m.date;
-            }
-            var isOut = m.sender_type === 'buyer';
-            html += '<div class="msg-bubble-row ' + (isOut ? 'out' : 'in') + '">';
-            html += '<div class="msg-bubble">';
-            html += escHtml(m.content);
-            html += '<div class="msg-bubble-time">' + m.time;
-            if (isOut && m.is_read) html += ' <i class="fas fa-check-double" style="color:#53bdeb;margin-left:3px;font-size:0.6rem;"></i>';
-            html += '</div></div></div>';
-        });
-        area.innerHTML = html;
-        area.scrollTop = area.scrollHeight;
-        activeUnreadCount = 0;
-    }
-
-    window.sendMessage = function() {
-        if (sending) return;
-        var input = document.getElementById('msgInput');
-        var text = input.value.trim();
-        if (!text || !activeConvoId) return;
-
-        sending = true;
-        var btn = document.getElementById('msgSendBtn');
-        btn.disabled = true;
-        input.value = '';
-        input.style.height = 'auto';
-
-        var area = document.getElementById('msgMessagesArea');
-        var tempBubble = document.createElement('div');
-        tempBubble.className = 'msg-bubble-row out msg-sending';
-        tempBubble.innerHTML = '<div class="msg-bubble">' + escHtml(text) + '<div class="msg-bubble-time"><i class="fas fa-clock" style="font-size:0.6rem;"></i></div></div>';
-        area.appendChild(tempBubble);
-        area.scrollTop = area.scrollHeight;
-
-        var csrf = getCSRF();
-        var fd = new FormData();
-        fd.append('conversation_id', activeConvoId);
-        fd.append('content', text);
-        fd.append('message', text);
-
-        fetch(SEND_API, {
-            method: 'POST',
-            body: fd,
-            headers: { 'X-CSRFToken': csrf },
-            credentials: 'same-origin'
-        })
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-            sending = false;
-            btn.disabled = false;
-            if (data.success) {
-                loadMessages(activeConvoId);
-                loadConversations();
-            } else {
-                tempBubble.remove();
-                input.value = text;
-                showError(data.message || 'Failed to send message');
-            }
-        })
-        .catch(function(e) {
-            sending = false;
-            btn.disabled = false;
-            tempBubble.remove();
-            input.value = text;
-            showError('Network error - please try again');
-        });
-    };
-
-    window.handleInputKey = function(e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            sendMessage();
-        }
-    };
-
-    window.insertQuickReply = function(text) {
-        var input = document.getElementById('msgInput');
-        if (!input) return;
-        input.value = text || '';
-        input.focus();
-    };
-
-    window.filterConversations = function(q) {
-        q = q.toLowerCase();
-        document.querySelectorAll('.msg-convo-item').forEach(function(el) {
-            var search = (el.dataset.search || '').toLowerCase();
-            el.style.display = search.indexOf(q) !== -1 ? '' : 'none';
-        });
-    };
-
-    function escHtml(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
-    function escAttr(s) { return (s || '').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
-
-    window.addEventListener('pageshow', function() {
-        applyConversationDeepLink();
+// ── Load conversations ─────────────────────────────────
+function loadConvos() {
+    fetch(CONVOS_API, {credentials:'same-origin'})
+    .then(function(r){return r.json();})
+    .then(function(data){
+        _convos = data.conversations || [];
+        renderConvos(_convos);
+        document.getElementById('mxListLoading').style.display = 'none';
+        // Re-poll active convo messages
+        if (activeConvoId) loadMessages(activeConvoId, false);
+    })
+    .catch(function(){
+        document.getElementById('mxListLoading').style.display = 'none';
     });
-    loadConversations();
-    setTimeout(applyConversationDeepLink, 50);
+}
+
+function renderConvos(convos) {
+    var list = document.getElementById('mxConvoList');
+    var loading = document.getElementById('mxListLoading');
+    var empty = document.getElementById('mxListEmpty');
+
+    // Remove old items (keep loading + empty)
+    list.querySelectorAll('.mx-convo-item').forEach(function(el){el.remove();});
+
+    var filtered = convos.filter(function(c) {
+        if (currentFilter === 'unread') return c.unread_count > 0;
+        if (currentFilter === 'vendor') return c.vendor_name;
+        return true;
+    });
+
+    if (!filtered.length) {
+        empty.classList.add('show');
+        return;
+    }
+    empty.classList.remove('show');
+
+    filtered.forEach(function(c) {
+        var item = document.createElement('div');
+        item.className = 'mx-convo-item' + (c.id == activeConvoId ? ' active' : '');
+        item.dataset.id = c.id;
+        item.dataset.search = ((c.vendor_name||'')+(c.last_message||'')+(c.ref_item_name||'')).toLowerCase();
+        item.setAttribute('role','button');
+        item.setAttribute('tabindex','0');
+
+        var vendorName = c.vendor_name || c.subject || '商家';
+        var colors = avatarColor(vendorName);
+        var preview = c.last_message ? esc(c.last_message) : '<em style="opacity:.6">{% trans "开始对话" %}</em>';
+        var youPrefix = c.last_sender_type === 'buyer' ? '<span style="color:var(--mx-primary);font-weight:700;margin-right:2px;">{% trans "我:" %}</span>' : '';
+        var refPill = c.ref_item_name ? '<span class="mx-convo-ref-pill">'+esc(c.ref_item_name)+'</span>' : '';
+        var unreadBadge = c.unread_count > 0
+            ? '<span class="mx-unread-badge">'+c.unread_count+'</span>' : '';
+        var timeStr = c.last_time || '';
+
+        item.innerHTML = [
+            '<div class="mx-avatar" style="background:linear-gradient(135deg,'+colors[0]+','+colors[1]+');">',
+                '<span>'+avatarInitials(vendorName)+'</span>',
+                '<div class="mx-online-dot"></div>',
+            '</div>',
+            '<div class="mx-convo-info">',
+                '<div class="mx-convo-name">'+esc(vendorName)+'</div>',
+                '<div class="mx-convo-preview">'+youPrefix+preview+refPill+'</div>',
+            '</div>',
+            '<div class="mx-convo-meta">',
+                '<span class="mx-convo-time">'+esc(timeStr)+'</span>',
+                unreadBadge,
+            '</div>',
+        ].join('');
+
+        item.addEventListener('click', function() { mxOpenConvo(c); });
+        item.addEventListener('keydown', function(e){ if(e.key==='Enter') mxOpenConvo(c); });
+        list.insertBefore(item, empty);
+    });
+}
+
+// ── Open conversation ─────────────────────────────────
+function mxOpenConvo(c) {
+    activeConvoId = c.id;
+    activeConvoName = c.vendor_name || c.subject || '商家';
+
+    // Mark active in list
+    document.querySelectorAll('.mx-convo-item').forEach(function(el){
+        el.classList.toggle('active', el.dataset.id == c.id);
+    });
+
+    // Update header
+    var headerAvatar = document.getElementById('mxHeaderAvatar');
+    setAvatar(headerAvatar, activeConvoName);
+    document.getElementById('mxChatTitle').textContent = activeConvoName;
+    document.getElementById('mxStatusText').textContent = '{% trans "对话进行中..." %}';
+
+    // Update typing avatar
+    setAvatar(document.getElementById('mxTypingAvatar'), activeConvoName);
+
+    // Product strip
+    var strip = document.getElementById('mxProductStrip');
+    if (c.ref_item_name) {
+        document.getElementById('mxProductName').textContent = c.ref_item_name;
+        document.getElementById('mxProductPrice').textContent = c.ref_item_price ? '¥' + c.ref_item_price : '';
+        var img = document.getElementById('mxProductImg');
+        img.src = c.ref_item_image || '/static/img/default_product.png';
+        img.alt = c.ref_item_name;
+        var link = document.getElementById('mxProductLink');
+        link.href = c.ref_item_url || '#';
+        strip.classList.add('show');
+    } else {
+        strip.classList.remove('show');
+    }
+
+    // Show chat panel
+    document.getElementById('mxIdle').style.display = 'none';
+    var panel = document.getElementById('mxChatPanel');
+    panel.style.display = 'flex';
+
+    // Mobile: slide in
+    document.getElementById('mxMain').classList.add('open');
+    document.getElementById('mxSidebar').classList.add('hidden');
+
+    loadMessages(c.id, true);
+
+    // Poll
+    clearInterval(pollTimer);
+    pollTimer = setInterval(function() {
+        loadMessages(activeConvoId, false);
+    }, 5000);
+
+    // Update URL
+    try { history.replaceState(null, '', '?convo=' + c.id); } catch(e){}
+}
+
+// ── Load messages ─────────────────────────────────────
+function loadMessages(convoId, scrollToBottom) {
+    if (!convoId) return;
+    fetch(MESSAGES_API_BASE + convoId + '/messages/', {credentials:'same-origin'})
+    .then(function(r){return r.json();})
+    .then(function(data){
+        renderMessages(data.messages || [], scrollToBottom !== false);
+    })
+    .catch(function(){});
+}
+
+function renderMessages(msgs, scrollBottom) {
+    var area = document.getElementById('mxMessages');
+    var html = '';
+    var lastDate = null;
+    var prevType = null;
+
+    msgs.forEach(function(m, idx) {
+        var isOut = m.sender_type === 'buyer';
+        var isLast = idx === msgs.length - 1;
+        var nextSameType = (idx < msgs.length - 1) && msgs[idx+1].sender_type === m.sender_type;
+        var tail = isLast || !nextSameType;
+
+        // Date separator
+        if (m.date !== lastDate) {
+            html += '<div class="mx-date-sep"><span>' + esc(m.date) + '</span></div>';
+            lastDate = m.date;
+        }
+
+        var rowClass = 'mx-row ' + (isOut ? 'out' : 'in') + (tail ? ' tail' : '');
+
+        // Tick icon for outgoing
+        var tickHtml = '';
+        if (isOut) {
+            if (m.is_read) {
+                tickHtml = '<span class="mx-tick read"><i class="fas fa-check-double"></i></span>';
+            } else {
+                tickHtml = '<span class="mx-tick"><i class="fas fa-check"></i></span>';
+            }
+        }
+
+        html += '<div class="' + rowClass + '">';
+        html += '<div class="mx-bubble">';
+        html += esc(m.content);
+        html += '<div class="mx-bubble-meta">';
+        html += '<span class="mx-time">' + esc(m.time) + '</span>';
+        html += tickHtml;
+        html += '</div>';
+        html += '</div></div>';
+
+        prevType = m.sender_type;
+    });
+
+    area.innerHTML = html || '<div style="text-align:center;padding:30px 20px;color:var(--mx-muted);font-size:.85rem;">{% trans "还没有消息，开始对话吧！" %}</div>';
+
+    if (scrollBottom) {
+        area.scrollTop = area.scrollHeight;
+        document.getElementById('mxScrollDownBtn').classList.remove('show');
+    }
+}
+
+// ── Send message ──────────────────────────────────────
+window.mxSendMessage = function() {
+    if (sending) return;
+    var input = document.getElementById('msgInput');
+    var text = (input.value || '').trim();
+    if (!text || !activeConvoId) return;
+
+    sending = true;
+    var btn = document.getElementById('msgSendBtn');
+    btn.disabled = true;
+    input.value = '';
+    mxAutoResize(input);
+
+    // Optimistic bubble
+    var area = document.getElementById('mxMessages');
+    var temp = document.createElement('div');
+    temp.className = 'mx-row out tail sending';
+    temp.innerHTML = '<div class="mx-bubble">' + esc(text) +
+        '<div class="mx-bubble-meta"><span class="mx-time"><i class="fas fa-clock" style="font-size:.55rem;"></i></span><span class="mx-tick"><i class="fas fa-clock" style="font-size:.55rem;"></i></span></div>' +
+        '</div>';
+    area.appendChild(temp);
+    area.scrollTop = area.scrollHeight;
+
+    var fd = new FormData();
+    fd.append('conversation_id', activeConvoId);
+    fd.append('content', text);
+    fd.append('message', text);
+
+    fetch(SEND_API, {
+        method: 'POST', body: fd,
+        headers: {'X-CSRFToken': csrf()},
+        credentials: 'same-origin'
+    })
+    .then(function(r){return r.json();})
+    .then(function(data) {
+        sending = false; btn.disabled = false;
+        if (data.success) {
+            loadMessages(activeConvoId, true);
+            loadConvos();
+        } else {
+            temp.remove(); input.value = text;
+            toast(data.message || '{% trans "发送失败，请重试" %}');
+        }
+    })
+    .catch(function() {
+        sending = false; btn.disabled = false;
+        temp.remove(); input.value = text;
+        toast('{% trans "网络错误，请重试" %}');
+    });
+};
+
+// ── UI helpers ────────────────────────────────────────
+window.mxKeyDown = function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); mxSendMessage(); }
+};
+window.mxAutoResize = function(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+};
+window.mxQuickReply = function(text) {
+    var input = document.getElementById('msgInput');
+    input.value = text.replace(/^[\u{1F300}-\u{1F9FF}\u{2702}-\u{27B0}\s]+/u,'').trim();
+    input.focus();
+};
+window.mxFilterConvos = function(q) {
+    q = q.toLowerCase();
+    document.querySelectorAll('.mx-convo-item').forEach(function(el) {
+        el.style.display = (el.dataset.search||'').indexOf(q) !== -1 ? '' : 'none';
+    });
+};
+window.mxSetFilter = function(filter, btn) {
+    currentFilter = filter;
+    document.querySelectorAll('.mx-filter-tab').forEach(function(t) {
+        t.classList.toggle('active', t === btn);
+    });
+    renderConvos(_convos);
+};
+window.mxGoBack = function() {
+    document.getElementById('mxMain').classList.remove('open');
+    document.getElementById('mxSidebar').classList.remove('hidden');
+    clearInterval(pollTimer);
+    try { history.replaceState(null, '', window.location.pathname); } catch(e){}
+};
+window.mxToggleProductStrip = function() {
+    var strip = document.getElementById('mxProductStrip');
+    strip.classList.toggle('show');
+};
+window.mxClearChat = function() { /* future: options menu */ };
+window.mxToggleEmoji = function() { /* future: emoji picker */ };
+window.mxPickFile = function() { /* future: file attach */ };
+window.mxScrollBottom = function() {
+    var area = document.getElementById('mxMessages');
+    area.scrollTop = area.scrollHeight;
+    document.getElementById('mxScrollDownBtn').classList.remove('show');
+};
+window.mxOnScroll = function() {
+    var area = document.getElementById('mxMessages');
+    var atBottom = area.scrollHeight - area.scrollTop - area.clientHeight < 80;
+    document.getElementById('mxScrollDownBtn').classList.toggle('show', !atBottom);
+};
+
+// ── Deep-link (URL param ?convo=) ─────────────────────
+function applyDeepLink() {
+    var params = new URLSearchParams(window.location.search);
+    var cid = params.get('convo');
+    if (!cid) return;
+    var found = _convos.find(function(c){ return String(c.id) === String(cid); });
+    if (found) mxOpenConvo(found);
+}
+
+// ── Init ──────────────────────────────────────────────
+loadConvos();
+setTimeout(function() {
+    loadConvos(); // second load to get fresh data
+    setTimeout(applyDeepLink, 100);
+}, 200);
+
+// Reload convos every 10s (background tab friendly)
+setInterval(function() {
+    if (document.visibilityState !== 'hidden') loadConvos();
+}, 10000);
+
 })();
 </script>
 {% endblock %}

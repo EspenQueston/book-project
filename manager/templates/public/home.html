@@ -695,86 +695,49 @@
         box-shadow: 0 15px 35px rgba(255, 255, 255, 0.3);
     }
 
-    /* Responsive Design */
+    /* ===== MOBILE RESPONSIVE — Compact hero ===== */
     @media (max-width: 768px) {
+        body { background: #f4f5f7; }
+
         .hero-section {
             min-height: auto;
-            padding: 86px 0 26px 0;
-            border-bottom-left-radius: 18px;
-            border-bottom-right-radius: 18px;
+            padding: 64px 0 18px;
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
         }
         .hero-title {
-            font-size: 2.45rem;
-            line-height: 1.1;
-            margin-bottom: 10px;
-            font-family: "Cinzel", "Georgia", "Times New Roman", serif;
+            font-size: 2rem;
+            line-height: 1.12;
+            margin-bottom: 6px;
             font-weight: 900;
-            letter-spacing: 0.8px;
+            letter-spacing: 0.5px;
         }
-        
         .hero-subtitle {
-            font-size: 0.95rem;
-            margin-bottom: 14px;
-            line-height: 1.45;
+            font-size: 0.88rem;
+            margin-bottom: 10px;
+            line-height: 1.5;
+            opacity: 0.92;
         }
-        
-        .hero-stats {
-            gap: 8px;
-            margin-top: 16px;
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-        
-        .hero-stat {
-            padding: 10px 8px;
-            min-width: 0;
-            border-radius: 12px;
-            backdrop-filter: blur(8px);
-        }
-        
-        .hero-stat-number {
-            font-size: 1.25rem;
-            margin-bottom: 2px;
-        }
-        .hero-stat-label {
-            font-size: 0.72rem;
-            letter-spacing: 0.2px;
-            text-transform: none;
-        }
-        
+        .hero-stats { display: none; }
         .cta-buttons {
             flex-direction: row;
             flex-wrap: nowrap;
             gap: 8px;
-            margin-top: 14px;
+            margin-top: 12px;
+            justify-content: flex-start;
         }
-        
         .btn-hero {
-            width: 100%;
+            flex: 1;
             min-width: 0;
-            margin-bottom: 0;
-            padding: 11px 10px;
-            font-size: 0.82rem;
+            padding: 10px 12px;
+            font-size: 0.8rem;
             border-radius: 12px;
-            letter-spacing: 0.3px;
+            letter-spacing: 0px;
         }
-        
-        .section-title {
-            font-size: 2.2rem;
-        }
-        
-        .feature-card {
-            margin-bottom: 30px;
-            padding: 40px 25px;
-        }
-        
-        .book-actions {
-            flex-direction: column;
-        }
-        
-        .cta-title {
-            font-size: 2rem;
-        }
+        .section-title { font-size: 1.8rem; }
+        .feature-card { margin-bottom: 20px; padding: 28px 18px; }
+        .book-actions { flex-direction: column; }
+        .cta-title { font-size: 1.7rem; }
     }
 
     /* Animation Effects */
@@ -808,17 +771,21 @@
         100% { background-position: 200% 0; }
     }
 
-    /* ===== King Kong Zone ===== */
+    /* ===== King Kong Zone — Modern App Style ===== */
     .king-kong-zone {
         background: #fff;
-        padding: 14px 12px 8px;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        padding: 16px 10px 10px;
+        box-shadow: 0 1px 0 rgba(0,0,0,0.06);
+        position: relative;
     }
-    html[data-theme="dark"] .king-kong-zone { background: #1e293b; }
+    html[data-theme="dark"] .king-kong-zone {
+        background: #1e293b;
+        box-shadow: 0 1px 0 rgba(255,255,255,0.06);
+    }
     .kk-grid {
         display: grid;
         grid-template-columns: repeat(5, 1fr);
-        gap: 6px 4px;
+        gap: 10px 6px;
         max-width: 500px;
         margin: 0 auto;
     }
@@ -826,75 +793,134 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 5px;
+        gap: 6px;
         text-decoration: none;
         color: #374151;
-        font-size: 0.7rem;
-        font-weight: 600;
+        font-size: 0.68rem;
+        font-weight: 700;
         padding: 4px 2px;
-        border-radius: 10px;
-        transition: transform 0.2s;
+        border-radius: 12px;
+        transition: transform 0.18s cubic-bezier(.34,1.56,.64,1);
+        -webkit-tap-highlight-color: transparent;
     }
     html[data-theme="dark"] .kk-item { color: #e2e8f0; }
-    .kk-item:hover { transform: scale(1.08); color: #667eea; }
+    .kk-item:active { transform: scale(0.88); }
+    .kk-item:hover { transform: scale(1.06); color: #667eea; }
     .kk-icon {
-        width: 46px;
-        height: 46px;
-        border-radius: 14px;
+        width: 50px;
+        height: 50px;
+        border-radius: 16px;
         display: flex;
         align-items: center;
         justify-content: center;
         color: #fff;
-        font-size: 1.15rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        font-size: 1.25rem;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.18);
+        transition: box-shadow 0.2s;
+        position: relative;
+        overflow: hidden;
     }
-    /* Show king kong zone on mobile, hide on desktop (already full nav) */
+    .kk-icon::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: rgba(255,255,255,0.15);
+        border-radius: inherit;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+    .kk-item:active .kk-icon::after { opacity: 1; }
+    .kk-label {
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+        line-height: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 52px;
+        text-align: center;
+    }
+    .kk-badge {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        background: #ef4444;
+        color: #fff;
+        font-size: 0.5rem;
+        font-weight: 900;
+        min-width: 15px;
+        height: 15px;
+        border-radius: 99px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1.5px solid #fff;
+    }
+    /* Show king kong zone on mobile, hide on desktop */
     @media (min-width: 769px) {
         .king-kong-zone { display: none; }
     }
 
-    /* ===== Flash Sales Zone ===== */
+    /* ===== Flash Sales Zone — Modern Countdown Style ===== */
     .flash-sales-section {
-        padding: 16px 0 10px;
+        padding: 0;
         background: #fff;
+        margin-top: 6px;
+        border-radius: 0;
     }
     html[data-theme="dark"] .flash-sales-section { background: #0f172a; }
     .flash-banner {
         display: flex;
         align-items: center;
-        gap: 10px;
-        padding: 0 12px 10px;
-        max-width: 600px;
-        margin: 0 auto;
+        gap: 8px;
+        padding: 12px 14px 10px;
+        background: linear-gradient(135deg, #ff4757 0%, #ff6b35 100%);
+        border-radius: 0;
     }
+    html[data-theme="dark"] .flash-banner { background: linear-gradient(135deg, #be123c, #ea580c); }
     .flash-banner-title {
-        font-size: 1rem;
-        font-weight: 800;
-        color: #ef4444;
-        letter-spacing: -0.3px;
+        font-size: 0.95rem;
+        font-weight: 900;
+        color: #fff;
+        letter-spacing: 0.3px;
+        text-shadow: 0 1px 4px rgba(0,0,0,0.15);
     }
     .flash-countdown {
         display: flex;
-        gap: 4px;
+        gap: 3px;
         align-items: center;
         margin-left: auto;
     }
     .flash-cd-part {
-        background: #1a1a2e;
+        background: rgba(0,0,0,0.25);
         color: #fff;
-        font-size: 0.8rem;
-        font-weight: 700;
-        padding: 2px 6px;
-        border-radius: 5px;
-        min-width: 26px;
+        font-size: 0.85rem;
+        font-weight: 900;
+        padding: 3px 7px;
+        border-radius: 6px;
+        min-width: 28px;
         text-align: center;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.5px;
     }
-    .flash-cd-sep { color: #ef4444; font-weight: 700; font-size: 0.9rem; }
+    .flash-cd-sep { color: rgba(255,255,255,0.8); font-weight: 900; font-size: 1rem; line-height: 1; }
+    .flash-see-all {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: rgba(255,255,255,0.9);
+        text-decoration: none;
+        border: 1px solid rgba(255,255,255,0.4);
+        border-radius: 99px;
+        padding: 3px 8px;
+        margin-left: 6px;
+        white-space: nowrap;
+    }
     .flash-scroll {
         display: flex;
         gap: 10px;
         overflow-x: auto;
-        padding: 4px 12px 8px;
+        padding: 10px 12px 10px;
         scroll-snap-type: x mandatory;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
@@ -951,82 +977,62 @@
     }
     .flash-stock-fill { height: 100%; background: linear-gradient(90deg,#ef4444,#f97316); border-radius: 3px; }
 
-    /* ===== PWA: Mobile Search Bar ===== */
-    .pwa-search-bar {
-        display: none;
-    }
+    /* ===== PWA: Mobile Search Bar — App Style ===== */
+    .pwa-search-bar { display: none; }
     @media (max-width: 768px) {
         .pwa-search-bar {
             display: flex;
             align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-            background: #fff;
-            padding: 10px 12px;
+            gap: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 10px 14px;
             position: sticky;
             top: 56px;
-            z-index: 800;
-            border-bottom: 1px solid #f0f0f0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            z-index: 850;
+            box-shadow: 0 3px 14px rgba(102,126,234,0.35);
         }
-        html[data-theme="dark"] .pwa-search-bar { background: #1e293b; border-bottom-color: #334155; }
-        .pwa-search-tabs {
-            width: 100%;
-            display: flex;
-            gap: 6px;
-            overflow-x: auto;
-            scrollbar-width: none;
-        }
-        .pwa-search-tabs::-webkit-scrollbar { display: none; }
-        .pwa-search-tab {
-            border: none;
-            border-radius: 999px;
-            padding: 6px 12px;
-            background: #f3f4f6;
-            color: #64748b;
-            font-size: 12px;
-            font-weight: 700;
-            white-space: nowrap;
-        }
-        .pwa-search-tab.active {
-            background: linear-gradient(135deg,#667eea,#764ba2);
-            color: #fff;
+        html[data-theme="dark"] .pwa-search-bar {
+            background: linear-gradient(135deg, #4338ca 0%, #5b21b6 100%);
         }
         .pwa-search-inner {
             flex: 1;
             display: flex;
             align-items: center;
-            background: #F5F5F5;
-            border-radius: 20px;
-            padding: 0 12px;
-            height: 42px;
+            background: rgba(255,255,255,0.92);
+            border-radius: 22px;
+            padding: 0 14px;
+            height: 40px;
             gap: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        html[data-theme="dark"] .pwa-search-inner { background: #0f172a; }
+        html[data-theme="dark"] .pwa-search-inner { background: rgba(15,23,42,0.8); }
         .pwa-search-inner input {
             flex: 1;
             border: none;
             background: transparent;
-            font-size: 13px;
+            font-size: 13.5px;
             outline: none;
-            color: #333;
+            color: #1e293b;
             padding: 0;
         }
         html[data-theme="dark"] .pwa-search-inner input { color: #e2e8f0; }
-        .pwa-search-inner i { color: #999; font-size: 15px; }
+        .pwa-search-inner i { color: #94a3b8; font-size: 14px; flex-shrink: 0; }
         .pwa-scan-btn {
-            width: 42px;
-            height: 42px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border: none;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.35);
             color: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            font-size: 16px;
+            font-size: 15px;
+            transition: background 0.2s;
+            -webkit-tap-highlight-color: transparent;
         }
+        .pwa-scan-btn:active { background: rgba(255,255,255,0.35); }
     }
     /* ===== Best Deals Auto-Sliding Carousel ===== */
     .bd-carousel-section {
@@ -1180,43 +1186,125 @@
         .bd-carousel-slide { flex: 0 0 calc(100% / 5 - 10px); }
         .bd-media { height: 142px; }
     }
-    .feed-title { font-size: 1rem; font-weight: 800; color: #1a1a2e; margin-bottom: 12px; }
+    /* ===== Product Feed — Pinterest Modern Style ===== */
+    .feed-section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 14px 8px;
+        background: #fff;
+    }
+    html[data-theme="dark"] .feed-section-header { background: #0f172a; }
+    .feed-title {
+        font-size: 1rem;
+        font-weight: 900;
+        color: #1a1a2e;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .feed-title-dot {
+        width: 6px; height: 6px;
+        border-radius: 50%;
+        background: linear-gradient(135deg,#667eea,#764ba2);
+        display: inline-block;
+    }
     html[data-theme="dark"] .feed-title { color: #e2e8f0; }
+    .feed-see-all {
+        font-size: 0.72rem;
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 700;
+    }
     .feed-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
+        gap: 8px;
+        padding: 0 8px 8px;
+        background: #f4f5f7;
     }
     @media (min-width: 769px) {
-        .feed-grid { grid-template-columns: repeat(4, 1fr); }
+        .feed-grid { grid-template-columns: repeat(4, 1fr); padding: 0; background: transparent; }
         .flash-sales-section { padding: 30px 0 20px; }
         .flash-scroll { padding: 4px 0 8px; max-width: 100%; }
     }
     .feed-card {
         background: #fff;
-        border-radius: 12px;
+        border-radius: 14px;
         overflow: hidden;
-        box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.07);
         text-decoration: none;
         color: inherit;
         display: block;
-        transition: transform 0.2s;
+        transition: transform 0.18s cubic-bezier(.34,1.56,.64,1), box-shadow 0.18s;
+        -webkit-tap-highlight-color: transparent;
+        position: relative;
     }
-    html[data-theme="dark"] .feed-card { background: #1e293b; }
-    .feed-card:hover { transform: translateY(-3px); }
-    .feed-card-img { width: 100%; aspect-ratio: 3/4; object-fit: cover; background: #f3f4f6; }
-    .feed-card-body { padding: 8px 10px 10px; }
-    .feed-card-name { font-size: 0.8rem; font-weight: 600; color: #1a1a2e; line-height: 1.3; }
-    html[data-theme="dark"] .feed-card-name { color: #e2e8f0; }
-    .feed-card-price { font-size: 0.85rem; font-weight: 800; color: #667eea; margin-top: 4px; }
-    .feed-card-tag {
-        display: inline-block;
-        font-size: 0.6rem;
+    html[data-theme="dark"] .feed-card { background: #1e293b; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+    .feed-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.13); }
+    .feed-card:active { transform: scale(0.97); }
+    .feed-card-img {
+        width: 100%;
+        aspect-ratio: 3/4;
+        object-fit: cover;
+        background: linear-gradient(135deg,#f3f4f6,#e5e7eb);
+        display: block;
+    }
+    .feed-card-body { padding: 9px 10px 10px; }
+    .feed-card-name {
+        font-size: 0.8rem;
         font-weight: 700;
-        padding: 2px 6px;
-        border-radius: 8px;
-        margin-top: 4px;
+        color: #1a1a2e;
+        line-height: 1.35;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        min-height: 2.1em;
     }
+    html[data-theme="dark"] .feed-card-name { color: #e2e8f0; }
+    .feed-card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 6px;
+    }
+    .feed-card-price {
+        font-size: 0.95rem;
+        font-weight: 900;
+        color: #E11D48;
+        line-height: 1;
+    }
+    .feed-card-tag {
+        display: inline-flex;
+        align-items: center;
+        font-size: 0.58rem;
+        font-weight: 800;
+        padding: 2px 7px;
+        border-radius: 6px;
+        line-height: 1.4;
+    }
+    .feed-card-wishlist {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.9);
+        border: none;
+        color: #cbd5e1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        cursor: pointer;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+        transition: color 0.2s;
+        -webkit-tap-highlight-color: transparent;
+    }
+    .feed-card-wishlist.wishlisted { color: #ef4444; }
     .feed-load-more { text-align: center; padding: 16px 0; }
     .feed-load-more button {
         background: linear-gradient(135deg,#667eea,#764ba2);
@@ -1224,14 +1312,13 @@
         border: none;
         padding: 10px 30px;
         border-radius: 25px;
-        font-weight: 600;
+        font-weight: 700;
         cursor: pointer;
         font-size: 0.85rem;
+        box-shadow: 0 4px 15px rgba(102,126,234,0.3);
     }
     #feedLoader { text-align: center; padding: 12px; color: #9ca3af; font-size: 0.85rem; }
-    @media (min-width: 769px) {
-        .feed-section { display: none; }
-    }
+    @media (min-width: 769px) { .feed-section { display: none; } }
 
 /* ===== New Arrivals Section ===== */
 .new-arrivals-section { padding: 80px 0; background: #fff; }
@@ -1267,7 +1354,7 @@
 .stat-label { font-size: .95rem; color: rgba(255,255,255,.75); margin-top: 8px; font-weight: 500; }
 .stat-icon { width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,.15); display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; font-size: 1.4rem; color: #fff; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,.2); }
 
-/* ===== MOBILE: Hide all sections after the feed ===== */
+/* ===== MOBILE: Hide desktop-only sections ===== */
 @media (max-width: 768px) {
     .features-section,
     .search-section,
@@ -1278,6 +1365,113 @@
     .cta-section {
         display: none !important;
     }
+    /* Bottom nav padding */
+    body { padding-bottom: 64px; }
+}
+
+/* ===== MOBILE BOTTOM NAVIGATION ===== */
+.mobile-bottom-nav {
+    display: none;
+}
+@media (max-width: 768px) {
+    .mobile-bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 58px;
+        background: rgba(255,255,255,0.97);
+        backdrop-filter: blur(12px) saturate(180%);
+        -webkit-backdrop-filter: blur(12px) saturate(180%);
+        border-top: 1px solid rgba(0,0,0,0.07);
+        z-index: 999;
+        align-items: stretch;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+    }
+    html[data-theme="dark"] .mobile-bottom-nav {
+        background: rgba(15,23,42,0.97);
+        border-top-color: rgba(255,255,255,0.08);
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
+    }
+    .mbn-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        text-decoration: none;
+        color: #94a3b8;
+        font-size: 0.58rem;
+        font-weight: 700;
+        position: relative;
+        transition: color 0.18s;
+        -webkit-tap-highlight-color: transparent;
+        letter-spacing: 0.2px;
+    }
+    html[data-theme="dark"] .mbn-item { color: #64748b; }
+    .mbn-item.active { color: #667eea; }
+    html[data-theme="dark"] .mbn-item.active { color: #818cf8; }
+    .mbn-icon {
+        font-size: 1.3rem;
+        line-height: 1;
+        transition: transform 0.18s cubic-bezier(.34,1.56,.64,1);
+    }
+    .mbn-item.active .mbn-icon { transform: translateY(-2px); }
+    .mbn-item:active .mbn-icon { transform: scale(0.85); }
+    .mbn-active-bar {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%) scaleX(0);
+        width: 28px;
+        height: 2.5px;
+        border-radius: 0 0 3px 3px;
+        background: linear-gradient(135deg,#667eea,#764ba2);
+        transition: transform 0.25s cubic-bezier(.34,1.56,.64,1);
+    }
+    .mbn-item.active .mbn-active-bar { transform: translateX(-50%) scaleX(1); }
+    .mbn-badge {
+        position: absolute;
+        top: 4px;
+        right: calc(50% - 16px);
+        min-width: 16px;
+        height: 16px;
+        border-radius: 99px;
+        background: #ef4444;
+        color: #fff;
+        font-size: 0.5rem;
+        font-weight: 900;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 3px;
+        border: 1.5px solid #fff;
+    }
+    html[data-theme="dark"] .mbn-badge { border-color: #0f172a; }
+    /* Center home button - special pill design */
+    .mbn-center {
+        position: relative;
+        top: -10px;
+    }
+    .mbn-center .mbn-icon-wrap {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: linear-gradient(135deg,#667eea,#764ba2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 1.35rem;
+        box-shadow: 0 6px 20px rgba(102,126,234,0.5);
+        border: 3px solid #fff;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    html[data-theme="dark"] .mbn-center .mbn-icon-wrap { border-color: #0f172a; }
+    .mbn-center:active .mbn-icon-wrap { transform: scale(0.9); box-shadow: 0 3px 10px rgba(102,126,234,0.35); }
+    .mbn-center-label { color: #667eea; }
 }
 </style>
 {% endblock %}
@@ -1331,30 +1525,14 @@
 
 <!-- ===== PWA: Mobile Search Bar (sticky, mobile only) ===== -->
 <div class="pwa-search-bar" id="pwaSearchBar">
-    <form class="pwa-search-inner" action="{% url 'manager:public_search' %}" method="get" id="pwaQuickSearchForm" style="flex:1;">
+    <form class="pwa-search-inner" action="{% url 'manager:public_search' %}" method="get" id="pwaQuickSearchForm">
         <i class="fas fa-search"></i>
         <input type="text" name="q" id="pwaSearchInput" placeholder="{% trans '搜索图书、商品、课程...' %}" autocomplete="off">
     </form>
-    <button class="pwa-scan-btn" onclick="document.getElementById('pwaQuickSearchForm').submit()">
+    <button class="pwa-scan-btn" onclick="document.getElementById('pwaQuickSearchForm').submit()" aria-label="Search">
         <i class="fas fa-search"></i>
     </button>
 </div>
-<script>
-// Rotating placeholder
-(function() {
-    var inp = document.getElementById('pwaSearchInput');
-    if (!inp) return;
-    var hints = ['Django pour débutants...','Python, Machine Learning...','Livres de cuisine...','Cours de Business...','Manga et BD...','Romans policiers...'];
-    var i = 0;
-    function cycle() {
-        if (inp.name !== 'search') return;
-        inp.placeholder = hints[i % hints.length];
-        i++;
-    }
-    cycle();
-    setInterval(cycle, 3000);
-})();
-</script>
 
 <!-- ===== Best Deals Auto-Sliding Carousel ===== -->
 {% if best_deals %}
@@ -1403,121 +1581,155 @@
 </section>
 {% endif %}
 
-<!-- ===== PWA Feature 2: King Kong Category Zone (mobile: 2 rows x 5 icons) ===== -->
+<!-- ===== PWA: King Kong Category Zone (mobile only, 2×5 icon grid) ===== -->
 <section class="king-kong-zone" id="kingKongZone">
     <div class="kk-grid">
         <a href="{% url 'manager:public_books' %}" class="kk-item">
-            <div class="kk-icon" style="background:linear-gradient(135deg,#667eea,#764ba2)"><i class="fas fa-book"></i></div>
-            <span data-zh="图书" data-en="Books" data-fr="Livres">图书</span>
+            <div class="kk-icon" style="background:linear-gradient(135deg,#667eea,#764ba2)">
+                <i class="fas fa-book"></i>
+            </div>
+            <span class="kk-label" data-zh="图书" data-en="Books" data-fr="Livres">图书</span>
         </a>
         <a href="/marketplace/products/" class="kk-item">
-            <div class="kk-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706)"><i class="fas fa-store"></i></div>
-            <span data-zh="商城" data-en="Market" data-fr="Marché">商城</span>
+            <div class="kk-icon" style="background:linear-gradient(135deg,#f97316,#ea580c)">
+                <i class="fas fa-store"></i>
+            </div>
+            <span class="kk-label" data-zh="商城" data-en="Market" data-fr="Marché">商城</span>
         </a>
         <a href="/marketplace/courses/" class="kk-item">
-            <div class="kk-icon" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed)"><i class="fas fa-graduation-cap"></i></div>
-            <span data-zh="课程" data-en="Courses" data-fr="Cours">课程</span>
+            <div class="kk-icon" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed)">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <span class="kk-label" data-zh="课程" data-en="Courses" data-fr="Cours">课程</span>
         </a>
         <a href="/marketplace/supermarket/" class="kk-item">
-            <div class="kk-icon" style="background:linear-gradient(135deg,#10b981,#059669)"><i class="fas fa-shopping-basket"></i></div>
-            <span data-zh="超市" data-en="Grocery" data-fr="Supermarché">超市</span>
+            <div class="kk-icon" style="background:linear-gradient(135deg,#10b981,#059669)">
+                <i class="fas fa-shopping-basket"></i>
+            </div>
+            <span class="kk-label" data-zh="超市" data-en="Grocery" data-fr="Supermarché">超市</span>
         </a>
         <a href="#flash-sales" class="kk-item">
-            <div class="kk-icon" style="background:linear-gradient(135deg,#ef4444,#dc2626)"><i class="fas fa-bolt"></i></div>
-            <span data-zh="特价" data-en="Deals" data-fr="Promos">特价</span>
+            <div class="kk-icon" style="background:linear-gradient(135deg,#ef4444,#dc2626)" id="kkFlashIcon">
+                <i class="fas fa-bolt"></i>
+                <span class="kk-badge" style="display:none" id="kkFlashBadge">热</span>
+            </div>
+            <span class="kk-label" data-zh="秒杀" data-en="Flash" data-fr="Promos">秒杀</span>
         </a>
         <a href="{% url 'manager:public_authors' %}" class="kk-item">
-            <div class="kk-icon" style="background:linear-gradient(135deg,#ec4899,#db2777)"><i class="fas fa-user-edit"></i></div>
-            <span data-zh="作者" data-en="Authors" data-fr="Auteurs">作者</span>
-        </a>
-        <a href="{% url 'manager:public_publishers' %}" class="kk-item">
-            <div class="kk-icon" style="background:linear-gradient(135deg,#06b6d4,#0891b2)"><i class="fas fa-building"></i></div>
-            <span data-zh="出版社" data-en="Publishers" data-fr="Éditions">出版社</span>
+            <div class="kk-icon" style="background:linear-gradient(135deg,#ec4899,#db2777)">
+                <i class="fas fa-user-edit"></i>
+            </div>
+            <span class="kk-label" data-zh="作者" data-en="Authors" data-fr="Auteurs">作者</span>
         </a>
         <a href="{% url 'manager:public_blog' %}" class="kk-item">
-            <div class="kk-icon" style="background:linear-gradient(135deg,#f97316,#ea580c)"><i class="fas fa-blog"></i></div>
-            <span data-zh="博客" data-en="Blog" data-fr="Blog">博客</span>
+            <div class="kk-icon" style="background:linear-gradient(135deg,#06b6d4,#0891b2)">
+                <i class="fas fa-newspaper"></i>
+            </div>
+            <span class="kk-label" data-zh="博客" data-en="Blog" data-fr="Blog">博客</span>
         </a>
         <a href="{% url 'manager:track_order' %}" class="kk-item">
-            <div class="kk-icon" style="background:linear-gradient(135deg,#6366f1,#4f46e5)"><i class="fas fa-receipt"></i></div>
-            <span data-zh="订单" data-en="Orders" data-fr="Commandes">订单</span>
+            <div class="kk-icon" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">
+                <i class="fas fa-receipt"></i>
+            </div>
+            <span class="kk-label" data-zh="订单" data-en="Orders" data-fr="Commandes">订单</span>
+        </a>
+        <a href="{% url 'manager:public_messages' %}" class="kk-item" id="kkMsgItem">
+            <div class="kk-icon" style="background:linear-gradient(135deg,#14b8a6,#0d9488)" id="kkMsgIcon">
+                <i class="fas fa-comments"></i>
+            </div>
+            <span class="kk-label" data-zh="消息" data-en="Messages" data-fr="Messages">消息</span>
         </a>
         <a href="{% url 'manager:public_contact' %}" class="kk-item">
-            <div class="kk-icon" style="background:linear-gradient(135deg,#6b7280,#4b5563)"><i class="fas fa-headset"></i></div>
-            <span data-zh="客服" data-en="Support" data-fr="Support">客服</span>
+            <div class="kk-icon" style="background:linear-gradient(135deg,#64748b,#475569)">
+                <i class="fas fa-headset"></i>
+            </div>
+            <span class="kk-label" data-zh="客服" data-en="Support" data-fr="Support">客服</span>
         </a>
     </div>
 </section>
 
-<!-- ===== PWA Feature 3: Flash Sales Section ===== -->
+<!-- ===== Flash Sales Section — Modern Countdown Style ===== -->
 {% if flash_sales %}
 <section class="flash-sales-section" id="flash-sales">
-    <div class="container">
-        <div class="flash-banner">
-            <i class="fas fa-bolt" style="color:#ef4444;font-size:1.3rem;"></i>
-            <span class="flash-banner-title" data-zh="⚡ 限时秒杀" data-en="⚡ Flash Sales" data-fr="⚡ Ventes Flash">⚡ 限时秒杀</span>
-            <div class="flash-countdown" id="flashCountdown">
-                <span class="flash-cd-part" id="flashH">00</span>
-                <span class="flash-cd-sep">:</span>
-                <span class="flash-cd-part" id="flashM">00</span>
-                <span class="flash-cd-sep">:</span>
-                <span class="flash-cd-part" id="flashS">00</span>
-            </div>
+    <div class="flash-banner">
+        <i class="fas fa-bolt" style="color:rgba(255,255,255,0.9);font-size:1.1rem;"></i>
+        <span class="flash-banner-title" data-zh="⚡ 限时秒杀" data-en="⚡ Flash Sale" data-fr="⚡ Ventes Flash">⚡ 限时秒杀</span>
+        <div class="flash-countdown" id="flashCountdown">
+            <span class="flash-cd-part" id="flashH">00</span>
+            <span class="flash-cd-sep">:</span>
+            <span class="flash-cd-part" id="flashM">00</span>
+            <span class="flash-cd-sep">:</span>
+            <span class="flash-cd-part" id="flashS">00</span>
         </div>
-        <div class="flash-scroll">
-            {% for sale in flash_sales %}
-            <a href="{{ sale.get_item_url }}" class="flash-card">
-                <img class="flash-card-img" src="{{ sale.get_item_image_url }}" alt="{{ sale.get_item_name }}" loading="lazy" onerror="this.src='/static/img/default_product.png'">
-                <div class="flash-card-body">
-                    <div class="flash-card-name">{{ sale.get_item_name }}</div>
-                    <div class="flash-card-prices">
-                        <span class="flash-price">¥{{ sale.flash_price }}</span>
-                        {% if sale.get_original_price != sale.flash_price %}
-                        <span class="flash-orig">¥{{ sale.get_original_price }}</span>
-                        {% endif %}
-                    </div>
-                    {% if sale.get_discount_percent > 0 %}
-                    <span class="flash-badge">-{{ sale.get_discount_percent }}%</span>
+        <a href="{% url 'manager:public_books' %}" class="flash-see-all" data-zh="查看全部 ›" data-en="See all ›" data-fr="Tout voir ›">查看全部 ›</a>
+    </div>
+    <div class="flash-scroll">
+        {% for sale in flash_sales %}
+        <a href="{{ sale.get_item_url }}" class="flash-card">
+            <img class="flash-card-img" src="{{ sale.get_item_image_url }}" alt="{{ sale.get_item_name }}" loading="lazy" onerror="this.src='/static/img/default_product.png'">
+            <div class="flash-card-body">
+                <div class="flash-card-name">{{ sale.get_item_name }}</div>
+                <div class="flash-card-prices">
+                    <span class="flash-price">&yen;{{ sale.flash_price }}</span>
+                    {% if sale.get_original_price != sale.flash_price %}
+                    <span class="flash-orig">&yen;{{ sale.get_original_price }}</span>
                     {% endif %}
-                    <div class="flash-stock-bar">
-                        <div class="flash-stock-fill" style="width:{% widthratio sale.sold_count sale.stock_limit 100 %}%"></div>
-                    </div>
                 </div>
-            </a>
-            {% endfor %}
-        </div>
+                {% if sale.get_discount_percent > 0 %}
+                <span class="flash-badge">-{{ sale.get_discount_percent }}%</span>
+                {% endif %}
+                <div class="flash-stock-bar">
+                    <div class="flash-stock-fill" style="width:{% widthratio sale.sold_count sale.stock_limit 100 %}%"></div>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
     </div>
 </section>
 {% endif %}
 
-<!-- ===== PWA Feature 1: Infinite 2-column Feed (homepage preview) ===== -->
+<!-- ===== PWA: 2-Column Infinite Feed ===== -->
 <section class="feed-section" id="homeFeed">
-    <div class="container-fluid px-0">
-        <div class="feed-title px-3" data-zh="🔥 热门推荐" data-en="🔥 Hot Items" data-fr="🔥 En vedette">🔥 热门推荐</div>
-        <div class="feed-grid px-2" id="homeFeedGrid">
-            {% for book in featured_books %}
-            <a href="{% url 'manager:public_book_detail' book.id %}" class="feed-card">
-                <img class="feed-card-img" src="{{ book.get_cover_url }}" alt="{{ book.name }}" loading="lazy" onerror="this.src='/static/img/default_cover.png'">
-                <div class="feed-card-body">
-                    <div class="feed-card-name">{{ book.name|truncatechars:28 }}</div>
-                    <div class="feed-card-price">¥{{ book.price }}</div>
+    <div class="feed-section-header">
+        <span class="feed-title">
+            <span class="feed-title-dot"></span>
+            <span data-zh="🔥 热门推荐" data-en="🔥 Hot Items" data-fr="🔥 En vedette">🔥 热门推荐</span>
+        </span>
+        <a href="{% url 'manager:public_books' %}" class="feed-see-all" data-zh="更多 ›" data-en="More ›" data-fr="Plus ›">更多 ›</a>
+    </div>
+    <div class="feed-grid" id="homeFeedGrid">
+        {% for book in featured_books %}
+        <a href="{% url 'manager:public_book_detail' book.id %}" class="feed-card">
+            <img class="feed-card-img" src="{{ book.get_cover_url }}" alt="{{ book.name }}" loading="lazy" onerror="this.src='/static/img/default_cover.png'">
+            <button class="feed-card-wishlist" onclick="event.preventDefault();toggleWishlistFeed(this,{{ book.id }},'book')" aria-label="Wishlist">
+                <i class="far fa-heart"></i>
+            </button>
+            <div class="feed-card-body">
+                <div class="feed-card-name">{{ book.name|truncatechars:28 }}</div>
+                <div class="feed-card-footer">
+                    <span class="feed-card-price">&yen;{{ book.price }}</span>
                     <span class="feed-card-tag" style="background:#ede9fe;color:#7c3aed;" data-zh="图书" data-en="Book" data-fr="Livre">图书</span>
                 </div>
-            </a>
-            {% endfor %}
-            {% for product in featured_products %}
-            <a href="/marketplace/products/{{ product.slug }}/" class="feed-card">
-                <img class="feed-card-img" src="{{ product.get_image_url }}" alt="{{ product.name }}" loading="lazy" onerror="this.src='/static/img/default_product.png'">
-                <div class="feed-card-body">
-                    <div class="feed-card-name">{{ product.name|truncatechars:28 }}</div>
-                    <div class="feed-card-price">¥{{ product.price }}</div>
+            </div>
+        </a>
+        {% endfor %}
+        {% for product in featured_products %}
+        <a href="/marketplace/products/{{ product.slug }}/" class="feed-card">
+            <img class="feed-card-img" src="{{ product.get_image_url }}" alt="{{ product.name }}" loading="lazy" onerror="this.src='/static/img/default_product.png'">
+            <button class="feed-card-wishlist" onclick="event.preventDefault();" aria-label="Wishlist">
+                <i class="far fa-heart"></i>
+            </button>
+            <div class="feed-card-body">
+                <div class="feed-card-name">{{ product.name|truncatechars:28 }}</div>
+                <div class="feed-card-footer">
+                    <span class="feed-card-price">&yen;{{ product.price }}</span>
                     <span class="feed-card-tag" style="background:#fef3c7;color:#d97706;" data-zh="商品" data-en="Product" data-fr="Produit">商品</span>
                 </div>
-            </a>
-            {% endfor %}
-        </div>
-        <div id="feedLoader" style="display:none"><i class="fas fa-spinner fa-spin"></i> <span data-zh="加载中..." data-en="Loading..." data-fr="Chargement...">加载中...</span></div>
+            </div>
+        </a>
+        {% endfor %}
     </div>
+    <div id="feedLoader" style="display:none"><i class="fas fa-spinner fa-spin"></i> <span data-zh="加载中..." data-en="Loading..." data-fr="Chargement...">加载中...</span></div>
 </section>
 
 <!-- Features Section -->
@@ -2276,5 +2488,89 @@ function getCsrfToken() {
     else setupBdMarquee();
     window.addEventListener('resize', setupBdMarquee, { passive: true });
 })();
+
+// ===== Mobile Search Bar: category switcher =====
+function switchMobileSearch(target, action, placeholder, inputName, btn) {
+    var form = document.getElementById('pwaQuickSearchForm');
+    var input = document.getElementById('pwaSearchInput');
+    if (form) form.action = action;
+    if (input) { input.placeholder = placeholder; input.name = inputName; input.focus(); }
+    document.querySelectorAll('.pwa-search-tab').forEach(function(t) {
+        t.classList.toggle('active', t === btn);
+    });
+}
+
+// ===== Mobile Bottom Nav: active state =====
+(function() {
+    var path = window.location.pathname;
+    var navItems = [
+        { sel: '#mbnHome', match: ['/manager/public/', '/manager/', '/'] },
+        { sel: '#mbnSearch', match: ['/manager/public/books', '/manager/public/search'] },
+        { sel: '#mbnCart', match: ['/manager/public/cart'] },
+        { sel: '#mbnMsg', match: ['/manager/public/messages'] },
+        { sel: '#mbnMe', match: ['/manager/public/profile', '/manager/public/user'] },
+    ];
+    navItems.forEach(function(item) {
+        var el = document.querySelector(item.sel);
+        if (!el) return;
+        if (item.match.some(function(m) { return path.startsWith(m); })) {
+            el.classList.add('active');
+        }
+    });
+    // Auto-mark home on homepage
+    if (path === '/manager/public/' || path === '/manager/' || path === '/') {
+        var homeEl = document.querySelector('#mbnHome');
+        if (homeEl) homeEl.classList.add('active');
+    }
+})();
+
+// ===== Feed wishlist toggle =====
+function toggleWishlistFeed(btn, id, type) {
+    var icon = btn.querySelector('i');
+    if (!icon) return;
+    if (icon.classList.contains('fas')) {
+        icon.classList.remove('fas'); icon.classList.add('far');
+        btn.classList.remove('wishlisted');
+    } else {
+        icon.classList.remove('far'); icon.classList.add('fas');
+        btn.classList.add('wishlisted');
+        // pulse animation
+        btn.style.transform = 'scale(1.3)';
+        setTimeout(function() { btn.style.transform = ''; }, 250);
+    }
+}
 </script>
+
+<!-- ===== Mobile Bottom Navigation ===== -->
+<nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="Mobile navigation">
+    <a href="{% url 'manager:public_home' %}" class="mbn-item" id="mbnHome">
+        <div class="mbn-active-bar"></div>
+        <span class="mbn-icon"><i class="fas fa-home"></i></span>
+        <span data-zh="首页" data-en="Home" data-fr="Accueil">首页</span>
+    </a>
+    <a href="{% url 'manager:public_search' %}" class="mbn-item" id="mbnSearch">
+        <div class="mbn-active-bar"></div>
+        <span class="mbn-icon"><i class="fas fa-search"></i></span>
+        <span data-zh="搜索" data-en="Search" data-fr="Recherche">搜索</span>
+    </a>
+    <a href="/manager/public/" class="mbn-item mbn-center" id="mbnShop" aria-label="Shop">
+        <div class="mbn-icon-wrap">
+            <i class="fas fa-store"></i>
+        </div>
+        <span class="mbn-center-label" style="font-size:0.58rem;font-weight:700;margin-top:2px;" data-zh="商城" data-en="Shop" data-fr="Boutique">商城</span>
+    </a>
+    <a href="{% url 'manager:public_messages' %}" class="mbn-item" id="mbnMsg">
+        <div class="mbn-active-bar"></div>
+        <span class="mbn-icon" style="position:relative;">
+            <i class="fas fa-comment-dots"></i>
+            <span class="mbn-badge" id="mbnMsgBadge" style="display:none">0</span>
+        </span>
+        <span data-zh="消息" data-en="Chat" data-fr="Chat">消息</span>
+    </a>
+    <a href="{% url 'manager:user_profile' %}" class="mbn-item" id="mbnMe">
+        <div class="mbn-active-bar"></div>
+        <span class="mbn-icon"><i class="fas fa-user-circle"></i></span>
+        <span data-zh="我的" data-en="Me" data-fr="Moi">我的</span>
+    </a>
+</nav>
 {% endblock %}
