@@ -28,15 +28,19 @@ def main() -> int:
 
     cmd = r"""set -e
 chown -R duno360:www-data /opt/duno360/app || true
+if ! command -v msgfmt >/dev/null 2>&1; then
+  export DEBIAN_FRONTEND=noninteractive
+  apt-get update -qq && apt-get install -y gettext
+fi
 sudo -u duno360 bash -lc 'cd /opt/duno360/app && git -c safe.directory=/opt/duno360/app fetch origin && git -c safe.directory=/opt/duno360/app pull origin main'
-sudo -u duno360 bash -lc 'cd /opt/duno360/app && set -a && . /opt/duno360/.env && set +a && .venv/bin/python manage.py migrate --noinput && (.venv/bin/python manage.py compilemessages || true)'
+sudo -u duno360 bash -lc 'cd /opt/duno360/app && set -a && . /opt/duno360/.env && set +a && .venv/bin/python manage.py migrate --noinput && .venv/bin/python manage.py compilemessages'
 systemctl restart duno360
 systemctl is-active duno360
 """
 
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect(host, username="root", password=pw, timeout=60)
+    client.connect(host, username="root", password=pw, timeout=120)
     _stdin, stdout, stderr = client.exec_command(cmd, get_pty=True)
     out = stdout.read().decode("utf-8", errors="replace")
     err = stderr.read().decode("utf-8", errors="replace")
