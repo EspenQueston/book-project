@@ -57,10 +57,17 @@
         transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
         border: 2px solid transparent;
     }
-    a.text-decoration-none:hover .dash-card.dash-card-click {
+    a.text-decoration-none:hover .dash-card.dash-card-click:not(.dash-orders-hub-tile) {
         transform: translateY(-5px);
         box-shadow: 0 14px 38px rgba(102,126,234,0.2);
         border-color: rgba(102,126,234,0.28);
+    }
+    a.text-decoration-none:hover .dash-orders-hub-tile {
+        transform: translateY(-5px);
+        box-shadow:
+            0 14px 38px rgba(102,126,234,0.22),
+            0 0 0 2px rgba(102, 126, 234, 0.45),
+            0 8px 30px rgba(0, 0, 0, 0.06);
     }
     .kpi-card.kpi-alt2 { background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 8px 25px rgba(16, 185, 129, 0.22); }
     .kpi-card.kpi-alt3 { background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); box-shadow: 0 8px 25px rgba(6, 182, 212, 0.22); }
@@ -245,9 +252,16 @@
         box-shadow: 0 4px 14px rgba(0,0,0,0.05);
     }
     .vq--out .vq-lab { color: #64748b; }
+    /* Orders Hub: same white card as peers, with soft gradient border */
     .dash-orders-hub-tile {
-        background: linear-gradient(160deg, rgba(102,126,234,0.12), rgba(118,75,162,0.06));
-        border: 1px solid rgba(102,126,234,0.22);
+        background: #fff;
+        border: 2px solid transparent;
+        background-image:
+            linear-gradient(#fff, #fff),
+            linear-gradient(135deg, rgba(102, 126, 234, 0.85), rgba(118, 75, 162, 0.75), rgba(6, 182, 212, 0.55));
+        background-origin: border-box;
+        background-clip: padding-box, border-box;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
     }
 </style>
 {% endblock %}
@@ -362,16 +376,12 @@
                     </div>
                 </a>
             </div>
-            <div class="col-12 col-sm-6 col-lg-4">
+            <div class="col-6 col-md-4 col-xl-2">
                 <a href="{% url 'manager:vendor_orders_hub' %}?channel=all" class="text-decoration-none">
                     <div class="dash-card dash-card-click text-center h-100 py-4 mb-0 dash-orders-hub-tile">
-                        <div class="d-flex align-items-center justify-content-center gap-2 flex-wrap mb-1">
-                            <i class="fas fa-box-open" style="color:#f59e0b;font-size:1.35rem;"></i>
-                            <i class="fas fa-chalkboard-teacher" style="color:#06b6d4;font-size:1.35rem;"></i>
-                            <i class="fas fa-apple-alt" style="color:#84cc16;font-size:1.35rem;"></i>
-                        </div>
+                        <i class="fas fa-layer-group fa-2x mb-2 d-block" style="color:#667eea;"></i>
                         <span class="fw-bold text-dark d-block">{% trans "Orders Hub" %}</span>
-                        <span class="small text-muted">{% trans "商品 · 课程 · 超市订单" %}</span>
+                        <span class="small text-muted d-block mt-1">{% trans "商品 · 课程 · 超市订单" %}</span>
                     </div>
                 </a>
             </div>
@@ -380,14 +390,6 @@
                     <div class="dash-card dash-card-click text-center h-100 py-4 mb-0">
                         <i class="fas fa-carrot fa-2x mb-2 d-block" style="color:#65a30d;"></i>
                         <span class="fw-bold text-dark">{% trans "超市商品" %}</span>
-                    </div>
-                </a>
-            </div>
-            <div class="col-6 col-md-4 col-xl-2">
-                <a href="{% url 'manager:vendor_books' %}" class="text-decoration-none">
-                    <div class="dash-card dash-card-click text-center h-100 py-4 mb-0">
-                        <i class="fas fa-book-open fa-2x mb-2 d-block" style="color:#10b981;"></i>
-                        <span class="fw-bold text-dark">{% trans "图书管理" %}</span>
                     </div>
                 </a>
             </div>
@@ -404,14 +406,6 @@
                     <div class="dash-card dash-card-click text-center h-100 py-4 mb-0">
                         <i class="fas fa-graduation-cap fa-2x mb-2 d-block" style="color:#6366f1;"></i>
                         <span class="fw-bold text-dark">{% trans "课程" %}</span>
-                    </div>
-                </a>
-            </div>
-            <div class="col-6 col-md-4 col-xl-2">
-                <a href="{% url 'manager:vendor_add_book' %}" class="text-decoration-none">
-                    <div class="dash-card dash-card-click text-center h-100 py-4 mb-0">
-                        <i class="fas fa-plus-circle fa-2x mb-2 d-block" style="color:#6366f1;"></i>
-                        <span class="fw-bold text-dark">{% trans "上架图书" %}</span>
                     </div>
                 </a>
             </div>
