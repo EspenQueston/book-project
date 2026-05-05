@@ -558,9 +558,75 @@
         '销售数据统计': 'Sales Data Analytics',
         '安全可靠': 'Secure & Reliable',
 
+        // ---------- Product Detail Page (Mobile BMP) ----------
+        '退货宝 | 7天无理由退换 | 极速退款': 'Buyer Protection | 7-Day No-Reason Returns | Fast Refund',
+        '7天无理由退货': '7-Day No-Reason Return',
+        '7天无理由退换': '7-Day No-Reason Return',
+        '正品保证': 'Authenticity Guaranteed',
+        'DUNO 平台担保 · 正品保证': 'DUNO Secure · Authenticity Guaranteed',
+        '快递配送': 'Express Delivery',
+        '预计 2-3天到达': 'Estimated delivery 2–3 days',
+        '预计 2-3天': 'Est. 2–3 days',
+        '库存:': 'Stock:',
+        '商品规格': 'Product Specifications',
+        '商品描述': 'Product Description',
+        '服务保障': 'Service Guarantee',
+        '15天退换': '15-Day Returns',
+        '运费险': 'Shipping Insurance',
+        '品质检验': 'Quality Check',
+        '认证商家': 'Verified Vendor',
+        '商品质量': 'Product Quality',
+        '配送速度': 'Delivery Speed',
+        '服务态度': 'Service',
+        '加入购物车': 'Add to Cart',
+        '立即购买': 'Buy Now',
+        '选择配置': 'Select Options',
+        '热销': 'Hot Seller',
+        '限量': 'Limited',
+        '现货': 'In Stock',
+        '已售': 'Sold',
+        '缺货': 'Out of Stock',
+        '进入店铺': 'Visit Shop',
+        '联系卖家': 'Contact Seller',
+        '关注': 'Follow',
+        '店铺': 'Shop',
+        '聊天': 'Chat',
+        '收藏': 'Wishlist',
+        '重量': 'Weight',
+        '状态': 'Status',
+        '品牌': 'Brand',
+        '已售': 'Sold',
+        // Course Detail
+        '课程大纲': 'Curriculum',
+        '课程简介': 'Course Overview',
+        '学员评价': 'Student Reviews',
+        '已购买': 'Purchased',
+        '立即购买': 'Enroll Now',
+        '学员人数': 'Students',
+        '课程时长': 'Duration',
+        '难度级别': 'Level',
+        '课程语言': 'Language',
+        '讲师': 'Instructor',
+        '开始学习': 'Start Learning',
+        '购买课程': 'Buy Course',
+        '课时': 'Lessons',
+        '章节': 'Section',
+        // Supermarket Detail
+        '克': 'g',
+        '千克': 'kg',
+        '产品规格': 'Specifications',
+        '生产日期': 'Prod. Date',
+        '保质期': 'Shelf Life',
+        '储存条件': 'Storage',
+        '产地': 'Origin',
+        '有机': 'Organic',
+        '生鲜': 'Fresh',
+        '购买数量': 'Quantity',
+        '加入购物车': 'Add to Cart',
+
         // ---------- Misc ----------
         '暂无': 'N/A',
-        '无': 'N/A',
+        '无': 'None',
         '是': 'Yes',
         '否': 'No',
         '或': 'or',
@@ -649,6 +715,8 @@
         '在售商品 / 课程': 'Active products / courses',
         '商品订单': 'Product orders',
         '课程订单': 'Course orders',
+        'Orders Hub': 'Orders Hub',
+        '商品 · 课程 · 超市订单': 'Product · Course · Supermarket orders',
         '上架图书': 'List books',
         '待支付(图)': 'Books · unpaid',
         '待支付(商)': 'Market · unpaid',
@@ -1541,9 +1609,72 @@
         '销售数据统计': 'Statistiques de ventes',
         '安全可靠': 'Sûr et fiable',
 
+        // ---------- Product Detail Page (Mobile BMP) ----------
+        '退货宝 | 7天无理由退换 | 极速退款': 'Protection acheteur | Retour 7 jours sans motif | Remboursement rapide',
+        '7天无理由退货': 'Retour 7 jours sans motif',
+        '7天无理由退换': 'Retour 7 jours sans motif',
+        '正品保证': 'Authenticité garantie',
+        'DUNO 平台担保 · 正品保证': 'Sécurisé par DUNO · Authenticité garantie',
+        '快递配送': 'Livraison express',
+        '预计 2-3天到达': 'Livraison estimée 2–3 jours',
+        '预计 2-3天': 'Est. 2–3 jours',
+        '库存:': 'Stock :',
+        '商品规格': 'Spécifications produit',
+        '商品描述': 'Description du produit',
+        '服务保障': 'Garanties de service',
+        '15天退换': 'Retours 15 jours',
+        '运费险': 'Assurance livraison',
+        '品质检验': 'Contrôle qualité',
+        '认证商家': 'Vendeur certifié',
+        '商品质量': 'Qualité produit',
+        '配送速度': 'Rapidité livraison',
+        '服务态度': 'Service client',
+        '加入购物车': 'Ajouter au panier',
+        '立即购买': 'Acheter',
+        '选择配置': 'Choisir options',
+        '热销': 'Best-seller',
+        '限量': 'Édition limitée',
+        '现货': 'En stock',
+        '已售': 'Vendu',
+        '缺货': 'Rupture de stock',
+        '进入店铺': 'Voir la boutique',
+        '联系卖家': 'Contacter le vendeur',
+        '关注': 'Suivre',
+        '店铺': 'Boutique',
+        '聊天': 'Chat',
+        '收藏': 'Favoris',
+        '重量': 'Poids',
+        '状态': 'État',
+        '品牌': 'Marque',
+        // Course Detail
+        '课程大纲': 'Programme',
+        '课程简介': 'Aperçu du cours',
+        '学员评价': 'Avis étudiants',
+        '已购买': 'Acheté',
+        '学员人数': 'Étudiants',
+        '课程时长': 'Durée',
+        '难度级别': 'Niveau',
+        '课程语言': 'Langue',
+        '讲师': 'Instructeur',
+        '开始学习': 'Commencer',
+        '购买课程': 'Acheter le cours',
+        '课时': 'Leçons',
+        '章节': 'Section',
+        // Supermarket Detail
+        '克': 'g',
+        '千克': 'kg',
+        '产品规格': 'Spécifications',
+        '生产日期': 'Date fab.',
+        '保质期': 'Date limite',
+        '储存条件': 'Conservation',
+        '产地': 'Origine',
+        '有机': 'Bio',
+        '生鲜': 'Frais',
+        '购买数量': 'Quantité',
+
         // ---------- Misc ----------
         '暂无': 'N/A',
-        '无': 'N/A',
+        '无': 'Aucun',
         '是': 'Oui',
         '否': 'Non',
         '或': 'ou',
@@ -1632,6 +1763,8 @@
         '在售商品 / 课程': 'Produits / cours actifs',
         '商品订单': 'Commandes produits',
         '课程订单': 'Commandes cours',
+        'Orders Hub': 'Hub commandes',
+        '商品 · 课程 · 超市订单': 'Produits · cours · supermarché',
         '上架图书': 'Ajouter des livres',
         '待支付(图)': 'Livres · non payés',
         '待支付(商)': 'Marché · non payés',
@@ -2148,10 +2281,39 @@
         if (lang === 'zh') { lang = 'en'; }
         else if (lang === 'en') { lang = 'fr'; }
         else { lang = 'zh'; }
+        
         localStorage.setItem('adminLang', lang);
-        // Clear cached originals when going back to Chinese
-        translatePage();
-        updateToggle();
+        
+        // Sync with Django backend
+        var djangoLang = lang === 'zh' ? 'zh-hans' : lang;
+        var formData = new URLSearchParams();
+        formData.append('language', djangoLang);
+        
+        // Locate CSRF token anywhere on the page
+        var csrfToken = document.querySelector('input[name=csrfmiddlewaretoken]');
+        if (csrfToken) {
+            formData.append('csrfmiddlewaretoken', csrfToken.value);
+            fetch('/i18n/setlang/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            }).then(function(res) {
+                if (res.ok) {
+                    location.reload(); // Reload to get newly translated db fields
+                } else {
+                    translatePage();
+                    updateToggle();
+                }
+            }).catch(function() {
+                translatePage();
+                updateToggle();
+            });
+        } else {
+            translatePage();
+            updateToggle();
+        }
     }
 
     /* ---- layout CSS for English/French mode ---- */

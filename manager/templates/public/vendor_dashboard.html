@@ -183,6 +183,72 @@
         .dtab-nav { gap: 6px; }
         .dtab-btn { padding: 8px 14px; font-size: 0.8rem; }
     }
+
+    /* Quick actions — pastel gradient tiles (vendor dashboard) */
+    .vq-grid {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: 1fr;
+    }
+    @media (min-width: 576px) {
+        .vq-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .vq-tile {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        text-decoration: none !important;
+        color: inherit !important;
+        border-radius: 14px;
+        padding: 18px 12px;
+        min-height: 108px;
+        border: 1px solid rgba(255,255,255,0.92);
+        box-shadow: 0 14px 36px rgba(79, 70, 229, 0.12), inset 0 1px 0 rgba(255,255,255,0.55);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .vq-tile:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 18px 42px rgba(79, 70, 229, 0.2);
+        color: inherit !important;
+    }
+    .vq-tile .vq-lbl {
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #475569;
+        margin-bottom: 8px;
+        line-height: 1.2;
+    }
+    .vq-tile .vq-lab {
+        font-size: 0.95rem;
+        font-weight: 800;
+        line-height: 1.25;
+    }
+    .vq--msg { background: linear-gradient(160deg, rgba(251,191,36,0.44), rgba(254,243,199,0.3)); }
+    .vq--msg .vq-lab { color: #b45309; }
+    .vq--book { background: linear-gradient(160deg, rgba(129,140,248,0.4), rgba(224,231,255,0.26)); }
+    .vq--book .vq-lab { color: #3730a3; }
+    .vq--shop { background: linear-gradient(160deg, rgba(167,139,250,0.42), rgba(237,233,254,0.28)); }
+    .vq--shop .vq-lab { color: #5b21b6; }
+    .vq--prod { background: linear-gradient(160deg, rgba(96,165,250,0.42), rgba(219,234,254,0.28)); }
+    .vq--prod .vq-lab { color: #1d4ed8; }
+    .vq--course { background: linear-gradient(160deg, rgba(52,211,153,0.4), rgba(209,250,229,0.26)); }
+    .vq--course .vq-lab { color: #047857; }
+    .vq--super { background: linear-gradient(160deg, rgba(163,230,53,0.42), rgba(236,252,203,0.28)); }
+    .vq--super .vq-lab { color: #3f6212; }
+    .vq--out {
+        border: 1px solid var(--card-border, #e5e7eb);
+        background: var(--section-bg, #f8fafc);
+        box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+    }
+    .vq--out .vq-lab { color: #64748b; }
+    .dash-orders-hub-tile {
+        background: linear-gradient(160deg, rgba(102,126,234,0.12), rgba(118,75,162,0.06));
+        border: 1px solid rgba(102,126,234,0.22);
+    }
 </style>
 {% endblock %}
 
@@ -296,27 +362,16 @@
                     </div>
                 </a>
             </div>
-            <div class="col-6 col-md-4 col-xl-2">
-                <a href="{% url 'manager:vendor_orders_hub' %}?channel=products" class="text-decoration-none">
-                    <div class="dash-card dash-card-click text-center h-100 py-4 mb-0">
-                        <i class="fas fa-box-open fa-2x mb-2 d-block" style="color:#f59e0b;"></i>
-                        <span class="fw-bold text-dark">{% trans "商品订单" %}</span>
-                    </div>
-                </a>
-            </div>
-            <div class="col-6 col-md-4 col-xl-2">
-                <a href="{% url 'manager:vendor_orders_hub' %}?channel=courses" class="text-decoration-none">
-                    <div class="dash-card dash-card-click text-center h-100 py-4 mb-0">
-                        <i class="fas fa-chalkboard-teacher fa-2x mb-2 d-block" style="color:#06b6d4;"></i>
-                        <span class="fw-bold text-dark">{% trans "课程订单" %}</span>
-                    </div>
-                </a>
-            </div>
-            <div class="col-6 col-md-4 col-xl-2">
-                <a href="{% url 'manager:vendor_orders_hub' %}?channel=supermarket" class="text-decoration-none">
-                    <div class="dash-card dash-card-click text-center h-100 py-4 mb-0">
-                        <i class="fas fa-apple-alt fa-2x mb-2 d-block" style="color:#84cc16;"></i>
-                        <span class="fw-bold text-dark">{% trans "超市订单" %}</span>
+            <div class="col-12 col-sm-6 col-lg-4">
+                <a href="{% url 'manager:vendor_orders_hub' %}?channel=all" class="text-decoration-none">
+                    <div class="dash-card dash-card-click text-center h-100 py-4 mb-0 dash-orders-hub-tile">
+                        <div class="d-flex align-items-center justify-content-center gap-2 flex-wrap mb-1">
+                            <i class="fas fa-box-open" style="color:#f59e0b;font-size:1.35rem;"></i>
+                            <i class="fas fa-chalkboard-teacher" style="color:#06b6d4;font-size:1.35rem;"></i>
+                            <i class="fas fa-apple-alt" style="color:#84cc16;font-size:1.35rem;"></i>
+                        </div>
+                        <span class="fw-bold text-dark d-block">{% trans "Orders Hub" %}</span>
+                        <span class="small text-muted">{% trans "商品 · 课程 · 超市订单" %}</span>
                     </div>
                 </a>
             </div>
@@ -365,28 +420,35 @@
             <!-- Sidebar -->
             <div class="col-lg-4" data-aos="fade-up">
                 <div class="dash-card">
-                    <h5><i class="fas fa-cogs me-2" style="color:#667eea;"></i>{% trans "快捷操作" %}</h5>
-                    <div class="d-grid gap-2">
-                        <a href="{% url 'manager:vendor_messages' %}" class="btn-vendor text-center" style="background:linear-gradient(135deg,#f59e0b,#ea580c);">
-                            <i class="fas fa-comments me-2"></i>{% trans "客户消息" %}
+                    <h5><i class="fas fa-bolt me-2" style="color:#667eea;"></i>{% trans "快捷操作" %}</h5>
+                    <div class="vq-grid">
+                        <a href="{% url 'manager:vendor_messages' %}" class="vq-tile vq--msg">
+                            <span class="vq-lbl">{% trans "消息" %}</span>
+                            <span class="vq-lab">{% trans "客户消息" %}</span>
                         </a>
-                        <a href="{% url 'manager:vendor_add_book' %}" class="btn-vendor text-center" style="background:linear-gradient(135deg,#10b981,#059669);">
-                            <i class="fas fa-plus me-2"></i>{% trans "上架新书" %}
+                        <a href="{% url 'manager:vendor_add_book' %}" class="vq-tile vq--book">
+                            <span class="vq-lbl">{% trans "图书" %}</span>
+                            <span class="vq-lab">{% trans "上架新书" %}</span>
                         </a>
-                        <a href="{% url 'manager:public_vendor_shop' vendor.id %}" class="btn-vendor text-center" target="_blank" style="background:linear-gradient(135deg,#6366f1,#4f46e5);">
-                            <i class="fas fa-store me-2"></i>{% trans "预览店铺前台" %}
+                        <a href="{% url 'manager:public_vendor_shop' vendor.id %}" class="vq-tile vq--shop" target="_blank" rel="noopener">
+                            <span class="vq-lbl">{% trans "店铺" %}</span>
+                            <span class="vq-lab">{% trans "预览店铺前台" %}</span>
                         </a>
-                        <a href="{% url 'marketplace:vendor_products' %}" class="btn-vendor text-center" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8);">
-                            <i class="fas fa-shopping-bag me-2"></i>{% trans "商城货架（商品）" %}
+                        <a href="{% url 'marketplace:vendor_products' %}" class="vq-tile vq--prod">
+                            <span class="vq-lbl">{% trans "商城" %}</span>
+                            <span class="vq-lab">{% trans "商城货架（商品）" %}</span>
                         </a>
-                        <a href="{% url 'marketplace:vendor_courses' %}" class="btn-vendor text-center" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);">
-                            <i class="fas fa-graduation-cap me-2"></i>{% trans "商城货架（课程）" %}
+                        <a href="{% url 'marketplace:vendor_courses' %}" class="vq-tile vq--course">
+                            <span class="vq-lbl">{% trans "课程" %}</span>
+                            <span class="vq-lab">{% trans "商城货架（课程）" %}</span>
                         </a>
-                        <a href="{% url 'marketplace:vendor_supermarket' %}" class="btn-vendor text-center" style="background:linear-gradient(135deg,#84cc16,#4d7c0f);">
-                            <i class="fas fa-apple-alt me-2"></i>{% trans "商城货架（超市）" %}
+                        <a href="{% url 'marketplace:vendor_supermarket' %}" class="vq-tile vq--super">
+                            <span class="vq-lbl">{% trans "超市" %}</span>
+                            <span class="vq-lab">{% trans "商城货架（超市）" %}</span>
                         </a>
-                        <a href="{% url 'manager:vendor_logout' %}" class="btn btn-outline-secondary" style="border-radius:12px;">
-                            <i class="fas fa-sign-out-alt me-2"></i>{% trans "退出" %}
+                        <a href="{% url 'manager:vendor_logout' %}" class="vq-tile vq--out">
+                            <span class="vq-lbl">{% trans "账户" %}</span>
+                            <span class="vq-lab">{% trans "退出" %}</span>
                         </a>
                     </div>
                     {% if admin_access %}

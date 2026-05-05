@@ -3499,3 +3499,270 @@ msgstr "Shelf"
 
 msgid "链接已复制!"
 msgstr "Link copied!"
+
+msgid "Items awaiting your review"
+msgstr "Items awaiting your review"
+
+msgid "关注店铺"
+msgstr "Followed shops"
+
+msgid "关注的卖家"
+msgstr "Followed sellers"
+
+msgid "市场卖家"
+msgstr "Marketplace seller"
+
+msgid "进店"
+msgstr "Visit shop"
+
+msgid "取消关注"
+msgstr "Unfollow"
+
+msgid "暂未关注任何卖家。"
+msgstr "You are not following any sellers yet."
+
+msgid "关注的出版社"
+msgstr "Followed publishers"
+
+msgid "主页"
+msgstr "Home"
+
+msgid "暂未关注任何出版社。"
+msgstr "You are not following any publishers yet."
+
+msgid "买家评价 — 市场管理"
+msgstr "Buyer reviews — marketplace admin"
+
+msgid "买家评价（只读）"
+msgstr "Buyer reviews (read-only)"
+
+msgid "展示管理员发布的商品、课程、超市等收到的收货后评价；不可编辑或删除。"
+msgstr ""
+"Post-delivery reviews for admin-listed products, courses, and supermarket "
+"items; read-only — cannot be edited or deleted."
+
+msgid "暂无评价"
+msgstr "No reviews yet"
+
+msgid "下单"
+msgstr "Ordered"
+
+msgid "送达"
+msgstr "Delivered"
+
+msgid "物流"
+msgstr "Delivery"
+
+msgid "买家评价"
+msgstr "Buyer reviews"
+
+msgid "评价订单"
+msgstr "Review your order"
+
+msgid "收货后评价"
+msgstr "Post-delivery review"
+
+msgid "分享真实体验，帮助其他买家做决定。"
+msgstr "Share your honest experience to help other buyers decide."
+
+msgid "完成"
+msgstr "Completed"
+
+msgid "商品质量"
+msgstr "Product quality"
+
+msgid "客服服务"
+msgstr "Customer service"
+
+msgid "物流速度"
+msgstr "Shipping speed"
+
+msgid "评价内容"
+msgstr "Review text"
+
+msgid "可选"
+msgstr "optional"
+
+msgid "描述商品、包装、使用感受…"
+msgstr "Describe the product, packaging, and your experience…"
+
+msgid "上传图片"
+msgstr "Upload images"
+
+msgid "最多5张，每张≤3MB"
+msgstr "Up to 5 images, ≤ 3 MB each"
+
+msgid "提交评价"
+msgstr "Submit review"
+
+msgid "好评"
+msgstr "Positive"
+
+msgid "中评"
+msgstr "Neutral"
+
+msgid "差评"
+msgstr "Negative"
+
+msgid "有图"
+msgstr "With photos"
+
+msgid "条"
+msgstr "reviews"
+
+msgid "查看全部评价"
+msgstr "View all reviews"
+
+msgid "全部评价"
+msgstr "All reviews"
+
+msgid "加载更多"
+msgstr "Load more"
+
+msgid "成为第一个评价的用户"
+msgstr "Be the first to leave a review"
+
+msgid "评价条数"
+msgstr "Reviews"
+
+msgid "星级与文字为买家真实反馈"
+msgstr "Stars and text reflect real buyer feedback"
+
+msgid "消息"
+msgstr "Messages"
+
+msgid "账户"
+msgstr "Account"
+
+# Marketplace admin (Chinese msgid → EN)
+msgid "市场管理"
+msgstr "Marketplace"
+
+msgid "管理控制台"
+msgstr "Admin console"
+
+msgid "市场侧栏导航"
+msgstr "Marketplace sidebar navigation"
+
+msgid "概览"
+msgstr "Overview"
+
+msgid "目录与商品"
+msgstr "Catalog"
+
+msgid "运营"
+msgstr "Operations"
+
+msgid "仪表板"
+msgstr "Dashboard"
+
+msgid "商品管理"
+msgstr "Products"
+
+msgid "课程管理"
+msgstr "Courses"
+
+msgid "超市管理"
+msgstr "Supermarket"
+
+msgid "分类管理"
+msgstr "Categories"
+
+msgid "订单管理"
+msgstr "Orders"
+
+msgid "返回主面板"
+msgstr "Back to main admin"
+
+msgid "查看市场"
+msgstr "View storefront"
+
+msgid "退出登录"
+msgstr "Sign out"
+
+msgid "打开菜单"
+msgstr "Open menu"
+
+msgid "市场管理仪表板"
+msgstr "Marketplace dashboard"
+
+msgid "概览商品、课程、超市及订单与收入。"
+msgstr "Overview of products, courses, supermarket, orders, and revenue."
+
+msgid "商品总数"
+msgstr "Total products"
+
+msgid "课程总数"
+msgstr "Total courses"
+
+msgid "超市SKU数"
+msgstr "Supermarket SKUs"
+
+msgid "统计内营收"
+msgstr "Revenue (in-scope orders)"
+
+msgid "分类数"
+msgstr "Categories"
+
+msgid "推荐商品"
+msgstr "Featured products"
+
+msgid "推荐课程"
+msgstr "Featured courses"
+
+msgid "近7日：销售额与订单数"
+msgstr "Last 7 days: sales & order count"
+
+msgid "订单状态分布"
+msgstr "Order status distribution"
+
+msgid "支付状态分布"
+msgstr "Payment status distribution"
+
+msgid "各类型行项目销量"
+msgstr "Line item units by catalog type"
+
+msgid "目录商品数量"
+msgstr "Catalog listing counts"
+
+msgid "月度营收（已付款订单）"
+msgstr "Monthly revenue (paid orders)"
+
+msgid "热销行项目（件数）"
+msgstr "Top selling line items (units)"
+
+msgid "添加商品"
+msgstr "Add product"
+
+msgid "添加课程"
+msgstr "Add course"
+
+msgid "添加超市商品"
+msgstr "Add supermarket item"
+
+msgid "添加分类"
+msgstr "Add category"
+
+msgid "最近订单"
+msgstr "Recent orders"
+
+msgid "销售额 (FCFA)"
+msgstr "Sales (FCFA)"
+
+msgid "订单数"
+msgstr "Order count"
+
+msgid "时间"
+msgstr "Time"
+
+msgid "超市商品"
+msgstr "Supermarket items"
+
+msgid "暂无数据"
+msgstr "No data"
+
+msgid "Orders Hub"
+msgstr "Orders Hub"
+
+msgid "商品 · 课程 · 超市订单"
+msgstr "Product, course & supermarket orders"
