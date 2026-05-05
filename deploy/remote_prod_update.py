@@ -33,7 +33,7 @@ if ! command -v msgfmt >/dev/null 2>&1; then
   apt-get update -qq && apt-get install -y gettext
 fi
 sudo -u duno360 bash -lc 'cd /opt/duno360/app && git -c safe.directory=/opt/duno360/app fetch origin && git -c safe.directory=/opt/duno360/app pull origin main'
-sudo -u duno360 bash -lc 'cd /opt/duno360/app && set -a && . /opt/duno360/.env && set +a && .venv/bin/python manage.py migrate --noinput && .venv/bin/python manage.py compilemessages'
+sudo -u duno360 bash -lc 'cd /opt/duno360/app && set -a && . /opt/duno360/.env && set +a && .venv/bin/python manage.py migrate --noinput && .venv/bin/python manage.py compilemessages -l en -l fr'
 systemctl restart duno360
 systemctl is-active duno360
 """

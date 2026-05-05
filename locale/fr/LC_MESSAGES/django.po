@@ -3420,9 +3420,6 @@ msgstr "Page commandes livres"
 msgid "商城订单专页"
 msgstr "Page commandes marketplace"
 
-msgid "类型"
-msgstr "Type"
-
 msgid "商品+课程"
 msgstr "Produits + cours"
 
@@ -3507,17 +3504,11 @@ msgstr ""
 msgid "保存联系信息"
 msgstr "Enregistrer les coordonnées"
 
-msgid "客户姓名"
-msgstr "Nom du client"
-
 msgid "电话 / 微信"
 msgstr "Téléphone / WeChat"
 
 msgid "国家 / 地区"
 msgstr "Pays / région"
-
-msgid "收货地址"
-msgstr "Adresse de livraison"
 
 msgid "设置已保存 (功能开发中)"
 msgstr "Paramètres enregistrés (fonctionnalité en développement)"

@@ -3378,9 +3378,6 @@ msgstr "Books orders page"
 msgid "商城订单专页"
 msgstr "Marketplace orders page"
 
-msgid "类型"
-msgstr "Type"
-
 msgid "商品+课程"
 msgstr "Products + courses"
 
@@ -3464,17 +3461,11 @@ msgstr ""
 msgid "保存联系信息"
 msgstr "Save contact details"
 
-msgid "客户姓名"
-msgstr "Customer name"
-
 msgid "电话 / 微信"
 msgstr "Phone / WeChat"
 
 msgid "国家 / 地区"
 msgstr "Country / region"
-
-msgid "收货地址"
-msgstr "Shipping address"
 
 msgid "设置已保存 (功能开发中)"
 msgstr "Settings saved (feature in development)"
