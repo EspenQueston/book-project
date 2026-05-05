@@ -1,5 +1,6 @@
 {% extends 'public/base.html' %}
 {% load i18n %}
+{% load currency_filters %}
 
 {% block title %}{% trans "订单跟踪" %} - {% trans "DUNO 360" %}{% endblock %}
 
@@ -468,7 +469,7 @@
                     <div class="order-item-name">{% if item.book %}{{ item.book.name }}{% else %}{{ item.product_name|default:"商品" }}{% endif %}</div>
                     <div class="order-item-qty">x{{ item.quantity }}</div>
                 </div>
-                <span class="order-item-price">¥{{ item.unit_price }}</span>
+                <span class="order-item-price">{{ item.unit_price|fcfa }}</span>
             </div>
             {% endfor %}
             {% if order.orderitem_set.count > 2 %}
@@ -478,7 +479,7 @@
         <!-- Footer -->
         <div class="order-mobile-footer">
             <span class="order-footer-num">{{ order.order_number }}</span>
-            <span class="order-footer-total">共 {{ order.orderitem_set.count }} 件 合计 <span>¥{{ order.total_amount }}</span></span>
+            <span class="order-footer-total">共 {{ order.orderitem_set.count }} 件 合计 <span>{{ order.total_amount|fcfa }}</span></span>
             <div class="order-footer-actions">
                 <a href="{% url 'manager:order_confirmation' order.order_number %}" class="order-btn-sm order-btn-outline">
                     <i class="fas fa-eye"></i> 详情
@@ -518,7 +519,7 @@
                     <div class="order-item-name">{% if item.product %}{{ item.product.name }}{% else %}商品{% endif %}</div>
                     <div class="order-item-qty">x{{ item.quantity }}</div>
                 </div>
-                <span class="order-item-price">¥{{ item.unit_price }}</span>
+                <span class="order-item-price">{{ item.unit_price|fcfa }}</span>
             </div>
             {% endfor %}
             {% if morder.items.count > 2 %}
@@ -527,7 +528,7 @@
         </div>
         <div class="order-mobile-footer">
             <span class="order-footer-num">{{ morder.order_number }}</span>
-            <span class="order-footer-total">共 {{ morder.items.count }} 件 合计 <span>¥{{ morder.total_amount }}</span></span>
+            <span class="order-footer-total">共 {{ morder.items.count }} 件 合计 <span>{{ morder.total_amount|fcfa }}</span></span>
             <div class="order-footer-actions">
                 <button class="order-btn-sm order-btn-outline" onclick="alert('{{ morder.order_number }}')">
                     <i class="fas fa-eye"></i> 详情
@@ -720,7 +721,7 @@
                                 {{ row.payment_status_display }}
                             </span>
                         </td>
-                        <td><strong>¥{{ row.total_amount }}</strong></td>
+                        <td><strong>{{ row.total_amount|fcfa }}</strong></td>
                         <td>{{ row.item_count }}</td>
                         <td>{{ row.created_at|date:"Y-m-d H:i" }}</td>
                         <td class="text-end">
@@ -766,7 +767,7 @@
                 <div class="row">
                     <div class="col-md-4">
                         <small class="text-muted">{% trans "订单金额" %}</small>
-                        <p class="mb-0 fw-bold text-success">¥{{ order.total_amount }}</p>
+                        <p class="mb-0 fw-bold text-success">{{ order.total_amount|fcfa }}</p>
                     </div>
                     <div class="col-md-4">
                         <small class="text-muted">{% trans "支付方式" %}</small>
@@ -822,7 +823,7 @@
                 <div class="row">
                     <div class="col-md-4">
                         <small class="text-muted">{% trans "订单金额" %}</small>
-                        <p class="mb-0 fw-bold text-success">¥{{ morder.total_amount }}</p>
+                        <p class="mb-0 fw-bold text-success">{{ morder.total_amount|fcfa }}</p>
                     </div>
                     <div class="col-md-4">
                         <small class="text-muted">{% trans "支付方式" %}</small>
@@ -884,7 +885,7 @@
             </div>
             <div class="info-card">
                 <div class="info-label">{% trans "订单金额" %}</div>
-                <div class="info-value">¥{{ order.total_amount }}</div>
+                <div class="info-value">{{ order.total_amount|fcfa }}</div>
             </div>
             <div class="info-card">
                 <div class="info-label">{% trans "下单时间" %}</div>
@@ -1064,15 +1065,15 @@
                             </div>
                         </td>
                         <td>{{ item.quantity }}</td>
-                        <td>¥{{ item.price }}</td>
-                        <td><strong>¥{{ item.get_total_price }}</strong></td>
+                        <td>{{ item.price|fcfa }}</td>
+                        <td><strong>{{ item.get_total_price|fcfa }}</strong></td>
                     </tr>
                     {% endfor %}
                 </tbody>
                 <tfoot>
                     <tr>
                         <th colspan="3" class="text-end">{% trans "总计" %}：</th>
-                        <th>¥{{ order.total_amount }}</th>
+                        <th>{{ order.total_amount|fcfa }}</th>
                     </tr>
                 </tfoot>
             </table>
@@ -1187,7 +1188,7 @@
             </div>
             <div class="info-card">
                 <div class="info-label">{% trans "订单金额" %}</div>
-                <div class="info-value">¥{{ mkt_order.total_amount }}</div>
+                <div class="info-value">{{ mkt_order.total_amount|fcfa }}</div>
             </div>
             <div class="info-card">
                 <div class="info-label">{% trans "下单时间" %}</div>
@@ -1287,15 +1288,15 @@
                             </span>
                         </td>
                         <td>{{ item.quantity }}</td>
-                        <td>¥{{ item.unit_price }}</td>
-                        <td><strong>¥{{ item.subtotal }}</strong></td>
+                        <td>{{ item.unit_price|fcfa }}</td>
+                        <td><strong>{{ item.subtotal|fcfa }}</strong></td>
                     </tr>
                     {% endfor %}
                 </tbody>
                 <tfoot>
                     <tr>
                         <th colspan="4" class="text-end">{% trans "总计" %}：</th>
-                        <th>¥{{ mkt_order.total_amount }}</th>
+                        <th>{{ mkt_order.total_amount|fcfa }}</th>
                     </tr>
                 </tfoot>
             </table>

@@ -1,5 +1,6 @@
 {% extends 'public/vendor_panel_base.html' %}
 {% load i18n %}
+{% load currency_filters %}
 
 {% block panel_title %}{% trans "订单详情" %} #{{ order.order_number }}{% endblock %}
 
@@ -94,8 +95,8 @@
                 </div>
             </div>
             <div class="text-end">
-                <div class="display-6 fw-bold lh-1">¥{{ order.total_amount }}</div>
-                <div class="small mt-2 opacity-90">{% trans "您的商品小计" %} · <strong>¥{{ vendor_lines_total }}</strong></div>
+                <div class="display-6 fw-bold lh-1">{{ order.total_amount|fcfa }}</div>
+                <div class="small mt-2 opacity-90">{% trans "您的商品小计" %} · <strong>{{ vendor_lines_total|fcfa }}</strong></div>
             </div>
         </div>
     </div>
@@ -211,10 +212,10 @@
             <img class="vo-thumb" src="{{ item.book.get_cover_url }}" alt="">
             <div>
                 <div class="fw-bold small">{{ item.book.name }}</div>
-                <div class="text-muted small">{% trans "单价" %} ¥{{ item.unit_price }}</div>
+                <div class="text-muted small">{% trans "单价" %} {{ item.unit_price|fcfa }}</div>
             </div>
             <div class="vo-li-qty text-muted small">× {{ item.quantity }}</div>
-            <div class="vo-li-sub fw-bold">¥{{ item.total_price }}</div>
+            <div class="vo-li-sub fw-bold">{{ item.total_price|fcfa }}</div>
         </div>
         {% endfor %}
     </div>

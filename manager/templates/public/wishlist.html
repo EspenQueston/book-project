@@ -1,5 +1,6 @@
 {% extends "public/base.html" %}
 {% load i18n %}
+{% load currency_filters %}
 
 {% block title %}{% trans "我的收藏" %} - DUNO 360{% endblock %}
 
@@ -107,7 +108,7 @@
                     <div class="wl-name">{{ item.name }}</div>
                     <div class="wl-meta">
                         <span class="wl-tag">{{ item.type_label }}</span>
-                        {% if item.price %}<span class="wl-price">¥{{ item.price }}</span>{% endif %}
+                        {% if item.price %}<span class="wl-price">{{ item.price|fcfa }}</span>{% endif %}
                     </div>
                 </div>
             </a>

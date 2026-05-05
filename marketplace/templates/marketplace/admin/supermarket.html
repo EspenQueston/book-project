@@ -1,5 +1,5 @@
 {% extends "marketplace/admin/base.html" %}
-{% block title %}超市管理 - 市场管理{% endblock %}
+{% load currency_filters %}
 {% block nav_supermarket %}active{% endblock %}
 
 {% block admin_content %}
@@ -44,7 +44,7 @@
                             </div>
                         </div>
                     </td>
-                    <td><span class="fw-bold text-danger">¥{{ item.price }}</span></td>
+                    <td><span class="fw-bold text-danger">{{ item.price|fcfa }}</span></td>
                     <td>{{ item.get_unit_display }}</td>
                     <td>
                         {% if item.stock > 0 %}<span class="badge bg-success">{{ item.stock }}</span>{% else %}<span class="badge bg-danger">缺货</span>{% endif %}

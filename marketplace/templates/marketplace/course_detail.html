@@ -1,5 +1,6 @@
 {% extends "public/base.html" %}
 {% load i18n %}
+{% load currency_filters %}
 
 {% block title %}{{ course.title }} - {% trans "课程" %}{% endblock %}
 
@@ -259,8 +260,8 @@
     <!-- B. Price -->
     <div class="bmp-price-section">
         <div class="d-flex align-items-baseline">
-            <div class="bmp-price-main"><small>¥</small>{{ course.price }}</div>
-            {% if course.original_price %}<div class="bmp-price-original">¥{{ course.original_price }}</div>{% endif %}
+            <div class="bmp-price-main">{{ course.price|fcfa }}</div>
+            {% if course.original_price %}<div class="bmp-price-original">{{ course.original_price|fcfa }}</div>{% endif %}
             <div class="bmp-price-sold ms-auto">{{ course.enrollment_count }}+ 已注册</div>
         </div>
         <div><span class="bmp-low-badge">终身学习</span> <span class="bmp-low-badge" style="margin-left:4px;">证书颁发</span></div>
@@ -509,9 +510,9 @@
                 <img src="{{ course.get_image_url }}" alt="{{ course.title }}" class="course-cover">
 
                 <div class="mb-3">
-                    <span class="course-price">¥{{ course.price }}</span>
+                    <span class="course-price">{{ course.price|fcfa }}</span>
                     {% if course.original_price %}
-                    <span class="course-price-orig">¥{{ course.original_price }}</span>
+                    <span class="course-price-orig">{{ course.original_price|fcfa }}</span>
                     {% endif %}
                 </div>
 
@@ -570,7 +571,7 @@
                         <div style="padding:14px;">
                             <h6 style="font-weight:700; font-size:0.9rem; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; margin-bottom:4px;">{{ c.title }}</h6>
                             <small class="text-muted d-block mb-1">{{ c.instructor }}</small>
-                            <span style="font-weight:800; color:var(--danger-color);">¥{{ c.price }}</span>
+                            <span style="font-weight:800; color:var(--danger-color);">{{ c.price|fcfa }}</span>
                         </div>
                     </div>
                 </a>

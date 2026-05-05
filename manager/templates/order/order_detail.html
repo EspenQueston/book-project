@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load currency_filters %}
 <!DOCTYPE html>
 <html lang="zh-Hans">
 <head>
@@ -317,7 +318,7 @@
                         <p class="mb-0 opacity-75">创建时间：{{ order.created_at|date:"Y年m月d日 H:i" }}</p>
                     </div>
                     <div class="col-md-4 text-end">
-                        <div class="total-amount">¥{{ order.total_amount }}</div>
+                        <div class="total-amount">{{ order.total_amount|fcfa }}</div>
                         <small class="opacity-75">订单总金额</small>
                     </div>
                 </div>
@@ -460,9 +461,9 @@
                                             <div class="book-title">{{ item.book.name }}</div>
                                             <div class="book-author">出版社：{{ item.book.publisher.publisher_name }}</div>
                                         </td>
-                                        <td><span class="price-tag">¥{{ item.unit_price }}</span></td>
+                                        <td><span class="price-tag">{{ item.unit_price|fcfa }}</span></td>
                                         <td class="text-center"><strong>{{ item.quantity }}</strong></td>
-                                        <td><strong class="text-success">¥{{ item.total_price }}</strong></td>
+                                        <td><strong class="text-success">{{ item.total_price|fcfa }}</strong></td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
@@ -474,7 +475,7 @@
                                     <h6 class="mb-0">订单总计：</h6>
                                 </div>
                                 <div class="col-md-4 text-end">
-                                    <div class="total-amount">¥{{ order.total_amount }}</div>
+                                    <div class="total-amount">{{ order.total_amount|fcfa }}</div>
                                 </div>
                             </div>
                         </div>
@@ -621,7 +622,7 @@
                             </div>
                             <div class="col-sm-6">
                                 <strong>订单金额：</strong><br>
-                                <span class="text-success fw-bold">¥{{ order.total_amount }}</span>
+                                <span class="text-success fw-bold">{{ order.total_amount|fcfa }}</span>
                             </div>
                         </div>
                     </div>

@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load currency_filters %}
 <!DOCTYPE html>
 <html lang="zh-hans">
 <head>
@@ -449,7 +450,7 @@
                                         {% if vb.is_active %}<span class="badge bg-success" style="font-size:0.65rem;">上架</span>{% else %}<span class="badge bg-secondary" style="font-size:0.65rem;">下架</span>{% endif %}
                                     </div>
                                 </div>
-                                <div class="vendor-item-price">¥{{ vb.vendor_price }}</div>
+                                <div class="vendor-item-price">{{ vb.vendor_price|fcfa }}</div>
                                 <button class="vendor-item-delete" onclick="deleteVendorItem('book', {{ vb.pk }}, '{{ vb.book.name|escapejs }}')" title="违规删除">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
@@ -474,7 +475,7 @@
                                         {% if p.is_active %}<span class="badge bg-success" style="font-size:0.65rem;">上架</span>{% else %}<span class="badge bg-secondary" style="font-size:0.65rem;">下架</span>{% endif %}
                                     </div>
                                 </div>
-                                <div class="vendor-item-price">¥{{ p.price }}</div>
+                                <div class="vendor-item-price">{{ p.price|fcfa }}</div>
                                 <button class="vendor-item-delete" onclick="deleteVendorItem('product', {{ p.pk }}, '{{ p.name|escapejs }}')" title="违规删除">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
@@ -499,7 +500,7 @@
                                         {% if c.is_active %}<span class="badge bg-success" style="font-size:0.65rem;">发布</span>{% else %}<span class="badge bg-secondary" style="font-size:0.65rem;">草稿</span>{% endif %}
                                     </div>
                                 </div>
-                                <div class="vendor-item-price">¥{{ c.price }}</div>
+                                <div class="vendor-item-price">{{ c.price|fcfa }}</div>
                                 <button class="vendor-item-delete" onclick="deleteVendorItem('course', {{ c.pk }}, '{{ c.title|escapejs }}')" title="违规删除">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>

@@ -1,5 +1,6 @@
 {% extends 'public/vendor_panel_base.html' %}
 {% load i18n %}
+{% load currency_filters %}
 
 {% block panel_title %}{% trans "订单中心" %} · {{ vendor.company_name }}{% endblock %}
 
@@ -187,7 +188,7 @@
                         <small class="text-muted">{{ row.order.user_email|truncatechars:28 }}</small>
                     {% endif %}
                 </td>
-                <td class="fw-bold text-danger">¥{{ row.order.total_amount }}</td>
+                <td class="fw-bold text-danger">{{ row.order.total_amount|fcfa }}</td>
                 <td>
                     {% if row.kind == 'book' %}
                         <span class="badge bg-{{ row.order.get_status_color }}">{{ row.order.get_status_display }}</span>

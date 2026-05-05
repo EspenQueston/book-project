@@ -1,5 +1,6 @@
 {% extends "public/base.html" %}
 {% load i18n %}
+{% load currency_filters %}
 
 {% block title %}{% trans "订单确认" %} - {% trans "市场" %}{% endblock %}
 
@@ -94,12 +95,12 @@
                         {% endif %}
                     </div>
                     <span class="item-qty">×{{ item.quantity }}</span>
-                    <span class="item-price">¥{{ item.subtotal }}</span>
+                    <span class="item-price">{{ item.subtotal|fcfa }}</span>
                 </div>
                 {% endfor %}
                 <div class="total-row">
                     <span style="font-weight:700;">{% trans "订单总额" %}</span>
-                    <span>¥{{ order.total_amount }}</span>
+                    <span>{{ order.total_amount|fcfa }}</span>
                 </div>
             </div>
 

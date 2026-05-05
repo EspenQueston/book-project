@@ -1,5 +1,6 @@
 {% extends 'public/vendor_panel_base.html' %}
 {% load i18n %}
+{% load currency_filters %}
 
 {% block panel_title %}{% trans "卖家中心" %} - {{ vendor.company_name }}{% endblock %}
 
@@ -230,7 +231,7 @@
                 <div class="kpi-card kpi-alt2 mb-0 h-100">
                     <div class="kpi-icon"><i class="fas fa-yen-sign"></i></div>
                     <div>
-                        <div class="kpi-value">¥{{ combined_revenue|floatformat:0 }}</div>
+                        <div class="kpi-value">{{ combined_revenue|fcfa }}</div>
                         <div class="kpi-label">{% trans "总收入（预估）" %}</div>
                     </div>
                 </div>
@@ -399,7 +400,7 @@
                     <div class="perf-item">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span style="font-size:0.85rem;color:var(--muted-text, #64748b);">{% trans "平均售价" %}</span>
-                            <strong style="color:var(--dark-text, #333);">¥{{ avg_price|floatformat:2 }}</strong>
+                            <strong style="color:var(--dark-text, #333);">{{ avg_price|fcfa }}</strong>
                         </div>
                     </div>
                     <div class="perf-item">
@@ -463,25 +464,25 @@
                     <div class="col-6 col-lg-3">
                         <div class="dash-card vp-glow-card text-center py-4 mb-0" style="background: linear-gradient(160deg, rgba(129,140,248,0.34), rgba(196,181,253,0.14));">
                             <div class="vp-stat-label">{% trans "图书收入" %}</div>
-                            <div class="dash-rev-num dash-rev-num--book">¥{{ total_revenue|floatformat:0 }}</div>
+                            <div class="dash-rev-num dash-rev-num--book">{{ total_revenue|fcfa }}</div>
                         </div>
                     </div>
                     <div class="col-6 col-lg-3">
                         <div class="dash-card vp-glow-card text-center py-4 mb-0" style="background: linear-gradient(160deg, rgba(251,191,36,0.38), rgba(253,224,71,0.16));">
                             <div class="vp-stat-label">{% trans "商品订单收入" %}</div>
-                            <div class="dash-rev-num dash-rev-num--product">¥{{ vm_mk_product_revenue|floatformat:0 }}</div>
+                            <div class="dash-rev-num dash-rev-num--product">{{ vm_mk_product_revenue|fcfa }}</div>
                         </div>
                     </div>
                     <div class="col-6 col-lg-3">
                         <div class="dash-card vp-glow-card text-center py-4 mb-0" style="background: linear-gradient(160deg, rgba(52,211,153,0.38), rgba(167,243,208,0.2));">
                             <div class="vp-stat-label">{% trans "课程订单收入" %}</div>
-                            <div class="dash-rev-num dash-rev-num--course">¥{{ vm_mk_course_revenue|floatformat:0 }}</div>
+                            <div class="dash-rev-num dash-rev-num--course">{{ vm_mk_course_revenue|fcfa }}</div>
                         </div>
                     </div>
                     <div class="col-6 col-lg-3">
                         <div class="dash-card vp-glow-card text-center py-4 mb-0" style="background: linear-gradient(160deg, rgba(251,146,60,0.38), rgba(254,215,170,0.22));">
                             <div class="vp-stat-label">{% trans "超市订单收入" %}</div>
-                            <div class="dash-rev-num dash-rev-num--supermarket">¥{{ vm_mk_supermarket_revenue|floatformat:0 }}</div>
+                            <div class="dash-rev-num dash-rev-num--supermarket">{{ vm_mk_supermarket_revenue|fcfa }}</div>
                         </div>
                     </div>
                 </div>

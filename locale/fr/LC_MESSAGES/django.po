@@ -1084,6 +1084,14 @@ msgstr "Parcourez notre riche collection de livres"
 msgid "搜索图书名称..."
 msgstr "Rechercher le nom du livre..."
 
+#: .\manager\templates\public\books.html:109
+msgid "所有分类"
+msgstr "Toutes les catégories"
+
+#: .\manager\templates\public\books.html:109
+msgid "最新上架"
+msgstr "Nouveautés"
+
 #: .\manager\templates\public\books.html:110
 msgid "按名称排序"
 msgstr "Trier par nom"
@@ -1099,6 +1107,18 @@ msgstr "Prix décroissant"
 #: .\manager\templates\public\books.html:113
 msgid "按销量排序"
 msgstr "Trier par ventes"
+
+#: .\manager\templates\public\books.html:114
+msgid "搜索图书、作者、出版社..."
+msgstr "Rechercher livres, auteurs, éditeurs..."
+
+#: .\manager\templates\public\books.html:195
+msgid "加载更多图书…"
+msgstr "Chargement de plus de livres…"
+
+#: .\manager\templates\public\books.html:196
+msgid "已显示全部图书"
+msgstr "Tous les livres affichés"
 
 #: .\manager\templates\public\books.html:121
 #, python-format

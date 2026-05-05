@@ -1,3 +1,4 @@
+{% load currency_filters %}
 <!DOCTYPE html>
 <html lang="zh-hans">
 <head>
@@ -105,7 +106,7 @@
                         <div class="d-flex align-items-center">
                             <div class="stat-icon me-3" style="background:linear-gradient(135deg,#10b981,#34d399);"><i class="fas fa-yen-sign"></i></div>
                             <div>
-                                <div class="stat-value">¥{{ total_revenue }}</div>
+                                <div class="stat-value">{{ total_revenue|fcfa }}</div>
                                 <div class="stat-label">总收入</div>
                             </div>
                         </div>
@@ -168,7 +169,7 @@
                                             {{ order.get_status_display }}
                                         </span>
                                     </td>
-                                    <td class="fw-bold">¥{{ order.total_amount }}</td>
+                                    <td class="fw-bold">{{ order.total_amount|fcfa }}</td>
                                     <td class="text-muted">{{ order.created_at|date:"Y-m-d H:i" }}</td>
                                 </tr>
                                 {% endfor %}

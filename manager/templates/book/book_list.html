@@ -1,3 +1,4 @@
+{% load currency_filters %}
 <!DOCTYPE html>
 <html lang="zh-hans">
 <head>
@@ -263,7 +264,7 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <span class="price-tag">¥{{ book_obj.price }}</span>
+                                    <span class="price-tag">{{ book_obj.price|fcfa }}</span>
                                 </td>
                                 <td>
                                     <span class="stock-badge 

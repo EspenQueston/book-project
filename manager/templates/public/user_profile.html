@@ -1,5 +1,6 @@
 {% extends 'public/base.html' %}
 {% load i18n %}
+{% load currency_filters %}
 
 {% block title %}{% trans "个人中心" %} - {% trans "DUNO 360" %}{% endblock %}
 
@@ -249,7 +250,7 @@
                 </div>
                 <div style="display:flex;align-items:center;gap:14px;">
                     <div style="text-align:right;">
-                        <div class="fw-bold" style="color:#667eea;font-size:1rem;">¥{{ od.total_amount }}</div>
+                        <div class="fw-bold" style="color:#667eea;font-size:1rem;">{{ od.total_amount|fcfa }}</div>
                         <small style="color:var(--muted-text,#94a3b8);">{{ od.items|length }} {% trans "件商品" %}</small>
                     </div>
                     <span class="status-badge" style="padding:5px 14px;">
@@ -270,8 +271,8 @@
                             {{ item.book.name }}
                         </div>
                         <div style="font-size:0.8rem;color:var(--muted-text,#64748b);">
-                            ¥{{ item.unit_price }} × {{ item.quantity }}
-                            <span style="color:#667eea;font-weight:700;margin-left:8px;">= ¥{{ item.total_price }}</span>
+                            {{ item.unit_price|fcfa }} × {{ item.quantity }}
+                            <span style="color:#667eea;font-weight:700;margin-left:8px;">= {{ item.total_price|fcfa }}</span>
                         </div>
                     </div>
                     <a href="{% url 'manager:public_book_detail' item.book.id %}" class="btn btn-sm" style="background:rgba(102,126,234,0.1);color:#667eea;border:none;border-radius:8px;padding:6px 12px;font-size:0.78rem;font-weight:600;white-space:nowrap;text-decoration:none;">
@@ -292,8 +293,8 @@
                             {{ item.item_name }}
                         </div>
                         <div style="font-size:0.8rem;color:var(--muted-text,#64748b);">
-                            ¥{{ item.unit_price }} × {{ item.quantity }}
-                            <span style="color:#667eea;font-weight:700;margin-left:8px;">= ¥{{ item.total_price }}</span>
+                            {{ item.unit_price|fcfa }} × {{ item.quantity }}
+                            <span style="color:#667eea;font-weight:700;margin-left:8px;">= {{ item.total_price|fcfa }}</span>
                         </div>
                     </div>
                     {% endif %}
@@ -363,7 +364,7 @@
                             {% if wish.item_type == 'book' %}{% trans "图书" %}{% elif wish.item_type == 'course' %}{% trans "课程" %}{% elif wish.item_type == 'supermarket' %}{% trans "超市" %}{% else %}{% trans "商品" %}{% endif %}
                         </span>
                     </div>
-                    <div style="color:#667eea; font-weight:700; font-size:0.85rem;">¥{{ wish.price }}</div>
+                    <div style="color:#667eea; font-weight:700; font-size:0.85rem;">{{ wish.price|fcfa }}</div>
                 </div>
                 <a href="{{ wish.detail_url }}" class="btn btn-sm" style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-radius:10px;padding:6px 14px;">
                     {% trans "查看" %}

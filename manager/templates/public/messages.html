@@ -941,7 +941,7 @@ function mxOpenConvo(c) {
     var strip = document.getElementById('mxProductStrip');
     if (c.ref_item_name) {
         document.getElementById('mxProductName').textContent = c.ref_item_name;
-        document.getElementById('mxProductPrice').textContent = c.ref_item_price ? '¥' + c.ref_item_price : '';
+        document.getElementById('mxProductPrice').textContent = c.ref_item_price ? Math.round(parseFloat(c.ref_item_price) * 82).toLocaleString('fr-FR') + '\u00a0FCFA' : '';
         var img = document.getElementById('mxProductImg');
         img.src = c.ref_item_image || '/static/img/default_product.png';
         img.alt = c.ref_item_name;

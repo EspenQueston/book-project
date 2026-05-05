@@ -1,5 +1,6 @@
 {% extends "public/base.html" %}
 {% load i18n %}
+{% load currency_filters %}
 
 {% block title %}{% trans "商品" %} - {% trans "市场" %}{% endblock %}
 
@@ -174,9 +175,9 @@
                         {% endif %}
                         <div class="d-flex align-items-center justify-content-between mt-2">
                             <div>
-                                <span class="product-price">¥{{ product.price }}</span>
+                                <span class="product-price">{{ product.price|fcfa }}</span>
                                 {% if product.original_price %}
-                                <span class="product-price-original">¥{{ product.original_price }}</span>
+                                <span class="product-price-original">{{ product.original_price|fcfa }}</span>
                                 {% endif %}
                             </div>
                             {% if product.in_stock %}
@@ -243,6 +244,11 @@
         return d.innerHTML;
     }
 
+    function fmtFcfa(val) {
+        var n = Math.round(parseFloat(val) * 82);
+        return n.toLocaleString('fr-FR') + '\u00a0FCFA';
+    }
+
     function buildCard(item) {
         return '<div class="col-6">'
             + '<a href="' + item.url + '" style="text-decoration:none; color:inherit;">'
@@ -250,7 +256,7 @@
             + '<div style="position:relative;"><img src="' + item.image + '" alt="' + escHtml(item.name) + '" class="product-card-img"></div>'
             + '<div class="product-card-body">'
             + '<h5>' + escHtml(item.name) + '</h5>'
-            + '<div class="d-flex align-items-center justify-content-between mt-2"><span class="product-price">¥' + item.price + '</span>'
+            + '<div class="d-flex align-items-center justify-content-between mt-2"><span class="product-price">' + fmtFcfa(item.price) + '</span>'
             + '<span class="badge ' + (item.stock_text === '有货' ? 'bg-success' : 'bg-secondary') + ' stock-badge">' + item.stock_text + '</span></div>'
             + '</div></div></a></div>';
     }

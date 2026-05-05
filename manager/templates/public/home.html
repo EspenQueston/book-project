@@ -1,5 +1,6 @@
 {% extends 'public/base.html' %}
 {% load i18n %}
+{% load currency_filters %}
 
 {% block title %}DUNO 360 - {% trans "首页" %}{% endblock %}
 
@@ -1891,7 +1892,7 @@
                                 <i class="fas fa-building"></i>{{ book.publisher.publisher_name }}
                             </p>
                             <div class="book-stats">
-                                <span class="book-price">¥{{ book.price }}</span>
+                                <span class="book-price">{{ book.price|fcfa }}</span>
                                 <span class="book-sales"><i class="fas fa-fire"></i><span data-zh="销量" data-en="Sales" data-fr="Ventes">销量</span> {{ book.sale_num }}</span>
                             </div>
                             <div class="book-actions">
@@ -1945,7 +1946,7 @@
                             {% endif %}
                             <h5>{{ product.name|truncatechars:28 }}</h5>
                             <div class="product-card-footer">
-                                <span class="price">¥{{ product.price }}</span>
+                                <span class="price">{{ product.price|fcfa }}</span>
                                 <span class="sales"><i class="fas fa-fire me-1"></i>{{ product.sales_count }}</span>
                             </div>
                         </div>
@@ -1993,7 +1994,7 @@
                                 <span><i class="fas fa-clock"></i>{{ course.duration }}</span>
                             </div>
                             <div class="course-card-footer">
-                                <span class="price">{% if course.price %}¥{{ course.price }}{% else %}<span data-zh="免费" data-en="Free" data-fr="Gratuit">免费</span>{% endif %}</span>
+                                <span class="price">{% if course.price %}{{ course.price|fcfa }}{% else %}<span data-zh="免费" data-en="Free" data-fr="Gratuit">免费</span>{% endif %}</span>
                                 <span class="enroll"><i class="fas fa-user-graduate me-1"></i>{{ course.enrollment_count }}</span>
                             </div>
                         </div>
@@ -2037,7 +2038,7 @@
                     <div class="na-title">{{ book.name }}</div>
                     <div class="na-pub"><i class="fas fa-building me-1"></i>{{ book.publisher.publisher_name }}</div>
                     <div class="na-footer">
-                        <span class="na-price">¥{{ book.price }}</span>
+                        <span class="na-price">{{ book.price|fcfa }}</span>
                         <a href="{% url 'manager:public_book_detail' book.id %}" class="na-btn"><i class="fas fa-eye me-1"></i><span data-zh="查看" data-en="View" data-fr="Voir">查看</span></a>
                     </div>
                 </div>
@@ -2358,6 +2359,10 @@ function getCsrfToken() {
 
 // ===== PWA Feature 1: Infinite Feed with Intersection Observer =====
 (function() {
+    function fmtFcfa(val) {
+        var n = Math.round(parseFloat(val) * 82);
+        return n.toLocaleString('fr-FR') + '\u00a0FCFA';
+    }
     var feedGrid = document.getElementById('homeFeedGrid');
     var feedLoader = document.getElementById('feedLoader');
     if (!feedGrid) return;
@@ -2392,7 +2397,7 @@ function getCsrfToken() {
                             : item.type === 'product'
                             ? 'background:#fef3c7;color:#d97706;'
                             : 'background:#d1fae5;color:#065f46;';
-                        card.innerHTML = '<img class="feed-card-img" src="'+item.image+'" alt="'+item.name+'" loading="lazy" onerror="this.src=\'/static/img/default_cover.png\'"><div class="feed-card-body"><div class="feed-card-name">'+item.name+'</div><div class="feed-card-price">¥'+item.price+'</div><span class="feed-card-tag" style="'+tagStyle+'">'+item.type_label+'</span></div>';
+                        card.innerHTML = '<img class="feed-card-img" src="'+item.image+'" alt="'+item.name+'" loading="lazy" onerror="this.src=\'/static/img/default_cover.png\'"><div class="feed-card-body"><div class="feed-card-name">'+item.name+'</div><div class="feed-card-price">'+fmtFcfa(item.price)+'</div><span class="feed-card-tag" style="'+tagStyle+'">'+item.type_label+'</span></div>';
                         feedGrid.appendChild(card);
                     });
                     page++;

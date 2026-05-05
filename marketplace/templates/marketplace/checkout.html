@@ -1,5 +1,6 @@
 {% extends "public/base.html" %}
 {% load i18n static %}
+{% load currency_filters %}
 
 {% block title %}{% trans "结算" %} - {% trans "市场" %}{% endblock %}
 
@@ -214,7 +215,7 @@
                         <img src="{{ ci.image_url }}" alt="{{ ci.name }}" class="order-item-img">
                         <div class="order-item-name">{{ ci.name }}</div>
                         <span class="order-item-qty">×{{ ci.quantity }}</span>
-                        <span class="order-item-price">¥{{ ci.total_price }}</span>
+                        <span class="order-item-price">{{ ci.total_price|fcfa }}</span>
                     </div>
                     {% endfor %}
 
@@ -224,7 +225,7 @@
                     </div>
                     <div class="summary-total">
                         <span style="font-weight:700;">{% trans "应付金额" %}</span>
-                        <span>¥{{ total_price }}</span>
+                        <span>{{ total_price|fcfa }}</span>
                     </div>
 
                     <button type="submit" class="btn-pay">
@@ -252,7 +253,7 @@
             </div>
             <p style="color:#666;margin-bottom:15px;">
                 <i class="fas fa-mobile-alt"></i> {% trans "请使用手机扫码完成支付" %}<br>
-                <strong style="color:#e74c3c;">{% trans "金额" %}：¥{{ total_price }}</strong>
+                <strong style="color:#e74c3c;">{% trans "金额" %}：{{ total_price|fcfa }}</strong>
             </p>
             <div id="qrTimer" style="color:#667eea;font-weight:bold;margin-bottom:20px;">60秒后显示确认按钮...</div>
             <div id="confirmButtons" style="display:none;">

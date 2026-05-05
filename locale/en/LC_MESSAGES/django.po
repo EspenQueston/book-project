@@ -1074,6 +1074,14 @@ msgstr "Browse our extensive book collection"
 msgid "搜索图书名称..."
 msgstr "Search book titles..."
 
+#: .\manager\templates\public\books.html:109
+msgid "所有分类"
+msgstr "All Categories"
+
+#: .\manager\templates\public\books.html:110
+msgid "最新上架"
+msgstr "New Arrivals"
+
 #: .\manager\templates\public\books.html:110
 msgid "按名称排序"
 msgstr "Sort by name"
@@ -1090,7 +1098,19 @@ msgstr "Price: high to low"
 msgid "按销量排序"
 msgstr "Sort by sales"
 
-#: .\manager\templates\public\books.html:121
+#: .\manager\templates\public\books.html:114
+msgid "搜索图书、作者、出版社..."
+msgstr "Search books, authors, publishers..."
+
+#: .\manager\templates\public\books.html:195
+msgid "加载更多图书…"
+msgstr "Loading more books…"
+
+#: .\manager\templates\public\books.html:196
+msgid "已显示全部图书"
+msgstr "All books displayed"
+
+#: .\manager\templates\public\books.html:113
 #, python-format
 msgid "共找到 %(count)s 本图书"
 msgstr "Found %(count)s books in total"

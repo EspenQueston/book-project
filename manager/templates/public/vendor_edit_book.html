@@ -1,5 +1,6 @@
 {% extends 'public/vendor_panel_base.html' %}
 {% load i18n %}
+{% load currency_filters %}
 
 {% block panel_title %}{% trans "编辑图书" %} · {% trans "卖家中心" %}{% endblock %}
 
@@ -74,11 +75,11 @@
                             <input type="text" name="name" class="form-control" value="{{ book.name }}" required>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label fw-bold">{% trans "售价 (¥)" %} <span class="text-danger">*</span></label>
+                            <label class="form-label fw-bold">{% trans "售价 (FCFA)" %} <span class="text-danger">*</span></label>
                             <input type="number" name="price" class="form-control" step="0.01" min="0" value="{{ book.price }}" required>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label fw-bold">{% trans "卖家定价 (¥)" %}</label>
+                            <label class="form-label fw-bold">{% trans "卖家定价 (FCFA)" %}</label>
                             <input type="number" name="vendor_price" class="form-control" step="0.01" min="0" value="{{ vb.vendor_price }}">
                         </div>
                         <div class="col-md-4">

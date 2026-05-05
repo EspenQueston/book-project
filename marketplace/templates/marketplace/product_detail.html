@@ -1,5 +1,6 @@
 {% extends "public/base.html" %}
 {% load i18n %}
+{% load currency_filters %}
 
 {% block title %}{{ product.name }} - {% trans "市场" %}{% endblock %}
 
@@ -253,8 +254,8 @@
     <!-- B. Price -->
     <div class="bmp-price-section">
         <div class="d-flex align-items-baseline">
-            <div class="bmp-price-main"><small>¥</small>{{ product.price }}</div>
-            {% if product.original_price %}<div class="bmp-price-original">¥{{ product.original_price }}</div>{% endif %}
+            <div class="bmp-price-main">{{ product.price|fcfa }}</div>
+            {% if product.original_price %}<div class="bmp-price-original">{{ product.original_price|fcfa }}</div>{% endif %}
             <div class="bmp-price-sold ms-auto">已售 {{ product.sales_count }}+</div>
         </div>
         <div><span class="bmp-low-badge">7天无理由退货</span> <span class="bmp-low-badge" style="margin-left:4px;">正品保证</span></div>
@@ -438,9 +439,9 @@
 
                 <!-- Price -->
                 <div class="price-block">
-                    <span class="price-current">¥{{ product.price }}</span>
+                    <span class="price-current">{{ product.price|fcfa }}</span>
                     {% if product.original_price %}
-                    <span class="price-original">¥{{ product.original_price }}</span>
+                    <span class="price-original">{{ product.original_price|fcfa }}</span>
                     <span class="price-discount">-{{ product.get_discount_percent }}%</span>
                     {% endif %}
                 </div>
@@ -608,7 +609,7 @@
                         <img src="{{ p.get_image_url }}" alt="{{ p.name }}">
                         <div class="related-card-body">
                             <h6>{{ p.name }}</h6>
-                            <span style="font-weight:800; color:var(--danger-color);">¥{{ p.price }}</span>
+                            <span style="font-weight:800; color:var(--danger-color);">{{ p.price|fcfa }}</span>
                         </div>
                     </div>
                 </a>

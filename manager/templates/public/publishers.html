@@ -1,5 +1,6 @@
 {% extends 'public/base.html' %}
 {% load i18n %}
+{% load currency_filters %}
 
 {% block title %}{% trans "出版社目录" %} - {% trans "DUNO 360" %}{% endblock %}
 
@@ -190,7 +191,7 @@
                                 <img src="{{ first_book.get_cover_url }}" alt="{{ first_book.name }}" class="featured-book-cover">
                                 <div class="featured-book-info">
                                     <div class="book-title">{{ first_book.name }}</div>
-                                    <div class="book-price">¥{{ first_book.price }}</div>
+                                    <div class="book-price">{{ first_book.price|fcfa }}</div>
                                 </div>
                             </div>
                             {% endif %}

@@ -1,5 +1,6 @@
 {% extends "public/base.html" %}
 {% load i18n %}
+{% load currency_filters %}
 
 {% block title %}{{ item.name }} - {% trans "超市" %}{% endblock %}
 
@@ -114,7 +115,7 @@
         <img src="{{ item.get_image_url }}" alt="{{ item.name }}">
     </div>
     <div class="pmp-info">
-        <div class="pmp-price">¥{{ item.price }}</div>
+        <div class="pmp-price">{{ item.price|fcfa }}</div>
         <h1 class="pmp-title">{{ item.name }}</h1>
         <div class="pmp-seller-row">
             <span>
@@ -181,10 +182,10 @@
                 </div>
 
                 <div class="mb-3">
-                    <span class="detail-price">¥{{ item.price }}</span>
+                    <span class="detail-price">{{ item.price|fcfa }}</span>
                     <span style="font-size:1rem; color:#64748b;"> / {{ item.get_unit_display }}</span>
                     {% if item.original_price %}
-                    <span style="font-size:1rem; color:#94a3b8; text-decoration:line-through; margin-left:10px;">¥{{ item.original_price }}</span>
+                    <span style="font-size:1rem; color:#94a3b8; text-decoration:line-through; margin-left:10px;">{{ item.original_price|fcfa }}</span>
                     <span class="badge ms-2" style="background:linear-gradient(135deg,#ef4444,#f97316);">-{{ item.get_discount_percent }}%</span>
                     {% endif %}
                 </div>
@@ -286,7 +287,7 @@
                         <img src="{{ r.get_image_url }}" alt="{{ r.name }}">
                         <div class="p-3">
                             <h6 class="fw-bold mb-1">{{ r.name }}</h6>
-                            <span style="font-weight:800; color:#ef4444;">¥{{ r.price }}/{{ r.get_unit_display }}</span>
+                            <span style="font-weight:800; color:#ef4444;">{{ r.price|fcfa }}/{{ r.get_unit_display }}</span>
                         </div>
                     </div>
                 </a>

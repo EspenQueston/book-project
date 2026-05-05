@@ -1,5 +1,6 @@
 {% extends 'public/base.html' %}
 {% load i18n static %}
+{% load currency_filters %}
 
 {% block title %}{% trans "订单确认" %} - {{ order.order_number }}{% endblock %}
 
@@ -304,7 +305,7 @@
         
         <div class="detail-row">
             <span><strong>{% trans "订单总额" %}:</strong></span>
-            <span class="text-success">¥{{ order.total_amount }}</span>
+            <span class="text-success">{{ order.total_amount|fcfa }}</span>
         </div>
     </div>
 
@@ -330,8 +331,8 @@
                 <h6 class="mb-1">{{ item.book.name }} <span class="badge bg-primary" style="font-size:0.65rem;">📚 {% trans "图书" %}</span></h6>
                 <p class="text-muted mb-1">{{ item.book.publisher.publisher_name }}</p>
                 <div class="d-flex justify-content-between">
-                    <span>{% trans "单价" %}: ¥{{ item.unit_price }} × {{ item.quantity }}</span>
-                    <strong class="text-primary">¥{{ item.total_price }}</strong>
+                    <span>{% trans "单价" %}: {{ item.unit_price|fcfa }} × {{ item.quantity }}</span>
+                    <strong class="text-primary">{{ item.total_price|fcfa }}</strong>
                 </div>
             </div>
         </div>
@@ -367,8 +368,8 @@
                 </div>
                 {% endif %}
                 <div class="d-flex justify-content-between">
-                    <span>{% trans "单价" %}: ¥{{ item.unit_price }} × {{ item.quantity }}</span>
-                    <strong class="text-primary">¥{{ item.subtotal }}</strong>
+                    <span>{% trans "单价" %}: {{ item.unit_price|fcfa }} × {{ item.quantity }}</span>
+                    <strong class="text-primary">{{ item.subtotal|fcfa }}</strong>
                 </div>
             </div>
         </div>
@@ -380,7 +381,7 @@
     <div class="payment-info">
         <h5><i class="fas fa-credit-card"></i> {% trans "支付信息" %}</h5>
         <p class="mb-2"><strong>{% trans "支付方式" %}:</strong> {{ order.get_payment_method_display }}</p>
-        <p class="mb-2"><strong>{% trans "应付金额" %}:</strong> <span class="text-success fw-bold">¥{{ order.total_amount }}</span></p>
+        <p class="mb-2"><strong>{% trans "应付金额" %}:</strong> <span class="text-success fw-bold">{{ order.total_amount|fcfa }}</span></p>
         <p class="mb-2"><strong>{% trans "订单状态" %}:</strong> <span class="status-badge {% if order.status == 'payment_pending' %}status-pending{% elif order.status == 'processing' %}badge bg-info{% elif order.status == 'shipped' %}badge bg-success{% endif %}">{{ order.get_status_display }}</span></p>
         
         {% if order.status == 'payment_pending' %}
@@ -424,7 +425,7 @@
                     <span class="step-num">2</span>
                     <div>
                         <strong>{% trans "完成付款" %}</strong>
-                        <small class="d-block text-muted">支付 <span class="text-danger fw-bold">¥{{ order.total_amount }}</span></small>
+                        <small class="d-block text-muted">支付 <span class="text-danger fw-bold">{{ order.total_amount|fcfa }}</span></small>
                     </div>
                 </li>
                 <li id="step3">
@@ -729,7 +730,7 @@ function showPaymentModal() {
                 <button onclick="closePaymentModal()" style="position: absolute; right: 15px; top: 15px; border: none; background: #f1f1f1; border-radius: 50%; width: 36px; height: 36px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;">&times;</button>
                 <div style="text-align: center;">
                     <h3 style="margin-bottom: 5px; font-size: 1.5rem; font-weight: 700;">${title}</h3>
-                    <p style="color: #e74c3c; font-size: 1.3rem; font-weight: 700; margin-bottom: 15px;">¥{{ order.total_amount }}</p>
+                    <p style="color: #e74c3c; font-size: 1.3rem; font-weight: 700; margin-bottom: 15px;">{{ order.total_amount|fcfa }}</p>
                     <div style="background: #f8f9fa; padding: 20px; border-radius: 15px; margin: 15px 0;">
                         <img src="${qrImage}" alt="QR Code" style="width: 100%; max-width: 320px; height: auto; border-radius: 10px;">
                     </div>

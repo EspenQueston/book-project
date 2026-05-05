@@ -29,7 +29,7 @@ def main() -> int:
     cmd = r"""set -e
 chown -R duno360:www-data /opt/duno360/app || true
 sudo -u duno360 bash -lc 'cd /opt/duno360/app && git -c safe.directory=/opt/duno360/app fetch origin && git -c safe.directory=/opt/duno360/app pull origin main'
-sudo -u duno360 bash -lc 'cd /opt/duno360/app && set -a && . /opt/duno360/.env && set +a && .venv/bin/python manage.py migrate --noinput'
+sudo -u duno360 bash -lc 'cd /opt/duno360/app && set -a && . /opt/duno360/.env && set +a && .venv/bin/python manage.py migrate --noinput && (.venv/bin/python manage.py compilemessages --noinput || true)'
 systemctl restart duno360
 systemctl is-active duno360
 """

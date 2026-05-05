@@ -1,5 +1,6 @@
 {% extends 'public/base.html' %}
 {% load i18n %}
+{% load currency_filters %}
 
 {% block title %}{% trans "搜索结果" %} - DUNO 360{% endblock %}
 
@@ -158,13 +159,18 @@
         container.innerHTML = html;
     }
 
+    function fmtFcfa(val) {
+        var n = Math.round(parseFloat(val) * 82);
+        return n.toLocaleString('fr-FR') + '\u00a0FCFA';
+    }
+
     function buildCard(item) {
         return '<a href="' + item.url + '" class="sr-card">' +
             '<img src="' + item.image + '" alt="' + escHtml(item.name) + '" loading="lazy">' +
             '<div class="sr-card-body">' +
             '<span class="sr-card-type ' + item.type + '">' + item.type_label + '</span>' +
             '<div class="sr-card-name">' + escHtml(item.name) + '</div>' +
-            '<div class="sr-card-price">¥' + item.price + '</div>' +
+            '<div class="sr-card-price">' + fmtFcfa(item.price) + '</div>' +
             '</div></a>';
     }
 

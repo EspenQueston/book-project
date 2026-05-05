@@ -1,4 +1,5 @@
 {% extends "marketplace/admin/base.html" %}
+{% load currency_filters %}
 {% block title %}订单管理 - 市场管理{% endblock %}
 {% block nav_orders %}active{% endblock %}
 
@@ -36,7 +37,7 @@
     <div class="col-6 col-md-3">
         <div class="card border-0 shadow-sm h-100" style="border-radius:12px;">
             <div class="card-body text-center">
-                <div class="text-danger fw-bold fs-3">¥{{ total_revenue }}</div>
+                <div class="text-danger fw-bold fs-3">{{ total_revenue|fcfa }}</div>
                 <small class="text-muted">总收入</small>
             </div>
         </div>
@@ -112,7 +113,7 @@
                         </div>
                         {% endfor %}
                     </td>
-                    <td class="fw-bold text-danger">¥{{ order.total_amount }}</td>
+                    <td class="fw-bold text-danger">{{ order.total_amount|fcfa }}</td>
                     <td>
                         <span class="badge {% if order.status == 'delivered' %}bg-success{% elif order.status == 'cancelled' %}bg-danger{% elif order.status == 'refunded' %}bg-dark{% elif order.status == 'pending' or order.status == 'payment_pending' %}bg-warning text-dark{% elif order.status == 'paid' %}bg-primary{% else %}bg-info{% endif %}">
                             {{ order.get_status_display }}

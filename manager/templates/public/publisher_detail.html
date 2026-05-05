@@ -1,5 +1,6 @@
 {% extends 'public/base.html' %}
 {% load i18n %}
+{% load currency_filters %}
 
 {% block title %}{{ publisher.publisher_name }} - {% trans "出版社详情" %}{% endblock %}
 
@@ -109,7 +110,7 @@
                     <div class="stat-icon" style="background:linear-gradient(135deg,rgba(239,68,68,0.15),rgba(220,38,38,0.15));">
                         <i class="fas fa-tag" style="color:#ef4444;font-size:1.3rem;"></i>
                     </div>
-                    <div class="stat-value">{% if avg_price %}¥{{ avg_price|floatformat:0 }}{% else %}—{% endif %}</div>
+                    <div class="stat-value">{% if avg_price %}{{ avg_price|fcfa }}{% else %}—{% endif %}</div>
                     <div class="stat-label">{% trans "平均售价" %}</div>
                 </div>
             </div>
@@ -164,7 +165,7 @@
                         </div>
                         <div class="col-6">
                             <div style="padding:16px;background:rgba(239,68,68,0.06);border-radius:12px;">
-                                <div style="font-size:1.6rem;font-weight:800;color:#ef4444;">{% if total_revenue %}¥{{ total_revenue|floatformat:0 }}{% else %}—{% endif %}</div>
+                                <div style="font-size:1.6rem;font-weight:800;color:#ef4444;">{% if total_revenue %}{{ total_revenue|fcfa }}{% else %}—{% endif %}</div>
                                 <div class="small text-muted">{% trans "预计营收" %}</div>
                             </div>
                         </div>
@@ -197,7 +198,7 @@
                             </h6>
                             <p class="small text-muted mb-2" style="min-height:40px;line-height:1.6;">{{ book.get_short_description }}</p>
                             <div class="d-flex align-items-center justify-content-between mb-3">
-                                <span class="fw-bold" style="font-size:1.2rem;color:#667eea;">¥{{ book.price }}</span>
+                                <span class="fw-bold" style="font-size:1.2rem;color:#667eea;">{{ book.price|fcfa }}</span>
                                 {% if book.inventory > 10 %}<span class="book-badge badge-stock-ok"><i class="fas fa-check-circle"></i>{% trans "有货" %}</span>
                                 {% elif book.inventory > 0 %}<span class="book-badge badge-stock-low"><i class="fas fa-exclamation-triangle"></i>{{ book.inventory }}{% trans "本" %}</span>
                                 {% else %}<span class="book-badge badge-stock-out"><i class="fas fa-times-circle"></i>{% trans "缺货" %}</span>{% endif %}

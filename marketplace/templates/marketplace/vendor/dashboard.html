@@ -1,4 +1,5 @@
 {% extends "marketplace/vendor/base.html" %}
+{% load currency_filters %}
 
 {% block title %}仪表板 - {{ vendor.company_name }}{% endblock %}
 {% block nav_dashboard %}active{% endblock %}
@@ -61,7 +62,7 @@
             <div class="d-flex align-items-center">
                 <div class="stat-icon me-3" style="background:linear-gradient(135deg,#10b981,#34d399);"><i class="fas fa-yen-sign"></i></div>
                 <div>
-                    <div class="stat-value">¥{{ total_revenue|floatformat:0 }}</div>
+                    <div class="stat-value">{{ total_revenue|fcfa }}</div>
                     <div class="stat-label">总收入</div>
                 </div>
             </div>
@@ -125,11 +126,11 @@
             <h6><i class="fas fa-balance-scale me-2" style="color:var(--primary-color);"></i>收入构成</h6>
             <div class="d-flex gap-3">
                 <div class="flex-fill text-center p-3" style="background:rgba(102,126,234,0.06);border-radius:12px;">
-                    <div style="font-size:1.3rem;font-weight:800;color:#667eea;">¥{{ product_revenue|floatformat:0 }}</div>
+                    <div style="font-size:1.3rem;font-weight:800;color:#667eea;">{{ product_revenue|fcfa }}</div>
                     <small class="text-muted">商品收入</small>
                 </div>
                 <div class="flex-fill text-center p-3" style="background:rgba(240,147,251,0.06);border-radius:12px;">
-                    <div style="font-size:1.3rem;font-weight:800;color:#f093fb;">¥{{ course_revenue|floatformat:0 }}</div>
+                    <div style="font-size:1.3rem;font-weight:800;color:#f093fb;">{{ course_revenue|fcfa }}</div>
                     <small class="text-muted">课程收入</small>
                 </div>
             </div>
@@ -177,7 +178,7 @@
                 <img src="{{ p.get_image_url }}" style="width:40px;height:40px;border-radius:8px;object-fit:cover;">
                 <div class="flex-grow-1" style="min-width:0;">
                     <div class="fw-bold text-truncate" style="font-size:0.85rem;">{{ p.name }}</div>
-                    <small class="text-muted">¥{{ p.price }}</small>
+                    <small class="text-muted">{{ p.price|fcfa }}</small>
                 </div>
                 <span class="badge" style="background:rgba(16,185,129,0.12);color:#10b981;">{{ p.sales_count }} 已售</span>
             </div>
@@ -198,7 +199,7 @@
                     <div class="fw-bold" style="font-size:0.85rem;">{{ order.user_name|default:"匿名" }}</div>
                     <small class="text-muted">{{ order.created_at|date:"m/d H:i" }}</small>
                 </div>
-                <span class="fw-bold" style="color:#ef4444;">¥{{ order.total_amount }}</span>
+                <span class="fw-bold" style="color:#ef4444;">{{ order.total_amount|fcfa }}</span>
                 <span class="badge bg-{{ order.get_status_color }}">{{ order.get_status_display }}</span>
             </div>
             {% endfor %}

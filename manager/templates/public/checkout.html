@@ -1,5 +1,6 @@
 {% extends 'public/base.html' %}
 {% load i18n static %}
+{% load currency_filters %}
 
 {% block title %}{% trans "结账" %} - {% trans "DUNO 360" %}{% endblock %}
 
@@ -634,8 +635,8 @@ html[data-theme="dark"] .ck-guarantee-banner {
                                 </div>
                                 {% endif %}
                                 <div class="d-flex justify-content-between mt-1">
-                                    <span style="color:var(--ck-text-muted);">¥{{ item.price }} &times; {{ item.quantity }}</span>
-                                    <strong>¥{{ item.total_price }}</strong>
+                                    <span style="color:var(--ck-text-muted);">{{ item.price|fcfa }} &times; {{ item.quantity }}</span>
+                                    <strong>{{ item.total_price|fcfa }}</strong>
                                 </div>
                             </div>
                         </div>
@@ -646,7 +647,7 @@ html[data-theme="dark"] .ck-guarantee-banner {
                     <div class="summary-details">
                         <div class="summary-item">
                             <span data-zh="商品总计" data-en="Subtotal" data-fr="Sous-total">{% trans "商品总计" %}:</span>
-                            <span>¥{{ total_amount }}</span>
+                            <span>{{ total_amount|fcfa }}</span>
                         </div>
                         <div class="summary-item">
                             <span data-zh="运费" data-en="Shipping" data-fr="Livraison">{% trans "运费" %}:</span>
@@ -654,7 +655,7 @@ html[data-theme="dark"] .ck-guarantee-banner {
                         </div>
                         <div class="summary-item">
                             <span data-zh="订单总额" data-en="Total" data-fr="Total">{% trans "订单总额" %}:</span>
-                            <span class="text-primary">¥{{ total_amount }}</span>
+                            <span class="text-primary">{{ total_amount|fcfa }}</span>
                         </div>
                     </div>
 
@@ -682,7 +683,7 @@ html[data-theme="dark"] .ck-guarantee-banner {
             <button type="submit" class="ck-pay-btn">
                 <i class="fas fa-lock"></i>
                 <span data-zh="立即付款" data-en="Pay now" data-fr="Payer maintenant">{% trans "立即付款" %}</span>
-                &nbsp;&mdash; ¥<span id="ckPayTotal">{{ total_amount }}</span>
+                &nbsp;&mdash; <span id="ckPayTotal">{{ total_amount|fcfa }}</span>
             </button>
         </div>
     </form>
@@ -834,7 +835,7 @@ function closeQRModal() {
 
             <p style="color: var(--ck-text-muted, #666); margin-bottom: 15px;">
                 <i class="fas fa-mobile-alt"></i> {% trans "请使用手机扫描二维码完成支付" %}<br>
-                <strong style="color: #e74c3c;">{% trans "金额" %}：¥{{ total_amount }}</strong>
+                <strong style="color: #e74c3c;">{% trans "金额" %}：{{ total_amount|fcfa }}</strong>
             </p>
 
             <div id="qrTimer" style="color: var(--ck-primary, #667eea); font-weight: bold; margin-bottom: 20px;">

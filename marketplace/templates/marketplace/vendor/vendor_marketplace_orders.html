@@ -1,5 +1,6 @@
 {% extends "marketplace/vendor/base.html" %}
 {% load i18n %}
+{% load currency_filters %}
 
 {% block title %}{% trans "商城订单" %} - {{ vendor.company_name }}{% endblock %}
 
@@ -74,7 +75,7 @@
                         <div class="small fw-semibold">{{ o.user_name|default:"—" }}</div>
                         <small class="text-muted">{{ o.user_email|truncatechars:26 }}</small>
                     </td>
-                    <td class="fw-bold text-danger">¥{{ o.total_amount }}</td>
+                    <td class="fw-bold text-danger">{{ o.total_amount|fcfa }}</td>
                     <td><span class="badge rounded-pill text-white" style="background:{{ o.get_status_color }};">{{ o.get_status_display }}</span></td>
                     <td><span class="badge bg-secondary">{{ o.get_payment_status_display }}</span></td>
                     <td><small>{{ o.created_at|date:"Y-m-d H:i" }}</small></td>

@@ -1,5 +1,6 @@
 {% extends "marketplace/vendor/base.html" %}
 {% load i18n %}
+{% load currency_filters %}
 
 {% block title %}{% trans "订单详情" %} - {{ order.order_number }}{% endblock %}
 
@@ -83,8 +84,8 @@
                 <small style="opacity:.9;">{{ order.created_at|date:"Y-m-d H:i" }}</small>
             </div>
             <div class="text-end">
-                <div class="fs-3 fw-bold">¥{{ order.total_amount }}</div>
-                <small style="opacity:.9;">{% trans "您的商品小计" %} · ¥{{ vendor_subtotal }}</small>
+                <div class="fs-3 fw-bold">{{ order.total_amount|fcfa }}</div>
+                <small style="opacity:.9;">{% trans "您的商品小计" %} · {{ vendor_subtotal|fcfa }}</small>
             </div>
         </div>
     </div>
@@ -205,9 +206,9 @@
                         {% endfor %}
                     </div>
                 </div>
-                <div class="vmo-price small text-muted d-none d-md-block">¥{{ it.unit_price }}</div>
+                <div class="vmo-price small text-muted d-none d-md-block">{{ it.unit_price|fcfa }}</div>
                 <div class="vmo-qty small text-muted">× {{ it.quantity }}</div>
-                <div class="vmo-sub fw-bold">¥{{ it.subtotal }}</div>
+                <div class="vmo-sub fw-bold">{{ it.subtotal|fcfa }}</div>
             </div>
             {% endfor %}
         </div>

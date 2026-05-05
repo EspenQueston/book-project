@@ -1,5 +1,6 @@
 {% extends 'public/base.html' %}
 {% load i18n %}
+{% load currency_filters %}
 
 {% block title %}{% trans "图书目录" %} - {% trans "DUNO 360" %}{% endblock %}
 
@@ -321,7 +322,7 @@
             {% if book.price == 0 %}
             <div class="bmf-free" data-zh="免费" data-en="FREE" data-fr="GRATUIT">免费</div>
             {% else %}
-            <div class="bmf-price">¥{{ book.price }}</div>
+            <div class="bmf-price">{{ book.price|fcfa }}</div>
             {% endif %}
             <span class="bmf-badge-type" style="background:#ede9fe;color:#7c3aed;" data-zh="图书" data-en="Book" data-fr="Livre">图书</span>
         </div>
@@ -400,7 +401,7 @@
                                 {% endif %}
                             </div>
                             <!-- Price badge overlay -->
-                            <span style="position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; padding: 5px 14px; border-radius: 20px; font-weight: 700; font-size: 0.95rem; border: 1px solid rgba(255,255,255,0.3);">¥{{ book.price }}</span>
+                            <span style="position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; padding: 5px 14px; border-radius: 20px; font-weight: 700; font-size: 0.95rem; border: 1px solid rgba(255,255,255,0.3);">{{ book.price|fcfa }}</span>
                             {% if book.inventory == 0 %}
                             <span style="position: absolute; bottom: 12px; left: 12px; background: #ef4444; color: white; padding: 4px 10px; border-radius: 15px; font-size: 0.75rem; font-weight: 600;">{% trans "缺货" %}</span>
                             {% elif book.inventory <= 5 %}
@@ -645,6 +646,11 @@ document.addEventListener('DOMContentLoaded', function() {
         return t === 'book' ? 'background:#ede9fe;color:#7c3aed;' : t === 'course' ? 'background:#e0e7ff;color:#3730a3;' : 'background:#fef3c7;color:#d97706;';
     }
 
+    function fmtFcfa(val) {
+        var n = Math.round(parseFloat(val) * 82);
+        return n.toLocaleString('fr-FR') + '\u00a0FCFA';
+    }
+
     function loadBooks() {
         loading = true;
         if (loader) loader.style.display = 'block';
@@ -657,7 +663,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     var card = document.createElement('a');
                     card.href = item.url;
                     card.className = 'bmf-card';
-                    card.innerHTML = '<img class="bmf-cover" src="'+item.image+'" alt="'+item.name+'" loading="lazy" onerror="this.src=\'/static/img/default_cover.png\'"><div class="bmf-body"><div class="bmf-title">'+item.name+'</div><div class="bmf-price">¥'+item.price+'</div><span class="bmf-badge-type" style="'+tagStyle(item.type)+'">'+item.type_label+'</span></div>';
+                    card.innerHTML = '<img class="bmf-cover" src="'+item.image+'" alt="'+item.name+'" loading="lazy" onerror="this.src=\'\'/static/img/default_cover.png\'\'"><div class="bmf-body"><div class="bmf-title">'+item.name+'</div><div class="bmf-price">'+fmtFcfa(item.price)+'</div><span class="bmf-badge-type" style="'+tagStyle(item.type)+'">'+item.type_label+'</span></div>';
                     feedDiv.appendChild(card);
                 });
                 page = data.has_more ? page + 1 : 1;
@@ -700,7 +706,7 @@ document.addEventListener('DOMContentLoaded', function() {
             + '<a href="' + book.url + '" style="text-decoration:none;"><div class="book-cover-container">'
             + '<button class="wish-btn" data-book-id="' + book.id + '" onclick="event.preventDefault();event.stopPropagation();toggleWish(this,' + book.id + ')" title="收藏"><i class="far fa-heart"></i></button>'
             + '<div class="book-cover-frame">' + coverHtml + '</div>'
-            + '<span style="position:absolute;top:12px;right:12px;background:rgba(255,255,255,0.2);backdrop-filter:blur(10px);color:white;padding:5px 14px;border-radius:20px;font-weight:700;font-size:0.95rem;border:1px solid rgba(255,255,255,0.3);">¥' + book.price + '</span>'
+            + '<span style="position:absolute;top:12px;right:12px;background:rgba(255,255,255,0.2);backdrop-filter:blur(10px);color:white;padding:5px 14px;border-radius:20px;font-weight:700;font-size:0.95rem;border:1px solid rgba(255,255,255,0.3);">' + fmtFcfa(book.price) + '</span>'
             + invBadge + '</div></a>'
             + '<div class="card-body d-flex flex-column" style="padding:18px;">'
             + '<h5 class="card-title fw-bold mb-2" style="font-size:1.05rem;line-height:1.4;min-height:42px;">' + escHtml(book.name) + '</h5>'
@@ -777,7 +783,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         suggest.innerHTML = results.map(function(item) {
-            var price = parseFloat(item.price || '0') <= 0 ? '{% trans "免费" %}' : '¥' + item.price;
+            var price = parseFloat(item.price || '0') <= 0 ? '{% trans "免费" %}' : fmtFcfa(item.price);
             var image = item.image || '/static/img/default_cover.png';
             return '<a class="bss-item" href="' + item.url + '">'
                 + '<img class="bss-thumb" src="' + image + '" alt="' + (item.name || '') + '" loading="lazy">'

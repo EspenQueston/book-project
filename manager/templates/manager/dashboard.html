@@ -1,3 +1,4 @@
+{% load currency_filters %}
 <!DOCTYPE html>
 <html lang="zh-Hans">
 <head>
@@ -316,7 +317,7 @@
                             <div class="kpi-card" style="background: var(--gradient-2);">
                                 <div class="kpi-icon"><i class="fas fa-yen-sign"></i></div>
                                 <div class="kpi-info">
-                                    <div class="kpi-value">¥{{ total_revenue|floatformat:0 }}</div>
+                                    <div class="kpi-value">{{ total_revenue|fcfa }}</div>
                                     <div class="kpi-label">总收入</div>
                                 </div>
                             </div>
@@ -374,7 +375,7 @@
                             <div class="kpi-card" style="background: linear-gradient(135deg, #f97316, #ea580c);">
                                 <div class="kpi-icon"><i class="fas fa-coins"></i></div>
                                 <div class="kpi-info">
-                                    <div class="kpi-value">¥{{ revenue_this_month|floatformat:0 }}</div>
+                                    <div class="kpi-value">{{ revenue_this_month|fcfa }}</div>
                                     <div class="kpi-label">本月收入</div>
                                 </div>
                             </div>
@@ -545,7 +546,7 @@
                                                     <small class="text-muted">{{ order.created_at|date:"m-d H:i" }}</small>
                                                 </td>
                                                 <td>{{ order.customer_name|truncatechars:8 }}</td>
-                                                <td><span class="text-success fw-bold">¥{{ order.total_amount }}</span></td>
+                                                <td><span class="text-success fw-bold">{{ order.total_amount|fcfa }}</span></td>
                                                 <td>
                                                     {% if order.status == 'pending' %}
                                                         <span class="badge bg-warning">待处理</span>
@@ -587,7 +588,7 @@
                 data: {
                     labels: salesData.map(function(i){ return i.date; }),
                     datasets: [{
-                        label: '销售额 (¥)',
+                        label: '销售额 (FCFA)',
                         data: salesData.map(function(i){ return i.revenue; }),
                         borderColor: '#667eea',
                         backgroundColor: 'rgba(102, 126, 234, 0.15)',
@@ -697,7 +698,7 @@
                         backgroundColor: 'rgba(102, 126, 234, 0.8)',
                         borderRadius: 8, barPercentage: 0.5, yAxisID: 'y'
                     }, {
-                        label: '收入 (¥)',
+                        label: '收入 (FCFA)',
                         data: moData.map(function(i){ return i.revenue; }),
                         type: 'line',
                         borderColor: '#ef4444',
@@ -723,7 +724,7 @@
             new Chart(prCtx.getContext('2d'), {
                 type: 'polarArea',
                 data: {
-                    labels: prData.map(function(i){ return '¥' + i.range; }),
+                    labels: prData.map(function(i){ return i.range; }),
                     datasets: [{
                         data: prData.map(function(i){ return i.count; }),
                         backgroundColor: ['rgba(102, 126, 234, 0.7)', 'rgba(118, 75, 162, 0.7)', 'rgba(16, 185, 129, 0.7)', 'rgba(245, 158, 11, 0.7)', 'rgba(239, 68, 68, 0.7)'],

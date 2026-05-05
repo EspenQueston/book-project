@@ -1,5 +1,6 @@
 {% extends 'public/base.html' %}
 {% load i18n %}
+{% load currency_filters %}
 
 {% block title %}{{ vendor.company_name }} - {% trans "店铺首页" %}{% endblock %}
 
@@ -279,7 +280,7 @@ html[data-theme="dark"] .vs-score-item { background: var(--section-bg); }
                             </a>
                             <div class="vs-card-footer">
                                 <div>
-                                    <div class="vs-card-price"><small>¥</small>{{ vb.vendor_price }}</div>
+                                    <div class="vs-card-price">{{ vb.vendor_price|fcfa }}</div>
                                     <div class="vs-card-sales"><span data-zh="已售" data-en="Sold" data-fr="Vendu">{% trans "已售" %}</span> {{ vb.book.sale_num }}+</div>
                                 </div>
                                 <a href="{% url 'manager:public_book_detail' vb.book.id %}" class="vs-card-btn" data-zh="查看" data-en="View" data-fr="Voir">{% trans "查看" %}</a>
@@ -302,7 +303,7 @@ html[data-theme="dark"] .vs-score-item { background: var(--section-bg); }
                             </a>
                             <div class="vs-card-footer">
                                 <div>
-                                    <div class="vs-card-price"><small>¥</small>{{ product.price }}</div>
+                                    <div class="vs-card-price">{{ product.price|fcfa }}</div>
                                     <div class="vs-card-sales"><span data-zh="已售" data-en="Sold" data-fr="Vendu">{% trans "已售" %}</span> {{ product.sales_count }}+</div>
                                 </div>
                                 <a href="{% url 'marketplace:product_detail' product.slug %}" class="vs-card-btn" data-zh="查看" data-en="View" data-fr="Voir">{% trans "查看" %}</a>
@@ -325,7 +326,7 @@ html[data-theme="dark"] .vs-score-item { background: var(--section-bg); }
                             </a>
                             <div class="vs-card-footer">
                                 <div>
-                                    <div class="vs-card-price"><small>¥</small>{{ course.price }}</div>
+                                    <div class="vs-card-price">{{ course.price|fcfa }}</div>
                                     <div class="vs-card-sales"><i class="fas fa-user-graduate me-1"></i>{{ course.enrollment_count }}</div>
                                 </div>
                                 <a href="{% url 'marketplace:course_detail' course.slug %}" class="vs-card-btn" data-zh="查看" data-en="View" data-fr="Voir">{% trans "查看" %}</a>

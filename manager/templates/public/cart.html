@@ -1,5 +1,6 @@
 {% extends 'public/base.html' %}
 {% load i18n %}
+{% load currency_filters %}
 
 {% block title %}{% trans "购物车" %} - {% trans "DUNO 360" %}{% endblock %}
 
@@ -273,9 +274,9 @@
                                 <!-- Price -->
                                 <div class="col-md-2 text-center">
                                     <div class="price-info">
-                                        <p class="mb-1 small text-muted">{% trans "单价" %}: ¥{{ item.price }}</p>
+                                        <p class="mb-1 small text-muted">{% trans "单价" %}: {{ item.price|fcfa }}</p>
                                         <p class="mb-0 fw-bold text-success h6" id="item-total-{{ item.item_type }}-{{ item.id }}">
-                                            ¥{{ item.total_price }}
+                                            {{ item.total_price|fcfa }}
                                         </p>
                                     </div>
                                 </div>
@@ -321,12 +322,12 @@
                         </div>
                         <div class="summary-row d-flex justify-content-between mb-3">
                             <span>{% trans "商品总额" %}:</span>
-                            <span id="summary-subtotal">¥{{ total_amount }}</span>
+                            <span id="summary-subtotal">{{ total_amount|fcfa }}</span>
                         </div>
                         <hr>
                         <div class="summary-row d-flex justify-content-between mb-4">
                             <strong>{% trans "总计" %}:</strong>
-                            <strong class="text-success h5" id="summary-total">¥{{ total_amount }}</strong>
+                            <strong class="text-success h5" id="summary-total">{{ total_amount|fcfa }}</strong>
                         </div>
                         
                         <div class="d-grid">
@@ -433,7 +434,7 @@ function updateQuantity(itemId, itemType, newQuantity) {
     .then(function(data) {
         if (data.success) {
             var itemTotal = document.getElementById('item-total-' + itemType + '-' + itemId);
-            if (itemTotal) itemTotal.textContent = '¥' + parseFloat(data.item_total).toFixed(2);
+            if (itemTotal) itemTotal.textContent = Math.round(parseFloat(data.item_total) * 82).toLocaleString('fr-FR') + '\u00a0FCFA';
             updateCartSummary(data.cart_total, data.total_items);
             gToast(data.message, 'success');
         } else {
@@ -505,8 +506,8 @@ function updateCartSummary(totalAmount, totalItems) {
     var st = document.getElementById('summary-total');
     var ti = document.getElementById('total-items');
     if (si) si.textContent = totalItems + ' 件';
-    if (ss) ss.textContent = '¥' + parseFloat(totalAmount).toFixed(2);
-    if (st) st.textContent = '¥' + parseFloat(totalAmount).toFixed(2);
+    if (ss) ss.textContent = Math.round(parseFloat(totalAmount) * 82).toLocaleString('fr-FR') + '\u00a0FCFA';
+    if (st) st.textContent = Math.round(parseFloat(totalAmount) * 82).toLocaleString('fr-FR') + '\u00a0FCFA';
     if (ti) ti.textContent = totalItems;
 }
 

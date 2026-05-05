@@ -1,5 +1,6 @@
 {% extends 'public/vendor_panel_base.html' %}
 {% load i18n %}
+{% load currency_filters %}
 
 {% block panel_title %}{% trans "图书管理" %} · {{ vendor.company_name }}{% endblock %}
 
@@ -60,7 +61,7 @@
         <img src="{{ vb.book.get_cover_url }}" alt="" class="book-row-v-cover">
         <div class="flex-grow-1" style="min-width:0;">
             <div class="fw-bold text-truncate">{{ vb.book.name }}</div>
-            <small class="text-muted">{% trans "售价" %} ¥{{ vb.vendor_price }} · {% trans "销量" %} {{ vb.book.sale_num }}
+            <small class="text-muted">{% trans "售价" %} {{ vb.vendor_price|fcfa }} · {% trans "销量" %} {{ vb.book.sale_num }}
                 {% if vb.book.publisher %} · {{ vb.book.publisher.publisher_name }}{% endif %}
             </small>
             {% if vb.book.inventory < 5 and vb.book.inventory > 0 %}

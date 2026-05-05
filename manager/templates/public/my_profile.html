@@ -1,5 +1,6 @@
 {% extends "public/base.html" %}
 {% load i18n static %}
+{% load currency_filters %}
 
 {% block title %}我的 - DUNO 360{% endblock %}
 
@@ -324,7 +325,7 @@
             </div>
             <div class="mypro-feed-body">
                 <div class="mypro-feed-name">{{ item.name }}</div>
-                <div class="mypro-feed-price"><small>¥</small>{{ item.price }}
+                <div class="mypro-feed-price">{{ item.price|fcfa }}
                     <span style="float:right;font-size:9px;padding:1px 6px;border-radius:8px;{% if item.type == 'product' %}background:#d1fae5;color:#065f46;{% else %}background:#ede9fe;color:#7c3aed;{% endif %}">{{ item.type }}</span>
                 </div>
             </div>
@@ -337,7 +338,7 @@
             </div>
             <div class="mypro-feed-body">
                 <div class="mypro-feed-name">{{ book.name }}</div>
-                <div class="mypro-feed-price"><small>¥</small>{{ book.price }}
+                <div class="mypro-feed-price">{{ book.price|fcfa }}
                     <span style="float:right;font-size:9px;padding:1px 6px;border-radius:8px;background:#dbeafe;color:#1d4ed8;">book</span>
                 </div>
             </div>
@@ -410,7 +411,7 @@ function followPublisher(pubId, btn) {
                     : '<i class="fas fa-book"></i>';
                 card.innerHTML = '<div class="mypro-feed-img">' + img + '</div>'
                     + '<div class="mypro-feed-body"><div class="mypro-feed-name">' + b.name + '</div>'
-                    + '<div class="mypro-feed-price"><small>¥</small>' + b.price + '</div></div>';
+                    + '<div class="mypro-feed-price">' + Math.round(parseFloat(b.price)*82).toLocaleString('fr-FR') + '\u00a0FCFA</div></div>';
                 grid.appendChild(card);
             });
             page = data.has_more ? page + 1 : 1;

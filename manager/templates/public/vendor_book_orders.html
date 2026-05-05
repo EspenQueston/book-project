@@ -1,5 +1,6 @@
 {% extends 'public/vendor_panel_base.html' %}
 {% load i18n %}
+{% load currency_filters %}
 
 {% block panel_title %}{% trans "图书订单" %} · {{ vendor.company_name }}{% endblock %}
 
@@ -110,7 +111,7 @@
                     <div class="fw-semibold small">{{ o.customer_name }}</div>
                     <small class="text-muted">{{ o.customer_email|truncatechars:28 }}</small>
                 </td>
-                <td class="fw-bold text-danger">¥{{ o.total_amount }}</td>
+                <td class="fw-bold text-danger">{{ o.total_amount|fcfa }}</td>
                 <td><span class="badge bg-{{ o.get_status_color }}">{{ o.get_status_display }}</span></td>
                 <td><span class="badge bg-{{ o.get_payment_status_color }}">{{ o.get_payment_status_display }}</span></td>
                 <td><small>{{ o.created_at|date:"Y-m-d H:i" }}</small></td>

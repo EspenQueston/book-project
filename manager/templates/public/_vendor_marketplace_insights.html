@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load currency_filters %}
 {# Marketplace analytics merged from former product-center dashboard (uses vm_* context keys). #}
 <div class="vm-insights-block mt-2">
     <div class="row g-4 mb-3">
@@ -19,19 +20,19 @@
                     <div class="col-12 col-md-4">
                         <div class="text-center p-3 rounded-3 h-100" style="background:linear-gradient(160deg,rgba(129,140,248,0.42),rgba(224,231,255,0.25));border:1px solid rgba(255,255,255,0.85);">
                             <div class="vp-stat-label">{% trans "商品订单收入" %}</div>
-                            <div class="fw-bold pt-1" style="font-size:1.25rem;color:#3730a3;">¥{{ vm_mk_product_revenue|floatformat:0 }}</div>
+                            <div class="fw-bold pt-1" style="font-size:1.25rem;color:#3730a3;">{{ vm_mk_product_revenue|fcfa }}</div>
                         </div>
                     </div>
                     <div class="col-12 col-md-4">
                         <div class="text-center p-3 rounded-3 h-100" style="background:linear-gradient(160deg,rgba(244,114,182,0.38),rgba(252,231,243,0.28));border:1px solid rgba(255,255,255,0.85);">
                             <div class="vp-stat-label">{% trans "课程订单收入" %}</div>
-                            <div class="fw-bold pt-1" style="font-size:1.25rem;color:#a21caf;">¥{{ vm_mk_course_revenue|floatformat:0 }}</div>
+                            <div class="fw-bold pt-1" style="font-size:1.25rem;color:#a21caf;">{{ vm_mk_course_revenue|fcfa }}</div>
                         </div>
                     </div>
                     <div class="col-12 col-md-4">
                         <div class="text-center p-3 rounded-3 h-100" style="background:linear-gradient(160deg,rgba(251,146,60,0.4),rgba(254,215,170,0.3));border:1px solid rgba(255,255,255,0.85);">
                             <div class="vp-stat-label">{% trans "超市订单收入" %}</div>
-                            <div class="fw-bold pt-1" style="font-size:1.2rem;color:#c2410c;">¥{{ vm_mk_supermarket_revenue|floatformat:0 }}</div>
+                            <div class="fw-bold pt-1" style="font-size:1.2rem;color:#c2410c;">{{ vm_mk_supermarket_revenue|fcfa }}</div>
                         </div>
                     </div>
                 </div>
@@ -98,7 +99,7 @@
                     <img src="{{ p.get_image_url }}" alt="" width="40" height="40" class="rounded-2 object-fit-cover">
                     <div class="flex-grow-1 text-truncate" style="min-width:0;">
                         <div class="fw-bold small text-truncate">{{ p.name }}</div>
-                        <small class="text-muted">¥{{ p.price }}</small>
+                        <small class="text-muted">{{ p.price|fcfa }}</small>
                     </div>
                     <span class="badge rounded-pill" style="background:rgba(16,185,129,0.15);color:#059669;">{{ p.sales_count }} {% trans "已售" %}</span>
                 </div>
@@ -119,7 +120,7 @@
                         <div class="fw-bold small">{% if order.user_name %}{{ order.user_name }}{% else %}{% trans "匿名" %}{% endif %}</div>
                         <small class="text-muted">{{ order.created_at|date:"m/d H:i" }}</small>
                     </div>
-                    <span class="fw-bold text-danger small">¥{{ order.total_amount }}</span>
+                    <span class="fw-bold text-danger small">{{ order.total_amount|fcfa }}</span>
                     <span class="badge rounded-pill text-white" style="background:{{ order.get_status_color }};font-size:0.68rem;">{{ order.get_status_display }}</span>
                 </div>
                 {% endfor %}

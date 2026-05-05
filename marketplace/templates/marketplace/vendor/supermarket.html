@@ -1,5 +1,6 @@
 {% extends "marketplace/vendor/base.html" %}
 {% load i18n %}
+{% load currency_filters %}
 
 {% block title %}{% trans "超市商品" %} · {{ vendor.company_name }}{% endblock %}
 
@@ -52,7 +53,7 @@
                             </div>
                         </div>
                     </td>
-                    <td class="fw-bold text-danger">¥{{ item.price }}</td>
+                    <td class="fw-bold text-danger">{{ item.price|fcfa }}</td>
                     <td>{{ item.stock }}</td>
                     <td>{{ item.sales_count }}</td>
                     <td>
