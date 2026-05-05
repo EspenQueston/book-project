@@ -1123,7 +1123,7 @@ msgstr "Tous les livres affichés"
 #: .\manager\templates\public\books.html:121
 #, python-format
 msgid "共找到 %(count)s 本图书"
-msgstr "{{count}} livres trouvés"
+msgstr "%(count)s livres trouvés"
 
 #: .\manager\templates\public\books.html:147
 msgid "暂无封面"
@@ -1132,7 +1132,7 @@ msgstr "Pas de couverture disponible"
 #: .\manager\templates\public\books.html:156
 #, python-format
 msgid "仅剩%(inv)s本"
-msgstr "Il ne reste que {{inv}} exemplaires"
+msgstr "Il ne reste que %(inv)s exemplaires"
 
 #: .\manager\templates\public\books.html:206
 msgid "未找到相关图书"
