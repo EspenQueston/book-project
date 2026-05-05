@@ -1,68 +1,316 @@
+{% load i18n %}
 <!DOCTYPE html>
-<html lang="zh-hans">
+<html lang="{{ LANGUAGE_CODE|default:'zh-hans' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}市场管理{% endblock %}</title>
+    <title>{% block title %}{% trans "市场管理" %}{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { --primary-color: #667eea; --secondary-color: #764ba2; }
-        body { background: #f0f2f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-        .sidebar { position: fixed; top: 0; left: 0; width: 260px; height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); z-index: 1000; overflow-y: auto; }
-        .sidebar .nav-link { color: rgba(255,255,255,0.7); padding: 12px 20px; font-size: 0.9rem; transition: all 0.3s ease; border-radius: 8px; margin: 2px 10px; }
-        .sidebar .nav-link:hover { background: rgba(255,255,255,0.1); color: #fff; }
-        .sidebar .nav-link.active { background: rgba(102,126,234,0.3); color: #fff; font-weight: 600; }
-        .sidebar .nav-link i { width: 22px; margin-right: 10px; }
-        .main-content { margin-left: 260px; padding: 30px; }
-        .page-header-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 25px 30px; color: #fff; margin-bottom: 25px; }
-        .page-header-card h4 { font-weight: 700; margin-bottom: 0; }
-        .content-card { background: #fff; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); }
-        .toolbar { background: #fff; border-radius: 15px; padding: 15px 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); }
-        .btn-primary-gradient { background: linear-gradient(135deg, #667eea, #764ba2); border: none; color: #fff; border-radius: 10px; font-weight: 600; padding: 8px 20px; }
-        .btn-primary-gradient:hover { color: #fff; box-shadow: 0 4px 15px rgba(102,126,234,0.3); }
-        .table th { font-weight: 600; color: #64748b; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #f1f5f9; }
+        :root {
+            --mkt-sidebar-bg: linear-gradient(165deg, #0f172a 0%, #1e293b 45%, #312e81 100%);
+            --mkt-sidebar-border: rgba(148, 163, 184, 0.12);
+            --mkt-accent: #818cf8;
+            --mkt-accent-soft: rgba(129, 140, 248, 0.15);
+            --mkt-text-muted: rgba(226, 232, 240, 0.55);
+            --mkt-page-bg: #f1f5f9;
+            --mkt-card-radius: 16px;
+        }
+        body.mkt-admin-body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--mkt-page-bg);
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            color: #0f172a;
+        }
+        .mkt-admin-shell { display: flex; min-height: 100vh; }
+        .mkt-sidebar-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            z-index: 1040;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        .mkt-sidebar-backdrop.show { opacity: 1; }
+        .mkt-sidebar {
+            width: 272px;
+            min-height: 100vh;
+            background: var(--mkt-sidebar-bg);
+            color: #e2e8f0;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1050;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--mkt-sidebar-border);
+            box-shadow: 8px 0 32px rgba(15, 23, 42, 0.25);
+            transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .mkt-sidebar-brand {
+            padding: 1.35rem 1.25rem 1.1rem;
+            border-bottom: 1px solid var(--mkt-sidebar-border);
+        }
+        .mkt-sidebar-brand .brand-mark {
+            width: 40px; height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #818cf8, #c084fc);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+            color: #0f172a;
+        }
+        .mkt-sidebar-brand h1 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin: 0;
+            color: #f8fafc;
+        }
+        .mkt-sidebar-brand p {
+            margin: 0.2rem 0 0;
+            font-size: 0.72rem;
+            color: var(--mkt-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .mkt-sidebar-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.75rem 0 1.25rem;
+            -webkit-overflow-scrolling: touch;
+        }
+        .mkt-nav-section-label {
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--mkt-text-muted);
+            padding: 0.85rem 1.25rem 0.35rem;
+        }
+        .mkt-sidebar .nav-link {
+            color: rgba(226, 232, 240, 0.82);
+            padding: 0.55rem 1rem;
+            margin: 0.1rem 0.65rem;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            border: 1px solid transparent;
+            transition: background 0.2s, color 0.2s, border-color 0.2s;
+        }
+        .mkt-sidebar .nav-link i {
+            width: 1.25rem;
+            text-align: center;
+            opacity: 0.85;
+            font-size: 0.95rem;
+        }
+        .mkt-sidebar .nav-link:hover {
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+        }
+        .mkt-sidebar .nav-link.active {
+            background: var(--mkt-accent-soft);
+            color: #fff;
+            border-color: rgba(129, 140, 248, 0.35);
+            box-shadow: 0 0 0 1px rgba(129, 140, 248, 0.08);
+        }
+        .mkt-sidebar .nav-link.active i { color: var(--mkt-accent); opacity: 1; }
+        .mkt-sidebar-footer {
+            border-top: 1px solid var(--mkt-sidebar-border);
+            padding: 0.75rem 0.65rem 1rem;
+        }
+        .mkt-sidebar-footer .nav-link { color: var(--mkt-text-muted); font-size: 0.82rem; }
+        .mkt-sidebar-footer .nav-link:hover { color: #fff; }
+        .mkt-main-wrap {
+            flex: 1;
+            margin-left: 272px;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .mkt-topbar {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.65rem 1rem;
+            background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+        }
+        .mkt-topbar .btn-icon {
+            width: 42px; height: 42px;
+            border-radius: 12px;
+            border: none;
+            background: #f1f5f9;
+            color: #334155;
+        }
+        .mkt-main-content {
+            flex: 1;
+            padding: clamp(1rem, 3vw, 2rem);
+        }
+        .page-header-card {
+            background: linear-gradient(125deg, #312e81 0%, #4f46e5 50%, #7c3aed 100%);
+            border-radius: var(--mkt-card-radius);
+            padding: 1.35rem 1.5rem;
+            color: #fff;
+            margin-bottom: 1.25rem;
+            box-shadow: 0 12px 40px rgba(79, 70, 229, 0.25);
+        }
+        .page-header-card h4 { font-weight: 700; margin: 0; letter-spacing: -0.02em; }
+        .content-card {
+            background: #fff;
+            border-radius: var(--mkt-card-radius);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+            border: 1px solid #e2e8f0;
+        }
+        .toolbar {
+            background: #fff;
+            border-radius: var(--mkt-card-radius);
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.25rem;
+            border: 1px solid #e2e8f0;
+        }
+        .btn-primary-gradient {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            border: none;
+            color: #fff;
+            border-radius: 10px;
+            font-weight: 600;
+            padding: 0.45rem 1.1rem;
+        }
+        .btn-primary-gradient:hover { color: #fff; filter: brightness(1.05); }
+        .table th {
+            font-weight: 600;
+            color: #64748b;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            border-bottom: 2px solid #f1f5f9;
+        }
         .table td { vertical-align: middle; }
-        @media(max-width:768px) { .sidebar { width: 100%; height: auto; position: relative; } .main-content { margin-left: 0; } }
+        @media (max-width: 991.98px) {
+            .mkt-sidebar-backdrop.show { display: block; }
+            .mkt-sidebar {
+                transform: translateX(-100%);
+            }
+            .mkt-sidebar.open { transform: translateX(0); }
+            .mkt-main-wrap { margin-left: 0; }
+            .mkt-topbar { display: flex; }
+        }
         {% block extra_admin_css %}{% endblock %}
     </style>
 </head>
-<body>
-    <div class="container-fluid p-0">
-        <div class="sidebar">
-            <div class="p-3">
-                <h5 class="text-white mb-0"><i class="fas fa-store"></i> 市场管理</h5>
-                <small style="color:rgba(255,255,255,0.5);">Marketplace Admin</small>
+<body class="mkt-admin-body">
+    <div class="mkt-admin-shell">
+        <div class="mkt-sidebar-backdrop" id="mktSidebarBackdrop" aria-hidden="true"></div>
+        <aside class="mkt-sidebar" id="mktSidebar" aria-label="{% trans "市场侧栏导航" %}">
+            <div class="mkt-sidebar-brand">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="brand-mark"><i class="fas fa-store"></i></div>
+                    <div>
+                        <h1>{% trans "市场管理" %}</h1>
+                        <p>{% trans "管理控制台" %}</p>
+                    </div>
+                </div>
             </div>
-            <nav class="nav flex-column">
-                <a class="nav-link {% block nav_dashboard %}{% endblock %}" href="{% url 'marketplace:admin_dashboard' %}"><i class="fas fa-tachometer-alt"></i> 仪表板</a>
-                <a class="nav-link {% block nav_products %}{% endblock %}" href="{% url 'marketplace:admin_products' %}"><i class="fas fa-shopping-bag"></i> 商品管理</a>
-                <a class="nav-link {% block nav_courses %}{% endblock %}" href="{% url 'marketplace:admin_courses' %}"><i class="fas fa-graduation-cap"></i> 课程管理</a>
-                <a class="nav-link {% block nav_supermarket %}{% endblock %}" href="{% url 'marketplace:admin_supermarket' %}"><i class="fas fa-apple-alt"></i> 超市管理</a>
-                <a class="nav-link {% block nav_categories %}{% endblock %}" href="{% url 'marketplace:admin_categories' %}"><i class="fas fa-folder-open"></i> 分类管理</a>
-                <a class="nav-link {% block nav_orders %}{% endblock %}" href="{% url 'marketplace:admin_orders' %}"><i class="fas fa-receipt"></i> 订单管理</a>
-                <div class="dropdown-divider mx-3 my-2" style="border-color: rgba(255,255,255,0.15);"></div>
-                <a class="nav-link" href="/manager/dashboard/"><i class="fas fa-arrow-left"></i> 返回主面板</a>
-                <a class="nav-link" href="{% url 'marketplace:home' %}"><i class="fas fa-globe"></i> 查看市场</a>
-                <a class="nav-link" href="/manager/logout/"><i class="fas fa-sign-out-alt"></i> 退出登录</a>
-            </nav>
-        </div>
-
-        <div class="main-content">
-            {% if messages %}
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" style="border-radius:12px;">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <div class="mkt-sidebar-scroll">
+                <div class="mkt-nav-section-label">{% trans "概览" %}</div>
+                <nav class="nav flex-column">
+                    <a class="nav-link {% block nav_dashboard %}{% endblock %}" href="{% url 'marketplace:admin_dashboard' %}">
+                        <i class="fas fa-chart-pie"></i> {% trans "仪表板" %}
+                    </a>
+                </nav>
+                <div class="mkt-nav-section-label">{% trans "目录与商品" %}</div>
+                <nav class="nav flex-column">
+                    <a class="nav-link {% block nav_products %}{% endblock %}" href="{% url 'marketplace:admin_products' %}">
+                        <i class="fas fa-shopping-bag"></i> {% trans "商品管理" %}
+                    </a>
+                    <a class="nav-link {% block nav_courses %}{% endblock %}" href="{% url 'marketplace:admin_courses' %}">
+                        <i class="fas fa-graduation-cap"></i> {% trans "课程管理" %}
+                    </a>
+                    <a class="nav-link {% block nav_supermarket %}{% endblock %}" href="{% url 'marketplace:admin_supermarket' %}">
+                        <i class="fas fa-basket-shopping"></i> {% trans "超市管理" %}
+                    </a>
+                    <a class="nav-link {% block nav_categories %}{% endblock %}" href="{% url 'marketplace:admin_categories' %}">
+                        <i class="fas fa-folder-tree"></i> {% trans "分类管理" %}
+                    </a>
+                </nav>
+                <div class="mkt-nav-section-label">{% trans "运营" %}</div>
+                <nav class="nav flex-column">
+                    <a class="nav-link {% block nav_orders %}{% endblock %}" href="{% url 'marketplace:admin_orders' %}">
+                        <i class="fas fa-receipt"></i> {% trans "订单管理" %}
+                    </a>
+                    <a class="nav-link {% block nav_reviews %}{% endblock %}" href="{% url 'marketplace:admin_post_reviews' %}">
+                        <i class="fas fa-star-half-stroke"></i> {% trans "买家评价" %}
+                    </a>
+                </nav>
             </div>
-            {% endfor %}
-            {% endif %}
+            <div class="mkt-sidebar-footer">
+                <nav class="nav flex-column">
+                    <a class="nav-link" href="/manager/dashboard/"><i class="fas fa-arrow-left"></i> {% trans "返回主面板" %}</a>
+                    <a class="nav-link" href="{% url 'marketplace:home' %}"><i class="fas fa-globe"></i> {% trans "查看市场" %}</a>
+                    <a class="nav-link" href="/manager/logout/"><i class="fas fa-right-from-bracket"></i> {% trans "退出登录" %}</a>
+                </nav>
+            </div>
+        </aside>
 
-            {% block admin_content %}{% endblock %}
+        <div class="mkt-main-wrap">
+            <header class="mkt-topbar">
+                <button type="button" class="btn-icon" id="mktSidebarToggle" aria-controls="mktSidebar" aria-expanded="false" aria-label="{% trans "打开菜单" %}">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <span class="fw-semibold text-slate-700 small">{% trans "市场管理" %}</span>
+                <span style="width:42px;"></span>
+            </header>
+            <main class="mkt-main-content">
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" style="border-radius:12px;">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% block admin_content %}{% endblock %}
+            </main>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    (function () {
+        var sidebar = document.getElementById('mktSidebar');
+        var backdrop = document.getElementById('mktSidebarBackdrop');
+        var toggle = document.getElementById('mktSidebarToggle');
+        if (!sidebar || !backdrop || !toggle) return;
+        function close() {
+            sidebar.classList.remove('open');
+            backdrop.classList.remove('show');
+            toggle.setAttribute('aria-expanded', 'false');
+            document.body.style.overflow = '';
+        }
+        function open() {
+            sidebar.classList.add('open');
+            backdrop.classList.add('show');
+            toggle.setAttribute('aria-expanded', 'true');
+            document.body.style.overflow = 'hidden';
+        }
+        toggle.addEventListener('click', function () {
+            if (sidebar.classList.contains('open')) close(); else open();
+        });
+        backdrop.addEventListener('click', close);
+        window.addEventListener('resize', function () {
+            if (window.innerWidth >= 992) close();
+        });
+    })();
+    </script>
     {% block extra_admin_js %}{% endblock %}
     <script src="/static/js/admin_i18n.js" defer></script>
 </body>

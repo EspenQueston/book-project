@@ -3,7 +3,8 @@ from django.http import JsonResponse, HttpResponse, HttpResponseNotAllowed, File
 from django.contrib import messages
 from django.db import transaction
 from django.views.decorators.http import require_http_methods, require_POST
-from django.db.models import Sum, Avg, Q, Count, Max, F, Prefetch
+from django.db.models import Sum, Avg, Q, Count, Max, F, Prefetch, OuterRef, Subquery, Value, IntegerField
+from django.db.models.functions import Coalesce
 from django.utils import timezone
 from decimal import Decimal
 from datetime import timedelta
@@ -42,6 +43,55 @@ import hashlib
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+def _annotate_book_delivered(qs):
+    """Sum OrderItem quantities for delivered book orders (payment completed)."""
+    sub = models.OrderItem.objects.filter(
+        book_id=OuterRef('pk'),
+        order__status='delivered',
+        order__payment_status='completed',
+    ).values('book_id').annotate(total=Sum('quantity')).values('total')[:1]
+    return qs.annotate(
+        sold_delivered=Coalesce(Subquery(sub, output_field=IntegerField()), Value(0))
+    )
+
+
+def _annotate_product_delivered(qs):
+    sub = MarketplaceOrderItem.objects.filter(
+        item_type='product',
+        item_id=OuterRef('pk'),
+        order__status='delivered',
+        order__payment_status='completed',
+    ).values('item_id').annotate(total=Sum('quantity')).values('total')[:1]
+    return qs.annotate(
+        sold_delivered=Coalesce(Subquery(sub, output_field=IntegerField()), Value(0))
+    )
+
+
+def _annotate_course_delivered(qs):
+    sub = MarketplaceOrderItem.objects.filter(
+        item_type='course',
+        item_id=OuterRef('pk'),
+        order__status='delivered',
+        order__payment_status='completed',
+    ).values('item_id').annotate(total=Sum('quantity')).values('total')[:1]
+    return qs.annotate(
+        sold_delivered=Coalesce(Subquery(sub, output_field=IntegerField()), Value(0))
+    )
+
+
+def _annotate_supermarket_delivered(qs):
+    sub = MarketplaceOrderItem.objects.filter(
+        item_type='supermarket',
+        item_id=OuterRef('pk'),
+        order__status='delivered',
+        order__payment_status='completed',
+    ).values('item_id').annotate(total=Sum('quantity')).values('total')[:1]
+    return qs.annotate(
+        sold_delivered=Coalesce(Subquery(sub, output_field=IntegerField()), Value(0))
+    )
+
 
 # ---------------------------------------------------------------------------
 # Simple IP-based brute-force guard (no extra packages needed).
@@ -588,7 +638,9 @@ def _build_best_deals_feed(max_items=24):
 
 def public_home(request):
     """Public homepage with platform statistics and featured content."""
-    cache_key = 'public_home:ctx:v3'
+    from django.utils import translation
+    lang = translation.get_language() or 'zh-hans'
+    cache_key = f'public_home:ctx:v5:{lang}'
     ctx = cache.get(cache_key)
     if ctx is None:
         book_count = models.Book.objects.filter(is_active=True).count()
@@ -605,8 +657,16 @@ def public_home(request):
             product_count = Product.objects.filter(is_active=True).count()
             course_count = Course.objects.filter(is_active=True).count()
             vendor_count = models.Vendor.objects.filter(is_active=True).count()
-            featured_products = list(Product.objects.filter(is_active=True).select_related('category').order_by('-sales_count')[:6])
-            featured_courses = list(Course.objects.filter(is_active=True).order_by('-enrollment_count')[:6])
+            featured_products = list(
+                _annotate_product_delivered(
+                    Product.objects.filter(is_active=True).select_related('category')
+                ).order_by('-sold_delivered', '-sales_count')[:6]
+            )
+            featured_courses = list(
+                _annotate_course_delivered(Course.objects.filter(is_active=True)).order_by(
+                    '-sold_delivered', '-enrollment_count'
+                )[:6]
+            )
             now = tz.now()
             flash_sales = list(FlashSale.objects.filter(
                 is_active=True, start_time__lte=now, end_time__gte=now
@@ -618,8 +678,16 @@ def public_home(request):
             course_count = 0
             vendor_count = 0
 
-        featured_books = list(models.Book.objects.filter(is_active=True).select_related('publisher', 'category').order_by('-sale_num')[:6])
-        recent_books = list(models.Book.objects.filter(is_active=True).select_related('publisher', 'category').order_by('-id')[:8])
+        featured_books = list(
+            _annotate_book_delivered(
+                models.Book.objects.filter(is_active=True).select_related('publisher', 'category')
+            ).order_by('-sold_delivered', '-sale_num')[:6]
+        )
+        recent_books = list(
+            _annotate_book_delivered(
+                models.Book.objects.filter(is_active=True).select_related('publisher', 'category')
+            ).order_by('-id')[:8]
+        )
         book_categories = list(models.BookCategory.objects.filter(is_active=True, parent__isnull=True)[:12])
         latest_blogs = list(models.BlogPost.objects.filter(status='published').order_by('-created_at')[:3])
         best_deals = _build_best_deals_feed(24)
@@ -1194,6 +1262,8 @@ def public_my_profile(request):
     all_publishers = models.Publisher.objects.all()[:20]
     all_vendors = models.Vendor.objects.filter(is_active=True)[:20]
 
+    from . import views_review
+
     context = {
         'site_user': user,
         'loyalty': loyalty,
@@ -1208,6 +1278,7 @@ def public_my_profile(request):
         'feed_items': feed_items,
         'all_publishers': all_publishers,
         'all_vendors': all_vendors,
+        'pending_review_items': views_review.collect_pending_reviews_for_user(user),
     }
     return render(request, 'public/my_profile.html', context)
 
@@ -1285,7 +1356,9 @@ def public_books(request):
     min_price = request.GET.get('min_price', '').strip()
     max_price = request.GET.get('max_price', '').strip()
     
-    books = models.Book.objects.filter(is_active=True).select_related('publisher', 'category')
+    books = _annotate_book_delivered(
+        models.Book.objects.filter(is_active=True).select_related('publisher', 'category')
+    )
     
     if search_query:
         books = books.filter(
@@ -1312,7 +1385,7 @@ def public_books(request):
     elif sort_by == 'price_high':
         books = books.order_by('-price')
     elif sort_by in ('popular', '-sale_num'):
-        books = books.order_by('-sale_num')
+        books = books.order_by('-sold_delivered', '-sale_num')
     elif sort_by == 'newest':
         books = books.order_by('-id')
     else:
@@ -1355,7 +1428,7 @@ def public_books(request):
                 'url': f'/manager/public/books/{book.id}/',
                 'publisher_name': book.publisher.publisher_name if book.publisher else '',
                 'inventory': getattr(book, 'inventory', 0),
-                'sale_num': book.sale_num,
+                'sale_num': book.sold_delivered,
                 'has_cover': bool(book.cover_image),
             })
         return JsonResponse({
@@ -1394,12 +1467,19 @@ def public_book_detail(request, book_id):
     # Find the vendor selling this book (if any)
     vendor_book = models.VendorBook.objects.filter(book=book, is_active=True).select_related('vendor').first()
     book_vendor = vendor_book.vendor if vendor_book else None
-    
+
+    from marketplace.review_service import reviews_for_listing, review_summary
+
     context = {
         'book': book,
         'authors': authors,
         'related_books': related_books,
         'book_vendor': book_vendor,
+        'sold_delivered': book.get_units_sold_delivered(),
+        'listing_reviews_preview': list(reviews_for_listing('book', book.pk)[:3]),
+        'listing_review_summary': review_summary('book', book.pk),
+        'listing_kind': 'book',
+        'listing_id': book.pk,
     }
     return render(request, 'public/book_detail.html', context)
 
@@ -2102,8 +2182,10 @@ def track_order(request):
             ).order_by('-created_at')
             orders = all_orders
             try:
+                from django.db.models import Q as _Q
+
                 all_mkt_orders = MarketplaceOrder.objects.filter(
-                    user_email=site_user.email
+                    _Q(user_email=site_user.email) | _Q(user_id=site_user.id)
                 ).order_by('-created_at')
                 mkt_orders = all_mkt_orders
                 if not all_mkt_orders.exists():
@@ -2276,6 +2358,12 @@ def track_order(request):
         else:
             desktop_order_rows = [r for r in desktop_order_rows if r['status'] == status_filter]
 
+    from . import views_review
+
+    pending_review_items = (
+        views_review.collect_pending_reviews_for_user(site_user) if site_user else []
+    )
+
     context = {
         'order': order,
         'orders': orders,
@@ -2287,8 +2375,10 @@ def track_order(request):
         'desktop_status_counts': status_counts,
         'status_filter': status_filter,
         'show_legacy_order_results': bool((orders or mkt_orders) and not desktop_order_rows),
+        'pending_review_items': pending_review_items,
     }
     return render(request, 'public/track_order.html', context)
+
 
 def download_book(request, order_id, book_id):
     """Download purchased ebook - supports files and external links"""
@@ -5076,10 +5166,14 @@ def user_profile(request):
         customer_email=user.email
     ).prefetch_related('orderitem_set__book').order_by('-created_at')[:10]
 
-    # Get marketplace orders
-    mkt_orders = list(MarketplaceOrder.objects.filter(
-        user_email=user.email
-    ).order_by('-created_at')[:10])
+    from django.db.models import Q
+
+    # Get marketplace orders (email or linked user id)
+    mkt_orders = list(
+        MarketplaceOrder.objects.filter(
+            Q(user_email=user.email) | Q(user_id=user.id)
+        ).order_by('-created_at')[:10]
+    )
 
     # Merge and sort all orders
     all_orders = []
@@ -5189,6 +5283,9 @@ def user_profile(request):
         'followed_publishers': followed_publishers,
         'followed_total_count': len(followed_vendors) + len(followed_publishers),
     }
+    from . import views_review
+
+    context['pending_review_items'] = views_review.collect_pending_reviews_for_user(user)
     # Loyalty / gamification
     try:
         loyalty = models.LoyaltyPoints.objects.filter(user=user).first()

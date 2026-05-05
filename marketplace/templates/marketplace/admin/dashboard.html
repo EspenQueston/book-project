@@ -1,188 +1,438 @@
+{% extends "marketplace/admin/base.html" %}
 {% load currency_filters %}
-<!DOCTYPE html>
-<html lang="zh-hans">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>市场管理 - Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        :root { --primary-color: #667eea; --secondary-color: #764ba2; }
-        body { background: #f0f2f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-        .sidebar { position: fixed; top: 0; left: 0; width: 260px; height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); z-index: 1000; overflow-y: auto; }
-        .sidebar .nav-link { color: rgba(255,255,255,0.7); padding: 12px 20px; font-size: 0.9rem; transition: all 0.3s ease; border-radius: 8px; margin: 2px 10px; }
-        .sidebar .nav-link:hover { background: rgba(255,255,255,0.1); color: #fff; }
-        .sidebar .nav-link.active { background: rgba(102,126,234,0.3); color: #fff; font-weight: 600; }
-        .sidebar .nav-link i { width: 22px; margin-right: 10px; }
-        .main-content { margin-left: 260px; padding: 30px; }
-        .welcome-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 30px; color: #fff; margin-bottom: 30px; }
-        .stat-card { background: #fff; border-radius: 15px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); transition: all 0.3s ease; height: 100%; }
-        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
-        .stat-icon { width: 55px; height: 55px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: #fff; }
-        .stat-value { font-size: 2rem; font-weight: 800; color: #1e293b; }
-        .stat-label { font-size: 0.85rem; color: #64748b; font-weight: 500; }
-        .quick-link { background: #fff; border-radius: 15px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); text-align: center; transition: all 0.3s ease; text-decoration: none; color: inherit; display: block; }
-        .quick-link:hover { transform: translateY(-5px); box-shadow: 0 12px 30px rgba(102,126,234,0.15); }
-        .quick-link i { font-size: 2rem; margin-bottom: 10px; }
-        @media(max-width:768px) { .sidebar { width: 100%; height: auto; position: relative; } .main-content { margin-left: 0; } }
-    </style>
-</head>
-<body>
-    <div class="container-fluid p-0">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="p-3">
-                <h5 class="text-white mb-0"><i class="fas fa-store"></i> 市场管理</h5>
-                <small style="color:rgba(255,255,255,0.5);">Marketplace Admin</small>
-            </div>
-            <nav class="nav flex-column">
-                <a class="nav-link active" href="{% url 'marketplace:admin_dashboard' %}"><i class="fas fa-tachometer-alt"></i> 仪表板</a>
-                <a class="nav-link" href="{% url 'marketplace:admin_products' %}"><i class="fas fa-shopping-bag"></i> 商品管理</a>
-                <a class="nav-link" href="{% url 'marketplace:admin_courses' %}"><i class="fas fa-graduation-cap"></i> 课程管理</a>
-                <a class="nav-link" href="{% url 'marketplace:admin_supermarket' %}"><i class="fas fa-apple-alt"></i> 超市管理</a>
-                <a class="nav-link" href="{% url 'marketplace:admin_categories' %}"><i class="fas fa-folder-open"></i> 分类管理</a>
-                <a class="nav-link" href="{% url 'marketplace:admin_orders' %}"><i class="fas fa-receipt"></i> 订单管理</a>
-                <div class="dropdown-divider mx-3 my-2" style="border-color: rgba(255,255,255,0.15);"></div>
-                <a class="nav-link" href="/manager/dashboard/"><i class="fas fa-arrow-left"></i> 返回主面板</a>
-                <a class="nav-link" href="{% url 'marketplace:home' %}"><i class="fas fa-globe"></i> 查看市场</a>
-                <a class="nav-link" href="/manager/logout/"><i class="fas fa-sign-out-alt"></i> 退出登录</a>
-            </nav>
-        </div>
+{% load i18n %}
 
-        <!-- Main Content -->
-        <div class="main-content">
-            <div class="welcome-header">
-                <h3><i class="fas fa-chart-line me-2"></i> 市场管理仪表板</h3>
-                <p class="mb-0 opacity-75">概览 · 商品 · 课程 · 超市</p>
-            </div>
+{% block title %}{% trans "市场管理仪表板" %} — {% trans "市场管理" %}{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
 
-            {% if messages %}
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-            {% endfor %}
-            {% endif %}
+{% block extra_admin_css %}
+<style>
+    .mkt-dash-hero {
+        background: linear-gradient(125deg, #0f172a 0%, #3730a3 55%, #6d28d9 100%);
+        border-radius: 20px;
+        padding: clamp(1.25rem, 3vw, 2rem);
+        color: #fff;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 20px 50px rgba(30, 27, 75, 0.35);
+    }
+    .mkt-dash-hero h2 { font-weight: 800; letter-spacing: -0.03em; margin: 0 0 0.35rem; font-size: clamp(1.25rem, 3vw, 1.65rem); }
+    .mkt-dash-hero p { margin: 0; opacity: 0.85; font-size: 0.9rem; }
+    .mkt-stat-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 1.15rem 1.2rem;
+        border: 1px solid #e2e8f0;
+        height: 100%;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .mkt-stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+    }
+    .mkt-stat-icon {
+        width: 48px; height: 48px;
+        border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.1rem;
+        color: #fff;
+    }
+    .mkt-stat-value { font-size: 1.65rem; font-weight: 800; color: #0f172a; line-height: 1.1; }
+    .mkt-stat-label { font-size: 0.8rem; color: #64748b; font-weight: 600; margin-top: 0.15rem; }
+    .chart-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 1.1rem 1.2rem 1rem;
+        border: 1px solid #e2e8f0;
+        height: 100%;
+        min-height: 280px;
+        display: flex;
+        flex-direction: column;
+    }
+    .chart-card h6 {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #334155;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+    }
+    .chart-card .chart-wrap { flex: 1; min-height: 200px; position: relative; }
+    .mkt-quick {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 1rem;
+        text-align: center;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    }
+    .mkt-quick:hover { transform: translateY(-3px); border-color: #c7d2fe; box-shadow: 0 12px 28px rgba(99, 102, 241, 0.12); color: inherit; }
+    .mkt-quick i { font-size: 1.75rem; margin-bottom: 0.5rem; display: block; }
+    .mkt-table-card { border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; background: #fff; }
+</style>
+{% endblock %}
 
-            <!-- Stats -->
-            <div class="row g-4 mb-4">
-                <div class="col-md-3">
-                    <div class="stat-card">
-                        <div class="d-flex align-items-center">
-                            <div class="stat-icon me-3" style="background:linear-gradient(135deg,#667eea,#764ba2);"><i class="fas fa-shopping-bag"></i></div>
-                            <div>
-                                <div class="stat-value">{{ product_count }}</div>
-                                <div class="stat-label">商品总数</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="stat-card">
-                        <div class="d-flex align-items-center">
-                            <div class="stat-icon me-3" style="background:linear-gradient(135deg,#f093fb,#f5576c);"><i class="fas fa-graduation-cap"></i></div>
-                            <div>
-                                <div class="stat-value">{{ course_count }}</div>
-                                <div class="stat-label">课程总数</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="stat-card">
-                        <div class="d-flex align-items-center">
-                            <div class="stat-icon me-3" style="background:linear-gradient(135deg,#4facfe,#00f2fe);"><i class="fas fa-apple-alt"></i></div>
-                            <div>
-                                <div class="stat-value">{{ supermarket_count }}</div>
-                                <div class="stat-label">超市商品</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="stat-card">
-                        <div class="d-flex align-items-center">
-                            <div class="stat-icon me-3" style="background:linear-gradient(135deg,#10b981,#34d399);"><i class="fas fa-yen-sign"></i></div>
-                            <div>
-                                <div class="stat-value">{{ total_revenue|fcfa }}</div>
-                                <div class="stat-label">总收入</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+{% block admin_content %}
+<div class="mkt-dash-hero">
+    <h2><i class="fas fa-wave-square me-2 opacity-75"></i>{% trans "市场管理仪表板" %}</h2>
+    <p>{% trans "概览商品、课程、超市及订单与收入。" %}</p>
+</div>
 
-            <!-- Quick Links -->
-            <h5 class="fw-bold mb-3"><i class="fas fa-bolt me-2" style="color:var(--primary-color);"></i>快捷操作</h5>
-            <div class="row g-4 mb-4">
-                <div class="col-md-3">
-                    <a href="{% url 'marketplace:admin_product_add' %}" class="quick-link">
-                        <i class="fas fa-plus-circle d-block" style="color:#667eea;"></i>
-                        <h6 class="fw-bold mb-0">添加商品</h6>
-                    </a>
-                </div>
-                <div class="col-md-3">
-                    <a href="{% url 'marketplace:admin_course_add' %}" class="quick-link">
-                        <i class="fas fa-plus-circle d-block" style="color:#f093fb;"></i>
-                        <h6 class="fw-bold mb-0">添加课程</h6>
-                    </a>
-                </div>
-                <div class="col-md-3">
-                    <a href="{% url 'marketplace:admin_supermarket_add' %}" class="quick-link">
-                        <i class="fas fa-plus-circle d-block" style="color:#4facfe;"></i>
-                        <h6 class="fw-bold mb-0">添加超市商品</h6>
-                    </a>
-                </div>
-                <div class="col-md-3">
-                    <a href="{% url 'marketplace:admin_category_add' %}" class="quick-link">
-                        <i class="fas fa-folder-plus d-block" style="color:#10b981;"></i>
-                        <h6 class="fw-bold mb-0">添加分类</h6>
-                    </a>
+<div class="row g-3 mb-4">
+    <div class="col-6 col-xl-3">
+        <div class="mkt-stat-card">
+            <div class="d-flex align-items-center gap-3">
+                <div class="mkt-stat-icon" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);"><i class="fas fa-shopping-bag"></i></div>
+                <div>
+                    <div class="mkt-stat-value">{{ product_count }}</div>
+                    <div class="mkt-stat-label">{% trans "商品总数" %}</div>
                 </div>
             </div>
-
-            <!-- Recent Orders -->
-            {% if recent_orders %}
-            <h5 class="fw-bold mb-3"><i class="fas fa-history me-2" style="color:var(--primary-color);"></i>最近订单</h5>
-            <div class="card border-0 shadow-sm" style="border-radius:15px;">
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead style="background:#f8fafc;">
-                                <tr>
-                                    <th class="border-0 ps-4">订单号</th>
-                                    <th class="border-0">客户</th>
-                                    <th class="border-0">状态</th>
-                                    <th class="border-0">金额</th>
-                                    <th class="border-0">时间</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for order in recent_orders %}
-                                <tr>
-                                    <td class="ps-4"><code>{{ order.order_number }}</code></td>
-                                    <td>{{ order.user_name|default:order.user_email }}</td>
-                                    <td>
-                                        <span class="badge {% if order.status == 'delivered' %}bg-success{% elif order.status == 'cancelled' %}bg-danger{% elif order.status == 'pending' %}bg-warning text-dark{% else %}bg-info{% endif %}">
-                                            {{ order.get_status_display }}
-                                        </span>
-                                    </td>
-                                    <td class="fw-bold">{{ order.total_amount|fcfa }}</td>
-                                    <td class="text-muted">{{ order.created_at|date:"Y-m-d H:i" }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
         </div>
     </div>
+    <div class="col-6 col-xl-3">
+        <div class="mkt-stat-card">
+            <div class="d-flex align-items-center gap-3">
+                <div class="mkt-stat-icon" style="background:linear-gradient(135deg,#ec4899,#db2777);"><i class="fas fa-graduation-cap"></i></div>
+                <div>
+                    <div class="mkt-stat-value">{{ course_count }}</div>
+                    <div class="mkt-stat-label">{% trans "课程总数" %}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="mkt-stat-card">
+            <div class="d-flex align-items-center gap-3">
+                <div class="mkt-stat-icon" style="background:linear-gradient(135deg,#06b6d4,#0891b2);"><i class="fas fa-carrot"></i></div>
+                <div>
+                    <div class="mkt-stat-value">{{ supermarket_count }}</div>
+                    <div class="mkt-stat-label">{% trans "超市SKU数" %}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="mkt-stat-card">
+            <div class="d-flex align-items-center gap-3">
+                <div class="mkt-stat-icon" style="background:linear-gradient(135deg,#10b981,#059669);"><i class="fas fa-coins"></i></div>
+                <div>
+                    <div class="mkt-stat-value">{{ total_revenue|fcfa }}</div>
+                    <div class="mkt-stat-label">{% trans "统计内营收" %}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/static/js/admin_i18n.js" defer></script>
-</body>
-</html>
+<div class="row g-3 mb-2">
+    <div class="col-md-3 col-6">
+        <div class="mkt-stat-card py-3 text-center">
+            <div class="mkt-stat-value" style="font-size:1.35rem;">{{ order_count }}</div>
+            <div class="mkt-stat-label">{% trans "订单总数" %}</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="mkt-stat-card py-3 text-center">
+            <div class="mkt-stat-value" style="font-size:1.35rem;">{{ category_count }}</div>
+            <div class="mkt-stat-label">{% trans "分类数" %}</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="mkt-stat-card py-3 text-center">
+            <div class="mkt-stat-value" style="font-size:1.35rem;">{{ featured_products }}</div>
+            <div class="mkt-stat-label">{% trans "推荐商品" %}</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="mkt-stat-card py-3 text-center">
+            <div class="mkt-stat-value" style="font-size:1.35rem;">{{ featured_courses }}</div>
+            <div class="mkt-stat-label">{% trans "推荐课程" %}</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-8">
+        <div class="chart-card">
+            <h6><i class="fas fa-chart-line text-primary"></i> {% trans "近7日：销售额与订单数" %}</h6>
+            <div class="chart-wrap"><canvas id="mktSalesChart"></canvas></div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="chart-card">
+            <h6><i class="fas fa-chart-pie text-success"></i> {% trans "订单状态分布" %}</h6>
+            <div class="chart-wrap"><canvas id="mktOrderStatusChart"></canvas></div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-4">
+        <div class="chart-card">
+            <h6><i class="fas fa-credit-card text-info"></i> {% trans "支付状态分布" %}</h6>
+            <div class="chart-wrap"><canvas id="mktPaymentChart"></canvas></div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="chart-card">
+            <h6><i class="fas fa-layer-group text-warning"></i> {% trans "各类型行项目销量" %}</h6>
+            <div class="chart-wrap"><canvas id="mktItemTypeChart"></canvas></div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="chart-card">
+            <h6><i class="fas fa-boxes-stacked text-secondary"></i> {% trans "目录商品数量" %}</h6>
+            <div class="chart-wrap"><canvas id="mktCatalogChart"></canvas></div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-7">
+        <div class="chart-card" style="min-height:300px;">
+            <h6><i class="fas fa-chart-column text-primary"></i> {% trans "月度营收（已付款订单）" %}</h6>
+            <div class="chart-wrap"><canvas id="mktMonthlyChart"></canvas></div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="chart-card" style="min-height:300px;">
+            <h6><i class="fas fa-fire text-danger"></i> {% trans "热销行项目（件数）" %}</h6>
+            <div class="chart-wrap"><canvas id="mktTopItemsChart"></canvas></div>
+        </div>
+    </div>
+</div>
+
+<h5 class="fw-bold mb-3" style="color:#334155;"><i class="fas fa-bolt me-2" style="color:#4f46e5;"></i>{% trans "快捷操作" %}</h5>
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <a href="{% url 'marketplace:admin_product_add' %}" class="mkt-quick">
+            <i class="fas fa-plus-circle" style="color:#6366f1;"></i>
+            <span class="fw-semibold small">{% trans "添加商品" %}</span>
+        </a>
+    </div>
+    <div class="col-6 col-md-3">
+        <a href="{% url 'marketplace:admin_course_add' %}" class="mkt-quick">
+            <i class="fas fa-plus-circle" style="color:#ec4899;"></i>
+            <span class="fw-semibold small">{% trans "添加课程" %}</span>
+        </a>
+    </div>
+    <div class="col-6 col-md-3">
+        <a href="{% url 'marketplace:admin_supermarket_add' %}" class="mkt-quick">
+            <i class="fas fa-plus-circle" style="color:#06b6d4;"></i>
+            <span class="fw-semibold small">{% trans "添加超市商品" %}</span>
+        </a>
+    </div>
+    <div class="col-6 col-md-3">
+        <a href="{% url 'marketplace:admin_category_add' %}" class="mkt-quick">
+            <i class="fas fa-folder-plus" style="color:#10b981;"></i>
+            <span class="fw-semibold small">{% trans "添加分类" %}</span>
+        </a>
+    </div>
+</div>
+
+{% if recent_orders %}
+<h5 class="fw-bold mb-3" style="color:#334155;"><i class="fas fa-clock-rotate-left me-2" style="color:#4f46e5;"></i>{% trans "最近订单" %}</h5>
+<div class="mkt-table-card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-4 border-0">{% trans "订单号" %}</th>
+                    <th class="border-0">{% trans "客户" %}</th>
+                    <th class="border-0">{% trans "状态" %}</th>
+                    <th class="border-0">{% trans "金额" %}</th>
+                    <th class="border-0 pe-4">{% trans "时间" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in recent_orders %}
+                <tr>
+                    <td class="ps-4"><code>{{ order.order_number }}</code></td>
+                    <td>{{ order.user_name|default:order.user_email }}</td>
+                    <td>
+                        <span class="badge rounded-pill {% if order.status == 'delivered' %}bg-success{% elif order.status == 'cancelled' %}bg-danger{% elif order.status == 'pending' %}bg-warning text-dark{% else %}bg-info text-dark{% endif %}">
+                            {{ order.get_status_display }}
+                        </span>
+                    </td>
+                    <td class="fw-bold">{{ order.total_amount|fcfa }}</td>
+                    <td class="text-muted small">{{ order.created_at|date:"Y-m-d H:i" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_admin_js %}
+{% trans "销售额 (FCFA)" as mkt_js_rev %}
+{% trans "订单数" as mkt_js_ord %}
+{% trans "销量" as mkt_js_qty %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var chartDefaults = {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: { padding: { top: 4, bottom: 4, left: 4, right: 4 } }
+    };
+    var LG = {
+        rev: "{{ mkt_js_rev|escapejs }}",
+        ord: "{{ mkt_js_ord|escapejs }}",
+        qty: "{{ mkt_js_qty|escapejs }}"
+    };
+
+    var salesCtx = document.getElementById('mktSalesChart');
+    if (salesCtx) {
+        var salesData = {{ mkt_daily_sales_json|safe }};
+        new Chart(salesCtx.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: salesData.map(function (i) { return i.date; }),
+                datasets: [{
+                    label: LG.rev,
+                    data: salesData.map(function (i) { return i.revenue; }),
+                    borderColor: '#6366f1',
+                    backgroundColor: 'rgba(99, 102, 241, 0.12)',
+                    borderWidth: 2.5,
+                    fill: true,
+                    tension: 0.42,
+                    pointRadius: 3,
+                    pointHoverRadius: 5
+                }, {
+                    label: LG.ord,
+                    data: salesData.map(function (i) { return i.orders; }),
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.08)',
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.35,
+                    yAxisID: 'y1',
+                    pointRadius: 2.5
+                }]
+            },
+            options: Object.assign({}, chartDefaults, {
+                scales: {
+                    y: { beginAtZero: true, ticks: { maxTicksLimit: 6 } },
+                    y1: { position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, ticks: { maxTicksLimit: 6 } },
+                    x: { ticks: { maxRotation: 0, font: { size: 10 } } }
+                },
+                plugins: { legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 8, font: { size: 11 } } } }
+            })
+        });
+    }
+
+    function doughnutChart(id, payload, colors) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        var p = typeof payload === 'string' ? JSON.parse(payload) : payload;
+        new Chart(el.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: p.labels,
+                datasets: [{ data: p.data, backgroundColor: colors, borderWidth: 2, borderColor: '#fff', hoverOffset: 8 }]
+            },
+            options: Object.assign({}, chartDefaults, {
+                plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, font: { size: 9 }, boxWidth: 10 } } }
+            })
+        });
+    }
+
+    doughnutChart('mktOrderStatusChart', {{ mkt_order_status_json|safe }}, ['#f59e0b', '#06b6d4', '#6366f1', '#8b5cf6', '#10b981', '#ef4444', '#64748b', '#ec4899']);
+    doughnutChart('mktPaymentChart', {{ mkt_payment_status_json|safe }}, ['#fbbf24', '#38bdf8', '#34d399', '#f87171', '#a78bfa', '#94a3b8']);
+
+    var itemCtx = document.getElementById('mktItemTypeChart');
+    if (itemCtx) {
+        var itemData = {{ mkt_item_type_json|safe }};
+        new Chart(itemCtx.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: itemData.labels,
+                datasets: [{
+                    label: LG.qty,
+                    data: itemData.data,
+                    backgroundColor: ['rgba(99, 102, 241, 0.75)', 'rgba(236, 72, 153, 0.75)', 'rgba(6, 182, 212, 0.75)'],
+                    borderRadius: 10,
+                    borderSkipped: false
+                }]
+            },
+            options: Object.assign({}, chartDefaults, {
+                indexAxis: 'y',
+                scales: { x: { beginAtZero: true }, y: { ticks: { font: { size: 11 } } } },
+                plugins: { legend: { display: false } }
+            })
+        });
+    }
+
+    var catCtx = document.getElementById('mktCatalogChart');
+    if (catCtx) {
+        var cat = {{ mkt_catalog_json|safe }};
+        new Chart(catCtx.getContext('2d'), {
+            type: 'polarArea',
+            data: {
+                labels: cat.labels,
+                datasets: [{
+                    data: cat.data,
+                    backgroundColor: ['rgba(99, 102, 241, 0.55)', 'rgba(236, 72, 153, 0.55)', 'rgba(6, 182, 212, 0.55)'],
+                    borderWidth: 1,
+                    borderColor: '#fff'
+                }]
+            },
+            options: Object.assign({}, chartDefaults, {
+                scales: { r: { beginAtZero: true, ticks: { backdropColor: 'transparent' } } },
+                plugins: { legend: { position: 'bottom', labels: { font: { size: 10 } } } }
+            })
+        });
+    }
+
+    var moCtx = document.getElementById('mktMonthlyChart');
+    if (moCtx) {
+        var mo = {{ mkt_monthly_json|safe }};
+        new Chart(moCtx.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: mo.map(function (i) { return i.month; }),
+                datasets: [{
+                    label: LG.rev,
+                    data: mo.map(function (i) { return i.revenue; }),
+                    backgroundColor: 'rgba(79, 70, 229, 0.65)',
+                    borderRadius: 8,
+                    borderSkipped: false
+                }]
+            },
+            options: Object.assign({}, chartDefaults, {
+                scales: { y: { beginAtZero: true }, x: { ticks: { font: { size: 10 } } } },
+                plugins: { legend: { display: false } }
+            })
+        });
+    }
+
+    var topCtx = document.getElementById('mktTopItemsChart');
+    if (topCtx) {
+        var ti = {{ mkt_top_items_json|safe }};
+        new Chart(topCtx.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: ti.map(function (i) { return i.name; }),
+                datasets: [{
+                    label: LG.qty,
+                    data: ti.map(function (i) { return i.qty; }),
+                    backgroundColor: 'rgba(244, 63, 94, 0.7)',
+                    borderRadius: 8
+                }]
+            },
+            options: Object.assign({}, chartDefaults, {
+                indexAxis: 'y',
+                scales: { x: { beginAtZero: true }, y: { ticks: { font: { size: 10 } } } },
+                plugins: { legend: { display: false } }
+            })
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -419,7 +419,7 @@
                         
                         <div class="d-flex gap-2 mb-3">
                             <span class="badge bg-light text-success" style="font-size: 0.8rem;"><i class="fas fa-boxes me-1"></i>{% trans "库存" %} {{ book.inventory }}</span>
-                            <span class="badge bg-light text-warning" style="font-size: 0.8rem;"><i class="fas fa-fire me-1"></i>{% trans "销量" %} {{ book.sale_num }}</span>
+                            <span class="badge bg-light text-warning" style="font-size: 0.8rem;"><i class="fas fa-fire me-1"></i>{% trans "销量" %} {{ book.sold_delivered }}</span>
                         </div>
                         
                         <div class="mt-auto">
@@ -690,6 +690,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!hasMore) { sentinel.style.display = 'none'; if (endMsg) endMsg.style.display = 'block'; }
 
     function escHtml(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+    function fmtFcfa(val) {
+        var n = Math.round(parseFloat(val) * 82);
+        return n.toLocaleString('fr-FR') + '\u00a0FCFA';
+    }
 
     function buildBookCard(book) {
         var coverHtml = book.has_cover

@@ -1,0 +1,217 @@
+{% load i18n %}
+{% firstof review_block_uid 'main' as lr_uid %}
+<section class="lr-block" id="listingReviews-{{ lr_uid }}" data-kind="{{ listing_kind }}" data-id="{{ listing_id }}"
+         data-api-url="{% url 'marketplace:listing_reviews_api' listing_kind listing_id %}">
+  <style>
+    .lr-block { margin: 0 0 14px; padding: 0; }
+    .lr-card {
+      background: linear-gradient(145deg, #fafbff 0%, #f1f5ff 100%);
+      border: 1px solid rgba(102,126,234,0.14);
+      border-radius: 18px;
+      padding: 16px 16px 14px;
+      box-shadow: 0 10px 28px rgba(15,23,42,0.06);
+    }
+    html[data-theme="dark"] .lr-card {
+      background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+      border-color: rgba(148,163,184,0.2);
+    }
+    .lr-head { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+    .lr-title { font-size:1rem; font-weight:800; color:#0f172a; margin:0; letter-spacing:-0.02em; }
+    html[data-theme="dark"] .lr-title { color:#f1f5f9; }
+    .lr-meta { font-size:0.78rem; color:#64748b; font-weight:600; }
+    html[data-theme="dark"] .lr-meta { color:#94a3b8; }
+    .lr-stars { color:#f59e0b; font-size:0.95rem; letter-spacing:1px; }
+    .lr-chips { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
+    .lr-chip {
+      border:none; border-radius:999px; padding:5px 12px; font-size:0.72rem; font-weight:700;
+      background:#fff; color:#475569; border:1px solid #e2e8f0; cursor:pointer; transition:.15s;
+    }
+    html[data-theme="dark"] .lr-chip { background:#334155; color:#e2e8f0; border-color:#475569; }
+    .lr-chip.active, .lr-chip:hover { background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; border-color:transparent; }
+    .lr-list { display:flex; flex-direction:column; gap:10px; }
+    .lr-item {
+      background:#fff; border-radius:14px; padding:12px 12px 10px;
+      border:1px solid rgba(226,232,240,0.9);
+    }
+    html[data-theme="dark"] .lr-item { background:#0f172a; border-color:#334155; }
+    .lr-user { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+    .lr-av { width:38px; height:38px; border-radius:50%; object-fit:cover; background:#e2e8f0; }
+    .lr-name { font-weight:800; font-size:0.85rem; color:#0f172a; }
+    html[data-theme="dark"] .lr-name { color:#f8fafc; }
+    .lr-msg { font-size:0.82rem; color:#475569; line-height:1.55; margin:4px 0 0; }
+    html[data-theme="dark"] .lr-msg { color:#cbd5e1; }
+    .lr-sub { font-size:0.7rem; color:#94a3b8; margin-top:6px; display:flex; flex-wrap:wrap; gap:8px; }
+    .lr-imgrow { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+    .lr-imgrow img { width:56px; height:56px; border-radius:10px; object-fit:cover; border:1px solid #e2e8f0; }
+    .lr-more {
+      margin-top:12px; width:100%; border:none; border-radius:12px; padding:11px;
+      font-weight:800; font-size:0.82rem;
+      background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; cursor:pointer;
+      box-shadow:0 8px 22px rgba(102,126,234,0.35);
+    }
+    .lr-modal .modal-content { border-radius:18px; border:none; overflow:hidden; }
+    .lr-modal-body { max-height:70vh; overflow-y:auto; }
+  </style>
+  <div class="lr-card">
+    <div class="lr-head">
+      <h2 class="lr-title"><i class="fas fa-star-half-alt me-2" style="color:#667eea;"></i>{% trans "买家评价" %}</h2>
+      <div class="lr-meta">
+        {% if listing_review_summary.count %}
+          <span class="lr-stars">{{ listing_review_summary.avg }} ★</span>
+          · {{ listing_review_summary.count }} {% trans "条" %}
+        {% else %}
+          {% trans "暂无评价" %}
+        {% endif %}
+      </div>
+    </div>
+    <div class="lr-chips lr-chips-preview-{{ lr_uid }}" role="tablist">
+      <button type="button" class="lr-chip active" data-filter="all">{% trans "全部" %}</button>
+      <button type="button" class="lr-chip" data-filter="good">{% trans "好评" %}</button>
+      <button type="button" class="lr-chip" data-filter="medium">{% trans "中评" %}</button>
+      <button type="button" class="lr-chip" data-filter="bad">{% trans "差评" %}</button>
+      <button type="button" class="lr-chip" data-filter="with_image">{% trans "有图" %}</button>
+    </div>
+    <div class="lr-list" id="lrPreviewList-{{ lr_uid }}">
+      {% for r in listing_reviews_preview %}
+      <article class="lr-item">
+        <div class="lr-user">
+          {% if r.site_user.get_avatar_url %}
+          <img class="lr-av" src="{{ r.site_user.get_avatar_url }}" alt="">
+          {% else %}
+          <div class="lr-av d-flex align-items-center justify-content-center"><i class="fas fa-user text-muted"></i></div>
+          {% endif %}
+          <div>
+            <div class="lr-name">{{ r.site_user.name }}</div>
+            <div class="lr-stars" style="font-size:0.78rem;">{{ r.avg_rating }} ★</div>
+          </div>
+        </div>
+        {% if r.message %}<p class="lr-msg">{{ r.message|linebreaksbr }}</p>{% endif %}
+        {% if r.images %}
+        <div class="lr-imgrow">
+          {% for im in r.images %}
+          {% if im|slice:":4" == "http" %}
+          <img src="{{ im }}" alt="" loading="lazy">
+          {% else %}
+          <img src="{{ MEDIA_URL }}{{ im }}" alt="" loading="lazy">
+          {% endif %}
+          {% endfor %}
+        </div>
+        {% endif %}
+        <div class="lr-sub">
+          <span>{% trans "商品" %} {{ r.rating_product }}★</span>
+          <span>{% trans "服务" %} {{ r.rating_service }}★</span>
+          <span>{% trans "物流" %} {{ r.rating_delivery }}★</span>
+        </div>
+      </article>
+      {% empty %}
+      <p class="text-muted small mb-0">{% trans "成为第一个评价的用户" %}</p>
+      {% endfor %}
+    </div>
+    {% if listing_review_summary.count > 3 %}
+    <button type="button" class="lr-more" data-bs-toggle="modal" data-bs-target="#lrModalAll-{{ lr_uid }}">{% trans "查看全部评价" %}</button>
+    {% endif %}
+  </div>
+
+  <div class="modal fade lr-modal" id="lrModalAll-{{ lr_uid }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold">{% trans "全部评价" %}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body lr-modal-body pt-2">
+          <div class="lr-chips mb-3" id="lrModalChips-{{ lr_uid }}">
+            <button type="button" class="lr-chip active" data-filter="all">{% trans "全部" %}</button>
+            <button type="button" class="lr-chip" data-filter="good">{% trans "好评" %}</button>
+            <button type="button" class="lr-chip" data-filter="medium">{% trans "中评" %}</button>
+            <button type="button" class="lr-chip" data-filter="bad">{% trans "差评" %}</button>
+            <button type="button" class="lr-chip" data-filter="with_image">{% trans "有图" %}</button>
+          </div>
+          <div id="lrModalList-{{ lr_uid }}" class="lr-list"></div>
+          <div class="text-center py-2 d-none" id="lrLoadMoreWrap-{{ lr_uid }}">
+            <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-4 fw-bold" id="lrLoadMore-{{ lr_uid }}">{% trans "加载更多" %}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  var lrUid = '{{ lr_uid|escapejs }}';
+  var root = document.getElementById('listingReviews-' + lrUid);
+  if (!root) return;
+  var api = root.getAttribute('data-api-url');
+  var modalList = document.getElementById('lrModalList-' + lrUid);
+  var loadWrap = document.getElementById('lrLoadMoreWrap-' + lrUid);
+  var loadBtn = document.getElementById('lrLoadMore-' + lrUid);
+  var modalEl = document.getElementById('lrModalAll-' + lrUid);
+  var modalChips = document.getElementById('lrModalChips-' + lrUid);
+  var curFilter = 'all', offset = 0, total = 999999, loading = false;
+
+  function esc(s){ var d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+
+  function renderItem(it){
+    var av = it.user_avatar ? '<img class="lr-av" src="'+esc(it.user_avatar)+'" alt="">' :
+      '<div class="lr-av d-flex align-items-center justify-content-center"><i class="fas fa-user text-muted"></i></div>';
+    var imgs = (it.images||[]).map(function(u){ return '<img src="'+esc(u)+'" alt="" loading="lazy">'; }).join('');
+    return '<article class="lr-item"><div class="lr-user">'+av+'<div><div class="lr-name">'+esc(it.user_name)+'</div>'+
+      '<div class="lr-stars" style="font-size:0.78rem;">'+it.avg_rating+' ★</div></div></div>'+
+      (it.message?'<p class="lr-msg">'+esc(it.message).replace(/\\n/g,'<br>')+'</p>':'')+
+      (imgs?'<div class="lr-imgrow">'+imgs+'</div>':'')+
+      '<div class="lr-sub"><span>{% trans "商品" %} '+it.rating_product+'★</span> <span>{% trans "服务" %} '+it.rating_service+'★</span> <span>{% trans "物流" %} '+it.rating_delivery+'★</span></div></article>';
+  }
+
+  function setChipsActive(container, fl){
+    if (!container) return;
+    container.querySelectorAll('.lr-chip').forEach(function(b){
+      b.classList.toggle('active', b.getAttribute('data-filter')===fl);
+    });
+  }
+
+  function fetchPage(reset){
+    if (loading) return;
+    loading = true;
+    if (reset){ offset = 0; if (modalList) modalList.innerHTML=''; }
+    var u = api + '?filter='+encodeURIComponent(curFilter)+'&offset='+offset+'&limit=12';
+    fetch(u).then(function(r){ return r.json(); }).then(function(data){
+      total = data.total || 0;
+      (data.reviews||[]).forEach(function(it){
+        var tmp = document.createElement('div');
+        tmp.innerHTML = renderItem(it);
+        if (modalList) modalList.appendChild(tmp.firstElementChild);
+      });
+      offset += (data.reviews||[]).length;
+      if (loadWrap) loadWrap.classList.toggle('d-none', offset >= total || !total);
+      loading = false;
+    }).catch(function(){ loading = false; });
+  }
+
+  if (modalEl) modalEl.addEventListener('show.bs.modal', function(){
+    curFilter = 'all'; offset = 0; setChipsActive(modalChips, 'all'); fetchPage(true);
+  });
+  if (modalChips) modalChips.addEventListener('click', function(e){
+    var t = e.target.closest('.lr-chip'); if (!t) return;
+    curFilter = t.getAttribute('data-filter')||'all'; setChipsActive(modalChips, curFilter); fetchPage(true);
+  });
+  if (loadBtn) loadBtn.addEventListener('click', function(){ fetchPage(false); });
+
+  var previewChips = root.querySelector('.lr-chips-preview-' + lrUid);
+  if (previewChips) previewChips.addEventListener('click', function(e){
+    var t = e.target.closest('.lr-chip'); if (!t) return;
+    var fl = t.getAttribute('data-filter')||'all';
+    setChipsActive(previewChips, fl);
+    fetch(api+'?filter='+encodeURIComponent(fl)+'&offset=0&limit=6').then(function(r){ return r.json(); }).then(function(data){
+      var host = document.getElementById('lrPreviewList-' + lrUid);
+      if (!host) return;
+      host.innerHTML = '';
+      if (!(data.reviews||[]).length){ host.innerHTML='<p class="text-muted small mb-0">{% trans "暂无评价" %}</p>'; return; }
+      (data.reviews||[]).forEach(function(it){
+        var tmp = document.createElement('div');
+        tmp.innerHTML = renderItem(it);
+        host.appendChild(tmp.firstElementChild);
+      });
+    });
+  });
+})();
+</script>

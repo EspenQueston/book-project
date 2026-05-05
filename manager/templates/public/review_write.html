@@ -1,0 +1,169 @@
+{% extends 'public/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "评价订单" %} — DUNO 360{% endblock %}
+
+{% block extra_css %}
+<style>
+  .rw-wrap { max-width: 640px; margin: 32px auto 80px; padding: 0 16px; }
+  .rw-hero {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 22px;
+    padding: 28px 22px;
+    color: #fff;
+    margin-bottom: 22px;
+    box-shadow: 0 16px 40px rgba(102, 126, 234, 0.35);
+  }
+  .rw-hero h1 { font-size: 1.35rem; font-weight: 800; margin: 0 0 8px; letter-spacing: -0.02em; }
+  .rw-hero p { margin: 0; opacity: 0.92; font-size: 0.9rem; }
+  .rw-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 22px;
+    box-shadow: 0 10px 36px rgba(15, 23, 42, 0.08);
+    border: 1px solid rgba(102, 126, 234, 0.1);
+  }
+  html[data-theme="dark"] .rw-card {
+    background: #0f172a;
+    border-color: #334155;
+    box-shadow: 0 10px 36px rgba(0, 0, 0, 0.35);
+  }
+  .rw-item-row { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 20px; }
+  .rw-item-img {
+    width: 88px; height: 88px; border-radius: 16px; object-fit: cover;
+    background: #f1f5f9; flex-shrink: 0; border: 1px solid #e2e8f0;
+  }
+  .rw-item-meta { flex: 1; min-width: 0; }
+  .rw-item-title { font-weight: 800; font-size: 1rem; color: #0f172a; margin-bottom: 6px; line-height: 1.35; }
+  html[data-theme="dark"] .rw-item-title { color: #f8fafc; }
+  .rw-pill { display: inline-block; font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: rgba(102, 126, 234, 0.12); color: #667eea; margin-right: 6px; margin-bottom: 4px; }
+  .rw-label { font-weight: 700; font-size: 0.82rem; color: #334155; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  html[data-theme="dark"] .rw-label { color: #e2e8f0; }
+  .rw-stars { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 4px; }
+  .rw-stars input { position: absolute; opacity: 0; pointer-events: none; }
+  .rw-stars label {
+    width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 1.15rem; color: #cbd5e1; border: 2px solid #e2e8f0; background: #fff;
+    transition: 0.15s;
+  }
+  html[data-theme="dark"] .rw-stars label { background: #1e293b; border-color: #475569; color: #64748b; }
+  .rw-stars label:hover { border-color: #667eea; color: #f59e0b; }
+  .rw-stars input:checked + label,
+  .rw-stars label.is-on { border-color: transparent; background: linear-gradient(135deg, #fef3c7, #fde68a); color: #d97706; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25); }
+  .rw-textarea {
+    width: 100%; min-height: 120px; border-radius: 14px; border: 1.5px solid #e2e8f0;
+    padding: 14px; font-size: 0.92rem; resize: vertical; transition: border 0.2s, box-shadow 0.2s;
+  }
+  .rw-textarea:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15); }
+  html[data-theme="dark"] .rw-textarea { background: #1e293b; border-color: #475569; color: #f1f5f9; }
+  .rw-file { border: 2px dashed rgba(102, 126, 234, 0.35); border-radius: 14px; padding: 14px; text-align: center; background: rgba(102, 126, 234, 0.04); }
+  .rw-submit {
+    width: 100%; border: none; border-radius: 14px; padding: 14px;
+    font-weight: 800; font-size: 0.95rem; color: #fff; cursor: pointer;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    box-shadow: 0 10px 28px rgba(102, 126, 234, 0.4);
+    margin-top: 10px;
+  }
+  .rw-submit:hover { filter: brightness(1.05); transform: translateY(-1px); }
+  .rw-hint { font-size: 0.75rem; color: #94a3b8; margin-top: 6px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="rw-wrap">
+  <div class="rw-hero">
+    <h1><i class="fas fa-star me-2"></i>{% trans "收货后评价" %}</h1>
+    <p>{% trans "分享真实体验，帮助其他买家做决定。" %}</p>
+  </div>
+
+  <div class="rw-card">
+    <div class="rw-item-row">
+      {% if item_image %}
+      <img class="rw-item-img" src="{{ item_image }}" alt="">
+      {% else %}
+      <div class="rw-item-img d-flex align-items-center justify-content-center text-muted"><i class="fas fa-image fa-2x"></i></div>
+      {% endif %}
+      <div class="rw-item-meta">
+        <div class="rw-item-title">{{ item_title }}</div>
+        <span class="rw-pill">× {{ quantity }}</span>
+        {% if attrs_display %}
+          {% for k, v in attrs_display %}
+          <span class="rw-pill">{{ k }}: {{ v }}</span>
+          {% endfor %}
+        {% endif %}
+        <div class="rw-hint mt-2">
+          {% trans "下单" %}: {{ order_date|date:"Y-m-d H:i" }} · {% trans "完成" %}: {{ delivered_at|date:"Y-m-d H:i" }}
+        </div>
+      </div>
+    </div>
+
+    <form method="post" action="{% url 'manager:review_submit' %}" enctype="multipart/form-data">
+      {% csrf_token %}
+      {% if book_order_item %}
+      <input type="hidden" name="book_item_id" value="{{ book_order_item.id }}">
+      {% else %}
+      <input type="hidden" name="mkt_item_id" value="{{ marketplace_order_item.id }}">
+      {% endif %}
+
+      <div class="mb-4">
+        <div class="rw-label"><i class="fas fa-box text-primary"></i>{% trans "商品质量" %} (1–5)</div>
+        <div class="rw-stars" data-rw-stars>
+          {% for n in "12345"|make_list %}
+          <input type="radio" name="rating_product" value="{{ n }}" id="id_rp_{{ n }}" {% if forloop.last %}checked{% endif %}>
+          <label for="id_rp_{{ n }}" data-val="{{ n }}">★</label>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="mb-4">
+        <div class="rw-label"><i class="fas fa-headset text-primary"></i>{% trans "客服服务" %} (1–5)</div>
+        <div class="rw-stars" data-rw-stars>
+          {% for n in "12345"|make_list %}
+          <input type="radio" name="rating_service" value="{{ n }}" id="id_rs_{{ n }}" {% if forloop.last %}checked{% endif %}>
+          <label for="id_rs_{{ n }}" data-val="{{ n }}">★</label>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="mb-4">
+        <div class="rw-label"><i class="fas fa-shipping-fast text-primary"></i>{% trans "物流速度" %} (1–5)</div>
+        <div class="rw-stars" data-rw-stars>
+          {% for n in "12345"|make_list %}
+          <input type="radio" name="rating_delivery" value="{{ n }}" id="id_rd_{{ n }}" {% if forloop.last %}checked{% endif %}>
+          <label for="id_rd_{{ n }}" data-val="{{ n }}">★</label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <div class="rw-label"><i class="fas fa-comment-alt text-primary"></i>{% trans "评价内容" %} ({% trans "可选" %})</div>
+        <textarea class="rw-textarea" name="message" maxlength="4000" placeholder="{% trans '描述商品、包装、使用感受…' %}"></textarea>
+      </div>
+
+      <div class="mb-4">
+        <div class="rw-label"><i class="fas fa-images text-primary"></i>{% trans "上传图片" %} ({% trans "最多5张，每张≤3MB" %})</div>
+        <div class="rw-file">
+          <input type="file" name="images" accept="image/jpeg,image/png,image/webp,image/gif" multiple class="form-control form-control-sm border-0 bg-transparent">
+        </div>
+      </div>
+
+      <button type="submit" class="rw-submit">{% trans "提交评价" %}</button>
+    </form>
+  </div>
+</div>
+<script>
+(function(){
+  document.querySelectorAll('[data-rw-stars]').forEach(function(group){
+    var inputs = group.querySelectorAll('input[type=radio]');
+    function paint(){
+      var checked = group.querySelector('input[type=radio]:checked');
+      var v = checked ? parseInt(checked.value, 10) : 0;
+      group.querySelectorAll('label').forEach(function(lb){
+        var n = parseInt(lb.getAttribute('data-val'), 10);
+        lb.classList.toggle('is-on', n <= v);
+      });
+    }
+    group.addEventListener('change', paint);
+    paint();
+  });
+})();
+</script>
+{% endblock %}

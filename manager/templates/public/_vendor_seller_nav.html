@@ -147,6 +147,10 @@
            href="{% url 'manager:vendor_messages' %}">
             <i class="fas fa-comments"></i>{% trans "客户消息" %}
         </a>
+        <a class="vp-sn-link {% if rn.namespace == 'marketplace' and rn.url_name == 'vendor_post_reviews' %}nav-active{% endif %}"
+           href="{% url 'marketplace:vendor_post_reviews' %}">
+            <i class="fas fa-star-half-alt"></i>{% trans "买家评价" %}
+        </a>
         <a class="vp-sn-link" href="{% url 'marketplace:home' %}" target="_blank" rel="noopener">
             <i class="fas fa-globe"></i>{% trans "浏览市场" %}
         </a>

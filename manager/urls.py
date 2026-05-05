@@ -1,5 +1,6 @@
 from django.urls import path, re_path
 from manager import views
+from manager import views_review
 from manager.payments.views import (
     mtn_momo_callback, airtel_money_callback,
     initiate_momo_payment, check_payment_status,
@@ -53,6 +54,8 @@ urlpatterns = [
     path('api/conversations/', views.api_conversations, name='api_conversations'),
     path('api/conversations/<int:conversation_id>/messages/', views.api_conversation_messages, name='api_conversation_messages'),
     path('public/my-profile/', views.public_my_profile, name='public_my_profile'),
+    path('public/reviews/write/', views_review.review_write, name='review_write'),
+    path('public/reviews/submit/', views_review.review_submit, name='review_submit'),
     path('public/wishlist/', views.public_wishlist, name='public_wishlist'),
     path('publisher/<int:publisher_id>/follow/', views.follow_publisher, name='follow_publisher'),
     path('vendor/<int:vendor_id>/follow/', views.follow_vendor, name='follow_vendor'),

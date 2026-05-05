@@ -1,0 +1,12 @@
+{% comment %}Resolves book/media URLs: absolute http(s), site-root /media/..., or storage-relative.{% endcomment %}
+{% if item_image %}
+  {% if item_image|slice:":4" == "http" or item_image|slice:":2" == "//" %}
+    <img class="{{ css_class }}" src="{{ item_image }}" alt="" loading="lazy">
+  {% elif item_image|slice:":1" == "/" %}
+    <img class="{{ css_class }}" src="{{ item_image }}" alt="" loading="lazy">
+  {% else %}
+    <img class="{{ css_class }}" src="{{ MEDIA_URL }}{{ item_image }}" alt="" loading="lazy">
+  {% endif %}
+{% else %}
+  <div class="{{ css_class }} d-flex align-items-center justify-content-center text-muted border bg-light"><i class="fas fa-image fa-2x opacity-50"></i></div>
+{% endif %}

@@ -1304,19 +1304,15 @@
     <!-- Client-side i18n: translates data-zh/data-en/data-fr elements -->
     <script src="{% static 'js/admin_i18n.js' %}"></script>
     <script>
-    /* Bridge: sync Django server-side language → JS i18n (for data-zh/data-en/data-fr).
-       Django session is always authoritative — localStorage is corrected if they diverge. */
+    /* Bridge: apply JS i18n for data-zh/data-en/data-fr using Django LANGUAGE_CODE.
+       localStorage is synced from the server — never override the server language. */
     (function() {
-        var djangoLang = '{{ LANGUAGE_CODE }}';  // e.g. 'zh-hans', 'en', 'fr'
+        var djangoLang = '{{ LANGUAGE_CODE }}';
         var jsLang = djangoLang === 'zh-hans' ? 'zh' : djangoLang;
-
-        // Correction de divergence : si localStorage dit autre chose que Django, on le corrige
-        var storedLang = localStorage.getItem('adminLang');
-        if (storedLang && storedLang !== jsLang) {
+        try {
             localStorage.setItem('adminLang', jsLang);
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
+        } catch (e) {}
+document.addEventListener('DOMContentLoaded', function() {
             if (window.adminI18n && typeof window.adminI18n.setLang === 'function') {
                 window.adminI18n.setLang(jsLang);
             }

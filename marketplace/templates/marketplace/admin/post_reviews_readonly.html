@@ -1,0 +1,86 @@
+{% extends "marketplace/admin/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "买家评价 — 市场管理" %}{% endblock %}
+{% block nav_reviews %}active{% endblock %}
+
+{% block extra_admin_css %}
+<style>
+  .prv-hero {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    padding: 24px 28px;
+    color: #fff;
+    margin-bottom: 24px;
+  }
+  .prv-hero h4 { font-weight: 800; margin: 0; }
+  .prv-hero p { margin: 10px 0 0; opacity: 0.9; font-size: 0.9rem; }
+  .prv-card {
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #eef2f7;
+    box-shadow: 0 6px 22px rgba(15, 23, 42, 0.05);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .prv-row { display: flex; gap: 18px; flex-wrap: wrap; align-items: flex-start; }
+  .prv-thumb { width: 100px; height: 100px; border-radius: 14px; object-fit: cover; background: #f8fafc; flex-shrink: 0; }
+  .prv-title { font-weight: 800; font-size: 1.05rem; color: #0f172a; margin-bottom: 8px; }
+  .prv-pill {
+    display: inline-block; font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 999px;
+    background: rgba(102, 126, 234, 0.1); color: #667eea; margin: 0 6px 6px 0;
+  }
+  .prv-msg { margin-top: 14px; padding: 14px 16px; border-radius: 12px; background: #f8fafc; font-size: 0.92rem; line-height: 1.65; white-space: pre-wrap; }
+  .prv-stars { color: #f59e0b; font-weight: 800; }
+  .prv-imgs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .prv-imgs img { width: 80px; height: 80px; object-fit: cover; border-radius: 10px; }
+  .prv-empty { text-align: center; padding: 60px; color: #94a3b8; background: #fff; border-radius: 16px; }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="prv-hero">
+  <h4><i class="fas fa-star-half-alt me-2"></i>{% trans "买家评价（只读）" %}</h4>
+  <p>{% trans "展示管理员发布的商品、课程、超市等收到的收货后评价；不可编辑或删除。" %}</p>
+</div>
+
+{% if not reviews %}
+<div class="prv-empty"><i class="fas fa-inbox fa-3x mb-3 d-block opacity-25"></i>{% trans "暂无评价" %}</div>
+{% endif %}
+
+{% for review in reviews %}
+{% with s=review.order_snapshot %}
+<div class="prv-card">
+  <div class="d-flex justify-content-between align-items-start mb-2">
+    <div class="text-muted small fw-semibold"><i class="fas fa-user me-1"></i>{{ review.site_user.name }} · {{ review.created_at|date:"Y-m-d H:i" }}</div>
+    <span class="prv-stars">{{ review.avg_rating }} ★</span>
+  </div>
+  <div class="prv-row">
+    {% include "marketplace/includes/review_item_thumb.html" with item_image=s.item_image css_class="prv-thumb" %}
+    <div style="flex:1;min-width:220px;">
+      <div class="prv-title">{{ s.item_name }}</div>
+      <span class="prv-pill">{{ s.channel }}</span>
+      <span class="prv-pill">{% trans "订单" %} {{ s.order_number }}</span>
+      <span class="prv-pill">{% trans "数量" %} ×{{ s.quantity }}</span>
+      <span class="prv-pill">{% trans "下单" %} {{ s.order_placed|date:"Y-m-d" }}</span>
+      <span class="prv-pill">{% trans "送达" %} {{ s.delivered_at|date:"Y-m-d" }}</span>
+      {% for line in s.attributes %}<span class="prv-pill">{{ line }}</span>{% endfor %}
+      <div class="mt-2 small text-muted">{% trans "商品" %} {{ review.rating_product }}★ · {% trans "服务" %} {{ review.rating_service }}★ · {% trans "物流" %} {{ review.rating_delivery }}★</div>
+    </div>
+  </div>
+  {% if review.message %}<div class="prv-msg">{{ review.message }}</div>{% endif %}
+  {% if review.images %}
+  <div class="prv-imgs">
+    {% for im in review.images %}
+    {% if im|slice:":4" == "http" %}
+    <a href="{{ im }}" target="_blank" rel="noopener"><img src="{{ im }}" alt=""></a>
+    {% else %}
+    <a href="{{ MEDIA_URL }}{{ im }}" target="_blank" rel="noopener"><img src="{{ MEDIA_URL }}{{ im }}" alt=""></a>
+    {% endif %}
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endwith %}
+{% endfor %}
+{% endblock %}

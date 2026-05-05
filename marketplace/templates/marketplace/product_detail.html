@@ -181,11 +181,6 @@
     .bmp-seller-logo { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; flex-shrink: 0; }
     .bmp-seller-name { font-size: 14px; font-weight: 700; color: #333; }
     .bmp-seller-meta { font-size: 11px; color: #999; margin-top: 2px; }
-    .bmp-seller-scores { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; margin-bottom: 10px; }
-    .bmp-score-item { text-align: center; }
-    .bmp-score-val { font-size: 14px; font-weight: 700; color: #E4393C; }
-    .bmp-score-lbl { font-size: 10px; color: #999; }
-    .bmp-seller-btns { display: flex; gap: 8px; }
     .bmp-seller-btn { flex: 1; padding: 7px 0; border-radius: 16px; font-size: 12px; font-weight: 600; text-align: center; border: 1px solid #667eea; color: #667eea; cursor: pointer; text-decoration: none; background: #fff; }
     .bmp-seller-btn.follow { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border-color: transparent; }
 
@@ -245,8 +240,8 @@
             <div class="bmp-gallery-slide"><img src="{{ product.get_image_url }}" alt="{{ product.name }}" style="filter:brightness(.9)saturate(1.2);"></div>
             {% endif %}
         </div>
-        {% if product.sales_count > 0 %}
-        <div class="bmp-promo-badge">{% if product.sales_count > 50 %}🔥 热销{% elif product.stock <= 5 and product.stock > 0 %}⚡ 限量{% else %}📦 现货{% endif %}</div>
+        {% if sold_delivered > 0 %}
+        <div class="bmp-promo-badge">{% if sold_delivered > 50 %}🔥 {% trans "热销" %}{% elif product.stock <= 5 and product.stock > 0 %}⚡ {% trans "限量" %}{% else %}📦 {% trans "现货" %}{% endif %}</div>
         {% endif %}
         <div class="bmp-gallery-counter" id="bmpCounter">1/2</div>
     </div>
@@ -256,9 +251,9 @@
         <div class="d-flex align-items-baseline">
             <div class="bmp-price-main">{{ product.price|fcfa }}</div>
             {% if product.original_price %}<div class="bmp-price-original">{{ product.original_price|fcfa }}</div>{% endif %}
-            <div class="bmp-price-sold ms-auto">已售 {{ product.sales_count }}+</div>
+            <div class="bmp-price-sold ms-auto">{% trans "已售" %} {{ sold_delivered }}+</div>
         </div>
-        <div><span class="bmp-low-badge">7天无理由退货</span> <span class="bmp-low-badge" style="margin-left:4px;">正品保证</span></div>
+        <div><span class="bmp-low-badge">{% trans "7天无理由退货" %}</span> <span class="bmp-low-badge" style="margin-left:4px;">{% trans "正品保证" %}</span></div>
     </div>
 
     <!-- C. Title -->
@@ -274,35 +269,35 @@
 
     <!-- D. Delivery -->
     <div class="bmp-delivery-section">
-        <div class="bmp-delivery-row"><i class="fas fa-truck"></i><span><span class="bmp-delivery-highlight">快递配送</span> · 预计 <strong>2-3天</strong>到达</span></div>
-        <div class="bmp-delivery-row"><i class="fas fa-shield-alt"></i><span>DUNO 平台担保 · 正品保证</span></div>
-        <div class="bmp-delivery-row"><i class="fas fa-warehouse"></i><span>库存: {% if product.in_stock %}<strong class="bmp-delivery-highlight">{{ product.stock }}</strong> 件{% else %}<span style="color:#E4393C;">缺货</span>{% endif %}</span></div>
+        <div class="bmp-delivery-row"><i class="fas fa-truck"></i><span><span class="bmp-delivery-highlight">{% trans "快递配送" %}</span> · {% trans "预计" %} <strong>2-3{% trans "天" %}</strong>{% trans "到达" %}</span></div>
+        <div class="bmp-delivery-row"><i class="fas fa-shield-alt"></i><span>{% trans "DUNO 平台担保 · 正品保证" %}</span></div>
+        <div class="bmp-delivery-row"><i class="fas fa-warehouse"></i><span>{% trans "库存" %}: {% if product.in_stock %}<strong class="bmp-delivery-highlight">{{ product.stock }}</strong> {% trans "件" %}{% else %}<span style="color:#E4393C;">{% trans "缺货" %}</span>{% endif %}</span></div>
     </div>
 
     <!-- E. Guarantee -->
-    <div class="bmp-guarantee"><i class="fas fa-shield-alt"></i><span>退货宝 | <strong>7天无理由退换</strong> | 极速退款</span></div>
+    <div class="bmp-guarantee"><i class="fas fa-shield-alt"></i><span>{% trans "退货宝" %} | <strong>{% trans "7天无理由退换" %}</strong> | {% trans "极速退款" %}</span></div>
 
     <!-- F. Specs -->
     <div class="bmp-specs-section">
-        <div class="bmp-specs-label">商品规格</div>
+        <div class="bmp-specs-label">{% trans "商品规格" %}</div>
         <div class="bmp-specs-scroll">
-            {% if product.brand %}<div class="bmp-spec-chip"><strong>品牌</strong>{{ product.brand }}</div>{% endif %}
-            {% if product.weight %}<div class="bmp-spec-chip"><strong>重量</strong>{{ product.weight }}kg</div>{% endif %}
-            <div class="bmp-spec-chip"><strong>状态</strong>{{ product.get_condition_display }}</div>
-            <div class="bmp-spec-chip"><strong>库存</strong>{{ product.stock }} 件</div>
-            <div class="bmp-spec-chip"><strong>已售</strong>{{ product.sales_count }}+</div>
+            {% if product.brand %}<div class="bmp-spec-chip"><strong>{% trans "品牌" %}</strong>{{ product.brand }}</div>{% endif %}
+            {% if product.weight %}<div class="bmp-spec-chip"><strong>{% trans "重量" %}</strong>{{ product.weight }}kg</div>{% endif %}
+            <div class="bmp-spec-chip"><strong>{% trans "状态" %}</strong>{{ product.get_condition_display }}</div>
+            <div class="bmp-spec-chip"><strong>{% trans "库存" %}</strong>{{ product.stock }} {% trans "件" %}</div>
+            <div class="bmp-spec-chip"><strong>{% trans "已售" %}</strong>{{ sold_delivered }}+</div>
         </div>
     </div>
 
     <!-- G. Variant Selectors (if any) -->
     {% if selectable_attributes %}
     <div style="background:#fff;padding:12px 14px;margin-bottom:6px;">
-        <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:8px;">选择配置</div>
+        <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:8px;">{% trans "选择配置" %}</div>
         {% for group in selectable_attributes %}
         <div style="margin-bottom:10px;">
             <label style="font-size:12px;color:#666;margin-bottom:4px;display:block;">{{ group.name }}</label>
             <select class="option-select" data-attribute-name="{{ group.name }}" style="width:100%;padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;">
-                <option value="">选择{{ group.name }}</option>
+                <option value="">{% trans "请选择" %} {{ group.name }}</option>
                 {% for value in group.values %}<option value="{{ value }}">{{ value }}</option>{% endfor %}
             </select>
         </div>
@@ -313,10 +308,14 @@
     <!-- H. Description -->
     {% if product.description %}
     <div style="background:#fff;padding:12px 14px;margin-bottom:6px;">
-        <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:8px;">商品描述</div>
+        <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:8px;">{% trans "商品描述" %}</div>
         <div style="font-size:13px;color:#666;line-height:1.7;">{{ product.description|linebreaksbr }}</div>
     </div>
     {% endif %}
+
+    {% with review_block_uid="mob" %}
+    {% include 'marketplace/includes/listing_reviews_block.html' %}
+    {% endwith %}
 
     <!-- I. Seller Section -->
     <div class="bmp-seller-section">
@@ -328,35 +327,30 @@
                 {% else %}
                 <div class="bmp-seller-name">DUNO 360</div>
                 {% endif %}
-                <div class="bmp-seller-meta"><i class="fas fa-star" style="color:#f59e0b;"></i> 4.9 · 认证商家</div>
+                <div class="bmp-seller-meta"><i class="fas fa-star" style="color:#f59e0b;"></i> 4.9 · {% trans "认证商家" %}</div>
             </div>
             {% if product.vendor %}
             <button class="bmp-seller-btn follow ms-auto" onclick="toggleVendorFollow({{ product.vendor.id }}, this)" id="followVendorBtn">
-                <i class="fas fa-plus"></i> 关注
+                <i class="fas fa-plus"></i> {% trans "关注" %}
             </button>
             {% endif %}
         </div>
-        <div class="bmp-seller-scores">
-            <div class="bmp-score-item"><div class="bmp-score-val">4.9</div><div class="bmp-score-lbl">商品质量</div></div>
-            <div class="bmp-score-item"><div class="bmp-score-val">4.8</div><div class="bmp-score-lbl">配送速度</div></div>
-            <div class="bmp-score-item"><div class="bmp-score-val">4.9</div><div class="bmp-score-lbl">服务态度</div></div>
-        </div>
         {% if product.vendor %}
         <div class="bmp-seller-btns">
-            <a href="{% url 'manager:public_vendor_shop' product.vendor.id %}" class="bmp-seller-btn" data-zh="进入店铺" data-en="Visit Shop" data-fr="Voir boutique">进入店铺</a>
-            <a href="{% url 'manager:start_conversation' %}?subject={{ product.vendor.company_name|urlencode }}" class="bmp-seller-btn" data-zh="联系卖家" data-en="Contact" data-fr="Contacter">联系卖家</a>
+            <a href="{% url 'manager:public_vendor_shop' product.vendor.id %}" class="bmp-seller-btn">{% trans "进入店铺" %}</a>
+            <a href="{% url 'manager:start_conversation' %}?subject={{ product.vendor.company_name|urlencode }}" class="bmp-seller-btn">{% trans "联系卖家" %}</a>
         </div>
         {% endif %}
     </div>
 
     <!-- J. Certifications -->
     <div class="bmp-certs-section">
-        <div class="bmp-certs-title">服务保障</div>
+        <div class="bmp-certs-title">{% trans "服务保障" %}</div>
         <div class="bmp-certs-grid">
-            <div class="bmp-cert-item"><div class="bmp-cert-icon" style="background:linear-gradient(135deg,#667eea,#764ba2);"><i class="fas fa-undo"></i></div><span class="bmp-cert-label">15天退换</span></div>
-            <div class="bmp-cert-item"><div class="bmp-cert-icon" style="background:linear-gradient(135deg,#10b981,#059669);"><i class="fas fa-certificate"></i></div><span class="bmp-cert-label">正品保证</span></div>
-            <div class="bmp-cert-item"><div class="bmp-cert-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);"><i class="fas fa-shipping-fast"></i></div><span class="bmp-cert-label">运费险</span></div>
-            <div class="bmp-cert-item"><div class="bmp-cert-icon" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8);"><i class="fas fa-check-double"></i></div><span class="bmp-cert-label">品质检验</span></div>
+            <div class="bmp-cert-item"><div class="bmp-cert-icon" style="background:linear-gradient(135deg,#667eea,#764ba2);"><i class="fas fa-undo"></i></div><span class="bmp-cert-label">{% trans "15天退换" %}</span></div>
+            <div class="bmp-cert-item"><div class="bmp-cert-icon" style="background:linear-gradient(135deg,#10b981,#059669);"><i class="fas fa-certificate"></i></div><span class="bmp-cert-label">{% trans "正品保证" %}</span></div>
+            <div class="bmp-cert-item"><div class="bmp-cert-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);"><i class="fas fa-shipping-fast"></i></div><span class="bmp-cert-label">{% trans "运费险" %}</span></div>
+            <div class="bmp-cert-item"><div class="bmp-cert-icon" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8);"><i class="fas fa-check-double"></i></div><span class="bmp-cert-label">{% trans "品质检验" %}</span></div>
         </div>
     </div>
 
@@ -364,18 +358,18 @@
     <div class="bmp-bottom-bar">
         <div class="bmp-action-icons">
             <a href="{% if product.vendor %}{% url 'manager:public_vendor_shop' product.vendor.id %}{% else %}{% url 'marketplace:product_list' %}{% endif %}" class="bmp-action-icon">
-                <i class="fas fa-store"></i><span>店铺</span>
+                <i class="fas fa-store"></i><span>{% trans "店铺" %}</span>
             </a>
             <a href="{% url 'manager:start_conversation' %}?item_type=product&item_id={{ product.id }}&subject={{ product.name|urlencode }}" class="bmp-action-icon">
-                <i class="fas fa-comments"></i><span>聊天</span>
+                <i class="fas fa-comments"></i><span>{% trans "聊天" %}</span>
             </a>
             <button class="bmp-action-icon" id="bmpWishBtn" onclick="mobileToggleWish()" style="cursor:pointer;">
-                <i class="far fa-heart" id="bmpWishIcon"></i><span>收藏</span>
+                <i class="far fa-heart" id="bmpWishIcon"></i><span>{% trans "收藏" %}</span>
             </button>
         </div>
         <div class="bmp-buy-btns">
-            <button class="bmp-cart-btn" onclick="addToCart()"><i class="fas fa-shopping-cart"></i> 加入购物车</button>
-            <button class="bmp-buy-btn" onclick="buyNow()"><i class="fas fa-bolt"></i> 立即购买</button>
+            <button class="bmp-cart-btn" onclick="addToCart()"><i class="fas fa-shopping-cart"></i> {% trans "加入购物车" %}</button>
+            <button class="bmp-buy-btn" onclick="buyNow()"><i class="fas fa-bolt"></i> {% trans "立即购买" %}</button>
         </div>
     </div>
 </div><!-- /.product-mobile-page -->
@@ -419,6 +413,10 @@
             <div class="product-info">
                 <h1 class="product-title">{{ product.name }}</h1>
 
+                {% with review_block_uid="desk" %}
+                {% include 'marketplace/includes/listing_reviews_block.html' %}
+                {% endwith %}
+
                 <div class="product-meta">
                     {% if product.category %}
                     <span class="meta-tag"><i class="fas fa-tag me-1"></i>{{ product.category.name }}</span>
@@ -451,18 +449,18 @@
                     <!-- Live viewers -->
                     <div class="sp-row sp-viewers">
                         <span class="sp-dot"></span>
-                        <span id="spViewers">{{ product.views_count|add:"3" }}</span>
-                        <span> <span data-zh="人正在看这件商品" data-en="people viewing this right now" data-fr="personnes regardent ce produit">人正在看这件商品</span></span>
+                        <span id="spViewers">{{ social_viewers }}</span>
+                        <span data-zh="人正在看这件商品" data-en="people are viewing this product right now" data-fr="personnes regardent ce produit en ce moment">人正在看这件商品</span>
                     </div>
-                    <!-- Monthly sales -->
-                    {% if product.sales_count > 0 %}
+                    <!-- Delivered sales -->
+                    {% if sold_delivered > 0 %}
                     <div class="sp-row sp-sold">
                         <i class="fas fa-fire" style="color:#ef4444;"></i>
-                        <span><strong>{{ product.sales_count }}</strong> <span data-zh="件已售出" data-en="sold this month" data-fr="vendus ce mois">件已售出</span></span>
-                        {% if product.sales_count >= 50 %}
-                        <span class="sp-badge sp-badge-hot" data-zh="热销" data-en="Hot" data-fr="Populaire">热销</span>
-                        {% elif product.sales_count >= 10 %}
-                        <span class="sp-badge sp-badge-trend" data-zh="趋势" data-en="Trending" data-fr="Tendance">趋势</span>
+                        <span><strong>{{ sold_delivered }}</strong> <span data-zh="件已售出（已完成订单）" data-en="units sold (delivered orders)" data-fr="unités vendues (commandes livrées)">件已售出（已完成订单）</span></span>
+                        {% if sold_delivered >= 50 %}
+                        <span class="sp-badge sp-badge-hot">{% trans "热销" %}</span>
+                        {% elif sold_delivered >= 10 %}
+                        <span class="sp-badge sp-badge-trend">{% trans "趋势" %}</span>
                         {% endif %}
                     </div>
                     {% endif %}
@@ -514,7 +512,7 @@
                     <div class="detail-row">
                         <i class="fas fa-fire"></i>
                         <span class="label">{% trans "已售" %}</span>
-                        <span>{{ product.sales_count }}</span>
+                        <span>{{ sold_delivered }}</span>
                     </div>
                 </div>
 

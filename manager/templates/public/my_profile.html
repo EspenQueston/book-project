@@ -56,6 +56,18 @@
 .mypro-orders-tab i { font-size: 20px; color: #667eea; }
 .mypro-orders-tab .badge { background: #E4393C; color: #fff; font-size: 9px; padding: 1px 5px; border-radius: 8px; }
 
+.mypro-pr-section { background: #fff; margin: 0 0 8px; padding: 12px 14px 14px; }
+.mypro-pr-title { font-size: 13px; font-weight: 800; color: #92400e; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+.mypro-pr-list { display: flex; flex-direction: column; gap: 8px; }
+.mypro-pr-row {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px;
+    background: linear-gradient(135deg, #fffbeb, #fef9c3); border: 1px solid rgba(251, 191, 36, 0.35);
+    text-decoration: none; color: inherit;
+}
+.mypro-pr-thumb { width: 48px; height: 48px; border-radius: 10px; object-fit: cover; background: #f8fafc; flex-shrink: 0; border: 1px solid #e2e8f0; }
+.mypro-pr-name { flex: 1; min-width: 0; font-size: 12px; font-weight: 700; color: #1e293b; line-height: 1.35; }
+.mypro-pr-go { font-size: 11px; font-weight: 800; color: #667eea; white-space: nowrap; }
+
 /* Quick actions */
 .mypro-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 12px 10px; }
 .mypro-action-btn {
@@ -235,6 +247,25 @@
         </a>
     </div>
 </div>
+
+{% if pending_review_items %}
+<div class="mypro-pr-section">
+    <div class="mypro-pr-title"><i class="fas fa-star-half-alt"></i><span data-zh="待评价" data-en="Reviews pending" data-fr="À noter">待评价</span></div>
+    <div class="mypro-pr-list">
+        {% for row in pending_review_items %}
+        <a class="mypro-pr-row" href="{{ row.url }}">
+            {% if row.thumb %}
+            <img class="mypro-pr-thumb" src="{{ row.thumb }}" alt="">
+            {% else %}
+            <div class="mypro-pr-thumb d-flex align-items-center justify-content-center text-muted"><i class="fas fa-image"></i></div>
+            {% endif %}
+            <div class="mypro-pr-name">{{ row.title|truncatechars:40 }}</div>
+            <span class="mypro-pr-go" data-zh="评价" data-en="Review" data-fr="Noter">评价 →</span>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
 
 <!-- Quick actions -->
 <div class="mypro-actions">

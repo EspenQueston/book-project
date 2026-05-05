@@ -117,6 +117,11 @@
     <div class="pmp-info">
         <div class="pmp-price">{{ item.price|fcfa }}</div>
         <h1 class="pmp-title">{{ item.name }}</h1>
+
+        {% with review_block_uid="sup-mob" %}
+        {% include 'marketplace/includes/listing_reviews_block.html' %}
+        {% endwith %}
+
         <div class="pmp-seller-row">
             <span>
                 <i class="fas fa-store me-1"></i>
@@ -131,11 +136,11 @@
     </div>
     
     <div class="pmp-bottom-bar">
-        <a href="{% url 'manager:public_home' %}" class="pmp-icon-btn"><i class="fas fa-store"></i><span>店铺</span></a>
-        <a href="{% url 'manager:start_conversation' %}?item_type=supermarket&item_id={{ item.id }}&subject={{ item.name|urlencode }}" class="pmp-icon-btn"><i class="fas fa-comment-dots"></i><span>聊天</span></a>
+        <a href="{% url 'manager:public_home' %}" class="pmp-icon-btn"><i class="fas fa-store"></i><span>{% trans "店铺" %}</span></a>
+        <a href="{% url 'manager:start_conversation' %}?item_type=supermarket&item_id={{ item.id }}&subject={{ item.name|urlencode }}" class="pmp-icon-btn"><i class="fas fa-comment-dots"></i><span>{% trans "聊天" %}</span></a>
         
-        <button class="pmp-action-btn pmp-cart" onclick="addToCart({{ item.id }})">加入购物车</button>
-        <button class="pmp-action-btn pmp-buy" onclick="buyNow({{ item.id }})">立即购买</button>
+        <button class="pmp-action-btn pmp-cart" onclick="addToCart({{ item.id }})">{% trans "加入购物车" %}</button>
+        <button class="pmp-action-btn pmp-buy" onclick="buyNow({{ item.id }})">{% trans "立即购买" %}</button>
     </div>
 </div>
 <script>
@@ -167,6 +172,10 @@
             </div>
             <div class="col-lg-6">
                 <h1 style="font-weight:800; font-size:1.8rem; margin-bottom:15px;">{{ item.name }}</h1>
+
+                {% with review_block_uid="sup-desk" %}
+                {% include 'marketplace/includes/listing_reviews_block.html' %}
+                {% endwith %}
 
                 <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
                     {% if item.is_organic %}
@@ -205,7 +214,7 @@
                         <span class="text-danger fw-bold ms-1">{% trans "缺货" %}</span>
                         {% endif %}
                     </div>
-                    <div class="info-item"><i class="fas fa-fire"></i>{% trans "已售" %}: {{ item.sales_count }}</div>
+                    <div class="info-item"><i class="fas fa-fire"></i>{% trans "已售" %}: {{ sold_delivered }}</div>
                 </div>
 
                 {% if item.description %}

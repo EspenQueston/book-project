@@ -1,5 +1,8 @@
 # Django Book Management System - Git Ignore File
 
+# Deploy logs / snapshots (may contain secrets)
+deploy/*.json
+
 # Python
 __pycache__/
 *.py[cod]

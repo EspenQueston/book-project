@@ -1584,7 +1584,7 @@
                     <div class="bd-carousel-body">
                         <div class="bd-carousel-name">{{ deal.name|truncatechars:28 }}</div>
                         <div class="bd-carousel-meta">
-                            <div class="bd-carousel-price">&yen;{{ deal.price }}</div>
+                            <div class="bd-carousel-price">{{ deal.price|fcfa }}</div>
                             <span class="bd-carousel-type"
                                   style="{% if deal.item_type == 'book' %}background:#ede9fe;color:#7c3aed;{% elif deal.item_type == 'product' %}background:#fef3c7;color:#d97706;{% elif deal.item_type == 'course' %}background:#e0e7ff;color:#3730a3;{% else %}background:#d1fae5;color:#065f46;{% endif %}"
                                   data-zh="{% if deal.item_type == 'book' %}图书{% elif deal.item_type == 'product' %}商品{% elif deal.item_type == 'course' %}课程{% else %}超市{% endif %}"
@@ -1691,9 +1691,9 @@
             <div class="flash-card-body">
                 <div class="flash-card-name">{{ sale.get_item_name }}</div>
                 <div class="flash-card-prices">
-                    <span class="flash-price">&yen;{{ sale.flash_price }}</span>
+                    <span class="flash-price">{{ sale.flash_price|fcfa }}</span>
                     {% if sale.get_original_price != sale.flash_price %}
-                    <span class="flash-orig">&yen;{{ sale.get_original_price }}</span>
+                    <span class="flash-orig">{{ sale.get_original_price|fcfa }}</span>
                     {% endif %}
                 </div>
                 {% if sale.get_discount_percent > 0 %}
@@ -1728,7 +1728,7 @@
             <div class="feed-card-body">
                 <div class="feed-card-name">{{ book.name|truncatechars:28 }}</div>
                 <div class="feed-card-footer">
-                    <span class="feed-card-price">&yen;{{ book.price }}</span>
+                    <span class="feed-card-price">{{ book.price|fcfa }}</span>
                     <span class="feed-card-tag" style="background:#ede9fe;color:#7c3aed;" data-zh="图书" data-en="Book" data-fr="Livre">图书</span>
                 </div>
             </div>
@@ -1743,7 +1743,7 @@
             <div class="feed-card-body">
                 <div class="feed-card-name">{{ product.name|truncatechars:28 }}</div>
                 <div class="feed-card-footer">
-                    <span class="feed-card-price">&yen;{{ product.price }}</span>
+                    <span class="feed-card-price">{{ product.price|fcfa }}</span>
                     <span class="feed-card-tag" style="background:#fef3c7;color:#d97706;" data-zh="商品" data-en="Product" data-fr="Produit">商品</span>
                 </div>
             </div>
@@ -1893,7 +1893,7 @@
                             </p>
                             <div class="book-stats">
                                 <span class="book-price">{{ book.price|fcfa }}</span>
-                                <span class="book-sales"><i class="fas fa-fire"></i><span data-zh="销量" data-en="Sales" data-fr="Ventes">销量</span> {{ book.sale_num }}</span>
+                                <span class="book-sales"><i class="fas fa-fire"></i><span data-zh="销量" data-en="Sales" data-fr="Ventes">销量</span> {{ book.sold_delivered }}</span>
                             </div>
                             <div class="book-actions">
                                 <a href="{% url 'manager:public_book_detail' book.id %}" class="btn btn-book-detail">
@@ -1947,7 +1947,7 @@
                             <h5>{{ product.name|truncatechars:28 }}</h5>
                             <div class="product-card-footer">
                                 <span class="price">{{ product.price|fcfa }}</span>
-                                <span class="sales"><i class="fas fa-fire me-1"></i>{{ product.sales_count }}</span>
+                                <span class="sales"><i class="fas fa-fire me-1"></i>{{ product.sold_delivered }}</span>
                             </div>
                         </div>
                     </div>
@@ -1990,12 +1990,12 @@
                             <h5>{{ course.title|truncatechars:28 }}</h5>
                             <div class="instructor"><i class="fas fa-user-tie me-1"></i>{{ course.instructor }}</div>
                             <div class="course-card-meta">
-                                <span><i class="fas fa-users"></i>{{ course.enrollment_count }}</span>
+                                <span><i class="fas fa-users"></i>{{ course.sold_delivered }}</span>
                                 <span><i class="fas fa-clock"></i>{{ course.duration }}</span>
                             </div>
                             <div class="course-card-footer">
                                 <span class="price">{% if course.price %}{{ course.price|fcfa }}{% else %}<span data-zh="免费" data-en="Free" data-fr="Gratuit">免费</span>{% endif %}</span>
-                                <span class="enroll"><i class="fas fa-user-graduate me-1"></i>{{ course.enrollment_count }}</span>
+                                <span class="enroll"><i class="fas fa-user-graduate me-1"></i>{{ course.sold_delivered }}</span>
                             </div>
                         </div>
                     </div>

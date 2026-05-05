@@ -1,7 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.http import JsonResponse, FileResponse, Http404
-from django.db.models import Q, Sum, Count, Avg
+from django.db.models import Q, Sum, Count, Avg, OuterRef, Subquery, Value, IntegerField
+from django.db.models.functions import Coalesce, TruncMonth
 from django.core.paginator import Paginator
 from django.contrib import messages
 from django.utils.text import slugify
@@ -14,12 +15,51 @@ from .models import (
     MarketplaceOrder, MarketplaceOrderItem,
     MarketplaceCartItem, CourseSection, CourseLesson, CourseProgress,
     ProductAttribute, SupermarketItemAttribute,
+    PostDeliveryReview,
 )
 from .utils import build_attribute_groups, validate_selected_attributes, normalize_selected_attributes
+from .review_service import reviews_for_listing, review_summary, filter_reviews, serialize_review
 from book_Project.payment_config import build_payment_options
 from decimal import Decimal
+from datetime import timedelta
 import uuid
 import json
+
+
+def _annotate_product_delivered(qs):
+    sub = MarketplaceOrderItem.objects.filter(
+        item_type='product',
+        item_id=OuterRef('pk'),
+        order__status='delivered',
+        order__payment_status='completed',
+    ).values('item_id').annotate(total=Sum('quantity')).values('total')[:1]
+    return qs.annotate(
+        sold_delivered=Coalesce(Subquery(sub, output_field=IntegerField()), Value(0))
+    )
+
+
+def _annotate_course_delivered(qs):
+    sub = MarketplaceOrderItem.objects.filter(
+        item_type='course',
+        item_id=OuterRef('pk'),
+        order__status='delivered',
+        order__payment_status='completed',
+    ).values('item_id').annotate(total=Sum('quantity')).values('total')[:1]
+    return qs.annotate(
+        sold_delivered=Coalesce(Subquery(sub, output_field=IntegerField()), Value(0))
+    )
+
+
+def _annotate_supermarket_delivered(qs):
+    sub = MarketplaceOrderItem.objects.filter(
+        item_type='supermarket',
+        item_id=OuterRef('pk'),
+        order__status='delivered',
+        order__payment_status='completed',
+    ).values('item_id').annotate(total=Sum('quantity')).values('total')[:1]
+    return qs.annotate(
+        sold_delivered=Coalesce(Subquery(sub, output_field=IntegerField()), Value(0))
+    )
 
 
 # ─── Helper ───────────────────────────────────────────────────────────────────
@@ -66,7 +106,9 @@ def marketplace_home(request):
 
 def product_list(request):
     """Browse all products with search and category filter."""
-    products = Product.objects.filter(is_active=True).select_related('category')
+    products = _annotate_product_delivered(
+        Product.objects.filter(is_active=True).select_related('category')
+    )
     categories = Category.objects.filter(section='products', is_active=True)
 
     q = request.GET.get('q', '').strip()
@@ -77,7 +119,9 @@ def product_list(request):
         products = products.filter(Q(name__icontains=q) | Q(description__icontains=q) | Q(brand__icontains=q))
     if cat:
         products = products.filter(category__slug=cat)
-    if sort in ['price', '-price', '-sales_count', '-created_at', 'name']:
+    if sort == '-sales_count':
+        products = products.order_by('-sold_delivered', '-sales_count')
+    elif sort in ['price', '-price', '-created_at', 'name']:
         products = products.order_by(sort)
 
     paginator = Paginator(products, 12)
@@ -94,6 +138,8 @@ def product_list(request):
                 'url': reverse('marketplace:product_detail', args=[product.slug]),
                 'badge': _('商品'),
                 'stock_text': _('有货') if product.in_stock else _('缺货'),
+                'sold_delivered': int(getattr(product, 'sold_delivered', 0) or 0),
+                'in_stock': product.in_stock,
             })
         return JsonResponse({
             'items': data_products,
@@ -120,19 +166,30 @@ def product_detail(request, slug):
     ).exclude(pk=product.pk)[:4] if product.category else Product.objects.none()
     attribute_context = build_attribute_groups(product.attributes.all())
 
+    sold_delivered = product.get_units_sold_delivered()
+    preview = list(reviews_for_listing('product', product.pk)[:3])
+    summary = review_summary('product', product.pk)
     context = {
         'product': product,
         'related_products': related,
         'attribute_groups': attribute_context['groups'],
         'selectable_attributes': attribute_context['selectable_groups'],
         'specification_attributes': attribute_context['specification_groups'],
+        'sold_delivered': sold_delivered,
+        'social_viewers': product.views_count + 3,
+        'listing_reviews_preview': preview,
+        'listing_review_summary': summary,
+        'listing_kind': 'product',
+        'listing_id': product.pk,
     }
     return render(request, 'marketplace/product_detail.html', context)
 
 
 def course_list(request):
     """Browse all courses with search and filter."""
-    courses = Course.objects.filter(is_active=True).select_related('category')
+    courses = _annotate_course_delivered(
+        Course.objects.filter(is_active=True).select_related('category')
+    )
     categories = Category.objects.filter(section='courses', is_active=True)
 
     q = request.GET.get('q', '').strip()
@@ -146,7 +203,9 @@ def course_list(request):
         courses = courses.filter(category__slug=cat)
     if level:
         courses = courses.filter(level=level)
-    if sort in ['price', '-price', '-enrollment_count', '-rating', '-created_at']:
+    if sort == '-enrollment_count':
+        courses = courses.order_by('-sold_delivered', '-enrollment_count')
+    elif sort in ['price', '-price', '-rating', '-created_at']:
         courses = courses.order_by(sort)
 
     paginator = Paginator(courses, 12)
@@ -163,6 +222,7 @@ def course_list(request):
                 'url': reverse('marketplace:course_detail', args=[course.slug]),
                 'badge': _('课程'),
                 'meta': f"{course.duration_hours}h · {course.lessons_count} {_('课时')}",
+                'sold_delivered': int(getattr(course, 'sold_delivered', 0) or 0),
             })
         return JsonResponse({
             'items': data_courses,
@@ -235,13 +295,20 @@ def course_detail(request, slug):
         'completed_count': completed_count,
         'progress_percent': progress_percent,
         'current_lesson': current_lesson,
+        'sold_delivered': course.get_units_sold_delivered(),
+        'listing_reviews_preview': list(reviews_for_listing('course', course.pk)[:3]),
+        'listing_review_summary': review_summary('course', course.pk),
+        'listing_kind': 'course',
+        'listing_id': course.pk,
     }
     return render(request, 'marketplace/course_detail.html', context)
 
 
 def supermarket_list(request):
     """Browse supermarket items with search and filter."""
-    items = SupermarketItem.objects.filter(is_active=True).select_related('category')
+    items = _annotate_supermarket_delivered(
+        SupermarketItem.objects.filter(is_active=True).select_related('category')
+    )
     categories = Category.objects.filter(section='supermarket', is_active=True)
 
     q = request.GET.get('q', '').strip()
@@ -252,7 +319,9 @@ def supermarket_list(request):
         items = items.filter(Q(name__icontains=q) | Q(description__icontains=q) | Q(brand__icontains=q))
     if cat:
         items = items.filter(category__slug=cat)
-    if sort in ['price', '-price', '-sales_count', '-created_at', 'name']:
+    if sort == '-sales_count':
+        items = items.order_by('-sold_delivered', '-sales_count')
+    elif sort in ['price', '-price', '-created_at', 'name']:
         items = items.order_by(sort)
 
     paginator = Paginator(items, 16)
@@ -301,6 +370,11 @@ def supermarket_detail(request, slug):
         'attribute_groups': attribute_context['groups'],
         'selectable_attributes': attribute_context['selectable_groups'],
         'specification_attributes': attribute_context['specification_groups'],
+        'sold_delivered': item.get_units_sold_delivered(),
+        'listing_reviews_preview': list(reviews_for_listing('supermarket', item.pk)[:3]),
+        'listing_review_summary': review_summary('supermarket', item.pk),
+        'listing_kind': 'supermarket',
+        'listing_id': item.pk,
     }
     return render(request, 'marketplace/supermarket_detail.html', context)
 
@@ -679,16 +753,124 @@ def serve_lesson_pdf(request, lesson_id):
 #  ADMIN VIEWS
 # ═══════════════════════════════════════════════════════════════════════════════
 
+def _marketplace_admin_chart_payload(product_count, course_count, supermarket_count):
+    """Build JSON-serializable chart data (same pattern as books admin dashboard)."""
+    local_today = timezone.localdate()
+    start_day = local_today - timedelta(days=6)
+    daily_sales = []
+    for i in range(7):
+        d = start_day + timedelta(days=i)
+        agg = MarketplaceOrder.objects.filter(created_at__date=d).aggregate(
+            revenue=Sum('total_amount'),
+            orders=Count('id'),
+        )
+        daily_sales.append({
+            'date': d.strftime('%m-%d'),
+            'revenue': float(agg['revenue'] or 0),
+            'orders': int(agg['orders'] or 0),
+        })
+
+    status_rows = list(
+        MarketplaceOrder.objects.values('status').annotate(c=Count('id')).order_by('-c')
+    )
+    status_display = dict(MarketplaceOrder.STATUS_CHOICES)
+    order_status = {
+        'labels': [str(_(status_display.get(r['status'], r['status']))) for r in status_rows],
+        'data': [int(r['c']) for r in status_rows],
+    }
+    if not order_status['labels']:
+        order_status = {'labels': [str(_('暂无数据'))], 'data': [1]}
+
+    pay_rows = list(
+        MarketplaceOrder.objects.values('payment_status').annotate(c=Count('id')).order_by('-c')
+    )
+    pay_display = dict(MarketplaceOrder.PAYMENT_STATUS_CHOICES)
+    payment_status = {
+        'labels': [str(_(pay_display.get(r['payment_status'], r['payment_status']))) for r in pay_rows],
+        'data': [int(r['c']) for r in pay_rows],
+    }
+    if not payment_status['labels']:
+        payment_status = {'labels': [str(_('暂无数据'))], 'data': [1]}
+
+    item_display = dict(MarketplaceOrderItem.ITEM_TYPE_CHOICES)
+    item_rows = list(
+        MarketplaceOrderItem.objects.values('item_type').annotate(
+            lines=Count('id'), qty=Sum('quantity')
+        ).order_by('-qty')
+    )
+    item_type_breakdown = {
+        'labels': [str(_(item_display.get(r['item_type'], r['item_type']))) for r in item_rows],
+        'data': [int(r['qty'] or 0) for r in item_rows],
+    }
+    if not item_type_breakdown['labels']:
+        item_type_breakdown = {'labels': [str(_('暂无数据'))], 'data': [0]}
+
+    now = timezone.now()
+    monthly_rows = list(
+        MarketplaceOrder.objects.filter(
+            payment_status='completed',
+            created_at__gte=now - timedelta(days=400),
+        )
+        .annotate(m=TruncMonth('created_at'))
+        .values('m')
+        .annotate(revenue=Sum('total_amount'), orders=Count('id'))
+        .order_by('-m')[:6]
+    )
+    monthly_rows.reverse()
+    monthly = []
+    for r in monthly_rows:
+        m = r.get('m')
+        label = m.strftime('%Y-%m') if m else ''
+        monthly.append({
+            'month': label,
+            'revenue': float(r['revenue'] or 0),
+            'orders': int(r['orders'] or 0),
+        })
+    if not monthly:
+        monthly = [{'month': str(_('暂无数据')), 'revenue': 0.0, 'orders': 0}]
+
+    catalog = {
+        'labels': [str(_('商品')), str(_('课程')), str(_('超市商品'))],
+        'data': [int(product_count), int(course_count), int(supermarket_count)],
+    }
+
+    top_lines = list(
+        MarketplaceOrderItem.objects.values('item_name')
+        .annotate(qty=Sum('quantity'))
+        .order_by('-qty')[:6]
+    )
+    top_items = [
+        {'name': (row['item_name'] or '')[:16], 'qty': int(row['qty'] or 0)}
+        for row in top_lines
+    ]
+    if not top_items:
+        top_items = [{'name': str(_('暂无数据')), 'qty': 0}]
+
+    return {
+        'mkt_daily_sales_json': json.dumps(daily_sales),
+        'mkt_order_status_json': json.dumps(order_status),
+        'mkt_payment_status_json': json.dumps(payment_status),
+        'mkt_item_type_json': json.dumps(item_type_breakdown),
+        'mkt_monthly_json': json.dumps(monthly),
+        'mkt_catalog_json': json.dumps(catalog),
+        'mkt_top_items_json': json.dumps(top_items),
+    }
+
+
 def admin_dashboard(request):
     """Marketplace admin dashboard with stats."""
     auth = _admin_required(request)
     if auth:
         return auth
 
+    product_count = Product.objects.count()
+    course_count = Course.objects.count()
+    supermarket_count = SupermarketItem.objects.count()
+
     context = {
-        'product_count': Product.objects.count(),
-        'course_count': Course.objects.count(),
-        'supermarket_count': SupermarketItem.objects.count(),
+        'product_count': product_count,
+        'course_count': course_count,
+        'supermarket_count': supermarket_count,
         'order_count': MarketplaceOrder.objects.count(),
         'category_count': Category.objects.count(),
         'recent_orders': MarketplaceOrder.objects.order_by('-created_at')[:10],
@@ -699,6 +881,7 @@ def admin_dashboard(request):
         ).aggregate(total=Sum('total_amount'))['total'] or 0,
         'name': request.session.get("name", "Admin"),
     }
+    context.update(_marketplace_admin_chart_payload(product_count, course_count, supermarket_count))
     return render(request, 'marketplace/admin/dashboard.html', context)
 
 
@@ -2343,3 +2526,61 @@ def vendor_supermarket_toggle(request, pk):
     item.is_active = not item.is_active
     item.save(update_fields=['is_active'])
     return JsonResponse({'success': True, 'is_active': item.is_active})
+
+
+def listing_reviews_api(request, kind, listing_id):
+    if request.method != 'GET':
+        return JsonResponse({'error': 'method'}, status=405)
+    try:
+        lid = int(listing_id)
+    except (TypeError, ValueError):
+        return JsonResponse({'error': 'invalid'}, status=400)
+    fl = (request.GET.get('filter') or 'all').lower()
+    offset = max(int(request.GET.get('offset', 0)), 0)
+    limit = min(max(int(request.GET.get('limit', 15)), 1), 50)
+    qs = filter_reviews(reviews_for_listing(kind, lid), fl)
+    total = qs.count()
+    rows = list(qs[offset : offset + limit])
+    return JsonResponse({'total': total, 'reviews': [serialize_review(r) for r in rows]})
+
+
+def vendor_post_reviews(request):
+    vendor, redir = _vendor_required(request)
+    if redir:
+        return redir
+    from manager import models as mgr_models
+
+    pids = list(Product.objects.filter(vendor=vendor).values_list('id', flat=True))
+    cids = list(Course.objects.filter(vendor=vendor).values_list('id', flat=True))
+    sids = list(SupermarketItem.objects.filter(vendor=vendor).values_list('id', flat=True))
+    bids = list(
+        mgr_models.VendorBook.objects.filter(vendor=vendor, is_active=True).values_list('book_id', flat=True)
+    )
+    q = (
+        Q(listing_kind='product', listing_id__in=pids)
+        | Q(listing_kind='course', listing_id__in=cids)
+        | Q(listing_kind='supermarket', listing_id__in=sids)
+        | Q(listing_kind='book', listing_id__in=bids)
+    )
+    reviews = list(
+        PostDeliveryReview.objects.filter(q)
+        .select_related('site_user')
+        .order_by('-created_at')[:200]
+    )
+    return render(
+        request,
+        'marketplace/vendor/post_reviews_readonly.html',
+        {'vendor': vendor, 'reviews': reviews},
+    )
+
+
+def admin_post_reviews(request):
+    gate = _admin_required(request)
+    if gate:
+        return gate
+    reviews = PostDeliveryReview.objects.select_related('site_user').order_by('-created_at')[:500]
+    return render(
+        request,
+        'marketplace/admin/post_reviews_readonly.html',
+        {'reviews': reviews},
+    )

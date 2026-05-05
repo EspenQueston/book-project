@@ -12,6 +12,7 @@ urlpatterns = [
     path('courses/<slug:slug>/', views.course_detail, name='course_detail'),
     path('supermarket/', views.supermarket_list, name='supermarket_list'),
     path('supermarket/<slug:slug>/', views.supermarket_detail, name='supermarket_detail'),
+    path('reviews/api/<str:kind>/<int:listing_id>/', views.listing_reviews_api, name='listing_reviews_api'),
 
     # Cart & Checkout
     path('cart/', views.view_cart, name='view_cart'),
@@ -57,9 +58,11 @@ urlpatterns = [
     path('admin/orders/update-status/', views.admin_update_order_status, name='admin_update_order_status'),
     path('admin/orders/update-payment/', views.admin_update_payment_status, name='admin_update_payment_status'),
     path('admin/orders/<int:pk>/delete/', views.admin_delete_order, name='admin_delete_order'),
+    path('admin/reviews/', views.admin_post_reviews, name='admin_post_reviews'),
 
     # Vendor management
     path('vendor/dashboard/', views.vendor_dashboard, name='vendor_dashboard'),
+    path('vendor/reviews/', views.vendor_post_reviews, name='vendor_post_reviews'),
     path('vendor/orders/', views.vendor_marketplace_orders, name='vendor_marketplace_orders'),
     path('vendor/orders/<int:pk>/customer/', views.vendor_marketplace_order_update_customer, name='vendor_marketplace_order_update_customer'),
     path('vendor/orders/<int:pk>/', views.vendor_marketplace_order_detail, name='vendor_marketplace_order_detail'),

@@ -159,6 +159,16 @@ class Book(models.Model):
             return 'link'
         return None
 
+    def get_units_sold_delivered(self):
+        """Copies sold on book orders that are delivered with completed payment."""
+        from django.db.models import Sum
+        total = OrderItem.objects.filter(
+            book_id=self.pk,
+            order__status='delivered',
+            order__payment_status='completed',
+        ).aggregate(s=Sum('quantity'))['s']
+        return int(total or 0)
+
 
 # 作者类
 class Author(models.Model):

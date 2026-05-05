@@ -89,6 +89,17 @@ class Product(models.Model):
     def in_stock(self):
         return self.stock > 0
 
+    def get_units_sold_delivered(self):
+        """Units sold on delivered marketplace orders (payment completed)."""
+        from django.db.models import Sum
+        agg = MarketplaceOrderItem.objects.filter(
+            item_type='product',
+            item_id=self.pk,
+            order__status='delivered',
+            order__payment_status='completed',
+        ).aggregate(s=Sum('quantity'))
+        return int(agg['s'] or 0)
+
     def save(self, *args, **kwargs):
         if not self.sku:
             self.sku = f'PRD-{uuid.uuid4().hex[:8].upper()}'
@@ -144,6 +155,17 @@ class Course(models.Model):
         if self.original_price and self.original_price > self.price:
             return int(((self.original_price - self.price) / self.original_price) * 100)
         return 0
+
+    def get_units_sold_delivered(self):
+        """Course seats sold on delivered marketplace orders (payment completed)."""
+        from django.db.models import Sum
+        agg = MarketplaceOrderItem.objects.filter(
+            item_type='course',
+            item_id=self.pk,
+            order__status='delivered',
+            order__payment_status='completed',
+        ).aggregate(s=Sum('quantity'))
+        return int(agg['s'] or 0)
 
 
 class SupermarketItem(models.Model):
@@ -207,6 +229,17 @@ class SupermarketItem(models.Model):
 
     def in_stock(self):
         return self.stock > 0
+
+    def get_units_sold_delivered(self):
+        """Units sold on delivered marketplace orders (payment completed)."""
+        from django.db.models import Sum
+        agg = MarketplaceOrderItem.objects.filter(
+            item_type='supermarket',
+            item_id=self.pk,
+            order__status='delivered',
+            order__payment_status='completed',
+        ).aggregate(s=Sum('quantity'))
+        return int(agg['s'] or 0)
 
 
 class ProductAttribute(models.Model):
@@ -657,3 +690,123 @@ class CourseProgress(models.Model):
 
     def __str__(self):
         return f'{self.lesson.title} - {"✓" if self.completed else "○"}'
+
+
+class PostDeliveryReview(models.Model):
+    """Buyer review after order is delivered (books + marketplace line items)."""
+
+    LISTING_KIND_CHOICES = [
+        ('book', 'Book'),
+        ('product', 'Product'),
+        ('course', 'Course'),
+        ('supermarket', 'Supermarket'),
+    ]
+
+    site_user = models.ForeignKey(
+        'manager.SiteUser',
+        on_delete=models.CASCADE,
+        related_name='post_delivery_reviews',
+        verbose_name='用户',
+    )
+    book_order_item = models.OneToOneField(
+        'manager.OrderItem',
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name='post_delivery_review',
+        verbose_name='图书订单行',
+    )
+    marketplace_order_item = models.OneToOneField(
+        'MarketplaceOrderItem',
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name='post_delivery_review',
+        verbose_name='市场订单行',
+    )
+    listing_kind = models.CharField(max_length=20, choices=LISTING_KIND_CHOICES, db_index=True, verbose_name='商品类型')
+    listing_id = models.PositiveIntegerField(db_index=True, verbose_name='商品ID')
+    message = models.TextField(blank=True, default='', verbose_name='评价内容')
+    images = models.JSONField(default=list, blank=True, verbose_name='图片')
+    has_images = models.BooleanField(default=False, verbose_name='含图')
+    rating_product = models.PositiveSmallIntegerField(verbose_name='商品质量')
+    rating_service = models.PositiveSmallIntegerField(verbose_name='客服质量')
+    rating_delivery = models.PositiveSmallIntegerField(verbose_name='物流速度')
+    avg_rating = models.DecimalField(max_digits=3, decimal_places=2, default=Decimal('0'), verbose_name='均分')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'marketplace_post_delivery_review'
+        verbose_name = '收货评价'
+        verbose_name_plural = '收货评价'
+        ordering = ['-avg_rating', '-created_at']
+        indexes = [
+            models.Index(fields=['listing_kind', 'listing_id', '-avg_rating']),
+        ]
+
+    def __str__(self):
+        return f'Review #{self.pk} {self.listing_kind}:{self.listing_id}'
+
+    def _sync_listing_from_fks(self) -> None:
+        """Set listing_kind / listing_id from order line FKs (required before field validation)."""
+        has_book = self.book_order_item_id is not None
+        if has_book:
+            self.listing_kind = 'book'
+            self.listing_id = self.book_order_item.book_id
+        elif self.marketplace_order_item_id is not None:
+            mi = self.marketplace_order_item
+            self.listing_kind = mi.item_type
+            self.listing_id = mi.item_id
+
+    def clean_fields(self, exclude=None):
+        self._sync_listing_from_fks()
+        super().clean_fields(exclude=exclude)
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+
+        has_book = self.book_order_item_id is not None
+        has_mkt = self.marketplace_order_item_id is not None
+        if has_book == has_mkt:
+            raise ValidationError('Exactly one of book_order_item or marketplace_order_item must be set.')
+
+    def save(self, *args, **kwargs):
+        self._sync_listing_from_fks()
+        imgs = self.images if isinstance(self.images, list) else []
+        self.has_images = len([u for u in imgs if u]) > 0
+        rp, rs, rd = int(self.rating_product), int(self.rating_service), int(self.rating_delivery)
+        self.avg_rating = Decimal(str(round((rp + rs + rd) / 3.0, 2)))
+        super().save(*args, **kwargs)
+
+    def order_snapshot(self) -> dict:
+        """Read-only context for vendor/admin panels."""
+        if self.book_order_item_id:
+            oi = self.book_order_item
+            o = oi.order
+            return {
+                'channel': 'book',
+                'item_name': oi.book.name,
+                'item_image': oi.book.get_cover_url(),
+                'attributes': [],
+                'quantity': oi.quantity,
+                'order_number': o.order_number,
+                'order_placed': o.created_at,
+                'delivered_at': o.updated_at,
+                'unit_price': str(oi.unit_price),
+            }
+        mi = self.marketplace_order_item
+        o = mi.order
+        attrs = []
+        if isinstance(mi.selected_attributes, dict):
+            attrs = [f'{k}: {v}' for k, v in mi.selected_attributes.items()]
+        return {
+            'channel': f'marketplace:{mi.item_type}',
+            'item_name': mi.item_name,
+            'item_image': mi.item_image or '',
+            'attributes': attrs,
+            'quantity': mi.quantity,
+            'order_number': o.order_number,
+            'order_placed': o.created_at,
+            'delivered_at': o.updated_at,
+            'unit_price': str(mi.unit_price),
+        }
