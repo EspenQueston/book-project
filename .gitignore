@@ -2,6 +2,9 @@
 
 # Deploy logs / snapshots (may contain secrets)
 deploy/*.json
+# Auto-generated deploy scripts with hardcoded DB values — do not commit
+deploy/apply_translations_prod.py
+deploy/translation_sync.sql
 
 # Python
 __pycache__/
