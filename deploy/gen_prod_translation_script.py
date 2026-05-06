@@ -37,7 +37,9 @@ lines.append("")
 for b in Book.objects.all().order_by("id"):
     en = repr(b.name_en or "")
     fr = repr(b.name_fr or "")
-    lines.append(f"Book.objects.filter(pk={b.id}).update(name_en={en}, name_fr={fr}); changed += 1")
+    d_en = repr(b.description_en or "")
+    d_fr = repr(b.description_fr or "")
+    lines.append(f"Book.objects.filter(pk={b.id}).update(name_en={en}, name_fr={fr}, description_en={d_en}, description_fr={d_fr}); changed += 1")
 
 lines.append("")
 for p in Publisher.objects.all().order_by("id"):
@@ -55,19 +57,25 @@ lines.append("")
 for p in Product.objects.all().order_by("id"):
     en = repr(p.name_en or "")
     fr = repr(p.name_fr or "")
-    lines.append(f"Product.objects.filter(pk={p.id}).update(name_en={en}, name_fr={fr}); changed += 1")
+    d_en = repr(p.description_en or "")
+    d_fr = repr(p.description_fr or "")
+    lines.append(f"Product.objects.filter(pk={p.id}).update(name_en={en}, name_fr={fr}, description_en={d_en}, description_fr={d_fr}); changed += 1")
 
 lines.append("")
 for c in Course.objects.all().order_by("id"):
     en = repr(c.title_en or "")
     fr = repr(c.title_fr or "")
-    lines.append(f"Course.objects.filter(pk={c.id}).update(title_en={en}, title_fr={fr}); changed += 1")
+    d_en = repr(c.description_en or "")
+    d_fr = repr(c.description_fr or "")
+    lines.append(f"Course.objects.filter(pk={c.id}).update(title_en={en}, title_fr={fr}, description_en={d_en}, description_fr={d_fr}); changed += 1")
 
 lines.append("")
 for s in SupermarketItem.objects.all().order_by("id"):
     en = repr(s.name_en or "")
     fr = repr(s.name_fr or "")
-    lines.append(f"SupermarketItem.objects.filter(pk={s.id}).update(name_en={en}, name_fr={fr}); changed += 1")
+    d_en = repr(s.description_en or "")
+    d_fr = repr(s.description_fr or "")
+    lines.append(f"SupermarketItem.objects.filter(pk={s.id}).update(name_en={en}, name_fr={fr}, description_en={d_en}, description_fr={d_fr}); changed += 1")
 
 lines.append("")
 lines.append('print(f"Done. Processed {changed} records.")')

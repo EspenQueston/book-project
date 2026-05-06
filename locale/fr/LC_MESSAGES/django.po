@@ -3810,3 +3810,81 @@ msgstr "Hub commandes"
 
 msgid "商品 · 课程 · 超市订单"
 msgstr "Commandes produits, cours & supermarché"
+
+msgid "卖家导航"
+msgstr "Navigation vendeur"
+
+msgid "店铺前台"
+msgstr "Vitrine"
+
+msgid "图书管理"
+msgstr "Livres"
+
+msgid "商品列表"
+msgstr "Liste de produits"
+
+msgid "课程列表"
+msgstr "Liste des cours"
+
+msgid "客户消息"
+msgstr "Messages clients"
+
+msgid "总览"
+msgstr "Vue d'ensemble"
+
+msgid "店铺设置"
+msgstr "Paramètres de la boutique"
+
+msgid "数据概览"
+msgstr "Aperçu des données"
+
+msgid "卖家仪表板"
+msgstr "Tableau de bord"
+
+msgid "近7天收入趋势"
+msgstr "Tendance des revenus (7 derniers jours)"
+
+msgid "商品分类分布"
+msgstr "Répartition par catégorie"
+
+msgid "收入构成"
+msgstr "Composition des revenus"
+
+msgid "商品收入"
+msgstr "Revenus produits"
+
+msgid "课程收入"
+msgstr "Revenus cours"
+
+msgid "上架商品"
+msgstr "Produits actifs"
+
+msgid "下架商品"
+msgstr "Produits inactifs"
+
+msgid "发布课程"
+msgstr "Cours publiés"
+
+msgid "课程注册"
+msgstr "Inscriptions aux cours"
+
+msgid "热销商品 TOP 5"
+msgstr "Top 5 meilleures ventes"
+
+msgid "暂无销量数据"
+msgstr "Aucune donnée de vente"
+
+msgid "匿名"
+msgstr "Anonyme"
+
+msgid "管理商品"
+msgstr "Gérer les produits"
+
+msgid "管理课程"
+msgstr "Gérer les cours"
+
+msgid "暂无分类数据"
+msgstr "Aucune donnée de catégorie"
+
+msgid "数据概览 · 店铺与货架 · 订单与设置"
+msgstr "Aperçu · Boutique & Stock · Commandes & Paramètres"

@@ -3766,3 +3766,81 @@ msgstr "Orders Hub"
 
 msgid "商品 · 课程 · 超市订单"
 msgstr "Product, course & supermarket orders"
+
+msgid "卖家导航"
+msgstr "Seller navigation"
+
+msgid "店铺前台"
+msgstr "Store front"
+
+msgid "图书管理"
+msgstr "Books"
+
+msgid "商品列表"
+msgstr "Product list"
+
+msgid "课程列表"
+msgstr "Course list"
+
+msgid "客户消息"
+msgstr "Customer messages"
+
+msgid "总览"
+msgstr "Overview"
+
+msgid "店铺设置"
+msgstr "Store settings"
+
+msgid "数据概览"
+msgstr "Data overview"
+
+msgid "卖家仪表板"
+msgstr "Vendor Dashboard"
+
+msgid "近7天收入趋势"
+msgstr "Revenue Trend (Last 7 Days)"
+
+msgid "商品分类分布"
+msgstr "Product Category Distribution"
+
+msgid "收入构成"
+msgstr "Revenue Breakdown"
+
+msgid "商品收入"
+msgstr "Product Revenue"
+
+msgid "课程收入"
+msgstr "Course Revenue"
+
+msgid "上架商品"
+msgstr "Active Products"
+
+msgid "下架商品"
+msgstr "Inactive Products"
+
+msgid "发布课程"
+msgstr "Published Courses"
+
+msgid "课程注册"
+msgstr "Course Enrollments"
+
+msgid "热销商品 TOP 5"
+msgstr "Top 5 Best Sellers"
+
+msgid "暂无销量数据"
+msgstr "No sales data"
+
+msgid "匿名"
+msgstr "Anonymous"
+
+msgid "管理商品"
+msgstr "Manage Products"
+
+msgid "管理课程"
+msgstr "Manage Courses"
+
+msgid "暂无分类数据"
+msgstr "No category data"
+
+msgid "数据概览 · 店铺与货架 · 订单与设置"
+msgstr "Overview · Store & Inventory · Orders & Settings"
