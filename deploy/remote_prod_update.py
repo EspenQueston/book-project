@@ -41,10 +41,11 @@ systemctl is-active duno360
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     client.connect(host, username="root", password=pw, timeout=120)
-    _stdin, stdout, stderr = client.exec_command(cmd, get_pty=True)
-    out = stdout.read().decode("utf-8", errors="replace")
+    _stdin, stdout, stderr = client.exec_command(cmd, timeout=300)
+    # Stream output line by line so we can see progress
+    for line in iter(stdout.readline, ""):
+        print(line, end="", flush=True)
     err = stderr.read().decode("utf-8", errors="replace")
-    print(out)
     if err.strip():
         print(err, file=sys.stderr)
     code = stdout.channel.recv_exit_status()

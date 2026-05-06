@@ -69,10 +69,10 @@ def main() -> int:
         "rm -f /opt/duno360/app/_apply_translations.py'"
     )
 
-    _stdin, stdout, stderr = client.exec_command(cmd, get_pty=True)
-    out = stdout.read().decode("utf-8", errors="replace")
+    _stdin, stdout, stderr = client.exec_command(cmd, timeout=120)
+    for line in iter(stdout.readline, ""):
+        print(line, end="", flush=True)
     err = stderr.read().decode("utf-8", errors="replace")
-    print(out)
     if err.strip():
         print(err, file=sys.stderr)
     code = stdout.channel.recv_exit_status()
