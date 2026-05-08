@@ -11,6 +11,9 @@ python manage.py collectstatic --no-input
 # Apply database migrations
 python manage.py migrate
 
+# Seed KKiaPay supported countries (update_or_create — safe to re-run)
+python manage.py seed_kkiapay_countries
+
 # Create default admin account if not present
 # Password is read from DJANGO_ADMIN_PASSWORD env var (must be set in production!)
 python manage.py shell -c "

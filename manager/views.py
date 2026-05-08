@@ -2098,13 +2098,27 @@ def checkout(request):
     
     payment_methods_by_region = build_payment_options()
 
+    from manager.templatetags.currency_filters import CNY_TO_XAF
+    total_amount_fcfa = round(float(total_amount) * CNY_TO_XAF)
+
+    from book_Project.payment_config import get_kkiapay_country_codes
+    kkiapay_countries = get_kkiapay_country_codes()
+
+    from manager.models import KkiapayCountry
+    kkiapay_countries_data = KkiapayCountry.get_for_widget()
+
     context = {
         'cart_items': unified_items,
         'book_items': book_items,
         'marketplace_items': marketplace_items,
         'total_amount': total_amount,
+        'total_amount_fcfa': total_amount_fcfa,
         'total_items': total_items_count,
         'payment_methods_by_region': payment_methods_by_region,
+        'KKIAPAY_PUBLIC_KEY': django_settings.KKIAPAY_PUBLIC_KEY,
+        'KKIAPAY_SANDBOX': django_settings.KKIAPAY_SANDBOX,
+        'kkiapay_countries': kkiapay_countries,
+        'kkiapay_countries_data': kkiapay_countries_data,
     }
     
     return render(request, 'public/checkout.html', context)

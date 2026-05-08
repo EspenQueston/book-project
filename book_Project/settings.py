@@ -404,6 +404,15 @@ AIRTEL_MONEY_CURRENCY = os.environ.get('AIRTEL_MONEY_CURRENCY', 'XAF')
 AIRTEL_MONEY_CALLBACK_URL = os.environ.get('AIRTEL_MONEY_CALLBACK_URL', '')
 
 # ============================================================
+# KKiaPay Payment Aggregator Configuration
+# ============================================================
+KKIAPAY_PUBLIC_KEY     = os.environ.get('KKIAPAY_PUBLIC_KEY',     '855c58403ef411f1bf4f9fabcaa86999')
+KKIAPAY_PRIVATE_KEY    = os.environ.get('KKIAPAY_PRIVATE_KEY',    'tpk_855c7f513ef411f1bf4f9fabcaa86999')
+KKIAPAY_SECRET         = os.environ.get('KKIAPAY_SECRET',         'tsk_855ca6603ef411f1bf4f9fabcaa86999')
+KKIAPAY_SANDBOX        = os.environ.get('KKIAPAY_SANDBOX',        'True') == 'True'
+KKIAPAY_WEBHOOK_SECRET = os.environ.get('KKIAPAY_WEBHOOK_SECRET', 'duno360')
+
+# ============================================================
 # ngrok Configuration (auto-tunnel for development callbacks)
 # ============================================================
 NGROK_AUTH_TOKEN = os.environ.get('NGROK_AUTH_TOKEN', '')

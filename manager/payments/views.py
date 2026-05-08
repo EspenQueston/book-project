@@ -346,3 +346,198 @@ def check_payment_status(request):
         'payment_status': order.payment_status,
         'order_status': order.status,
     })
+
+
+# =========================================================================
+# KKiaPay — Server-side transaction verification (called from JS widget)
+# =========================================================================
+@csrf_exempt
+@require_POST
+def kkiapay_verify(request):
+    """
+    Verify a KKiaPay transaction server-side after the JS widget fires
+    addSuccessListener.
+
+    POST JSON:
+    {
+        "transaction_id": "3iH6wjHJ3",
+        "order_number":   "ORD-..."
+    }
+
+    Returns JSON:
+    {
+        "success": true | false,
+        "payment_status": "completed" | "failed",
+        "message": "..."
+    }
+
+    Security: always verify server-side — never trust the JS callback alone.
+    """
+    try:
+        body = json.loads(request.body)
+        transaction_id = body.get('transaction_id', '').strip()
+        order_number = body.get('order_number', '').strip()
+
+        if not transaction_id or not order_number:
+            return JsonResponse(
+                {'success': False, 'message': 'transaction_id and order_number are required'},
+                status=400
+            )
+
+        # --- Find the order ---
+        order = None
+        try:
+            order = models.Order.objects.get(order_number=order_number)
+        except models.Order.DoesNotExist:
+            try:
+                order = MarketplaceOrder.objects.get(order_number=order_number)
+            except MarketplaceOrder.DoesNotExist:
+                return JsonResponse(
+                    {'success': False, 'message': 'Order not found'},
+                    status=404
+                )
+
+        # --- Idempotence: already processed ---
+        if order.payment_status == 'completed':
+            return JsonResponse({
+                'success': True,
+                'payment_status': 'completed',
+                'message': 'Payment already confirmed',
+            })
+
+        # --- Verify with KKiaPay SDK ---
+        from manager.payments.kkiapay import is_transaction_successful
+        success, tx = is_transaction_successful(transaction_id)
+
+        if success:
+            _update_order_status(order, 'SUCCESSFUL', transaction_id=transaction_id)
+            logger.info('KKiaPay verify OK: order=%s tx=%s amount=%s',
+                        order_number, transaction_id,
+                        getattr(tx, 'amount', '?'))
+            return JsonResponse({
+                'success': True,
+                'payment_status': 'completed',
+                'message': 'Payment verified and confirmed',
+            })
+        else:
+            _update_order_status(order, 'FAILED', transaction_id=transaction_id)
+            reason = getattr(tx, 'reason', 'unknown') if tx else 'verification_error'
+            logger.warning('KKiaPay verify FAILED: order=%s tx=%s reason=%s',
+                           order_number, transaction_id, reason)
+            return JsonResponse({
+                'success': False,
+                'payment_status': 'failed',
+                'message': f'Payment verification failed: {reason}',
+            })
+
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'message': 'Invalid JSON body'}, status=400)
+    except Exception as exc:
+        logger.exception('KKiaPay verify error: %s', exc)
+        return JsonResponse({'success': False, 'message': 'Server error'}, status=500)
+
+
+# =========================================================================
+# KKiaPay — Webhook (async notification from KKiaPay servers)
+# =========================================================================
+@csrf_exempt
+@require_POST
+def kkiapay_webhook(request):
+    """
+    Receive asynchronous payment notifications from KKiaPay.
+
+    KKiaPay sends POST with header:
+        x-kkiapay-secret: <KKIAPAY_WEBHOOK_SECRET>
+
+    Payload (success):
+    {
+        "transactionId": "3iH6wjHJ3",
+        "isPaymentSucces": true,
+        "event": "transaction.success",
+        "amount": 1000,
+        "fees": 19,
+        "partnerId": "...",          <- order_number stored here
+        "method": "MOBILE_MONEY",
+        "account": "22996000000"
+    }
+
+    Payload (failure):
+    {
+        "transactionId": "erjEU5P9o",
+        "isPaymentSucces": false,
+        "event": "transaction.failed",
+        "failureCode": "processing_error",
+        "failureMessage": "processing_error",
+        ...
+    }
+
+    Must return HTTP 2xx — otherwise KKiaPay retries 5 times.
+    """
+    # --- Verify webhook signature ---
+    webhook_secret = getattr(settings, 'KKIAPAY_WEBHOOK_SECRET', '')
+    if webhook_secret:
+        incoming_secret = request.headers.get('x-kkiapay-secret', '')
+        if incoming_secret != webhook_secret:
+            logger.warning('KKiaPay webhook: invalid secret header — rejected')
+            return HttpResponse(status=403)
+
+    try:
+        body = json.loads(request.body)
+        logger.info('KKiaPay webhook received: %s', json.dumps(body))
+
+        transaction_id = body.get('transactionId', '')
+        is_success = body.get('isPaymentSucces', False)
+        event = body.get('event', '')
+        # partnerId is the order_number we store via widget `data` attribute
+        order_number = body.get('partnerId', '')
+
+        if not transaction_id:
+            logger.warning('KKiaPay webhook: missing transactionId')
+            return HttpResponse(status=200)
+
+        # --- Find the order ---
+        order = None
+        if order_number:
+            try:
+                order = models.Order.objects.get(order_number=order_number)
+            except models.Order.DoesNotExist:
+                try:
+                    order = MarketplaceOrder.objects.get(order_number=order_number)
+                except MarketplaceOrder.DoesNotExist:
+                    order = None
+
+        # Fallback: find by payment_transaction_id
+        if not order:
+            order, _ = _find_order(transaction_id)
+
+        if not order:
+            logger.warning('KKiaPay webhook: no order found for tx=%s partnerId=%s',
+                           transaction_id, order_number)
+            return HttpResponse(status=200)  # 200 to stop retries
+
+        # --- Idempotence ---
+        if order.payment_status == 'completed':
+            logger.info('KKiaPay webhook: order %s already completed, skipping',
+                        order_number)
+            return HttpResponse(status=200)
+
+        # --- Update order ---
+        if event == 'transaction.success' or is_success:
+            _update_order_status(order, 'SUCCESSFUL', transaction_id=transaction_id)
+            logger.info('KKiaPay webhook SUCCESS: order=%s tx=%s amount=%s',
+                        order_number, transaction_id, body.get('amount'))
+        elif event == 'transaction.failed' or not is_success:
+            _update_order_status(order, 'FAILED', transaction_id=transaction_id)
+            logger.warning('KKiaPay webhook FAILED: order=%s tx=%s code=%s msg=%s',
+                           order_number, transaction_id,
+                           body.get('failureCode', ''),
+                           body.get('failureMessage', ''))
+
+        return HttpResponse(status=200)
+
+    except json.JSONDecodeError:
+        logger.error('KKiaPay webhook: invalid JSON body')
+        return HttpResponse(status=200)  # Still 200 to stop retries
+    except Exception as exc:
+        logger.exception('KKiaPay webhook error: %s', exc)
+        return HttpResponse(status=200)  # Always 200 to avoid infinite retries

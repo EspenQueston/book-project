@@ -510,8 +510,14 @@ html[data-theme="dark"] .ck-guarantee-banner {
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label class="form-label" data-zh="微信/电话号码 *" data-en="Phone/WeChat *" data-fr="Téléphone/WeChat *">{% trans "微信/电话号码" %} *</label>
-                                <input type="tel" name="customer_phone" class="form-control" required
-                                       placeholder="{% trans "微信号或电话号码" %}">
+                                <div class="input-group">
+                                    <span class="input-group-text" id="phone-prefix-badge" style="font-size:0.85rem;min-width:60px;background:var(--ck-primary,#667eea);color:#fff;border:none;">
+                                        <span id="phone-prefix-text">📱</span>
+                                    </span>
+                                    <input type="tel" name="customer_phone" id="customer_phone_input" class="form-control" required
+                                           placeholder="{% trans "微信号或电话号码" %}">
+                                </div>
+                                <small id="phone-prefix-hint" class="text-muted d-none" style="font-size:0.78rem;"></small>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -519,27 +525,27 @@ html[data-theme="dark"] .ck-guarantee-banner {
                                 <label class="form-label" data-zh="国家 *" data-en="Country *" data-fr="Pays *">{% trans "国家" %} *</label>
                                 <select name="country" class="form-control" required>
                                     <option value="">{% trans "请选择国家" %} / Select Country</option>
-                                    <optgroup label="West Africa / 西非">
-                                        <option value="Benin">Benin / 贝宁</option>
-                                        <option value="Burkina Faso">Burkina Faso / 布基纳法索</option>
+                                    <optgroup label="West Africa — Mobile Money ✅">
+                                        <option value="Benin" data-iso="BJ" data-phone="+229" data-kkiapay="1">🇧🇯 Bénin (+229)</option>
+                                        <option value="Burkina Faso" data-iso="BF" data-phone="+226" data-kkiapay="1">🇧🇫 Burkina Faso (+226)</option>
                                         <option value="Cape Verde">Cape Verde / 佛得角</option>
-                                        <option value="Côte d'Ivoire">Côte d'Ivoire / 科特迪瓦</option>
+                                        <option value="Côte d'Ivoire" data-iso="CI" data-phone="+225" data-kkiapay="1">🇨🇮 Côte d'Ivoire (+225)</option>
                                         <option value="Gambia">Gambia / 冈比亚</option>
                                         <option value="Ghana">Ghana / 加纳</option>
-                                        <option value="Guinea">Guinea / 几内亚</option>
+                                        <option value="Guinea" data-iso="GN" data-phone="+224" data-kkiapay="1">🇬🇳 Guinée / Guinea (+224)</option>
                                         <option value="Guinea-Bissau">Guinea-Bissau / 几内亚比绍</option>
                                         <option value="Liberia">Liberia / 利比里亚</option>
-                                        <option value="Mali">Mali / 马里</option>
+                                        <option value="Mali" data-iso="ML" data-phone="+223" data-kkiapay="1">🇲🇱 Mali (+223)</option>
                                         <option value="Mauritania">Mauritania / 毛里塔尼亚</option>
-                                        <option value="Niger">Niger / 尼日尔</option>
+                                        <option value="Niger" data-iso="NE" data-phone="+227" data-kkiapay="1">🇳🇪 Niger (+227)</option>
                                         <option value="Nigeria">Nigeria / 尼日利亚</option>
-                                        <option value="Senegal">Senegal / 塞内加尔</option>
+                                        <option value="Senegal" data-iso="SN" data-phone="+221" data-kkiapay="1">🇸🇳 Sénégal (+221)</option>
                                         <option value="Sierra Leone">Sierra Leone / 塞拉利昂</option>
-                                        <option value="Togo">Togo / 多哥</option>
+                                        <option value="Togo" data-iso="TG" data-phone="+228" data-kkiapay="1">🇹🇬 Togo (+228)</option>
                                     </optgroup>
                                     <optgroup label="Central Africa / 中非">
                                         <option value="Angola">Angola / 安哥拉</option>
-                                        <option value="Cameroon">Cameroon / 喀麦隆</option>
+                                        <option value="Cameroon" data-iso="CM" data-phone="+237" data-kkiapay="1">🇨🇲 Cameroun (+237)</option>
                                         <option value="Central African Republic">Central African Republic / 中非共和国</option>
                                         <option value="Chad">Chad / 乍得</option>
                                         <option value="Congo">Congo / 刚果</option>
@@ -766,11 +772,169 @@ document.getElementById('checkoutForm').addEventListener('submit', function(e) {
 
     if (paymentMethod === 'wechat_pay' || paymentMethod === 'alipay') {
         showQRCodeModal(paymentMethod);
+    } else if (paymentMethod === 'kkiapay') {
+        openKkiapayForCheckout();
     } else {
         document.getElementById('paymentConfirmed').value = 'no';
         this.submit();
     }
 });
+
+// ===== KKiaPay Widget Integration =====
+const KKIAPAY_PUBLIC_KEY = '{{ KKIAPAY_PUBLIC_KEY }}';
+const KKIAPAY_SANDBOX    = {% if KKIAPAY_SANDBOX %}true{% else %}false{% endif %};
+
+// KKiaPay countries from DB (ISO codes + phone codes)
+const KKIAPAY_COUNTRIES_DB = JSON.parse(document.getElementById('kkiapay-countries-data').textContent || '[]');
+
+// Phone prefix UI — update badge when country changes
+(function initPhonePrefix() {
+    const countrySelect = document.querySelector('[name="country"]');
+    const prefixText    = document.getElementById('phone-prefix-text');
+    const prefixHint    = document.getElementById('phone-prefix-hint');
+    const phoneInput    = document.getElementById('customer_phone_input');
+    if (!countrySelect || !prefixText) return;
+
+    function updatePrefix() {
+        const selected = countrySelect.options[countrySelect.selectedIndex];
+        const phoneCode = selected ? selected.getAttribute('data-phone') : null;
+        const isKkiapay = selected ? selected.getAttribute('data-kkiapay') === '1' : false;
+        const flag      = selected ? (selected.textContent.trim().split(' ')[0] || '📱') : '📱';
+
+        if (phoneCode && isKkiapay) {
+            prefixText.textContent = phoneCode;
+            prefixHint.textContent = '📱 Mobile Money disponible via KKiaPay';
+            prefixHint.classList.remove('d-none');
+            prefixHint.style.color = '#10b981';
+            if (phoneInput && !phoneInput.value.startsWith(phoneCode)) {
+                phoneInput.placeholder = phoneCode + ' …';
+            }
+        } else {
+            prefixText.textContent = '📱';
+            prefixHint.classList.add('d-none');
+            if (phoneInput) phoneInput.placeholder = '';
+        }
+    }
+
+    countrySelect.addEventListener('change', updatePrefix);
+    updatePrefix(); // init on page load
+})();
+
+function openKkiapayForCheckout() {
+    // Validate form first
+    const form = document.getElementById('checkoutForm');
+    const requiredFields = form.querySelectorAll('[required]');
+    for (let field of requiredFields) {
+        if (field.id === 'selectedPaymentMethod') continue; // already checked
+        if (!field.value.trim()) {
+            field.focus();
+            if (typeof gToast === 'function') gToast('{% trans "请填写所有必填字段" %}', 'warning');
+            else alert('{% trans "请填写所有必填字段" %}');
+            return;
+        }
+    }
+
+    const totalAmount  = {{ total_amount_fcfa }};
+    const customerName  = document.querySelector('[name="customer_name"]').value.trim();
+    const customerEmail = document.querySelector('[name="customer_email"]').value.trim();
+    const rawPhone      = document.querySelector('[name="customer_phone"]').value.trim();
+
+    // Build phone with country code prefix (e.g. +229 18506959673)
+    const countrySelect = document.querySelector('[name="country"]');
+    const selectedOpt   = countrySelect ? countrySelect.options[countrySelect.selectedIndex] : null;
+    const phoneCode     = selectedOpt ? (selectedOpt.getAttribute('data-phone') || '') : '';
+    let customerPhone   = rawPhone;
+    if (phoneCode && !rawPhone.startsWith('+') && !rawPhone.startsWith(phoneCode.replace('+', ''))) {
+        customerPhone = phoneCode + rawPhone;
+    }
+
+    if (!KKIAPAY_PUBLIC_KEY) {
+        alert('KKiaPay not configured. Contact support.');
+        return;
+    }
+
+    // First submit the form to create the order, then open widget
+    // We use a hidden flag to indicate this is a kkiapay flow
+    document.getElementById('paymentConfirmed').value = 'kkiapay_pending';
+
+    // Submit form to create the order (server returns order_number in session)
+    // We intercept with AJAX to avoid page redirect before payment
+    const formData = new FormData(form);
+    fetch(form.action || window.location.href, {
+        method: 'POST',
+        body: formData,
+        headers: {'X-CSRFToken': '{{ csrf_token }}', 'X-Requested-With': 'KKiaPay'},
+    })
+    .then(r => r.json())
+    .catch(() => null)
+    .then(data => {
+        // Whether AJAX or not, open widget — order_number passed via `data` field
+        const orderNumber = (data && data.order_number) || '';
+        openKkiapayWidget({
+            amount:        totalAmount,
+            key:           KKIAPAY_PUBLIC_KEY,
+            sandbox:       KKIAPAY_SANDBOX,
+            theme:         '#667eea',
+            position:      'center',
+            paymentmethod: 'momo',
+            name:          customerName,
+            email:         customerEmail,
+            phone:         customerPhone,
+            data:          orderNumber,
+        });
+    });
+}
+
+// Listen for KKiaPay payment result
+if (typeof addSuccessListener === 'function' || window.addEventListener) {
+    window.addEventListener('load', function() {
+        if (typeof addSuccessListener !== 'undefined') {
+            addSuccessListener(function(response) {
+                const transactionId = response.transactionId;
+                const orderNumber   = response.data || '';
+                const CSRF = '{{ csrf_token }}';
+
+                // Server-side verification (mandatory — never trust client alone)
+                fetch('/manager/api/payment/kkiapay/verify/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': CSRF,
+                    },
+                    body: JSON.stringify({
+                        transaction_id: transactionId,
+                        order_number: orderNumber,
+                    }),
+                })
+                .then(r => r.json())
+                .then(function(result) {
+                    if (result.success) {
+                        if (typeof gToast === 'function') gToast('Paiement confirmé !', 'success');
+                        setTimeout(function() {
+                            window.location.href = orderNumber
+                                ? '/manager/public/order/' + orderNumber + '/confirmation/'
+                                : '/manager/public/';
+                        }, 1000);
+                    } else {
+                        if (typeof gToast === 'function') gToast('Échec du paiement: ' + (result.message || ''), 'error');
+                        else alert('Échec du paiement: ' + (result.message || ''));
+                    }
+                })
+                .catch(function() {
+                    alert('Erreur réseau lors de la vérification du paiement.');
+                });
+            });
+
+            addFailedListener(function(error) {
+                if (typeof gToast === 'function')
+                    gToast('Paiement échoué. Veuillez réessayer.', 'error');
+                else
+                    alert('Paiement échoué. Veuillez réessayer.');
+                console.error('KKiaPay payment failed:', error);
+            });
+        }
+    });
+}
 
 function showQRCodeModal(method) {
     const modal = document.getElementById('qrCodeModal');
@@ -856,4 +1020,9 @@ function closeQRModal() {
         </div>
     </div>
 </div>
+
+<!-- KKiaPay JS SDK — Mobile Money aggregator for Africa -->
+{{ kkiapay_countries_data|json_script:"kkiapay-countries-data" }}
+<script src="https://cdn.kkiapay.me/k.js"></script>
+
 {% endblock %}

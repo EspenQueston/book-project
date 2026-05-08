@@ -1297,6 +1297,47 @@ class DirectMessage(models.Model):
         return f'[{self.sender_type}] {self.content[:60]}'
 
 
+# ==========================================
+# KKiaPay Supported Countries
+# ==========================================
+
+class KkiapayCountry(models.Model):
+    """Countries supported by KKiaPay mobile money aggregator."""
+    name_fr = models.CharField(max_length=100, verbose_name='Nom (Français)')
+    name_en = models.CharField(max_length=100, verbose_name='Name (English)')
+    iso_code = models.CharField(max_length=2, unique=True, verbose_name='Code ISO 3166-1 alpha-2')
+    phone_code = models.CharField(max_length=10, verbose_name='Indicatif téléphonique')
+    currency_code = models.CharField(max_length=3, default='XOF', verbose_name='Code devise ISO 4217')
+    currency_name_fr = models.CharField(max_length=100, verbose_name='Nom devise')
+    mobile_operators = models.JSONField(default=list, verbose_name='Opérateurs mobiles')
+    flag_emoji = models.CharField(max_length=10, blank=True, default='', verbose_name='Drapeau emoji')
+    is_active = models.BooleanField(default=True, verbose_name='Actif')
+    display_order = models.PositiveSmallIntegerField(default=0, verbose_name='Ordre affichage')
+
+    class Meta:
+        db_table = 'kkiapay_country'
+        ordering = ['display_order', 'name_fr']
+        verbose_name = 'Pays KKiaPay'
+        verbose_name_plural = 'Pays KKiaPay'
+
+    def __str__(self):
+        return f"{self.flag_emoji} {self.name_fr} ({self.iso_code})"
+
+    @classmethod
+    def get_active_iso_codes(cls):
+        """Returns list of ISO codes for active KKiaPay countries."""
+        return list(cls.objects.filter(is_active=True).values_list('iso_code', flat=True))
+
+    @classmethod
+    def get_for_widget(cls):
+        """Returns list of dicts suitable for the KKiaPay JS widget country selector."""
+        return list(
+            cls.objects.filter(is_active=True)
+            .order_by('display_order', 'name_fr')
+            .values('iso_code', 'name_fr', 'phone_code', 'flag_emoji', 'mobile_operators')
+        )
+
+
 # 创建(同步)数据表命令
 # 创建数据库db_book
 # python manage.py makemigrations

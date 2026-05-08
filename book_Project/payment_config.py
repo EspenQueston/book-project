@@ -5,11 +5,29 @@ AFRICAN_COUNTRIES = {
     'Guinea-Bissau', 'Liberia', 'Mali', 'Mauritania', 'Niger', 'Nigeria', 'Senegal',
     'Sierra Leone', 'Togo', 'Angola', 'Cameroon', 'Central African Republic', 'Chad',
     'Congo', 'Democratic Republic of the Congo', 'Equatorial Guinea', 'Gabon',
-    'São Tomé and Príncipe', 'Rwanda', 'Uganda', 'Kenya', 'Tanzania', 'Zambia', 'Malawi'
+    'São Tomé and Príncipe', 'Rwanda', 'Uganda', 'Kenya', 'Tanzania', 'Zambia', 'Malawi',
+    # KKiaPay expanded coverage
+    'Bénin', "Côte d'Ivoire", 'Sénégal', 'Guinée',
 }
+
+# ISO codes for the KKiaPay widget 'countries' parameter (9 supported markets)
+KKIAPAY_COUNTRY_CODES = ['BJ', 'CI', 'TG', 'SN', 'NE', 'GN', 'BF', 'ML', 'CM']
 GREATER_CHINA_COUNTRIES = {'China', 'Hong Kong', 'Taiwan'}
 
 PAYMENT_METHODS = {
+    # --------------------------------------------------------
+    # KKiaPay — Aggregator for Africa (MTN, Moov, Orange, Wave…)
+    # --------------------------------------------------------
+    'kkiapay': {
+        'label': 'Mobile Money (KKiaPay)',
+        'icon': 'fas fa-mobile-alt',
+        'accent': '#e85d04',
+        'provider': 'kkiapay',
+        'mode': 'widget',
+        'enabled': os.environ.get('KKIAPAY_ENABLED', 'True') == 'True',
+        'requires_manual_review': False,
+        'description': 'MTN, Moov, Orange, Wave, T-Money, Airtel…',
+    },
     'mtn_money': {
         'label': 'MTN Money',
         'icon': 'fas fa-signal',
@@ -91,7 +109,7 @@ PAYMENT_METHODS = {
 }
 
 PAYMENT_METHODS_BY_REGION = {
-    'africa': ['mtn_money', 'orange_money', 'airtel_money'],
+    'africa': ['kkiapay', 'mtn_money', 'orange_money', 'airtel_money'],
     'china': ['wechat_pay', 'alipay'],
     'others': ['paypal', 'credit_card', 'bank_transfer'],
 }
@@ -103,6 +121,16 @@ def resolve_payment_region(country):
     if country in GREATER_CHINA_COUNTRIES:
         return 'china'
     return 'others'
+
+
+def get_kkiapay_country_codes():
+    """Returns KKiaPay ISO country codes, preferring DB values if available."""
+    try:
+        from manager.models import KkiapayCountry
+        codes = KkiapayCountry.get_active_iso_codes()
+        return codes if codes else KKIAPAY_COUNTRY_CODES
+    except Exception:
+        return KKIAPAY_COUNTRY_CODES
 
 
 

@@ -4,6 +4,7 @@ from manager import views_review
 from manager.payments.views import (
     mtn_momo_callback, airtel_money_callback,
     initiate_momo_payment, check_payment_status,
+    kkiapay_verify, kkiapay_webhook,
 )
 
 # manager中转路由
@@ -188,6 +189,10 @@ urlpatterns = [
     path('api/payment/airtel/callback/', airtel_money_callback, name='airtel_money_callback'),
     path('api/payment/initiate/', initiate_momo_payment, name='initiate_momo_payment'),
     path('api/payment/status/', check_payment_status, name='check_payment_status'),
+
+    # =========================KKiaPay========================
+    path('api/payment/kkiapay/verify/',  kkiapay_verify,  name='kkiapay_verify'),
+    path('api/payment/kkiapay/webhook/', kkiapay_webhook, name='kkiapay_webhook'),
 
     # =========================AI Chatbot========================
     path('chatbot/send/', views.chatbot_send, name='chatbot_send'),
