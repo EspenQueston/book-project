@@ -2100,14 +2100,21 @@ def checkout(request):
                 if _order_key not in _accessible:
                     _accessible.append(_order_key)
                 request.session['accessible_orders'] = _accessible
-                return redirect('manager:order_confirmation', order_number=book_order.order_number)
-            elif mkt_order:
+                
+            if mkt_order:
                 _accessible = request.session.get('accessible_orders', [])
                 _order_key = str(mkt_order.order_number)
                 if _order_key not in _accessible:
                     _accessible.append(_order_key)
                 request.session['accessible_orders'] = _accessible
-                return redirect('manager:order_confirmation', order_number=mkt_order.order_number)
+                
+            # If payment method is KKiaPay, redirect to the new dedicated payment page
+            if payment_method == 'kkiapay':
+                target_order = book_order if book_order else mkt_order
+                return redirect('manager:kkiapay_pay', order_number=target_order.order_number)
+            
+            target_order_for_redirect = book_order if book_order else mkt_order
+            return redirect('manager:order_confirmation', order_number=target_order_for_redirect.order_number)
             
         except Exception as e:
             messages.error(request, '订单创建失败，请重试')
@@ -2138,6 +2145,79 @@ def checkout(request):
     }
     
     return render(request, 'public/checkout.html', context)
+
+
+def kkiapay_pay(request, order_number):
+    """
+    Dedicated view for KKiaPay payment flow.
+    The order is already created with 'payment_pending'.
+    This view hosts the KKiaPay widget.
+    """
+    from django.conf import settings as django_settings
+    
+    accessible = request.session.get('accessible_orders', [])
+    if str(order_number) not in accessible:
+        messages.warning(request, 'Non autorisé ou session expirée.')
+        return redirect('manager:public_home')
+        
+    order = None
+    try:
+        order = models.Order.objects.get(order_number=order_number)
+    except models.Order.DoesNotExist:
+        try:
+            from marketplace.models import MarketplaceOrder
+            order = MarketplaceOrder.objects.get(order_number=order_number)
+        except MarketplaceOrder.DoesNotExist:
+            messages.error(request, 'Commande non trouvée.')
+            return redirect('manager:public_home')
+
+    if order.payment_status == 'completed':
+        messages.info(request, 'Commande déjà payée.')
+        return redirect('manager:order_confirmation', order_number=order.order_number)
+
+    # Pass the order parameters safely to Kkiapay
+    context = {
+        'order': order,
+        'order_number': order.order_number,
+        'total_amount_fcfa': int(order.total_amount),
+        'customer_name': order.customer_name if hasattr(order, 'customer_name') else getattr(order, 'user_name', ''),
+        'customer_email': order.customer_email if hasattr(order, 'customer_email') else getattr(order, 'user_email', ''),
+        'customer_phone': order.customer_phone,
+        'kkiapay_public_key': django_settings.KKIAPAY_PUBLIC_KEY,
+        'kkiapay_sandbox': django_settings.KKIAPAY_SANDBOX,
+        'callback_url': request.build_absolute_uri(f"/manager/public/kkiapay/success/{order_number}/")
+    }
+    
+    return render(request, 'public/kkiapay_pay.html', context)
+
+
+def kkiapay_success_redirect(request, order_number):
+    """
+    Redirected here after KKiaPay widget completes via callback GET.
+    We just show confirmation page. The async webhook or client JS 
+    will/has hit the verify endpoint. But we can also proactively verify here if we want!
+    """
+    from manager.payments.kkiapay import is_transaction_successful
+    transaction_id = request.GET.get('transaction_id')
+    
+    if transaction_id:
+        try:
+            order = models.Order.objects.get(order_number=order_number)
+        except models.Order.DoesNotExist:
+            from marketplace.models import MarketplaceOrder
+            order = MarketplaceOrder.objects.filter(order_number=order_number).first()
+            
+        if order and order.payment_status != 'completed':
+            success, tx = is_transaction_successful(transaction_id)
+            if success:
+                order.payment_status = 'completed'
+                order.payment_transaction_id = transaction_id
+                if hasattr(order, 'status') and order.status in ('payment_pending', 'pending'):
+                    order.status = 'processing'
+                order.save()
+    
+    return redirect('manager:order_confirmation', order_number=order_number)
+
 
 def order_confirmation(request, order_number):
     """Order confirmation page - handles both book and marketplace orders"""

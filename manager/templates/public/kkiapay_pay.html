@@ -1,0 +1,45 @@
+{% extends 'public/base.html' %}
+{% load i18n %}
+
+{% block title %}Paiement KKiaPay - {{ order_number }}{% endblock %}
+
+{% block content %}
+<div class="checkout-header">
+    <div class="container">
+        <h1>Paiement Sécurisé</h1>
+        <p class="lead">Commande #{{ order_number }}</p>
+    </div>
+</div>
+
+<div class="container" style="padding-top: 40px; padding-bottom: 80px; min-height: 50vh; text-align: center;">
+    <div class="card shadow-sm mx-auto" style="max-width: 500px; border-radius: 15px; padding: 40px;">
+        <i class="fas fa-shield-alt" style="font-size: 3rem; color: #10b981; margin-bottom: 20px;"></i>
+        <h3 class="mb-3">Montant à régler : {{ total_amount_fcfa }} FCFA</h3>
+        <p class="text-muted mb-4">
+            Veuillez procéder au paiement pour confirmer votre commande. <br>
+            Vous allez être redirigé vers l'interface sécurisée de KKiaPay.
+        </p>
+
+        <!-- The KKiaPay Widget Button -->
+        <kkiapay-widget 
+            amount="{{ total_amount_fcfa }}" 
+            key="{{ kkiapay_public_key }}"
+            url="<kkiapay-url>" 
+            position="center" 
+            sandbox="{% if kkiapay_sandbox %}true{% else %}false{% endif %}"
+            data="{{ order_number }}" 
+            theme="#667eea"
+            paymentmethod="momo"
+            callback="{{ callback_url }}">
+        </kkiapay-widget>
+        
+        <script src="https://cdn.kkiapay.me/k.js"></script>
+
+        <div class="mt-4">
+            <a href="{% url 'manager:public_home' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i> Retour à l'accueil
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

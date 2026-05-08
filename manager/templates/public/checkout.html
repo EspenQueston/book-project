@@ -773,10 +773,17 @@ document.getElementById('checkoutForm').addEventListener('submit', function(e) {
 
     if (paymentMethod === 'wechat_pay' || paymentMethod === 'alipay') {
         showQRCodeModal(paymentMethod);
-    } else if (paymentMethod === 'kkiapay') {
-        openKkiapayForCheckout();
     } else {
+        // For KKiaPay and standard methods, create order first
         document.getElementById('paymentConfirmed').value = 'no';
+        
+        // Show our own simple loading spinner to avoid double-clicks
+        const submitBtn = this.querySelector('button[type="submit"]');
+        if(submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Traitement...';
+        }
+        
         this.submit();
     }
 });
@@ -820,95 +827,6 @@ const KKIAPAY_COUNTRIES_DB = JSON.parse(document.getElementById('kkiapay-countri
     countrySelect.addEventListener('change', updatePrefix);
     updatePrefix(); // init on page load
 })();
-
-function openKkiapayForCheckout() {
-    // Validate form first
-    const form = document.getElementById('checkoutForm');
-    const requiredFields = form.querySelectorAll('[required]');
-    for (let field of requiredFields) {
-        if (field.id === 'selectedPaymentMethod') continue; // already checked
-        if (!field.value.trim()) {
-            field.focus();
-            if (typeof gToast === 'function') gToast('{% trans "请填写所有必填字段" %}', 'warning');
-            else alert('{% trans "请填写所有必填字段" %}');
-            return;
-        }
-    }
-
-    const totalAmount  = {{ total_amount_fcfa }};
-    const customerName  = document.querySelector('[name="customer_name"]').value.trim();
-    const customerEmail = document.querySelector('[name="customer_email"]').value.trim();
-    const rawPhone      = document.querySelector('[name="customer_phone"]').value.trim();
-
-    // Build phone with country code prefix (e.g. +229 18506959673)
-    const countrySelect = document.querySelector('[name="country"]');
-    const selectedOpt   = countrySelect ? countrySelect.options[countrySelect.selectedIndex] : null;
-    const phoneCode     = selectedOpt ? (selectedOpt.getAttribute('data-phone') || '') : '';
-    let customerPhone   = rawPhone;
-    if (phoneCode && !rawPhone.startsWith('+') && !rawPhone.startsWith(phoneCode.replace('+', ''))) {
-        customerPhone = phoneCode + rawPhone;
-    }
-
-    if (!KKIAPAY_PUBLIC_KEY) {
-        alert('KKiaPay not configured. Contact support.');
-        return;
-    }
-
-    // Open widget IMMEDIATELY — no blocking server round-trip before the popup.
-    // Order creation + KKiaPay verification happen in a single step AFTER payment
-    // succeeds (see addSuccessListener below), which eliminates the perceived delay.
-    openKkiapayWidget({
-        amount:        totalAmount,
-        key:           KKIAPAY_PUBLIC_KEY,
-        sandbox:       KKIAPAY_SANDBOX,
-        theme:         '#667eea',
-        position:      'center',
-        paymentmethod: 'momo',
-        name:          customerName,
-        email:         customerEmail,
-        phone:         customerPhone,
-        data:          '',
-    });
-}
-
-// Initialize KKiaPay success/failure listeners.
-// Uses a retry loop so it works whether k.js loads synchronously or async.
-function _initKkiapayListeners() {
-    if (typeof addSuccessListener !== 'function') {
-        setTimeout(_initKkiapayListeners, 100);
-        return;
-    }
-
-    addSuccessListener(function(response) {
-        const transactionId = response.transactionId;
-        const form = document.getElementById('checkoutForm');
-
-        // Inject hidden fields: checkout view will create the order AND verify
-        // the KKiaPay transaction in a single server round-trip.
-        document.getElementById('paymentConfirmed').value = 'kkiapay_success';
-        let txField = document.getElementById('kkiapayTransactionId');
-        if (!txField) {
-            txField = document.createElement('input');
-            txField.type = 'hidden';
-            txField.name = 'kkiapay_transaction_id';
-            txField.id = 'kkiapayTransactionId';
-            form.appendChild(txField);
-        }
-        txField.value = transactionId;
-
-        if (typeof gToast === 'function') gToast('Paiement reçu, confirmation en cours…', 'info');
-        form.submit();
-    });
-
-    addFailedListener(function(error) {
-        if (typeof gToast === 'function')
-            gToast('Paiement échoué. Veuillez réessayer.', 'error');
-        else
-            alert('Paiement échoué. Veuillez réessayer.');
-        console.error('KKiaPay payment failed:', error);
-    });
-}
-_initKkiapayListeners();
 
 function showQRCodeModal(method) {
     const modal = document.getElementById('qrCodeModal');
