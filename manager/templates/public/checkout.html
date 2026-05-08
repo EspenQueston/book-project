@@ -696,7 +696,6 @@ html[data-theme="dark"] .ck-guarantee-banner {
 </div>
 
 {{ payment_methods_by_region|json_script:"payment-method-catalog" }}
-{{ kkiapay_countries_data|json_script:"kkiapay-countries-data" }}
 
 <script>
 const africanCountries = [
@@ -787,13 +786,6 @@ document.getElementById('checkoutForm').addEventListener('submit', function(e) {
         this.submit();
     }
 });
-
-// ===== KKiaPay Widget Integration =====
-const KKIAPAY_PUBLIC_KEY = '{{ KKIAPAY_PUBLIC_KEY }}';
-const KKIAPAY_SANDBOX    = {% if KKIAPAY_SANDBOX %}true{% else %}false{% endif %};
-
-// KKiaPay countries from DB (ISO codes + phone codes)
-const KKIAPAY_COUNTRIES_DB = JSON.parse(document.getElementById('kkiapay-countries-data').textContent || '[]');
 
 // Phone prefix UI — update badge when country changes
 (function initPhonePrefix() {
@@ -912,8 +904,5 @@ function closeQRModal() {
         </div>
     </div>
 </div>
-
-<!-- KKiaPay JS SDK — Mobile Money aggregator for Africa -->
-<script src="https://cdn.kkiapay.me/k.js" async></script>
 
 {% endblock %}
