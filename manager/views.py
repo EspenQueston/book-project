@@ -1965,7 +1965,21 @@ def checkout(request):
     if request.method == 'POST':
         try:
             payment_confirmed = request.POST.get('payment_confirmed', 'no')
-            if payment_confirmed == 'yes':
+            kkiapay_transaction_id = request.POST.get('kkiapay_transaction_id', '').strip()
+
+            if payment_confirmed == 'kkiapay_success':
+                # Payment completed via KKiaPay widget — verify server-side FIRST
+                if not kkiapay_transaction_id:
+                    messages.error(request, 'Transaction ID manquant. Contactez le support.')
+                    return redirect('manager:checkout')
+                from manager.payments.kkiapay import is_transaction_successful
+                verified, _tx = is_transaction_successful(kkiapay_transaction_id)
+                if not verified:
+                    messages.error(request, 'Vérification du paiement échouée. Contactez le support.')
+                    return redirect('manager:checkout')
+                initial_status = 'processing'
+                payment_status = 'completed'
+            elif payment_confirmed == 'yes':
                 initial_status = 'processing'
                 payment_status = 'pending'
             else:
@@ -2003,7 +2017,8 @@ def checkout(request):
                     total_amount=book_total,
                     status=initial_status,
                     payment_status=payment_status,
-                    customer_notes=customer_notes
+                    customer_notes=customer_notes,
+                    payment_transaction_id=kkiapay_transaction_id or None,
                 )
                 for item in book_items:
                     models.OrderItem.objects.create(
@@ -2046,6 +2061,7 @@ def checkout(request):
                     shipping_address=request.POST.get('shipping_address', ''),
                     notes=customer_notes,
                     customer_notes=customer_notes,
+                    payment_transaction_id=kkiapay_transaction_id or None,
                 )
                 mkt_order.save()
 

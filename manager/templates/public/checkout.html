@@ -853,88 +853,61 @@ function openKkiapayForCheckout() {
         return;
     }
 
-    // First submit the form to create the order, then open widget
-    // We use a hidden flag to indicate this is a kkiapay flow
-    document.getElementById('paymentConfirmed').value = 'kkiapay_pending';
-
-    // Submit form to create the order (server returns order_number in session)
-    // We intercept with AJAX to avoid page redirect before payment
-    const formData = new FormData(form);
-    fetch(form.action || window.location.href, {
-        method: 'POST',
-        body: formData,
-        headers: {'X-CSRFToken': '{{ csrf_token }}', 'X-Requested-With': 'KKiaPay'},
-    })
-    .then(r => r.json())
-    .catch(() => null)
-    .then(data => {
-        // Whether AJAX or not, open widget — order_number passed via `data` field
-        const orderNumber = (data && data.order_number) || '';
-        openKkiapayWidget({
-            amount:        totalAmount,
-            key:           KKIAPAY_PUBLIC_KEY,
-            sandbox:       KKIAPAY_SANDBOX,
-            theme:         '#667eea',
-            position:      'center',
-            paymentmethod: 'momo',
-            name:          customerName,
-            email:         customerEmail,
-            phone:         customerPhone,
-            data:          orderNumber,
-        });
+    // Open widget IMMEDIATELY — no blocking server round-trip before the popup.
+    // Order creation + KKiaPay verification happen in a single step AFTER payment
+    // succeeds (see addSuccessListener below), which eliminates the perceived delay.
+    openKkiapayWidget({
+        amount:        totalAmount,
+        key:           KKIAPAY_PUBLIC_KEY,
+        sandbox:       KKIAPAY_SANDBOX,
+        theme:         '#667eea',
+        position:      'center',
+        paymentmethod: 'momo',
+        name:          customerName,
+        email:         customerEmail,
+        phone:         customerPhone,
+        data:          '',
     });
 }
 
-// Listen for KKiaPay payment result
-if (typeof addSuccessListener === 'function' || window.addEventListener) {
-    window.addEventListener('load', function() {
-        if (typeof addSuccessListener !== 'undefined') {
-            addSuccessListener(function(response) {
-                const transactionId = response.transactionId;
-                const orderNumber   = response.data || '';
-                const CSRF = '{{ csrf_token }}';
+// Initialize KKiaPay success/failure listeners.
+// Uses a retry loop so it works whether k.js loads synchronously or async.
+function _initKkiapayListeners() {
+    if (typeof addSuccessListener !== 'function') {
+        setTimeout(_initKkiapayListeners, 100);
+        return;
+    }
 
-                // Server-side verification (mandatory — never trust client alone)
-                fetch('/manager/api/payment/kkiapay/verify/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': CSRF,
-                    },
-                    body: JSON.stringify({
-                        transaction_id: transactionId,
-                        order_number: orderNumber,
-                    }),
-                })
-                .then(r => r.json())
-                .then(function(result) {
-                    if (result.success) {
-                        if (typeof gToast === 'function') gToast('Paiement confirmé !', 'success');
-                        setTimeout(function() {
-                            window.location.href = orderNumber
-                                ? '/manager/public/order/' + orderNumber + '/confirmation/'
-                                : '/manager/public/';
-                        }, 1000);
-                    } else {
-                        if (typeof gToast === 'function') gToast('Échec du paiement: ' + (result.message || ''), 'error');
-                        else alert('Échec du paiement: ' + (result.message || ''));
-                    }
-                })
-                .catch(function() {
-                    alert('Erreur réseau lors de la vérification du paiement.');
-                });
-            });
+    addSuccessListener(function(response) {
+        const transactionId = response.transactionId;
+        const form = document.getElementById('checkoutForm');
 
-            addFailedListener(function(error) {
-                if (typeof gToast === 'function')
-                    gToast('Paiement échoué. Veuillez réessayer.', 'error');
-                else
-                    alert('Paiement échoué. Veuillez réessayer.');
-                console.error('KKiaPay payment failed:', error);
-            });
+        // Inject hidden fields: checkout view will create the order AND verify
+        // the KKiaPay transaction in a single server round-trip.
+        document.getElementById('paymentConfirmed').value = 'kkiapay_success';
+        let txField = document.getElementById('kkiapayTransactionId');
+        if (!txField) {
+            txField = document.createElement('input');
+            txField.type = 'hidden';
+            txField.name = 'kkiapay_transaction_id';
+            txField.id = 'kkiapayTransactionId';
+            form.appendChild(txField);
         }
+        txField.value = transactionId;
+
+        if (typeof gToast === 'function') gToast('Paiement reçu, confirmation en cours…', 'info');
+        form.submit();
+    });
+
+    addFailedListener(function(error) {
+        if (typeof gToast === 'function')
+            gToast('Paiement échoué. Veuillez réessayer.', 'error');
+        else
+            alert('Paiement échoué. Veuillez réessayer.');
+        console.error('KKiaPay payment failed:', error);
     });
 }
+_initKkiapayListeners();
 
 function showQRCodeModal(method) {
     const modal = document.getElementById('qrCodeModal');
@@ -1023,6 +996,6 @@ function closeQRModal() {
 
 <!-- KKiaPay JS SDK — Mobile Money aggregator for Africa -->
 {{ kkiapay_countries_data|json_script:"kkiapay-countries-data" }}
-<script src="https://cdn.kkiapay.me/k.js"></script>
+<script src="https://cdn.kkiapay.me/k.js" async></script>
 
 {% endblock %}
