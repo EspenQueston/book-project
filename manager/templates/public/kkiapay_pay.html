@@ -1,45 +1,204 @@
 {% extends 'public/base.html' %}
-{% load i18n %}
+{% load i18n static %}
 
-{% block title %}Paiement KKiaPay - {{ order_number }}{% endblock %}
+{% block title %}Paiement Mobile Money - {{ order_number }}{% endblock %}
 
 {% block content %}
-<div class="checkout-header">
-    <div class="container">
-        <h1>Paiement Sécurisé</h1>
-        <p class="lead">Commande #{{ order_number }}</p>
-    </div>
-</div>
+<style>
+    .pay-wrapper {
+        min-height: 60vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+    }
+    .pay-card {
+        background: #fff;
+        border-radius: 20px;
+        padding: 50px 40px;
+        max-width: 480px;
+        width: 100%;
+        text-align: center;
+        box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+    }
+    .pay-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 24px;
+    }
+    .pay-icon i { font-size: 2rem; color: #fff; }
+    .pay-amount {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #667eea;
+        margin-bottom: 8px;
+    }
+    .pay-order-ref {
+        font-size: 0.9rem;
+        color: #888;
+        margin-bottom: 30px;
+        font-family: monospace;
+    }
+    .btn-pay {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        padding: 16px 40px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+        transition: opacity 0.2s;
+    }
+    .btn-pay:hover { opacity: 0.9; }
+    .btn-pay:disabled { opacity: 0.6; cursor: not-allowed; }
+    .status-msg {
+        margin-top: 20px;
+        font-size: 0.95rem;
+        color: #555;
+        min-height: 24px;
+    }
+    .status-msg.success { color: #10b981; font-weight: 600; }
+    .status-msg.error   { color: #ef4444; font-weight: 600; }
+</style>
 
-<div class="container" style="padding-top: 40px; padding-bottom: 80px; min-height: 50vh; text-align: center;">
-    <div class="card shadow-sm mx-auto" style="max-width: 500px; border-radius: 15px; padding: 40px;">
-        <i class="fas fa-shield-alt" style="font-size: 3rem; color: #10b981; margin-bottom: 20px;"></i>
-        <h3 class="mb-3">Montant à régler : {{ total_amount_fcfa }} FCFA</h3>
-        <p class="text-muted mb-4">
-            Veuillez procéder au paiement pour confirmer votre commande. <br>
-            Vous allez être redirigé vers l'interface sécurisée de KKiaPay.
+<div class="pay-wrapper">
+    <div class="pay-card">
+        <div class="pay-icon">
+            <i class="fas fa-mobile-alt"></i>
+        </div>
+        <div class="pay-amount">{{ total_amount_fcfa|floatformat:0 }} FCFA</div>
+        <div class="pay-order-ref">Commande #{{ order_number }}</div>
+
+        <p class="text-muted mb-4" style="font-size:0.95rem;">
+            Cliquez sur le bouton ci-dessous pour ouvrir l'interface de paiement Mobile Money sécurisée KKiaPay.
         </p>
 
-        <!-- The KKiaPay Widget Button -->
-        <kkiapay-widget 
-            amount="{{ total_amount_fcfa }}" 
-            key="{{ kkiapay_public_key }}"
-            url="<kkiapay-url>" 
-            position="center" 
-            sandbox="{% if kkiapay_sandbox %}true{% else %}false{% endif %}"
-            data="{{ order_number }}" 
-            theme="#667eea"
-            paymentmethod="momo"
-            callback="{{ callback_url }}">
-        </kkiapay-widget>
-        
-        <script src="https://cdn.kkiapay.me/k.js"></script>
+        <button id="btnOpenKkiapay" class="btn-pay">
+            <i class="fas fa-lock me-2"></i> Payer via Mobile Money
+        </button>
+
+        <div id="payStatus" class="status-msg"></div>
 
         <div class="mt-4">
-            <a href="{% url 'manager:public_home' %}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-2"></i> Retour à l'accueil
+            <a href="{% url 'manager:public_home' %}" class="text-muted" style="font-size:0.85rem;">
+                <i class="fas fa-arrow-left me-1"></i> Annuler et retourner à l'accueil
             </a>
         </div>
     </div>
 </div>
+
+<!-- KKiaPay SDK -->
+<script src="https://cdn.kkiapay.me/k.js"></script>
+
+<script>
+(function() {
+    var ORDER_NUMBER    = '{{ order_number }}';
+    var TOTAL_AMOUNT    = {{ total_amount_fcfa }};
+    var PUBLIC_KEY      = '{{ kkiapay_public_key }}';
+    var IS_SANDBOX      = {% if kkiapay_sandbox %}true{% else %}false{% endif %};
+    var CUSTOMER_NAME   = '{{ customer_name|escapejs }}';
+    var CUSTOMER_EMAIL  = '{{ customer_email|escapejs }}';
+    var CUSTOMER_PHONE  = '{{ customer_phone|escapejs }}';
+    var CONFIRM_URL     = '{% url "manager:order_confirmation" order_number=order_number %}';
+    var VERIFY_URL      = '{% url "manager:kkiapay_verify" %}';
+
+    var btn = document.getElementById('btnOpenKkiapay');
+    var statusEl = document.getElementById('payStatus');
+
+    function getCsrf() {
+        var name = 'csrftoken';
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var c = cookies[i].trim();
+            if (c.indexOf(name + '=') === 0) return c.substring(name.length + 1);
+        }
+        return '';
+    }
+
+    function setStatus(msg, type) {
+        statusEl.textContent = msg;
+        statusEl.className = 'status-msg ' + (type || '');
+    }
+
+    function openWidget() {
+        if (!PUBLIC_KEY) {
+            setStatus('Erreur: clé KKiaPay manquante. Contactez le support.', 'error');
+            return;
+        }
+        btn.disabled = true;
+        setStatus('Ouverture du widget de paiement...', '');
+
+        openKkiapayWidget({
+            amount:        TOTAL_AMOUNT,
+            key:           PUBLIC_KEY,
+            sandbox:       IS_SANDBOX,
+            theme:         '#667eea',
+            position:      'center',
+            paymentmethod: 'momo',
+            name:          CUSTOMER_NAME,
+            email:         CUSTOMER_EMAIL,
+            phone:         CUSTOMER_PHONE,
+            data:          ORDER_NUMBER
+        });
+    }
+
+    // Re-enable button if widget is closed without paying
+    function _initListeners() {
+        if (typeof addSuccessListener !== 'function') {
+            setTimeout(_initListeners, 150);
+            return;
+        }
+
+        addSuccessListener(function(response) {
+            setStatus('Paiement reçu, vérification en cours...', '');
+            var txId = response.transactionId;
+
+            fetch(VERIFY_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrf()
+                },
+                body: JSON.stringify({
+                    transaction_id: txId,
+                    order_number: ORDER_NUMBER
+                })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    setStatus('✅ Paiement confirmé ! Redirection...', 'success');
+                    setTimeout(function() {
+                        window.location.href = CONFIRM_URL;
+                    }, 1500);
+                } else {
+                    setStatus('❌ Vérification échouée: ' + data.message, 'error');
+                    btn.disabled = false;
+                }
+            })
+            .catch(function(err) {
+                setStatus('❌ Erreur réseau. Contactez le support avec ref: ' + txId, 'error');
+                btn.disabled = false;
+                console.error('KKiaPay verify error:', err);
+            });
+        });
+
+        addFailedListener(function(error) {
+            setStatus('❌ Paiement refusé. Veuillez réessayer.', 'error');
+            btn.disabled = false;
+            console.warn('KKiaPay payment failed:', error);
+        });
+    }
+
+    btn.addEventListener('click', openWidget);
+    _initListeners();
+})();
+</script>
 {% endblock %}

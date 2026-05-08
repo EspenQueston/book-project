@@ -2144,7 +2144,11 @@ def checkout(request):
         'kkiapay_countries_data': kkiapay_countries_data,
     }
     
-    return render(request, 'public/checkout.html', context)
+    response = render(request, 'public/checkout.html', context)
+    # Prevent browser from caching the checkout page (avoids stale JS bugs)
+    response['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response['Pragma'] = 'no-cache'
+    return response
 
 
 def kkiapay_pay(request, order_number):
