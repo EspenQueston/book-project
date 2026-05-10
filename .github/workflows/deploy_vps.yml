@@ -1,0 +1,62 @@
+name: Deploy & Fix VPS
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to run'
+        required: true
+        default: 'fix_ssl'
+        type: choice
+        options:
+          - fix_ssl
+          - git_pull_only
+          - restart_service
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Install sshpass
+        run: sudo apt-get install -y sshpass
+
+      - name: Git pull on VPS
+        env:
+          SSHPASS: ${{ secrets.VPS_PASS }}
+        run: |
+          sshpass -e ssh -o StrictHostKeyChecking=no \
+                         -o ConnectTimeout=30 \
+                         root@${{ secrets.VPS_HOST }} \
+            "cd /opt/duno360/app && git pull origin main 2>&1"
+
+      - name: Run fix_ssl.py
+        if: ${{ github.event.inputs.action == 'fix_ssl' }}
+        env:
+          SSHPASS: ${{ secrets.VPS_PASS }}
+        run: |
+          sshpass -e ssh -o StrictHostKeyChecking=no \
+                         -o ConnectTimeout=30 \
+                         -o ServerAliveInterval=30 \
+                         root@${{ secrets.VPS_HOST }} \
+            "cd /opt/duno360/app && python3 deploy/fix_ssl.py 2>&1"
+
+      - name: Restart service only
+        if: ${{ github.event.inputs.action == 'restart_service' }}
+        env:
+          SSHPASS: ${{ secrets.VPS_PASS }}
+        run: |
+          sshpass -e ssh -o StrictHostKeyChecking=no \
+                         -o ConnectTimeout=30 \
+                         root@${{ secrets.VPS_HOST }} \
+            "systemctl restart duno360 && systemctl status duno360 --no-pager 2>&1"
+
+      - name: Check service status
+        env:
+          SSHPASS: ${{ secrets.VPS_PASS }}
+        run: |
+          sshpass -e ssh -o StrictHostKeyChecking=no \
+                         -o ConnectTimeout=30 \
+                         root@${{ secrets.VPS_HOST }} \
+            "systemctl is-active duno360 && curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/manager/public/ 2>&1 || true"
