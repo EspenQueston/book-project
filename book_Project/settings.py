@@ -49,7 +49,7 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 # Allowed hosts for production
 ALLOWED_HOSTS = os.environ.get(
-    'ALLOWED_HOSTS', 'scholarquest.tech,www.scholarquest.tech,localhost,127.0.0.1'
+    'ALLOWED_HOSTS', 'duno360.com,www.duno360.com,localhost,127.0.0.1'
 ).split(',')
 
 
@@ -377,7 +377,7 @@ ROSETTA_LOGIN_URL = '/manager/login/'
 # CSRF trusted origins (required for Django 4.x with HTTPS)
 CSRF_TRUSTED_ORIGINS = os.environ.get(
     'CSRF_TRUSTED_ORIGINS',
-    'https://scholarquest.tech,https://www.scholarquest.tech'
+    'https://duno360.com,https://www.duno360.com'
 ).split(',')
 
 # ============================================================
@@ -406,11 +406,11 @@ AIRTEL_MONEY_CALLBACK_URL = os.environ.get('AIRTEL_MONEY_CALLBACK_URL', '')
 # ============================================================
 # KKiaPay Payment Aggregator Configuration
 # ============================================================
-KKIAPAY_PUBLIC_KEY     = os.environ.get('KKIAPAY_PUBLIC_KEY',     '855c58403ef411f1bf4f9fabcaa86999')
-KKIAPAY_PRIVATE_KEY    = os.environ.get('KKIAPAY_PRIVATE_KEY',    'tpk_855c7f513ef411f1bf4f9fabcaa86999')
-KKIAPAY_SECRET         = os.environ.get('KKIAPAY_SECRET',         'tsk_855ca6603ef411f1bf4f9fabcaa86999')
+KKIAPAY_PUBLIC_KEY     = os.environ.get('KKIAPAY_PUBLIC_KEY',     '')
+KKIAPAY_PRIVATE_KEY    = os.environ.get('KKIAPAY_PRIVATE_KEY',    '')
+KKIAPAY_SECRET         = os.environ.get('KKIAPAY_SECRET',         '')
 KKIAPAY_SANDBOX        = os.environ.get('KKIAPAY_SANDBOX',        'True') == 'True'
-KKIAPAY_WEBHOOK_SECRET = os.environ.get('KKIAPAY_WEBHOOK_SECRET', 'duno360')
+KKIAPAY_WEBHOOK_SECRET = os.environ.get('KKIAPAY_WEBHOOK_SECRET', '')
 
 # ============================================================
 # ngrok Configuration (auto-tunnel for development callbacks)
