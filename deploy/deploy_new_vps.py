@@ -156,7 +156,7 @@ def main() -> None:
         "export DEBIAN_FRONTEND=noninteractive && "
         "apt-get update -qq && "
         "apt-get install -y --no-install-recommends "
-        "nginx git python3.11 python3.11-venv python3.11-dev "
+        "nginx git python3 python3-venv python3-dev "
         "python3-pip build-essential libpq-dev ufw curl openssl"
     )
 
@@ -179,7 +179,7 @@ def main() -> None:
 
     # 4 -- Python venv
     print("\n[4] Setting up Python virtualenv ...")
-    run(f"sudo -u {APP_USER} python3.11 -m venv {APP_DIR}/.venv")
+    run(f"sudo -u {APP_USER} python3 -m venv {APP_DIR}/.venv")
     run(f"sudo -u {APP_USER} {APP_DIR}/.venv/bin/pip install --upgrade --quiet pip wheel")
     run(
         f"sudo -u {APP_USER} {APP_DIR}/.venv/bin/pip install "

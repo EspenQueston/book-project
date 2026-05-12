@@ -1,0 +1,49 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:   # allow manual trigger from GitHub UI
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ── SSH into VPS and deploy ──────────────────────────────────────────
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          timeout: 600s
+          script: |
+            set -e
+            APP_DIR="/opt/duno360/app"
+            APP_USER="duno360"
+            PY="$APP_DIR/.venv/bin/python"
+
+            echo "=== Pulling latest code ==="
+            cd $APP_DIR
+            git pull origin main
+
+            echo "=== Installing/updating Python deps ==="
+            sudo -u $APP_USER $APP_DIR/.venv/bin/pip install --quiet -r $APP_DIR/requirements.txt
+
+            echo "=== Django migrate ==="
+            sudo -u $APP_USER $PY manage.py migrate --noinput
+
+            echo "=== collectstatic ==="
+            sudo -u $APP_USER $PY manage.py collectstatic --noinput --clear
+
+            echo "=== Restarting app ==="
+            systemctl restart duno360
+            sleep 3
+            systemctl is-active duno360
+            echo "Deployment complete."

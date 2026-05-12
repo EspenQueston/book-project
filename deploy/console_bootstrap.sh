@@ -14,7 +14,7 @@ echo "===== [1] System packages ====="
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
 apt-get install -y --no-install-recommends \
-    nginx git python3.11 python3.11-venv python3.11-dev \
+    nginx git python3 python3-venv python3-dev \
     python3-pip build-essential libpq-dev ufw curl openssl
 
 echo "===== [2] App user + dirs ====="
@@ -31,7 +31,7 @@ fi
 chown -R $APP_USER:$APP_USER $APP_DIR
 
 echo "===== [4] Python venv ====="
-sudo -u $APP_USER python3.11 -m venv $APP_DIR/.venv
+sudo -u $APP_USER python3 -m venv $APP_DIR/.venv
 sudo -u $APP_USER $APP_DIR/.venv/bin/pip install --upgrade --quiet pip wheel
 sudo -u $APP_USER $APP_DIR/.venv/bin/pip install --quiet -r $APP_DIR/requirements.txt
 
