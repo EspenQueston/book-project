@@ -2,9 +2,14 @@
 
 # Deploy logs / snapshots (may contain secrets)
 deploy/*.json
-# Auto-generated deploy scripts with hardcoded DB values — do not commit
+# Auto-generated deploy scripts with hardcoded DB values -- do not commit
 deploy/apply_translations_prod.py
 deploy/translation_sync.sql
+# Local TLS cert files for Cloudflare Origin Certificate (NEVER commit private keys)
+deploy/cloudflare_origin.crt
+deploy/cloudflare_origin.key
+# Local env file for deploy script
+deploy/.env.local
 
 # Python
 __pycache__/
