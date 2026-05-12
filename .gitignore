@@ -10,6 +10,8 @@ deploy/cloudflare_origin.crt
 deploy/cloudflare_origin.key
 # Local env file for deploy script
 deploy/.env.local
+# Deployment script with hardcoded credentials (should use env vars)
+deploy/vps_deploy_full.py
 
 # Python
 __pycache__/

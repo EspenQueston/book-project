@@ -164,4 +164,4 @@ curl -sI http://127.0.0.1:8000/manager/ | head -3
 systemctl status duno360 --no-pager -l | tail -10
 
 echo ""
-echo "✅ Setup complete — update Cloudflare DNS A record to 142.93.45.77"
+echo "✅ Setup complete — update Cloudflare DNS A record to your VPS IP"

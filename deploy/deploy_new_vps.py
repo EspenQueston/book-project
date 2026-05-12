@@ -30,7 +30,7 @@ import subprocess
 import base64
 
 # -- connection ---------------------------------------------------------------
-HOST = "142.93.45.77"
+HOST = os.environ.get("VPS_HOST", "142.93.45.77")
 USER = "root"
 
 SSH_BASE = [
