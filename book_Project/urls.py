@@ -34,7 +34,6 @@ class RosettaAdminMiddleware:
 urlpatterns = [
     path('admin/', admin.site.urls),  # Django admin
     path('i18n/', include('django.conf.urls.i18n')),  # Language switching
-    path('rosetta/', include('rosetta.urls')),  # Translation interface
     path('marketplace/', include('marketplace.urls')),  # Marketplace
     path('manager/', include('manager.urls')),  # Public interface at /manager/
     path('', home_redirect, name='home'),  # Add this line for root URL
