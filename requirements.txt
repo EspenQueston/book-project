@@ -14,7 +14,6 @@ gunicorn>=22.0.0
 # Translation
 django-rosetta>=0.10.0
 django-modeltranslation>=0.20.0
-translatebot-django>=1.3.0
 polib>=1.2.0
 
 # Data & Analytics

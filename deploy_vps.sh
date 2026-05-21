@@ -51,7 +51,7 @@ if [ ! -f "$APP_DIR/.env" ]; then
     echo ""
     echo "  DEBUG=False"
     echo "  SECRET_KEY=<generate with: python -c \"from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())\">"
-    echo "  ALLOWED_HOSTS=duno360.com,www.duno360.com,127.0.0.1,localhost"
+    echo "  ALLOWED_HOSTS=142.93.45.77,duno360.com,www.duno360.com,127.0.0.1,localhost"
     echo "  DATABASE_URL=postgresql://postgres:<DB-PASSWORD>@db.<project-ref>.supabase.co:5432/postgres?sslmode=require"
     echo "  DJANGO_ADMIN_PASSWORD=<strong-password>"
     echo "  EMAIL_HOST_USER=your-email@domain.com"
