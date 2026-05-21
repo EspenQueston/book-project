@@ -26,7 +26,7 @@ def setup_django_for_mysql():
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'db_book',
             'USER': 'bookuser',  # or 'root' if needed
-            'PASSWORD': 'BookProject123!',  # Update with your MySQL password
+            'PASSWORD': os.environ.get('MYSQL_PASSWORD', ''),
             'HOST': '127.0.0.1',
             'PORT': '3306',
             'OPTIONS': {
@@ -53,7 +53,7 @@ def setup_django_for_postgresql():
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': 'db_book',
             'USER': 'bookuser',
-            'PASSWORD': 'BookProject123!',
+            'PASSWORD': os.environ.get('MYSQL_PASSWORD', ''),
             'HOST': '127.0.0.1',
             'PORT': '5432',
             'OPTIONS': {

@@ -45,7 +45,7 @@ def create_database_and_user():
     commands = [
         # Connect as postgres superuser and create database/user
         "CREATE DATABASE db_book;",
-        "CREATE USER bookuser WITH PASSWORD 'BookProject123!';",
+        f"CREATE USER bookuser WITH PASSWORD '{os.environ.get('POSTGRES_BOOKUSER_PASSWORD', 'changeme')}';",
         "GRANT ALL PRIVILEGES ON DATABASE db_book TO bookuser;",
         "ALTER USER bookuser CREATEDB;",  # Allow user to create test databases
     ]

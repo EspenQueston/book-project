@@ -1,20 +1,35 @@
+# DUNO 360 — Nginx example (Cloudflare Origin Certificate or Let's Encrypt)
+# App layout matches deploy/deploy_new_vps.py: /opt/duno360/app
+
 server {
     listen 80;
-    server_name 159.203.186.103 scholarquest.tech www.scholarquest.tech;
+    server_name duno360.com www.duno360.com;
 
-    # Redirect HTTP -> HTTPS (uncomment after SSL is configured)
-    # return 301 https://$server_name$request_uri;
+    # Redirect HTTP -> HTTPS
+    return 301 https://$host$request_uri;
+}
 
-    client_max_body_size 512M;
+server {
+    listen 443 ssl http2;
+    server_name duno360.com www.duno360.com;
+
+    ssl_certificate     /etc/nginx/ssl/duno360.crt;
+    ssl_certificate_key /etc/nginx/ssl/duno360.key;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+    client_max_body_size 10M;
 
     location /static/ {
-        alias /var/www/duno360/staticfiles/;
+        alias /opt/duno360/app/staticfiles/;
         expires 30d;
-        add_header Cache-Control "public, immutable";
+        add_header Cache-Control "public, max-age=2592000";
     }
 
     location /media/ {
-        alias /var/www/duno360/media/;
+        alias /opt/duno360/app/media/;
         expires 7d;
         add_header Cache-Control "public";
     }
@@ -29,38 +44,3 @@ server {
         proxy_connect_timeout 10s;
     }
 }
-
-# HTTPS block — uncomment and configure SSL after obtaining a certificate
-# server {
-#     listen 443 ssl;
-#     server_name scholarquest.tech www.scholarquest.tech;
-#
-#     ssl_certificate     /etc/letsencrypt/live/scholarquest.tech/fullchain.pem;
-#     ssl_certificate_key /etc/letsencrypt/live/scholarquest.tech/privkey.pem;
-#     ssl_protocols TLSv1.2 TLSv1.3;
-#     ssl_prefer_server_ciphers on;
-#     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
-#
-#     client_max_body_size 512M;
-#
-#     location /static/ {
-#         alias /var/www/duno360/staticfiles/;
-#         expires 30d;
-#         add_header Cache-Control "public, immutable";
-#     }
-#
-#     location /media/ {
-#         alias /var/www/duno360/media/;
-#         expires 7d;
-#         add_header Cache-Control "public";
-#     }
-#
-#     location / {
-#         proxy_pass         http://127.0.0.1:8000;
-#         proxy_set_header   Host              $host;
-#         proxy_set_header   X-Real-IP         $remote_addr;
-#         proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
-#         proxy_set_header   X-Forwarded-Proto $scheme;
-#         proxy_read_timeout 120s;
-#     }
-# }

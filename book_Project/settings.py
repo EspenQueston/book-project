@@ -62,6 +62,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rosetta',
+    'translatebot_django',
     'manager.apps.ManagerConfig',
     'marketplace.apps.MarketplaceConfig',
     # 新加入的程序模块放这里
@@ -88,6 +90,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'book_Project.middleware.AdminDebugMiddleware',
+    'book_Project.urls.RosettaAdminMiddleware',  # Restrict /rosetta/ to admin sessions
 ]
 
 # 根URL配置
@@ -366,6 +369,10 @@ SESSION_COOKIE_HTTPONLY = True     # JS cannot read the session cookie
 SESSION_SAVE_EVERY_REQUEST = True  # Slide the expiry window on each request
 SESSION_COOKIE_SAMESITE = os.environ.get('SESSION_COOKIE_SAMESITE', 'Lax')
 CSRF_COOKIE_SAMESITE = os.environ.get('CSRF_COOKIE_SAMESITE', 'Lax')
+
+# Rosetta translation UI — restrict access to admin sessions only
+ROSETTA_REQUIRES_AUTH = True
+ROSETTA_LOGIN_URL = '/manager/login/'
 
 # CSRF trusted origins (required for Django 4.x with HTTPS)
 CSRF_TRUSTED_ORIGINS = os.environ.get(

@@ -5,7 +5,7 @@ import multiprocessing
 import os
 
 # Bind
-bind = "0.0.0.0:8000"
+bind = "127.0.0.1:8000"
 
 # Workers — 2 * CPU cores + 1 is the standard recommendation
 workers = multiprocessing.cpu_count() * 2 + 1

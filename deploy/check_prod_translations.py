@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Check production DB for Chinese characters in EN/FR translation fields."""
-import os, sys, base64
-import paramiko
+import base64
+import os
+import sys
 
-pw = os.environ.get("DUNO360_ROOT_PASS", "")
-if not pw:
-    print("Set DUNO360_ROOT_PASS"); sys.exit(1)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from vps_client import connect_vps
 
 check_script = """import os, sys
 os.environ.setdefault('DJANGO_SETTINGS_MODULE','book_Project.settings')
@@ -41,16 +41,13 @@ print('Book id=7 name_fr:', b7.name_fr if b7 else 'NOT FOUND')
 
 b64 = base64.b64encode(check_script.encode()).decode()
 
-client = paramiko.SSHClient()
-client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-client.connect("159.203.186.103", username="root", password=pw, timeout=30)
+client, host = connect_vps(timeout=30)
+print(f"Connected to {host}")
 
-# Write the check script to /tmp
 _, sw, _ = client.exec_command("echo " + b64 + " | base64 -d > /tmp/_chk.py && echo wrote")
 result = sw.read().decode().strip()
 print("Upload:", result)
 
-# Copy to app dir and run
 run_cmd = (
     "sudo -u duno360 bash -lc "
     "'cp /tmp/_chk.py /opt/duno360/app/_chk.py && "
