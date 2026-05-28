@@ -53,6 +53,223 @@
     .cart-badge { position: absolute; top: -4px; right: -4px; background: var(--danger-color); color: #fff; font-size: 0.7rem; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
     .spec-row-alt { background: #f8fafc; }
 
+    /* === Supermarket Mobile Taobao Design === */
+    .pmp-delivery-section {
+        background: #fff;
+        padding: 12px 14px;
+        margin-bottom: 6px;
+    }
+    .pmp-delivery-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 0;
+        font-size: 13px;
+        color: #475569;
+    }
+    .pmp-delivery-row i {
+        color: #667eea;
+        width: 18px;
+    }
+    .pmp-delivery-highlight {
+        color: #667eea;
+        font-weight: 600;
+    }
+    .pmp-guarantee {
+        background: linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.08));
+        padding: 10px 14px;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: #475569;
+    }
+    .pmp-guarantee i {
+        color: #667eea;
+    }
+    .pmp-specs-section {
+        background: #fff;
+        padding: 12px 14px;
+        margin-bottom: 6px;
+    }
+    .pmp-specs-label {
+        font-size: 13px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 10px;
+    }
+    .pmp-specs-scroll {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+    }
+    .pmp-spec-chip {
+        flex-shrink: 0;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 12px;
+        color: #475569;
+    }
+    .pmp-spec-chip strong {
+        color: #1e293b;
+    }
+    .pmp-seller-section {
+        background: #fff;
+        padding: 14px;
+        margin-bottom: 6px;
+    }
+    .pmp-seller-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .pmp-seller-logo {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 18px;
+        overflow: hidden;
+    }
+    .pmp-seller-name {
+        font-size: 14px;
+        font-weight: 700;
+        color: #1e293b;
+    }
+    .pmp-seller-meta {
+        font-size: 11px;
+        color: #64748b;
+        margin-top: 2px;
+    }
+    .pmp-seller-btn {
+        padding: 6px 14px;
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        background: #fff;
+        font-size: 12px;
+        color: #475569;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .pmp-seller-btn.follow {
+        border-color: #667eea;
+        color: #667eea;
+    }
+    .pmp-seller-scores {
+        display: flex;
+        justify-content: space-around;
+        padding: 12px 0;
+    }
+    .pmp-score-item {
+        text-align: center;
+    }
+    .pmp-score-val {
+        font-size: 16px;
+        font-weight: 800;
+        color: #1e293b;
+    }
+    .pmp-score-lbl {
+        font-size: 11px;
+        color: #64748b;
+        margin-top: 2px;
+    }
+    .pmp-seller-btns {
+        display: flex;
+        gap: 8px;
+        padding-top: 12px;
+        border-top: 1px solid #f1f5f9;
+    }
+    .pmp-seller-btns .pmp-seller-btn {
+        flex: 1;
+        text-align: center;
+        text-decoration: none;
+    }
+    .pmp-certs-section {
+        background: #fff;
+        padding: 14px;
+        margin-bottom: 6px;
+    }
+    .pmp-certs-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 12px;
+    }
+    .pmp-certs-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+    }
+    .pmp-cert-item {
+        text-align: center;
+    }
+    .pmp-cert-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 14px;
+        margin: 0 auto 6px;
+    }
+    .pmp-cert-label {
+        font-size: 11px;
+        color: #475569;
+    }
+    .pmp-feed-section {
+        background: #fff;
+        padding: 14px;
+        margin-bottom: 6px;
+    }
+    .pmp-feed-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 12px;
+    }
+    .pmp-feed-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    .pmp-feed-card {
+        border: 1px solid #f1f5f9;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    .pmp-feed-card img {
+        width: 100%;
+        height: 100px;
+        object-fit: cover;
+    }
+    .pmp-feed-name {
+        padding: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #1e293b;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .pmp-feed-price {
+        padding: 0 8px 8px;
+        font-size: 13px;
+        font-weight: 700;
+        color: #ef4444;
+    }
+
     /* === PWA Task 1: Mobile Taobao Design === */
     @media (max-width: 768px) {
         .detail-hero, .desktop-layout { display: none !important; }
@@ -131,14 +348,141 @@
                 DUNO 360
                 {% endif %}
             </span>
-            <span>{% trans "Support admin" %}</span>
+            <span>{% trans "官方自营" %}</span>
         </div>
     </div>
-    
+
+    <!-- Delivery Section -->
+    <div class="pmp-delivery-section">
+        <div class="pmp-delivery-row">
+            <i class="fas fa-truck"></i>
+            <span><span class="pmp-delivery-highlight">{% trans "同城配送" %}</span> · {% trans "预计" %} <strong>1-2{% trans "天" %}</strong>{% trans "到达" %}</span>
+            <i class="fas fa-chevron-right ms-auto" style="font-size:10px;color:#ccc;"></i>
+        </div>
+        <div class="pmp-delivery-row">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>{% trans "发货自" %} <strong>{% trans "Dakar仓库" %}</strong> · <span class="pmp-delivery-highlight">{% trans "满额包邮" %}</span></span>
+        </div>
+        <div class="pmp-delivery-row">
+            <i class="fas fa-shield-alt"></i>
+            <span>{% trans "品质保证" %} · {% trans "DUNO 平台担保" %}</span>
+        </div>
+    </div>
+
+    <!-- Guarantee -->
+    <div class="pmp-guarantee">
+        <i class="fas fa-shield-alt"></i>
+        <span>{% trans "退货宝" %} | <strong>{% trans "7天无理由退换" %}</strong> | {% trans "极速退款" %}</span>
+    </div>
+
+    <!-- Specs -->
+    <div class="pmp-specs-section">
+        <div class="pmp-specs-label">{% trans "商品规格" %}</div>
+        <div class="pmp-specs-scroll">
+            {% if item.brand %}
+            <div class="pmp-spec-chip"><strong>{% trans "品牌" %}</strong>{{ item.brand }}</div>
+            {% endif %}
+            {% if item.origin %}
+            <div class="pmp-spec-chip"><strong>{% trans "产地" %}</strong>{{ item.origin }}</div>
+            {% endif %}
+            <div class="pmp-spec-chip"><strong>{% trans "库存" %}</strong>{{ item.stock }} {{ item.get_unit_display }}</div>
+            <div class="pmp-spec-chip"><strong>{% trans "销量" %}</strong>{{ sold_delivered }}+</div>
+            {% if item.is_organic %}
+            <div class="pmp-spec-chip"><strong>{% trans "有机" %}</strong>{% trans "有机食品" %}</div>
+            {% endif %}
+            {% for attr in specification_attributes %}
+            <div class="pmp-spec-chip"><strong>{{ attr.name }}</strong>{{ attr.display_value }}</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Seller Section -->
+    <div class="pmp-seller-section">
+        <div class="pmp-seller-header">
+            <div class="pmp-seller-logo">
+                {% if item.vendor and item.vendor.get_logo_url %}<img src="{{ item.vendor.get_logo_url }}" style="width:100%;height:100%;object-fit:cover;">{% else %}<i class="fas fa-store"></i>{% endif %}
+            </div>
+            <div>
+                <div class="pmp-seller-name">{% if item.vendor %}{{ item.vendor.company_name }}{% else %}DUNO 360{% endif %}</div>
+                <div class="pmp-seller-meta">
+                    <i class="fas fa-star" style="color:#f59e0b;"></i> 4.9 · <span>{% trans "官方自营" %}</span>
+                </div>
+            </div>
+            <button class="pmp-seller-btn follow ms-auto" onclick="toggleVendorFollow({% if item.vendor %}{{ item.vendor.id }}{% else %}0{% endif %})" id="followVendorBtn">
+                <i class="fas fa-plus"></i> <span>{% trans "关注" %}</span>
+            </button>
+        </div>
+        <div class="pmp-seller-scores">
+            <div class="pmp-score-item"><div class="pmp-score-val">4.9</div><div class="pmp-score-lbl">{% trans "商品质量" %}</div></div>
+            <div class="pmp-score-item"><div class="pmp-score-val">4.8</div><div class="pmp-score-lbl">{% trans "配送速度" %}</div></div>
+            <div class="pmp-score-item"><div class="pmp-score-val">4.9</div><div class="pmp-score-lbl">{% trans "服务态度" %}</div></div>
+        </div>
+        <div class="pmp-seller-btns">
+            {% if item.vendor %}
+            <a href="{% url 'manager:public_vendor_shop' item.vendor.id %}" class="pmp-seller-btn">{% trans "进入店铺" %}</a>
+            {% else %}
+            <a href="{% url 'marketplace:supermarket_list' %}" class="pmp-seller-btn">{% trans "超市首页" %}</a>
+            {% endif %}
+            <a href="{% url 'manager:start_conversation' %}?item_type=supermarket&item_id={{ item.id }}&subject={{ item.name|urlencode }}" class="pmp-seller-btn">{% trans "联系卖家" %}</a>
+        </div>
+    </div>
+
+    <!-- Certifications -->
+    <div class="pmp-certs-section">
+        <div class="pmp-certs-title">{% trans "服务保障" %}</div>
+        <div class="pmp-certs-grid">
+            <div class="pmp-cert-item">
+                <div class="pmp-cert-icon" style="background:linear-gradient(135deg,#667eea,#764ba2);"><i class="fas fa-undo"></i></div>
+                <span class="pmp-cert-label">{% trans "7天退换" %}</span>
+            </div>
+            <div class="pmp-cert-item">
+                <div class="pmp-cert-icon" style="background:linear-gradient(135deg,#10b981,#059669);"><i class="fas fa-certificate"></i></div>
+                <span class="pmp-cert-label">{% trans "正品保证" %}</span>
+            </div>
+            <div class="pmp-cert-item">
+                <div class="pmp-cert-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);"><i class="fas fa-shipping-fast"></i></div>
+                <span class="pmp-cert-label">{% trans "冷链配送" %}</span>
+            </div>
+            <div class="pmp-cert-item">
+                <div class="pmp-cert-icon" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);"><i class="fas fa-truck"></i></div>
+                <span class="pmp-cert-label">{% trans "满额包邮" %}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Description -->
+    {% if item.description %}
+    <div style="background:#fff;padding:12px 14px;margin-bottom:6px;">
+        <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:8px;">{% trans "商品简介" %}</div>
+        <div style="font-size:13px;color:#666;line-height:1.7;">{{ item.description }}</div>
+    </div>
+    {% endif %}
+
+    <!-- Related Items -->
+    {% if related_items %}
+    <div class="pmp-feed-section">
+        <div class="pmp-feed-title"><i class="fas fa-th-large"></i>{% trans "相关推荐" %}</div>
+        <div class="pmp-feed-grid">
+            {% for r in related_items %}
+            <a href="{% url 'marketplace:supermarket_detail' r.slug %}" style="text-decoration:none;color:inherit;">
+                <div class="pmp-feed-card">
+                    <img src="{{ r.get_image_url }}" alt="{{ r.name }}">
+                    <div class="pmp-feed-name">{{ r.name }}</div>
+                    <div class="pmp-feed-price">{{ r.price|fcfa }}</div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
     <div class="pmp-bottom-bar">
-        <a href="{% url 'manager:public_home' %}" class="pmp-icon-btn"><i class="fas fa-store"></i><span>{% trans "店铺" %}</span></a>
+        <a href="{% url 'marketplace:supermarket_list' %}" class="pmp-icon-btn"><i class="fas fa-store"></i><span>{% trans "店铺" %}</span></a>
         <a href="{% url 'manager:start_conversation' %}?item_type=supermarket&item_id={{ item.id }}&subject={{ item.name|urlencode }}" class="pmp-icon-btn"><i class="fas fa-comment-dots"></i><span>{% trans "聊天" %}</span></a>
-        
+        <button class="pmp-icon-btn" id="pmpWishBtn" onclick="toggleWishlistMobile({{ item.id }})" style="cursor:pointer;">
+            <i class="far fa-heart" id="pmpWishIcon"></i>
+            <span>{% trans "收藏" %}</span>
+        </button>
         <button class="pmp-action-btn pmp-cart" onclick="addToCart({{ item.id }})">{% trans "加入购物车" %}</button>
         <button class="pmp-action-btn pmp-buy" onclick="buyNow({{ item.id }})">{% trans "立即购买" %}</button>
     </div>

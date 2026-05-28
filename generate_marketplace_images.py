@@ -9,7 +9,7 @@ django.setup()
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from marketplace.models import Product, Course, SupermarketItem
 
-DB = 'marketplace'
+DB = 'default'
 BASE = os.path.dirname(os.path.abspath(__file__))
 MEDIA = os.path.join(BASE, 'media')
 

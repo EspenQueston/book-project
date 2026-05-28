@@ -3844,3 +3844,138 @@ msgstr "No category data"
 
 msgid "数据概览 · 店铺与货架 · 订单与设置"
 msgstr "Overview · Store & Inventory · Orders & Settings"
+
+msgid "操作失败"
+msgstr "Operation failed"
+
+msgid "已关注"
+msgstr "Following"
+
+msgid "关注"
+msgstr "Follow"
+
+msgid "终身学习"
+msgstr "Lifetime access"
+
+msgid "证书颁发"
+msgstr "Certificate"
+
+msgid "共"
+msgstr "Total"
+
+msgid "授课语言"
+msgstr "Language"
+
+msgid "永久回看"
+msgstr "Lifetime replay"
+
+msgid "购买后随时学习"
+msgstr "Learn anytime after purchase"
+
+msgid "品质保障"
+msgstr "Quality guarantee"
+
+msgid "7天退款"
+msgstr "7-day refund"
+
+msgid "课程信息"
+msgstr "Course info"
+
+msgid "进入店铺"
+msgstr "Visit shop"
+
+msgid "联系卖家"
+msgstr "Contact seller"
+
+msgid "聊天"
+msgstr "Chat"
+
+msgid "立即报名"
+msgstr "Enroll now"
+
+msgid "节"
+msgstr "lessons"
+
+msgid "这本书有电子版吗？"
+msgstr "Is there a digital version?"
+
+msgid "有的，可以联系客服获取下载码。"
+msgstr "Yes, contact support for a download code."
+
+msgid "内容和描述一致吗？"
+msgstr "Does it match the description?"
+
+msgid "是正版，质量很好，强烈推荐！"
+msgstr "Genuine product, high quality, highly recommended!"
+
+msgid "查看更多 >"
+msgstr "See more >"
+
+msgid "认证商家"
+msgstr "Verified Seller"
+
+msgid "正规出版商"
+msgstr "Certified Publisher"
+
+msgid "查看主页"
+msgstr "View Shop"
+
+msgid "全部商品"
+msgstr "All Books"
+
+msgid "服务保障"
+msgstr "Service Guarantee"
+
+msgid "15天退换"
+msgstr "15-day return"
+
+msgid "店铺1年保"
+msgstr "1yr warranty"
+
+msgid "运费险"
+msgstr "Free shipping"
+
+msgid "50+验货"
+msgstr "50+ checks"
+
+msgid "1赔1"
+msgstr "1-for-1"
+
+msgid "包邮"
+msgstr "Free delivery"
+
+msgid "终生维修"
+msgstr "Lifetime repair"
+
+msgid "新客礼包"
+msgstr "Welcome gift"
+
+msgid "简介"
+msgstr "Introduction"
+
+msgid "官方自营"
+msgstr "Official Store"
+
+msgid "同城配送"
+msgstr "Same-day delivery"
+
+msgid "Dakar仓库"
+msgstr "Dakar Warehouse"
+
+msgid "满额包邮"
+msgstr "Free shipping on orders"
+
+msgid "品质保证"
+msgstr "Quality guarantee"
+
+msgid "超市首页"
+msgstr "Supermarket Home"
+
+msgid "正品保证"
+msgstr "Authentic guarantee"
+
+msgid "冷链配送"
+msgstr "Cold chain delivery"
+
+msgid "商品简介"
+msgstr "Product description"

@@ -7,7 +7,7 @@ django.setup()
 import urllib.request
 from marketplace.models import Product, Course, SupermarketItem
 
-DB = 'marketplace'
+DB = 'default'
 MEDIA = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'media')
 
 HEADERS = {
@@ -67,6 +67,34 @@ PRODUCTS = {
         pexels(1181244),   # laptop workspace desk
         pexels(574069),    # laptop on stand
     ],
+    # Bags and Accessories
+    'sac-bandouliere-noir-croco': [
+        unsplash('photo-1584917865442-de89df76afd3'),  # black leather bag
+        pexels(2678483),   # handbag fashion
+        pexels(5418899),   # luxury bag
+    ],
+    'sac-bicolore-moutarde-marron': [
+        pexels(1152077),   # mustard/brown handbag
+        unsplash('photo-1590874103328-eac38a683ce7'),  # leather handbag
+        pexels(2047397),   # fashion bag
+    ],
+    # Beauty Products
+    'young-vision-coffret-6-gloss': [
+        pexels(2668401),   # lip gloss makeup
+        pexels(4041392),   # cosmetics
+        pexels(3685530),   # beauty products
+    ],
+    # Clothing/Robes
+    'robe': [
+        unsplash('photo-1515372039744-b8f02a3ae446'),  # women's fashion/dress
+        pexels(9851121),   # robe/dress
+        pexels(5693889),   # fashion clothing
+    ],
+    'robe-2-1': [
+        unsplash('photo-1515372039744-b8f02a3ae446'),  # women's fashion
+        pexels(5693893),   # dress/clothing
+        pexels(9558754),   # robe fashion
+    ],
 }
 
 # Courses: slug -> img_url
@@ -75,8 +103,10 @@ COURSES = {
     'react-nextjs-modern-frontend':  pexels(29459444, 800, 450),  # JSX React code
     'ui-ux-design-masterclass':      pexels(196644, 800, 450),    # design workspace
     'digital-marketing-practice':    pexels(905163, 800, 450),    # analytics charts
-    'business-english-advanced':     pexels(159711, 800, 450),    # open books
+    'business-english-advanced':     unsplash('photo-1456513080510-7bf3a84b82f8', 800, 450),  # books/learning
     'data-science-machine-learning': pexels(5825573, 800, 450),   # data analytics screen
+    # Duplicate with typo slug
+    'data-science-machine-learning-bvbvvv': pexels(5825573, 800, 450),  # same image
 }
 
 # Supermarket: slug -> img_url
@@ -87,7 +117,7 @@ SUPERMARKET = {
     'premium-coffee-beans': pexels(4109751),   # coffee beans flat lay
     'mixed-nuts-premium':   pexels(1295572),   # mixed nuts
     'cold-pressed-juice-set': pexels(1337825), # fresh juice
-    'greek-yogurt-natural': pexels(1126760),   # yogurt
+    'greek-yogurt-natural': unsplash('photo-1488477181946-6428a0291777', 600, 600),  # yogurt
     'organic-apples':       pexels(1510392),   # red apples
 }
 

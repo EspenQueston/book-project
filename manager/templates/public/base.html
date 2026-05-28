@@ -802,15 +802,6 @@
                                     </div>
                                 </a>
                             </li>
-                            <li>
-                                <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'manager:public_messages' %}" style="border-radius: 8px; padding: 10px 16px;">
-                                    <i class="fas fa-comments text-info"></i>
-                                    <div>
-                                        <div class="fw-bold" style="font-size:0.9rem;">{% trans "消息" %}</div>
-                                        <small class="text-muted">{% trans "与卖家沟通" %}</small>
-                                    </div>
-                                </a>
-                            </li>
                             <li><hr class="dropdown-divider my-1"></li>
                             <li>
                                 <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'manager:public_contact' %}" style="border-radius: 8px; padding: 10px 16px;">
@@ -996,11 +987,11 @@
                             <li><a href="{% url 'manager:public_authors' %}"><i class="fas fa-chevron-right"></i><span>{% trans "作者列表" %}</span></a></li>
                             <li><a href="{% url 'manager:public_publishers' %}"><i class="fas fa-chevron-right"></i><span>{% trans "出版社" %}</span></a></li>
                             <li><a href="{% url 'manager:track_order' %}"><i class="fas fa-chevron-right"></i><span>{% trans "订单跟踪" %}</span></a></li>
-                            <li><a href="{% url 'manager:public_blog' %}"><i class="fas fa-chevron-right"></i><span>{% trans "博客" %}</span></a></li>
+                            <li><a href="{% url 'marketplace:home' %}"><i class="fas fa-chevron-right"></i><span>{% trans "市场" %}</span></a></li>
                         </ul>
                     </div>
                 </div>
-                
+
                 <!-- Services -->
                 <div class="col-lg-2 col-md-6">
                     <div class="footer-section">

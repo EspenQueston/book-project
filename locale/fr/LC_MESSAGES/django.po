@@ -3888,3 +3888,138 @@ msgstr "Aucune donnée de catégorie"
 
 msgid "数据概览 · 店铺与货架 · 订单与设置"
 msgstr "Aperçu · Boutique & Stock · Commandes & Paramètres"
+
+msgid "操作失败"
+msgstr "Échec de l'opération"
+
+msgid "已关注"
+msgstr "Suivi"
+
+msgid "关注"
+msgstr "Suivre"
+
+msgid "终身学习"
+msgstr "Accès à vie"
+
+msgid "证书颁发"
+msgstr "Certificat"
+
+msgid "共"
+msgstr "Total"
+
+msgid "授课语言"
+msgstr "Langue"
+
+msgid "永久回看"
+msgstr "Replay permanent"
+
+msgid "购买后随时学习"
+msgstr "Apprenez quand vous voulez"
+
+msgid "品质保障"
+msgstr "Garantie qualité"
+
+msgid "7天退款"
+msgstr "Remboursement 7j"
+
+msgid "课程信息"
+msgstr "Infos du cours"
+
+msgid "进入店铺"
+msgstr "Voir boutique"
+
+msgid "联系卖家"
+msgstr "Contacter vendeur"
+
+msgid "聊天"
+msgstr "Chat"
+
+msgid "立即报名"
+msgstr "S'inscrire"
+
+msgid "节"
+msgstr "leçons"
+
+msgid "这本书有电子版吗？"
+msgstr "Y a-t-il une version numérique ?"
+
+msgid "有的，可以联系客服获取下载码。"
+msgstr "Oui, contactez le support pour un code de téléchargement."
+
+msgid "内容和描述一致吗？"
+msgstr "Est-ce conforme à la description ?"
+
+msgid "是正版，质量很好，强烈推荐！"
+msgstr "Produit authentique, haute qualité, vivement recommandé !"
+
+msgid "查看更多 >"
+msgstr "Voir plus >"
+
+msgid "认证商家"
+msgstr "Vendeur Vérifié"
+
+msgid "正规出版商"
+msgstr "Éditeur certifié"
+
+msgid "查看主页"
+msgstr "Voir la boutique"
+
+msgid "全部商品"
+msgstr "Tous les livres"
+
+msgid "服务保障"
+msgstr "Garanties de service"
+
+msgid "15天退换"
+msgstr "15j retour"
+
+msgid "店铺1年保"
+msgstr "Garantie 1an"
+
+msgid "运费险"
+msgstr "Frais offerts"
+
+msgid "50+验货"
+msgstr "50+ contrôles"
+
+msgid "1赔1"
+msgstr "SAV 1p1"
+
+msgid "包邮"
+msgstr "Livraison offerte"
+
+msgid "终生维修"
+msgstr "Réparation vie"
+
+msgid "新客礼包"
+msgstr "Cadeau bienvenu"
+
+msgid "简介"
+msgstr "Introduction"
+
+msgid "官方自营"
+msgstr "Magasin officiel"
+
+msgid "同城配送"
+msgstr "Livraison le jour même"
+
+msgid "Dakar仓库"
+msgstr "Entrepôt Dakar"
+
+msgid "满额包邮"
+msgstr "Livraison gratuite sur commande"
+
+msgid "品质保证"
+msgstr "Garantie qualité"
+
+msgid "超市首页"
+msgstr "Accueil Supermarché"
+
+msgid "正品保证"
+msgstr "Garantie authenticité"
+
+msgid "冷链配送"
+msgstr "Livraison chaîne de froid"
+
+msgid "商品简介"
+msgstr "Description du produit"

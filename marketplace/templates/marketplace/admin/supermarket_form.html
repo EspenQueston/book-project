@@ -58,6 +58,16 @@
             </div>
             <div class="col-md-4">
                 <div class="mb-3">
+                    <label class="form-label fw-bold">卖家 (Vendor)</label>
+                    <select name="vendor" class="form-select" style="border-radius:10px;">
+                        <option value="">-- 官方自营 (无卖家) --</option>
+                        {% for vendor in vendors %}
+                        <option value="{{ vendor.id }}" {% if item.vendor_id == vendor.id %}selected{% endif %}>{{ vendor.company_name }}</option>
+                        {% endfor %}
+                    </select>
+                    <small class="text-muted">留空则由平台官方自营</small>
+                </div>
+                <div class="mb-3">
                     <label class="form-label fw-bold">分类</label>
                     <select name="category" class="form-select" style="border-radius:10px;">
                         <option value="">-- 选择分类 --</option>

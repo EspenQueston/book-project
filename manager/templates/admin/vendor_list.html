@@ -208,6 +208,15 @@
                 </div>
                 <div class="col-6 col-lg-3">
                     <div class="mp-stat-card">
+                        <div class="mp-stat-icon" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);"><i class="fas fa-shopping-basket"></i></div>
+                        <div>
+                            <div class="mp-stat-value">{{ total_mp_supermarket }}</div>
+                            <div class="mp-stat-label">超市商品总数</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="mp-stat-card">
                         <div class="mp-stat-icon" style="background:linear-gradient(135deg,#10b981,#34d399);"><i class="fas fa-chart-line"></i></div>
                         <div>
                             <div class="mp-stat-value">{{ total_mp_sales }}</div>
@@ -347,7 +356,8 @@
                                 <td>
                                     <span class="v-metric prod"><i class="fas fa-box"></i> {{ vendor.product_count|default:0 }}</span>
                                     <span class="v-metric course"><i class="fas fa-play"></i> {{ vendor.course_count|default:0 }}</span>
-                                    <span class="v-metric sales"><i class="fas fa-chart-line"></i> {{ vendor.mp_total_sales|default:0 }}</span>
+                                    <span class="v-metric sales"><i class="fas fa-shopping-basket"></i> {{ vendor.supermarket_count|default:0 }}</span>
+                                    <span class="v-metric" style="color:#f59e0b; background:rgba(245,158,11,0.08);"><i class="fas fa-chart-line"></i> {{ vendor.mp_total_sales|default:0 }}</span>
                                 </td>
                                 <td>
                                     <span class="badge-status badge-{{ vendor.status }}">
@@ -414,10 +424,11 @@
                         </a>
                     </div>
                     <!-- Quick stats for this vendor -->
-                    <div class="d-flex gap-4 mt-3">
+                    <div class="d-flex gap-4 mt-3 flex-wrap">
                         <div><span style="font-size:1.4rem;font-weight:800;">{{ vendor_books_list|length }}</span> <span class="opacity-75" style="font-size:0.85rem;">图书</span></div>
                         <div><span style="font-size:1.4rem;font-weight:800;">{{ vendor_products_list|length }}</span> <span class="opacity-75" style="font-size:0.85rem;">商品</span></div>
                         <div><span style="font-size:1.4rem;font-weight:800;">{{ vendor_courses_list|length }}</span> <span class="opacity-75" style="font-size:0.85rem;">课程</span></div>
+                        <div><span style="font-size:1.4rem;font-weight:800;">{{ vendor_supermarket_list|length }}</span> <span class="opacity-75" style="font-size:0.85rem;">超市</span></div>
                     </div>
                 </div>
                 <div class="vendor-detail-body">
@@ -431,6 +442,9 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" data-bs-toggle="tab" href="#vdCourses" role="tab"><i class="fas fa-graduation-cap me-1"></i> 课程 ({{ vendor_courses_list|length }})</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#vdSupermarket" role="tab"><i class="fas fa-shopping-basket me-1"></i> 超市 ({{ vendor_supermarket_list|length }})</a>
                         </li>
                     </ul>
                     <div class="tab-content">
@@ -507,6 +521,32 @@
                             </div>
                             {% empty %}
                             <div class="text-center text-muted py-4" style="font-size:0.88rem;"><i class="fas fa-graduation-cap d-block mb-2" style="font-size:1.5rem;opacity:0.3;"></i>该卖家暂无课程</div>
+                            {% endfor %}
+                        </div>
+                        <!-- Supermarket Tab -->
+                        <div class="tab-pane fade" id="vdSupermarket" role="tabpanel">
+                            {% for s in vendor_supermarket_list %}
+                            <div class="vendor-item-card" id="item-supermarket-{{ s.pk }}">
+                                {% if s.image %}
+                                <img src="{{ s.image.url }}" class="vendor-item-img" alt="">
+                                {% else %}
+                                <div class="vendor-item-img d-flex align-items-center justify-content-center" style="background:linear-gradient(135deg,#10b981,#34d399);"><i class="fas fa-shopping-basket text-white"></i></div>
+                                {% endif %}
+                                <div class="vendor-item-info">
+                                    <div class="vendor-item-name">{{ s.name }}</div>
+                                    <div class="vendor-item-meta">
+                                        {{ s.category.name|default:"未分类" }} · 库存: {{ s.stock }} · 销量: {{ s.sales_count }}
+                                        {% if s.is_organic %}<span class="badge bg-success" style="font-size:0.65rem;">有机</span>{% endif %}
+                                        {% if s.is_active %}<span class="badge bg-success" style="font-size:0.65rem;">上架</span>{% else %}<span class="badge bg-secondary" style="font-size:0.65rem;">下架</span>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="vendor-item-price">{{ s.price|fcfa }}</div>
+                                <button class="vendor-item-delete" onclick="deleteVendorItem('supermarket', {{ s.pk }}, '{{ s.name|escapejs }}')" title="违规删除">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                            {% empty %}
+                            <div class="text-center text-muted py-4" style="font-size:0.88rem;"><i class="fas fa-shopping-basket d-block mb-2" style="font-size:1.5rem;opacity:0.3;"></i>该卖家暂无超市商品</div>
                             {% endfor %}
                         </div>
                     </div>

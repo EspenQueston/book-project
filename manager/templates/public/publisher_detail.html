@@ -36,6 +36,46 @@
 .badge-stock-out { background:#fee2e2; color:#991b1b; }
 .btn-primary-grad { background:linear-gradient(135deg,#667eea,#764ba2); color:white; border:none; border-radius:8px; padding:7px 16px; font-size:0.85rem; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:all 0.2s; }
 .btn-primary-grad:hover { transform:translateY(-2px); box-shadow:0 5px 15px rgba(102,126,234,0.35); color:white; }
+
+/* ===== Mobile Publisher Detail (≤768px) ===== */
+@media (max-width: 768px) {
+    .publisher-hero { padding: 28px 0 40px; }
+    .publisher-hero h1 { font-size: 1.4rem !important; line-height: 1.3; }
+    .pub-logo { width: 64px; height: 64px; border-radius: 16px; }
+    .pub-logo i { font-size: 1.6rem !important; }
+    .publisher-hero .breadcrumb { font-size: 0.7rem; }
+    .publisher-hero span { font-size: 0.75rem !important; padding: 3px 10px !important; }
+
+    .stat-card { padding: 14px 8px; border-radius: 12px; }
+    .stat-icon { width: 40px; height: 40px; border-radius: 10px; }
+    .stat-icon i { font-size: 1rem !important; }
+    .stat-value { font-size: 1.2rem; }
+    .stat-label { font-size: 0.7rem; }
+
+    .section-card { padding: 16px; border-radius: 14px; margin-bottom: 12px; }
+    .section-heading { font-size: 0.9rem; margin-bottom: 12px; padding-bottom: 8px; }
+    .info-row { padding: 8px 0; }
+    .info-lbl { width: 80px; font-size: 0.78rem; }
+    .info-val { font-size: 0.85rem; }
+
+    /* 2-column book feed on mobile */
+    .book-card { border-radius: 12px; }
+    .book-cover { height: 140px; }
+    .book-cover i { font-size: 2rem !important; }
+    .book-card .p-3 { padding: 10px !important; }
+    .book-card h6 { font-size: 0.8rem; min-height: auto; line-height: 1.35; }
+    .book-card p { font-size: 0.72rem; min-height: auto; margin-bottom: 6px !important; }
+    .book-card .fw-bold[style*="1.2rem"] { font-size: 1rem !important; }
+    .book-badge { font-size: 0.65rem; padding: 2px 6px; }
+    .btn-primary-grad { padding: 6px 10px; font-size: 0.72rem; border-radius: 6px; gap: 4px; }
+    .btn-success { padding: 5px 10px !important; }
+
+    /* Back nav buttons full-width stack */
+    .text-center.mt-4 .btn,
+    .text-center.mt-4 .btn-primary-grad {
+        display: block !important; width: 100% !important; margin: 0 0 8px 0 !important;
+    }
+}
 </style>
 {% endblock %}
 
@@ -183,7 +223,7 @@
             {% if books %}
             <div class="row g-4">
                 {% for book in books %}
-                <div class="col-lg-4 col-md-6">
+                <div class="col-6 col-md-6 col-lg-4">
                     <div class="book-card">
                         <div class="book-cover">
                             {% if book.cover_image %}

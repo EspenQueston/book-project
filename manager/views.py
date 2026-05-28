@@ -7763,6 +7763,7 @@ def admin_vendor_list(request):
     vendors = vendors.annotate(
         product_count=Count('products', distinct=True),
         course_count=Count('courses', distinct=True),
+        supermarket_count=Count('supermarket_items', distinct=True),
         mp_total_sales=Sum('products__sales_count'),
         mp_total_stock=Sum('products__stock'),
         mp_total_enrollments=Sum('courses__enrollment_count'),
@@ -7772,6 +7773,7 @@ def admin_vendor_list(request):
     all_vendors = models.Vendor.objects.all()
     total_mp_products = Product.objects.filter(vendor__isnull=False).count()
     total_mp_courses = Course.objects.filter(vendor__isnull=False).count()
+    total_mp_supermarket = SupermarketItem.objects.filter(vendor__isnull=False).count()
     total_mp_sales = Product.objects.filter(vendor__isnull=False).aggregate(s=Sum('sales_count'))['s'] or 0
     total_mp_enrollments = Course.objects.filter(vendor__isnull=False).aggregate(s=Sum('enrollment_count'))['s'] or 0
     total_mp_revenue = MarketplaceOrderItem.objects.filter(
@@ -7794,12 +7796,14 @@ def admin_vendor_list(request):
     vendor_products_list = []
     vendor_courses_list = []
     vendor_books_list = []
+    vendor_supermarket_list = []
     if view_vendor_id:
         viewed_vendor = models.Vendor.objects.filter(id=view_vendor_id).first()
         if viewed_vendor:
             vendor_products_list = Product.objects.filter(vendor=viewed_vendor).select_related('category').order_by('-created_at')[:50]
             vendor_courses_list = Course.objects.filter(vendor=viewed_vendor).select_related('category').order_by('-created_at')[:50]
             vendor_books_list = models.VendorBook.objects.filter(vendor=viewed_vendor).select_related('book', 'book__publisher').order_by('-created_at')[:50]
+            vendor_supermarket_list = SupermarketItem.objects.filter(vendor=viewed_vendor).select_related('category').order_by('-created_at')[:50]
 
     return render(request, 'admin/vendor_list.html', {
         'vendors': vendors,
@@ -7809,6 +7813,7 @@ def admin_vendor_list(request):
         'name': request.session.get('name', ''),
         'total_mp_products': total_mp_products,
         'total_mp_courses': total_mp_courses,
+        'total_mp_supermarket': total_mp_supermarket,
         'total_mp_sales': total_mp_sales,
         'total_mp_enrollments': total_mp_enrollments,
         'total_mp_revenue': total_mp_revenue,
@@ -7818,6 +7823,7 @@ def admin_vendor_list(request):
         'vendor_products_list': vendor_products_list,
         'vendor_courses_list': vendor_courses_list,
         'vendor_books_list': vendor_books_list,
+        'vendor_supermarket_list': vendor_supermarket_list,
     })
 
 
@@ -7836,7 +7842,7 @@ def admin_vendor_status(request):
 
 
 def admin_delete_vendor_item(request):
-    """Admin delete a vendor's product or course from the platform"""
+    """Admin delete a vendor's product, course, book, or supermarket item from the platform"""
     if "name" not in request.session:
         return JsonResponse({'success': False, 'message': '未授权'})
     if request.method == 'POST':
@@ -7857,6 +7863,11 @@ def admin_delete_vendor_item(request):
             name = item.book.name
             item.delete()
             return JsonResponse({'success': True, 'message': f'图书 "{name}" 已从卖家下架'})
+        elif item_type == 'supermarket':
+            item = get_object_or_404(SupermarketItem, id=item_id)
+            name = item.name
+            item.delete()
+            return JsonResponse({'success': True, 'message': f'超市商品 "{name}" 已删除'})
     return JsonResponse({'success': False, 'message': '无效请求'})
 
 

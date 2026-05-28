@@ -242,157 +242,211 @@ html[data-theme="dark"] .ck-guarantee-banner {
 /* ===== Responsive / Mobile ===== */
 @media (max-width: 768px) {
     .checkout-container {
-        padding: 0;
-        background: var(--ck-bg-page);
-        padding-bottom: 80px;
+        padding: 0 0 90px;
+        background: linear-gradient(180deg, #f0f4ff 0%, #f8f9ff 100%);
     }
 
-    /* Compact step indicator */
+    /* Compact step indicator — pill style */
     .step-indicator {
         margin-bottom: 0;
-        padding: 10px 14px;
+        padding: 12px 14px 10px;
         background: var(--ck-bg);
         border-bottom: 1px solid var(--ck-border-light);
         justify-content: center;
         gap: 0;
     }
     .step {
-        margin: 0 6px;
+        margin: 0 4px;
     }
     .step-number {
-        width: 28px;
-        height: 28px;
-        font-size: 0.75rem;
-        margin-right: 5px;
+        width: 26px;
+        height: 26px;
+        font-size: 0.7rem;
+        margin-right: 4px;
     }
     .step-label {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
     }
     .step-connector {
-        width: 20px;
+        width: 14px;
     }
 
-    /* Card sections */
+    /* Card sections — floating cards */
     .form-section {
-        border-radius: 0;
-        margin-bottom: 6px;
-        padding: 14px;
-        box-shadow: none;
-        border-bottom: 1px solid var(--ck-border-light);
+        border-radius: 18px;
+        margin: 0 10px 12px;
+        padding: 18px;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+        border: 1px solid rgba(99, 102, 241, 0.08);
+        background: var(--ck-bg);
     }
     .form-section h4 {
-        font-size: 0.9rem;
-        margin-bottom: 12px !important;
+        font-size: 0.95rem;
+        margin-bottom: 16px !important;
+        font-weight: 800;
+        color: #1e293b;
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
+    .form-section h4 i { font-size: 1rem; }
 
     /* Stack columns */
     .row {
         flex-direction: column;
+        margin: 0;
     }
     .col-lg-8, .col-lg-4,
     .col-md-6 {
         width: 100% !important;
         flex: none;
         max-width: 100%;
+        padding: 0;
     }
 
-    /* Inputs full-width */
+    /* Modern inputs */
     .form-control {
-        padding: 10px 12px;
-        font-size: 0.85rem;
-        background: #fafafa;
-        border-color: #eee;
-        border-radius: 8px;
+        padding: 13px 14px;
+        font-size: 0.9rem;
+        background: #f8f9fc;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 12px;
+        transition: all 0.25s ease;
+    }
+    .form-control:focus {
+        background: #fff;
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102,126,234,0.12);
     }
     html[data-theme="dark"] .form-control {
         background: var(--ck-input-bg);
         border-color: var(--ck-input-border);
     }
-    .form-control:focus {
-        background: var(--ck-bg);
-    }
     .form-group {
-        margin-bottom: 12px;
+        margin-bottom: 16px;
     }
     .form-label {
         font-size: 0.8rem;
-        color: var(--ck-text-muted);
-        margin-bottom: 3px;
+        font-weight: 700;
+        color: #64748b;
+        margin-bottom: 5px;
+        display: block;
+    }
+    .input-group-text {
+        border-radius: 12px 0 0 12px !important;
+        font-weight: 700;
+        font-size: 0.8rem;
+    }
+    .input-group .form-control {
+        border-radius: 0 12px 12px 0 !important;
     }
 
-    /* Payment options: stack vertically */
+    /* Payment options: modern cards */
     .payment-methods {
         grid-template-columns: 1fr;
-        gap: 8px;
+        gap: 10px;
     }
     .payment-option {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 14px;
         text-align: left;
-        padding: 12px;
-        border-radius: 10px;
+        padding: 14px 16px;
+        border-radius: 14px;
+        border: 1.5px solid #e2e8f0;
+        background: #fff;
+        transition: all 0.2s ease;
+    }
+    .payment-option.selected {
+        border-color: #667eea;
+        background: linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.06));
+        box-shadow: 0 4px 14px rgba(102,126,234,0.15);
     }
     .payment-icon {
-        font-size: 1.4rem;
+        font-size: 1.5rem;
         margin-bottom: 0;
-        width: 36px;
-        height: 36px;
-        border-radius: 8px;
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #f0f4ff, #e8e0ff);
         display: flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
     }
     .payment-option .payment-name {
-        font-size: 0.85rem;
-        font-weight: 600;
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #1e293b;
     }
     .payment-option small {
-        font-size: 0.72rem;
+        font-size: 0.75rem;
+        color: #94a3b8;
     }
 
-    /* Order summary */
+    /* Order summary — floating card */
     .order-summary {
-        border-radius: 0;
-        padding: 14px;
+        border-radius: 18px;
+        padding: 18px;
         position: static;
-        margin-bottom: 6px;
+        margin: 0 10px 12px;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+        border: 1px solid rgba(99, 102, 241, 0.08);
+        background: var(--ck-bg);
+    }
+    .order-summary h4 {
+        font-size: 0.95rem;
+        font-weight: 800;
     }
     .book-item {
         padding: 10px;
-        border-radius: 8px;
+        border-radius: 12px;
         gap: 10px;
+        background: #f8f9fc;
+        border: none;
+        margin-bottom: 8px;
     }
     .book-item img,
     .book-cover > div {
-        width: 52px !important;
-        height: 66px !important;
+        width: 48px !important;
+        height: 62px !important;
+        border-radius: 8px;
     }
     .book-info {
         margin-left: 10px;
     }
     .book-info h6 {
         font-size: 0.82rem;
-        margin-bottom: 4px !important;
+        font-weight: 700;
+        margin-bottom: 3px !important;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
+        color: #1e293b;
+    }
+    .summary-details {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px dashed #e2e8f0;
     }
     .summary-item {
         font-size: 0.85rem;
         padding: 8px 0;
+        color: #475569;
     }
     .summary-item:last-child {
-        font-size: 1rem;
+        font-size: 1.1rem;
+        padding-top: 10px;
+        margin-top: 4px;
+        border-top: 1.5px solid #e2e8f0;
     }
-    .summary-item:last-child .text-primary {
+    .summary-item:last-child span:last-child {
         color: var(--ck-accent) !important;
         font-weight: 900;
     }
 
-    /* Price highlight (Taobao-style) */
+    /* Price highlight */
     .book-info strong {
         color: var(--ck-accent);
         font-weight: 800;
@@ -413,18 +467,21 @@ html[data-theme="dark"] .ck-guarantee-banner {
         bottom: 60px;
         left: 0;
         right: 0;
-        background: var(--ck-bg);
-        border-top: 1px solid var(--ck-border-light);
-        padding: 8px 14px;
+        background: rgba(255,255,255,0.92);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-top: 1px solid rgba(102,126,234,0.12);
+        padding: 10px 14px;
         z-index: 900;
+        box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.1);
     }
     .ck-pay-btn {
         width: 100%;
-        background: linear-gradient(135deg, #FF6000, var(--ck-accent));
+        background: linear-gradient(135deg, #667eea, #764ba2);
         color: #fff;
         border: none;
-        border-radius: 22px;
-        padding: 13px 0;
+        border-radius: 14px;
+        padding: 14px 0;
         font-size: 0.95rem;
         font-weight: 800;
         cursor: pointer;
@@ -433,18 +490,20 @@ html[data-theme="dark"] .ck-guarantee-banner {
         align-items: center;
         justify-content: center;
         gap: 8px;
+        letter-spacing: 0.3px;
     }
-    .ck-pay-btn:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 16px rgba(228,57,60,.35);
+    .ck-pay-btn:active {
+        transform: scale(0.98);
     }
 
-    /* Guarantee banner */
+    /* Guarantee banner — modern pill */
     .ck-guarantee-banner {
-        border-radius: 0;
-        margin-bottom: 6px;
+        border-radius: 14px;
+        margin: 0 10px 12px;
         font-size: 0.75rem;
-        padding: 8px 14px;
+        padding: 10px 14px;
+        background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+        border: 1px solid #bbf7d0;
     }
 }
 </style>

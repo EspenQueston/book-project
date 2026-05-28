@@ -364,6 +364,13 @@ def supermarket_detail(request, slug):
     ).exclude(pk=item.pk)[:4] if item.category else SupermarketItem.objects.none()
     attribute_context = build_attribute_groups(item.attributes.all())
 
+    # Fallback seller: if no vendor, use admin/staff user as default seller
+    fallback_seller = None
+    if not item.vendor:
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        fallback_seller = User.objects.filter(is_staff=True).first()
+
     context = {
         'item': item,
         'related_items': related,
@@ -375,6 +382,7 @@ def supermarket_detail(request, slug):
         'listing_review_summary': review_summary('supermarket', item.pk),
         'listing_kind': 'supermarket',
         'listing_id': item.pk,
+        'fallback_seller': fallback_seller,
     }
     return render(request, 'marketplace/supermarket_detail.html', context)
 
@@ -1358,6 +1366,9 @@ def admin_supermarket_add(request):
         cat_id = request.POST.get('category')
         if cat_id:
             item.category_id = int(cat_id)
+        vendor_id = request.POST.get('vendor')
+        if vendor_id:
+            item.vendor_id = int(vendor_id)
         if 'image' in request.FILES:
             item.image = request.FILES['image']
 
@@ -1382,7 +1393,9 @@ def admin_supermarket_add(request):
         return redirect('marketplace:admin_supermarket')
 
     categories = Category.objects.filter(section='supermarket', is_active=True)
-    context = {'categories': categories, 'name': request.session.get("name", "Admin")}
+    from manager.models import Vendor
+    vendors = Vendor.objects.filter(is_active=True)
+    context = {'categories': categories, 'vendors': vendors, 'name': request.session.get("name", "Admin")}
     return render(request, 'marketplace/admin/supermarket_form.html', context)
 
 
@@ -1407,6 +1420,11 @@ def admin_supermarket_edit(request, pk):
         item.is_active = request.POST.get('is_active', 'on') == 'on'
         cat_id = request.POST.get('category')
         item.category_id = int(cat_id) if cat_id else None
+        vendor_id = request.POST.get('vendor')
+        if vendor_id:
+            item.vendor_id = int(vendor_id)
+        else:
+            item.vendor_id = None
         if 'image' in request.FILES:
             item.image = request.FILES['image']
         item.save()
@@ -1425,7 +1443,9 @@ def admin_supermarket_edit(request, pk):
         return redirect('marketplace:admin_supermarket')
 
     categories = Category.objects.filter(section='supermarket', is_active=True)
-    context = {'item': item, 'categories': categories, 'name': request.session.get("name", "Admin")}
+    from manager.models import Vendor
+    vendors = Vendor.objects.filter(is_active=True)
+    context = {'item': item, 'categories': categories, 'vendors': vendors, 'name': request.session.get("name", "Admin")}
     return render(request, 'marketplace/admin/supermarket_form.html', context)
 
 

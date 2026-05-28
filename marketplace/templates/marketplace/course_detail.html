@@ -195,6 +195,11 @@
     .bmp-score-item { text-align: center; }
     .bmp-score-val { font-size: 14px; font-weight: 700; color: #f5576c; }
     .bmp-score-lbl { font-size: 10px; color: #999; }
+    .bmp-seller-btns { display: flex; gap: 14px; margin-top: 4px; }
+    .bmp-seller-btn { flex: 1; padding: 11px 8px; border-radius: 22px; font-size: 13px; font-weight: 700; text-align: center; border: 1.5px solid #f093fb; color: #f093fb; cursor: pointer; text-decoration: none; background: #fff; transition: all 0.25s ease; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 42px; }
+    .bmp-seller-btn:active { transform: scale(0.97); }
+    .bmp-seller-btns .bmp-seller-btn:nth-child(2) { background: linear-gradient(135deg, #f093fb, #f5576c); color: #fff; border-color: transparent; box-shadow: 0 4px 14px rgba(240,147,251,0.32); }
+    .bmp-seller-btn.follow { background: linear-gradient(135deg, #f093fb, #f5576c); color: #fff; border-color: transparent; flex: 0 0 auto; padding: 6px 14px; min-height: 32px; font-size: 12px; }
 
     .bmp-bottom-bar { position: fixed; bottom: 60px; left: 0; right: 0; background: #fff; display: flex; align-items: center; border-top: 1px solid #f0f0f0; z-index: 900; padding: 6px 10px; gap: 0; }
     .bmp-action-icons { display: flex; gap: 0; margin-right: 8px; }
@@ -609,10 +614,10 @@ function toggleComplete(lessonId, el){
             } else {
                 item.classList.remove('completed');
             }
-            document.getElementById('progressText').textContent = d.completed_count + '/' + d.total_lessons + ' 已完成';
+            document.getElementById('progressText').textContent = d.completed_count + '/' + d.total_lessons + " {% trans '已完成' %}";
             document.getElementById('progressBar').style.width = d.progress_percent + '%';
         }
-    }).catch(()=> showToast('操作失败', 'error'));
+    }).catch(()=> showToast("{% trans '操作失败' %}", 'error'));
 }
 
 function addCourseToCart(){
@@ -624,7 +629,7 @@ function addCourseToCart(){
     fetch("{% url 'manager:add_marketplace_item_to_cart' %}", { method:'POST', body: fd })
         .then(r=>r.json())
         .then(d=> showToast(d.message, d.success ? 'success' : 'error'))
-        .catch(()=> showToast('网络错误', 'error'));
+        .catch(()=> showToast("{% trans '网络错误' %}", 'error'));
 }
 
 function buyNowCourse(){
@@ -647,8 +652,8 @@ function toggleVendorFollow(vendorId, btn){
         .then(d=>{
             if(d.login_required){ window.location.href='{% url "manager:user_login" %}'; return; }
             if(typeof showToast==='function') showToast(d.message || 'OK', d.success ? 'success' : 'error');
-            if(d.success && btn){ btn.textContent = d.following ? '已关注' : '关注'; }
-        }).catch(()=> { if(typeof showToast==='function') showToast('网络错误', 'error'); });
+            if(d.success && btn){ btn.textContent = d.following ? "{% trans '已关注' %}" : "{% trans '关注' %}"; }
+        }).catch(()=> { if(typeof showToast==='function') showToast("{% trans '网络错误' %}", 'error'); });
 }
 
 // Wishlist

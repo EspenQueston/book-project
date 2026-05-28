@@ -253,6 +253,7 @@ _supabase_public_base = os.environ.get('SUPABASE_STORAGE_PUBLIC_BASE_URL', '').s
 if not _supabase_public_base and _supabase_project_url:
     _supabase_public_base = f'{_supabase_project_url}/storage/v1/object/public/{_supabase_bucket}'
 _supabase_public_base = _supabase_public_base.rstrip('/')
+_r2_public_domain = urlparse(_supabase_public_base).netloc if _supabase_public_base else ''
 
 _supabase_ready = all([
     _supabase_storage_enabled,
@@ -272,6 +273,7 @@ if _supabase_ready:
                 'secret_key': _supabase_s3_secret,
                 'region_name': _supabase_s3_region,
                 'endpoint_url': _supabase_storage_endpoint,
+                'custom_domain': _r2_public_domain or None,
                 'default_acl': None,
                 'querystring_auth': False,
                 'file_overwrite': False,
@@ -288,6 +290,7 @@ if _supabase_ready:
                 'secret_key': _supabase_s3_secret,
                 'region_name': _supabase_s3_region,
                 'endpoint_url': _supabase_storage_endpoint,
+                'custom_domain': _r2_public_domain or None,
                 'default_acl': None,
                 'querystring_auth': False,
                 'file_overwrite': True,

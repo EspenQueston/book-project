@@ -9,7 +9,7 @@ django.setup()
 from PIL import Image, ImageDraw, ImageFont
 from marketplace.models import Product, Course, SupermarketItem
 
-DB = 'marketplace'
+DB = 'default'
 MEDIA = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'media')
 
 # Fonts
