@@ -1338,6 +1338,136 @@ class KkiapayCountry(models.Model):
         )
 
 
+# ==========================================
+# Wallet / Credit System
+# ==========================================
+
+class UserWallet(models.Model):
+    """Prepaid wallet balance per SiteUser. Separate from LoyaltyPoints."""
+    user = models.OneToOneField(SiteUser, on_delete=models.CASCADE,
+                                 related_name='wallet', verbose_name='用户')
+    balance = models.DecimalField(max_digits=12, decimal_places=2,
+                                  default=Decimal('0.00'), verbose_name='余额')
+    total_deposited = models.DecimalField(max_digits=12, decimal_places=2,
+                                          default=Decimal('0.00'), verbose_name='累计充值')
+    total_spent = models.DecimalField(max_digits=12, decimal_places=2,
+                                      default=Decimal('0.00'), verbose_name='累计消费')
+    is_active = models.BooleanField(default=True, verbose_name='启用')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'user_wallet'
+        verbose_name = '用户钱包'
+        verbose_name_plural = '用户钱包'
+
+    def __str__(self):
+        return f'{self.user.name} — {self.balance}'
+
+    def credit(self, amount, source, description='', source_id=None):
+        """Atomically add funds."""
+        amount = Decimal(str(amount))
+        if amount <= 0:
+            return False
+        self.balance += amount
+        self.total_deposited += amount
+        self.save(update_fields=['balance', 'total_deposited', 'updated_at'])
+        WalletTransaction.objects.create(
+            user=self.user,
+            amount=amount,
+            txn_type='credit',
+            source=source,
+            description=description,
+            source_id=source_id or '',
+        )
+        return True
+
+    def debit(self, amount, source, description='', source_id=None):
+        """Atomically spend funds. Returns True on success."""
+        amount = Decimal(str(amount))
+        if amount <= 0:
+            return False
+        if self.balance < amount:
+            return False
+        self.balance -= amount
+        self.total_spent += amount
+        self.save(update_fields=['balance', 'total_spent', 'updated_at'])
+        WalletTransaction.objects.create(
+            user=self.user,
+            amount=-amount,
+            txn_type='debit',
+            source=source,
+            description=description,
+            source_id=source_id or '',
+        )
+        return True
+
+
+class WalletTransaction(models.Model):
+    """Immutable ledger of every wallet movement."""
+    TXN_TYPE_CHOICES = [
+        ('credit', '充值'),
+        ('debit', '消费'),
+        ('refund', '退款'),
+        ('bonus', '平台赠送'),
+    ]
+    SOURCE_CHOICES = [
+        ('deposit', '用户充值'),
+        ('order_payment', '订单支付'),
+        ('order_refund', '订单退款'),
+        ('loyalty_convert', '积分兑换'),
+        ('admin_adjust', '管理员调整'),
+        ('promo_bonus', '活动奖励'),
+    ]
+
+    user = models.ForeignKey(SiteUser, on_delete=models.CASCADE,
+                             related_name='wallet_transactions', verbose_name='用户')
+    amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='金额(负=支出)')
+    txn_type = models.CharField(max_length=20, choices=TXN_TYPE_CHOICES, verbose_name='类型')
+    source = models.CharField(max_length=20, choices=SOURCE_CHOICES, verbose_name='来源')
+    description = models.CharField(max_length=255, blank=True, default='', verbose_name='描述')
+    source_id = models.CharField(max_length=50, blank=True, default='', verbose_name='关联ID')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'wallet_transaction'
+        ordering = ['-created_at']
+        verbose_name = '钱包流水'
+        verbose_name_plural = '钱包流水'
+
+    def __str__(self):
+        sign = '+' if self.amount > 0 else ''
+        return f'{self.user.name} {sign}{self.amount} ({self.get_txn_type_display()})'
+
+
+class TopUpOrder(models.Model):
+    """Pending wallet deposit order."""
+    STATUS_CHOICES = [
+        ('pending', '待支付'),
+        ('completed', '已完成'),
+        ('failed', '失败'),
+        ('cancelled', '已取消'),
+    ]
+    user = models.ForeignKey(SiteUser, on_delete=models.CASCADE,
+                             related_name='topup_orders', verbose_name='用户')
+    order_number = models.CharField(max_length=32, unique=True, verbose_name='充值单号')
+    amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='充值金额')
+    payment_method = models.CharField(max_length=20, verbose_name='支付方式')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    transaction_id = models.CharField(max_length=100, blank=True, default='', verbose_name='外部交易号')
+    created_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        db_table = 'topup_order'
+        ordering = ['-created_at']
+        verbose_name = '充值订单'
+        verbose_name_plural = '充值订单'
+
+    def __str__(self):
+        return f'{self.order_number} — {self.amount} ({self.get_status_display()})'
+
+
 # 创建(同步)数据表命令
 # 创建数据库db_book
 # python manage.py makemigrations

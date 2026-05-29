@@ -1,0 +1,95 @@
+{% extends 'public/base.html' %}
+{% load i18n %}
+{% load currency_filters %}
+
+{% block title %}{% trans "Top Up Wallet" %} - DUNO 360{% endblock %}
+
+{% block extra_css %}
+<style>
+    .topup-card {
+        background: #fff; border-radius: 20px;
+        padding: 28px; margin-bottom: 20px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+    }
+    .amount-grid {
+        display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px;
+    }
+    .amount-option {
+        border: 2px solid #e2e8f0; border-radius: 12px;
+        padding: 14px 8px; text-align: center; cursor: pointer;
+        background: #fff; transition: all 0.2s; font-weight: 700; color: #334155;
+    }
+    .amount-option:hover, .amount-option.active {
+        border-color: #667eea; color: #667eea;
+        background: rgba(102,126,234,0.06);
+    }
+    .custom-amount-wrap { margin-bottom: 20px; }
+    .method-list { display: flex; flex-direction: column; gap: 10px; }
+    .method-item {
+        display: flex; align-items: center; gap: 12px;
+        border: 2px solid #e2e8f0; border-radius: 14px;
+        padding: 14px 16px; cursor: pointer; background: #fff; transition: all 0.2s;
+    }
+    .method-item:hover, .method-item.active {
+        border-color: #667eea; background: rgba(102,126,234,0.05);
+    }
+    .method-item input { accent-color: #667eea; }
+    .method-icon { font-size: 1.3rem; width: 32px; text-align: center; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="topup-card">
+        <h5 class="fw-bold mb-3"><i class="fas fa-wallet me-2 text-primary"></i>{% trans "Top Up Wallet" %}</h5>
+        <form method="post" action="{% url 'manager:public_wallet_topup' %}">
+            {% csrf_token %}
+            <label class="form-label fw-semibold">{% trans "Select Amount" %}</label>
+            <div class="amount-grid">
+                <div class="amount-option" data-val="1000">1,000</div>
+                <div class="amount-option" data-val="5000">5,000</div>
+                <div class="amount-option" data-val="10000">10,000</div>
+                <div class="amount-option" data-val="20000">20,000</div>
+                <div class="amount-option" data-val="50000">50,000</div>
+                <div class="amount-option" data-val="100000">100,000</div>
+            </div>
+            <div class="custom-amount-wrap">
+                <label class="form-label fw-semibold">{% trans "Or enter custom amount" %}</label>
+                <input type="number" name="amount" id="amountInput" class="form-control form-control-lg rounded-3" placeholder="{% trans 'Enter amount' %}" min="1" step="1" required>
+            </div>
+
+            <label class="form-label fw-semibold">{% trans "Payment Method" %}</label>
+            <div class="method-list">
+                {% for val, label in payment_methods %}
+                <label class="method-item">
+                    <input type="radio" name="payment_method" value="{{ val }}" {% if forloop.first %}checked{% endif %}>
+                    <span class="method-icon">
+                        {% if val == 'mtn_money' %}<i class="fas fa-mobile-alt" style="color:#ffcc00;"></i>
+                        {% elif val == 'orange_money' %}<i class="fas fa-mobile-alt" style="color:#ff6600;"></i>
+                        {% elif val == 'airtel_money' %}<i class="fas fa-mobile-alt" style="color:#e60000;"></i>
+                        {% elif val == 'paypal' %}<i class="fab fa-paypal" style="color:#003087;"></i>
+                        {% elif val == 'credit_card' %}<i class="fas fa-credit-card" style="color:#1e293b;"></i>
+                        {% else %}<i class="fas fa-university" style="color:#475569;"></i>{% endif %}
+                    </span>
+                    <span class="fw-semibold">{{ label }}</span>
+                </label>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 rounded-pill mt-4 py-3 fw-bold">
+                <i class="fas fa-arrow-circle-right me-2"></i>{% trans "Proceed to Payment" %}
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.amount-option').forEach(function(opt) {
+        opt.addEventListener('click', function() {
+            document.querySelectorAll('.amount-option').forEach(function(o) { o.classList.remove('active'); });
+            this.classList.add('active');
+            document.getElementById('amountInput').value = this.dataset.val;
+        });
+    });
+</script>
+{% endblock %}

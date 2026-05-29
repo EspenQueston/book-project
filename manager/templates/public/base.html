@@ -1097,15 +1097,15 @@
             once: true
         });
         
-        // Smooth scrolling for anchor links
+        // Smooth scrolling for anchor links (only real #id anchors)
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
+                var href = this.getAttribute('href');
+                if (!href || href === '#' || href.length < 2) return;
+                var target = document.querySelector(href);
                 if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth'
-                    });
+                    e.preventDefault();
+                    target.scrollIntoView({ behavior: 'smooth' });
                 }
             });
         });

@@ -202,6 +202,23 @@
         html[data-theme="dark"] .bft-item { color: #94a3b8; }
         .bft-item.active { color: #FF6000; border-bottom-color: #FF6000; }
 
+        /* Mobile category header */
+        .books-mobile-cat-header {
+            display: flex !important;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: #fff8f0;
+            border-bottom: 1px solid #ffe4cc;
+        }
+        html[data-theme="dark"] .books-mobile-cat-header { background: #2d2418; border-bottom-color: #4a3b2a; }
+        .bmc-label { font-size: 13px; color: #666; }
+        html[data-theme="dark"] .bmc-label { color: #cbd5e1; }
+        .bmc-clear {
+            font-size: 12px; color: #FF6000; text-decoration: none;
+            display: flex; align-items: center; gap: 4px; font-weight: 600;
+        }
+
         /* Books King Kong zone — 2 rows × 5 columns */
         .books-king-kong {
             display: grid !important;
@@ -286,13 +303,21 @@
     <div id="booksSearchSuggest" class="books-search-suggest"></div>
 </div>
 
+<!-- ===== MOBILE ONLY: Category header (shown when category selected) ===== -->
+{% if current_category %}
+<div class="books-mobile-cat-header" style="display:none;">
+    <span class="bmc-label">{% trans "Category" %}: <strong>{{ current_category_name|default:current_category }}</strong></span>
+    <a href="{% url 'manager:public_books' %}" class="bmc-clear">{% trans "Clear" %} <i class="fas fa-times-circle"></i></a>
+</div>
+{% endif %}
+
 <!-- ===== MOBILE ONLY: Filter tabs ===== -->
-<div class="books-filter-tabs" style="display:none;">
-    <a href="{% url 'manager:public_books' %}" class="bft-item {% if not current_category %}active{% endif %}" data-zh="推荐" data-en="Featured" data-fr="Recommandés">推荐</a>
+<div class="books-filter-tabs" style="display:none;" id="booksFilterTabs">
+    <a href="{% url 'manager:public_books' %}" class="bft-item {% if not current_category %}active{% endif %}" data-zh="{% trans 'All' %}" data-en="{% trans 'All' %}" data-fr="{% trans 'All' %}">{% trans "All" %}</a>
     {% for cat in categories %}
-    <a href="{% url 'manager:public_books' %}?category={{ cat.slug }}" class="bft-item {% if current_category == cat.slug %}active{% endif %}" data-zh="{{ cat.name }}" data-en="{{ cat.name }}" data-fr="{{ cat.name }}">{{ cat.name }}</a>
+    <a href="{% url 'manager:public_books' %}?category={{ cat.slug }}" class="bft-item {% if current_category == cat.slug %}active{% endif %}" data-zh="{{ cat.name }}" data-en="{{ cat.name_en|default:cat.name }}" data-fr="{{ cat.name_fr|default:cat.name }}">{{ cat.name }}</a>
     {% endfor %}
-    <a href="/marketplace/courses/" class="bft-item" data-zh="课程" data-en="Courses" data-fr="Cours">课程</a>
+    <a href="{% url 'marketplace:course_list' %}" class="bft-item" data-zh="{% trans 'Courses' %}" data-en="{% trans 'Courses' %}" data-fr="{% trans 'Courses' %}">{% trans "Courses" %}</a>
 </div>
 
 <!-- ===== MOBILE ONLY: Books King Kong Zone (2×5) ===== -->
@@ -320,16 +345,16 @@
             {% if authors %}<div class="bmf-author">{{ authors.0.name|default:"" }}</div>{% endif %}
             {% endwith %}
             {% if book.price == 0 %}
-            <div class="bmf-free" data-zh="免费" data-en="FREE" data-fr="GRATUIT">免费</div>
+            <div class="bmf-free" data-zh="{% trans 'Free' %}" data-en="{% trans 'Free' %}" data-fr="{% trans 'Free' %}">{% trans "Free" %}</div>
             {% else %}
             <div class="bmf-price">{{ book.price|fcfa }}</div>
             {% endif %}
-            <span class="bmf-badge-type" style="background:#ede9fe;color:#7c3aed;" data-zh="图书" data-en="Book" data-fr="Livre">图书</span>
+            <span class="bmf-badge-type" style="background:#ede9fe;color:#7c3aed;" data-zh="{% trans 'Book' %}" data-en="{% trans 'Book' %}" data-fr="{% trans 'Book' %}">{% trans "Book" %}</span>
         </div>
     </a>
     {% endfor %}
 </div>
-<div id="booksFeedLoader" style="display:none;text-align:center;padding:12px;color:#999;font-size:.85rem;"><i class="fas fa-spinner fa-spin"></i> <span data-zh="加载中..." data-en="Loading..." data-fr="Chargement...">加载中...</span></div>
+<div id="booksFeedLoader" style="display:none;text-align:center;padding:12px;color:#999;font-size:.85rem;"><i class="fas fa-spinner fa-spin"></i> <span>{% trans "Loading..." %}</span></div>
 
 <!-- ===== DESKTOP: Page Header ===== -->
 <section class="books-desktop-hero hero-section text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 0; margin-bottom: 30px;">
@@ -654,7 +679,9 @@ document.addEventListener('DOMContentLoaded', function() {
     function loadBooks() {
         loading = true;
         if (loader) loader.style.display = 'block';
-        fetch('/manager/api/feed/?feed=books&page=' + page)
+        var __url = '/manager/public/books/?format=json&page=' + page;
+        if ('{{ current_category|default:""|escapejs }}') __url += '&category=' + encodeURIComponent('{{ current_category|default:""|escapejs }}');
+        fetch(__url)
             .then(r => r.json())
             .then(data => {
                 var items = data.items || [];
@@ -831,6 +858,66 @@ document.addEventListener('DOMContentLoaded', function() {
 
     form.addEventListener('submit', function() {
         hideSuggest();
+    });
+})();
+
+// ===== Mobile category tab AJAX filtering =====
+(function() {
+    if (window.innerWidth > 768) return;
+    var tabs = document.getElementById('booksFilterTabs');
+    var feedDiv = document.getElementById('booksMobileFeed');
+    var loader = document.getElementById('booksFeedLoader');
+    if (!tabs || !feedDiv) return;
+
+    function fmtFcfa(val) {
+        var n = Math.round(parseFloat(val) * 82);
+        return n.toLocaleString('fr-FR') + '\u00a0FCFA';
+    }
+
+    function buildBookCard(book) {
+        var priceHtml = parseFloat(book.price || '0') <= 0
+            ? '<div class="bmf-free">{% trans "Free" %}</div>'
+            : '<div class="bmf-price">'+fmtFcfa(book.price)+'</div>';
+        var img = book.cover_url || '/static/img/default_cover.png';
+        return '<a href="'+book.url+'" class="bmf-card">'
+            + '<img class="bmf-cover" src="'+img+'" alt="'+book.name+'" loading="lazy" onerror="this.src=\'/static/img/default_cover.png\'">'
+            + '<div class="bmf-body">'
+            + '<div class="bmf-title">'+book.name+'</div>'
+            + priceHtml
+            + '<span class="bmf-badge-type" style="background:#ede9fe;color:#7c3aed;">{% trans "Book" %}</span>'
+            + '</div></a>';
+    }
+
+    tabs.querySelectorAll('a.bft-item').forEach(function(tab) {
+        tab.addEventListener('click', function(e) {
+            var href = this.getAttribute('href');
+            if (!href || href.indexOf('/marketplace/courses/') !== -1) return;
+            e.preventDefault();
+            var newCat = '';
+            var match = href.match(/[?&]category=([^&]+)/);
+            if (match) newCat = decodeURIComponent(match[1]);
+
+            tabs.querySelectorAll('a.bft-item').forEach(function(t) { t.classList.remove('active'); });
+            this.classList.add('active');
+
+            var catHeader = document.querySelector('.books-mobile-cat-header');
+            if (catHeader) catHeader.style.display = newCat ? 'flex' : 'none';
+
+            feedDiv.innerHTML = '';
+            if (loader) loader.style.display = 'block';
+            var url = '/manager/public/books/?format=json&page=1' + (newCat ? '&category=' + encodeURIComponent(newCat) : '');
+            fetch(url)
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    var books = data.books || [];
+                    books.forEach(function(book) {
+                        feedDiv.insertAdjacentHTML('beforeend', buildBookCard(book));
+                    });
+                    if (loader) loader.style.display = 'none';
+                    try { history.pushState(null, '', href); } catch(e){}
+                })
+                .catch(function() { if (loader) loader.style.display = 'none'; });
+        });
     });
 })();
 </script>

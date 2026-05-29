@@ -940,7 +940,7 @@ def api_conversations(request):
             if _lm.date() == _now.date():
                 last_time_str = _lm.strftime('%H:%M')
             elif (_now.date() - _lm.date()).days == 1:
-                last_time_str = '昨天'
+                last_time_str = '{% trans "Yesterday" %}'
             else:
                 last_time_str = _lm.strftime('%m/%d')
             last_date_str = _lm.strftime('%Y-%m-%d')
@@ -1021,6 +1021,18 @@ def api_conversation_messages(request, conversation_id):
             'ref_item_url': ref.get('url', '') if ref else '',
         }
     })
+
+
+def api_mark_conversation_read(request, conversation_id):
+    """API: mark all messages in a conversation as read."""
+    user_id = request.session.get('site_user_id')
+    if not user_id:
+        return JsonResponse({'success': False, 'error': 'not_logged_in'})
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'method_not_allowed'})
+    convo = get_object_or_404(models.Conversation, pk=conversation_id, buyer_id=user_id)
+    convo.direct_messages.filter(is_read=False).exclude(sender_type='buyer').update(is_read=True)
+    return JsonResponse({'success': True})
 
 
 def api_vendor_conversations(request):
@@ -1264,6 +1276,14 @@ def public_my_profile(request):
 
     from . import views_review
 
+    # Wallet
+    wallet_balance = Decimal('0.00')
+    try:
+        wallet = models.UserWallet.objects.get(user=user)
+        wallet_balance = wallet.balance
+    except Exception:
+        pass
+
     context = {
         'site_user': user,
         'loyalty': loyalty,
@@ -1279,6 +1299,7 @@ def public_my_profile(request):
         'all_publishers': all_publishers,
         'all_vendors': all_vendors,
         'pending_review_items': views_review.collect_pending_reviews_for_user(user),
+        'wallet_balance': wallet_balance,
     }
     return render(request, 'public/my_profile.html', context)
 
@@ -1396,6 +1417,15 @@ def public_books(request):
     page_obj = paginator.get_page(page_number)
     categories = models.BookCategory.objects.filter(is_active=True, parent__isnull=True)
 
+    current_category_obj = None
+    current_category_name = ''
+    if category_slug:
+        try:
+            current_category_obj = models.BookCategory.objects.get(slug=category_slug, is_active=True)
+            current_category_name = current_category_obj.name
+        except models.BookCategory.DoesNotExist:
+            pass
+
     response_format = request.GET.get('format')
 
     if response_format == 'suggest':
@@ -1447,6 +1477,8 @@ def public_books(request):
         'sort_by': sort_by,
         'current_sort': sort_by,
         'current_category': category_slug,
+        'current_category_name': current_category_name,
+        'current_category_obj': current_category_obj,
         'active_category': category_slug,
         'min_price': min_price,
         'max_price': max_price,
@@ -5845,9 +5877,10 @@ def public_vendor_shop(request, vendor_id):
     """Public vendor storefront page - Taobao style."""
     vendor = get_object_or_404(models.Vendor, pk=vendor_id, is_active=True)
     vendor_books = models.VendorBook.objects.filter(vendor=vendor, is_active=True).select_related('book', 'book__publisher')
-    from marketplace.models import Product, Course
+    from marketplace.models import Product, Course, SupermarketItem
     vendor_products = Product.objects.filter(vendor=vendor, is_active=True)
     vendor_courses = Course.objects.filter(vendor=vendor, is_active=True)
+    vendor_supermarket = SupermarketItem.objects.filter(vendor=vendor, is_active=True)
 
     is_following = False
     follower_count = models.UserFollowedVendor.objects.filter(vendor=vendor).count()
@@ -5858,7 +5891,8 @@ def public_vendor_shop(request, vendor_id):
     total_sales = sum(vb.book.sale_num for vb in vendor_books)
     total_products = vendor_products.count()
     total_courses = vendor_courses.count()
-    total_items = vendor_books.count() + total_products + total_courses
+    total_supermarket = vendor_supermarket.count()
+    total_items = vendor_books.count() + total_products + total_courses + total_supermarket
 
     tab = request.GET.get('tab', 'all')
     context = {
@@ -5866,12 +5900,14 @@ def public_vendor_shop(request, vendor_id):
         'vendor_books': vendor_books,
         'vendor_products': vendor_products,
         'vendor_courses': vendor_courses,
+        'vendor_supermarket': vendor_supermarket,
         'is_following': is_following,
         'follower_count': follower_count,
         'active_tab': tab,
         'total_sales': total_sales,
         'total_products': total_products,
         'total_courses': total_courses,
+        'total_supermarket': total_supermarket,
         'total_items': total_items,
     }
     return render(request, 'public/vendor_shop.html', context)
@@ -8383,3 +8419,100 @@ def admin_delete_vendor(request):
             return JsonResponse({'success': True, 'message': f'卖家 {name} 已删除'})
         return JsonResponse({'success': False, 'message': '卖家不存在'})
     return JsonResponse({'success': False})
+
+
+# ==========================================
+# Wallet / Credit System Views
+# ==========================================
+
+def _get_or_create_wallet(user):
+    """Get or create wallet for a SiteUser."""
+    wallet, _ = models.UserWallet.objects.get_or_create(user=user, defaults={
+        'balance': Decimal('0.00'),
+        'total_deposited': Decimal('0.00'),
+        'total_spent': Decimal('0.00'),
+    })
+    return wallet
+
+
+def public_wallet(request):
+    """Public wallet dashboard: balance, transactions, top-up button."""
+    user_id = request.session.get('site_user_id')
+    if not user_id:
+        return redirect('manager:user_login')
+    user = get_object_or_404(models.SiteUser, pk=user_id)
+    wallet = _get_or_create_wallet(user)
+    transactions = user.wallet_transactions.all()[:20]
+    return render(request, 'public/wallet.html', {
+        'user': user,
+        'wallet': wallet,
+        'transactions': transactions,
+    })
+
+
+def public_wallet_topup(request):
+    """Top-up page: amount selection + payment method."""
+    user_id = request.session.get('site_user_id')
+    if not user_id:
+        return redirect('manager:user_login')
+    user = get_object_or_404(models.SiteUser, pk=user_id)
+
+    if request.method == 'POST':
+        amount = request.POST.get('amount', '').strip()
+        payment_method = request.POST.get('payment_method', '').strip()
+        try:
+            amount = Decimal(amount)
+            if amount <= 0:
+                raise ValueError
+        except Exception:
+            messages.error(request, 'Invalid amount')
+            return redirect('manager:public_wallet_topup')
+
+        topup = models.TopUpOrder(
+            user=user,
+            order_number=f'TOP{timezone.now().strftime("%Y%m%d")}{uuid.uuid4().hex[:8].upper()}',
+            amount=amount,
+            payment_method=payment_method,
+            status='pending',
+        )
+        topup.save()
+        messages.success(request, 'Top-up order created. Please complete payment.')
+        return redirect('manager:public_wallet')
+
+    return render(request, 'public/wallet_topup.html', {
+        'user': user,
+        'payment_methods': [
+            ('mtn_money', 'MTN Money'),
+            ('orange_money', 'Orange Money'),
+            ('airtel_money', 'Airtel Money'),
+            ('paypal', 'PayPal'),
+            ('credit_card', 'Credit Card'),
+            ('bank_transfer', 'Bank Transfer'),
+        ],
+    })
+
+
+@require_POST
+def public_wallet_topup_webhook(request):
+    """Webhook callback from payment gateway to confirm top-up."""
+    order_number = request.POST.get('order_number', '').strip()
+    transaction_id = request.POST.get('transaction_id', '').strip()
+    signature = request.POST.get('signature', '').strip()
+
+    # TODO: verify signature against gateway secret
+    topup = models.TopUpOrder.objects.filter(order_number=order_number, status='pending').first()
+    if not topup:
+        return JsonResponse({'success': False, 'message': 'Order not found or already processed'})
+
+    wallet = _get_or_create_wallet(topup.user)
+    wallet.credit(
+        topup.amount,
+        source='deposit',
+        description=f'Top-up via {topup.payment_method}',
+        source_id=str(topup.id),
+    )
+    topup.status = 'completed'
+    topup.transaction_id = transaction_id
+    topup.completed_at = timezone.now()
+    topup.save(update_fields=['status', 'transaction_id', 'completed_at'])
+    return JsonResponse({'success': True, 'message': 'Top-up completed'})

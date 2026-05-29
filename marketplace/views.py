@@ -634,7 +634,25 @@ def checkout(request):
                 messages.error(request, '当前国家暂不支持该支付方式，请重新选择。')
                 return redirect('marketplace:checkout')
 
+            # Handle wallet payment
+            user_id = request.session.get('site_user_id')
+            if payment_method == 'wallet':
+                from manager import models as mgr_models
+                if not user_id:
+                    messages.error(request, 'Please log in to use wallet payment.')
+                    return redirect('manager:user_login')
+                site_user = get_object_or_404(mgr_models.SiteUser, pk=user_id)
+                wallet, _ = mgr_models.UserWallet.objects.get_or_create(user=site_user, defaults={
+                    'balance': Decimal('0.00'),
+                    'total_deposited': Decimal('0.00'),
+                    'total_spent': Decimal('0.00'),
+                })
+                if wallet.balance < total_amount:
+                    messages.error(request, 'Insufficient wallet balance.')
+                    return redirect('marketplace:checkout')
+
             order = MarketplaceOrder(
+                user_id=user_id,
                 user_name=request.POST.get('customer_name', ''),
                 user_email=request.POST.get('customer_email', ''),
                 customer_phone=request.POST.get('customer_phone', ''),
@@ -645,6 +663,23 @@ def checkout(request):
                 notes=request.POST.get('notes', ''),
             )
             order.save()
+
+            # Debit wallet after order is created
+            if payment_method == 'wallet' and user_id:
+                from django.db import transaction
+                with transaction.atomic():
+                    wallet = mgr_models.UserWallet.objects.select_for_update().get(user_id=user_id)
+                    if wallet.balance < total_amount:
+                        messages.error(request, 'Insufficient wallet balance.')
+                        order.delete()
+                        return redirect('marketplace:checkout')
+                    wallet.debit(
+                        total_amount,
+                        source='order_payment',
+                        description=f'Payment for {order.order_number}',
+                        source_id=str(order.id),
+                    )
+                    order.mark_as_paid(transaction_id='wallet')
 
             for detail in items_with_details:
                 ci = detail['cart_item']
@@ -681,6 +716,18 @@ def checkout(request):
 
     payment_methods = build_payment_options()
 
+    # Load wallet balance for logged-in user
+    wallet_balance = None
+    user_id = request.session.get('site_user_id')
+    if user_id:
+        try:
+            from manager import models as mgr_models
+            wallet = mgr_models.UserWallet.objects.filter(user_id=user_id).first()
+            if wallet:
+                wallet_balance = wallet.balance
+        except Exception:
+            pass
+
     context = {
         'cart_items': items_with_details,
         'total_amount': total_amount,
@@ -688,6 +735,7 @@ def checkout(request):
         'total_quantity': total_qty,
         'total_count': len(items_with_details),
         'payment_methods': payment_methods,
+        'wallet_balance': wallet_balance,
     }
     return render(request, 'marketplace/checkout.html', context)
 
@@ -2451,6 +2499,10 @@ def vendor_supermarket_add(request):
             item.category_id = int(cat_id)
         if 'image' in request.FILES:
             item.image = request.FILES['image']
+        if 'image_2' in request.FILES:
+            item.image_2 = request.FILES['image_2']
+        if 'image_3' in request.FILES:
+            item.image_3 = request.FILES['image_3']
 
         base_slug = item.slug
         counter = 1
@@ -2503,6 +2555,10 @@ def vendor_supermarket_edit(request, pk):
         item.category_id = int(cat_id) if cat_id else None
         if 'image' in request.FILES:
             item.image = request.FILES['image']
+        if 'image_2' in request.FILES:
+            item.image_2 = request.FILES['image_2']
+        if 'image_3' in request.FILES:
+            item.image_3 = request.FILES['image_3']
         item.save()
 
         item.attributes.all().delete()

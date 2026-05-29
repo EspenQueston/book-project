@@ -1,7 +1,7 @@
 {% extends 'public/base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans "消息" %} - DUNO 360{% endblock %}
+{% block title %}{% trans "Messages" %} - DUNO 360{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -295,6 +295,21 @@ html[data-theme="dark"] .mx-convo-item.active { background: rgba(102,126,234,0.0
     transition: all 0.18s;
 }
 .mx-header-btn:hover { background: var(--mx-bg); color: var(--mx-primary); border-color: var(--mx-primary); }
+.mx-dropdown {
+    position: absolute; top: 44px; right: 0;
+    background: var(--mx-panel-bg); border: 1px solid var(--mx-border);
+    border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    display: none; flex-direction: column; min-width: 180px;
+    z-index: 100; overflow: hidden; animation: mxFadeSlideDown 0.18s ease;
+}
+.mx-dropdown.show { display: flex; }
+.mx-dropdown-item {
+    padding: 10px 14px; font-size: 0.85rem; color: var(--mx-text);
+    cursor: pointer; display: flex; align-items: center; gap: 10px;
+    transition: background 0.15s;
+}
+.mx-dropdown-item:hover { background: rgba(102,126,234,0.08); }
+.mx-dropdown-item i { width: 18px; text-align: center; color: var(--mx-muted); }
 
 /* Product strip */
 .mx-product-strip {
@@ -650,7 +665,7 @@ html[data-theme="dark"] .mx-textarea-wrap { background: #0d1117; }
     <aside class="mx-sidebar" id="mxSidebar">
         <div class="mx-sidebar-header">
             <i class="fas fa-comment-dots" style="font-size:1.25rem;opacity:.9;"></i>
-            <h2 class="mx-sidebar-title" data-zh="消息" data-en="Messages" data-fr="Messages">消息</h2>
+            <h2 class="mx-sidebar-title" data-zh="消息" data-en="Messages" data-fr="Messages">Messages</h2>
             <a class="mx-compose-btn" href="{% url 'manager:public_books' %}" title="New conversation">
                 <i class="fas fa-pen-nib"></i>
             </a>
@@ -659,35 +674,35 @@ html[data-theme="dark"] .mx-textarea-wrap { background: #0d1117; }
         <div class="mx-search-wrap">
             <div class="mx-search-inner">
                 <i class="fas fa-search"></i>
-                <input type="text" id="mxSearchInput" placeholder="{% trans '搜索对话...' %}"
+                <input type="text" id="mxSearchInput" placeholder="{% trans 'Search conversations...' %}"
                        oninput="mxFilterConvos(this.value)" autocomplete="off">
             </div>
         </div>
 
         <div class="mx-filter-tabs" id="mxFilterTabs">
             <button class="mx-filter-tab active" data-filter="all" onclick="mxSetFilter('all',this)">
-                {% trans "全部" %}
+                {% trans "All" %}
             </button>
             <button class="mx-filter-tab" data-filter="unread" onclick="mxSetFilter('unread',this)">
-                {% trans "未读" %}
+                {% trans "Unread" %}
             </button>
             <button class="mx-filter-tab" data-filter="vendor" onclick="mxSetFilter('vendor',this)">
-                {% trans "商家" %}
+                {% trans "Vendors" %}
             </button>
         </div>
 
         <div class="mx-convo-list" id="mxConvoList">
             <div class="mx-loading" id="mxListLoading">
-                <i class="fas fa-spinner fa-spin me-2"></i>{% trans "加载中..." %}
+                <i class="fas fa-spinner fa-spin me-2"></i>{% trans "Loading..." %}
             </div>
             <div class="mx-list-empty" id="mxListEmpty">
                 <div class="mx-list-empty-icon"><i class="fas fa-comments"></i></div>
                 <p class="mx-list-empty-text" data-zh="暂无对话&#10;浏览商品并点击「聊天」" data-en="No conversations yet&#10;Browse products and tap Chat" data-fr="Aucune conversation&#10;Parcourez les produits">
-                    {% trans "暂无对话" %}<br>
-                    <span style="font-size:.75rem">{% trans "浏览商品并点击「聊天」按钮" %}</span>
+                    {% trans "No conversations yet" %}<br>
+                    <span style="font-size:.75rem">{% trans "Browse products and tap the Chat button" %}</span>
                 </p>
                 <a href="{% url 'manager:public_books' %}" class="mx-idle-cta" style="margin-top:4px;font-size:.78rem;padding:8px 20px;">
-                    <i class="fas fa-store me-1"></i>{% trans "去逛逛" %}
+                    <i class="fas fa-store me-1"></i>{% trans "Browse" %}
                 </a>
             </div>
         </div>
@@ -699,12 +714,12 @@ html[data-theme="dark"] .mx-textarea-wrap { background: #0d1117; }
         <!-- Idle: no convo selected -->
         <div class="mx-idle-state" id="mxIdle">
             <div class="mx-idle-icon"><i class="fas fa-comment-smile"></i></div>
-            <p class="mx-idle-title" data-zh="选择一个对话" data-en="Select a conversation" data-fr="Sélectionnez une conversation">{% trans "选择一个对话" %}</p>
+            <p class="mx-idle-title" data-zh="选择一个对话" data-en="Select a conversation" data-fr="Sélectionnez une conversation">{% trans "Select a conversation" %}</p>
             <p class="mx-idle-sub" data-zh="从左侧列表选择一个对话，或点击任意商品页的「聊天」按钮开始新对话。" data-en="Choose a conversation from the list, or tap Chat on any product page to start a new one." data-fr="Choisissez une conversation dans la liste ou appuyez sur Chat sur une page produit.">
-                {% trans "从左侧列表选择一个对话，或点击任意商品页的「聊天」按钮开始新对话。" %}
+                {% trans "Choose a conversation from the list, or tap Chat on any product page to start a new one." %}
             </p>
             <a href="{% url 'manager:public_books' %}" class="mx-idle-cta">
-                <i class="fas fa-store me-1"></i>{% trans "浏览商品" %}
+                <i class="fas fa-store me-1"></i>{% trans "Browse Products" %}
             </a>
         </div>
 
@@ -720,16 +735,24 @@ html[data-theme="dark"] .mx-textarea-wrap { background: #0d1117; }
                 <div style="flex:1;min-width:0;">
                     <div class="mx-chat-title" id="mxChatTitle">—</div>
                     <div class="mx-chat-status" id="mxChatStatus">
-                        <span id="mxStatusText">{% trans "点击查看详情" %}</span>
+                        <span id="mxStatusText">{% trans "Tap to view details" %}</span>
                     </div>
                 </div>
-                <div class="mx-header-actions">
-                    <button class="mx-header-btn" onclick="mxToggleProductStrip()" title="{% trans '查看商品' %}">
-                        <i class="fas fa-tag"></i>
-                    </button>
-                    <button class="mx-header-btn" onclick="mxClearChat()" title="{% trans '清除聊天' %}">
+                <div class="mx-header-actions" style="position:relative;">
+                    <button class="mx-header-btn" onclick="mxToggleDropdown()" title="Menu" id="mxMenuBtn">
                         <i class="fas fa-ellipsis-v"></i>
                     </button>
+                    <div class="mx-dropdown" id="mxDropdown">
+                        <div class="mx-dropdown-item" onclick="mxMarkAllRead()">
+                            <i class="fas fa-check-double"></i>{% trans "Mark all as read" %}
+                        </div>
+                        <div class="mx-dropdown-item" onclick="mxToggleProductStrip()">
+                            <i class="fas fa-tag"></i>{% trans "View product" %}
+                        </div>
+                        <div class="mx-dropdown-item" onclick="mxCloseDropdown()">
+                            <i class="fas fa-times"></i>{% trans "Close" %}
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -740,7 +763,10 @@ html[data-theme="dark"] .mx-textarea-wrap { background: #0d1117; }
                     <div class="mx-product-name" id="mxProductName"></div>
                     <div class="mx-product-price" id="mxProductPrice"></div>
                 </div>
-                <a class="mx-product-cta" id="mxProductLink" href="#" target="_blank" data-zh="查看" data-en="View" data-fr="Voir">{% trans "查看" %}</a>
+                <button class="mx-product-cta" id="mxSendLinkBtn" onclick="mxSendProductLink()" style="border:none;cursor:pointer;">
+                    <i class="fas fa-share me-1"></i>{% trans "Send Link" %}
+                </button>
+                <a class="mx-product-cta" id="mxProductLink" href="#" target="_blank" rel="noopener" data-zh="查看" data-en="View" data-fr="Voir">{% trans "View" %}</a>
                 <button class="mx-product-strip-close" onclick="document.getElementById('mxProductStrip').classList.remove('show')" aria-label="Close">
                     <i class="fas fa-times"></i>
                 </button>
@@ -768,11 +794,11 @@ html[data-theme="dark"] .mx-textarea-wrap { background: #0d1117; }
 
             <!-- Quick replies -->
             <div class="mx-quick-wrap" id="mxQuickReplies">
-                <button class="mx-quick-chip" onclick="mxQuickReply(this.textContent)">👋 {% trans "你好" %}</button>
-                <button class="mx-quick-chip" onclick="mxQuickReply(this.textContent)">📦 {% trans "还有库存吗？" %}</button>
-                <button class="mx-quick-chip" onclick="mxQuickReply(this.textContent)">💰 {% trans "可以优惠吗？" %}</button>
-                <button class="mx-quick-chip" onclick="mxQuickReply(this.textContent)">🚚 {% trans "多久能发货？" %}</button>
-                <button class="mx-quick-chip" onclick="mxQuickReply(this.textContent)">✅ {% trans "好的，谢谢！" %}</button>
+                <button class="mx-quick-chip" onclick="mxQuickReply(this.textContent)">👋 {% trans "Hello" %}</button>
+                <button class="mx-quick-chip" onclick="mxQuickReply(this.textContent)">📦 {% trans "Is it still in stock?" %}</button>
+                <button class="mx-quick-chip" onclick="mxQuickReply(this.textContent)">💰 {% trans "Any discount?" %}</button>
+                <button class="mx-quick-chip" onclick="mxQuickReply(this.textContent)">🚚 {% trans "How soon can it ship?" %}</button>
+                <button class="mx-quick-chip" onclick="mxQuickReply(this.textContent)">✅ {% trans "OK, thanks!" %}</button>
             </div>
 
             <!-- Input area -->
@@ -782,7 +808,7 @@ html[data-theme="dark"] .mx-textarea-wrap { background: #0d1117; }
                 </button>
                 <div class="mx-textarea-wrap">
                     <textarea id="msgInput" rows="1"
-                              placeholder="{% trans '输入消息...' %}"
+                              placeholder="{% trans 'Type a message...' %}"
                               onkeydown="mxKeyDown(event)"
                               oninput="mxAutoResize(this)"></textarea>
                 </div>
@@ -888,10 +914,10 @@ function renderConvos(convos) {
         item.setAttribute('role','button');
         item.setAttribute('tabindex','0');
 
-        var vendorName = c.vendor_name || c.subject || '商家';
+        var vendorName = c.vendor_name || c.subject || '{% trans "Vendor" %}';
         var colors = avatarColor(vendorName);
-        var preview = c.last_message ? esc(c.last_message) : '<em style="opacity:.6">{% trans "开始对话" %}</em>';
-        var youPrefix = c.last_sender_type === 'buyer' ? '<span style="color:var(--mx-primary);font-weight:700;margin-right:2px;">{% trans "我:" %}</span>' : '';
+        var preview = c.last_message ? esc(c.last_message) : '<em style="opacity:.6">{% trans "Start conversation" %}</em>';
+        var youPrefix = c.last_sender_type === 'buyer' ? '<span style="color:var(--mx-primary);font-weight:700;margin-right:2px;">{% trans "Me:" %}</span>' : '';
         var refPill = c.ref_item_name ? '<span class="mx-convo-ref-pill">'+esc(c.ref_item_name)+'</span>' : '';
         var unreadBadge = c.unread_count > 0
             ? '<span class="mx-unread-badge">'+c.unread_count+'</span>' : '';
@@ -921,7 +947,7 @@ function renderConvos(convos) {
 // ── Open conversation ─────────────────────────────────
 function mxOpenConvo(c) {
     activeConvoId = c.id;
-    activeConvoName = c.vendor_name || c.subject || '商家';
+    activeConvoName = c.vendor_name || c.subject || '{% trans "Vendor" %}';
 
     // Mark active in list
     document.querySelectorAll('.mx-convo-item').forEach(function(el){
@@ -932,7 +958,7 @@ function mxOpenConvo(c) {
     var headerAvatar = document.getElementById('mxHeaderAvatar');
     setAvatar(headerAvatar, activeConvoName);
     document.getElementById('mxChatTitle').textContent = activeConvoName;
-    document.getElementById('mxStatusText').textContent = '{% trans "对话进行中..." %}';
+    document.getElementById('mxStatusText').textContent = '{% trans "Conversation in progress..." %}';
 
     // Update typing avatar
     setAvatar(document.getElementById('mxTypingAvatar'), activeConvoName);
@@ -969,6 +995,10 @@ function mxOpenConvo(c) {
         loadMessages(activeConvoId, false);
     }, 5000);
 
+    // Reset message tracking for stable rendering
+    _lastRenderedId = 0;
+    _msgCount = 0;
+
     // Update URL
     try { history.replaceState(null, '', '?convo=' + c.id); } catch(e){}
 }
@@ -984,54 +1014,97 @@ function loadMessages(convoId, scrollToBottom) {
     .catch(function(){});
 }
 
+function formatContent(text) {
+    var escaped = esc(text);
+    var urlRegex = /(https?:\/\/[^\s]+)/g;
+    return escaped.replace(urlRegex, function(url) {
+        return '<a href="' + url + '" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;word-break:break-all;">' + url + '</a>';
+    });
+}
+
+var _lastRenderedId = 0;
+var _msgCount = 0;
+
 function renderMessages(msgs, scrollBottom) {
     var area = document.getElementById('mxMessages');
-    var html = '';
-    var lastDate = null;
-    var prevType = null;
+    if (!area) return;
 
-    msgs.forEach(function(m, idx) {
-        var isOut = m.sender_type === 'buyer';
-        var isLast = idx === msgs.length - 1;
-        var nextSameType = (idx < msgs.length - 1) && msgs[idx+1].sender_type === m.sender_type;
-        var tail = isLast || !nextSameType;
-
-        // Date separator
-        if (m.date !== lastDate) {
-            html += '<div class="mx-date-sep"><span>' + esc(m.date) + '</span></div>';
-            lastDate = m.date;
+    if (!msgs || !msgs.length) {
+        if (_msgCount === 0) {
+            area.innerHTML = '<div style="text-align:center;padding:30px 20px;color:var(--mx-muted);font-size:.85rem;">{% trans "No messages yet, start the conversation!" %}</div>';
         }
+        return;
+    }
 
-        var rowClass = 'mx-row ' + (isOut ? 'out' : 'in') + (tail ? ' tail' : '');
+    // Find max rendered ID to know what's new
+    var maxRendered = _lastRenderedId;
+    var hasNew = false;
 
-        // Tick icon for outgoing
-        var tickHtml = '';
-        if (isOut) {
-            if (m.is_read) {
-                tickHtml = '<span class="mx-tick read"><i class="fas fa-check-double"></i></span>';
-            } else {
-                tickHtml = '<span class="mx-tick"><i class="fas fa-check"></i></span>';
+    // On first load or if all messages are new, do full render
+    var isFirstRender = _msgCount === 0;
+    if (isFirstRender) {
+        area.innerHTML = '';
+        var lastDate = null;
+        msgs.forEach(function(m, idx) {
+            var el = buildMessageEl(m, idx, msgs);
+            area.appendChild(el);
+            if (m.id > maxRendered) maxRendered = m.id;
+        });
+        hasNew = true;
+    } else {
+        // Append-only: only render messages with id > _lastRenderedId
+        // Also update read status on existing outgoing messages
+        msgs.forEach(function(m, idx) {
+            if (m.id > _lastRenderedId) {
+                var el = buildMessageEl(m, idx, msgs);
+                area.appendChild(el);
+                hasNew = true;
+                if (m.id > maxRendered) maxRendered = m.id;
+            } else if (m.sender_type === 'buyer') {
+                // Update read status if changed
+                var existing = area.querySelector('[data-msg-id="' + m.id + '"]');
+                if (existing) {
+                    var tick = existing.querySelector('.mx-tick');
+                    if (tick) {
+                        var wantRead = m.is_read;
+                        var isRead = tick.classList.contains('read');
+                        if (wantRead && !isRead) {
+                            tick.classList.add('read');
+                            tick.innerHTML = '<i class="fas fa-check-double"></i>';
+                        }
+                    }
+                }
             }
-        }
+        });
+    }
 
-        html += '<div class="' + rowClass + '">';
-        html += '<div class="mx-bubble">';
-        html += esc(m.content);
-        html += '<div class="mx-bubble-meta">';
-        html += '<span class="mx-time">' + esc(m.time) + '</span>';
-        html += tickHtml;
-        html += '</div>';
-        html += '</div></div>';
+    _lastRenderedId = maxRendered;
+    _msgCount = msgs.length;
 
-        prevType = m.sender_type;
-    });
-
-    area.innerHTML = html || '<div style="text-align:center;padding:30px 20px;color:var(--mx-muted);font-size:.85rem;">{% trans "还没有消息，开始对话吧！" %}</div>';
-
-    if (scrollBottom) {
+    if (scrollBottom && hasNew) {
         area.scrollTop = area.scrollHeight;
         document.getElementById('mxScrollDownBtn').classList.remove('show');
     }
+}
+
+function buildMessageEl(m, idx, allMsgs) {
+    var isOut = m.sender_type === 'buyer';
+    var isLast = idx === allMsgs.length - 1;
+    var nextSameType = (idx < allMsgs.length - 1) && allMsgs[idx+1].sender_type === m.sender_type;
+    var tail = isLast || !nextSameType;
+    var rowClass = 'mx-row ' + (isOut ? 'out' : 'in') + (tail ? ' tail' : '');
+    var tickHtml = '';
+    if (isOut) {
+        tickHtml = m.is_read
+            ? '<span class="mx-tick read"><i class="fas fa-check-double"></i></span>'
+            : '<span class="mx-tick"><i class="fas fa-check"></i></span>';
+    }
+    var el = document.createElement('div');
+    el.className = rowClass;
+    el.dataset.msgId = m.id;
+    el.innerHTML = '<div class="mx-bubble">' + formatContent(m.content) +
+        '<div class="mx-bubble-meta"><span class="mx-time">' + esc(m.time) + '</span>' + tickHtml + '</div></div>';
+    return el;
 }
 
 // ── Send message ──────────────────────────────────────
@@ -1075,13 +1148,13 @@ window.mxSendMessage = function() {
             loadConvos();
         } else {
             temp.remove(); input.value = text;
-            toast(data.message || '{% trans "发送失败，请重试" %}');
+            toast(data.message || '{% trans "Send failed, please retry" %}');
         }
     })
     .catch(function() {
         sending = false; btn.disabled = false;
         temp.remove(); input.value = text;
-        toast('{% trans "网络错误，请重试" %}');
+        toast('{% trans "Network error, please retry" %}');
     });
 };
 
@@ -1121,7 +1194,30 @@ window.mxToggleProductStrip = function() {
     var strip = document.getElementById('mxProductStrip');
     strip.classList.toggle('show');
 };
-window.mxClearChat = function() { /* future: options menu */ };
+window.mxToggleDropdown = function() {
+    document.getElementById('mxDropdown').classList.toggle('show');
+};
+window.mxCloseDropdown = function() {
+    document.getElementById('mxDropdown').classList.remove('show');
+};
+window.mxMarkAllRead = function() {
+    if (!activeConvoId) return;
+    fetch('/manager/api/conversations/' + activeConvoId + '/mark_read/', {
+        method: 'POST', headers: {'X-CSRFToken': csrf()}, credentials: 'same-origin'
+    }).then(function(r){return r.json();}).then(function(data){
+        if (data.success) { loadConvos(); loadMessages(activeConvoId, false); }
+    }).catch(function(){});
+    mxCloseDropdown();
+};
+window.mxSendProductLink = function() {
+    var link = document.getElementById('mxProductLink');
+    var name = document.getElementById('mxProductName').textContent;
+    if (!link || !link.href || link.href === '#' || !activeConvoId) return;
+    var msgInput = document.getElementById('msgInput');
+    msgInput.value = name + ': ' + link.href;
+    mxAutoResize(msgInput);
+    mxSendMessage();
+};
 window.mxToggleEmoji = function() { /* future: emoji picker */ };
 window.mxPickFile = function() { /* future: file attach */ };
 window.mxScrollBottom = function() {
@@ -1155,6 +1251,15 @@ setTimeout(function() {
 setInterval(function() {
     if (document.visibilityState !== 'hidden') loadConvos();
 }, 10000);
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+    var menu = document.getElementById('mxDropdown');
+    var btn = document.getElementById('mxMenuBtn');
+    if (menu && btn && menu.classList.contains('show') && !menu.contains(e.target) && !btn.contains(e.target)) {
+        menu.classList.remove('show');
+    }
+});
 
 })();
 </script>

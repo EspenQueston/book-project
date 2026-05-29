@@ -203,6 +203,15 @@
                     <div class="payment-methods" id="paymentMethodsContainer">
                         <p class="text-muted text-center py-3">{% trans "请先选择国家以显示可用的支付方式" %}</p>
                     </div>
+                    {% if wallet_balance is not None %}
+                    <div class="payment-methods mt-2" id="walletPaymentContainer">
+                        <div class="payment-option" data-method="wallet">
+                            <i class="fas fa-wallet payment-icon" style="color:#667eea;"></i>
+                            <span class="payment-name">{% trans "Wallet / Store Credit" %}</span>
+                            <span class="payment-provider">{% trans "Balance" %}: {{ wallet_balance|fcfa }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
 
@@ -322,6 +331,20 @@ function attachPaymentOptionListeners() {
         });
     });
 }
+
+// Attach wallet option listener immediately
+(function() {
+    const walletContainer = document.getElementById('walletPaymentContainer');
+    if (walletContainer) {
+        walletContainer.querySelectorAll('.payment-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+                document.getElementById('selectedPaymentMethod').value = this.dataset.method;
+            });
+        });
+    }
+})();
 
 document.getElementById('countrySelect').addEventListener('change', function() {
     updatePaymentMethods(this.value);

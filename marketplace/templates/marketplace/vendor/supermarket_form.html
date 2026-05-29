@@ -70,9 +70,19 @@
                     <input type="text" name="origin" class="form-control rounded-3" value="{{ item.origin|default:'' }}">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">{% trans "图片" %}</label>
+                    <label class="form-label fw-semibold">{% trans "Main image" %}</label>
                     <input type="file" name="image" class="form-control rounded-3" accept="image/*">
                     {% if item and item.image %}<small class="text-muted d-block mt-1">{{ item.image.name }}</small>{% endif %}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">{% trans "Image 2" %}</label>
+                    <input type="file" name="image_2" class="form-control rounded-3" accept="image/*">
+                    {% if item and item.image_2 %}<small class="text-muted d-block mt-1">{{ item.image_2.name }}</small>{% endif %}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">{% trans "Image 3" %}</label>
+                    <input type="file" name="image_3" class="form-control rounded-3" accept="image/*">
+                    {% if item and item.image_3 %}<small class="text-muted d-block mt-1">{{ item.image_3.name }}</small>{% endif %}
                 </div>
                 <div class="form-check form-switch mb-2">
                     <input class="form-check-input" type="checkbox" name="is_active" id="smActive" {% if item.is_active or not item %}checked{% endif %}>

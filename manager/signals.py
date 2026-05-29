@@ -252,3 +252,21 @@ def auto_translate_author(sender, instance, created, **kwargs):
         logger.info("Auto-translated Author #%s", instance.pk)
     except Exception as exc:
         logger.error("auto_translate_author error for #%s: %s", instance.pk, exc)
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Auto-create wallet for new SiteUser
+# ──────────────────────────────────────────────────────────────────────────────
+
+@receiver(post_save, sender='manager.SiteUser')
+def auto_create_wallet(sender, instance, created, **kwargs):
+    """Create a UserWallet with zero balance for every new SiteUser."""
+    if not created:
+        return
+    from decimal import Decimal
+    from manager.models import UserWallet
+    UserWallet.objects.get_or_create(user=instance, defaults={
+        'balance': Decimal('0.00'),
+        'total_deposited': Decimal('0.00'),
+        'total_spent': Decimal('0.00'),
+    })

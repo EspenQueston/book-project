@@ -2,7 +2,7 @@
 {% load i18n %}
 {% load currency_filters %}
 
-{% block title %}{{ product.name }} - {% trans "市场" %}{% endblock %}
+{% block title %}{{ product.name }} - {% trans "Market" %}{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -258,7 +258,7 @@
             {% endif %}
         </div>
         {% if sold_delivered > 0 %}
-        <div class="bmp-promo-badge">{% if sold_delivered > 50 %}🔥 {% trans "热销" %}{% elif product.stock <= 5 and product.stock > 0 %}⚡ {% trans "限量" %}{% else %}📦 {% trans "现货" %}{% endif %}</div>
+        <div class="bmp-promo-badge">{% if sold_delivered > 50 %}🔥 {% trans "Hot" %}{% elif product.stock <= 5 and product.stock > 0 %}⚡ {% trans "Limited" %}{% else %}📦 {% trans "In Stock" %}{% endif %}</div>
         {% endif %}
         <div class="bmp-gallery-counter" id="bmpCounter">1/2</div>
     </div>
@@ -268,9 +268,9 @@
         <div class="d-flex align-items-baseline">
             <div class="bmp-price-main">{{ product.price|fcfa }}</div>
             {% if product.original_price %}<div class="bmp-price-original">{{ product.original_price|fcfa }}</div>{% endif %}
-            <div class="bmp-price-sold ms-auto">{% trans "已售" %} {{ sold_delivered }}+</div>
+            <div class="bmp-price-sold ms-auto">{% trans "Sold" %} {{ sold_delivered }}+</div>
         </div>
-        <div><span class="bmp-low-badge">{% trans "7天无理由退货" %}</span> <span class="bmp-low-badge" style="margin-left:4px;">{% trans "正品保证" %}</span></div>
+        <div><span class="bmp-low-badge">{% trans "7-Day Return" %}</span> <span class="bmp-low-badge" style="margin-left:4px;">{% trans "Authentic Guarantee" %}</span></div>
     </div>
 
     <!-- C. Title -->
@@ -286,35 +286,35 @@
 
     <!-- D. Delivery -->
     <div class="bmp-delivery-section">
-        <div class="bmp-delivery-row"><i class="fas fa-truck"></i><span><span class="bmp-delivery-highlight">{% trans "快递配送" %}</span> · {% trans "预计" %} <strong>2-3{% trans "天" %}</strong>{% trans "到达" %}</span></div>
-        <div class="bmp-delivery-row"><i class="fas fa-shield-alt"></i><span>{% trans "DUNO 平台担保 · 正品保证" %}</span></div>
-        <div class="bmp-delivery-row"><i class="fas fa-warehouse"></i><span>{% trans "库存" %}: {% if product.in_stock %}<strong class="bmp-delivery-highlight">{{ product.stock }}</strong> {% trans "件" %}{% else %}<span style="color:#E4393C;">{% trans "缺货" %}</span>{% endif %}</span></div>
+        <div class="bmp-delivery-row"><i class="fas fa-truck"></i><span><span class="bmp-delivery-highlight">{% trans "Express Delivery" %}</span> · {% trans "Est." %} <strong>2-3{% trans "days" %}</strong>{% trans "delivery" %}</span></div>
+        <div class="bmp-delivery-row"><i class="fas fa-shield-alt"></i><span>{% trans "DUNO Platform Guarantee · Authentic" %}</span></div>
+        <div class="bmp-delivery-row"><i class="fas fa-warehouse"></i><span>{% trans "Stock" %}: {% if product.in_stock %}<strong class="bmp-delivery-highlight">{{ product.stock }}</strong> {% trans "pcs" %}{% else %}<span style="color:#E4393C;">{% trans "Out of Stock" %}</span>{% endif %}</span></div>
     </div>
 
     <!-- E. Guarantee -->
-    <div class="bmp-guarantee"><i class="fas fa-shield-alt"></i><span>{% trans "退货宝" %} | <strong>{% trans "7天无理由退换" %}</strong> | {% trans "极速退款" %}</span></div>
+    <div class="bmp-guarantee"><i class="fas fa-shield-alt"></i><span>{% trans "Return Protection" %} | <strong>{% trans "7-Day No-Reason Return" %}</strong> | {% trans "Fast Refund" %}</span></div>
 
     <!-- F. Specs -->
     <div class="bmp-specs-section">
-        <div class="bmp-specs-label">{% trans "商品规格" %}</div>
+        <div class="bmp-specs-label">{% trans "Specifications" %}</div>
         <div class="bmp-specs-scroll">
-            {% if product.brand %}<div class="bmp-spec-chip"><strong>{% trans "品牌" %}</strong>{{ product.brand }}</div>{% endif %}
-            {% if product.weight %}<div class="bmp-spec-chip"><strong>{% trans "重量" %}</strong>{{ product.weight }}kg</div>{% endif %}
-            <div class="bmp-spec-chip"><strong>{% trans "状态" %}</strong>{{ product.get_condition_display }}</div>
-            <div class="bmp-spec-chip"><strong>{% trans "库存" %}</strong>{{ product.stock }} {% trans "件" %}</div>
-            <div class="bmp-spec-chip"><strong>{% trans "已售" %}</strong>{{ sold_delivered }}+</div>
+            {% if product.brand %}<div class="bmp-spec-chip"><strong>{% trans "Brand" %}</strong>{{ product.brand }}</div>{% endif %}
+            {% if product.weight %}<div class="bmp-spec-chip"><strong>{% trans "Weight" %}</strong>{{ product.weight }}kg</div>{% endif %}
+            <div class="bmp-spec-chip"><strong>{% trans "Condition" %}</strong>{{ product.get_condition_display }}</div>
+            <div class="bmp-spec-chip"><strong>{% trans "Stock" %}</strong>{{ product.stock }} {% trans "pcs" %}</div>
+            <div class="bmp-spec-chip"><strong>{% trans "Sold" %}</strong>{{ sold_delivered }}+</div>
         </div>
     </div>
 
     <!-- G. Variant Selectors (if any) -->
     {% if selectable_attributes %}
     <div style="background:#fff;padding:12px 14px;margin-bottom:6px;">
-        <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:8px;">{% trans "选择配置" %}</div>
+        <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:8px;">{% trans "Select Configuration" %}</div>
         {% for group in selectable_attributes %}
         <div style="margin-bottom:10px;">
             <label style="font-size:12px;color:#666;margin-bottom:4px;display:block;">{{ group.name }}</label>
             <select class="option-select" data-attribute-name="{{ group.name }}" style="width:100%;padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;">
-                <option value="">{% trans "请选择" %} {{ group.name }}</option>
+                <option value="">{% trans "Please select" %} {{ group.name }}</option>
                 {% for value in group.values %}<option value="{{ value }}">{{ value }}</option>{% endfor %}
             </select>
         </div>
@@ -344,37 +344,37 @@
                 {% else %}
                 <div class="bmp-seller-name">DUNO 360</div>
                 {% endif %}
-                <div class="bmp-seller-meta"><i class="fas fa-star" style="color:#f59e0b;"></i> 4.9 · {% trans "认证商家" %}</div>
+                <div class="bmp-seller-meta"><i class="fas fa-star" style="color:#f59e0b;"></i> 4.9 · {% trans "Verified Seller" %}</div>
             </div>
             {% if product.vendor %}
             <button class="bmp-seller-btn follow ms-auto" onclick="toggleVendorFollow({{ product.vendor.id }}, this)" id="followVendorBtn">
-                <i class="fas fa-plus"></i> {% trans "关注" %}
+                <i class="fas fa-plus"></i> {% trans "Follow" %}
             </button>
             {% endif %}
         </div>
         {% if product.vendor %}
         <div class="bmp-seller-btns">
-            <a href="{% url 'manager:public_vendor_shop' product.vendor.id %}" class="bmp-seller-btn">{% trans "进入店铺" %}</a>
-            <a href="{% url 'manager:start_conversation' %}?subject={{ product.vendor.company_name|urlencode }}" class="bmp-seller-btn">{% trans "联系卖家" %}</a>
+            <a href="{% url 'manager:public_vendor_shop' product.vendor.id %}" class="bmp-seller-btn">{% trans "Visit Shop" %}</a>
+            <a href="{% url 'manager:start_conversation' %}?subject={{ product.vendor.company_name|urlencode }}" class="bmp-seller-btn">{% trans "Contact Seller" %}</a>
         </div>
         {% endif %}
     </div>
 
     <!-- J. Certifications -->
     <div class="bmp-certs-section">
-        <div class="bmp-certs-title">{% trans "服务保障" %}</div>
+        <div class="bmp-certs-title">{% trans "Service Guarantee" %}</div>
         <div class="bmp-certs-grid">
-            <div class="bmp-cert-item"><div class="bmp-cert-icon" style="background:linear-gradient(135deg,#667eea,#764ba2);"><i class="fas fa-undo"></i></div><span class="bmp-cert-label">{% trans "15天退换" %}</span></div>
-            <div class="bmp-cert-item"><div class="bmp-cert-icon" style="background:linear-gradient(135deg,#10b981,#059669);"><i class="fas fa-certificate"></i></div><span class="bmp-cert-label">{% trans "正品保证" %}</span></div>
-            <div class="bmp-cert-item"><div class="bmp-cert-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);"><i class="fas fa-shipping-fast"></i></div><span class="bmp-cert-label">{% trans "运费险" %}</span></div>
-            <div class="bmp-cert-item"><div class="bmp-cert-icon" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8);"><i class="fas fa-check-double"></i></div><span class="bmp-cert-label">{% trans "品质检验" %}</span></div>
+            <div class="bmp-cert-item"><div class="bmp-cert-icon" style="background:linear-gradient(135deg,#667eea,#764ba2);"><i class="fas fa-undo"></i></div><span class="bmp-cert-label">{% trans "15-Day Return" %}</span></div>
+            <div class="bmp-cert-item"><div class="bmp-cert-icon" style="background:linear-gradient(135deg,#10b981,#059669);"><i class="fas fa-certificate"></i></div><span class="bmp-cert-label">{% trans "Authentic Guarantee" %}</span></div>
+            <div class="bmp-cert-item"><div class="bmp-cert-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);"><i class="fas fa-shipping-fast"></i></div><span class="bmp-cert-label">{% trans "Shipping Insurance" %}</span></div>
+            <div class="bmp-cert-item"><div class="bmp-cert-icon" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8);"><i class="fas fa-check-double"></i></div><span class="bmp-cert-label">{% trans "Quality Inspection" %}</span></div>
         </div>
     </div>
 
     <!-- L. Mobile 2-column feed (related products) -->
     {% if related_products %}
     <div class="bmp-feed-section">
-        <div class="bmp-feed-title"><i class="fas fa-th-large"></i>{% trans "相关商品" %}</div>
+        <div class="bmp-feed-title"><i class="fas fa-th-large"></i>{% trans "Related Products" %}</div>
         <div class="bmp-feed-grid">
             {% for p in related_products %}
             <a href="{% url 'marketplace:product_detail' p.slug %}" class="bmp-feed-card">
@@ -396,18 +396,18 @@
     <div class="bmp-bottom-bar">
         <div class="bmp-action-icons">
             <a href="{% if product.vendor %}{% url 'manager:public_vendor_shop' product.vendor.id %}{% else %}{% url 'marketplace:product_list' %}{% endif %}" class="bmp-action-icon">
-                <i class="fas fa-store"></i><span>{% trans "店铺" %}</span>
+                <i class="fas fa-store"></i><span>{% trans "Shop" %}</span>
             </a>
             <a href="{% url 'manager:start_conversation' %}?item_type=product&item_id={{ product.id }}&subject={{ product.name|urlencode }}" class="bmp-action-icon">
-                <i class="fas fa-comments"></i><span>{% trans "聊天" %}</span>
+                <i class="fas fa-comments"></i><span>{% trans "Chat" %}</span>
             </a>
             <button class="bmp-action-icon" id="bmpWishBtn" onclick="mobileToggleWish()" style="cursor:pointer;">
-                <i class="far fa-heart" id="bmpWishIcon"></i><span>{% trans "收藏" %}</span>
+                <i class="far fa-heart" id="bmpWishIcon"></i><span>{% trans "Favorite" %}</span>
             </button>
         </div>
         <div class="bmp-buy-btns">
-            <button class="bmp-cart-btn" onclick="addToCart()"><i class="fas fa-shopping-cart"></i> {% trans "加入购物车" %}</button>
-            <button class="bmp-buy-btn" onclick="buyNow()"><i class="fas fa-bolt"></i> {% trans "立即购买" %}</button>
+            <button class="bmp-cart-btn" onclick="addToCart()"><i class="fas fa-shopping-cart"></i> {% trans "Add to Cart" %}</button>
+            <button class="bmp-buy-btn" onclick="buyNow()"><i class="fas fa-bolt"></i> {% trans "Buy Now" %}</button>
         </div>
     </div>
 </div><!-- /.product-mobile-page -->
@@ -416,8 +416,8 @@
     <div class="container">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a href="{% url 'marketplace:home' %}">{% trans "市场" %}</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'marketplace:product_list' %}">{% trans "商品" %}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'marketplace:home' %}">{% trans "Market" %}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'marketplace:product_list' %}">{% trans "Products" %}</a></li>
                 <li class="breadcrumb-item active">{{ product.name }}</li>
             </ol>
         </nav>
@@ -488,17 +488,17 @@
                     <div class="sp-row sp-viewers">
                         <span class="sp-dot"></span>
                         <span id="spViewers">{{ social_viewers }}</span>
-                        <span data-zh="人正在看这件商品" data-en="people are viewing this product right now" data-fr="personnes regardent ce produit en ce moment">人正在看这件商品</span>
+                        <span data-zh="人正在看这件商品" data-en="people are viewing this product right now" data-fr="personnes regardent ce produit en ce moment">people are viewing this product right now</span>
                     </div>
                     <!-- Delivered sales -->
                     {% if sold_delivered > 0 %}
                     <div class="sp-row sp-sold">
                         <i class="fas fa-fire" style="color:#ef4444;"></i>
-                        <span><strong>{{ sold_delivered }}</strong> <span data-zh="件已售出（已完成订单）" data-en="units sold (delivered orders)" data-fr="unités vendues (commandes livrées)">件已售出（已完成订单）</span></span>
+                        <span><strong>{{ sold_delivered }}</strong> <span data-zh="件已售出（已完成订单）" data-en="units sold (delivered orders)" data-fr="unités vendues (commandes livrées)">units sold (delivered orders)</span></span>
                         {% if sold_delivered >= 50 %}
-                        <span class="sp-badge sp-badge-hot">{% trans "热销" %}</span>
+                        <span class="sp-badge sp-badge-hot">{% trans "Hot" %}</span>
                         {% elif sold_delivered >= 10 %}
-                        <span class="sp-badge sp-badge-trend">{% trans "趋势" %}</span>
+                        <span class="sp-badge sp-badge-trend">{% trans "Trending" %}</span>
                         {% endif %}
                     </div>
                     {% endif %}
@@ -506,7 +506,7 @@
                     {% if product.stock > 0 and product.stock <= 10 %}
                     <div class="sp-row sp-urgent">
                         <i class="fas fa-exclamation-circle" style="color:#f59e0b;"></i>
-                        <span data-zh="仅剩" data-en="Only" data-fr="Il ne reste que">仅剩</span> <strong>{{ product.stock }}</strong> <span data-zh="件，速抢！" data-en="left — order soon!" data-fr="en stock !">件，速抢！</span>
+                        <span data-zh="仅剩" data-en="Only" data-fr="Il ne reste que">Only</span> <strong>{{ product.stock }}</strong> <span data-zh="件，速抢！" data-en="left — order soon!" data-fr="en stock !">left — order soon!</span>
                     </div>
                     {% endif %}
                 </div>
@@ -528,28 +528,28 @@
                 <div class="mb-3">
                     <div class="detail-row">
                         <i class="fas fa-box"></i>
-                        <span class="label">{% trans "状况" %}</span>
+                        <span class="label">{% trans "Condition" %}</span>
                         <span>{{ product.get_condition_display }}</span>
                     </div>
                     {% if product.weight %}
                     <div class="detail-row">
                         <i class="fas fa-weight-hanging"></i>
-                        <span class="label">{% trans "重量" %}</span>
+                        <span class="label">{% trans "Weight" %}</span>
                         <span>{{ product.weight }} kg</span>
                     </div>
                     {% endif %}
                     <div class="detail-row">
                         <i class="fas fa-warehouse"></i>
-                        <span class="label">{% trans "库存" %}</span>
+                        <span class="label">{% trans "Stock" %}</span>
                         {% if product.in_stock %}
-                        <span class="stock-ok">{% trans "有货" %} ({{ product.stock }})</span>
+                        <span class="stock-ok">{% trans "In Stock" %} ({{ product.stock }})</span>
                         {% else %}
-                        <span class="stock-out">{% trans "缺货" %}</span>
+                        <span class="stock-out">{% trans "Out of Stock" %}</span>
                         {% endif %}
                     </div>
                     <div class="detail-row">
                         <i class="fas fa-fire"></i>
-                        <span class="label">{% trans "已售" %}</span>
+                        <span class="label">{% trans "Sold" %}</span>
                         <span>{{ sold_delivered }}</span>
                     </div>
                 </div>
@@ -559,12 +559,12 @@
 
                 {% if selectable_attributes %}
                 <div class="option-panel">
-                    <h5><i class="fas fa-sliders me-2" style="color:var(--primary-color);"></i>{% trans "选择配置" %}</h5>
+                    <h5><i class="fas fa-sliders me-2" style="color:var(--primary-color);"></i>{% trans "Select Configuration" %}</h5>
                     {% for group in selectable_attributes %}
                     <div class="option-group" data-attribute-name="{{ group.name }}">
                         <label class="option-group-label">{{ group.name }}</label>
                         <select class="option-select" data-attribute-name="{{ group.name }}">
-                            <option value="">{% trans "选择一个选项" %}</option>
+                            <option value="">{% trans "Choose an option" %}</option>
                             {% for value in group.values %}
                             <option value="{{ value }}">{{ value }}</option>
                             {% endfor %}
@@ -586,29 +586,29 @@
                 <!-- Actions -->
                 <div class="action-buttons">
                     <button class="btn-add-cart" onclick="addToCart()" style="flex:1;">
-                        <i class="fas fa-cart-plus"></i> {% trans "加入购物车" %}
+                        <i class="fas fa-cart-plus"></i> {% trans "Add to Cart" %}
                     </button>
                     <button class="btn-buy-now" onclick="buyNow()">
-                        <i class="fas fa-bolt"></i> {% trans "立即购买" %}
+                        <i class="fas fa-bolt"></i> {% trans "Buy Now" %}
                     </button>
                     <a href="{% url 'manager:start_conversation' %}?item_type=product&item_id={{ product.id }}&subject={{ product.name|urlencode }}" class="btn-add-cart" style="flex:0 0 auto; min-width:auto; text-decoration:none;">
-                        <i class="fas fa-comment-dots"></i> {% trans "聊天" %}
+                        <i class="fas fa-comment-dots"></i> {% trans "Chat" %}
                     </a>
-                    <button class="btn-wishlist-action" id="wishBtn" onclick="toggleWishlist()" title="{% trans '收藏' %}" style="width:48px;height:48px;border-radius:50%;background:rgba(102,126,234,0.1);border:2px solid rgba(102,126,234,0.3);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.3s;color:#667eea;font-size:1.2rem;">
+                    <button class="btn-wishlist-action" id="wishBtn" onclick="toggleWishlist()" title="{% trans 'Favorite' %}" style="width:48px;height:48px;border-radius:50%;background:rgba(102,126,234,0.1);border:2px solid rgba(102,126,234,0.3);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.3s;color:#667eea;font-size:1.2rem;">
                         <i class="far fa-heart" id="wishIcon"></i>
                     </button>
                 </div>
                 {% else %}
                 <div class="action-buttons">
                     <button class="btn-add-cart" disabled style="opacity:0.5; cursor:not-allowed;">
-                        <i class="fas fa-ban"></i> {% trans "暂时缺货" %}
+                        <i class="fas fa-ban"></i> {% trans "Temporarily Out of Stock" %}
                     </button>
                 </div>
                 {% endif %}
 
                 {% if specification_attributes %}
                 <div class="desc-section">
-                    <h5><i class="fas fa-list-check me-2" style="color:var(--primary-color);"></i>{% trans "商品规格" %}</h5>
+                    <h5><i class="fas fa-list-check me-2" style="color:var(--primary-color);"></i>{% trans "Specifications" %}</h5>
                     <div class="table-responsive">
                         <table class="table table-sm mb-0" style="font-size:0.9rem;">
                             <tbody>
@@ -626,7 +626,7 @@
 
                 <!-- Description -->
                 <div class="desc-section">
-                    <h5><i class="fas fa-info-circle me-2" style="color:var(--primary-color);"></i>{% trans "商品描述" %}</h5>
+                    <h5><i class="fas fa-info-circle me-2" style="color:var(--primary-color);"></i>{% trans "Product Description" %}</h5>
                     <div class="desc-text">{{ product.description|linebreaksbr }}</div>
                 </div>
             </div>
@@ -636,7 +636,7 @@
     <!-- Related -->
     {% if related_products %}
     <div class="related-section">
-        <h3 class="related-title"><i class="fas fa-th-large me-2" style="color:var(--primary-color);"></i>{% trans "相关商品" %}</h3>
+        <h3 class="related-title"><i class="fas fa-th-large me-2" style="color:var(--primary-color);"></i>{% trans "Related Products" %}</h3>
         <div class="row g-3">
             {% for p in related_products %}
             <div class="col-6 col-md-3">

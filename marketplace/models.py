@@ -196,6 +196,8 @@ class SupermarketItem(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='价格')
     original_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='原价')
     image = models.ImageField(upload_to='marketplace/supermarket/', blank=True, null=True, verbose_name='商品图片')
+    image_2 = models.ImageField(upload_to='marketplace/supermarket/', blank=True, null=True, verbose_name='图片2')
+    image_3 = models.ImageField(upload_to='marketplace/supermarket/', blank=True, null=True, verbose_name='图片3')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='supermarket_items')
     stock = models.PositiveIntegerField(default=0, verbose_name='库存')
     unit = models.CharField(max_length=20, choices=UNIT_CHOICES, default='piece', verbose_name='单位')
@@ -221,6 +223,16 @@ class SupermarketItem(models.Model):
         if self.image and hasattr(self.image, 'url'):
             return self.image.url
         return '/static/img/default_product.png'
+
+    def get_image_2_url(self):
+        if self.image_2 and hasattr(self.image_2, 'url'):
+            return self.image_2.url
+        return ''
+
+    def get_image_3_url(self):
+        if self.image_3 and hasattr(self.image_3, 'url'):
+            return self.image_3.url
+        return ''
 
     def get_discount_percent(self):
         if self.original_price and self.original_price > self.price:
@@ -296,6 +308,7 @@ class MarketplaceOrder(models.Model):
         ('paypal', 'PayPal'),
         ('credit_card', '信用卡'),
         ('bank_transfer', '银行转账'),
+        ('wallet', 'Wallet'),
     ]
 
     PAYMENT_STATUS_CHOICES = [

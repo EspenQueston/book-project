@@ -247,6 +247,8 @@ html[data-theme="dark"] .vs-score-item { background: var(--section-bg); }
                     <i class="fas fa-box-open"></i> <span data-zh="商品" data-en="Products" data-fr="Produits">{% trans "商品" %}</span> <span class="vs-tab-count">{{ total_products }}</span></a></li>
                 <li><a class="vs-tab-item {% if active_tab == 'courses' %}active{% endif %}" href="?tab=courses" data-zh="课程" data-en="Courses" data-fr="Cours">
                     <i class="fas fa-graduation-cap"></i> <span data-zh="课程" data-en="Courses" data-fr="Cours">{% trans "课程" %}</span> <span class="vs-tab-count">{{ total_courses }}</span></a></li>
+                <li><a class="vs-tab-item {% if active_tab == 'supermarket' %}active{% endif %}" href="?tab=supermarket" data-zh="超市" data-en="Supermarket" data-fr="Supermarché">
+                    <i class="fas fa-carrot"></i> <span data-zh="超市" data-en="Supermarket" data-fr="Supermarché">{% trans "超市" %}</span> <span class="vs-tab-count">{{ total_supermarket }}</span></a></li>
                 <li><a class="vs-tab-item {% if active_tab == 'shop' %}active{% endif %}" href="?tab=shop" data-zh="店铺" data-en="Shop" data-fr="Boutique">
                     <i class="fas fa-store-alt"></i> <span data-zh="店铺" data-en="Shop" data-fr="Boutique">{% trans "店铺" %}</span></a></li>
             </ul>
@@ -336,6 +338,29 @@ html[data-theme="dark"] .vs-score-item { background: var(--section-bg); }
                     {% endfor %}
                     {% endif %}
 
+                    {% if active_tab == 'all' or active_tab == 'supermarket' %}
+                    {% for sm in vendor_supermarket %}
+                    <div class="vs-card" data-type="supermarket">
+                        <a href="{% url 'marketplace:supermarket_detail' sm.slug %}">
+                            <img src="{{ sm.get_image_url }}" alt="{{ sm.name }}" class="vs-card-img">
+                        </a>
+                        <div class="vs-card-body">
+                            <span class="vs-card-type" style="background:linear-gradient(135deg,#65a30d,#84cc16);color:#fff;"><i class="fas fa-carrot me-1"></i><span data-zh="超市" data-en="Supermarket" data-fr="Supermarché">{% trans "超市" %}</span></span>
+                            <a href="{% url 'marketplace:supermarket_detail' sm.slug %}" style="text-decoration:none;">
+                                <div class="vs-card-title">{{ sm.name }}</div>
+                            </a>
+                            <div class="vs-card-footer">
+                                <div>
+                                    <div class="vs-card-price">{{ sm.price|fcfa }}</div>
+                                    <div class="vs-card-sales"><i class="fas fa-shopping-basket me-1"></i>{{ sm.sales_count }}</div>
+                                </div>
+                                <a href="{% url 'marketplace:supermarket_detail' sm.slug %}" class="vs-card-btn" data-zh="查看" data-en="View" data-fr="Voir">{% trans "查看" %}</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
                 </div>
 
                 {% if total_items == 0 %}
@@ -363,6 +388,13 @@ html[data-theme="dark"] .vs-score-item { background: var(--section-bg); }
                 <div class="vs-empty">
                     <i class="fas fa-graduation-cap"></i>
                     <p data-zh="暂无课程" data-en="No courses available" data-fr="Aucun cours disponible">{% trans "暂无课程" %}</p>
+                </div>
+                {% endif %}
+
+                {% if active_tab == 'supermarket' and not vendor_supermarket %}
+                <div class="vs-empty">
+                    <i class="fas fa-carrot"></i>
+                    <p data-zh="暂无超市商品" data-en="No supermarket items available" data-fr="Aucun article de supermarché disponible">{% trans "暂无超市商品" %}</p>
                 </div>
                 {% endif %}
             </div>

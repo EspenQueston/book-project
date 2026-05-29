@@ -216,6 +216,11 @@
         <div class="mypro-points-val" style="font-size:16px;">{{ following_count|default:0 }}</div>
         <div class="mypro-points-label" data-zh="关注" data-en="Following" data-fr="Abonnements">关注</div>
     </div>
+    <div class="mypro-divider-v"></div>
+    <div class="mypro-points-col">
+        <div class="mypro-points-val" style="font-size:16px;">{{ wallet_balance|default:"0" }}</div>
+        <div class="mypro-points-label" data-zh="钱包" data-en="Wallet" data-fr="Portefeuille">钱包</div>
+    </div>
 </div>
 
 <!-- Orders shortcuts -->
@@ -280,6 +285,10 @@
     <a href="{% url 'manager:public_books' %}" class="mypro-action-btn" style="color:#FF6000;">
         <i class="fas fa-book-open"></i>
         <span data-zh="书城" data-en="Books" data-fr="Livres">书城</span>
+    </a>
+    <a href="{% url 'manager:public_wallet' %}" class="mypro-action-btn" style="color:#10b981;">
+        <i class="fas fa-wallet"></i>
+        <span data-zh="我的钱包" data-en="Wallet" data-fr="Portefeuille">我的钱包</span>
     </a>
     <a href="{% url 'manager:user_profile' %}" class="mypro-action-btn" style="color:#764ba2;">
         <i class="fas fa-user-cog"></i>
