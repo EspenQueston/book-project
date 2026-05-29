@@ -26,4 +26,4 @@ django-extensions>=3.2.0
 markdown>=3.5.0
 
 # Payment Aggregator
-kkiapay==0.0.6
+kkiapay>=0.0.6
