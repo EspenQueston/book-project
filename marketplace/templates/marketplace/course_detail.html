@@ -201,6 +201,15 @@
     .bmp-seller-btns .bmp-seller-btn:nth-child(2) { background: linear-gradient(135deg, #f093fb, #f5576c); color: #fff; border-color: transparent; box-shadow: 0 4px 14px rgba(240,147,251,0.32); }
     .bmp-seller-btn.follow { background: linear-gradient(135deg, #f093fb, #f5576c); color: #fff; border-color: transparent; flex: 0 0 auto; padding: 6px 14px; min-height: 32px; font-size: 12px; }
 
+    /* Related courses feed (mobile) */
+    .crc-feed-section { background: #fff; padding: 14px; margin-bottom: 6px; }
+    .crc-feed-title { font-size: 14px; font-weight: 700; color: #333; margin-bottom: 12px; }
+    .crc-feed-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .crc-feed-card { border: 1px solid #f1f5f9; border-radius: 10px; overflow: hidden; }
+    .crc-feed-card img { width: 100%; height: 100px; object-fit: cover; }
+    .crc-feed-name { padding: 8px; font-size: 12px; font-weight: 600; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .crc-feed-price { padding: 0 8px 8px; font-size: 13px; font-weight: 700; color: #ef4444; }
+
     .bmp-bottom-bar { position: fixed; bottom: 60px; left: 0; right: 0; background: #fff; display: flex; align-items: center; border-top: 1px solid #f0f0f0; z-index: 900; padding: 6px 10px; gap: 0; }
     .bmp-action-icons { display: flex; gap: 0; margin-right: 8px; }
     .bmp-action-icon { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 0 8px; font-size: 18px; color: #666; cursor: pointer; border: none; background: none; text-decoration: none; }
@@ -358,6 +367,24 @@
         </div>
         {% endif %}
     </div>
+
+    <!-- J. Related Courses (mobile 2-col feed) -->
+    {% if related_courses %}
+    <div class="crc-feed-section">
+        <div class="crc-feed-title"><i class="fas fa-th-large me-1" style="color:#f093fb;"></i>{% trans "Related Courses" %}</div>
+        <div class="crc-feed-grid">
+            {% for c in related_courses %}
+            <a href="{% url 'marketplace:course_detail' c.slug %}" style="text-decoration:none;color:inherit;">
+                <div class="crc-feed-card">
+                    <img src="{{ c.get_image_url }}" alt="{{ c.title }}">
+                    <div class="crc-feed-name">{{ c.title }}</div>
+                    <div class="crc-feed-price">{{ c.price|fcfa }}</div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
 
     <!-- K. Sticky Bottom Bar -->
     <div class="bmp-bottom-bar">
