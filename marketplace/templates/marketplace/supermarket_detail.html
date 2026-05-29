@@ -414,9 +414,11 @@
                     <i class="fas fa-star" style="color:#f59e0b;"></i> 4.9 · <span>{% trans "Official Store" %}</span>
                 </div>
             </div>
-            <button class="pmp-seller-btn follow ms-auto" onclick="toggleVendorFollow({% if item.vendor %}{{ item.vendor.id }}{% else %}0{% endif %})" id="followVendorBtn">
+            {% if item.vendor %}
+            <button class="pmp-seller-btn follow ms-auto" onclick="toggleVendorFollow({{ item.vendor.id }}, this)" id="followVendorBtn">
                 <i class="fas fa-plus"></i> <span>{% trans "Follow" %}</span>
             </button>
+            {% endif %}
         </div>
         <div class="pmp-seller-scores">
             <div class="pmp-score-item"><div class="pmp-score-val">4.9</div><div class="pmp-score-lbl">{% trans "Product Quality" %}</div></div>
@@ -798,7 +800,10 @@ function toggleVendorFollow(vendorId, btn){
         .then(d=>{
             if(d.login_required){ window.location.href='{% url "manager:user_login" %}'; return; }
             if(typeof showToast==='function') showToast(d.message || 'OK', d.success ? 'success' : 'error');
-            if(d.success && btn){ btn.textContent = d.following ? "{% trans 'Following' %}" : "{% trans 'Follow' %}"; }
+            if(d.success && btn){
+                var lbl = btn.querySelector('span');
+                if(lbl) lbl.textContent = d.following ? "{% trans 'Following' %}" : "{% trans 'Follow' %}";
+            }
         }).catch(()=> { if(typeof showToast==='function') showToast("{% trans 'Network error' %}", 'error'); });
 }
 
