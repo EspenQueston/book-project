@@ -1,0 +1,137 @@
+<!-- Comprehensive admin sidebar — include this in any admin page that lacks a sidebar -->
+<style>
+    .admin-sidebar-wrap {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        height: 100vh;
+        box-shadow: 4px 0 28px rgba(102, 126, 234, 0.28);
+        position: fixed;
+        width: 268px;
+        z-index: 1050;
+        overflow-y: auto;
+        overflow-x: hidden;
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid rgba(255, 255, 255, 0.08);
+        transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+        top: 0;
+        left: 0;
+    }
+    .admin-sidebar-wrap .sidebar-brand {
+        padding: 1.15rem 1.1rem 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .admin-sidebar-wrap .sidebar-brand .brand-icon {
+        width: 42px; height: 42px; border-radius: 12px;
+        background: rgba(255,255,255,0.18);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.1rem; color: #fff;
+    }
+    .admin-sidebar-wrap .sidebar-brand h4 {
+        font-size: 1.05rem; font-weight: 700; letter-spacing: -0.02em; color: #fff;
+    }
+    .admin-sidebar-wrap .sidebar-brand small {
+        color: rgba(255,255,255,0.65) !important; font-size: 0.78rem;
+    }
+    .admin-sidebar-wrap .sidebar-scroll { flex: 1; padding: 0.5rem 0 1rem; }
+    .admin-sidebar-wrap .nav-section-label {
+        font-size: 0.62rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 0.14em; color: rgba(255,255,255,0.45);
+        padding: 0.85rem 1.15rem 0.35rem;
+    }
+    .admin-sidebar-wrap .nav-link {
+        color: rgba(255,255,255,0.92); padding: 0.55rem 0.95rem;
+        border-radius: 10px; margin: 2px 10px;
+        transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+        display: flex; align-items: center; gap: 0.65rem;
+        font-size: 0.88rem; font-weight: 500; border: 1px solid transparent;
+    }
+    .admin-sidebar-wrap .nav-link i { width: 1.2rem; text-align: center; opacity: 0.92; font-size: 0.95rem; }
+    .admin-sidebar-wrap .nav-link:hover {
+        background: rgba(255,255,255,0.12); color: #fff; transform: translateX(2px);
+    }
+    .admin-sidebar-wrap .nav-link.active {
+        background: rgba(255,255,255,0.18); color: #fff;
+        border-color: rgba(255,255,255,0.22);
+        box-shadow: inset 3px 0 0 rgba(255,255,255,0.85);
+    }
+    .admin-sidebar-wrap .sidebar-footer {
+        border-top: 1px solid rgba(255,255,255,0.1); padding: 0.35rem 0 0.75rem;
+    }
+    .admin-sidebar-wrap .sidebar-footer .nav-link {
+        color: rgba(255,255,255,0.72); font-size: 0.84rem;
+    }
+    .admin-main-offset { margin-left: 268px; min-height: 100vh; padding: 20px; }
+    @media (max-width: 991.98px) {
+        .admin-sidebar-wrap { transform: translateX(-100%); }
+        .admin-sidebar-wrap.open { transform: translateX(0); }
+        .admin-main-offset { margin-left: 0; }
+    }
+</style>
+
+<aside class="admin-sidebar-wrap" id="adminSidebar" aria-label="管理导航">
+    <div class="sidebar-brand">
+        <div class="d-flex align-items-center gap-3">
+            <div class="brand-icon"><i class="fas fa-user-shield"></i></div>
+            <div class="min-w-0">
+                <h4 class="text-white mb-0">管理面板</h4>
+                <small class="d-block text-truncate">欢迎回来，{{ name }}</small>
+            </div>
+        </div>
+    </div>
+    <div class="sidebar-scroll">
+        <nav class="nav flex-column">
+            <a class="nav-link {% if request.path == '/manager/dashboard/' %}active{% endif %}" href="/manager/dashboard/">
+                <i class="fas fa-chart-pie"></i><span>图书仪表板</span>
+            </a>
+        </nav>
+        <div class="nav-section-label">图书中心</div>
+        <nav class="nav flex-column">
+            <a class="nav-link {% if request.path == '/manager/book_list/' %}active{% endif %}" href="/manager/book_list/">
+                <i class="fas fa-book"></i><span>图书管理</span>
+            </a>
+            <a class="nav-link {% if request.path == '/manager/author_list/' %}active{% endif %}" href="/manager/author_list/">
+                <i class="fas fa-user-edit"></i><span>作者管理</span>
+            </a>
+            <a class="nav-link {% if request.path == '/manager/publisher_list/' %}active{% endif %}" href="/manager/publisher_list/">
+                <i class="fas fa-building"></i><span>出版社管理</span>
+            </a>
+        </nav>
+        <div class="nav-section-label">运营管理</div>
+        <nav class="nav flex-column">
+            <a class="nav-link {% if request.path == '/manager/order_list/' %}active{% endif %}" href="/manager/order_list/">
+                <i class="fas fa-shopping-cart"></i><span>订单管理</span>
+            </a>
+            <a class="nav-link {% if request.path == '/manager/blog_list/' %}active{% endif %}" href="/manager/blog_list/">
+                <i class="fas fa-blog"></i><span>博客管理</span>
+            </a>
+            <a class="nav-link {% if request.path == '/manager/email/' %}active{% endif %}" href="/manager/email/">
+                <i class="fas fa-envelope"></i><span>消息管理</span>
+            </a>
+            <a class="nav-link {% if '/marketplace/admin/' in request.path %}active{% endif %}" href="/marketplace/admin/dashboard/">
+                <i class="fas fa-store"></i><span>市场管理</span>
+            </a>
+        </nav>
+        <div class="nav-section-label">平台管理</div>
+        <nav class="nav flex-column">
+            <a class="nav-link {% if request.path == '/manager/admin/users/' %}active{% endif %}" href="/manager/admin/users/">
+                <i class="fas fa-users"></i><span>用户管理</span>
+            </a>
+            <a class="nav-link {% if request.path == '/manager/admin/vendors/' %}active{% endif %}" href="/manager/admin/vendors/">
+                <i class="fas fa-store-alt"></i><span>卖家管理</span>
+            </a>
+            <a class="nav-link {% if request.path == '/manager/admin/chatbot/' %}active{% endif %}" href="/manager/admin/chatbot/">
+                <i class="fas fa-robot"></i><span>AI 聊天配置</span>
+            </a>
+        </nav>
+    </div>
+    <div class="sidebar-footer">
+        <nav class="nav flex-column">
+            <a class="nav-link" href="/manager/public/">
+                <i class="fas fa-globe"></i><span>查看网站</span>
+            </a>
+            <a class="nav-link" href="/manager/logout/">
+                <i class="fas fa-sign-out-alt"></i><span>退出登录</span>
+            </a>
+        </nav>
+    </div>
+</aside>

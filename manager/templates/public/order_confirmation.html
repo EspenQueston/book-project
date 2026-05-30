@@ -247,6 +247,63 @@
         transform: translateY(-2px);
         color: white;
     }
+
+    /* ========== DARK MODE ========== */
+    html[data-theme="dark"] .order-details {
+        background: var(--bg-surface);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    html[data-theme="dark"] .payment-info {
+        background: var(--bg-elevated);
+    }
+    html[data-theme="dark"] .detail-row {
+        border-bottom-color: var(--border-default);
+    }
+    html[data-theme="dark"] .payment-checklist li {
+        background: var(--bg-surface);
+        border-left-color: var(--border-default);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    html[data-theme="dark"] .payment-checklist li.active {
+        background: rgba(245,158,11,0.08);
+        border-left-color: #f59e0b;
+    }
+    html[data-theme="dark"] .verification-overlay {
+        background: rgba(15,23,42,0.95);
+    }
+    html[data-theme="dark"] .verification-overlay h3 {
+        color: var(--text-primary);
+    }
+    html[data-theme="dark"] .verification-overlay p {
+        color: var(--text-secondary);
+    }
+    html[data-theme="dark"] .verification-spinner {
+        border-color: var(--border-default);
+        border-top-color: var(--brand-primary);
+    }
+    html[data-theme="dark"] .order-timeline::before {
+        background: var(--border-default);
+    }
+    html[data-theme="dark"] .timeline-dot {
+        background: var(--bg-elevated);
+        color: var(--text-tertiary);
+    }
+    html[data-theme="dark"] .timeline-label {
+        color: var(--text-tertiary);
+    }
+    html[data-theme="dark"] .timeline-step.active .timeline-label {
+        color: #818cf8;
+    }
+    html[data-theme="dark"] .next-action {
+        background: linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.08));
+        border-color: rgba(102,126,234,0.3);
+    }
+    html[data-theme="dark"] .text-muted {
+        color: var(--text-tertiary) !important;
+    }
+    html[data-theme="dark"] .border-bottom {
+        border-bottom-color: var(--border-default) !important;
+    }
 </style>
 
 <div class="confirmation-container">

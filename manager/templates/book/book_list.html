@@ -169,6 +169,8 @@
     </style>
 </head>
 <body>
+    {% include "admin/_admin_sidebar.html" %}
+    <div class="admin-main-offset">
     <div class="main-container">
         <div class="container-fluid">
             <!-- Header -->
@@ -357,7 +359,7 @@
     <script>
         // Display current date
         document.getElementById('currentDate').textContent = new Date().toLocaleDateString('zh-CN');
-        
+
         // Delete confirmation — POST to prevent CSRF via GET
         function confirmDelete(bookId, bookName) {
             document.getElementById('bookName').textContent = bookName;
@@ -366,5 +368,6 @@
         }
     </script>
 <script src="/static/js/admin_i18n.js" defer></script>
+    </div><!-- /admin-main-offset -->
 </body>
 </html>

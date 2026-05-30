@@ -266,6 +266,8 @@
     </style>
 </head>
 <body>
+    {% include "admin/_admin_sidebar.html" %}
+    <div class="admin-main-offset">
     <div class="main-container">
         <div class="container-fluid">
             <!-- Header -->
@@ -581,5 +583,6 @@
         });
     </script>
 <script src="/static/js/admin_i18n.js" defer></script>
+    </div><!-- /admin-main-offset -->
 </body>
 </html>

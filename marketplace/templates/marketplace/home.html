@@ -107,6 +107,44 @@
         color: #fff; border-radius: 50%; width: 22px; height: 22px; font-size: 0.7rem;
         display: flex; align-items: center; justify-content: center; font-weight: 700;
     }
+
+    /* ========== DARK MODE ========== */
+    html[data-theme="dark"] .marketplace-hero {
+        background: linear-gradient(135deg, #4338ca 0%, #5b21b6 100%);
+    }
+    html[data-theme="dark"] .stats-banner {
+        background: var(--bg-surface);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+    }
+    html[data-theme="dark"] .section-stat-label {
+        color: var(--text-tertiary);
+    }
+    html[data-theme="dark"] .section-card {
+        background: var(--bg-surface);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+    html[data-theme="dark"] .section-card:hover {
+        box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+    }
+    html[data-theme="dark"] .section-card-body p {
+        color: var(--text-secondary);
+    }
+    html[data-theme="dark"] .product-card {
+        background: var(--bg-surface);
+        box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+    }
+    html[data-theme="dark"] .product-card:hover {
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    html[data-theme="dark"] .product-card-body h5 {
+        color: var(--text-primary);
+    }
+    html[data-theme="dark"] .product-card-body .meta {
+        color: var(--text-tertiary);
+    }
+    html[data-theme="dark"] .item-price-original {
+        color: var(--text-tertiary);
+    }
 </style>
 {% endblock %}
 

@@ -45,6 +45,52 @@
 .info-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f3f4f6; }
 .info-item:last-child { border-bottom: none; }
 .info-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+    /* ========== DARK MODE ========== */
+    html[data-theme="dark"] .stat-card {
+        background: var(--bg-surface);
+        border-color: var(--border-subtle);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    html[data-theme="dark"] .stat-value {
+        color: var(--text-primary);
+    }
+    html[data-theme="dark"] .stat-label {
+        color: var(--text-tertiary);
+    }
+    html[data-theme="dark"] .section-heading {
+        color: var(--brand-primary);
+        border-color: var(--border-default);
+    }
+    html[data-theme="dark"] .content-card {
+        background: var(--bg-surface);
+        border-color: var(--border-subtle);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    html[data-theme="dark"] .book-row {
+        border-color: var(--border-subtle);
+    }
+    html[data-theme="dark"] .book-row:hover {
+        background: var(--bg-elevated);
+    }
+    html[data-theme="dark"] .book-cover-placeholder {
+        background: linear-gradient(135deg, #1e1b4b, #312e81);
+    }
+    html[data-theme="dark"] .meta-badge {
+        background: var(--bg-elevated);
+        color: var(--text-secondary);
+    }
+    html[data-theme="dark"] .sidebar-card {
+        background: var(--bg-surface);
+        border-color: var(--border-subtle);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    html[data-theme="dark"] .info-item {
+        border-color: var(--border-subtle);
+    }
+    html[data-theme="dark"] .author-detail-wrap {
+        background: var(--bg-page) !important;
+    }
 </style>
 {% endblock %}
 
@@ -123,7 +169,7 @@
 </div>
 
 <!-- Content -->
-<div style="background:#f8f9ff; padding: 0 0 60px;">
+<div class="author-detail-wrap" style="background:#f8f9ff; padding: 0 0 60px;">
     <div class="container">
         <div class="row g-4">
             <!-- Books List -->

@@ -79,6 +79,36 @@
     font-weight: 700;
     font-size: 0.82rem;
 }
+
+/* ========== DARK MODE ========== */
+html[data-theme="dark"] .wl-page {
+    background: var(--bg-page);
+}
+html[data-theme="dark"] .wl-card {
+    background: var(--bg-surface);
+    border-color: var(--border-subtle);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+html[data-theme="dark"] .wl-media {
+    background: var(--bg-elevated);
+}
+html[data-theme="dark"] .wl-name {
+    color: var(--text-primary);
+}
+html[data-theme="dark"] .wl-tag {
+    background: var(--bg-elevated);
+    color: var(--brand-primary);
+}
+html[data-theme="dark"] .wl-empty {
+    background: var(--bg-surface);
+    border-color: var(--border-subtle);
+}
+html[data-theme="dark"] .wl-empty i {
+    color: var(--text-tertiary);
+}
+html[data-theme="dark"] .wl-empty p {
+    color: var(--text-secondary);
+}
 </style>
 {% endblock %}
 

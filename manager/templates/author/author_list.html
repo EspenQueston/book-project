@@ -173,6 +173,8 @@
     </style>
 </head>
 <body>
+    {% include "admin/_admin_sidebar.html" %}
+    <div class="admin-main-offset">
     <div class="main-container">
         <div class="container-fluid">
             <!-- Header -->
@@ -331,5 +333,6 @@
     function gToast(msg,type,dur){type=type||'success';dur=dur||3000;var c=document.querySelector('.g-toast-container');if(!c){c=document.createElement('div');c.className='g-toast-container';document.body.appendChild(c);}var icons={success:'fa-check-circle',error:'fa-times-circle',warning:'fa-exclamation-triangle'};var t=document.createElement('div');t.className='g-toast '+type;t.innerHTML='<i class="fas '+(icons[type]||'fa-info-circle')+'"></i>'+msg;c.appendChild(t);setTimeout(function(){t.style.opacity='0';setTimeout(function(){t.remove()},300)},dur);}
     </script>
 <script src="/static/js/admin_i18n.js" defer></script>
+    </div><!-- /admin-main-offset -->
 </body>
 </html>

@@ -41,6 +41,15 @@
     .txn-credit .txn-amount { color: #10b981; }
     .txn-debit .txn-amount { color: #ef4444; }
     .empty-state { text-align: center; padding: 40px 20px; color: #94a3b8; }
+
+    /* ========== DARK MODE ========== */
+    html[data-theme="dark"] .txn-row {
+        background: var(--bg-surface);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    }
+    html[data-theme="dark"] .empty-state {
+        color: var(--text-tertiary);
+    }
 </style>
 {% endblock %}
 

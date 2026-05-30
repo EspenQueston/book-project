@@ -66,6 +66,18 @@
     }
     .status-msg.success { color: #10b981; font-weight: 600; }
     .status-msg.error   { color: #ef4444; font-weight: 600; }
+
+    /* ========== DARK MODE ========== */
+    html[data-theme="dark"] .pay-card {
+        background: var(--bg-surface);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+    }
+    html[data-theme="dark"] .pay-order-ref {
+        color: var(--text-tertiary);
+    }
+    html[data-theme="dark"] .status-msg {
+        color: var(--text-secondary);
+    }
 </style>
 
 <div class="pay-wrapper">

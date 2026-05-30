@@ -105,6 +105,28 @@
         #productsGrid > div { margin-bottom: 0; }
         .pagination { display: none !important; }
     }
+
+    /* ========== DARK MODE ========== */
+    html[data-theme="dark"] .filter-bar {
+        background: var(--bg-surface);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    html[data-theme="dark"] .product-card {
+        background: var(--bg-surface);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    html[data-theme="dark"] .product-card-img {
+        background: linear-gradient(135deg, #0f172a, #1e293b);
+    }
+    html[data-theme="dark"] .product-card-body h5 {
+        color: var(--text-primary);
+    }
+    html[data-theme="dark"] .product-price-original {
+        color: var(--text-tertiary);
+    }
+    html[data-theme="dark"] .empty-state {
+        color: var(--text-tertiary);
+    }
 </style>
 {% endblock %}
 

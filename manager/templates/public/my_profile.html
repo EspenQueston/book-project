@@ -164,6 +164,96 @@
     transition: all .2s; box-shadow: 0 4px 16px rgba(102,126,234,.35);
 }
 .mypro-login-btn:hover { color: #fff; transform: translateY(-2px); }
+
+/* ========== DARK MODE ========== */
+html[data-theme="dark"] .mypro-page {
+    background: var(--bg-page);
+}
+html[data-theme="dark"] .mypro-points-card {
+    background: var(--bg-surface);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+}
+html[data-theme="dark"] .mypro-points-label {
+    color: var(--text-tertiary);
+}
+html[data-theme="dark"] .mypro-divider-v {
+    background: var(--border-default);
+}
+html[data-theme="dark"] .mypro-orders-section,
+html[data-theme="dark"] .mypro-pr-section,
+html[data-theme="dark"] .mypro-wishlist-section,
+html[data-theme="dark"] .mypro-shops-section {
+    background: var(--bg-surface);
+}
+html[data-theme="dark"] .mypro-orders-title {
+    color: var(--text-primary);
+}
+html[data-theme="dark"] .mypro-orders-tab {
+    color: var(--text-secondary);
+}
+html[data-theme="dark"] .mypro-pr-title {
+    color: var(--text-primary);
+}
+html[data-theme="dark"] .mypro-pr-row {
+    background: linear-gradient(135deg, rgba(251,191,36,0.1), rgba(251,191,36,0.05));
+    border-color: rgba(251,191,36,0.25);
+}
+html[data-theme="dark"] .mypro-pr-name {
+    color: var(--text-primary);
+}
+html[data-theme="dark"] .mypro-pr-thumb {
+    background: var(--bg-elevated);
+    border-color: var(--border-subtle);
+}
+html[data-theme="dark"] .mypro-action-btn {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+html[data-theme="dark"] .mypro-wishlist-header {
+    color: var(--text-primary);
+}
+html[data-theme="dark"] .mypro-wishlist-header .count {
+    background: var(--bg-elevated);
+    color: var(--brand-primary);
+}
+html[data-theme="dark"] .mypro-wishlist-item {
+    background: var(--bg-elevated);
+    border-color: var(--border-subtle);
+    color: var(--text-primary);
+}
+html[data-theme="dark"] .mypro-wishlist-thumb {
+    background: var(--bg-surface);
+    color: var(--text-tertiary);
+}
+html[data-theme="dark"] .mypro-wishlist-name {
+    color: var(--text-primary);
+}
+html[data-theme="dark"] .mypro-shops-header {
+    color: var(--text-primary);
+}
+html[data-theme="dark"] .mypro-shop-chip {
+    color: var(--text-secondary);
+}
+html[data-theme="dark"] .mypro-empty-shops {
+    color: var(--text-tertiary);
+}
+html[data-theme="dark"] .mypro-feed-title {
+    color: var(--text-primary);
+}
+html[data-theme="dark"] .mypro-feed-card {
+    background: var(--bg-surface);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+html[data-theme="dark"] .mypro-feed-name {
+    color: var(--text-primary);
+}
+html[data-theme="dark"] .mypro-login-title {
+    color: var(--text-primary);
+}
+html[data-theme="dark"] .mypro-login-sub {
+    color: var(--text-tertiary);
+}
 </style>
 {% endblock %}
 

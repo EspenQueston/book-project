@@ -288,6 +288,93 @@
         .books-mobile-search, .books-filter-tabs, .books-king-kong, .books-mobile-feed { display: none !important; }
         .books-desktop-hero, .books-desktop-search, .books-desktop-grid, .books-desktop-quicklinks { display: block !important; }
     }
+
+    /* ========== DARK MODE ========== */
+    html[data-theme="dark"] .books-hero {
+        background: linear-gradient(135deg, #4338ca 0%, #5b21b6 100%);
+    }
+    html[data-theme="dark"] .book-card-modern {
+        background: var(--bg-surface);
+        border-color: var(--border-subtle);
+    }
+    html[data-theme="dark"] .book-card-modern:hover {
+        box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    }
+    html[data-theme="dark"] .bmc-body h5 {
+        color: var(--text-primary);
+    }
+    html[data-theme="dark"] .bmc-author {
+        color: var(--text-tertiary);
+    }
+    html[data-theme="dark"] .bmc-price {
+        color: #f87171;
+    }
+    html[data-theme="dark"] .bmc-badge-stock {
+        background: rgba(239,68,68,0.15);
+        color: #f87171;
+    }
+    html[data-theme="dark"] .bmc-actions .btn-outline-primary {
+        border-color: var(--border-default);
+        color: var(--text-secondary);
+    }
+    html[data-theme="dark"] .bmc-actions .btn-outline-primary:hover {
+        background: var(--button-hover);
+        color: var(--brand-primary);
+    }
+    html[data-theme="dark"] .wish-btn {
+        background: rgba(255,255,255,0.08);
+        border-color: rgba(255,255,255,0.12);
+    }
+    html[data-theme="dark"] .sidebar-card {
+        background: var(--bg-surface);
+        border-color: var(--border-subtle);
+    }
+    html[data-theme="dark"] .sidebar-card h5 {
+        color: var(--text-primary);
+    }
+    html[data-theme="dark"] .category-link {
+        color: var(--text-secondary);
+    }
+    html[data-theme="dark"] .category-link:hover,
+    html[data-theme="dark"] .category-link.active {
+        background: var(--button-hover);
+        color: var(--brand-primary);
+    }
+    html[data-theme="dark"] .sort-bar {
+        background: var(--bg-surface);
+        border-color: var(--border-subtle);
+    }
+    html[data-theme="dark"] .empty-state {
+        background: var(--bg-surface);
+    }
+    html[data-theme="dark"] .empty-state h4 {
+        color: var(--text-primary);
+    }
+    html[data-theme="dark"] .empty-state p {
+        color: var(--text-secondary);
+    }
+    /* Mobile dark mode */
+    html[data-theme="dark"] .books-mobile-search,
+    html[data-theme="dark"] .books-filter-tabs,
+    html[data-theme="dark"] .books-king-kong,
+    html[data-theme="dark"] .books-mobile-feed {
+        background: var(--bg-page);
+    }
+    html[data-theme="dark"] .bss-dropdown {
+        background: var(--bg-elevated);
+        border-color: var(--border-default);
+    }
+    html[data-theme="dark"] .bss-item {
+        background: var(--bg-surface);
+        border-color: var(--border-subtle);
+    }
+    html[data-theme="dark"] .bss-item:hover {
+        background: var(--bg-elevated);
+    }
+    html[data-theme="dark"] .bmf-card {
+        background: var(--bg-surface);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
 </style>
 {% endblock %}
 

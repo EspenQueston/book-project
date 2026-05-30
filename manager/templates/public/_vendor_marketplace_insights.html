@@ -14,29 +14,6 @@
                 <h5><i class="fas fa-chart-pie me-2" style="color:#667eea;"></i>{% trans "商品分类分布" %}</h5>
                 <div class="vm-chart-wrap vm-chart-wrap-sm"><canvas id="vendorInsightCategoryChart" aria-hidden="true"></canvas></div>
             </div>
-            <div class="dash-card vp-glow-card mt-3">
-                <h6 class="fw-bold mb-3" style="font-size:0.92rem;"><i class="fas fa-balance-scale me-2 text-primary"></i>{% trans "市场订单收入构成（商品 / 课程 / 超市）" %}</h6>
-                <div class="row g-2">
-                    <div class="col-12 col-md-4">
-                        <div class="text-center p-3 rounded-3 h-100" style="background:linear-gradient(160deg,rgba(129,140,248,0.42),rgba(224,231,255,0.25));border:1px solid rgba(255,255,255,0.85);">
-                            <div class="vp-stat-label">{% trans "商品订单收入" %}</div>
-                            <div class="fw-bold pt-1" style="font-size:1.25rem;color:#3730a3;">{{ vm_mk_product_revenue|fcfa }}</div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <div class="text-center p-3 rounded-3 h-100" style="background:linear-gradient(160deg,rgba(244,114,182,0.38),rgba(252,231,243,0.28));border:1px solid rgba(255,255,255,0.85);">
-                            <div class="vp-stat-label">{% trans "课程订单收入" %}</div>
-                            <div class="fw-bold pt-1" style="font-size:1.25rem;color:#a21caf;">{{ vm_mk_course_revenue|fcfa }}</div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <div class="text-center p-3 rounded-3 h-100" style="background:linear-gradient(160deg,rgba(251,146,60,0.4),rgba(254,215,170,0.3));border:1px solid rgba(255,255,255,0.85);">
-                            <div class="vp-stat-label">{% trans "超市订单收入" %}</div>
-                            <div class="fw-bold pt-1" style="font-size:1.2rem;color:#c2410c;">{{ vm_mk_supermarket_revenue|fcfa }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -101,7 +78,7 @@
                         <div class="fw-bold small text-truncate">{{ p.name }}</div>
                         <small class="text-muted">{{ p.price|fcfa }}</small>
                     </div>
-                    <span class="badge rounded-pill" style="background:rgba(16,185,129,0.15);color:#059669;">{{ p.sales_count }} {% trans "已售" %}</span>
+                    <span class="badge rounded-pill" style="background:rgba(16,185,129,0.15);color:#059669;">{{ p.display_sales|default:p.sales_count }} {% trans "已售" %}</span>
                 </div>
                 {% endfor %}
                 {% else %}

@@ -99,6 +99,8 @@
     </style>
 </head>
 <body>
+    {% include "admin/_admin_sidebar.html" %}
+    <div class="admin-main-offset">
     <div class="g-toast-container" id="toastContainer"></div>
 
     <div class="main-container">
@@ -437,5 +439,6 @@
     }
     </script>
 <script src="/static/js/admin_i18n.js" defer></script>
+    </div><!-- /admin-main-offset -->
 </body>
 </html>

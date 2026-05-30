@@ -1,0 +1,404 @@
+{% extends 'public/vendor_panel_base.html' %}
+{% load i18n %}
+{% load currency_filters %}
+
+{% block panel_title %}{% trans "Inventory" %} · {{ vendor.company_name }}{% endblock %}
+
+{% block panel_extra_css %}
+<style>
+    .vp-page-head {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        padding: 20px 22px;
+        border-radius: 15px;
+        margin-bottom: 20px;
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.28);
+    }
+    .vp-card {
+        background: var(--card-bg, #fff);
+        border-radius: 18px;
+        box-shadow: 0 8px 28px rgba(0,0,0,0.06);
+        padding: 22px;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+    .inv-section-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .inv-row {
+        display: flex; align-items: center; gap: 14px;
+        padding: 14px 16px; border-radius: 14px; margin-bottom: 10px;
+        background: var(--section-bg, #f8f9fa);
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: 1px solid rgba(0,0,0,0.04);
+    }
+    .inv-row:hover { transform: translateX(3px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+    .inv-cover {
+        width: 52px; height: 68px; border-radius: 8px; object-fit: cover; flex-shrink: 0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+    .inv-img {
+        width: 52px; height: 52px; border-radius: 10px; object-fit: cover; flex-shrink: 0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+    .inv-stock-badge {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 6px 14px; border-radius: 20px;
+        font-size: 0.85rem; font-weight: 700;
+    }
+    .inv-stock-badge.ok { background: #dcfce7; color: #15803d; }
+    .inv-stock-badge.low { background: #fef3c7; color: #a16207; }
+    .inv-stock-badge.out { background: #fee2e2; color: #b91c1c; }
+    .stock-num { font-size: 1.3rem; font-weight: 700; }
+    .stock-num.ok { color: #15803d; }
+    .stock-num.low { color: #a16207; }
+    .stock-num.out { color: #b91c1c; }
+    .inv-actions {
+        display: flex; align-items: center; gap: 6px; flex-shrink: 0; flex-wrap: wrap;
+    }
+    .inv-actions form { display: flex; align-items: center; gap: 6px; }
+    .inv-input {
+        width: 64px; text-align: center;
+        border-radius: 10px; border: 1px solid #e5e7eb;
+        padding: 6px 8px; font-size: 0.85rem; font-weight: 600;
+    }
+    .inv-btn {
+        border-radius: 10px; padding: 6px 14px; font-size: 0.8rem; font-weight: 700;
+        border: none; cursor: pointer; transition: all 0.15s;
+    }
+    .inv-btn:hover { transform: scale(1.05); }
+    .inv-btn-add { background: linear-gradient(135deg,#667eea,#764ba2); color: #fff; }
+    .inv-btn-set { background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; }
+    .inv-btn-set:hover { background: #e5e7eb; }
+    .inv-empty {
+        text-align: center; padding: 48px 20px; color: #9ca3af;
+    }
+    .stat-pill {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: rgba(255,255,255,0.18);
+        border-radius: 20px;
+        padding: 6px 14px;
+        font-size: 0.82rem;
+        font-weight: 600;
+    }
+    .inv-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .inv-tab {
+        padding: 10px 20px; border-radius: 12px;
+        font-size: 0.88rem; font-weight: 700;
+        border: 2px solid rgba(102,126,234,0.15);
+        background: var(--card-bg, #fff);
+        color: var(--text-color, #374151);
+        cursor: pointer; transition: all 0.2s;
+    }
+    .inv-tab:hover { border-color: rgba(102,126,234,0.4); }
+    .inv-tab.active {
+        background: linear-gradient(135deg,#667eea,#764ba2);
+        color: #fff; border-color: transparent;
+        box-shadow: 0 4px 14px rgba(102,126,234,0.35);
+    }
+    .inv-tab i { margin-right: 6px; }
+    .inv-panel { display: none; }
+    .inv-panel.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: translateY(0); } }
+
+    /* Stock bar visual */
+    .stock-bar-wrap {
+        width: 80px; height: 6px; background: #e5e7eb; border-radius: 10px; overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 6px;
+    }
+    .stock-bar-fill {
+        height: 100%; border-radius: 10px; transition: width 0.3s ease;
+    }
+</style>
+{% endblock %}
+
+{% block vendor_panel_content %}
+<div class="vp-page-head d-flex flex-wrap justify-content-between align-items-center gap-3">
+    <div>
+        <h4 class="mb-1 fw-bold"><i class="fas fa-boxes me-2"></i>{% trans "Inventory" %}</h4>
+        <small class="opacity-90">{% trans "Manage stock levels for all your items in one place" %}</small>
+    </div>
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+        <span class="stat-pill"><i class="fas fa-book"></i> {% trans "Books" %} {{ total_books }}</span>
+        <span class="stat-pill"><i class="fas fa-shopping-bag"></i> {% trans "Products" %} {{ total_products }}</span>
+        <span class="stat-pill"><i class="fas fa-graduation-cap"></i> {% trans "Courses" %} {{ total_courses }}</span>
+        <span class="stat-pill"><i class="fas fa-apple-alt"></i> {% trans "Supermarket" %} {{ total_supermarket }}</span>
+    </div>
+</div>
+
+{% if messages %}
+<div class="mb-3">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-3" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Category Tabs -->
+<div class="inv-tabs">
+    <button type="button" class="inv-tab active" onclick="switchInvTab('books', this)">
+        <i class="fas fa-book text-primary"></i>{% trans "Books" %} <span class="badge bg-light text-dark ms-1">{{ total_books }}</span>
+    </button>
+    <button type="button" class="inv-tab" onclick="switchInvTab('products', this)">
+        <i class="fas fa-shopping-bag text-success"></i>{% trans "Products" %} <span class="badge bg-light text-dark ms-1">{{ total_products }}</span>
+    </button>
+    <button type="button" class="inv-tab" onclick="switchInvTab('courses', this)">
+        <i class="fas fa-graduation-cap text-info"></i>{% trans "Courses" %} <span class="badge bg-light text-dark ms-1">{{ total_courses }}</span>
+    </button>
+    <button type="button" class="inv-tab" onclick="switchInvTab('supermarket', this)">
+        <i class="fas fa-apple-alt text-warning"></i>{% trans "Supermarket" %} <span class="badge bg-light text-dark ms-1">{{ total_supermarket }}</span>
+    </button>
+</div>
+
+<!-- Books Panel -->
+<div class="inv-panel active" id="inv-panel-books">
+    <div class="vp-card">
+        <div class="inv-section-title"><i class="fas fa-book text-primary"></i>{% trans "Book Stock" %}</div>
+        {% if vendor_books %}
+        {% for vb in vendor_books %}
+        <div class="inv-row">
+            <img src="{{ vb.book.get_cover_url }}" alt="" class="inv-cover">
+            <div class="flex-grow-1" style="min-width:0;">
+                <div class="fw-bold text-truncate">{{ vb.book.name }}</div>
+                <small class="text-muted">
+                    {% trans "Price" %} {{ vb.vendor_price|fcfa }}
+                    {% if vb.book.publisher %} · {{ vb.book.publisher.publisher_name }}{% endif %}
+                    · {% trans "Sales" %} {{ vb.book.sale_num }}
+                </small>
+                {% if vb.book.inventory == 0 %}
+                <div class="mt-1"><span class="inv-stock-badge out"><i class="fas fa-times-circle"></i> {% trans "Out of Stock" %}</span></div>
+                {% elif vb.book.inventory < 5 %}
+                <div class="mt-1"><span class="inv-stock-badge low"><i class="fas fa-exclamation-triangle"></i> {% trans "Low Stock" %} ({{ vb.book.inventory }})</span></div>
+                {% endif %}
+            </div>
+            <div class="d-flex align-items-center gap-3 flex-shrink-0 flex-wrap">
+                <div class="text-center">
+                    <div class="fw-bold stock-num {% if vb.book.inventory == 0 %}out{% elif vb.book.inventory < 5 %}low{% else %}ok{% endif %}">{{ vb.book.inventory }}</div>
+                    <small class="text-muted">{% trans "In Stock" %}</small>
+                </div>
+                <div class="inv-actions">
+                    <form method="post" action="{% url 'manager:vendor_inventory' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="item_type" value="book">
+                        <input type="hidden" name="item_id" value="{{ vb.id }}">
+                        <input type="hidden" name="action" value="add">
+                        <input type="number" name="delta" value="1" class="inv-input">
+                        <button type="submit" class="inv-btn inv-btn-add" title="{% trans 'Add' %}"><i class="fas fa-plus"></i></button>
+                    </form>
+                    <form method="post" action="{% url 'manager:vendor_inventory' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="item_type" value="book">
+                        <input type="hidden" name="item_id" value="{{ vb.id }}">
+                        <input type="hidden" name="action" value="set">
+                        <input type="number" name="manual_value" value="{{ vb.book.inventory }}" class="inv-input">
+                        <button type="submit" class="inv-btn inv-btn-set" title="{% trans 'Set' %}"><i class="fas fa-check"></i></button>
+                    </form>
+                </div>
+                <span class="badge rounded-pill {% if vb.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                    {% if vb.is_active %}{% trans "Active" %}{% else %}{% trans "Inactive" %}{% endif %}
+                </span>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="inv-empty">
+            <i class="fas fa-book-open fa-3x mb-3 opacity-50"></i>
+            <p>{% trans "No books listed yet" %}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Products Panel -->
+<div class="inv-panel" id="inv-panel-products">
+    <div class="vp-card">
+        <div class="inv-section-title"><i class="fas fa-shopping-bag text-success"></i>{% trans "Product Stock" %}</div>
+        {% if products %}
+        {% for p in products %}
+        <div class="inv-row">
+            <img src="{{ p.get_image_url }}" alt="" class="inv-img">
+            <div class="flex-grow-1" style="min-width:0;">
+                <div class="fw-bold text-truncate">{{ p.name }}</div>
+                <small class="text-muted">{% trans "Price" %} {{ p.price|fcfa }} · {% trans "Sales" %} {{ p.get_units_sold_delivered }}</small>
+                {% if p.stock == 0 %}
+                <div class="mt-1"><span class="inv-stock-badge out"><i class="fas fa-times-circle"></i> {% trans "Out of Stock" %}</span></div>
+                {% elif p.stock < 5 %}
+                <div class="mt-1"><span class="inv-stock-badge low"><i class="fas fa-exclamation-triangle"></i> {% trans "Low Stock" %} ({{ p.stock }})</span></div>
+                {% endif %}
+            </div>
+            <div class="d-flex align-items-center gap-3 flex-shrink-0 flex-wrap">
+                <div class="text-center">
+                    <div class="fw-bold stock-num {% if p.stock == 0 %}out{% elif p.stock < 5 %}low{% else %}ok{% endif %}">{{ p.stock|default:0 }}</div>
+                    <small class="text-muted">{% trans "In Stock" %}</small>
+                </div>
+                <div class="inv-actions">
+                    <form method="post" action="{% url 'manager:vendor_inventory' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="item_type" value="product">
+                        <input type="hidden" name="item_id" value="{{ p.id }}">
+                        <input type="hidden" name="action" value="add">
+                        <input type="number" name="delta" value="1" class="inv-input">
+                        <button type="submit" class="inv-btn inv-btn-add" title="{% trans 'Add' %}"><i class="fas fa-plus"></i></button>
+                    </form>
+                    <form method="post" action="{% url 'manager:vendor_inventory' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="item_type" value="product">
+                        <input type="hidden" name="item_id" value="{{ p.id }}">
+                        <input type="hidden" name="action" value="set">
+                        <input type="number" name="manual_value" value="{{ p.stock|default:0 }}" class="inv-input">
+                        <button type="submit" class="inv-btn inv-btn-set" title="{% trans 'Set' %}"><i class="fas fa-check"></i></button>
+                    </form>
+                </div>
+                <span class="badge rounded-pill {% if p.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                    {% if p.is_active %}{% trans "Active" %}{% else %}{% trans "Inactive" %}{% endif %}
+                </span>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="inv-empty">
+            <i class="fas fa-shopping-bag fa-3x mb-3 opacity-50"></i>
+            <p>{% trans "No products listed yet" %}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Courses Panel -->
+<div class="inv-panel" id="inv-panel-courses">
+    <div class="vp-card">
+        <div class="inv-section-title"><i class="fas fa-graduation-cap text-info"></i>{% trans "Course Stock" %}</div>
+        {% if courses %}
+        {% for c in courses %}
+        <div class="inv-row">
+            <img src="{{ c.get_image_url }}" alt="" class="inv-img">
+            <div class="flex-grow-1" style="min-width:0;">
+                <div class="fw-bold text-truncate">{{ c.title }}</div>
+                <small class="text-muted">{% trans "Price" %} {{ c.price|fcfa }} · {% trans "Enrolled" %} {{ c.enrollment_count }}</small>
+                {% if c.stock == 0 %}
+                <div class="mt-1"><span class="inv-stock-badge out"><i class="fas fa-times-circle"></i> {% trans "Out of Stock" %}</span></div>
+                {% elif c.stock < 5 %}
+                <div class="mt-1"><span class="inv-stock-badge low"><i class="fas fa-exclamation-triangle"></i> {% trans "Low Stock" %} ({{ c.stock }})</span></div>
+                {% endif %}
+            </div>
+            <div class="d-flex align-items-center gap-3 flex-shrink-0 flex-wrap">
+                <div class="text-center">
+                    <div class="fw-bold stock-num {% if c.stock == 0 %}out{% elif c.stock < 5 %}low{% else %}ok{% endif %}">{{ c.stock|default:0 }}</div>
+                    <small class="text-muted">{% trans "Seats" %}</small>
+                </div>
+                <div class="inv-actions">
+                    <form method="post" action="{% url 'manager:vendor_inventory' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="item_type" value="course">
+                        <input type="hidden" name="item_id" value="{{ c.id }}">
+                        <input type="hidden" name="action" value="add">
+                        <input type="number" name="delta" value="1" class="inv-input">
+                        <button type="submit" class="inv-btn inv-btn-add" title="{% trans 'Add' %}"><i class="fas fa-plus"></i></button>
+                    </form>
+                    <form method="post" action="{% url 'manager:vendor_inventory' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="item_type" value="course">
+                        <input type="hidden" name="item_id" value="{{ c.id }}">
+                        <input type="hidden" name="action" value="set">
+                        <input type="number" name="manual_value" value="{{ c.stock|default:0 }}" class="inv-input">
+                        <button type="submit" class="inv-btn inv-btn-set" title="{% trans 'Set' %}"><i class="fas fa-check"></i></button>
+                    </form>
+                </div>
+                <span class="badge rounded-pill {% if c.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                    {% if c.is_active %}{% trans "Active" %}{% else %}{% trans "Inactive" %}{% endif %}
+                </span>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="inv-empty">
+            <i class="fas fa-graduation-cap fa-3x mb-3 opacity-50"></i>
+            <p>{% trans "No courses listed yet" %}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Supermarket Panel -->
+<div class="inv-panel" id="inv-panel-supermarket">
+    <div class="vp-card">
+        <div class="inv-section-title"><i class="fas fa-apple-alt text-warning"></i>{% trans "Supermarket Stock" %}</div>
+        {% if supermarket_items %}
+        {% for s in supermarket_items %}
+        <div class="inv-row">
+            <img src="{{ s.get_image_url }}" alt="" class="inv-img">
+            <div class="flex-grow-1" style="min-width:0;">
+                <div class="fw-bold text-truncate">{{ s.name }}</div>
+                <small class="text-muted">{% trans "Price" %} {{ s.price|fcfa }} · {% trans "Sold" %} {{ s.get_units_sold_delivered }}</small>
+                {% if s.stock == 0 %}
+                <div class="mt-1"><span class="inv-stock-badge out"><i class="fas fa-times-circle"></i> {% trans "Out of Stock" %}</span></div>
+                {% elif s.stock < 5 %}
+                <div class="mt-1"><span class="inv-stock-badge low"><i class="fas fa-exclamation-triangle"></i> {% trans "Low Stock" %} ({{ s.stock }})</span></div>
+                {% endif %}
+            </div>
+            <div class="d-flex align-items-center gap-3 flex-shrink-0 flex-wrap">
+                <div class="text-center">
+                    <div class="fw-bold stock-num {% if s.stock == 0 %}out{% elif s.stock < 5 %}low{% else %}ok{% endif %}">{{ s.stock|default:0 }}</div>
+                    <small class="text-muted">{% trans "In Stock" %}</small>
+                </div>
+                <div class="inv-actions">
+                    <form method="post" action="{% url 'manager:vendor_inventory' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="item_type" value="supermarket">
+                        <input type="hidden" name="item_id" value="{{ s.id }}">
+                        <input type="hidden" name="action" value="add">
+                        <input type="number" name="delta" value="1" class="inv-input">
+                        <button type="submit" class="inv-btn inv-btn-add" title="{% trans 'Add' %}"><i class="fas fa-plus"></i></button>
+                    </form>
+                    <form method="post" action="{% url 'manager:vendor_inventory' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="item_type" value="supermarket">
+                        <input type="hidden" name="item_id" value="{{ s.id }}">
+                        <input type="hidden" name="action" value="set">
+                        <input type="number" name="manual_value" value="{{ s.stock|default:0 }}" class="inv-input">
+                        <button type="submit" class="inv-btn inv-btn-set" title="{% trans 'Set' %}"><i class="fas fa-check"></i></button>
+                    </form>
+                </div>
+                <span class="badge rounded-pill {% if s.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                    {% if s.is_active %}{% trans "Active" %}{% else %}{% trans "Inactive" %}{% endif %}
+                </span>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="inv-empty">
+            <i class="fas fa-apple-alt fa-3x mb-3 opacity-50"></i>
+            <p>{% trans "No supermarket items listed yet" %}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock vendor_panel_content %}
+
+{% block panel_extra_js %}
+<script>
+function switchInvTab(tabId, btn) {
+    document.querySelectorAll('.inv-panel').forEach(function(p) { p.classList.remove('active'); });
+    document.querySelectorAll('.inv-tab').forEach(function(b) { b.classList.remove('active'); });
+    var panel = document.getElementById('inv-panel-' + tabId);
+    if (panel) panel.classList.add('active');
+    if (btn) btn.classList.add('active');
+    // Persist active tab in URL hash
+    history.replaceState(null, '', '#inv-' + tabId);
+}
+// Restore tab from hash on load
+(function() {
+    var hash = window.location.hash.replace('#inv-', '');
+    if (hash) {
+        var btn = document.querySelector('.inv-tab[onclick*="' + hash + '"]');
+        if (btn) switchInvTab(hash, btn);
+    }
+})();
+</script>
+{% endblock %}

@@ -265,7 +265,7 @@ _supabase_ready = all([
 if _supabase_ready:
     STORAGES = {
         'default': {
-            'BACKEND': 'storages.backends.s3.S3Storage',
+            'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage',
             'OPTIONS': {
                 'bucket_name': _supabase_bucket,
                 'location': 'media',
@@ -282,7 +282,7 @@ if _supabase_ready:
             },
         },
         'staticfiles': {
-            'BACKEND': 'storages.backends.s3.S3Storage',
+            'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage',
             'OPTIONS': {
                 'bucket_name': _supabase_bucket,
                 'location': 'static',

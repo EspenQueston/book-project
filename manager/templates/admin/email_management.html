@@ -325,6 +325,8 @@
     </style>
 </head>
 <body>
+    {% include "admin/_admin_sidebar.html" %}
+    <div class="admin-main-offset">
 <!-- Navbar -->
 <nav class="top-navbar">
     <a href="/manager/dashboard/" class="nav-brand">
@@ -1252,5 +1254,6 @@ document.addEventListener('keydown', function(e) {
 });
 </script>
 <script src="/static/js/admin_i18n.js" defer></script>
+    </div><!-- /admin-main-offset -->
 </body>
 </html>

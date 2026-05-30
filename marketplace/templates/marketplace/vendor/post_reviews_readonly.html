@@ -1,7 +1,7 @@
 {% extends "marketplace/vendor/base.html" %}
 {% load i18n %}
 
-{% block title %}{% trans "买家评价" %} — {{ vendor.company_name }}{% endblock %}
+{% block title %}{% trans "Buyer Reviews" %} — {{ vendor.company_name }}{% endblock %}
 
 {% block extra_vendor_css %}
 <style>
@@ -10,10 +10,10 @@
     color: #fff;
     padding: 20px 22px;
     border-radius: 15px;
-    margin-bottom: 18px;
+    margin-bottom: 28px;
     box-shadow: 0 8px 28px rgba(102, 126, 234, 0.32);
   }
-  .vpr-head h4 { font-weight: 800; margin: 0; letter-spacing: -0.02em; }
+  .vpr-head h4 { font-weight: 800; margin: 0; letter-spacing: -0.02em; font-size: 1.75rem; }
   .vpr-head p { margin: 8px 0 0; opacity: 0.92; font-size: 0.88rem; max-width: 720px; }
   .vpr-stat {
     border: 1px solid rgba(255,255,255,0.92) !important;
@@ -95,29 +95,28 @@
   <div class="vpr-head">
     <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
       <div>
-        <h4><i class="fas fa-star-half-alt me-2"></i>{% trans "买家评价" %}</h4>
-        <p class="mb-0">{% trans "只读展示：已收货买家对您的商品 / 课程 / 图书 / 超市商品的评价。" %}</p>
+        <h4><i class="fas fa-star-half-alt me-2"></i>{% trans "Buyer Reviews" %}</h4>
       </div>
     </div>
   </div>
 
-  <div class="row g-3 mb-3">
+  <div class="row g-3 mb-4">
     <div class="col-6 col-md-4">
       <div class="vpr-stat h-100 mb-0" style="background:linear-gradient(160deg,rgba(129,140,248,0.38),rgba(224,231,255,0.22));">
-        <div class="lbl">{% trans "评价条数" %}</div>
+        <div class="lbl">{% trans "Reviews" %}</div>
         <div class="val">{{ reviews|length }}</div>
       </div>
     </div>
     <div class="col-6 col-md-4">
       <div class="vpr-stat h-100 mb-0" style="background:linear-gradient(160deg,rgba(52,211,153,0.36),rgba(209,250,229,0.24));">
-        <div class="lbl">{% trans "店铺" %}</div>
+        <div class="lbl">{% trans "Shop" %}</div>
         <div class="val" style="font-size:1.1rem;color:#047857;">{{ vendor.company_name|truncatechars:18 }}</div>
       </div>
     </div>
     <div class="col-12 col-md-4">
       <div class="vpr-stat h-100 mb-0" style="background:linear-gradient(160deg,rgba(251,191,36,0.4),rgba(254,243,199,0.28));">
-        <div class="lbl">{% trans "提示" %}</div>
-        <div class="val" style="font-size:0.95rem;color:#b45309;line-height:1.25;">{% trans "星级与文字为买家真实反馈" %}</div>
+        <div class="lbl">{% trans "Prompt" %}</div>
+        <div class="val" style="font-size:0.95rem;color:#b45309;line-height:1.25;">{% trans "Stars and text reflect real buyer feedback" %}</div>
       </div>
     </div>
   </div>
@@ -125,7 +124,7 @@
   {% if not reviews %}
   <div class="vpr-empty">
     <i class="fas fa-inbox fa-3x mb-3 d-block opacity-25"></i>
-    {% trans "暂无评价" %}
+    {% trans "No reviews yet" %}
   </div>
   {% endif %}
 
@@ -145,14 +144,14 @@
           <div class="vpr-title">{{ s.item_name }}</div>
           <span class="vpr-pill">{{ s.channel }}</span>
           <span class="vpr-pill">#{{ s.order_number }}</span>
-          <span class="vpr-pill">{% trans "数量" %} ×{{ s.quantity }}</span>
-          <span class="vpr-pill">{% trans "下单" %} {{ s.order_placed|date:"Y-m-d" }}</span>
-          <span class="vpr-pill">{% trans "送达" %} {{ s.delivered_at|date:"Y-m-d" }}</span>
+          <span class="vpr-pill">{% trans "Qty" %} ×{{ s.quantity }}</span>
+          <span class="vpr-pill">{% trans "Ordered" %} {{ s.order_placed|date:"Y-m-d" }}</span>
+          <span class="vpr-pill">{% trans "Delivered" %} {{ s.delivered_at|date:"Y-m-d" }}</span>
           {% for line in s.attributes %}
           <span class="vpr-pill">{{ line }}</span>
           {% endfor %}
           <div class="vpr-ratings">
-            {% trans "商品" %} {{ review.rating_product }}★ · {% trans "服务" %} {{ review.rating_service }}★ · {% trans "物流" %} {{ review.rating_delivery }}★
+            {% trans "Product" %} {{ review.rating_product }}★ · {% trans "Service" %} {{ review.rating_service }}★ · {% trans "Delivery" %} {{ review.rating_delivery }}★
           </div>
         </div>
       </div>

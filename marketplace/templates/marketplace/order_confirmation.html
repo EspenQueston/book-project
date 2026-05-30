@@ -56,6 +56,47 @@
         font-weight: 700; text-decoration: none; transition: all 0.3s;
     }
     .btn-outline-custom:hover { background: rgba(102,126,234,0.04); color: var(--primary-color); }
+
+    /* ========== DARK MODE ========== */
+    html[data-theme="dark"] .success-card {
+        background: var(--bg-surface);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+    }
+    html[data-theme="dark"] .order-number {
+        color: var(--text-secondary);
+    }
+    html[data-theme="dark"] .detail-card {
+        background: var(--bg-elevated);
+    }
+    html[data-theme="dark"] .detail-row {
+        color: var(--text-secondary);
+        border-color: var(--border-default);
+    }
+    html[data-theme="dark"] .detail-row .label {
+        color: var(--text-primary);
+    }
+    html[data-theme="dark"] .items-section h6 {
+        color: var(--text-primary);
+    }
+    html[data-theme="dark"] .item-row {
+        border-color: var(--border-subtle);
+    }
+    html[data-theme="dark"] .item-name {
+        color: var(--text-primary);
+    }
+    html[data-theme="dark"] .item-qty {
+        color: var(--text-tertiary);
+    }
+    html[data-theme="dark"] .total-row {
+        border-color: var(--border-default);
+    }
+    html[data-theme="dark"] .btn-outline-custom {
+        background: var(--bg-surface);
+        color: var(--brand-primary);
+    }
+    html[data-theme="dark"] .btn-outline-custom:hover {
+        background: var(--button-hover);
+    }
 </style>
 {% endblock %}
 

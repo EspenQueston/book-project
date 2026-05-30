@@ -35,6 +35,32 @@
     }
     .method-item input { accent-color: #667eea; }
     .method-icon { font-size: 1.3rem; width: 32px; text-align: center; }
+
+    /* ========== DARK MODE ========== */
+    html[data-theme="dark"] .topup-card {
+        background: var(--bg-surface);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    }
+    html[data-theme="dark"] .amount-option {
+        background: var(--bg-elevated);
+        border-color: var(--input-border);
+        color: var(--text-primary);
+    }
+    html[data-theme="dark"] .amount-option:hover,
+    html[data-theme="dark"] .amount-option.active {
+        background: var(--button-hover);
+        border-color: var(--brand-primary);
+        color: var(--brand-primary);
+    }
+    html[data-theme="dark"] .method-item {
+        background: var(--bg-elevated);
+        border-color: var(--input-border);
+    }
+    html[data-theme="dark"] .method-item:hover,
+    html[data-theme="dark"] .method-item.active {
+        background: var(--button-hover);
+        border-color: var(--brand-primary);
+    }
 </style>
 {% endblock %}
 

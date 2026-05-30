@@ -133,6 +133,7 @@ class Course(models.Model):
     is_featured = models.BooleanField(default=False, verbose_name='推荐课程')
     is_active = models.BooleanField(default=True, verbose_name='是否发布')
     enrollment_count = models.PositiveIntegerField(default=0, verbose_name='注册人数')
+    stock = models.PositiveIntegerField(default=0, verbose_name='库存')
     rating = models.DecimalField(max_digits=3, decimal_places=1, default=0, verbose_name='评分')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

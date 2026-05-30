@@ -146,6 +146,38 @@
         display: none !important;
     }
 }
+
+/* ========== DARK MODE ========== */
+html[data-theme="dark"] body.cart-mobile-active {
+    background: var(--bg-page) !important;
+}
+html[data-theme="dark"] .cart-desktop-content .col-lg-8 > .card-modern {
+    background: var(--bg-surface) !important;
+    border-color: var(--border-subtle) !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2) !important;
+}
+html[data-theme="dark"] .cart-item {
+    background: var(--bg-surface) !important;
+    border-color: var(--border-subtle) !important;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+}
+html[data-theme="dark"] .cart-item h6 {
+    color: var(--text-primary);
+}
+html[data-theme="dark"] .cart-item .item-cover {
+    background: var(--bg-elevated);
+}
+html[data-theme="dark"] .cart-summary-card {
+    background: var(--bg-surface) !important;
+    border-color: var(--border-subtle) !important;
+    box-shadow: 0 16px 45px rgba(0,0,0,0.3) !important;
+}
+html[data-theme="dark"] .cart-summary-card .card-body {
+    color: var(--text-secondary);
+}
+html[data-theme="dark"] .cart-summary-card .summary-row strong.h5 {
+    color: var(--text-primary);
+}
 </style>
 {% endblock %}
 

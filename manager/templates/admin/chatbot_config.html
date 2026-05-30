@@ -261,6 +261,8 @@
     </style>
 </head>
 <body>
+    {% include "admin/_admin_sidebar.html" %}
+    <div class="admin-main-offset">
 
 <!-- TOP NAVBAR -->
 <nav class="top-navbar">
@@ -824,5 +826,6 @@ function getCsrf() {
 }
 </script>
 <script src="/static/js/admin_i18n.js" defer></script>
+    </div><!-- /admin-main-offset -->
 </body>
 </html>

@@ -667,6 +667,12 @@ def public_home(request):
                     '-sold_delivered', '-enrollment_count'
                 )[:6]
             )
+            recent_products = list(
+                Product.objects.filter(is_active=True).select_related('category').order_by('-id')[:4]
+            )
+            recent_courses = list(
+                Course.objects.filter(is_active=True).order_by('-id')[:4]
+            )
             now = tz.now()
             flash_sales = list(FlashSale.objects.filter(
                 is_active=True, start_time__lte=now, end_time__gte=now
@@ -677,6 +683,8 @@ def public_home(request):
             product_count = 0
             course_count = 0
             vendor_count = 0
+            recent_products = []
+            recent_courses = []
 
         featured_books = list(
             _annotate_book_delivered(
@@ -703,6 +711,8 @@ def public_home(request):
             'featured_products': featured_products,
             'featured_courses': featured_courses,
             'recent_books': recent_books,
+            'recent_products': recent_products,
+            'recent_courses': recent_courses,
             'book_categories': book_categories,
             'flash_sales': flash_sales,
             'flash_sale_end': flash_sale_end,
@@ -5925,10 +5935,6 @@ def _vendor_marketplace_insights_dict(vendor):
     active_courses = vendor_courses.filter(is_active=True).count()
     active_supermarket = vendor_supermarket.filter(is_active=True).count()
 
-    total_product_sales = vendor_products.aggregate(s=Sum('sales_count'))['s'] or 0
-    total_enrollments = vendor_courses.aggregate(s=Sum('enrollment_count'))['s'] or 0
-    total_supermarket_sales = vendor_supermarket.aggregate(s=Sum('sales_count'))['s'] or 0
-
     product_ids = list(vendor_products.values_list('id', flat=True))
     course_ids = list(vendor_courses.values_list('id', flat=True))
     supermarket_ids = list(vendor_supermarket.values_list('id', flat=True))
@@ -5949,6 +5955,10 @@ def _vendor_marketplace_insights_dict(vendor):
         item_type='supermarket', item_id__in=supermarket_ids,
         order__status__in=paid_statuses,
     ) if supermarket_ids else MarketplaceOrderItem.objects.none()
+
+    total_product_sales = product_order_items.aggregate(s=Sum('quantity'))['s'] or 0
+    total_enrollments = course_order_items.aggregate(s=Sum('quantity'))['s'] or 0
+    total_supermarket_sales = supermarket_order_items.aggregate(s=Sum('quantity'))['s'] or 0
 
     product_rev_agg = product_order_items.aggregate(s=Sum('subtotal'))['s']
     course_rev_agg = course_order_items.aggregate(s=Sum('subtotal'))['s']
@@ -5972,7 +5982,18 @@ def _vendor_marketplace_insights_dict(vendor):
         daily_course_data.append(float(c_rev))
         daily_supermarket_data.append(float(s_rev))
 
-    top_products = list(vendor_products.order_by('-sales_count')[:5])
+    # Top products by actual sold quantity (not cached sales_count)
+    product_sales_sub = MarketplaceOrderItem.objects.filter(
+        item_type='product', item_id=OuterRef('pk'),
+        order__status__in=paid_statuses,
+    ).values('item_id').annotate(total=Sum('quantity')).values('total')[:1]
+    annotated_products = vendor_products.annotate(
+        actual_sales=Coalesce(Subquery(product_sales_sub, output_field=IntegerField()), Value(0))
+    )
+    top_products = list(annotated_products.order_by('-actual_sales')[:5])
+    for p in top_products:
+        p.display_sales = p.actual_sales
+
     recent_order_ids = []
     item_q = None
     if product_ids:
@@ -6086,11 +6107,19 @@ def vendor_dashboard(request):
             })
 
     vendor_books = models.VendorBook.objects.filter(vendor=vendor).select_related('book', 'book__publisher')
-    total_sales = sum(vb.book.sale_num for vb in vendor_books)
-    total_revenue = sum(vb.vendor_price * vb.book.sale_num for vb in vendor_books)
     active_books = sum(1 for vb in vendor_books if vb.is_active)
     inactive_books = vendor_books.count() - active_books
     total_inventory = sum(vb.book.inventory for vb in vendor_books)
+    vendor_book_ids = list(vendor_books.values_list('book_id', flat=True))
+
+    # Real per-vendor book stats from OrderItem (not cached global Book.sale_num)
+    paid_book_statuses = ['paid', 'confirmed', 'processing', 'shipped', 'delivered']
+    book_order_items = models.OrderItem.objects.filter(
+        book_id__in=vendor_book_ids,
+        order__status__in=paid_book_statuses,
+    )
+    total_sales = book_order_items.aggregate(s=Sum('quantity'))['s'] or 0
+    total_revenue = book_order_items.aggregate(s=Sum('total_price'))['s'] or 0
 
     # --- Marketplace products, courses & supermarket ---
     from marketplace.models import Product, Course, SupermarketItem, MarketplaceOrder, MarketplaceOrderItem
@@ -6100,13 +6129,30 @@ def vendor_dashboard(request):
     active_products = vendor_products.filter(is_active=True).count()
     active_courses = vendor_courses.filter(is_active=True).count()
     active_supermarket_items = vendor_supermarket.filter(is_active=True).count()
-    product_revenue = sum(p.price * p.sales_count for p in vendor_products)
-    course_revenue = sum(c.price * c.enrollment_count for c in vendor_courses)
-    supermarket_revenue = sum(s.price * s.sales_count for s in vendor_supermarket)
+
+    # Real per-vendor marketplace stats from MarketplaceOrderItem (not cached fields)
+    paid_mkt_statuses = ['paid', 'processing', 'shipped', 'delivered']
+    product_ids = list(vendor_products.values_list('id', flat=True))
+    course_ids = list(vendor_courses.values_list('id', flat=True))
+    supermarket_ids = list(vendor_supermarket.values_list('id', flat=True))
+
+    mkt_product_items = MarketplaceOrderItem.objects.filter(
+        item_type='product', item_id__in=product_ids, order__status__in=paid_mkt_statuses,
+    ) if product_ids else MarketplaceOrderItem.objects.none()
+    mkt_course_items = MarketplaceOrderItem.objects.filter(
+        item_type='course', item_id__in=course_ids, order__status__in=paid_mkt_statuses,
+    ) if course_ids else MarketplaceOrderItem.objects.none()
+    mkt_supermarket_items = MarketplaceOrderItem.objects.filter(
+        item_type='supermarket', item_id__in=supermarket_ids, order__status__in=paid_mkt_statuses,
+    ) if supermarket_ids else MarketplaceOrderItem.objects.none()
+
+    product_revenue = mkt_product_items.aggregate(s=Sum('subtotal'))['s'] or 0
+    course_revenue = mkt_course_items.aggregate(s=Sum('subtotal'))['s'] or 0
+    supermarket_revenue = mkt_supermarket_items.aggregate(s=Sum('subtotal'))['s'] or 0
     combined_revenue = total_revenue + product_revenue + course_revenue + supermarket_revenue
-    total_product_sales = sum(p.sales_count for p in vendor_products)
-    total_course_enrollments = sum(c.enrollment_count for c in vendor_courses)
-    total_supermarket_sales_count = sum(s.sales_count for s in vendor_supermarket)
+    total_product_sales = mkt_product_items.aggregate(s=Sum('quantity'))['s'] or 0
+    total_course_enrollments = mkt_course_items.aggregate(s=Sum('quantity'))['s'] or 0
+    total_supermarket_sales_count = mkt_supermarket_items.aggregate(s=Sum('quantity'))['s'] or 0
     combined_sales = total_sales + total_product_sales + total_course_enrollments + total_supermarket_sales_count
 
     price_samples = []
@@ -6126,39 +6172,52 @@ def vendor_dashboard(request):
 
     perf_top_items = []
     if vendor_books.exists():
-        vb_top = max(vendor_books, key=lambda x: x.book.sale_num)
-        perf_top_items.append({
-            'kind': 'book',
-            'title': vb_top.book.name,
-            'image_url': vb_top.book.get_cover_url(),
-            'value': vb_top.book.sale_num,
-        })
+        top_book = book_order_items.values('book_id').annotate(total_qty=Sum('quantity')).order_by('-total_qty').first()
+        if top_book:
+            vb_top = vendor_books.filter(book_id=top_book['book_id']).first()
+            if vb_top:
+                perf_top_items.append({
+                    'kind': 'book',
+                    'title': vb_top.book.name,
+                    'image_url': vb_top.book.get_cover_url(),
+                    'value': top_book['total_qty'],
+                })
     if vendor_products.exists():
-        p_top = max(vendor_products, key=lambda x: x.sales_count)
-        perf_top_items.append({
-            'kind': 'product',
-            'title': p_top.name,
-            'image_url': p_top.get_image_url(),
-            'value': p_top.sales_count,
-        })
+        p_top = mkt_product_items.values('item_id').annotate(total_qty=Sum('quantity')).order_by('-total_qty').first()
+        if p_top:
+            p_obj = vendor_products.filter(id=p_top['item_id']).first()
+            if p_obj:
+                perf_top_items.append({
+                    'kind': 'product',
+                    'title': p_obj.name,
+                    'image_url': p_obj.get_image_url(),
+                    'value': p_top['total_qty'],
+                })
     if vendor_courses.exists():
-        c_top = max(vendor_courses, key=lambda x: x.enrollment_count)
-        perf_top_items.append({
-            'kind': 'course',
-            'title': c_top.title,
-            'image_url': c_top.get_image_url(),
-            'value': c_top.enrollment_count,
-        })
+        c_top = mkt_course_items.values('item_id').annotate(total_qty=Sum('quantity')).order_by('-total_qty').first()
+        if c_top:
+            c_obj = vendor_courses.filter(id=c_top['item_id']).first()
+            if c_obj:
+                perf_top_items.append({
+                    'kind': 'course',
+                    'title': c_obj.title,
+                    'image_url': c_obj.get_image_url(),
+                    'value': c_top['total_qty'],
+                })
     if vendor_supermarket.exists():
-        s_top = max(vendor_supermarket, key=lambda x: x.sales_count)
-        perf_top_items.append({
-            'kind': 'supermarket',
-            'title': s_top.name,
-            'image_url': s_top.get_image_url(),
-            'value': s_top.sales_count,
-        })
+        s_top = mkt_supermarket_items.values('item_id').annotate(total_qty=Sum('quantity')).order_by('-total_qty').first()
+        if s_top:
+            s_obj = vendor_supermarket.filter(id=s_top['item_id']).first()
+            if s_obj:
+                perf_top_items.append({
+                    'kind': 'supermarket',
+                    'title': s_obj.name,
+                    'image_url': s_obj.get_image_url(),
+                    'value': s_top['total_qty'],
+                })
 
-    best_seller = max(vendor_books, key=lambda vb: vb.book.sale_num) if vendor_books.exists() else None
+    best_seller_agg = book_order_items.values('book_id').annotate(total_qty=Sum('quantity')).order_by('-total_qty').first()
+    best_seller = vendor_books.filter(book_id=best_seller_agg['book_id']).first() if best_seller_agg else None
 
     follower_count = models.UserFollowedVendor.objects.filter(vendor=vendor).count()
 
@@ -6214,18 +6273,24 @@ def vendor_dashboard(request):
                 'status': item.order.get_status_display(),
             })
 
+    from django.utils import timezone
+    from datetime import timedelta
+
     cart_data = []
     if vendor_book_ids:
         cart_items = models.CartItem.objects.filter(
             book_id__in=vendor_book_ids
         ).select_related('book').order_by('-updated_at')[:50]
         for ci in cart_items:
+            days_in_cart = (timezone.now() - ci.created_at).days
             cart_data.append({
                 'book_name': ci.book.name,
                 'quantity': ci.quantity,
+                'book_price': ci.book.price,
                 'session_key': ci.session_key[:8] + '...',
                 'added_at': ci.created_at,
                 'updated_at': ci.updated_at,
+                'days_in_cart': days_in_cart,
             })
 
     wishlist_data = []
@@ -6238,7 +6303,27 @@ def vendor_dashboard(request):
                 'book_name': w.book.name,
                 'user_name': w.user.name,
                 'user_email': w.user.email,
+                'book_price': w.book.price,
                 'added_at': w.created_at,
+            })
+
+    # Abandoned payments: orders placed but not paid for this vendor's books
+    abandoned_orders = []
+    if vendor_book_ids:
+        abandoned_items = models.OrderItem.objects.filter(
+            book_id__in=vendor_book_ids,
+            order__status='payment_pending'
+        ).select_related('order', 'book').order_by('-order__created_at')[:20]
+        for item in abandoned_items:
+            unit_price = item.total_price / item.quantity if item.quantity else item.total_price
+            abandoned_orders.append({
+                'book_name': item.book.name,
+                'customer_name': item.order.customer_name,
+                'customer_email': item.order.customer_email,
+                'total_price': item.total_price,
+                'unit_price': unit_price,
+                'quantity': item.quantity,
+                'date': item.order.created_at,
             })
 
     total_purchases = len(purchase_data)
@@ -6282,6 +6367,7 @@ def vendor_dashboard(request):
         'total_supermarket_stock': total_supermarket_stock,
         'listing_activation_pct': listing_activation_pct,
         'total_listings': total_listings,
+        'total_items': total_listings,
         'perf_top_items': perf_top_items,
         'follower_count': follower_count,
         'marketplace_orders': marketplace_orders,
@@ -6292,6 +6378,7 @@ def vendor_dashboard(request):
         'total_purchases': total_purchases,
         'total_cart_items': total_cart_items,
         'total_wishlists': total_wishlists,
+        'abandoned_orders': abandoned_orders,
         'hub_book_order_count': hub_book_order_count,
         'hub_mkt_order_count': hub_mkt_order_count,
         'hub_orders_total': hub_book_order_count + hub_mkt_order_count,
@@ -6315,16 +6402,136 @@ def vendor_books(request):
         else:
             return redirect('/manager/vendor/dashboard/')
 
-    vendor_books_qs = models.VendorBook.objects.filter(vendor=vendor).select_related('book', 'book__publisher')
+    vendor_books_qs = models.VendorBook.objects.filter(vendor=vendor).select_related('book', 'book__publisher', 'book__category')
     inactive_ct = vendor_books_qs.filter(is_active=False).count()
+    active_ct = vendor_books_qs.filter(is_active=True).count()
+    total_sales = sum(vb.book.sale_num for vb in vendor_books_qs)
+    total_stock = sum(vb.book.inventory for vb in vendor_books_qs)
     context = {
         'vendor': vendor,
         'admin_access': admin_access,
         'vendor_books': vendor_books_qs,
         'total_books': vendor_books_qs.count(),
         'inactive_books': inactive_ct,
+        'active_books': active_ct,
+        'total_sales': total_sales,
+        'total_stock': total_stock,
     }
     return render(request, 'public/vendor_books.html', context)
+
+
+@require_POST
+def vendor_settings_save(request):
+    """Save vendor store settings from the dashboard settings tab."""
+    admin_access = request.session.get('name')
+    vendor = _get_vendor(request)
+    if not vendor and not admin_access:
+        return JsonResponse({'success': False, 'message': _('未登录')})
+    if admin_access and not vendor:
+        vid = request.POST.get('vendor_id') or request.GET.get('vendor_id')
+        if vid:
+            vendor = get_object_or_404(models.Vendor, id=vid)
+        else:
+            return JsonResponse({'success': False, 'message': _('未指定卖家')})
+
+    company_name = request.POST.get('company_name', '').strip()
+    description = request.POST.get('description', '').strip()
+    phone = request.POST.get('phone', '').strip()
+    email = request.POST.get('email', '').strip()
+
+    if company_name:
+        vendor.company_name = company_name
+    if description:
+        vendor.description = description
+    if phone:
+        vendor.phone = phone
+    if email:
+        vendor.email = email
+
+    if 'logo' in request.FILES:
+        vendor.logo = request.FILES['logo']
+
+    vendor.save()
+    messages.success(request, _('店铺设置已保存'))
+    return redirect('manager:vendor_dashboard') + '#dtab-settings'
+
+
+def vendor_inventory(request):
+    """Vendor inventory management — view and update stock for books, products, courses, supermarket."""
+    admin_access = request.session.get('name')
+    vendor = _get_vendor(request)
+    if not vendor and not admin_access:
+        return redirect('/manager/vendor/login/')
+    if admin_access and not vendor:
+        vid = request.GET.get('vendor_id')
+        if vid:
+            vendor = get_object_or_404(models.Vendor, id=vid)
+        else:
+            return redirect('/manager/vendor/dashboard/')
+
+    if request.method == 'POST':
+        item_type = request.POST.get('item_type')
+        item_id = request.POST.get('item_id')
+        action = request.POST.get('action')
+        delta = int(request.POST.get('delta', 0))
+        manual_value = request.POST.get('manual_value')
+
+        try:
+            if item_type == 'book' and item_id:
+                vb = models.VendorBook.objects.get(id=item_id, vendor=vendor)
+                if action == 'set' and manual_value is not None:
+                    vb.book.inventory = max(0, int(manual_value))
+                elif action == 'add':
+                    vb.book.inventory = max(0, vb.book.inventory + delta)
+                vb.book.save(update_fields=['inventory'])
+            elif item_type == 'product' and item_id:
+                from marketplace.models import Product
+                p = Product.objects.get(id=item_id, vendor=vendor)
+                if action == 'set' and manual_value is not None:
+                    p.stock = max(0, int(manual_value))
+                elif action == 'add':
+                    p.stock = max(0, p.stock + delta)
+                p.save(update_fields=['stock'])
+            elif item_type == 'course' and item_id:
+                from marketplace.models import Course
+                c = Course.objects.get(id=item_id, vendor=vendor)
+                if action == 'set' and manual_value is not None:
+                    c.stock = max(0, int(manual_value))
+                elif action == 'add':
+                    c.stock = max(0, c.stock + delta)
+                c.save(update_fields=['stock'])
+            elif item_type == 'supermarket' and item_id:
+                from marketplace.models import SupermarketItem
+                s = SupermarketItem.objects.get(id=item_id, vendor=vendor)
+                if action == 'set' and manual_value is not None:
+                    s.stock = max(0, int(manual_value))
+                elif action == 'add':
+                    s.stock = max(0, s.stock + delta)
+                s.save(update_fields=['stock'])
+            messages.success(request, _('库存已更新'))
+        except Exception as e:
+            messages.error(request, str(e))
+        return redirect('manager:vendor_inventory')
+
+    from marketplace.models import Product, Course, SupermarketItem
+    vendor_books = models.VendorBook.objects.filter(vendor=vendor).select_related('book')
+    products = Product.objects.filter(vendor=vendor)
+    courses = Course.objects.filter(vendor=vendor)
+    supermarket = SupermarketItem.objects.filter(vendor=vendor)
+
+    context = {
+        'vendor': vendor,
+        'admin_access': admin_access,
+        'vendor_books': vendor_books,
+        'products': products,
+        'courses': courses,
+        'supermarket_items': supermarket,
+        'total_books': vendor_books.count(),
+        'total_products': products.count(),
+        'total_courses': courses.count(),
+        'total_supermarket': supermarket.count(),
+    }
+    return render(request, 'public/vendor_inventory.html', context)
 
 
 def _vendor_book_order_ids(vendor):

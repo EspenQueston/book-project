@@ -91,11 +91,11 @@
     .sec-heading { font-size: 2.3rem; font-weight: 800; color: #1a1a2e; margin-bottom: 18px; }
     /* Service cards */
     .srv-card {
-        background: #fff;
+        background: #ffffff;
         border-radius: 24px;
         padding: 40px 28px 35px;
-        box-shadow: 0 4px 25px rgba(0,0,0,0.04);
-        transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(102,126,234,0.04);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         border: 1px solid rgba(102,126,234,0.06);
         height: 100%;
         position: relative;
@@ -112,25 +112,38 @@
         opacity: 0;
         transition: opacity 0.4s;
     }
-    .srv-card:hover { transform: translateY(-12px); box-shadow: 0 25px 60px rgba(102,126,234,0.12); }
+    .srv-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 40px rgba(102,126,234,0.14), 0 2px 8px rgba(0,0,0,0.06);
+        border-color: rgba(102,126,234,0.18);
+    }
     .srv-card:hover::after { opacity: 1; }
+    .srv-card.active,
+    .srv-card:active {
+        background: linear-gradient(145deg, #f8f9ff 0%, #f4f0ff 100%);
+        border-color: rgba(102,126,234,0.25);
+        box-shadow: 0 0 0 3px rgba(102,126,234,0.12), 0 8px 30px rgba(102,126,234,0.12);
+    }
+    .srv-card.active::after,
+    .srv-card:active::after { opacity: 1; }
     .srv-ico {
-        width: 72px;
-        height: 72px;
-        border-radius: 20px;
+        width: 68px;
+        height: 68px;
+        border-radius: 18px;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: 22px;
-        transition: transform 0.4s;
+        margin-bottom: 20px;
+        transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    .srv-card:hover .srv-ico { transform: scale(1.1) rotate(5deg); }
-    .srv-ico i { font-size: 1.7rem; color: #fff; }
-    .srv-card h4 { font-size: 1.2rem; font-weight: 700; color: #1a1a2e; margin-bottom: 12px; }
+    .srv-card:hover .srv-ico,
+    .srv-card.active .srv-ico { transform: scale(1.08) rotate(3deg); }
+    .srv-ico i { font-size: 1.5rem; color: #fff; }
+    .srv-card h4 { font-size: 1.15rem; font-weight: 700; color: #1a1a2e; margin-bottom: 10px; }
     .srv-card > p { color: #6b7280; line-height: 1.7; font-size: 0.92rem; }
-    .srv-feats { list-style: none; padding: 0; margin-top: 18px; }
+    .srv-feats { list-style: none; padding: 0; margin-top: 16px; }
     .srv-feats li {
-        padding: 7px 0;
+        padding: 6px 0;
         color: #6b7280;
         font-size: 0.88rem;
         display: flex;
@@ -214,13 +227,159 @@
         box-shadow: 0 10px 30px rgba(0,0,0,0.15);
     }
     .cta-btn:hover { transform: translateY(-4px); box-shadow: 0 18px 40px rgba(0,0,0,0.2); color: #764ba2; }
+    /* ── Mobile Optimizations ── */
     @media (max-width: 768px) {
-        .srv-hero h1 { font-size: 2rem; }
-        .sec-heading { font-size: 1.7rem; }
+        .srv-hero { padding: 100px 0 70px; }
+        .srv-hero h1 { font-size: 2.2rem; letter-spacing: -0.5px; }
+        .srv-hero .lead { font-size: 1rem; max-width: 100%; }
+        .srv-pill { font-size: 0.75rem; padding: 6px 16px; margin-bottom: 18px; }
+        .sec { padding: 60px 0; }
+        .sec-heading { font-size: 1.6rem; }
+        .sec-label { font-size: 0.72rem; letter-spacing: 2px; }
+
+        /* Service cards mobile */
+        .srv-card { padding: 28px 20px 24px; border-radius: 20px; }
+        .srv-ico { width: 56px; height: 56px; border-radius: 16px; margin-bottom: 16px; }
+        .srv-ico i { font-size: 1.4rem; }
+        .srv-card h4 { font-size: 1.05rem; }
+        .srv-card > p { font-size: 0.88rem; }
+        .srv-feats li { font-size: 0.82rem; padding: 5px 0; }
+
+        /* Process vertical on mobile */
         .proc-line { display: none; }
-        .cta-box { padding: 40px 25px; }
-        .cta-box h2 { font-size: 1.7rem; }
-        .hero-orbit { width: 200px; height: 200px; }
+        .proc-step { text-align: left; display: flex; gap: 16px; align-items: flex-start; margin-bottom: 20px; }
+        .proc-num { width: 52px; height: 52px; font-size: 1.1rem; margin: 0; flex-shrink: 0; }
+        .proc-step h5 { font-size: 0.95rem; margin-bottom: 6px; }
+        .proc-step p { font-size: 0.85rem; }
+        .hero-orbit { width: 180px; height: 180px; }
+
+        /* Modern CTA block */
+        .cta-sec { padding: 50px 0; }
+        .cta-box {
+            padding: 40px 22px 32px;
+            border-radius: 24px;
+            margin: 0 4px;
+            background: linear-gradient(145deg, #667eea 0%, #764ba2 50%, #5a3f9e 100%);
+            box-shadow: 0 20px 60px rgba(102,126,234,0.25), inset 0 1px 0 rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .cta-box::before {
+            width: 300px; height: 300px;
+            top: -40%; right: -30%;
+            background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%);
+            animation: cta-float 6s ease-in-out infinite;
+        }
+        .cta-box::after {
+            content: '';
+            position: absolute;
+            bottom: -30%; left: -20%;
+            width: 250px; height: 250px;
+            background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: cta-float 8s ease-in-out infinite reverse;
+        }
+        @keyframes cta-float {
+            0%, 100% { transform: translate(0,0) scale(1); }
+            50% { transform: translate(15px,-12px) scale(1.05); }
+        }
+        .cta-box h2 {
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .cta-box p {
+            font-size: 0.92rem;
+            max-width: 100%;
+            margin-bottom: 24px;
+            opacity: 0.92;
+            position: relative;
+            z-index: 1;
+            line-height: 1.6;
+        }
+        .cta-btn {
+            display: flex;
+            width: 100%;
+            justify-content: center;
+            padding: 14px 20px;
+            font-size: 0.95rem;
+            border-radius: 16px;
+            margin: 0 0 12px 0 !important;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+        }
+        .cta-btn:last-child { margin-bottom: 0 !important; }
+        .cta-btn:active { transform: scale(0.97); }
+
+        /* Floating sparkle decorations for CTA */
+        .cta-box .cta-sparkle {
+            position: absolute;
+            width: 6px; height: 6px;
+            background: rgba(255,255,255,0.4);
+            border-radius: 50%;
+            animation: sparkle 3s ease-in-out infinite;
+            z-index: 0;
+        }
+        .cta-box .cta-sparkle:nth-child(1) { top: 15%; left: 10%; animation-delay: 0s; }
+        .cta-box .cta-sparkle:nth-child(2) { top: 25%; right: 15%; animation-delay: 0.8s; width: 4px; height: 4px; }
+        .cta-box .cta-sparkle:nth-child(3) { bottom: 30%; left: 20%; animation-delay: 1.6s; width: 5px; height: 5px; }
+        .cta-box .cta-sparkle:nth-child(4) { bottom: 20%; right: 10%; animation-delay: 2.4s; width: 3px; height: 3px; }
+        @keyframes sparkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.4); }
+        }
+    }
+    @media (max-width: 576px) {
+        .srv-hero { padding: 80px 0 55px; }
+        .srv-hero h1 { font-size: 1.85rem; }
+        .srv-card { padding: 24px 18px 20px; }
+        .proc-step { gap: 12px; }
+        .cta-box { padding: 32px 18px 26px; border-radius: 20px; }
+        .cta-box h2 { font-size: 1.35rem; }
+        .cta-btn { padding: 13px 16px; font-size: 0.9rem; border-radius: 14px; }
+    }
+
+    /* ========== DARK MODE ========== */
+    html[data-theme="dark"] .srv-card {
+        background: var(--bg-surface);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.15), 0 4px 12px rgba(0,0,0,0.1);
+    }
+    html[data-theme="dark"] .srv-card.active,
+    html[data-theme="dark"] .srv-card:active {
+        background: linear-gradient(145deg, rgba(102,126,234,0.08) 0%, rgba(118,75,162,0.05) 100%);
+        border-color: rgba(102,126,234,0.3);
+        box-shadow: 0 0 0 3px rgba(102,126,234,0.15), 0 8px 30px rgba(0,0,0,0.2);
+    }
+    html[data-theme="dark"] .srv-card h4 {
+        color: var(--text-primary);
+    }
+    html[data-theme="dark"] .srv-card > p {
+        color: var(--text-secondary);
+    }
+    html[data-theme="dark"] .srv-feats li {
+        color: var(--text-secondary);
+    }
+    html[data-theme="dark"] .proc-num {
+        background: var(--bg-surface);
+        color: var(--text-primary);
+    }
+    html[data-theme="dark"] .proc-step h5 {
+        color: var(--text-primary);
+    }
+    html[data-theme="dark"] .proc-step p {
+        color: var(--text-secondary);
+    }
+    html[data-theme="dark"] .sec-alt {
+        background: var(--bg-page);
+    }
+    html[data-theme="dark"] .sec-heading {
+        color: var(--text-primary);
+    }
+    html[data-theme="dark"] .cta-sec {
+        background: var(--bg-page);
     }
 </style>
 {% endblock %}
@@ -357,9 +516,10 @@
 <section class="cta-sec">
     <div class="container">
         <div class="cta-box" data-aos="zoom-in">
+            <span class="cta-sparkle"></span><span class="cta-sparkle"></span><span class="cta-sparkle"></span><span class="cta-sparkle"></span>
             <h2>{% trans "立即开始探索" %}</h2>
             <p>{% trans "浏览图书、选修课程、逛市场——开启您的一站式数字生活。" %}</p>
-            <a href="{% url 'manager:public_books' %}" class="cta-btn me-3"><i class="fas fa-book-open"></i>{% trans "浏览图书" %}</a>
+            <a href="{% url 'manager:public_books' %}" class="cta-btn"><i class="fas fa-book-open"></i>{% trans "浏览图书" %}</a>
             <a href="{% url 'marketplace:home' %}" class="cta-btn" style="background:#10b981;color:#fff;box-shadow:0 10px 30px rgba(16,185,129,0.3)"><i class="fas fa-store"></i>{% trans "逛市场" %}</a>
         </div>
     </div>

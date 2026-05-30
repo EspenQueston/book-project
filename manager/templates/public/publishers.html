@@ -114,6 +114,36 @@
         text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.06);
     }
     .empty-state-card i { font-size: 4rem; color: #cbd5e1; margin-bottom: 20px; }
+
+    /* ========== DARK MODE ========== */
+    html[data-theme="dark"] .search-card {
+        background: var(--bg-surface);
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    html[data-theme="dark"] .search-card input {
+        background: var(--input-bg);
+        border-color: var(--input-border);
+        color: var(--text-primary);
+    }
+    html[data-theme="dark"] .pub-card {
+        background: var(--bg-surface);
+        border-color: var(--border-subtle);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    html[data-theme="dark"] .pub-stat-item {
+        background: var(--bg-elevated);
+        border-color: var(--border-subtle);
+    }
+    html[data-theme="dark"] .pub-stat-item .stat-lbl {
+        color: var(--text-tertiary);
+    }
+    html[data-theme="dark"] .empty-state-card {
+        background: var(--bg-surface);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    html[data-theme="dark"] .empty-state-card i {
+        color: var(--text-tertiary);
+    }
 </style>
 {% endblock %}
 

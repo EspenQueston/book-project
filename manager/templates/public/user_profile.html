@@ -139,6 +139,76 @@
     .upro-pending-name { flex: 1; min-width: 0; font-weight: 700; font-size: 0.88rem; }
     .upro-pending-go { font-weight: 800; font-size: 0.78rem; color: #667eea; white-space: nowrap; }
     .order-card-v2 .order-card-header { border-radius: 16px 16px 0 0; }
+
+    /* ========== DARK MODE ========== */
+    html[data-theme="dark"] .order-card-header:hover {
+        background: var(--bg-elevated);
+    }
+    html[data-theme="dark"] .order-item-row:hover {
+        background: var(--bg-elevated);
+    }
+    html[data-theme="dark"] .wish-card:hover {
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    }
+    html[data-theme="dark"] .follow-chip:hover {
+        box-shadow: 0 4px 18px rgba(0,0,0,0.15);
+    }
+    html[data-theme="dark"] .upro-pending {
+        background: linear-gradient(135deg, rgba(251,191,36,0.1), rgba(251,191,36,0.05));
+        border-color: rgba(251,191,36,0.3);
+    }
+    html[data-theme="dark"] .upro-pending-title {
+        color: #fbbf24;
+    }
+    html[data-theme="dark"] .upro-pending-row {
+        background: var(--bg-surface);
+        border-color: rgba(251,191,36,0.25);
+    }
+    html[data-theme="dark"] .upro-pending-row:hover {
+        box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+    }
+    html[data-theme="dark"] .upro-pending-thumb {
+        border-color: var(--border-subtle);
+    }
+    html[data-theme="dark"] .upro-pending-name {
+        color: var(--text-primary);
+    }
+    html[data-theme="dark"] .order-card {
+        background: var(--bg-surface);
+        border-color: var(--border-subtle);
+        box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    }
+    html[data-theme="dark"] .order-card-header {
+        background: var(--bg-elevated);
+        border-color: var(--border-default);
+    }
+    html[data-theme="dark"] .order-card-footer {
+        background: var(--bg-elevated);
+        border-color: var(--border-default);
+    }
+    html[data-theme="dark"] .order-item-row {
+        border-color: var(--border-subtle);
+    }
+    html[data-theme="dark"] .wish-card {
+        background: var(--bg-elevated);
+        border-color: var(--border-subtle);
+    }
+    html[data-theme="dark"] .follow-chip {
+        background: var(--bg-elevated);
+        border-color: var(--border-subtle);
+    }
+    html[data-theme="dark"] .tab-btn {
+        color: var(--text-primary);
+        border-color: var(--input-border);
+    }
+    html[data-theme="dark"] .profile-card {
+        background: var(--bg-surface);
+        border-color: var(--border-subtle);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    }
+    html[data-theme="dark"] .profile-card h5 {
+        color: var(--text-primary);
+    }
 </style>
 {% endblock %}
 

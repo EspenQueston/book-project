@@ -29,6 +29,10 @@
                         <span class="vs-info-val">{{ vendor.created_at|date:"Y-m-d" }}</span>
                     </div>
                     <div class="vs-info-row">
+                        <span class="vs-info-lbl"><i class="fas fa-envelope me-1"></i> <span data-zh="邮箱" data-en="Email" data-fr="Email">{% trans "邮箱" %}</span></span>
+                        <span class="vs-info-val">{{ vendor.email }}</span>
+                    </div>
+                    <div class="vs-info-row">
                         <span class="vs-info-lbl"><i class="fas fa-box me-1"></i> <span data-zh="商品数" data-en="Items" data-fr="Articles">{% trans "商品数" %}</span></span>
                         <span class="vs-info-val">{{ total_items }}</span>
                     </div>

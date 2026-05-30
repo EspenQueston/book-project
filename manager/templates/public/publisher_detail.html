@@ -76,6 +76,48 @@
         display: block !important; width: 100% !important; margin: 0 0 8px 0 !important;
     }
 }
+
+/* ========== DARK MODE ========== */
+html[data-theme="dark"] .stat-card {
+    background: var(--bg-surface);
+    border-color: var(--border-subtle);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+html[data-theme="dark"] .stat-value {
+    color: var(--text-primary);
+}
+html[data-theme="dark"] .stat-label {
+    color: var(--text-tertiary);
+}
+html[data-theme="dark"] .section-card {
+    background: var(--bg-surface);
+    border-color: var(--border-subtle);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+html[data-theme="dark"] .section-heading {
+    color: var(--brand-primary);
+    border-color: var(--border-default);
+}
+html[data-theme="dark"] .info-row {
+    border-color: var(--border-subtle);
+}
+html[data-theme="dark"] .info-lbl {
+    color: var(--text-tertiary);
+}
+html[data-theme="dark"] .info-val {
+    color: var(--text-primary);
+}
+html[data-theme="dark"] .book-card {
+    background: var(--bg-surface);
+    border-color: var(--border-subtle);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+html[data-theme="dark"] .book-cover {
+    background: linear-gradient(135deg, #1e1b4b, #312e81);
+}
+html[data-theme="dark"] .publisher-detail-wrap {
+    background: var(--bg-page) !important;
+}
 </style>
 {% endblock %}
 
@@ -159,7 +201,7 @@
 </div>
 
 <!-- Content -->
-<div style="background:#f8f9ff; padding:0 0 60px;">
+<div class="publisher-detail-wrap" style="background:#f8f9ff; padding:0 0 60px;">
     <div class="container">
         <div class="row g-4 mb-4">
             <!-- Publisher Info -->

@@ -154,11 +154,24 @@
 .vs-contact-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245,158,11,0.35); color: #fff; }
 
 /* ===== Dark Mode ===== */
-html[data-theme="dark"] .vs-card { background: var(--card-bg); }
-html[data-theme="dark"] .vs-card-title { color: var(--dark-text); }
-html[data-theme="dark"] .vs-info-card { background: var(--card-bg); }
-html[data-theme="dark"] .vs-body { background: var(--body-bg); }
-html[data-theme="dark"] .vs-score-item { background: var(--section-bg); }
+html[data-theme="dark"] .vs-card {
+    background: var(--bg-surface);
+    border-color: var(--border-subtle);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+html[data-theme="dark"] .vs-card-title { color: var(--text-primary); }
+html[data-theme="dark"] .vs-card-img {
+    background: linear-gradient(135deg, #1e1b4b, #312e81);
+}
+html[data-theme="dark"] .vs-info-card {
+    background: var(--bg-surface);
+    border-color: var(--border-subtle);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+html[data-theme="dark"] .vs-info-card h6 { color: var(--text-primary); }
+html[data-theme="dark"] .vs-body { background: var(--bg-page); }
+html[data-theme="dark"] .vs-score-item { background: var(--bg-elevated); }
+html[data-theme="dark"] .vs-empty { color: var(--text-tertiary); }
 
 /* ===== Mobile ===== */
 @media (max-width: 768px) {

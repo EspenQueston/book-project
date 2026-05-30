@@ -280,16 +280,16 @@
         /* Responsive */
         @media (max-width: 991.98px) {
             .sidebar {
-                transform: translateX(-100%);
-            }
-            .sidebar.open {
-                transform: translateX(0);
+                width: 220px;
             }
             .main-wrapper {
-                margin-left: 0;
+                margin-left: 220px;
             }
             .admin-mobile-topbar {
-                display: flex;
+                display: none !important;
+            }
+            .sidebar-backdrop {
+                display: none !important;
             }
         }
 

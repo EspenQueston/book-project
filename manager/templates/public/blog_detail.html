@@ -396,6 +396,85 @@
         .post-hero h1 { font-size: 1.8rem; }
         .article-card { padding: 25px; }
     }
+
+    /* ========== DARK MODE ========== */
+    html[data-theme="dark"] .post-content-area {
+        background: var(--bg-page);
+    }
+    html[data-theme="dark"] .article-card {
+        background: var(--bg-surface);
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    html[data-theme="dark"] .article-content {
+        color: var(--text-secondary);
+    }
+    html[data-theme="dark"] .article-content h2,
+    html[data-theme="dark"] .article-content h3 {
+        color: var(--text-primary);
+    }
+    html[data-theme="dark"] .article-content blockquote {
+        background: var(--bg-elevated);
+        color: var(--text-secondary);
+    }
+    html[data-theme="dark"] .article-content code {
+        background: var(--bg-elevated);
+        color: var(--brand-primary);
+    }
+    html[data-theme="dark"] .article-content th,
+    html[data-theme="dark"] .article-content td {
+        border-color: var(--border-default);
+    }
+    html[data-theme="dark"] .article-content hr {
+        border-color: var(--border-default);
+    }
+    html[data-theme="dark"] .author-box {
+        background: var(--bg-elevated);
+        border-color: var(--border-subtle);
+    }
+    html[data-theme="dark"] .author-info h5 {
+        color: var(--text-primary);
+    }
+    html[data-theme="dark"] .author-info p {
+        color: var(--text-secondary);
+    }
+    html[data-theme="dark"] .share-section {
+        border-color: var(--border-default);
+    }
+    html[data-theme="dark"] .share-section h6 {
+        color: var(--text-primary);
+    }
+    html[data-theme="dark"] .related-section {
+        background: var(--bg-page);
+    }
+    html[data-theme="dark"] .related-card {
+        background: var(--bg-surface);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    }
+    html[data-theme="dark"] .related-body h5 {
+        color: var(--text-primary);
+    }
+    html[data-theme="dark"] .related-body .meta {
+        color: var(--text-tertiary);
+    }
+    html[data-theme="dark"] .sidebar-widget {
+        background: var(--bg-surface);
+        box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+    }
+    html[data-theme="dark"] .sidebar-widget h5 {
+        color: var(--text-primary);
+    }
+    html[data-theme="dark"] .related-sidebar-item {
+        border-color: var(--border-subtle);
+    }
+    html[data-theme="dark"] .related-sidebar-item h6 {
+        color: var(--text-primary);
+    }
+    html[data-theme="dark"] .related-sidebar-item small {
+        color: var(--text-tertiary);
+    }
+    html[data-theme="dark"] .back-to-blog {
+        color: var(--brand-primary);
+    }
 </style>
 {% endblock %}
 

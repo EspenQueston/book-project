@@ -171,12 +171,12 @@
     .story-btn:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 14px 35px rgba(102,126,234,0.4); color: #fff; }
     /* Values */
     .val-card {
-        background: #fff;
+        background: #ffffff;
         border-radius: 24px;
         padding: 45px 30px 40px;
         text-align: center;
-        box-shadow: 0 4px 25px rgba(0,0,0,0.04);
-        transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(102,126,234,0.04);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         border: 1px solid rgba(102,126,234,0.06);
         height: 100%;
         position: relative;
@@ -193,24 +193,41 @@
         opacity: 0;
         transition: opacity 0.4s;
     }
-    .val-card:hover { transform: translateY(-12px); box-shadow: 0 25px 60px rgba(102,126,234,0.12); }
+    .val-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 40px rgba(102,126,234,0.14), 0 2px 8px rgba(0,0,0,0.06);
+        border-color: rgba(102,126,234,0.18);
+    }
     .val-card:hover::before { opacity: 1; }
+    .val-card.active,
+    .val-card:active {
+        background: linear-gradient(145deg, #f8f9ff 0%, #f4f0ff 100%);
+        border-color: rgba(102,126,234,0.25);
+        box-shadow: 0 0 0 3px rgba(102,126,234,0.12), 0 8px 30px rgba(102,126,234,0.12);
+    }
+    .val-card.active::before,
+    .val-card:active::before { opacity: 1; }
     .val-ico {
-        width: 80px;
-        height: 80px;
-        background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1));
-        border-radius: 22px;
+        width: 72px;
+        height: 72px;
+        background: linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.08));
+        border-radius: 20px;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 25px;
-        transition: all 0.4s;
+        margin: 0 auto 22px;
+        transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    .val-card:hover .val-ico { background: linear-gradient(135deg, #667eea, #764ba2); }
-    .val-ico i { font-size: 1.8rem; color: #667eea; transition: color 0.4s; }
-    .val-card:hover .val-ico i { color: #fff; }
-    .val-card h4 { font-size: 1.25rem; font-weight: 700; color: #1a1a2e; margin-bottom: 14px; }
-    .val-card p { color: #6b7280; line-height: 1.75; font-size: 0.93rem; }
+    .val-card:hover .val-ico,
+    .val-card.active .val-ico {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        transform: scale(1.08) rotate(3deg);
+    }
+    .val-ico i { font-size: 1.6rem; color: #667eea; transition: color 0.35s; }
+    .val-card:hover .val-ico i,
+    .val-card.active .val-ico i { color: #fff; }
+    .val-card h4 { font-size: 1.15rem; font-weight: 700; color: #1a1a2e; margin-bottom: 10px; }
+    .val-card p { color: #6b7280; line-height: 1.7; font-size: 0.92rem; }
     /* Stats */
     .stats-band {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -230,13 +247,23 @@
     .team-card {
         text-align: center;
         padding: 35px 20px;
-        background: #fff;
+        background: #ffffff;
         border-radius: 24px;
-        box-shadow: 0 4px 25px rgba(0,0,0,0.04);
-        transition: all 0.4s;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(102,126,234,0.04);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         border: 1px solid rgba(102,126,234,0.06);
     }
-    .team-card:hover { transform: translateY(-8px); box-shadow: 0 20px 50px rgba(102,126,234,0.12); }
+    .team-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 40px rgba(102,126,234,0.14), 0 2px 8px rgba(0,0,0,0.06);
+        border-color: rgba(102,126,234,0.15);
+    }
+    .team-card.active,
+    .team-card:active {
+        background: linear-gradient(145deg, #f8f9ff 0%, #f4f0ff 100%);
+        border-color: rgba(102,126,234,0.2);
+        box-shadow: 0 0 0 3px rgba(102,126,234,0.1), 0 8px 30px rgba(102,126,234,0.12);
+    }
     .team-pic {
         width: 110px;
         height: 110px;
@@ -292,14 +319,188 @@
         box-shadow: 0 10px 30px rgba(0,0,0,0.15);
     }
     .cta-btn:hover { transform: translateY(-4px); box-shadow: 0 18px 40px rgba(0,0,0,0.2); color: #764ba2; }
+    /* ── Mobile Optimizations ── */
     @media (max-width: 768px) {
-        .about-hero h1 { font-size: 2rem; }
-        .sec-heading { font-size: 1.7rem; }
-        .stat-num { font-size: 2.2rem; }
-        .cta-box { padding: 40px 25px; }
-        .cta-box h2 { font-size: 1.7rem; }
-        .hero-glow { width: 200px; height: 200px; }
-        .hero-glow i { font-size: 4rem; }
+        .about-hero { padding: 100px 0 70px; }
+        .about-hero h1 { font-size: 2.2rem; letter-spacing: -0.5px; }
+        .about-hero .lead { font-size: 1rem; max-width: 100%; }
+        .hero-pill { font-size: 0.75rem; padding: 6px 16px; margin-bottom: 18px; }
+        .sec { padding: 60px 0; }
+        .sec-heading { font-size: 1.6rem; }
+        .sec-label { font-size: 0.72rem; letter-spacing: 2px; }
+        .sec-desc { font-size: 0.95rem; }
+
+        /* Story section */
+        .story-visual-inner { height: 260px; border-radius: 18px; }
+        .story-visual { border-radius: 18px; }
+        .story-year { padding: 12px 20px; border-radius: 12px; bottom: 15px; right: 15px; }
+        .story-year h3 { font-size: 1.5rem; }
+        .story-btn { padding: 12px 24px; font-size: 0.9rem; border-radius: 12px; }
+
+        /* Values cards */
+        .val-card { padding: 32px 20px 28px; border-radius: 20px; }
+        .val-ico { width: 64px; height: 64px; border-radius: 18px; }
+        .val-ico i { font-size: 1.5rem; }
+        .val-card h4 { font-size: 1.05rem; }
+        .val-card p { font-size: 0.88rem; }
+
+        /* Stats band */
+        .stats-band { padding: 45px 0; }
+        .stat-num { font-size: 2rem; }
+        .stat-lbl { font-size: 0.82rem; }
+
+        /* Platform features (team-card reuse) */
+        .team-card { padding: 28px 16px; border-radius: 20px; }
+        .team-pic { width: 80px; height: 80px; }
+        .team-pic i { font-size: 2rem; }
+        .team-card h5 { font-size: 0.95rem; }
+        .team-card .role { font-size: 0.82rem; }
+        .hero-glow { width: 180px; height: 180px; }
+        .hero-glow i { font-size: 3.5rem; }
+
+        /* Modern CTA block */
+        .cta-sec { padding: 50px 0; }
+        .cta-box {
+            padding: 40px 22px 32px;
+            border-radius: 24px;
+            margin: 0 4px;
+            background: linear-gradient(145deg, #667eea 0%, #764ba2 50%, #5a3f9e 100%);
+            box-shadow: 0 20px 60px rgba(102,126,234,0.25), inset 0 1px 0 rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .cta-box::before {
+            width: 300px; height: 300px;
+            top: -40%; right: -30%;
+            background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%);
+            animation: cta-float 6s ease-in-out infinite;
+        }
+        .cta-box::after {
+            content: '';
+            position: absolute;
+            bottom: -30%; left: -20%;
+            width: 250px; height: 250px;
+            background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: cta-float 8s ease-in-out infinite reverse;
+        }
+        @keyframes cta-float {
+            0%, 100% { transform: translate(0,0) scale(1); }
+            50% { transform: translate(15px,-12px) scale(1.05); }
+        }
+        .cta-box h2 {
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .cta-box p {
+            font-size: 0.92rem;
+            max-width: 100%;
+            margin-bottom: 24px;
+            opacity: 0.92;
+            position: relative;
+            z-index: 1;
+            line-height: 1.6;
+        }
+        .cta-btn {
+            display: flex;
+            width: 100%;
+            justify-content: center;
+            padding: 14px 20px;
+            font-size: 0.95rem;
+            border-radius: 16px;
+            margin: 0 0 12px 0 !important;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+        }
+        .cta-btn:last-child { margin-bottom: 0 !important; }
+        .cta-btn:active { transform: scale(0.97); }
+
+        /* Floating sparkle decorations for CTA */
+        .cta-box .cta-sparkle {
+            position: absolute;
+            width: 6px; height: 6px;
+            background: rgba(255,255,255,0.4);
+            border-radius: 50%;
+            animation: sparkle 3s ease-in-out infinite;
+            z-index: 0;
+        }
+        .cta-box .cta-sparkle:nth-child(1) { top: 15%; left: 10%; animation-delay: 0s; }
+        .cta-box .cta-sparkle:nth-child(2) { top: 25%; right: 15%; animation-delay: 0.8s; width: 4px; height: 4px; }
+        .cta-box .cta-sparkle:nth-child(3) { bottom: 30%; left: 20%; animation-delay: 1.6s; width: 5px; height: 5px; }
+        .cta-box .cta-sparkle:nth-child(4) { bottom: 20%; right: 10%; animation-delay: 2.4s; width: 3px; height: 3px; }
+        @keyframes sparkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.4); }
+        }
+    }
+    @media (max-width: 576px) {
+        .about-hero { padding: 80px 0 55px; }
+        .about-hero h1 { font-size: 1.85rem; }
+        .story-visual-inner { height: 220px; }
+        .val-card { padding: 26px 16px 22px; }
+        .stats-band { padding: 35px 0; }
+        .stat-num { font-size: 1.7rem; }
+        .team-card { padding: 24px 14px; }
+        .cta-box { padding: 32px 18px 26px; border-radius: 20px; }
+        .cta-box h2 { font-size: 1.35rem; }
+        .cta-btn { padding: 13px 16px; font-size: 0.9rem; border-radius: 14px; }
+    }
+
+    /* ========== DARK MODE ========== */
+    html[data-theme="dark"] .val-card {
+        background: var(--bg-surface);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.15), 0 4px 12px rgba(0,0,0,0.1);
+    }
+    html[data-theme="dark"] .val-card.active,
+    html[data-theme="dark"] .val-card:active {
+        background: linear-gradient(145deg, rgba(102,126,234,0.08) 0%, rgba(118,75,162,0.05) 100%);
+        border-color: rgba(102,126,234,0.3);
+        box-shadow: 0 0 0 3px rgba(102,126,234,0.15), 0 8px 30px rgba(0,0,0,0.2);
+    }
+    html[data-theme="dark"] .val-card h4 {
+        color: var(--text-primary);
+    }
+    html[data-theme="dark"] .val-card p {
+        color: var(--text-secondary);
+    }
+    html[data-theme="dark"] .team-card {
+        background: var(--bg-surface);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.15), 0 4px 12px rgba(0,0,0,0.1);
+    }
+    html[data-theme="dark"] .team-card.active,
+    html[data-theme="dark"] .team-card:active {
+        background: linear-gradient(145deg, rgba(102,126,234,0.08) 0%, rgba(118,75,162,0.05) 100%);
+        border-color: rgba(102,126,234,0.25);
+        box-shadow: 0 0 0 3px rgba(102,126,234,0.12), 0 8px 30px rgba(0,0,0,0.2);
+    }
+    html[data-theme="dark"] .team-card h5 {
+        color: var(--text-primary);
+    }
+    html[data-theme="dark"] .story-year {
+        background: var(--bg-surface);
+        color: var(--text-primary);
+    }
+    html[data-theme="dark"] .story-year h3 {
+        color: var(--brand-primary);
+    }
+    html[data-theme="dark"] .story-year span {
+        color: var(--text-secondary);
+    }
+    html[data-theme="dark"] .sec-light {
+        background: var(--bg-page);
+    }
+    html[data-theme="dark"] .sec-heading {
+        color: var(--text-primary);
+    }
+    html[data-theme="dark"] .sec-desc {
+        color: var(--text-secondary);
+    }
+    html[data-theme="dark"] .cta-sec {
+        background: var(--bg-page);
     }
 </style>
 {% endblock %}
@@ -429,9 +630,10 @@
 <section class="cta-sec">
     <div class="container">
         <div class="cta-box" data-aos="zoom-in">
+            <span class="cta-sparkle"></span><span class="cta-sparkle"></span><span class="cta-sparkle"></span><span class="cta-sparkle"></span>
             <h2>{% trans "准备好开始了吗？" %}</h2>
             <p>{% trans "浏览图书、探索课程、选购商品——从这里开始您的旅程。" %}</p>
-            <a href="{% url 'manager:public_books' %}" class="cta-btn me-3"><i class="fas fa-book-open"></i>{% trans "浏览图书" %}</a>
+            <a href="{% url 'manager:public_books' %}" class="cta-btn"><i class="fas fa-book-open"></i>{% trans "浏览图书" %}</a>
             <a href="{% url 'marketplace:home' %}" class="cta-btn" style="background:#10b981;color:#fff;box-shadow:0 10px 30px rgba(16,185,129,0.3)"><i class="fas fa-store"></i>{% trans "逛市场" %}</a>
         </div>
     </div>

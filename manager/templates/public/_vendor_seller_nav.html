@@ -142,6 +142,17 @@
         </a>
 
         <div class="vp-sn-divider"></div>
+        <div class="vp-sn-label">{% trans "Inventory" %}</div>
+        <a class="vp-sn-link {% if rn.namespace == 'manager' and rn.url_name == 'vendor_inventory' %}nav-active{% endif %}"
+           href="{% url 'manager:vendor_inventory' %}">
+            <i class="fas fa-boxes"></i>{% trans "Inventory Management" %}
+        </a>
+        <div class="vp-sn-divider"></div>
+        <div class="vp-sn-label">{% trans "设置" %}</div>
+        <a class="vp-sn-link" href="{% url 'manager:vendor_dashboard' %}#dtab-settings">
+            <i class="fas fa-cog"></i>{% trans "店铺设置" %}
+        </a>
+        <div class="vp-sn-divider"></div>
         <div class="vp-sn-label">{% trans "客户" %}</div>
         <a class="vp-sn-link {% if rn.namespace == 'manager' and rn.url_name == 'vendor_messages' %}nav-active{% endif %}"
            href="{% url 'manager:vendor_messages' %}">
