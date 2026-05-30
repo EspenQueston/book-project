@@ -110,10 +110,15 @@ ssh "$VPS_HOST" bash -s << 'REMOTE_SCRIPT'
     git pull origin main || git pull origin master
     echo "  [VPS] Code pulled successfully."
 
+    # Apply database migrations
+    echo ""
+    echo "  [VPS] Running database migrations..."
+    source .venv/bin/activate
+    python manage.py migrate --noinput || echo "  [VPS] migrate failed or no migrations"
+
     # Collect static files if needed (R2/S3 storage)
     echo ""
     echo "  [VPS] Running collectstatic..."
-    source .venv/bin/activate
     python manage.py collectstatic --noinput 2>/dev/null || echo "  [VPS] collectstatic skipped or already up-to-date"
 
     # Restart service
