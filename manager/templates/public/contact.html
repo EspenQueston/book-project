@@ -353,6 +353,8 @@
         color: #34d399;
     }
 </style>
+{% include 'includes/home_faq_styles.html' %}
+{% include 'includes/hero_wave_divider_styles.html' %}
 {% endblock %}
 
 {% block content %}
@@ -374,6 +376,7 @@
             </div>
         </div>
     </div>
+    {% include 'includes/hero_wave_divider.html' with hero_divider_fill='#ffffff' %}
 </section>
 
 <section class="sec">
@@ -390,14 +393,14 @@
                 <div class="info-card">
                     <div class="info-ico" style="background:linear-gradient(135deg,#f093fb,#f5576c)"><i class="fas fa-phone-alt"></i></div>
                     <h5>{% trans "电话" %}</h5>
-                    <p><a href="tel:+8613520646854">+86 135 2064 6854</a></p>
+                    <p><a href="{{ PLATFORM_PHONE_TEL }}">{{ PLATFORM_PHONE_DISPLAY }}</a></p>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
                 <div class="info-card">
                     <div class="info-ico" style="background:linear-gradient(135deg,#4facfe,#00f2fe)"><i class="fas fa-envelope"></i></div>
                     <h5>{% trans "邮箱" %}</h5>
-                    <p><a href="mailto:bizkey2024@gmail.com">bizkey2024@gmail.com</a></p>
+                    <p><a href="mailto:{{ PLATFORM_CONTACT_EMAIL }}">{{ PLATFORM_CONTACT_EMAIL }}</a></p>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
@@ -450,25 +453,18 @@
             <div class="col-lg-5" data-aos="fade-left">
                 <p class="sec-label">{% trans "其他联系方式" %}</p>
                 <h2 class="sec-heading mb-4">{% trans "关注我们" %}</h2>
-                <a href="https://github.com/EspenQueston" target="_blank" rel="noopener noreferrer" class="soc-card">
-                    <div class="soc-ico" style="background:#333"><i class="fab fa-github"></i></div>
-                    <div><h6>GitHub</h6><p>EspenQueston</p></div>
-                </a>
-                <a href="https://www.facebook.com/poires.gomai" target="_blank" rel="noopener noreferrer" class="soc-card">
-                    <div class="soc-ico" style="background:#1877f2"><i class="fab fa-facebook-f"></i></div>
-                    <div><h6>Facebook</h6><p>poires.gomai</p></div>
-                </a>
+                {% include 'includes/social_links_contact.html' %}
                 <div class="soc-card" style="cursor:default">
                     <div class="soc-ico" style="background:#07c160"><i class="fab fa-weixin"></i></div>
                     <div><h6>WeChat</h6><p>ID: bizkey2025</p></div>
                 </div>
-                <a href="https://wa.me/8613520646854" target="_blank" rel="noopener noreferrer" class="soc-card">
+                <a href="{{ PLATFORM_WHATSAPP_URL }}" target="_blank" rel="noopener noreferrer" class="soc-card">
                     <div class="soc-ico" style="background:#25d366"><i class="fab fa-whatsapp"></i></div>
-                    <div><h6>WhatsApp</h6><p>+86 135 2064 6854</p></div>
+                    <div><h6>WhatsApp</h6><p>{{ PLATFORM_PHONE_DISPLAY }}</p></div>
                 </a>
-                <a href="mailto:bizkey2024@gmail.com" class="soc-card">
+                <a href="mailto:{{ PLATFORM_CONTACT_EMAIL }}" class="soc-card">
                     <div class="soc-ico" style="background:linear-gradient(135deg,#667eea,#764ba2)"><i class="fas fa-envelope"></i></div>
-                    <div><h6>{% trans "邮箱" %}</h6><p>bizkey2024@gmail.com</p></div>
+                    <div><h6>{% trans "邮箱" %}</h6><p>{{ PLATFORM_CONTACT_EMAIL }}</p></div>
                 </a>
                 <div class="map-box">
                     <i class="fas fa-map-marked-alt"></i>
@@ -478,6 +474,8 @@
         </div>
     </div>
 </section>
+
+{% include 'includes/home_faq_section.html' %}
 {% endblock %}
 
 {% block extra_js %}

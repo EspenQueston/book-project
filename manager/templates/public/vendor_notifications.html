@@ -1,0 +1,128 @@
+{% extends 'public/vendor_panel_base.html' %}
+{% load i18n %}
+
+{% block panel_title %}{% trans "Notifications" %} · {{ vendor.company_name }}{% endblock %}
+
+{% block panel_extra_css %}
+<style>
+    .vn-head {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        padding: 22px 24px;
+        border-radius: 18px;
+        margin-bottom: 20px;
+        box-shadow: 0 12px 32px rgba(102, 126, 234, 0.28);
+    }
+    .vn-card {
+        background: var(--card-bg, #fff);
+        border-radius: 16px;
+        box-shadow: 0 8px 28px rgba(15, 23, 42, 0.06);
+        border: 1px solid rgba(15, 23, 42, 0.06);
+        overflow: hidden;
+    }
+    .vn-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 18px;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+        background: rgba(248, 250, 252, 0.8);
+    }
+    .vn-item {
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+        padding: 16px 18px;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.05);
+        transition: background 0.15s ease;
+    }
+    .vn-item:hover { background: rgba(102, 126, 234, 0.04); }
+    .vn-item.unread { background: rgba(16, 185, 129, 0.06); }
+    .vn-item:last-child { border-bottom: none; }
+    .vn-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        background: rgba(102, 126, 234, 0.1);
+        font-size: 1rem;
+    }
+    .vn-title { font-weight: 700; font-size: 0.92rem; color: #1e293b; }
+    .vn-msg { font-size: 0.82rem; color: #64748b; margin-top: 4px; line-height: 1.45; }
+    .vn-time { font-size: 0.72rem; color: #94a3b8; margin-top: 6px; }
+    .vn-empty { text-align: center; padding: 48px 20px; color: #94a3b8; }
+</style>
+{% endblock %}
+
+{% block vendor_panel_content %}
+<form id="vnCsrf" class="d-none">{% csrf_token %}</form>
+<div class="vn-head d-flex flex-wrap justify-content-between align-items-center gap-3">
+    <div>
+        <h4 class="mb-1 fw-bold"><i class="fas fa-bell me-2"></i>{% trans "Notifications" %}</h4>
+        <small class="opacity-90">{% trans "Last 30 days only · linked to your shop" %}</small>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        {% if unread_count %}
+        <span class="badge rounded-pill bg-white text-success px-3 py-2">{{ unread_count }} {% trans "unread" %}</span>
+        {% endif %}
+    </div>
+</div>
+
+<div class="vn-card">
+    <div class="vn-toolbar">
+        <small class="text-muted mb-0">{% blocktrans with days=lookback_days %}Showing notifications from the last {{ days }} days{% endblocktrans %}</small>
+        <div class="d-flex gap-2 flex-wrap">
+            <form method="post" class="m-0">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="mark_all_read">
+                <button type="submit" class="btn btn-sm btn-outline-success rounded-pill px-3">{% trans "Mark all read" %}</button>
+            </form>
+            <form method="post" class="m-0" data-confirm-message="{% trans 'Clear all read notifications?' %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="clear_read">
+                <button type="submit" class="btn btn-sm btn-outline-secondary rounded-pill px-3">{% trans "Clear read" %}</button>
+            </form>
+        </div>
+    </div>
+
+    {% if notifications %}
+        {% for n in notifications %}
+        <a href="{{ n.link|default:'#' }}" class="vn-item text-decoration-none {% if not n.is_read %}unread{% endif %}" data-notif-id="{{ n.id }}" {% if n.link %}data-has-link="1"{% endif %}>
+            <div class="vn-icon" style="color:{{ n.color }};"><i class="{{ n.icon }}"></i></div>
+            <div class="flex-grow-1" style="min-width:0;">
+                <div class="vn-title">{{ n.title }}</div>
+                <div class="vn-msg">{{ n.message }}</div>
+                <div class="vn-time">{{ n.created_at|date:"Y-m-d H:i" }}</div>
+            </div>
+            {% if not n.is_read %}
+            <span class="badge bg-success rounded-pill align-self-center">{% trans "New" %}</span>
+            {% endif %}
+        </a>
+        {% endfor %}
+    {% else %}
+        <div class="vn-empty">
+            <i class="fas fa-bell-slash fa-3x mb-3 opacity-50"></i>
+            <p class="mb-0">{% trans "No notifications in the last 30 days." %}</p>
+        </div>
+    {% endif %}
+</div>
+<script>
+document.querySelectorAll('.vn-item[data-notif-id]').forEach(function(el) {
+    el.addEventListener('click', function() {
+        var csrf = document.querySelector('#vnCsrf [name=csrfmiddlewaretoken]');
+        if (!csrf) return;
+        fetch('/manager/api/vendor/notifications/', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrf.value},
+            body: 'action=mark_read&id=' + encodeURIComponent(el.dataset.notifId),
+            credentials: 'same-origin'
+        });
+    });
+});
+</script>
+{% endblock %}

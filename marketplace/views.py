@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.http import JsonResponse, FileResponse, Http404
-from django.db.models import Q, Sum, Count, Avg, OuterRef, Subquery, Value, IntegerField
+from django.db.models import Q, Sum, Count, Avg, OuterRef, Subquery, Value, IntegerField, F
 from django.db.models.functions import Coalesce, TruncMonth
 from django.core.paginator import Paginator
 from django.contrib import messages
@@ -19,11 +19,44 @@ from .models import (
 )
 from .utils import build_attribute_groups, validate_selected_attributes, normalize_selected_attributes
 from .review_service import reviews_for_listing, review_summary, filter_reviews, serialize_review
+from .pricing_rules import validate_quantity
+from .presence import (
+    get_visitor_id,
+    touch_product_presence,
+    HEARTBEAT_INTERVAL_SECONDS,
+)
 from book_Project.payment_config import build_payment_options
+
+try:
+    from .recommendations import recommended_items
+except ModuleNotFoundError:
+    def recommended_items(request, limit=20, include=(), category_slug='', query=''):
+        """Safe fallback when optional recommendations module is absent."""
+        return []
 from decimal import Decimal
 from datetime import timedelta
+from django.db import transaction
 import uuid
 import json
+from manager.models import SiteUser, Vendor, UserFollowedVendor
+from manager.official_store import assign_official_vendor, resolve_listing_vendor
+
+
+def _seller_follow_context(request, vendor=None):
+    """Follow state for marketplace listing detail pages."""
+    ctx = {
+        'is_following_vendor': False,
+        'vendor_follower_count': 0,
+    }
+    if not vendor:
+        return ctx
+    ctx['vendor_follower_count'] = UserFollowedVendor.objects.filter(vendor=vendor).count()
+    user_id = request.session.get('site_user_id')
+    if user_id:
+        ctx['is_following_vendor'] = UserFollowedVendor.objects.filter(
+            user_id=user_id, vendor=vendor
+        ).exists()
+    return ctx
 
 
 def _annotate_product_delivered(qs):
@@ -71,27 +104,152 @@ def _admin_required(request):
     return None
 
 
+def _positive_int(value, default=1):
+    try:
+        return max(1, int(value))
+    except (TypeError, ValueError):
+        return default
+
+
+def _optional_positive_int(value):
+    if value in (None, ''):
+        return None
+    try:
+        return max(1, int(value))
+    except (TypeError, ValueError):
+        return None
+
+
+def _minimum_quantity_message(item):
+    return f'最低购买数量为 {getattr(item, "min_order_quantity", 1)} 件'
+
+
+def _pricing_rules_from_post(request):
+    """Build the internal rules JSON from friendly form fields."""
+    rules = {}
+
+    tiers = []
+    for min_qty, max_qty, unit_price in zip(
+        request.POST.getlist('tier_min'),
+        request.POST.getlist('tier_max'),
+        request.POST.getlist('tier_unit_price'),
+    ):
+        min_qty = (min_qty or '').strip()
+        max_qty = (max_qty or '').strip()
+        unit_price = (unit_price or '').strip()
+        if min_qty and unit_price:
+            tier = {'min': _positive_int(min_qty, 1), 'unit_price': unit_price}
+            if max_qty:
+                tier['max'] = _positive_int(max_qty, 1)
+            tiers.append(tier)
+    if tiers:
+        rules['tiers'] = tiers
+
+    discount_value = (request.POST.get('discount_value') or '').strip()
+    if discount_value:
+        discount = {
+            'type': request.POST.get('discount_type', 'percent'),
+            'value': discount_value,
+            'priority': _positive_int(request.POST.get('discount_priority'), 1),
+        }
+        min_total = (request.POST.get('discount_min_total') or '').strip()
+        if min_total:
+            discount['min_cart_total'] = min_total
+        rules['discounts'] = [discount]
+
+    buy_qty = _optional_positive_int(request.POST.get('bogo_buy_qty'))
+    get_qty = _optional_positive_int(request.POST.get('bogo_get_qty'))
+    if buy_qty and get_qty:
+        rules['bogo'] = {
+            'buy_qty': buy_qty,
+            'get_qty': get_qty,
+            'discount_percent': request.POST.get('bogo_discount_percent') or '100',
+        }
+
+    raw = (request.POST.get('pricing_rules') or '').strip()
+    if not rules and raw:
+        try:
+            parsed = json.loads(raw)
+            return parsed if isinstance(parsed, dict) else {}
+        except json.JSONDecodeError:
+            messages.warning(request, 'Les règles avancées sont invalides et ont été ignorées.')
+    return rules
+
+
+def _rules_json_for_form(obj=None):
+    rules = getattr(obj, 'pricing_rules', None) or {}
+    if not rules:
+        return ''
+    return json.dumps(rules, ensure_ascii=False, indent=2)
+
+
+def _pricing_rule_form(obj=None):
+    rules = getattr(obj, 'pricing_rules', None) or {}
+    if not isinstance(rules, dict):
+        rules = {}
+    tiers = list(rules.get('tiers') or [])
+    if not tiers:
+        tiers = [{'min': '', 'max': '', 'unit_price': ''}]
+
+    discounts = list(rules.get('discounts') or [])
+    discount = discounts[0] if discounts else {}
+    bogo = rules.get('bogo') or {}
+    return {
+        'tiers': tiers,
+        'discount': discount,
+        'bogo': bogo,
+        'has_rules': bool(rules),
+    }
+
+
+def _form_context_with_pricing(context, obj=None):
+    context['pricing_rule_form'] = _pricing_rule_form(obj)
+    context['pricing_rules_json'] = _rules_json_for_form(obj)
+    return context
+
+
+def _max_purchase_quantity(item):
+    max_qty = getattr(item, 'max_order_quantity', None)
+    stock = getattr(item, 'stock', 0) or 0
+    return min(stock, max_qty) if max_qty else stock
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 #  PUBLIC VIEWS
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def marketplace_home(request):
     """Marketplace landing page with featured items from all sections."""
-    featured_products = Product.objects.filter(is_active=True, is_featured=True)[:4]
-    featured_courses = Course.objects.filter(is_active=True, is_featured=True)[:4]
-    featured_supermarket = SupermarketItem.objects.filter(is_active=True, is_featured=True)[:4]
+    featured_products = _annotate_product_delivered(
+        Product.objects.filter(is_active=True).select_related('category')
+    ).order_by('-sold_delivered', '-sales_count', '-created_at')[:8]
+    featured_courses = _annotate_course_delivered(
+        Course.objects.filter(is_active=True).select_related('category')
+    ).order_by('-sold_delivered', '-enrollment_count', '-created_at')[:4]
+    featured_supermarket = _annotate_supermarket_delivered(
+        SupermarketItem.objects.filter(is_active=True).select_related('category')
+    ).order_by('-sold_delivered', '-sales_count', '-created_at')[:4]
 
-    # Fallback if not enough featured items
-    if featured_products.count() < 4:
-        featured_products = Product.objects.filter(is_active=True)[:4]
-    if featured_courses.count() < 4:
-        featured_courses = Course.objects.filter(is_active=True)[:4]
-    if featured_supermarket.count() < 4:
-        featured_supermarket = SupermarketItem.objects.filter(is_active=True)[:4]
+    if request.GET.get('format') == 'json':
+        page_num = int(request.GET.get('page', 1) or 1)
+        rec_items = recommended_items(request, limit=24, include=('product', 'course', 'supermarket'))
+        page_size = 12
+        start = (page_num - 1) * page_size
+        end = start + page_size
+        sliced = rec_items[start:end]
+        if not sliced and rec_items:
+            sliced = rec_items[:page_size]
+            page_num = 1
+        return JsonResponse({
+            'items': sliced,
+            'page': page_num,
+            'has_more': bool(rec_items),
+        })
 
     product_count = Product.objects.filter(is_active=True).count()
     course_count = Course.objects.filter(is_active=True).count()
     supermarket_count = SupermarketItem.objects.filter(is_active=True).count()
+    recommended_feed = recommended_items(request, limit=12, include=('product', 'course', 'supermarket'))
 
     context = {
         'featured_products': featured_products,
@@ -100,6 +258,7 @@ def marketplace_home(request):
         'product_count': product_count,
         'course_count': course_count,
         'supermarket_count': supermarket_count,
+        'recommended_feed': recommended_feed,
     }
     return render(request, 'marketplace/home.html', context)
 
@@ -128,6 +287,9 @@ def product_list(request):
     page = paginator.get_page(request.GET.get('page', 1))
 
     if request.GET.get('format') == 'json':
+        if request.GET.get('recommend') == '1':
+            rec_items = recommended_items(request, limit=20, include=('product',), category_slug=cat, query=q)
+            return JsonResponse({'items': rec_items, 'page': int(request.GET.get('page', 1) or 1), 'has_more': True})
         data_products = []
         for product in page:
             data_products.append({
@@ -160,7 +322,16 @@ def product_list(request):
 def product_detail(request, slug):
     """Single product detail page."""
     product = get_object_or_404(Product, slug=slug, is_active=True)
-    Product.objects.filter(pk=product.pk).update(views_count=product.views_count + 1)
+
+    view_key = f'product_viewed_{product.pk}'
+    if not request.session.get(view_key):
+        Product.objects.filter(pk=product.pk).update(views_count=F('views_count') + 1)
+        request.session[view_key] = True
+        product.views_count = (product.views_count or 0) + 1
+
+    visitor_id = get_visitor_id(request)
+    live_viewers = touch_product_presence(product.pk, visitor_id)
+
     related = Product.objects.filter(
         is_active=True, category=product.category
     ).exclude(pk=product.pk)[:4] if product.category else Product.objects.none()
@@ -169,20 +340,34 @@ def product_detail(request, slug):
     sold_delivered = product.get_units_sold_delivered()
     preview = list(reviews_for_listing('product', product.pk)[:3])
     summary = review_summary('product', product.pk)
+    seller_vendor = resolve_listing_vendor(product.vendor)
     context = {
         'product': product,
+        'seller_vendor': seller_vendor,
         'related_products': related,
         'attribute_groups': attribute_context['groups'],
         'selectable_attributes': attribute_context['selectable_groups'],
         'specification_attributes': attribute_context['specification_groups'],
         'sold_delivered': sold_delivered,
-        'social_viewers': product.views_count + 3,
+        'live_viewers': live_viewers,
+        'presence_heartbeat_seconds': HEARTBEAT_INTERVAL_SECONDS,
         'listing_reviews_preview': preview,
         'listing_review_summary': summary,
         'listing_kind': 'product',
         'listing_id': product.pk,
+        'max_purchase_quantity': _max_purchase_quantity(product),
+        **_seller_follow_context(request, seller_vendor),
     }
     return render(request, 'marketplace/product_detail.html', context)
+
+
+@require_POST
+def product_presence(request, product_id):
+    """Heartbeat: keep session active on product page; return live viewer count."""
+    get_object_or_404(Product, pk=product_id, is_active=True)
+    visitor_id = get_visitor_id(request)
+    count = touch_product_presence(product_id, visitor_id)
+    return JsonResponse({'success': True, 'count': count})
 
 
 def course_list(request):
@@ -212,6 +397,9 @@ def course_list(request):
     page = paginator.get_page(request.GET.get('page', 1))
 
     if request.GET.get('format') == 'json':
+        if request.GET.get('recommend') == '1':
+            rec_items = recommended_items(request, limit=20, include=('course',), category_slug=cat, query=q)
+            return JsonResponse({'items': rec_items, 'page': int(request.GET.get('page', 1) or 1), 'has_more': True})
         data_courses = []
         for course in page:
             data_courses.append({
@@ -286,8 +474,10 @@ def course_detail(request, slug):
             if first_section and first_section.lessons.exists():
                 current_lesson = first_section.lessons.first()
 
+    seller_vendor = resolve_listing_vendor(course.vendor)
     context = {
         'course': course,
+        'seller_vendor': seller_vendor,
         'sections': sections,
         'related_courses': related,
         'completed_ids': completed_ids,
@@ -300,6 +490,7 @@ def course_detail(request, slug):
         'listing_review_summary': review_summary('course', course.pk),
         'listing_kind': 'course',
         'listing_id': course.pk,
+        **_seller_follow_context(request, seller_vendor),
     }
     return render(request, 'marketplace/course_detail.html', context)
 
@@ -328,6 +519,9 @@ def supermarket_list(request):
     page = paginator.get_page(request.GET.get('page', 1))
 
     if request.GET.get('format') == 'json':
+        if request.GET.get('recommend') == '1':
+            rec_items = recommended_items(request, limit=20, include=('supermarket',), category_slug=cat, query=q)
+            return JsonResponse({'items': rec_items, 'page': int(request.GET.get('page', 1) or 1), 'has_more': True})
         data_items = []
         for item in page:
             data_items.append({
@@ -364,15 +558,11 @@ def supermarket_detail(request, slug):
     ).exclude(pk=item.pk)[:4] if item.category else SupermarketItem.objects.none()
     attribute_context = build_attribute_groups(item.attributes.all())
 
-    # Fallback seller: if no vendor, use admin/staff user as default seller
-    fallback_seller = None
-    if not item.vendor:
-        from django.contrib.auth import get_user_model
-        User = get_user_model()
-        fallback_seller = User.objects.filter(is_staff=True).first()
+    seller_vendor = resolve_listing_vendor(item.vendor)
 
     context = {
         'item': item,
+        'seller_vendor': seller_vendor,
         'related_items': related,
         'attribute_groups': attribute_context['groups'],
         'selectable_attributes': attribute_context['selectable_groups'],
@@ -382,7 +572,8 @@ def supermarket_detail(request, slug):
         'listing_review_summary': review_summary('supermarket', item.pk),
         'listing_kind': 'supermarket',
         'listing_id': item.pk,
-        'fallback_seller': fallback_seller,
+        'max_purchase_quantity': _max_purchase_quantity(item),
+        **_seller_follow_context(request, seller_vendor),
     }
     return render(request, 'marketplace/supermarket_detail.html', context)
 
@@ -409,6 +600,9 @@ def add_to_cart(request):
         # Validate item exists and has stock
         if item_type == 'product':
             item = get_object_or_404(Product, pk=item_id, is_active=True)
+            qty_check = validate_quantity(item, quantity)
+            if not qty_check.is_valid:
+                return JsonResponse({'success': False, 'message': qty_check.message, 'suggested_quantity': qty_check.suggested_quantity})
             if quantity > item.stock:
                 return JsonResponse({'success': False, 'message': f'库存不足！当前库存：{item.stock}'})
             item_name = item.name
@@ -418,6 +612,9 @@ def add_to_cart(request):
             item_name = item.title
         elif item_type == 'supermarket':
             item = get_object_or_404(SupermarketItem, pk=item_id, is_active=True)
+            qty_check = validate_quantity(item, quantity)
+            if not qty_check.is_valid:
+                return JsonResponse({'success': False, 'message': qty_check.message, 'suggested_quantity': qty_check.suggested_quantity})
             if quantity > item.stock:
                 return JsonResponse({'success': False, 'message': f'库存不足！当前库存：{item.stock}'})
             item_name = item.name
@@ -435,10 +632,12 @@ def add_to_cart(request):
             if item_type == 'course':
                 return JsonResponse({'success': False, 'message': '该课程已在购物车中'})
             new_qty = cart_item.quantity + quantity
-            if item_type == 'product' and new_qty > item.stock:
-                return JsonResponse({'success': False, 'message': f'库存不足！购物车已有{cart_item.quantity}件'})
-            if item_type == 'supermarket' and new_qty > item.stock:
-                return JsonResponse({'success': False, 'message': f'库存不足！购物车已有{cart_item.quantity}件'})
+            if item_type in ('product', 'supermarket'):
+                qty_check = validate_quantity(item, new_qty)
+                if not qty_check.is_valid:
+                    return JsonResponse({'success': False, 'message': qty_check.message, 'suggested_quantity': qty_check.suggested_quantity})
+                if new_qty > item.stock:
+                    return JsonResponse({'success': False, 'message': f'库存不足！购物车已有{cart_item.quantity}件'})
             cart_item.quantity = new_qty
             cart_item.save()
 
@@ -476,6 +675,7 @@ def view_cart(request):
                 'quantity': ci.quantity,
                 'image_url': ci.get_item_image_url(),
                 'total_price': subtotal,
+                'pricing_rule_log': ci.pricing_rule_log or {},
             })
 
     context = {
@@ -504,8 +704,12 @@ def update_cart(request):
         else:
             # Validate stock
             item = ci.get_item()
-            if ci.item_type in ('product', 'supermarket') and item and quantity > item.stock:
-                return JsonResponse({'success': False, 'message': f'库存不足！最大可购买：{item.stock}'})
+            if ci.item_type in ('product', 'supermarket') and item:
+                qty_check = validate_quantity(item, quantity)
+                if not qty_check.is_valid:
+                    return JsonResponse({'success': False, 'message': qty_check.message, 'suggested_quantity': qty_check.suggested_quantity})
+                if quantity > item.stock:
+                    return JsonResponse({'success': False, 'message': f'库存不足！最大可购买：{item.stock}'})
             ci.quantity = quantity
             ci.save()
 
@@ -571,6 +775,13 @@ def buy_now(request):
         item = get_object_or_404(SupermarketItem, pk=item_id, is_active=True)
 
     if item:
+        qty_check = validate_quantity(item, quantity)
+        if not qty_check.is_valid:
+            messages.error(request, qty_check.message)
+            return redirect(request.META.get('HTTP_REFERER', 'marketplace:home'))
+        if quantity > item.stock:
+            messages.error(request, f'库存不足！当前库存：{item.stock}')
+            return redirect(request.META.get('HTTP_REFERER', 'marketplace:home'))
         validation = validate_selected_attributes(
             build_attribute_groups(item.attributes.all()),
             selected_attributes,
@@ -619,12 +830,32 @@ def checkout(request):
                 'image_url': ci.get_item_image_url(),
                 'total_price': subtotal,
                 'selected_attributes': ci.selected_attributes or {},
+                'pricing_rule_log': ci.pricing_rule_log or {},
             })
 
     if request.method == 'POST':
         try:
+            for detail in items_with_details:
+                item = detail['item']
+                ci = detail['cart_item']
+                if ci.item_type in ('product', 'supermarket'):
+                    qty_check = validate_quantity(item, ci.quantity)
+                    if not qty_check.is_valid:
+                        messages.error(request, qty_check.message)
+                        return redirect('marketplace:view_cart')
+                    if ci.quantity > item.stock:
+                        messages.error(request, f'库存不足！当前库存：{item.stock}')
+                        return redirect('marketplace:view_cart')
             country = request.POST.get('country', 'China')
+            city = request.POST.get('city', '').strip()
+            shipping_address = request.POST.get('shipping_address', '').strip()
             payment_method = request.POST.get('payment_method', 'wechat_pay')
+
+            from book_Project.checkout_cities import is_valid_checkout_city
+            if not is_valid_checkout_city(country, city):
+                messages.error(request, '请选择有效的城市。')
+                return redirect('marketplace:checkout')
+
             available_methods = {
                 option['method']
                 for region_options in build_payment_options(country).values()
@@ -657,9 +888,10 @@ def checkout(request):
                 user_email=request.POST.get('customer_email', ''),
                 customer_phone=request.POST.get('customer_phone', ''),
                 country=country,
+                city=city,
                 payment_method=payment_method,
                 total_amount=total_amount,
-                shipping_address=request.POST.get('shipping_address', ''),
+                shipping_address=shipping_address,
                 notes=request.POST.get('notes', ''),
             )
             order.save()
@@ -692,6 +924,7 @@ def checkout(request):
                     quantity=ci.quantity,
                     unit_price=detail['price'],
                     selected_attributes=detail.get('selected_attributes', {}),
+                    pricing_rule_log=detail.get('pricing_rule_log', {}),
                 )
 
                 # Update stock/sales
@@ -709,6 +942,14 @@ def checkout(request):
                     item.save()
 
             cart_items.delete()
+            _accessible = request.session.get('accessible_orders', [])
+            if str(order.order_number) not in _accessible:
+                _accessible.append(str(order.order_number))
+            request.session['accessible_orders'] = _accessible
+            if payment_method == 'kkiapay':
+                return redirect('manager:kkiapay_pay', order_number=order.order_number)
+            if payment_method == 'pawapay':
+                return redirect('manager:pawapay_pay', order_number=order.order_number)
             return redirect('marketplace:order_confirmation', order_number=order.order_number)
 
         except Exception as e:
@@ -728,6 +969,8 @@ def checkout(request):
         except Exception:
             pass
 
+    from book_Project.checkout_cities import get_checkout_cities_by_country
+
     context = {
         'cart_items': items_with_details,
         'total_amount': total_amount,
@@ -736,6 +979,7 @@ def checkout(request):
         'total_count': len(items_with_details),
         'payment_methods': payment_methods,
         'wallet_balance': wallet_balance,
+        'checkout_cities_by_country': get_checkout_cities_by_country(),
     }
     return render(request, 'marketplace/checkout.html', context)
 
@@ -978,6 +1222,10 @@ def admin_product_add(request):
             price=request.POST.get('price', 0),
             original_price=request.POST.get('original_price') or None,
             stock=request.POST.get('stock', 0),
+            min_order_quantity=_positive_int(request.POST.get('min_order_quantity'), 1),
+            max_order_quantity=_optional_positive_int(request.POST.get('max_order_quantity')),
+            quantity_step=_positive_int(request.POST.get('quantity_step'), 1),
+            pricing_rules=_pricing_rules_from_post(request),
             brand=request.POST.get('brand', '').strip(),
             condition=request.POST.get('condition', 'new'),
             weight=request.POST.get('weight') or None,
@@ -1001,6 +1249,7 @@ def admin_product_add(request):
             product.slug = f'{base_slug}-{counter}'
             counter += 1
 
+        assign_official_vendor(product)
         product.save()
 
         # Save dynamic attributes
@@ -1016,7 +1265,7 @@ def admin_product_add(request):
         return redirect('marketplace:admin_products')
 
     categories = Category.objects.filter(section='products', is_active=True)
-    context = {'categories': categories, 'name': request.session.get("name", "Admin")}
+    context = _form_context_with_pricing({'categories': categories, 'name': request.session.get("name", "Admin")})
     return render(request, 'marketplace/admin/product_form.html', context)
 
 
@@ -1033,6 +1282,10 @@ def admin_product_edit(request, pk):
         product.price = request.POST.get('price', product.price)
         product.original_price = request.POST.get('original_price') or None
         product.stock = request.POST.get('stock', product.stock)
+        product.min_order_quantity = _positive_int(request.POST.get('min_order_quantity'), product.min_order_quantity)
+        product.max_order_quantity = _optional_positive_int(request.POST.get('max_order_quantity'))
+        product.quantity_step = _positive_int(request.POST.get('quantity_step'), product.quantity_step)
+        product.pricing_rules = _pricing_rules_from_post(request)
         product.brand = request.POST.get('brand', '').strip()
         product.condition = request.POST.get('condition', 'new')
         product.weight = request.POST.get('weight') or None
@@ -1046,6 +1299,7 @@ def admin_product_edit(request, pk):
             product.image_2 = request.FILES['image_2']
         if 'image_3' in request.FILES:
             product.image_3 = request.FILES['image_3']
+        assign_official_vendor(product)
         product.save()
 
         # Update dynamic attributes: clear old, save new
@@ -1062,7 +1316,7 @@ def admin_product_edit(request, pk):
         return redirect('marketplace:admin_products')
 
     categories = Category.objects.filter(section='products', is_active=True)
-    context = {'product': product, 'categories': categories, 'name': request.session.get("name", "Admin")}
+    context = _form_context_with_pricing({'product': product, 'categories': categories, 'name': request.session.get("name", "Admin")}, product)
     return render(request, 'marketplace/admin/product_form.html', context)
 
 
@@ -1136,6 +1390,7 @@ def admin_course_add(request):
             course.slug = f'{base_slug}-{counter}'
             counter += 1
 
+        assign_official_vendor(course)
         course.save()
         messages.success(request, f'课程 "{title}" 已添加')
         return redirect('marketplace:admin_courses')
@@ -1169,6 +1424,7 @@ def admin_course_edit(request, pk):
         course.category_id = int(cat_id) if cat_id else None
         if 'image' in request.FILES:
             course.image = request.FILES['image']
+        assign_official_vendor(course)
         course.save()
         messages.success(request, f'课程 "{course.title}" 已更新')
         return redirect('marketplace:admin_courses')
@@ -1404,6 +1660,10 @@ def admin_supermarket_add(request):
             price=request.POST.get('price', 0),
             original_price=request.POST.get('original_price') or None,
             stock=request.POST.get('stock', 0),
+            min_order_quantity=_positive_int(request.POST.get('min_order_quantity'), 1),
+            max_order_quantity=_optional_positive_int(request.POST.get('max_order_quantity')),
+            quantity_step=_positive_int(request.POST.get('quantity_step'), 1),
+            pricing_rules=_pricing_rules_from_post(request),
             unit=request.POST.get('unit', 'piece'),
             brand=request.POST.get('brand', '').strip(),
             origin=request.POST.get('origin', '').strip(),
@@ -1426,6 +1686,8 @@ def admin_supermarket_add(request):
             item.slug = f'{base_slug}-{counter}'
             counter += 1
 
+        if not item.vendor_id:
+            assign_official_vendor(item)
         item.save()
 
         # Save dynamic attributes
@@ -1443,7 +1705,7 @@ def admin_supermarket_add(request):
     categories = Category.objects.filter(section='supermarket', is_active=True)
     from manager.models import Vendor
     vendors = Vendor.objects.filter(is_active=True)
-    context = {'categories': categories, 'vendors': vendors, 'name': request.session.get("name", "Admin")}
+    context = _form_context_with_pricing({'categories': categories, 'vendors': vendors, 'name': request.session.get("name", "Admin")})
     return render(request, 'marketplace/admin/supermarket_form.html', context)
 
 
@@ -1460,6 +1722,10 @@ def admin_supermarket_edit(request, pk):
         item.price = request.POST.get('price', item.price)
         item.original_price = request.POST.get('original_price') or None
         item.stock = request.POST.get('stock', item.stock)
+        item.min_order_quantity = _positive_int(request.POST.get('min_order_quantity'), item.min_order_quantity)
+        item.max_order_quantity = _optional_positive_int(request.POST.get('max_order_quantity'))
+        item.quantity_step = _positive_int(request.POST.get('quantity_step'), item.quantity_step)
+        item.pricing_rules = _pricing_rules_from_post(request)
         item.unit = request.POST.get('unit', 'piece')
         item.brand = request.POST.get('brand', '').strip()
         item.origin = request.POST.get('origin', '').strip()
@@ -1473,6 +1739,7 @@ def admin_supermarket_edit(request, pk):
             item.vendor_id = int(vendor_id)
         else:
             item.vendor_id = None
+            assign_official_vendor(item)
         if 'image' in request.FILES:
             item.image = request.FILES['image']
         item.save()
@@ -1493,7 +1760,7 @@ def admin_supermarket_edit(request, pk):
     categories = Category.objects.filter(section='supermarket', is_active=True)
     from manager.models import Vendor
     vendors = Vendor.objects.filter(is_active=True)
-    context = {'item': item, 'categories': categories, 'vendors': vendors, 'name': request.session.get("name", "Admin")}
+    context = _form_context_with_pricing({'item': item, 'categories': categories, 'vendors': vendors, 'name': request.session.get("name", "Admin")}, item)
     return render(request, 'marketplace/admin/supermarket_form.html', context)
 
 
@@ -2030,41 +2297,120 @@ def vendor_products(request):
     return render(request, 'marketplace/vendor/products.html', context)
 
 
-def vendor_product_add(request):
-    """Add a new product."""
-    vendor, redir = _vendor_required(request)
-    if redir:
-        return redir
+def _ensure_vendor_for_site_user(site_user):
+    if not site_user:
+        return None
+    site_user.promote_to_seller()
+    vendor, created = Vendor.objects.get_or_create(
+        user=site_user,
+        defaults={
+            'company_name': site_user.name,
+            'contact_name': site_user.name,
+            'email': site_user.email,
+            'phone': site_user.phone or '',
+            'password': site_user.password,
+            'description': '',
+            'status': 'approved',
+            'is_active': True,
+        }
+    )
+    changed = False
+    if not vendor.phone and site_user.phone:
+        vendor.phone = site_user.phone
+        changed = True
+    if vendor.status != 'approved':
+        vendor.status = 'approved'
+        changed = True
+    if not vendor.is_active:
+        vendor.is_active = True
+        changed = True
+    if changed:
+        vendor.save()
+    return vendor
+
+
+def vendor_publish_product(request):
+    """Public publish flow that auto-promotes buyer to seller."""
+    user_id = request.session.get('site_user_id')
+    if not user_id:
+        messages.error(request, 'Veuillez vous connecter pour publier une annonce.')
+        return redirect('manager:public_login')
+
+    site_user = SiteUser.objects.filter(pk=user_id, is_active=True).first()
+    if not site_user:
+        messages.error(request, 'Session utilisateur invalide. Veuillez vous reconnecter.')
+        return redirect('manager:public_login')
+
+    vendor = _ensure_vendor_for_site_user(site_user)
+    request.session['user_role'] = 'seller'
 
     if request.method == 'POST':
-        name = request.POST.get('name', '').strip()
-        if not name:
-            messages.error(request, '商品名称不能为空')
-            return redirect('marketplace:vendor_product_add')
+        return _handle_vendor_product_form_submission(request, vendor, redirect_name='marketplace:vendor_publish_product')
 
+    categories = Category.objects.filter(section='products', is_active=True)
+    context = {
+        'vendor': vendor,
+        'categories': categories,
+        'public_publish_mode': True,
+        'seller_phone': site_user.phone or vendor.phone or '',
+        'seller_name': site_user.name or vendor.contact_name,
+    }
+    return render(request, 'marketplace/vendor/product_form.html', context)
+
+
+def _handle_vendor_product_form_submission(request, vendor, redirect_name='marketplace:vendor_products'):
+    title = (request.POST.get('title') or request.POST.get('name') or '').strip()
+    category_id = request.POST.get('category', '').strip()
+    phone = request.POST.get('seller_phone', '').strip()
+    description = (request.POST.get('description', '') or '').strip()[:850]
+    image_count = sum(1 for key in ['image', 'image_2', 'image_3'] if request.FILES.get(key))
+
+    if not title:
+        messages.error(request, 'Le titre est obligatoire.')
+        return redirect(redirect_name)
+    if len(title) > 70:
+        messages.error(request, 'Le titre ne doit pas dépasser 70 caractères.')
+        return redirect(redirect_name)
+    if not category_id:
+        messages.error(request, 'La catégorie est obligatoire.')
+        return redirect(redirect_name)
+    if not phone:
+        messages.error(request, 'Le numéro de téléphone est obligatoire.')
+        return redirect(redirect_name)
+    if image_count < 2:
+        messages.error(request, 'Veuillez ajouter au moins 2 photos.')
+        return redirect(redirect_name)
+
+    category = Category.objects.filter(pk=category_id, section='products', is_active=True).first()
+    if not category:
+        messages.error(request, 'Catégorie invalide.')
+        return redirect(redirect_name)
+
+    with transaction.atomic():
         product = Product(
             vendor_id=vendor.pk,
-            name=name,
-            name_en=request.POST.get('name_en', '').strip(),
-            slug=slugify(name) or f'product-{uuid.uuid4().hex[:8]}',
-            description=request.POST.get('description', ''),
-            price=request.POST.get('price', 0),
+            name=title,
+            slug=slugify(title) or f'product-{uuid.uuid4().hex[:8]}',
+            description=description,
+            price=request.POST.get('price', 0) or 0,
             original_price=request.POST.get('original_price') or None,
-            stock=request.POST.get('stock', 0),
+            stock=request.POST.get('stock', 1) or 1,
+            min_order_quantity=_positive_int(request.POST.get('min_order_quantity'), 1),
+            max_order_quantity=_optional_positive_int(request.POST.get('max_order_quantity')),
+            quantity_step=_positive_int(request.POST.get('quantity_step'), 1),
+            pricing_rules=_pricing_rules_from_post(request),
             brand=request.POST.get('brand', '').strip(),
             condition=request.POST.get('condition', 'new'),
             weight=request.POST.get('weight') or None,
             is_featured=False,
             is_active=request.POST.get('is_active', 'on') == 'on',
+            category=category,
         )
-        cat_id = request.POST.get('category')
-        if cat_id:
-            product.category_id = int(cat_id)
-        if 'image' in request.FILES:
+        if request.FILES.get('image'):
             product.image = request.FILES['image']
-        if 'image_2' in request.FILES:
+        if request.FILES.get('image_2'):
             product.image_2 = request.FILES['image_2']
-        if 'image_3' in request.FILES:
+        if request.FILES.get('image_3'):
             product.image_3 = request.FILES['image_3']
 
         base_slug = product.slug
@@ -2074,6 +2420,39 @@ def vendor_product_add(request):
             counter += 1
         product.save()
 
+        dynamic_fields = {
+            'location': 'Emplacement',
+            'brand': 'Marque',
+            'item_type': 'Type',
+            'gender': 'Sexe',
+            'material': 'Matériel',
+            'size_text': 'Taille',
+            'color_text': 'Couleur',
+            'style': 'Style',
+            'length_style': 'Longueur',
+            'fit': 'Coupe',
+            'neckline': 'Encolure',
+            'details_text': 'Détails',
+            'season': 'Saison',
+            'closure': 'Fermeture',
+            'sub_type': 'Sous-type',
+            'youtube_url': 'Vidéo YouTube',
+            'seller_name': 'Nom du vendeur',
+            'negotiation': 'Négociation',
+            'bulk_min_qty': 'Qté gros min',
+            'bulk_unit_price': 'Prix gros unitaire',
+            'delivery_available': 'Livraison',
+        }
+        for field_name, label in dynamic_fields.items():
+            raw_value = request.POST.get(field_name, '')
+            value = raw_value.strip() if isinstance(raw_value, str) else str(raw_value).strip()
+            if value:
+                ProductAttribute.objects.create(product=product, name=label, value=value)
+
+        for field_name, label in [('is_handmade', 'Fait main'), ('has_warranty', 'Garantie')]:
+            if request.POST.get(field_name):
+                ProductAttribute.objects.create(product=product, name=label, value='Oui')
+
         attr_names = request.POST.getlist('attr_name')
         attr_values = request.POST.getlist('attr_value')
         for a_name, a_val in zip(attr_names, attr_values):
@@ -2081,11 +2460,28 @@ def vendor_product_add(request):
             if a_name and a_val:
                 ProductAttribute.objects.create(product=product, name=a_name, value=a_val)
 
-        messages.success(request, f'商品 "{name}" 已添加')
-        return redirect('marketplace:vendor_products')
+        if vendor.phone != phone:
+            vendor.phone = phone
+            vendor.save(update_fields=['phone'])
+        if vendor.user and vendor.user.phone != phone:
+            vendor.user.phone = phone
+            vendor.user.save(update_fields=['phone', 'updated_at'])
+
+    messages.success(request, f'Annonce "{title}" publiée avec succès')
+    return redirect('marketplace:vendor_products')
+
+
+def vendor_product_add(request):
+    """Add a new product."""
+    vendor, redir = _vendor_required(request)
+    if redir:
+        return redir
+
+    if request.method == 'POST':
+        return _handle_vendor_product_form_submission(request, vendor)
 
     categories = Category.objects.filter(section='products', is_active=True)
-    context = {'vendor': vendor, 'categories': categories}
+    context = _form_context_with_pricing({'vendor': vendor, 'categories': categories})
     return render(request, 'marketplace/vendor/product_form.html', context)
 
 
@@ -2104,6 +2500,10 @@ def vendor_product_edit(request, pk):
         product.price = request.POST.get('price', product.price)
         product.original_price = request.POST.get('original_price') or None
         product.stock = request.POST.get('stock', product.stock)
+        product.min_order_quantity = _positive_int(request.POST.get('min_order_quantity'), product.min_order_quantity)
+        product.max_order_quantity = _optional_positive_int(request.POST.get('max_order_quantity'))
+        product.quantity_step = _positive_int(request.POST.get('quantity_step'), product.quantity_step)
+        product.pricing_rules = _pricing_rules_from_post(request)
         product.brand = request.POST.get('brand', '').strip()
         product.condition = request.POST.get('condition', 'new')
         product.weight = request.POST.get('weight') or None
@@ -2130,7 +2530,7 @@ def vendor_product_edit(request, pk):
         return redirect('marketplace:vendor_products')
 
     categories = Category.objects.filter(section='products', is_active=True)
-    context = {'vendor': vendor, 'product': product, 'categories': categories}
+    context = _form_context_with_pricing({'vendor': vendor, 'product': product, 'categories': categories}, product)
     return render(request, 'marketplace/vendor/product_form.html', context)
 
 
@@ -2487,6 +2887,10 @@ def vendor_supermarket_add(request):
             price=request.POST.get('price', 0),
             original_price=request.POST.get('original_price') or None,
             stock=request.POST.get('stock', 0),
+            min_order_quantity=_positive_int(request.POST.get('min_order_quantity'), 1),
+            max_order_quantity=_optional_positive_int(request.POST.get('max_order_quantity')),
+            quantity_step=_positive_int(request.POST.get('quantity_step'), 1),
+            pricing_rules=_pricing_rules_from_post(request),
             unit=request.POST.get('unit', 'piece'),
             brand=request.POST.get('brand', '').strip(),
             origin=request.POST.get('origin', '').strip(),
@@ -2524,12 +2928,13 @@ def vendor_supermarket_add(request):
         return redirect('marketplace:vendor_supermarket')
 
     categories = Category.objects.filter(section='supermarket', is_active=True)
-    return render(request, 'marketplace/vendor/supermarket_form.html', {
+    context = _form_context_with_pricing({
         'vendor': vendor,
         'categories': categories,
         'item': None,
         'unit_choices': SupermarketItem.UNIT_CHOICES,
     })
+    return render(request, 'marketplace/vendor/supermarket_form.html', context)
 
 
 def vendor_supermarket_edit(request, pk):
@@ -2546,6 +2951,10 @@ def vendor_supermarket_edit(request, pk):
         item.price = request.POST.get('price', item.price)
         item.original_price = request.POST.get('original_price') or None
         item.stock = request.POST.get('stock', item.stock)
+        item.min_order_quantity = _positive_int(request.POST.get('min_order_quantity'), item.min_order_quantity)
+        item.max_order_quantity = _optional_positive_int(request.POST.get('max_order_quantity'))
+        item.quantity_step = _positive_int(request.POST.get('quantity_step'), item.quantity_step)
+        item.pricing_rules = _pricing_rules_from_post(request)
         item.unit = request.POST.get('unit', item.unit)
         item.brand = request.POST.get('brand', '').strip()
         item.origin = request.POST.get('origin', '').strip()
@@ -2574,12 +2983,13 @@ def vendor_supermarket_edit(request, pk):
         return redirect('marketplace:vendor_supermarket')
 
     categories = Category.objects.filter(section='supermarket', is_active=True)
-    return render(request, 'marketplace/vendor/supermarket_form.html', {
+    context = _form_context_with_pricing({
         'vendor': vendor,
         'categories': categories,
         'item': item,
         'unit_choices': SupermarketItem.UNIT_CHOICES,
-    })
+    }, item)
+    return render(request, 'marketplace/vendor/supermarket_form.html', context)
 
 
 @require_POST

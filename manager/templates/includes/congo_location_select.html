@@ -1,0 +1,22 @@
+{% load i18n %}
+<div class="signup-location-group mb-3" data-location-cascade>
+    <select name="location"
+            id="{{ select_id|default:'regLocation' }}"
+            class="form-select form-control signup-dept-select auth-field{% if placeholders_only %} auth-field-placeholder{% endif %}"
+            data-placeholder="{% trans 'Select your department' %}"
+            data-selected="{{ selected_location|default:'' }}"
+            required
+            aria-label="{% trans 'Department' %}">
+        <option value="" disabled selected>{% trans "Select your department" %}</option>
+    </select>
+    <select name="city"
+            id="{{ city_id|default:'regCity' }}"
+            class="form-select form-control signup-city-select auth-field mt-3{% if placeholders_only %} auth-field-placeholder{% endif %}"
+            data-placeholder="{% trans 'Select your city' %}"
+            data-selected="{{ selected_city|default:'' }}"
+            disabled
+            required
+            aria-label="{% trans 'City' %}">
+        <option value="" disabled selected>{% trans "Select your city" %}</option>
+    </select>
+</div>

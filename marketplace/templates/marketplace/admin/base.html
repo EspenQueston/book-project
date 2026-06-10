@@ -132,6 +132,7 @@
             min-width: 0;
             display: flex;
             flex-direction: column;
+            transition: margin-left 0.28s ease;
         }
         .mkt-topbar {
             display: none;
@@ -148,8 +149,47 @@
             width: 42px; height: 42px;
             border-radius: 12px;
             border: none;
-            background: #f1f5f9;
-            color: #334155;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: #fff;
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.35);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .mkt-topbar .btn-icon:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 28px rgba(79, 70, 229, 0.45);
+            color: #fff;
+        }
+        .mkt-top-toolbar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            min-height: 42px;
+        }
+        .mkt-sidebar-toggle {
+            width: 42px;
+            height: 42px;
+            border: 0;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: #fff;
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.35);
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        }
+        .mkt-sidebar-toggle:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 28px rgba(79, 70, 229, 0.45);
+            color: #fff;
+        }
+        body.mkt-sidebar-collapsed .mkt-sidebar-toggle {
+            background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
         }
         .mkt-main-content {
             flex: 1;
@@ -169,6 +209,17 @@
             border-radius: var(--mkt-card-radius);
             box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
             border: 1px solid #e2e8f0;
+            position: relative;
+            overflow: hidden;
+        }
+        .content-card::before,
+        .toolbar::before,
+        .page-header-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: radial-gradient(circle at top left, rgba(255,255,255,0.18), transparent 30%), radial-gradient(circle at bottom right, rgba(129,140,248,0.10), transparent 28%);
         }
         .toolbar {
             background: #fff;
@@ -195,6 +246,8 @@
             border-bottom: 2px solid #f1f5f9;
         }
         .table td { vertical-align: middle; }
+        body.mkt-sidebar-collapsed .mkt-sidebar { transform: translateX(-100%); }
+        body.mkt-sidebar-collapsed .mkt-main-wrap { margin-left: 0; }
         @media (max-width: 991.98px) {
             .mkt-sidebar-backdrop.show { display: block; }
             .mkt-sidebar {
@@ -203,6 +256,7 @@
             .mkt-sidebar.open { transform: translateX(0); }
             .mkt-main-wrap { margin-left: 0; }
             .mkt-topbar { display: flex; }
+            .mkt-top-toolbar { display: none; }
         }
         {% block extra_admin_css %}{% endblock %}
     </style>
@@ -264,12 +318,17 @@
         <div class="mkt-main-wrap">
             <header class="mkt-topbar">
                 <button type="button" class="btn-icon" id="mktSidebarToggle" aria-controls="mktSidebar" aria-expanded="false" aria-label="{% trans "打开菜单" %}">
-                    <i class="fas fa-bars"></i>
+                    <i class="fas fa-bars-staggered"></i>
                 </button>
                 <span class="fw-semibold text-slate-700 small">{% trans "市场管理" %}</span>
                 <span style="width:42px;"></span>
             </header>
             <main class="mkt-main-content">
+                <div class="mkt-top-toolbar">
+                    <button type="button" class="mkt-sidebar-toggle" id="mktDesktopSidebarToggle" aria-controls="mktSidebar" aria-expanded="true" title="{% trans "Afficher / cacher le menu" %}">
+                        <i class="fas fa-bars-staggered"></i>
+                    </button>
+                </div>
                 {% if messages %}
                 {% for message in messages %}
                 <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" style="border-radius:12px;">
@@ -289,29 +348,68 @@
         var sidebar = document.getElementById('mktSidebar');
         var backdrop = document.getElementById('mktSidebarBackdrop');
         var toggle = document.getElementById('mktSidebarToggle');
-        if (!sidebar || !backdrop || !toggle) return;
+        var desktopToggle = document.getElementById('mktDesktopSidebarToggle');
+        if (!sidebar || !backdrop) return;
+        var storageKey = 'mktAdminSidebarCollapsed';
+
+        function isDesktop() {
+            return window.innerWidth >= 992;
+        }
+        function updateToggleIcons(collapsed) {
+            [desktopToggle, toggle].forEach(function (btn) {
+                if (!btn) return;
+                var icon = btn.querySelector('i');
+                if (!icon) return;
+                if (isDesktop()) {
+                    icon.className = collapsed ? 'fas fa-bars' : 'fas fa-bars-staggered';
+                } else {
+                    icon.className = 'fas fa-bars-staggered';
+                }
+            });
+        }
+        function applyDesktopState(collapsed) {
+            document.body.classList.toggle('mkt-sidebar-collapsed', collapsed && isDesktop());
+            var effective = collapsed && isDesktop();
+            if (desktopToggle) {
+                desktopToggle.setAttribute('aria-expanded', effective ? 'false' : 'true');
+            }
+            updateToggleIcons(effective);
+        }
         function close() {
             sidebar.classList.remove('open');
             backdrop.classList.remove('show');
-            toggle.setAttribute('aria-expanded', 'false');
+            if (toggle) toggle.setAttribute('aria-expanded', 'false');
             document.body.style.overflow = '';
         }
         function open() {
             sidebar.classList.add('open');
             backdrop.classList.add('show');
-            toggle.setAttribute('aria-expanded', 'true');
+            if (toggle) toggle.setAttribute('aria-expanded', 'true');
             document.body.style.overflow = 'hidden';
         }
-        toggle.addEventListener('click', function () {
-            if (sidebar.classList.contains('open')) close(); else open();
-        });
+        if (toggle) {
+            toggle.addEventListener('click', function () {
+                if (sidebar.classList.contains('open')) close(); else open();
+            });
+        }
+        if (desktopToggle) {
+            desktopToggle.addEventListener('click', function () {
+                if (!isDesktop()) return;
+                var collapsed = !document.body.classList.contains('mkt-sidebar-collapsed');
+                localStorage.setItem(storageKey, collapsed ? '1' : '0');
+                applyDesktopState(collapsed);
+            });
+        }
         backdrop.addEventListener('click', close);
         window.addEventListener('resize', function () {
-            if (window.innerWidth >= 992) close();
+            if (isDesktop()) close();
+            applyDesktopState(localStorage.getItem(storageKey) === '1');
         });
+        applyDesktopState(localStorage.getItem(storageKey) === '1');
     })();
     </script>
     {% block extra_admin_js %}{% endblock %}
+    <script src="/static/js/destructive_action_guards.js"></script>
     <script src="/static/js/admin_i18n.js" defer></script>
 </body>
 </html>

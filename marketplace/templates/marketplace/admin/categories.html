@@ -51,7 +51,7 @@
                     <td>{% if cat.is_active %}<span class="badge bg-success">启用</span>{% else %}<span class="badge bg-secondary">禁用</span>{% endif %}</td>
                     <td>
                         <a href="{% url 'marketplace:admin_category_edit' cat.pk %}" class="btn btn-sm btn-outline-primary rounded-pill"><i class="fas fa-edit"></i></a>
-                        <form method="post" action="{% url 'marketplace:admin_category_delete' cat.pk %}" style="display:inline;" onsubmit="return confirm('确定删除该分类？')">
+                        <form method="post" action="{% url 'marketplace:admin_category_delete' cat.pk %}" style="display:inline;">
                             {% csrf_token %}
                             <button class="btn btn-sm btn-outline-danger rounded-pill"><i class="fas fa-trash"></i></button>
                         </form>

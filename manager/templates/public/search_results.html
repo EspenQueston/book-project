@@ -162,7 +162,7 @@
     }
 
     function fmtFcfa(val) {
-        var n = Math.round(parseFloat(val) * 82);
+        var n = Math.round(parseFloat(val) || 0);
         return n.toLocaleString('fr-FR') + '\u00a0FCFA';
     }
 

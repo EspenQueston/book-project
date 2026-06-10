@@ -1,9 +1,11 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.shortcuts import redirect
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.staticfiles.views import serve as staticfiles_serve
 from django.http import HttpResponseForbidden
+import sys
 
 
 def home_redirect(request):
@@ -45,4 +47,13 @@ handler500 = 'django.views.defaults.server_error'
 # Serve media files during development
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += [
+        re_path(r'^static/(?P<path>.*)$', staticfiles_serve, {'insecure': True}),
+    ]
+elif 'runserver' in sys.argv:
+    # Local runserver can use DEBUG=False for production-like settings. In that
+    # mode Django does not expose app static files, which hides admin_i18n.js
+    # and chatbot_widget.js. Keep this limited to runserver only.
+    urlpatterns += [
+        re_path(r'^static/(?P<path>.*)$', staticfiles_serve, {'insecure': True}),
+    ]

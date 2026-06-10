@@ -1,0 +1,6 @@
+{% for social in PLATFORM_SOCIAL_LINKS %}
+<a href="{{ social.url }}" target="_blank" rel="noopener noreferrer" class="soc-card">
+    <div class="soc-ico" style="background:{{ social.color }}"><i class="{{ social.icon }}"></i></div>
+    <div><h6>{{ social.label }}</h6><p>{{ social.handle }}</p></div>
+</a>
+{% endfor %}

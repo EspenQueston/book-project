@@ -1,0 +1,18 @@
+{% comment %}
+Attractive hero bottom divider — pass optional fill color via `hero_divider_fill` (default #f8fafc).
+Usage: {% include 'includes/hero_wave_divider.html' %} or {% include 'includes/hero_wave_divider.html' with hero_divider_fill='#ffffff' %}
+{% endcomment %}
+<div class="duno-hero-divider" aria-hidden="true">
+    <svg viewBox="0 0 1440 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="dunoHeroDividerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#667eea" stop-opacity="0.45"/>
+                <stop offset="50%" stop-color="#764ba2" stop-opacity="0.35"/>
+                <stop offset="100%" stop-color="#667eea" stop-opacity="0.45"/>
+            </linearGradient>
+        </defs>
+        <path class="duno-hero-divider-shadow" d="M0,64 C180,108 360,28 540,58 C720,88 900,18 1080,52 C1260,86 1380,72 1440,64 L1440,120 L0,120 Z" fill="url(#dunoHeroDividerGrad)" opacity="0.55"/>
+        <path class="duno-hero-divider-main" d="M0,72 C240,112 420,32 660,62 C900,92 1140,38 1440,68 L1440,120 L0,120 Z" fill="{{ hero_divider_fill|default:'#f8fafc' }}"/>
+        <path class="duno-hero-divider-accent" d="M0,88 C320,104 580,76 840,94 C1100,112 1320,82 1440,90 L1440,120 L0,120 Z" fill="{{ hero_divider_fill|default:'#f8fafc' }}" opacity="0.92"/>
+    </svg>
+</div>

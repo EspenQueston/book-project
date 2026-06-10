@@ -164,15 +164,16 @@ function vpToggleBook(id, btn) {
     });
 }
 function vpDeleteBook(id) {
-    if (!confirm('{% trans "Are you sure you want to remove this book from your store?" %}')) return;
-    fetch('{% url "manager:vendor_delete_book" %}', {
-        method: 'POST',
-        headers: {'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/x-www-form-urlencoded'},
-        body: 'id=' + id
-    }).then(r => r.json()).then(d => {
-        if (d.success) location.reload();
-        else if (typeof gToast === 'function') gToast(d.message || 'Error', 'error');
-    });
+    gConfirmAction('{% trans "Are you sure you want to remove this book from your store?" %}', function() {
+        fetch('{% url "manager:vendor_delete_book" %}', {
+            method: 'POST',
+            headers: {'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'id=' + id
+        }).then(r => r.json()).then(d => {
+            if (d.success) location.reload();
+            else if (typeof gToast === 'function') gToast(d.message || 'Error', 'error');
+        });
+    }, { danger: true, title: '{% trans "Confirm deletion" %}' });
 }
 </script>
 {% endblock %}

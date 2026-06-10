@@ -92,6 +92,7 @@
     html[data-theme="dark"] .empty-state {
         color: var(--text-tertiary);
     }
+    {% include 'public/includes/feed_view_details_css.html' %}
 </style>
 {% endblock %}
 
@@ -149,7 +150,7 @@
         {% for course in courses %}
         <div class="col-sm-6 col-md-4 col-lg-3" data-aos="fade-up">
             <a href="{% url 'marketplace:course_detail' course.slug %}" style="text-decoration:none; color:inherit;">
-                <div class="course-card">
+                <div class="course-card feed-card-stretch">
                     <div style="position:relative;">
                         <img src="{{ course.get_image_url }}" alt="{{ course.title }}" class="course-card-img">
                         <span class="position-absolute top-0 end-0 m-2 level-badge level-{{ course.level }}">{{ course.get_level_display }}</span>
@@ -157,7 +158,7 @@
                         <span class="position-absolute top-0 start-0 m-2 badge" style="background:linear-gradient(135deg,#f59e0b,#f97316);font-size:0.7rem;"><i class="fas fa-star me-1"></i>{% trans "推荐" %}</span>
                         {% endif %}
                     </div>
-                    <div class="course-card-body">
+                    <div class="course-card-body feed-card-body-stretch">
                         <h5>{{ course.title }}</h5>
                         <div class="course-meta mb-2">
                             <i class="fas fa-user me-1"></i>{{ course.instructor }}
@@ -178,11 +179,16 @@
                             <small class="text-muted ms-1">({{ course.sold_delivered }})</small>
                         </div>
                         {% endif %}
-                        <div>
-                            <span class="course-price">{{ course.price|fcfa }}</span>
-                            {% if course.original_price %}
-                            <span style="font-size:0.85rem; color:#94a3b8; text-decoration:line-through; margin-left:8px;">{{ course.original_price|fcfa }}</span>
-                            {% endif %}
+                        <div class="feed-card-actions">
+                            <div class="feed-card-actions-main">
+                                <div>
+                                    <span class="course-price">{{ course.price|fcfa }}</span>
+                                    {% if course.original_price %}
+                                    <span style="font-size:0.85rem; color:#94a3b8; text-decoration:line-through; margin-left:8px;">{{ course.original_price|fcfa }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% include 'public/includes/feed_view_details_btn.html' %}
                         </div>
                     </div>
                 </div>
@@ -223,17 +229,22 @@
     </div>
     {% endif %}
 </div>
+<template id="feedViewDetailsBtnTpl">{% include 'public/includes/feed_view_details_btn.html' %}</template>
 <script>
 (function() {
     if (window.innerWidth > 768) return;
     var grid = document.getElementById('coursesGrid');
     var loader = document.getElementById('coursesFeedLoader');
     var sentinel = document.getElementById('coursesFeedSentinel');
+    var feedDetailsBtn = (document.getElementById('feedViewDetailsBtnTpl') || {}).innerHTML || '';
     if (!grid || !sentinel) return;
 
-    var page = {{ courses.number|default:1 }} + 1;
-    var hasMore = {{ courses.has_next|yesno:"true,false" }};
+    var page = 1;
+    var hasMore = true;
     var loading = false;
+    var params = new URLSearchParams(window.location.search);
+    params.set('format', 'json');
+    params.set('recommend', '1');
 
     function escHtml(str) {
         var d = document.createElement('div');
@@ -242,27 +253,25 @@
     }
 
     function fmtFcfa(val) {
-        var n = Math.round(parseFloat(val) * 82);
+        var n = Math.round(parseFloat(val) || 0);
         return n.toLocaleString('fr-FR') + '\u00a0FCFA';
     }
 
     function buildCard(item) {
         return '<div class="col-6">'
             + '<a href="' + item.url + '" style="text-decoration:none; color:inherit;">'
-            + '<div class="course-card">'
+            + '<div class="course-card feed-card-stretch">'
             + '<div style="position:relative;"><img src="' + item.image + '" alt="' + escHtml(item.name) + '" class="course-card-img"></div>'
-            + '<div class="course-card-body"><h5>' + escHtml(item.name) + '</h5>'
+            + '<div class="course-card-body feed-card-body-stretch"><h5>' + escHtml(item.name) + '</h5>'
             + '<div class="course-meta mb-1">' + escHtml(item.meta || '') + '</div>'
-            + '<span class="course-price">' + fmtFcfa(item.price) + '</span></div>'
-            + '</div></a></div>';
+            + '<div class="feed-card-actions"><div class="feed-card-actions-main"><span class="course-price">' + fmtFcfa(item.price) + '</span></div>' + feedDetailsBtn + '</div>'
+            + '</div></div></a></div>';
     }
 
     function loadMore() {
         if (!hasMore || loading) return;
         loading = true;
         if (loader) loader.style.display = 'block';
-        var params = new URLSearchParams(window.location.search);
-        params.set('format', 'json');
         params.set('page', page);
         fetch(window.location.pathname + '?' + params.toString())
             .then(function(r) { return r.json(); })
@@ -284,9 +293,8 @@
                     tmp.innerHTML = buildCard(item);
                     grid.appendChild(tmp.firstElementChild);
                 });
-                hasMore = !!data.has_more;
-                page = hasMore ? page + 1 : 1;
-                if (!hasMore) hasMore = true;
+                hasMore = true;
+                page = page + 1;
                 loading = false;
                 if (loader) loader.style.display = 'none';
             })

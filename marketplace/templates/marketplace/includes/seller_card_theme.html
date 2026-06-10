@@ -1,0 +1,387 @@
+{% load i18n %}
+<style>
+/* Shared seller / publisher card theme */
+.desk-seller-card {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(145deg, rgba(255,255,255,0.98) 0%, rgba(248,250,255,0.96) 100%);
+    border: 1px solid rgba(102,126,234,0.16);
+    border-radius: 22px;
+    padding: 20px 20px 18px;
+    margin-bottom: 0;
+    box-shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
+    transition: box-shadow 0.28s ease, transform 0.28s ease, border-color 0.28s ease;
+}
+.desk-seller-card::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
+    opacity: 0.85;
+}
+.desk-seller-card:hover {
+    box-shadow: 0 20px 48px rgba(102,126,234,0.16);
+    transform: translateY(-2px);
+    border-color: rgba(102,126,234,0.28);
+}
+.desk-seller-card--publisher::before {
+    background: linear-gradient(90deg, #10b981, #059669, #34d399);
+}
+
+/* —— Official store: premium indigo seal (no default yellow) —— */
+.desk-seller-card--official {
+    border: none;
+    background:
+        radial-gradient(ellipse 120% 80% at 0% 0%, rgba(102,126,234,0.09) 0%, transparent 55%),
+        radial-gradient(ellipse 90% 70% at 100% 100%, rgba(118,75,162,0.07) 0%, transparent 50%),
+        linear-gradient(155deg, #ffffff 0%, #f8faff 45%, #f5f3ff 100%);
+    box-shadow:
+        0 16px 44px rgba(102, 126, 234, 0.14),
+        0 0 0 1px rgba(102, 126, 234, 0.14);
+}
+.desk-seller-card--official::before {
+    height: 4px;
+    opacity: 1;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 40%, #a78bfa 70%, #667eea 100%);
+    background-size: 220% 100%;
+    animation: dunoOfficialBar 5s ease-in-out infinite;
+}
+.desk-seller-card--official::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 22px;
+    padding: 1.5px;
+    background: linear-gradient(135deg, rgba(102,126,234,0.55), rgba(118,75,162,0.35), rgba(167,139,250,0.45), rgba(102,126,234,0.4));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0.85;
+}
+.desk-seller-card--official:hover {
+    box-shadow:
+        0 22px 52px rgba(102, 126, 234, 0.2),
+        0 0 0 1px rgba(102, 126, 234, 0.22);
+}
+.desk-seller-card--official:hover::after {
+    opacity: 1;
+}
+.desk-seller-card--official .desk-seller-kicker {
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.desk-seller-card--official .desk-seller-avatar {
+    box-shadow:
+        0 10px 26px rgba(102,126,234,0.38),
+        0 0 0 3px #fff,
+        0 0 0 5px rgba(102,126,234,0.22);
+}
+.desk-seller-card--official .desk-seller-name:hover {
+    color: #764ba2;
+}
+
+@keyframes dunoOfficialBar {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+.desk-seller-card-inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+.desk-seller-avatar {
+    width: 68px;
+    height: 68px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.55rem;
+    font-weight: 800;
+    overflow: hidden;
+    flex-shrink: 0;
+    box-shadow: 0 8px 22px rgba(102,126,234,0.28);
+}
+.desk-seller-card--publisher .desk-seller-avatar {
+    background: linear-gradient(135deg, #10b981, #059669);
+    box-shadow: 0 8px 22px rgba(16,185,129,0.28);
+}
+.desk-seller-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.desk-seller-body { flex: 1; min-width: 160px; }
+.desk-seller-kicker {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #667eea;
+    margin-bottom: 5px;
+}
+.desk-seller-card--publisher .desk-seller-kicker { color: #059669; }
+.desk-seller-name {
+    font-size: 1.18rem;
+    font-weight: 800;
+    color: #0f172a;
+    text-decoration: none;
+    line-height: 1.25;
+    transition: color 0.2s;
+    display: inline-block;
+}
+.desk-seller-name:hover { color: #667eea; }
+.desk-seller-card--publisher .desk-seller-name:hover { color: #059669; }
+.desk-seller-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    margin-top: 8px;
+    font-size: 0.8rem;
+    color: #64748b;
+}
+.desk-seller-meta span:not(.desk-seller-badge-official) {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.7);
+    border: 1px solid rgba(226,232,240,0.9);
+}
+.desk-seller-meta .verified {
+    color: #059669;
+    font-weight: 700;
+    border-color: rgba(16,185,129,0.25);
+    background: rgba(16,185,129,0.08);
+}
+.desk-seller-meta .desk-seller-badge-official {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    color: #5b21b6 !important;
+    background: rgba(102,126,234,0.1) !important;
+    border: 1px solid rgba(102,126,234,0.22) !important;
+    box-shadow: none;
+    max-width: none;
+    white-space: nowrap;
+}
+.desk-seller-badge-official i {
+    font-size: 0.74rem;
+    color: #667eea;
+    opacity: 1;
+}
+.desk-seller-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-left: auto;
+}
+.vendor-follow-btn,
+.publisher-follow-btn,
+.desk-seller-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 42px;
+    padding: 0 16px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.84rem;
+    cursor: pointer;
+    transition: all 0.22s ease;
+    text-decoration: none;
+    white-space: nowrap;
+    border: none;
+}
+.vendor-follow-btn,
+.publisher-follow-btn {
+    border: 2px solid #667eea;
+    background: #fff;
+    color: #667eea;
+}
+.desk-seller-card--publisher .publisher-follow-btn {
+    border-color: #10b981;
+    color: #059669;
+}
+.vendor-follow-btn:hover,
+.publisher-follow-btn:hover {
+    background: rgba(102,126,234,0.08);
+    transform: translateY(-1px);
+}
+.desk-seller-card--publisher .publisher-follow-btn:hover {
+    background: rgba(16,185,129,0.08);
+}
+.vendor-follow-btn.is-following,
+.publisher-follow-btn.is-following {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(102,126,234,0.35);
+}
+.desk-seller-card--publisher .publisher-follow-btn.is-following {
+    background: linear-gradient(135deg, #10b981, #059669);
+    box-shadow: 0 6px 18px rgba(16,185,129,0.35);
+}
+.desk-seller-link {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    color: #334155;
+}
+.desk-seller-link:hover {
+    border-color: #667eea;
+    color: #667eea;
+    background: rgba(102,126,234,0.04);
+    transform: translateY(-1px);
+}
+.desk-seller-link.primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-color: transparent;
+    color: #fff;
+}
+.desk-seller-link.primary:hover {
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(102,126,234,0.35);
+}
+.desk-seller-card--publisher .desk-seller-link.primary {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+.desk-seller-card--sidebar .desk-seller-card-inner {
+    flex-direction: column;
+    align-items: stretch;
+}
+.desk-seller-card--sidebar .desk-seller-actions {
+    margin-left: 0;
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+.desk-seller-card--sidebar .vendor-follow-btn,
+.desk-seller-card--sidebar .publisher-follow-btn,
+.desk-seller-card--sidebar .desk-seller-link {
+    width: 100%;
+    min-height: 40px;
+    padding: 0 6px;
+    font-size: 0.74rem;
+}
+.desk-seller-card--sidebar .vendor-follow-btn span,
+.desk-seller-card--sidebar .publisher-follow-btn span,
+.desk-seller-card--sidebar .desk-seller-link span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Mobile seller blocks — official variant */
+.bmp-seller-section--official,
+.pmp-seller-section--official {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(155deg, #fff 0%, #f8faff 100%) !important;
+    box-shadow: inset 0 0 0 1px rgba(102,126,234,0.14);
+}
+.bmp-seller-section--official::before,
+.pmp-seller-section--official::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #667eea, #764ba2, #a78bfa);
+}
+.bmp-seller-section--official .bmp-seller-logo,
+.pmp-seller-section--official .pmp-seller-logo {
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    box-shadow: 0 4px 14px rgba(102,126,234,0.3);
+}
+.bmp-seller-badge-official,
+.pmp-seller-badge-official {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #5b21b6;
+    background: rgba(102,126,234,0.1);
+    border: 1px solid rgba(102,126,234,0.22);
+    box-shadow: none;
+}
+.bmp-seller-badge-official i,
+.pmp-seller-badge-official i {
+    color: #667eea;
+    font-size: 0.74rem;
+}
+html[data-theme="dark"] .desk-seller-meta .desk-seller-badge-official {
+    color: #c4b5fd !important;
+    background: rgba(102,126,234,0.18) !important;
+    border-color: rgba(129,140,248,0.35) !important;
+}
+html[data-theme="dark"] .desk-seller-badge-official i {
+    color: #a5b4fc;
+}
+html[data-theme="dark"] .bmp-seller-badge-official,
+html[data-theme="dark"] .pmp-seller-badge-official {
+    color: #c4b5fd;
+    background: rgba(102,126,234,0.18);
+    border-color: rgba(129,140,248,0.35);
+}
+.bmp-seller-meta .verified {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #059669;
+    font-weight: 700;
+}
+.bmp-seller-meta span,
+.pmp-seller-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+html[data-theme="dark"] .desk-seller-card {
+    background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+    border-color: rgba(129,140,248,0.22);
+}
+html[data-theme="dark"] .desk-seller-card--official {
+    background:
+        radial-gradient(ellipse 100% 80% at 0% 0%, rgba(102,126,234,0.14) 0%, transparent 55%),
+        linear-gradient(155deg, #1e293b 0%, #0f172a 100%);
+    box-shadow: 0 16px 44px rgba(0,0,0,0.35), 0 0 0 1px rgba(129,140,248,0.25);
+}
+html[data-theme="dark"] .desk-seller-card--official::after {
+    background: linear-gradient(135deg, rgba(102,126,234,0.5), rgba(167,139,250,0.35));
+}
+html[data-theme="dark"] .desk-seller-name { color: #f1f5f9; }
+html[data-theme="dark"] .desk-seller-meta span:not(.desk-seller-badge-official) { background: rgba(15,23,42,0.6); border-color: #334155; color: #cbd5e1; }
+html[data-theme="dark"] .desk-seller-link { background: #1e293b; border-color: #334155; color: #e2e8f0; }
+html[data-theme="dark"] .vendor-follow-btn,
+html[data-theme="dark"] .publisher-follow-btn { background: #1e293b; }
+html[data-theme="dark"] .bmp-seller-section--official,
+html[data-theme="dark"] .pmp-seller-section--official {
+    background: linear-gradient(155deg, #1e293b 0%, #0f172a 100%) !important;
+    box-shadow: inset 0 0 0 1px rgba(129,140,248,0.22);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .desk-seller-card--official::before { animation: none; }
+}
+</style>

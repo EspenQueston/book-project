@@ -1,0 +1,299 @@
+{% extends 'public/base.html' %}
+
+{% block title %}Publier sur Duno360{% endblock %}
+
+{% block extra_css %}
+<style>
+    .publish-page {
+        padding: 40px 0 80px;
+        background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+        min-height: 70vh;
+    }
+    .publish-badge {
+        display: inline-block;
+        padding: 8px 16px;
+        border-radius: 999px;
+        background: rgba(102,126,234,.12);
+        color: #667eea;
+        font-weight: 800;
+    }
+    .publish-title {
+        margin-top: 18px;
+        font-size: 2.2rem;
+        font-weight: 900;
+        color: #1e293b;
+    }
+    .publish-lead {
+        color: #64748b;
+        max-width: 620px;
+        margin: 12px auto 0;
+    }
+    .publish-card {
+        background: #fff;
+        border-radius: 24px;
+        padding: 28px;
+        box-shadow: 0 18px 50px rgba(102,126,234,.12);
+        border: 1px solid rgba(102,126,234,.10);
+        text-align: center;
+    }
+    .publish-icon {
+        width: 88px;
+        height: 88px;
+        border-radius: 24px;
+        margin: 0 auto 18px;
+        background: linear-gradient(135deg,#667eea,#764ba2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 2rem;
+        box-shadow: 0 14px 30px rgba(102,126,234,.28);
+    }
+    .publish-card h2 {
+        font-size: 1.5rem;
+        font-weight: 900;
+        color: #1e293b;
+    }
+    .publish-card p {
+        color: #64748b;
+        margin-top: 10px;
+    }
+    .publish-btn-primary {
+        border: none;
+        border-radius: 999px;
+        padding: 14px 28px;
+        background: linear-gradient(135deg,#667eea,#764ba2);
+        color: #fff;
+        font-weight: 800;
+        box-shadow: 0 12px 28px rgba(102,126,234,.26);
+    }
+    .publish-btn-secondary {
+        border-radius: 999px;
+        padding: 14px 28px;
+        background: #f8fafc;
+        color: #334155;
+        font-weight: 800;
+        border: 1px solid #e2e8f0;
+    }
+    .publish-modal-icon {
+        width: 72px;
+        height: 72px;
+        border-radius: 20px;
+        background: rgba(102,126,234,.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #667eea;
+        font-size: 1.8rem;
+        margin: 0 auto 16px;
+    }
+    .publish-modal-title {
+        font-weight: 900;
+        color: #1e293b;
+    }
+    .publish-modal-text {
+        color: #64748b;
+    }
+    .publish-type-card {
+        border: 1px solid rgba(102,126,234,.14);
+        background: #fff;
+        border-radius: 22px;
+        padding: 22px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        text-align: left;
+        box-shadow: 0 10px 26px rgba(15,23,42,.06);
+        transition: .22s ease;
+        color: #1e293b;
+    }
+    .publish-type-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(102,126,234,.35);
+        box-shadow: 0 18px 40px rgba(102,126,234,.14);
+    }
+    .publish-type-card i { font-size: 1.6rem; color: #667eea; }
+    .publish-type-card strong { font-size: 1.02rem; }
+    .publish-type-card span { font-size: .9rem; color: #64748b; }
+
+    html[data-theme="dark"] .publish-page {
+        background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+    }
+    html[data-theme="dark"] .publish-title,
+    html[data-theme="dark"] .publish-card h2,
+    html[data-theme="dark"] .publish-modal-title {
+        color: var(--text-primary);
+    }
+    html[data-theme="dark"] .publish-lead,
+    html[data-theme="dark"] .publish-card p,
+    html[data-theme="dark"] .publish-modal-text,
+    html[data-theme="dark"] .publish-type-card span {
+        color: var(--text-secondary);
+    }
+    html[data-theme="dark"] .publish-card,
+    html[data-theme="dark"] .publish-type-card {
+        background: var(--bg-surface);
+        border-color: var(--border-default);
+        box-shadow: 0 18px 50px rgba(0,0,0,.28);
+    }
+    html[data-theme="dark"] .publish-type-card {
+        color: var(--text-primary);
+    }
+    html[data-theme="dark"] .publish-btn-secondary {
+        background: var(--bg-elevated);
+        color: var(--text-primary);
+        border-color: var(--border-default);
+    }
+    html[data-theme="dark"] .modal-content {
+        background: var(--bg-surface);
+    }
+    html[data-theme="dark"] .publish-badge {
+        background: rgba(129,140,248,0.16);
+        color: #a5b4fc;
+    }
+    html[data-theme="dark"] .modal-content .btn-light {
+        background: var(--bg-elevated);
+        color: var(--text-primary);
+        border-color: var(--border-default);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="publish-page">
+    <div class="container">
+        <div class="mx-auto" style="max-width:760px;">
+            <div class="text-center mb-4">
+                <span class="publish-badge">Publier sur Duno360</span>
+                <h1 class="publish-title">Diffusez vos livres, produits, cours et articles de supermarché</h1>
+                <p class="publish-lead">Activez votre espace vendeur, puis choisissez ce que vous souhaitez publier. Votre compte gardera aussi votre statut d'utilisateur ordinaire.</p>
+            </div>
+
+            <div class="publish-card">
+                <div class="publish-icon">
+                    <i class="fas fa-store"></i>
+                </div>
+                <h2>Prêt à publier sur la plateforme ?</h2>
+                <p>En cliquant sur publier, vous activez aussi votre accès au panel vendeur.</p>
+                <div class="d-flex justify-content-center gap-3 flex-wrap mt-4">
+                    <button type="button" id="launchPublishFlow" class="btn publish-btn-primary">Publier maintenant</button>
+                    <a href="/manager/public/" class="btn publish-btn-secondary">Plus tard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="modal fade" id="publishConfirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border:none;border-radius:24px;overflow:hidden;">
+      <div class="modal-body p-4 text-center">
+        <div class="publish-modal-icon"><i class="fas fa-bullhorn"></i></div>
+        <h3 class="publish-modal-title">Voulez-vous publier sur la plateforme ?</h3>
+        <p class="publish-modal-text">Vous garderez votre compte actuel et vous aurez aussi accès au vendor panel.</p>
+        <div class="d-flex justify-content-center gap-2 mt-4">
+          <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal" style="border-radius:999px;font-weight:800;">Non</button>
+          <button type="button" class="btn px-4 publish-btn-primary" id="confirmPublishYes">Oui</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="publishCongratsModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border:none;border-radius:24px;overflow:hidden;">
+      <div class="modal-body p-4 text-center">
+        <div style="font-size:3rem;">🎉🥳✨</div>
+        <h3 class="publish-modal-title" style="margin-top:8px;">Félicitations !</h3>
+        <p class="publish-modal-text">Vous êtes désormais capable de publier sur la plateforme et d'accéder au panel vendeur.</p>
+        <button type="button" class="btn mt-3 publish-btn-primary" id="continueToChoice">Continuer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="publishTypeModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content" style="border:none;border-radius:28px;overflow:hidden;">
+      <div class="modal-body p-4 p-md-5">
+        <div class="text-center mb-4">
+          <div class="publish-modal-icon" style="width:76px;height:76px;border-radius:22px;font-size:2rem;"><i class="fas fa-box-open"></i></div>
+          <h3 class="publish-modal-title">Que voulez-vous publier ?</h3>
+          <p class="publish-modal-text">Choisissez le type d'article disponible sur la plateforme.</p>
+          <div class="d-flex justify-content-center gap-2 mt-3 flex-wrap">
+            <button type="button" class="btn btn-light" id="publishTypeBack" style="border-radius:999px;padding:10px 20px;font-weight:800;border:1px solid #e2e8f0;">Retour</button>
+            <a href="/manager/public/" class="btn btn-light" style="border-radius:999px;padding:10px 20px;font-weight:800;border:1px solid #e2e8f0;">Annuler</a>
+          </div>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-6"><button class="publish-type-card w-100" data-type="product"><i class="fas fa-shopping-bag"></i><strong>Produit ordinaire</strong><span>Boutique · commission 10%</span></button></div>
+          <div class="col-md-6"><button class="publish-type-card w-100" data-type="supermarket"><i class="fas fa-apple-alt"></i><strong>Produit consommable</strong><span>Supermarché · commission 12%</span></button></div>
+          <div class="col-md-6"><button class="publish-type-card w-100" data-type="course"><i class="fas fa-graduation-cap"></i><strong>Cours en ligne</strong><span>Formation · commission 10%</span></button></div>
+          <div class="col-md-6"><button class="publish-type-card w-100" data-type="book"><i class="fas fa-book"></i><strong>Livre</strong><span>Livre · commission 9%</span></button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const csrftoken = (document.querySelector('[name=csrfmiddlewaretoken]') || {}).value || '{{ csrf_token }}';
+  const confirmModal = new bootstrap.Modal(document.getElementById('publishConfirmModal'));
+  const congratsModal = new bootstrap.Modal(document.getElementById('publishCongratsModal'));
+  const typeModal = new bootstrap.Modal(document.getElementById('publishTypeModal'));
+
+  {% if direct_type_choice %}
+  typeModal.show();
+  {% endif %}
+
+  document.getElementById('launchPublishFlow').addEventListener('click', function() {
+    confirmModal.show();
+  });
+
+  document.getElementById('confirmPublishYes').addEventListener('click', function() {
+    fetch('{% url "manager:publish_entry" %}', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrftoken },
+      body: new URLSearchParams({ action: 'activate_vendor' })
+    }).then(r => r.json()).then(data => {
+      if (!data.success) throw new Error(data.message || 'Erreur');
+      confirmModal.hide();
+      congratsModal.show();
+    }).catch(err => alert(err.message || 'Une erreur est survenue.'));
+  });
+
+  document.getElementById('continueToChoice').addEventListener('click', function() {
+    congratsModal.hide();
+    typeModal.show();
+  });
+
+  var publishTypeBack = document.getElementById('publishTypeBack');
+  if (publishTypeBack) {
+    publishTypeBack.addEventListener('click', function() {
+      typeModal.hide();
+      {% if already_vendor %}
+      window.location.href = '/manager/public/';
+      {% else %}
+      congratsModal.show();
+      {% endif %}
+    });
+  }
+
+  document.querySelectorAll('.publish-type-card').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      const type = btn.dataset.type;
+      fetch('{% url "manager:publish_entry" %}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrftoken },
+        body: new URLSearchParams({ action: 'choose_type', item_type: type })
+      }).then(r => r.json()).then(data => {
+        if (!data.success) throw new Error(data.message || 'Erreur');
+        window.location.href = data.redirect_url;
+      }).catch(err => alert(err.message || 'Une erreur est survenue.'));
+    });
+  });
+});
+</script>
+{% endblock %}

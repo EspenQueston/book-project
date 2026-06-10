@@ -1,0 +1,43 @@
+{% load i18n %}
+
+<section class="duno-section duno-section-platform visible" aria-label="{% trans 'Premium 合作伙伴' %}">
+    <details class="duno-acc-item" id="avantages" open>
+        <summary class="duno-acc-head">
+            <span class="duno-acc-icon"><i class="fas fa-gem"></i></span>
+            {% trans "Premium 专属优势" %}
+        </summary>
+        <div class="duno-acc-body">
+            <div class="duno-cards-grid-legal">
+                <div class="duno-data-card"><i class="fas fa-arrow-up"></i><h4>{% trans "优先展示" %}</h4><p>{% trans "搜索结果置顶及每日精选产品专区。" %}</p></div>
+                <div class="duno-data-card"><i class="fas fa-bullhorn"></i><h4>{% trans "增强推广" %}</h4><p>{% trans "用户通知及赞助推广活动。" %}</p></div>
+                <div class="duno-data-card"><i class="fas fa-store"></i><h4>{% trans "专业店铺" %}</h4><p>{% trans "Premium 认证卖家徽章、横幅及高级统计。" %}</p></div>
+                <div class="duno-data-card"><i class="fas fa-headset"></i><h4>{% trans "优先支持" %}</h4><p>{% trans "快速协助及争议优先处理。" %}</p></div>
+            </div>
+        </div>
+    </details>
+
+    <details class="duno-acc-item" id="tarifs">
+        <summary class="duno-acc-head">
+            <span class="duno-acc-icon"><i class="fas fa-tags"></i></span>
+            {% trans "Premium 套餐" %}
+        </summary>
+        <div class="duno-acc-body">
+            <div class="duno-cards-grid-legal">
+                <div class="duno-price-card"><i class="fas fa-seedling"></i><h4>Starter</h4><p>{% trans "核心功能——低至 200 非洲法郎/月" %}</p></div>
+                <div class="duno-price-card featured"><i class="fas fa-briefcase"></i><h4>Business</h4><p>{% trans "高级统计 + 推广——低至 250 非洲法郎/月" %}</p></div>
+                <div class="duno-price-card"><i class="fas fa-crown"></i><h4>Elite</h4><p>{% trans "最大曝光——低至 500 非洲法郎/月" %}</p></div>
+            </div>
+        </div>
+    </details>
+
+    <details class="duno-acc-item" id="souscrire" data-single="false">
+        <summary class="duno-acc-head">
+            <span class="duno-acc-icon"><i class="fas fa-bolt"></i></span>
+            {% trans "如何订阅？" %}
+        </summary>
+        <div class="duno-acc-body">
+            <p>{% trans "登录后进入「成为 Premium」，选择套餐并通过移动支付付款。即时激活。" %}</p>
+            <a href="{% url 'manager:vendor_register' %}" class="duno-legal-contact"><i class="fas fa-crown"></i>{% trans "成为 Premium" %}</a>
+        </div>
+    </details>
+</section>

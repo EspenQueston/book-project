@@ -1,0 +1,354 @@
+<style>
+:root {
+    --duno-hero-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.duno-page-hero.duno-platform-hero,
+.duno-page-hero.duno-legal-hero {
+    background: var(--duno-hero-gradient);
+    padding: 132px 0 88px;
+    min-height: 460px;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.duno-page-hero.duno-platform-hero::before,
+.duno-page-hero.duno-platform-hero::after,
+.duno-page-hero.duno-legal-hero::before,
+.duno-page-hero.duno-legal-hero::after {
+    z-index: 0;
+}
+.duno-page-hero.duno-platform-hero::before,
+.duno-page-hero.duno-legal-hero::before {
+    width: 620px; height: 620px; top: -42%; right: -14%;
+    background: radial-gradient(circle, rgba(255,255,255,.18) 0%, transparent 70%);
+}
+.duno-page-hero.duno-platform-hero::after,
+.duno-page-hero.duno-legal-hero::after {
+    width: 420px; height: 420px; bottom: -38%; left: -10%;
+    background: radial-gradient(circle, rgba(255,255,255,.12) 0%, transparent 70%);
+}
+.duno-page-hero.duno-platform-hero .duno-page-hero-inner,
+.duno-page-hero.duno-legal-hero .duno-page-hero-inner {
+    position: relative;
+    z-index: 3;
+}
+.duno-page-hero.duno-platform-hero .duno-page-badge,
+.duno-page-hero.duno-platform-hero h1,
+.duno-page-hero.duno-platform-hero .lead,
+.duno-page-hero.duno-platform-hero .breadcrumb,
+.duno-page-hero.duno-legal-hero .duno-page-badge,
+.duno-page-hero.duno-legal-hero h1,
+.duno-page-hero.duno-legal-hero .lead,
+.duno-page-hero.duno-legal-hero .breadcrumb {
+    position: relative;
+    z-index: 2;
+}
+.duno-page-hero.duno-platform-hero h1,
+.duno-page-hero.duno-legal-hero h1 {
+    text-shadow: 0 2px 24px rgba(15, 23, 42, 0.18);
+}
+.duno-platform-ambient,
+.duno-legal-ambient {
+    position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden;
+}
+.duno-legal-ambient .hero-text-grid {
+    position: absolute; inset: 0;
+    background-image:
+        linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+    background-size: 52px 52px;
+    mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, black 20%, transparent 78%);
+    opacity: .55;
+}
+.duno-legal-ambient .hero-aurora {
+    position: absolute; border-radius: 50%; filter: blur(90px); opacity: .26;
+}
+.duno-legal-ambient .hero-aurora-a {
+    width: 260px; height: 260px; right: -4%; bottom: -12%;
+    background: rgba(118,75,162,.55);
+    animation: dunoLegalDrift 16s ease-in-out infinite;
+}
+.duno-legal-ambient .hero-aurora-b {
+    width: 210px; height: 210px; left: -6%; top: -8%;
+    background: rgba(99,102,241,.42);
+    animation: dunoLegalDrift 13s ease-in-out infinite reverse;
+}
+@keyframes dunoLegalDrift {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(12px, -16px) scale(1.06); }
+}
+
+.duno-platform-trust,
+.duno-legal-trust {
+    display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px;
+    position: relative; z-index: 2;
+}
+.duno-legal-trust-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 9px 16px; border-radius: 999px;
+    background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.22);
+    color: #fff; font-size: .82rem; font-weight: 700;
+    backdrop-filter: blur(12px);
+    transition: transform .22s ease, background .22s ease;
+}
+.duno-legal-trust-pill:hover { transform: translateY(-2px); background: rgba(255,255,255,.22); }
+.duno-legal-trust-pill i { opacity: .9; }
+
+.duno-legal-tabs {
+    display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px;
+    position: relative; z-index: 2;
+}
+.duno-legal-tab {
+    padding: 11px 20px; border-radius: 999px; font-weight: 700; font-size: .88rem;
+    border: 2px solid rgba(255,255,255,.35); color: #fff; text-decoration: none;
+    transition: all .22s; backdrop-filter: blur(8px);
+}
+.duno-legal-tab:hover, .duno-legal-tab.active {
+    background: rgba(255,255,255,.95); border-color: #fff; color: #667eea;
+    box-shadow: 0 8px 28px rgba(15,23,42,.18);
+}
+
+.duno-platform-wave,
+.duno-legal-wave {
+    position: absolute; left: 0; right: 0; bottom: -1px; z-index: 4;
+    line-height: 0;
+}
+.duno-platform-wave svg,
+.duno-legal-wave svg {
+    display: block; width: 100%; height: 64px;
+}
+html[data-theme="dark"] .duno-platform-wave svg path,
+html[data-theme="dark"] .duno-legal-wave svg path { fill: var(--bg-page, #141422); }
+
+.duno-page-layout--platform,
+.duno-page-layout--legal {
+    margin-top: 36px !important;
+    position: relative;
+    z-index: 5;
+}
+
+.duno-legal-summary {
+    border-radius: 20px;
+    padding: 22px 26px 22px 30px;
+    margin-bottom: 20px;
+    background: #fff;
+    border: 1px solid rgba(102,126,234,.12);
+    box-shadow: 0 12px 36px rgba(102,126,234,.08);
+    position: relative;
+    overflow: hidden;
+}
+.duno-legal-summary::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    background: var(--duno-hero-gradient);
+}
+.duno-legal-summary p {
+    color: #475569;
+    line-height: 1.85;
+    margin: 0;
+    font-size: .98rem;
+}
+.duno-legal-summary-label {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: .72rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .08em; color: #667eea; margin-bottom: 10px;
+}
+
+.duno-legal-intro {
+    display: none;
+}
+
+.duno-section-platform,
+.duno-section-legal {
+    padding: 0; overflow: hidden; border: 1px solid rgba(102,126,234,.12);
+    box-shadow: 0 16px 48px rgba(102,126,234,.08);
+}
+.duno-acc-item {
+    border-bottom: 1px solid rgba(226,232,240,.95);
+    background: var(--dp-card, #fff);
+}
+.duno-acc-item:last-child { border-bottom: none; }
+.duno-acc-item[open] { background: linear-gradient(180deg, rgba(102,126,234,.04), rgba(255,255,255,0)); }
+.duno-acc-head {
+    list-style: none; cursor: pointer; padding: 20px 24px;
+    display: flex; align-items: center; gap: 14px;
+    font-weight: 800; color: #0f172a; font-size: 1rem;
+    transition: background .2s ease;
+}
+.duno-acc-head::-webkit-details-marker { display: none; }
+.duno-acc-head::after {
+    content: '\f078'; font-family: 'Font Awesome 6 Free'; font-weight: 900;
+    margin-left: auto; color: #94a3b8; font-size: .78rem;
+    transition: transform .25s ease, color .25s ease;
+}
+.duno-acc-item[open] .duno-acc-head::after { transform: rotate(180deg); color: #667eea; }
+.duno-acc-head:hover { background: rgba(102,126,234,.05); }
+.duno-acc-icon {
+    width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--duno-hero-gradient); color: #fff; font-size: .95rem;
+    box-shadow: 0 8px 20px rgba(102,126,234,.25);
+}
+.duno-acc-body { padding: 0 24px 22px 78px; color: #475569; line-height: 1.8; font-size: .95rem; }
+.duno-acc-body p { margin-bottom: 12px; }
+.duno-acc-body p:last-child { margin-bottom: 0; }
+
+.duno-cards-grid-legal {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px; margin: 14px 0 4px;
+}
+.duno-data-card {
+    border-radius: 18px; padding: 20px 18px;
+    background: linear-gradient(180deg, #fff, #f8faff);
+    border: 1px solid rgba(102,126,234,.12);
+    transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease;
+    position: relative; overflow: hidden;
+}
+.duno-data-card::before {
+    content: ''; position: absolute; inset: 0 auto auto 0; width: 100%; height: 3px;
+    background: var(--duno-hero-gradient); opacity: 0; transition: opacity .25s;
+}
+.duno-data-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(102,126,234,.14);
+    border-color: rgba(102,126,234,.28);
+}
+.duno-data-card:hover::before { opacity: 1; }
+.duno-data-card i {
+    width: 42px; height: 42px; border-radius: 12px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, rgba(102,126,234,.12), rgba(118,75,162,.1));
+    color: #667eea; font-size: 1.1rem; margin-bottom: 12px;
+}
+.duno-data-card h4 { font-size: .92rem; font-weight: 800; color: #1e293b; margin-bottom: 6px; }
+.duno-data-card p { font-size: .84rem; color: #64748b; margin: 0; line-height: 1.55; }
+
+.duno-highlight-legal {
+    border-radius: 16px; padding: 16px 18px; margin: 14px 0 0;
+    background: linear-gradient(135deg, rgba(16,185,129,.08), rgba(102,126,234,.06));
+    border: 1px solid rgba(16,185,129,.2); color: #065f46;
+    font-weight: 600; font-size: .92rem;
+}
+.duno-highlight-legal.warn {
+    background: linear-gradient(135deg, rgba(245,158,11,.1), rgba(102,126,234,.05));
+    border-color: rgba(245,158,11,.25); color: #92400e;
+}
+
+.duno-section-platform .duno-section-list,
+.duno-section-legal .duno-section-list { padding-left: 0; list-style: none; margin: 10px 0 0; }
+.duno-section-platform .duno-section-list li,
+.duno-section-legal .duno-section-list li {
+    position: relative; padding: 9px 0 9px 28px;
+    border-bottom: 1px dashed rgba(226,232,240,.85);
+    color: #475569; line-height: 1.65; font-size: .93rem;
+}
+.duno-section-platform .duno-section-list li:last-child,
+.duno-section-legal .duno-section-list li:last-child { border-bottom: none; }
+.duno-section-platform .duno-section-list li::before,
+.duno-section-legal .duno-section-list li::before {
+    content: '\f00c'; font-family: 'Font Awesome 6 Free'; font-weight: 900;
+    position: absolute; left: 0; top: 11px; color: #667eea; font-size: .72rem;
+}
+.duno-section-platform .duno-section-list.deny li::before,
+.duno-section-legal .duno-section-list.deny li::before { content: '\f00d'; color: #ef4444; }
+
+.duno-acc-body h3 {
+    font-size: .92rem; font-weight: 800; color: #334155;
+    margin: 16px 0 8px; text-transform: uppercase; letter-spacing: .04em;
+}
+.duno-steps-list {
+    padding-left: 0; list-style: none; margin: 12px 0 0; counter-reset: duno-step;
+}
+.duno-steps-list li {
+    position: relative; padding: 10px 0 10px 42px;
+    border-bottom: 1px dashed rgba(226,232,240,.85);
+    color: #475569; line-height: 1.65; font-size: .93rem;
+    counter-increment: duno-step;
+}
+.duno-steps-list li:last-child { border-bottom: none; }
+.duno-steps-list li::before {
+    content: counter(duno-step);
+    position: absolute; left: 0; top: 8px;
+    width: 28px; height: 28px; border-radius: 8px;
+    background: var(--duno-hero-gradient); color: #fff;
+    font-size: .75rem; font-weight: 800;
+    display: inline-flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 12px rgba(102,126,234,.25);
+}
+.duno-price-card {
+    border-radius: 18px; padding: 22px 18px; text-align: center;
+    background: linear-gradient(180deg, #fff, #f8faff);
+    border: 1px solid rgba(102,126,234,.12);
+    transition: transform .28s ease, box-shadow .28s ease;
+}
+.duno-price-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(102,126,234,.14);
+}
+.duno-price-card.featured {
+    border-color: rgba(102,126,234,.35);
+    background: linear-gradient(180deg, rgba(102,126,234,.06), #fff);
+    box-shadow: 0 12px 32px rgba(102,126,234,.12);
+}
+.duno-price-card i {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--duno-hero-gradient); color: #fff;
+    font-size: 1rem; margin-bottom: 12px;
+}
+.duno-price-card h4 { font-size: 1rem; font-weight: 800; color: #1e293b; margin-bottom: 6px; }
+.duno-price-card p { font-size: .84rem; color: #64748b; margin: 0; }
+
+.duno-contact-row {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 0; border-bottom: 1px dashed rgba(226,232,240,.85);
+    color: #475569; font-size: .93rem;
+}
+.duno-contact-row:last-child { border-bottom: none; }
+.duno-contact-row i { width: 20px; text-align: center; margin-top: 3px; }
+
+.duno-legal-contact {
+    display: inline-flex; align-items: center; gap: 10px; margin-top: 14px;
+    padding: 12px 18px; border-radius: 14px;
+    background: var(--duno-hero-gradient); color: #fff;
+    text-decoration: none; font-weight: 700; font-size: .9rem;
+    box-shadow: 0 10px 28px rgba(102,126,234,.28);
+    transition: transform .22s ease, box-shadow .22s ease;
+}
+.duno-legal-contact:hover { transform: translateY(-2px); color: #fff; box-shadow: 0 14px 36px rgba(102,126,234,.34); }
+
+.duno-page-nav a.active {
+    background: var(--duno-hero-gradient); color: #fff;
+    box-shadow: 0 8px 22px rgba(102,126,234,.25);
+}
+.duno-page-nav a.active i { color: #fff; }
+
+html[data-theme="dark"] .duno-legal-summary { background: var(--bg-surface); border-color: var(--border-default); }
+html[data-theme="dark"] .duno-legal-summary p { color: var(--text-secondary); }
+html[data-theme="dark"] .duno-legal-intro { background: rgba(102,126,234,.1); border-color: var(--border-default); }
+html[data-theme="dark"] .duno-acc-item { background: var(--bg-surface); border-color: var(--border-default); }
+html[data-theme="dark"] .duno-acc-head { color: var(--text-primary); }
+html[data-theme="dark"] .duno-data-card { background: var(--bg-page); border-color: var(--border-default); }
+html[data-theme="dark"] .duno-data-card h4 { color: var(--text-primary); }
+
+@media (max-width: 767px) {
+    .duno-page-hero.duno-platform-hero,
+    .duno-page-hero.duno-legal-hero {
+        min-height: auto;
+        padding: 108px 0 72px;
+    }
+    .duno-platform-wave svg,
+    .duno-legal-wave svg { height: 40px; }
+    .duno-page-layout--platform,
+    .duno-page-layout--legal { margin-top: 24px !important; }
+    .duno-acc-body { padding-left: 24px; padding-right: 18px; }
+    .duno-legal-trust { gap: 8px; }
+    .duno-legal-trust-pill { font-size: .76rem; padding: 8px 12px; }
+}
+</style>

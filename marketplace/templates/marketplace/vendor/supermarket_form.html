@@ -1,13 +1,13 @@
 {% extends "marketplace/vendor/base.html" %}
 {% load i18n %}
 
-{% block title %}{% if item %}{% trans "编辑超市商品" %}{% else %}{% trans "添加超市商品" %}{% endif %} · {{ vendor.company_name }}{% endblock %}
+{% block title %}{% if item %}Modifier l'article supermarché{% else %}Ajouter un article supermarché{% endif %} · {{ vendor.company_name }}{% endblock %}
 
 {% block vendor_content %}
 <div class="page-header-card">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <h4 class="mb-0 fw-bold"><i class="fas fa-leaf me-2"></i>{% if item %}{% trans "编辑超市商品" %}{% else %}{% trans "添加超市商品" %}{% endif %}</h4>
-        <a href="{% url 'marketplace:vendor_supermarket' %}" class="btn btn-light rounded-pill px-3 fw-semibold"><i class="fas fa-arrow-left me-2"></i>{% trans "返回" %}</a>
+        <h4 class="mb-0 fw-bold"><i class="fas fa-leaf me-2"></i>{% if item %}Modifier l'article supermarché{% else %}Ajouter un article supermarché{% endif %}</h4>
+        <a href="{% url 'marketplace:vendor_supermarket' %}" class="btn btn-light rounded-pill px-3 fw-semibold"><i class="fas fa-arrow-left me-2"></i>Retour</a>
     </div>
 </div>
 
@@ -17,7 +17,7 @@
         <div class="row g-4">
             <div class="col-lg-8">
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">{% trans "名称" %} <span class="text-danger">*</span></label>
+                    <label class="form-label fw-semibold">Nom <span class="text-danger">*</span></label>
                     <input type="text" name="name" class="form-control rounded-3" value="{{ item.name|default:'' }}" required>
                 </div>
                 <div class="mb-3">
@@ -25,35 +25,59 @@
                     <input type="text" name="name_en" class="form-control rounded-3" value="{{ item.name_en|default:'' }}">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">{% trans "描述" %}</label>
+                    <label class="form-label fw-semibold">Description</label>
                     <textarea name="description" class="form-control rounded-3" rows="4">{{ item.description|default:'' }}</textarea>
                 </div>
                 <div class="row g-3">
                     <div class="col-md-3">
-                        <label class="form-label fw-semibold">{% trans "价格" %} *</label>
+                        <label class="form-label fw-semibold">Prix *</label>
                         <input type="number" step="0.01" name="price" class="form-control rounded-3" value="{{ item.price|default:'' }}" required>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label fw-semibold">{% trans "原价" %}</label>
+                        <label class="form-label fw-semibold">Prix original</label>
                         <input type="number" step="0.01" name="original_price" class="form-control rounded-3" value="{{ item.original_price|default:'' }}">
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label fw-semibold">{% trans "库存" %}</label>
+                        <label class="form-label fw-semibold">Stock</label>
                         <input type="number" name="stock" class="form-control rounded-3" value="{{ item.stock|default:'0' }}">
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label fw-semibold">{% trans "单位" %}</label>
+                        <label class="form-label fw-semibold">Unité</label>
                         <select name="unit" class="form-select rounded-3">
-                            {% for val,lab in unit_choices %}
-                            <option value="{{ val }}" {% if item and item.unit == val %}selected{% elif not item and val == 'piece' %}selected{% endif %}>{{ lab }}</option>
-                            {% endfor %}
+                            <option value="piece" {% if item and item.unit == 'piece' %}selected{% elif not item %}selected{% endif %}>Pièce</option>
+                            <option value="kg" {% if item and item.unit == 'kg' %}selected{% endif %}>Kilogramme</option>
+                            <option value="g" {% if item and item.unit == 'g' %}selected{% endif %}>Gramme</option>
+                            <option value="liter" {% if item and item.unit == 'liter' %}selected{% endif %}>Litre</option>
+                            <option value="ml" {% if item and item.unit == 'ml' %}selected{% endif %}>Millilitre</option>
+                            <option value="pack" {% if item and item.unit == 'pack' %}selected{% endif %}>Pack</option>
+                            <option value="box" {% if item and item.unit == 'box' %}selected{% endif %}>Boîte</option>
+                            <option value="bottle" {% if item and item.unit == 'bottle' %}selected{% endif %}>Bouteille</option>
+                            <option value="bag" {% if item and item.unit == 'bag' %}selected{% endif %}>Sac</option>
                         </select>
                     </div>
                 </div>
+                <div class="row g-3 mt-1">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Vente minimum</label>
+                        <input type="number" name="min_order_quantity" class="form-control rounded-3" min="1" value="{{ item.min_order_quantity|default:'1' }}">
+                        <small class="text-muted">Nombre minimum de pièces par commande.</small>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Vente maximum</label>
+                        <input type="number" name="max_order_quantity" class="form-control rounded-3" min="1" value="{{ item.max_order_quantity|default:'' }}">
+                        <small class="text-muted">Optionnel.</small>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Incrément</label>
+                        <input type="number" name="quantity_step" class="form-control rounded-3" min="1" value="{{ item.quantity_step|default:'1' }}">
+                        <small class="text-muted">Ex: 12, 24, 36...</small>
+                    </div>
+                </div>
+                <div class="mt-3">{% include "marketplace/includes/pricing_rules_form.html" %}</div>
             </div>
             <div class="col-lg-4">
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">{% trans "分类" %}</label>
+                    <label class="form-label fw-semibold">Catégorie</label>
                     <select name="category" class="form-select rounded-3">
                         <option value="">—</option>
                         {% for cat in categories %}
@@ -62,15 +86,15 @@
                     </select>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">{% trans "品牌" %}</label>
+                    <label class="form-label fw-semibold">Marque</label>
                     <input type="text" name="brand" class="form-control rounded-3" value="{{ item.brand|default:'' }}">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">{% trans "产地" %}</label>
+                    <label class="form-label fw-semibold">Origine</label>
                     <input type="text" name="origin" class="form-control rounded-3" value="{{ item.origin|default:'' }}">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">{% trans "Main image" %}</label>
+                    <label class="form-label fw-semibold">Image principale</label>
                     <input type="file" name="image" class="form-control rounded-3" accept="image/*">
                     {% if item and item.image %}<small class="text-muted d-block mt-1">{{ item.image.name }}</small>{% endif %}
                 </div>
@@ -86,34 +110,34 @@
                 </div>
                 <div class="form-check form-switch mb-2">
                     <input class="form-check-input" type="checkbox" name="is_active" id="smActive" {% if item.is_active or not item %}checked{% endif %}>
-                    <label class="form-check-label" for="smActive">{% trans "上架" %}</label>
+                    <label class="form-check-label" for="smActive">Publier</label>
                 </div>
                 <div class="form-check form-switch mb-3">
                     <input class="form-check-input" type="checkbox" name="is_organic" id="smOrg" {% if item.is_organic %}checked{% endif %}>
-                    <label class="form-check-label" for="smOrg">{% trans "有机" %}</label>
+                    <label class="form-check-label" for="smOrg">Produit bio</label>
                 </div>
             </div>
         </div>
 
         <hr class="my-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h6 class="mb-0 fw-bold"><i class="fas fa-tags me-2 text-primary"></i>{% trans "属性 / 规格" %}</h6>
-            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill" onclick="smAddAttr()"><i class="fas fa-plus me-1"></i>{% trans "添加" %}</button>
+            <h6 class="mb-0 fw-bold"><i class="fas fa-tags me-2 text-primary"></i>Attributs / Spécifications</h6>
+            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill" onclick="smAddAttr()"><i class="fas fa-plus me-1"></i>Ajouter</button>
         </div>
         <div id="sm-attrs">
             {% if item %}
                 {% for attr in item.attributes.all %}
                 <div class="row g-2 mb-2 sm-attr-row">
-                    <div class="col-5"><input type="text" name="attr_name" class="form-control form-control-sm rounded-3" value="{{ attr.name }}" placeholder="{% trans '名称' %}"></div>
-                    <div class="col-5"><input type="text" name="attr_value" class="form-control form-control-sm rounded-3" value="{{ attr.value }}" placeholder="{% trans '值' %}"></div>
-                    <div class="col-2 d-flex align-items-center"><button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="this.closest('.sm-attr-row').remove()">{% trans "移除" %}</button></div>
+                    <div class="col-5"><input type="text" name="attr_name" class="form-control form-control-sm rounded-3" value="{{ attr.name }}" placeholder="Nom"></div>
+                    <div class="col-5"><input type="text" name="attr_value" class="form-control form-control-sm rounded-3" value="{{ attr.value }}" placeholder="Valeur"></div>
+                    <div class="col-2 d-flex align-items-center"><button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="this.closest('.sm-attr-row').remove()">Retirer</button></div>
                 </div>
                 {% endfor %}
             {% endif %}
         </div>
 
         <div class="mt-4">
-            <button type="submit" class="btn btn-primary-gradient rounded-pill px-5 fw-semibold">{% trans "保存" %}</button>
+            <button type="submit" class="btn btn-primary-gradient rounded-pill px-5 fw-semibold">Enregistrer</button>
         </div>
     </form>
 </div>
@@ -122,9 +146,9 @@
 function smAddAttr() {
     var wrap = document.createElement('div');
     wrap.className = 'row g-2 mb-2 sm-attr-row';
-    wrap.innerHTML = '<div class="col-5"><input type="text" name="attr_name" class="form-control form-control-sm rounded-3" placeholder="{% trans "名称"|escapejs %}"></div>' +
-        '<div class="col-5"><input type="text" name="attr_value" class="form-control form-control-sm rounded-3" placeholder="{% trans "值"|escapejs %}"></div>' +
-        '<div class="col-2 d-flex align-items-center"><button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="this.closest(\'.sm-attr-row\').remove()">{% trans "移除"|escapejs %}</button></div>';
+    wrap.innerHTML = '<div class="col-5"><input type="text" name="attr_name" class="form-control form-control-sm rounded-3" placeholder="Nom"></div>' +
+        '<div class="col-5"><input type="text" name="attr_value" class="form-control form-control-sm rounded-3" placeholder="Valeur"></div>' +
+        '<div class="col-2 d-flex align-items-center"><button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="this.closest(\'.sm-attr-row\').remove()">Retirer</button></div>';
     document.getElementById('sm-attrs').appendChild(wrap);
 }
 </script>

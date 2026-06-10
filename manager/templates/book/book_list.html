@@ -105,12 +105,18 @@
         }
         
         .price-tag {
-            background: linear-gradient(135deg, var(--success-color), #059669);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 92px;
+            background: linear-gradient(135deg, #047857, #10b981);
             color: white;
-            padding: 4px 12px;
-            border-radius: 15px;
-            font-weight: 600;
-            font-size: 0.9rem;
+            padding: 7px 13px;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: 0.88rem;
+            white-space: nowrap;
+            box-shadow: 0 7px 18px rgba(16,185,129,0.28);
         }
         
         .stock-badge {
@@ -237,7 +243,7 @@
                                 <th width="80">封面</th>
                                 <th width="40">ID</th>
                                 <th>图书名称</th>
-                                <th width="100">价格</th>
+                                <th width="130">价格</th>
                                 <th width="80">库存</th>
                                 <th width="80">销量</th>
                                 <th width="120">分类</th>

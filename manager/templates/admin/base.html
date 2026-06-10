@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-hans">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -48,6 +48,7 @@
             left: 20px;
             width: 260px;
             z-index: 1050;
+            transition: transform 0.28s ease;
         }
         @media (min-width: 768px) {
             .col-md-3 {
@@ -56,6 +57,20 @@
                 max-width: 280px !important;
             }
             .col-md-9 {
+                flex: 1;
+                max-width: none;
+                width: auto;
+            }
+            body.legacy-sidebar-collapsed .sidebar { transform: translateX(-300px); }
+            body.legacy-sidebar-collapsed .col-md-3 {
+                width: 0 !important;
+                flex: 0 0 0 !important;
+                max-width: 0 !important;
+                padding: 0 !important;
+                overflow: hidden;
+            }
+            body.legacy-sidebar-collapsed .admin-content-offset {
+                margin-left: 0 !important;
                 flex: 1;
                 max-width: none;
                 width: auto;
@@ -81,6 +96,33 @@
                 max-width: none;
                 width: auto;
             }
+        }
+        .legacy-sidebar-toggle {
+            width: 42px;
+            height: 42px;
+            border: 0;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
+            font-size: 1rem;
+            position: fixed;
+            left: calc(280px + 22px);
+            top: 18px;
+            z-index: 1100;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, left 0.28s ease;
+        }
+        .legacy-sidebar-toggle:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 28px rgba(102, 126, 234, 0.45);
+            color: #fff;
+        }
+        body.legacy-sidebar-collapsed .legacy-sidebar-toggle {
+            left: 18px;
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
         }
         
         .sidebar-link {
@@ -196,6 +238,9 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
+    <button type="button" class="legacy-sidebar-toggle" id="legacySidebarToggle" aria-label="Afficher / cacher le menu">
+        <i class="fas fa-bars-staggered"></i>
+    </button>
     <div class="container-fluid main-container">
         {% block header %}
         <div class="header-card">
@@ -210,20 +255,23 @@
             <div class="col-md-3">
                 <div class="sidebar">
                     <div class="sidebar-section">
-                        <h6>快速操作</h6>
+                        <h6>Quick actions</h6>
                         <a href="/manager/add_book/" class="sidebar-link">
-                            <i class="fas fa-plus"></i> 添加图书
+                            <i class="fas fa-plus"></i> Add book
                         </a>
                         <a href="/manager/add_author/" class="sidebar-link">
-                            <i class="fas fa-user-plus"></i> 添加作者
+                            <i class="fas fa-user-plus"></i> Add author
                         </a>
                         <a href="/manager/add_publisher/" class="sidebar-link">
-                            <i class="fas fa-plus-circle"></i> 添加出版社
+                            <i class="fas fa-plus-circle"></i> Add publisher
+                        </a>
+                        <a href="/manager/inventory/" class="sidebar-link">
+                            <i class="fas fa-boxes"></i> Inventory
                         </a>
                     </div>
                     <hr>
                     <a href="/manager/logout/" class="sidebar-link text-danger">
-                        <i class="fas fa-sign-out-alt"></i> 退出系统
+                        <i class="fas fa-sign-out-alt"></i> Sign out
                     </a>
                 </div>
             </div>
@@ -243,6 +291,23 @@
         document.addEventListener('DOMContentLoaded', function() {
             const currentPath = window.location.pathname;
             const sidebarLinks = document.querySelectorAll('.sidebar-link');
+            const toggle = document.getElementById('legacySidebarToggle');
+            const storageKey = 'legacyAdminSidebarCollapsed';
+            function applySidebarState(collapsed) {
+                document.body.classList.toggle('legacy-sidebar-collapsed', collapsed);
+                if (toggle) {
+                    const icon = toggle.querySelector('i');
+                    if (icon) icon.className = collapsed ? 'fas fa-bars' : 'fas fa-bars-staggered';
+                }
+            }
+            applySidebarState(localStorage.getItem(storageKey) === '1');
+            if (toggle) {
+                toggle.addEventListener('click', function() {
+                    const collapsed = !document.body.classList.contains('legacy-sidebar-collapsed');
+                    localStorage.setItem(storageKey, collapsed ? '1' : '0');
+                    applySidebarState(collapsed);
+                });
+            }
             
             sidebarLinks.forEach(link => {
                 if (link.getAttribute('href') === currentPath || 
@@ -254,6 +319,7 @@
     </script>
     
     {% block extra_js %}{% endblock %}
+<script src="/static/js/destructive_action_guards.js"></script>
 <script src="/static/js/admin_i18n.js" defer></script>
 </body>
 </html>

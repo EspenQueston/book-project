@@ -158,6 +158,7 @@ html[data-theme="dark"] .wl-empty p {
 {% block extra_js %}
 <script>
 function removeWish(btn, itemType, itemId) {
+    gConfirmAction('{% trans "Remove this item from your wishlist?" %}', function() {
     var csrf = document.querySelector('[name=csrfmiddlewaretoken]');
     var fd = new URLSearchParams();
     fd.append('item_type', itemType);
@@ -182,6 +183,7 @@ function removeWish(btn, itemType, itemId) {
             setTimeout(function() { card.remove(); }, 200);
         }
     });
+    }, { danger: true, title: '{% trans "Confirm deletion" %}' });
 }
 </script>
 {% endblock %}

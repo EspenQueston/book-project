@@ -5,8 +5,8 @@
 {% block admin_content %}
 <div class="page-header-card">
     <div class="d-flex justify-content-between align-items-center">
-        <h4><i class="fas fa-{% if item %}edit{% else %}plus-circle{% endif %} me-2"></i>{% if item %}编辑超市商品{% else %}添加超市商品{% endif %}</h4>
-        <a href="{% url 'marketplace:admin_supermarket' %}" class="btn btn-light rounded-pill px-4"><i class="fas fa-arrow-left me-2"></i>返回列表</a>
+        <h4><i class="fas fa-{% if item %}edit{% else %}plus-circle{% endif %} me-2"></i><span data-zh="{% if item %}编辑超市商品{% else %}添加超市商品{% endif %}" data-en="{% if item %}Edit Supermarket Item{% else %}Add Supermarket Item{% endif %}" data-fr="{% if item %}Modifier l’article supermarché{% else %}Ajouter un article supermarché{% endif %}">{% if item %}编辑超市商品{% else %}添加超市商品{% endif %}</span></h4>
+        <a href="{% url 'marketplace:admin_supermarket' %}" class="btn btn-light rounded-pill px-4"><i class="fas fa-arrow-left me-2"></i><span data-zh="返回列表" data-en="Back to List" data-fr="Retour à la liste">返回列表</span></a>
     </div>
 </div>
 
@@ -16,7 +16,7 @@
         <div class="row g-4">
             <div class="col-md-8">
                 <div class="mb-3">
-                    <label class="form-label fw-bold">商品名称 <span class="text-danger">*</span></label>
+                    <label class="form-label fw-bold"><span data-zh="商品名称" data-en="Product Name" data-fr="Nom du produit">商品名称</span> <span class="text-danger">*</span></label>
                     <input type="text" name="name" class="form-control" value="{{ item.name|default:'' }}" required style="border-radius:10px;">
                 </div>
                 <div class="mb-3">
@@ -24,82 +24,98 @@
                     <input type="text" name="name_en" class="form-control" value="{{ item.name_en|default:'' }}" style="border-radius:10px;">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label fw-bold">商品描述</label>
+                    <label class="form-label fw-bold" data-zh="商品描述" data-en="Product Description" data-fr="Description du produit">商品描述</label>
                     <textarea name="description" class="form-control" rows="4" style="border-radius:10px;">{{ item.description|default:'' }}</textarea>
                 </div>
                 <div class="row g-3">
                     <div class="col-md-3">
-                        <label class="form-label fw-bold">价格 <span class="text-danger">*</span></label>
+                        <label class="form-label fw-bold"><span data-zh="价格 (FCFA)" data-en="Price (FCFA)" data-fr="Prix (FCFA)">价格 (FCFA)</span> <span class="text-danger">*</span></label>
                         <input type="number" name="price" class="form-control" step="0.01" value="{{ item.price|default:'' }}" required style="border-radius:10px;">
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label fw-bold">原价</label>
+                        <label class="form-label fw-bold" data-zh="原价 (FCFA)" data-en="Original Price (FCFA)" data-fr="Prix original (FCFA)">原价 (FCFA)</label>
                         <input type="number" name="original_price" class="form-control" step="0.01" value="{{ item.original_price|default:'' }}" style="border-radius:10px;">
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label fw-bold">库存</label>
+                        <label class="form-label fw-bold" data-zh="库存" data-en="Stock" data-fr="Stock">库存</label>
                         <input type="number" name="stock" class="form-control" value="{{ item.stock|default:'0' }}" style="border-radius:10px;">
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label fw-bold">单位</label>
+                        <label class="form-label fw-bold" data-zh="单位" data-en="Unit" data-fr="Unité">单位</label>
                         <select name="unit" class="form-select" style="border-radius:10px;">
-                            <option value="piece" {% if item.unit == 'piece' %}selected{% endif %}>个</option>
-                            <option value="kg" {% if item.unit == 'kg' %}selected{% endif %}>公斤</option>
-                            <option value="g" {% if item.unit == 'g' %}selected{% endif %}>克</option>
-                            <option value="liter" {% if item.unit == 'liter' %}selected{% endif %}>升</option>
-                            <option value="ml" {% if item.unit == 'ml' %}selected{% endif %}>毫升</option>
-                            <option value="pack" {% if item.unit == 'pack' %}selected{% endif %}>包</option>
-                            <option value="box" {% if item.unit == 'box' %}selected{% endif %}>盒</option>
-                            <option value="bottle" {% if item.unit == 'bottle' %}selected{% endif %}>瓶</option>
-                            <option value="bag" {% if item.unit == 'bag' %}selected{% endif %}>袋</option>
+                            <option value="piece" {% if item.unit == 'piece' %}selected{% endif %} data-zh="个" data-en="Piece" data-fr="Pièce">个</option>
+                            <option value="kg" {% if item.unit == 'kg' %}selected{% endif %} data-zh="公斤" data-en="Kilogram" data-fr="Kilogramme">公斤</option>
+                            <option value="g" {% if item.unit == 'g' %}selected{% endif %} data-zh="克" data-en="Gram" data-fr="Gramme">克</option>
+                            <option value="liter" {% if item.unit == 'liter' %}selected{% endif %} data-zh="升" data-en="Liter" data-fr="Litre">升</option>
+                            <option value="ml" {% if item.unit == 'ml' %}selected{% endif %} data-zh="毫升" data-en="Milliliter" data-fr="Millilitre">毫升</option>
+                            <option value="pack" {% if item.unit == 'pack' %}selected{% endif %} data-zh="包" data-en="Pack" data-fr="Pack">包</option>
+                            <option value="box" {% if item.unit == 'box' %}selected{% endif %} data-zh="盒" data-en="Box" data-fr="Boîte">盒</option>
+                            <option value="bottle" {% if item.unit == 'bottle' %}selected{% endif %} data-zh="瓶" data-en="Bottle" data-fr="Bouteille">瓶</option>
+                            <option value="bag" {% if item.unit == 'bag' %}selected{% endif %} data-zh="袋" data-en="Bag" data-fr="Sac">袋</option>
                         </select>
                     </div>
                 </div>
+                <div class="row g-3 mt-1">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold" data-zh="最低购买数量" data-en="Minimum Order Quantity" data-fr="Quantité minimum de commande">最低购买数量</label>
+                        <input type="number" name="min_order_quantity" class="form-control" min="1" value="{{ item.min_order_quantity|default:'1' }}" style="border-radius:10px;">
+                        <small class="text-muted" data-zh="买家下单时不能低于这个数量。" data-en="Buyers cannot order below this quantity." data-fr="Les acheteurs ne peuvent pas commander en dessous de cette quantité.">买家下单时不能低于这个数量。</small>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold" data-zh="最高购买数量" data-en="Maximum Order Quantity" data-fr="Quantité maximum de commande">最高购买数量</label>
+                        <input type="number" name="max_order_quantity" class="form-control" min="1" value="{{ item.max_order_quantity|default:'' }}" style="border-radius:10px;">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold" data-zh="购买步长" data-en="Quantity Step" data-fr="Incrément de quantité">购买步长</label>
+                        <input type="number" name="quantity_step" class="form-control" min="1" value="{{ item.quantity_step|default:'1' }}" style="border-radius:10px;">
+                    </div>
+                </div>
+                <div class="mt-3">{% include "marketplace/includes/pricing_rules_form.html" %}</div>
             </div>
             <div class="col-md-4">
                 <div class="mb-3">
-                    <label class="form-label fw-bold">卖家 (Vendor)</label>
+                    <label class="form-label fw-bold" data-zh="卖家" data-en="Vendor" data-fr="Vendeur">卖家</label>
                     <select name="vendor" class="form-select" style="border-radius:10px;">
-                        <option value="">-- 官方自营 (无卖家) --</option>
+                        <option value="" data-zh="-- 官方自营 --" data-en="-- Official Store --" data-fr="-- Boutique officielle --">-- 官方自营 --</option>
                         {% for vendor in vendors %}
                         <option value="{{ vendor.id }}" {% if item.vendor_id == vendor.id %}selected{% endif %}>{{ vendor.company_name }}</option>
                         {% endfor %}
                     </select>
-                    <small class="text-muted">留空则由平台官方自营</small>
+                    <small class="text-muted" data-zh="留空则由平台官方自营" data-en="Leave empty for official platform sales" data-fr="Laisser vide pour une vente officielle de la plateforme">留空则由平台官方自营</small>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label fw-bold">分类</label>
+                    <label class="form-label fw-bold" data-zh="分类" data-en="Category" data-fr="Catégorie">分类</label>
                     <select name="category" class="form-select" style="border-radius:10px;">
-                        <option value="">-- 选择分类 --</option>
+                        <option value="" data-zh="-- 选择分类 --" data-en="-- Choose Category --" data-fr="-- Choisir une catégorie --">-- 选择分类 --</option>
                         {% for cat in categories %}
                         <option value="{{ cat.id }}" {% if item.category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
                         {% endfor %}
                     </select>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label fw-bold">品牌</label>
+                    <label class="form-label fw-bold" data-zh="品牌" data-en="Brand" data-fr="Marque">品牌</label>
                     <input type="text" name="brand" class="form-control" value="{{ item.brand|default:'' }}" style="border-radius:10px;">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label fw-bold">产地</label>
+                    <label class="form-label fw-bold" data-zh="产地" data-en="Origin" data-fr="Origine">产地</label>
                     <input type="text" name="origin" class="form-control" value="{{ item.origin|default:'' }}" style="border-radius:10px;">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label fw-bold">商品图片</label>
+                    <label class="form-label fw-bold" data-zh="商品图片" data-en="Product Image" data-fr="Image du produit">商品图片</label>
                     <input type="file" name="image" class="form-control" accept="image/*" style="border-radius:10px;">
-                    {% if item.image %}<small class="text-muted">当前: {{ item.image.name }}</small>{% endif %}
+                    {% if item.image %}<small class="text-muted"><span data-zh="当前" data-en="Current" data-fr="Actuel">当前</span>: {{ item.image.name }}</small>{% endif %}
                 </div>
                 <div class="form-check form-switch mb-2">
                     <input type="checkbox" name="is_active" class="form-check-input" id="isActive" {% if item.is_active or not item %}checked{% endif %}>
-                    <label class="form-check-label" for="isActive">上架</label>
+                    <label class="form-check-label" for="isActive" data-zh="上架" data-en="Active" data-fr="Actif">上架</label>
                 </div>
                 <div class="form-check form-switch mb-2">
                     <input type="checkbox" name="is_featured" class="form-check-input" id="isFeatured" {% if item.is_featured %}checked{% endif %}>
-                    <label class="form-check-label" for="isFeatured">推荐商品</label>
+                    <label class="form-check-label" for="isFeatured" data-zh="推荐商品" data-en="Featured Product" data-fr="Produit recommandé">推荐商品</label>
                 </div>
                 <div class="form-check form-switch mb-3">
                     <input type="checkbox" name="is_organic" class="form-check-input" id="isOrganic" {% if item.is_organic %}checked{% endif %}>
-                    <label class="form-check-label" for="isOrganic">有机食品</label>
+                    <label class="form-check-label" for="isOrganic" data-zh="有机食品" data-en="Organic Food" data-fr="Produit bio">有机食品</label>
                 </div>
             </div>
         </div>
@@ -107,21 +123,21 @@
         <!-- Dynamic Attributes Section -->
         <div class="mt-4">
             <div class="p-3 mb-3 rounded-4" style="background:linear-gradient(135deg, rgba(79,172,254,0.10), rgba(0,242,254,0.07)); border:1px solid rgba(79,172,254,0.18);">
-                <div class="fw-bold mb-2" style="color:#0f172a;"><i class="fas fa-layer-group me-2"></i>前台规格逻辑</div>
-                <div class="small text-muted">单值属性显示为商品规格，多值属性显示为用户可选规格。请保持命名一致，避免同一属性出现多种拼写。</div>
-                <div class="small mt-2"><strong>示例：</strong>“规格 / 500g | 1kg”、“包装 / 袋装 | 盒装”、“颜色 / 红色”。</div>
+                <div class="fw-bold mb-2" style="color:#0f172a;"><i class="fas fa-layer-group me-2"></i><span data-zh="前台规格逻辑" data-en="Product Spec Logic" data-fr="Logique des spécifications">前台规格逻辑</span></div>
+                <div class="small text-muted" data-zh="单值属性显示为商品规格，多值属性显示为用户可选规格。请保持命名一致，避免同一属性出现多种拼写。" data-en="Single-value shows as spec; multi-value shows as selectable option. Keep naming consistent." data-fr="Une valeur unique s’affiche comme spécification ; plusieurs valeurs deviennent des options sélectionnables. Gardez des noms cohérents.">单值属性显示为商品规格，多值属性显示为用户可选规格。请保持命名一致，避免同一属性出现多种拼写。</div>
+                <div class="small mt-2"><strong data-zh="示例：" data-en="Example:" data-fr="Exemple :">示例：</strong><span data-zh="“规格 / 500g | 1kg”、“包装 / 袋装 | 盒装”、“颜色 / 红色”。" data-en="“Specification / 500g | 1kg”, “Package / Bag | Box”, “Color / Red”." data-fr="« Spécification / 500g | 1kg », « Emballage / Sac | Boîte », « Couleur / Rouge ».">“规格 / 500g | 1kg”、“包装 / 袋装 | 盒装”、“颜色 / 红色”。</span></div>
             </div>
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="mb-0"><i class="fas fa-tags me-2"></i>商品属性与可选规格</h5>
+                <h5 class="mb-0"><i class="fas fa-tags me-2"></i><span data-zh="商品属性与可选规格" data-en="Attributes & Specifications" data-fr="Attributs et spécifications">商品属性与可选规格</span></h5>
                 <button type="button" class="btn btn-sm btn-outline-primary rounded-pill" onclick="addAttribute()">
-                    <i class="fas fa-plus me-1"></i>添加属性
+                    <i class="fas fa-plus me-1"></i><span data-zh="添加属性" data-en="Add Attribute" data-fr="Ajouter un attribut">添加属性</span>
                 </button>
             </div>
-            <p class="text-muted small mb-3">用这里定义用户可选规格与商品说明，例如包装、净含量、保质期、成分、储存方式。</p>
+            <p class="text-muted small mb-3" data-zh="用这里定义用户可选规格与商品说明，例如包装、净含量、保质期、成分、储存方式。" data-en="Use this area to define selectable specs and product details, such as packaging, net weight, shelf life, ingredients, and storage." data-fr="Utilisez cette zone pour définir les options et détails produit, comme l’emballage, le poids net, la durée de conservation, les ingrédients et le stockage.">用这里定义用户可选规格与商品说明，例如包装、净含量、保质期、成分、储存方式。</p>
 
             <div class="row g-2 mb-2">
-                <div class="col-5"><label class="form-label fw-bold small text-muted">属性名称</label></div>
-                <div class="col-5"><label class="form-label fw-bold small text-muted">属性值</label></div>
+                <div class="col-5"><label class="form-label fw-bold small text-muted" data-zh="属性名称" data-en="Attribute Name" data-fr="Nom de l’attribut">属性名称</label></div>
+                <div class="col-5"><label class="form-label fw-bold small text-muted" data-zh="属性值" data-en="Attribute Value" data-fr="Valeur de l’attribut">属性值</label></div>
                 <div class="col-2"></div>
             </div>
             <div id="attributes-container">
@@ -129,10 +145,10 @@
                     {% for attr in item.attributes.all %}
                     <div class="row g-2 mb-2 attr-row">
                         <div class="col-5">
-                            <input type="text" name="attr_name" class="form-control form-control-sm" value="{{ attr.name }}" placeholder="例如：重量" style="border-radius:8px;">
+                            <input type="text" name="attr_name" class="form-control form-control-sm" value="{{ attr.name }}" placeholder="例如：重量" data-ph-zh="例如：重量" data-ph-en="e.g. Weight" data-ph-fr="ex. Poids" style="border-radius:8px;">
                         </div>
                         <div class="col-5">
-                            <input type="text" name="attr_value" class="form-control form-control-sm" value="{{ attr.value }}" placeholder="例如：500g" style="border-radius:8px;">
+                            <input type="text" name="attr_value" class="form-control form-control-sm" value="{{ attr.value }}" placeholder="例如：500g" data-ph-zh="例如：500g" data-ph-en="e.g. 500g" data-ph-fr="ex. 500g" style="border-radius:8px;">
                         </div>
                         <div class="col-2">
                             <button type="button" class="btn btn-sm btn-outline-danger rounded-pill" onclick="this.closest('.attr-row').remove()">
@@ -147,17 +163,17 @@
             <div class="row g-2 mt-2">
                 <div class="col-12">
                     <div class="d-flex flex-wrap gap-1">
-                        <span class="text-muted small me-2">快速添加：</span>
-                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="addPreset('重量','')">重量</button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="addPreset('保质期','')">保质期</button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="addPreset('成分','')">成分</button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="addPreset('储存方式','')">储存方式</button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="addPreset('规格','')">规格</button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="addPreset('颜色','')">颜色</button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="addPreset('尺寸','')">尺寸</button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="addPreset('生产日期','')">生产日期</button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="addPreset('营养成分','')">营养成分</button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="addPreset('过敏原','')">过敏原</button>
+                        <span class="text-muted small me-2" data-zh="快速添加：" data-en="Quick Add:" data-fr="Ajout rapide :">快速添加：</span>
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="addPreset('重量','')" data-zh="重量" data-en="Weight" data-fr="Poids">重量</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="addPreset('保质期','')" data-zh="保质期" data-en="Shelf Life" data-fr="Durée de conservation">保质期</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="addPreset('成分','')" data-zh="成分" data-en="Ingredients" data-fr="Ingrédients">成分</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="addPreset('储存方式','')" data-zh="储存方式" data-en="Storage" data-fr="Stockage">储存方式</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="addPreset('规格','')" data-zh="规格" data-en="Specification" data-fr="Spécification">规格</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="addPreset('颜色','')" data-zh="颜色" data-en="Color" data-fr="Couleur">颜色</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="addPreset('尺寸','')" data-zh="尺寸" data-en="Size" data-fr="Taille">尺寸</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="addPreset('生产日期','')" data-zh="生产日期" data-en="Production Date" data-fr="Date de production">生产日期</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="addPreset('营养成分','')" data-zh="营养成分" data-en="Nutrition Facts" data-fr="Valeurs nutritionnelles">营养成分</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="addPreset('过敏原','')" data-zh="过敏原" data-en="Allergens" data-fr="Allergènes">过敏原</button>
                     </div>
                 </div>
             </div>
@@ -165,8 +181,8 @@
 
         <hr>
         <div class="d-flex gap-2">
-            <button type="submit" class="btn btn-primary-gradient px-4"><i class="fas fa-save me-2"></i>{% if item %}保存修改{% else %}添加商品{% endif %}</button>
-            <a href="{% url 'marketplace:admin_supermarket' %}" class="btn btn-outline-secondary rounded-pill px-4">取消</a>
+            <button type="submit" class="btn btn-primary-gradient px-4"><i class="fas fa-save me-2"></i><span data-zh="{% if item %}保存修改{% else %}添加商品{% endif %}" data-en="{% if item %}Save Changes{% else %}Add Item{% endif %}" data-fr="{% if item %}Enregistrer les modifications{% else %}Ajouter l’article{% endif %}">{% if item %}保存修改{% else %}添加商品{% endif %}</span></button>
+            <a href="{% url 'marketplace:admin_supermarket' %}" class="btn btn-outline-secondary rounded-pill px-4" data-zh="取消" data-en="Cancel" data-fr="Annuler">取消</a>
         </div>
     </form>
 </div>
@@ -177,8 +193,8 @@ function addAttribute(name, value) {
     var row = document.createElement('div');
     row.className = 'row g-2 mb-2 attr-row';
     row.innerHTML =
-        '<div class="col-5"><input type="text" name="attr_name" class="form-control form-control-sm" value="' + (name||'') + '" placeholder="例如：重量" style="border-radius:8px;"></div>' +
-        '<div class="col-5"><input type="text" name="attr_value" class="form-control form-control-sm" value="' + (value||'') + '" placeholder="例如：500g" style="border-radius:8px;"></div>' +
+        '<div class="col-5"><input type="text" name="attr_name" class="form-control form-control-sm" value="' + (name||'') + '" placeholder="Attribute name" style="border-radius:8px;"></div>' +
+        '<div class="col-5"><input type="text" name="attr_value" class="form-control form-control-sm" value="' + (value||'') + '" placeholder="Attribute value" style="border-radius:8px;"></div>' +
         '<div class="col-2"><button type="button" class="btn btn-sm btn-outline-danger rounded-pill" onclick="this.closest(\'.attr-row\').remove()"><i class="fas fa-trash-alt"></i></button></div>';
     container.appendChild(row);
     row.querySelector('input[name=attr_' + (name ? 'value' : 'name') + ']').focus();

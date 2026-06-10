@@ -5,6 +5,7 @@ from manager.payments.views import (
     mtn_momo_callback, airtel_money_callback,
     initiate_momo_payment, check_payment_status,
     kkiapay_verify, kkiapay_webhook,
+    pawapay_callback, pawapay_initiate, pawapay_verify,
 )
 
 # manager中转路由
@@ -72,6 +73,10 @@ urlpatterns = [
     path('public/about/', views.public_about, name='public_about'),
     path('public/services/', views.public_services, name='public_services'),
     path('public/contact/', views.public_contact, name='public_contact'),
+    path('public/legal/', views.public_legal_privacy, name='legal_privacy'),
+    path('public/legal/terms/', views.public_legal_terms, name='legal_terms'),
+    path('public/pages/<slug:slug>/', views.public_info_page, name='info_page'),
+    path('public/site-map/', views.public_site_map, name='site_map'),
 
     # =========================Public Blog========================
     path('public/blog/', views.public_blog, name='public_blog'),
@@ -95,6 +100,7 @@ urlpatterns = [
     path('buy-now/<int:book_id>/', views.buy_now, name='buy_now'),
     path('checkout/', views.checkout, name='checkout'),
     path('payment/kkiapay/<str:order_number>/', views.kkiapay_pay, name='kkiapay_pay'),
+    path('payment/pawapay/<str:order_number>/', views.pawapay_pay, name='pawapay_pay'),
     path('public/kkiapay/success/<str:order_number>/', views.kkiapay_success_redirect, name='kkiapay_success_redirect'),
     path('order-confirmation/<str:order_number>/', views.order_confirmation, name='order_confirmation'),
     path('track-order/', views.track_order, name='track_order'),
@@ -139,11 +145,16 @@ urlpatterns = [
     path('public/user/register/', views.user_register, name='user_register'),
     path('public/user/verify-email/', views.verify_email_pin, name='verify_email_pin'),
     path('public/user/resend-pin/', views.resend_verification_pin, name='resend_verification_pin'),
+    path('public/user/resend-phone/', views.resend_phone_verification, name='resend_phone_verification'),
+    path('public/user/verification-status/', views.signup_verification_status, name='signup_verification_status'),
     path('public/user/login/', views.user_login, name='user_login'),
     path('public/user/logout/', views.user_logout, name='user_logout'),
     path('public/user/profile/', views.user_profile, name='user_profile'),
     path('public/user/wishlist/toggle/', views.user_toggle_wishlist, name='user_toggle_wishlist'),
     path('public/user/wishlist/check/', views.user_check_wishlist, name='user_check_wishlist'),
+    path('public/publish/', views.publish_entry, name='publish_entry'),
+    path('inventory/', views.admin_inventory, name='admin_inventory'),
+    path('admin/escrow/', views.admin_escrow_transactions, name='admin_escrow'),
     path('public/forgot-password/', views.forgot_password, name='forgot_password'),
     path('public/reset-password/', views.reset_password_verify, name='reset_password_verify'),
 
@@ -160,6 +171,7 @@ urlpatterns = [
     path('vendor/login/', views.vendor_login, name='vendor_login'),
     path('vendor/logout/', views.vendor_logout, name='vendor_logout'),
     path('vendor/dashboard/', views.vendor_dashboard, name='vendor_dashboard'),
+    path('vendor/settings/', views.vendor_settings, name='vendor_settings'),
     path('vendor/settings/save/', views.vendor_settings_save, name='vendor_settings_save'),
     path('vendor/orders/hub/update/', views.vendor_hub_order_update, name='vendor_hub_order_update'),
     path('vendor/orders/', views.vendor_orders_hub, name='vendor_orders_hub'),
@@ -170,6 +182,8 @@ urlpatterns = [
     path('vendor/orders/books/update-status/', views.vendor_book_order_update_status, name='vendor_book_order_update_status'),
     path('vendor/orders/books/customer/', views.vendor_book_order_update_customer, name='vendor_book_order_update_customer'),
     path('vendor/messages/', views.vendor_messages_page, name='vendor_messages'),
+    path('vendor/notifications/', views.vendor_notifications_page, name='vendor_notifications'),
+    path('vendor/payments/', views.vendor_payments_page, name='vendor_payments'),
     path('api/vendor/notifications/', views.vendor_notifications_api, name='vendor_notifications_api'),
     path('api/vendor/conversations/', views.api_vendor_conversations, name='api_vendor_conversations'),
     path('api/vendor/conversations/<int:conversation_id>/messages/', views.api_vendor_conversation_messages, name='api_vendor_conversation_messages'),
@@ -201,6 +215,11 @@ urlpatterns = [
     # =========================KKiaPay========================
     path('api/payment/kkiapay/verify/',  kkiapay_verify,  name='kkiapay_verify'),
     path('api/payment/kkiapay/webhook/', kkiapay_webhook, name='kkiapay_webhook'),
+    path('api/payment/pawapay/initiate/', pawapay_initiate, name='pawapay_initiate'),
+    path('api/payment/pawapay/verify/', pawapay_verify, name='pawapay_verify'),
+    path('api/payment/pawapay/callback/deposits/', pawapay_callback, name='pawapay_callback_deposits'),
+    path('api/payment/pawapay/callback/payouts/', pawapay_callback, name='pawapay_callback_payouts'),
+    path('api/payment/pawapay/callback/refunds/', pawapay_callback, name='pawapay_callback_refunds'),
 
     # =========================AI Chatbot========================
     path('chatbot/send/', views.chatbot_send, name='chatbot_send'),

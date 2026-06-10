@@ -64,6 +64,15 @@ def _update_order_status(order, status, transaction_id=None):
     logger.info('Order %s updated: payment_status=%s',
                 getattr(order, 'order_number', order.pk),
                 order.payment_status)
+    if order.payment_status == 'completed':
+        try:
+            from manager.escrow_service import sync_escrow_on_payment
+            if isinstance(order, MarketplaceOrder):
+                sync_escrow_on_payment(order, 'marketplace')
+            else:
+                sync_escrow_on_payment(order, 'book')
+        except Exception as exc:
+            logger.exception('Escrow payment sync failed: %s', exc)
 
 
 # =========================================================================
@@ -339,6 +348,13 @@ def check_payment_status(request):
                 if provider_status in ('SUCCESSFUL', 'FAILED'):
                     _update_order_status(order, provider_status, ref_id)
 
+            elif payment_method == 'pawapay':
+                from manager.payments.pawapay import get_deposit_status, normalize_pawapay_status
+                result = get_deposit_status(ref_id)
+                provider_status = normalize_pawapay_status(result.get('status', 'PENDING'))
+                if provider_status in ('SUCCESSFUL', 'FAILED'):
+                    _update_order_status(order, provider_status, ref_id)
+
         except Exception as e:
             logger.warning('Error polling payment status: %s', e)
 
@@ -541,3 +557,152 @@ def kkiapay_webhook(request):
     except Exception as exc:
         logger.exception('KKiaPay webhook error: %s', exc)
         return HttpResponse(status=200)  # Always 200 to avoid infinite retries
+
+
+def _find_order_by_number(order_number):
+    if not order_number:
+        return None
+    try:
+        return models.Order.objects.get(order_number=order_number)
+    except models.Order.DoesNotExist:
+        try:
+            return MarketplaceOrder.objects.get(order_number=order_number)
+        except MarketplaceOrder.DoesNotExist:
+            return None
+
+
+def _pawapay_process_callback(data):
+    """Shared logic for PawaPay deposit/payout/refund webhooks."""
+    from manager.payments.pawapay import normalize_pawapay_status
+
+    payment_id = (
+        data.get('depositId')
+        or data.get('payoutId')
+        or data.get('refundId')
+        or data.get('id')
+    )
+    status = data.get('status', '')
+    internal_status = normalize_pawapay_status(status)
+
+    order = None
+    order_number = None
+    for meta in data.get('metadata', []) or []:
+        if meta.get('fieldName') == 'orderNumber':
+            order_number = meta.get('fieldValue')
+            break
+    if order_number:
+        order = _find_order_by_number(order_number)
+    if not order and payment_id:
+        order, _ = _find_order(payment_id)
+
+    if not order:
+        logger.warning('PawaPay callback: no order for payment_id=%s order_number=%s',
+                       payment_id, order_number)
+        return False
+
+    if order.payment_status == 'completed' and internal_status == 'SUCCESSFUL':
+        return True
+
+    _update_order_status(order, internal_status, transaction_id=payment_id)
+    return True
+
+
+# =========================================================================
+# PawaPay — Webhooks (deposits / payouts / refunds)
+# =========================================================================
+@csrf_exempt
+@require_POST
+def pawapay_callback(request):
+    """Receive PawaPay async notifications (deposits, payouts, refunds)."""
+    try:
+        body = json.loads(request.body)
+        logger.info('PawaPay callback received: %s', json.dumps(body))
+        _pawapay_process_callback(body)
+        return JsonResponse({'status': 'ok'}, status=200)
+    except json.JSONDecodeError:
+        logger.error('PawaPay callback: invalid JSON')
+        return JsonResponse({'error': 'invalid json'}, status=400)
+    except Exception as exc:
+        logger.exception('PawaPay callback error: %s', exc)
+        return JsonResponse({'error': str(exc)}, status=400)
+
+
+@csrf_exempt
+@require_POST
+def pawapay_initiate(request):
+    """
+    AJAX: initiate PawaPay deposit from payment page.
+    POST JSON: order_number, phone_number, amount (optional)
+    """
+    try:
+        body = json.loads(request.body)
+        order_number = body.get('order_number', '').strip()
+        phone_number = body.get('phone_number', '').strip()
+        if not order_number or not phone_number:
+            return JsonResponse({'success': False, 'error': 'order_number and phone_number required'}, status=400)
+
+        order = _find_order_by_number(order_number)
+        if not order:
+            return JsonResponse({'success': False, 'error': 'Order not found'}, status=404)
+
+        amount = body.get('amount') or float(order.total_amount)
+        from manager.payments.pawapay import create_deposit
+        result = create_deposit(
+            amount=amount,
+            phone_number=phone_number,
+            order_number=order_number,
+            provider=body.get('provider'),
+        )
+        if result.get('deposit_id'):
+            order.payment_transaction_id = result['deposit_id']
+            order.payment_status = 'processing'
+            order.save(update_fields=['payment_transaction_id', 'payment_status'])
+
+        return JsonResponse({
+            'success': result.get('success', False),
+            'deposit_id': result.get('deposit_id', ''),
+            'status': result.get('status', 'UNKNOWN'),
+            'error': result.get('error', ''),
+        })
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON'}, status=400)
+    except Exception as exc:
+        logger.exception('PawaPay initiate error: %s', exc)
+        return JsonResponse({'success': False, 'error': str(exc)}, status=500)
+
+
+@csrf_exempt
+@require_POST
+def pawapay_verify(request):
+    """Verify PawaPay deposit status server-side after user completes payment."""
+    try:
+        body = json.loads(request.body)
+        deposit_id = body.get('deposit_id', '').strip()
+        order_number = body.get('order_number', '').strip()
+        if not deposit_id or not order_number:
+            return JsonResponse({'success': False, 'message': 'deposit_id and order_number required'}, status=400)
+
+        order = _find_order_by_number(order_number)
+        if not order:
+            return JsonResponse({'success': False, 'message': 'Order not found'}, status=404)
+
+        if order.payment_status == 'completed':
+            return JsonResponse({'success': True, 'payment_status': 'completed', 'message': 'Already paid'})
+
+        from manager.payments.pawapay import get_deposit_status, normalize_pawapay_status
+        result = get_deposit_status(deposit_id)
+        internal = normalize_pawapay_status(result.get('status', 'PENDING'))
+
+        if internal == 'SUCCESSFUL':
+            _update_order_status(order, 'SUCCESSFUL', transaction_id=deposit_id)
+            return JsonResponse({'success': True, 'payment_status': 'completed', 'message': 'Payment confirmed'})
+        if internal == 'FAILED':
+            _update_order_status(order, 'FAILED', transaction_id=deposit_id)
+            return JsonResponse({'success': False, 'payment_status': 'failed', 'message': 'Payment failed'})
+
+        return JsonResponse({'success': False, 'payment_status': 'pending', 'message': 'Payment still pending'})
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'message': 'Invalid JSON'}, status=400)
+    except Exception as exc:
+        logger.exception('PawaPay verify error: %s', exc)
+        return JsonResponse({'success': False, 'message': 'Server error'}, status=500)

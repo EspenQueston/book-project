@@ -1,0 +1,15 @@
+{% load i18n %}
+<div class="contact-item">
+    <i class="fas fa-phone"></i>
+    <div class="contact-details">
+        <strong>{% trans "电话" %}</strong>
+        <span><a href="{{ PLATFORM_PHONE_TEL }}">{{ PLATFORM_PHONE_DISPLAY }}</a></span>
+    </div>
+</div>
+<div class="contact-item">
+    <i class="fab fa-whatsapp"></i>
+    <div class="contact-details">
+        <strong>WhatsApp</strong>
+        <span><a href="{{ PLATFORM_WHATSAPP_URL }}" target="_blank" rel="noopener noreferrer">{{ PLATFORM_PHONE_DISPLAY }}</a></span>
+    </div>
+</div>

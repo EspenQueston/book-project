@@ -1,0 +1,57 @@
+{% load i18n %}
+<style>
+/* Desktop single-page: gallery left, buy top-right, reviews+vendor bottom-right */
+@media (min-width: 992px) {
+    .desk-single-hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-rows: auto auto;
+        gap: 28px 32px;
+        align-items: start;
+    }
+    .desk-single-gallery {
+        grid-column: 1;
+        grid-row: 1 / span 2;
+        position: sticky;
+        top: 88px;
+    }
+    .desk-single-buy {
+        grid-column: 2;
+        grid-row: 1;
+    }
+    .desk-single-social {
+        grid-column: 2;
+        grid-row: 2;
+    }
+}
+.desk-social-zone {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+.desk-social-zone .lr-block { margin-bottom: 0; }
+.desk-social-zone .lr-card {
+    border-radius: 20px;
+    padding: 18px 18px 16px;
+    box-shadow: 0 12px 36px rgba(15, 23, 42, 0.07);
+}
+.desk-social-zone .desk-seller-card {
+    margin-bottom: 0;
+    border-radius: 20px;
+    padding: 16px 18px;
+    transition: box-shadow 0.25s, transform 0.25s;
+}
+.desk-social-zone .desk-seller-card:hover {
+    box-shadow: 0 16px 40px rgba(102, 126, 234, 0.14);
+    transform: translateY(-1px);
+}
+.desk-social-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(102,126,234,0.25), transparent);
+    margin: 2px 0;
+}
+.desk-single-buy .product-title,
+.desk-single-buy h1 {
+    letter-spacing: -0.03em;
+}
+</style>

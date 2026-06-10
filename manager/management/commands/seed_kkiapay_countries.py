@@ -98,17 +98,6 @@ KKIAPAY_COUNTRIES_DATA = [
         'flag_emoji': '🇲🇱',
         'display_order': 8,
     },
-    {
-        'iso_code': 'CM',
-        'name_fr': 'Cameroun',
-        'name_en': 'Cameroon',
-        'phone_code': '+237',
-        'currency_code': 'XAF',
-        'currency_name_fr': 'Franc CFA (CEMAC)',
-        'mobile_operators': ['MTN', 'Orange'],
-        'flag_emoji': '🇨🇲',
-        'display_order': 9,
-    },
 ]
 
 

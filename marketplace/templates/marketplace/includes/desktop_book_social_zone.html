@@ -1,0 +1,15 @@
+{% load i18n %}
+{# Book desktop: reviews first, then vendor, then publisher #}
+<div class="desk-social-zone desk-book-social-zone">
+    {% if review_block_uid %}
+    {% include 'marketplace/includes/listing_reviews_block.html' %}
+    {% endif %}
+    {% if seller_vendor %}
+    <div class="desk-social-divider" aria-hidden="true"></div>
+    {% include 'marketplace/includes/desktop_vendor_card.html' with seller_vendor=seller_vendor seller_item_name=seller_item_name listing_kind=listing_kind listing_id=listing_id seller_card_variant='sidebar' %}
+    {% endif %}
+    {% if publisher %}
+    <div class="desk-social-divider" aria-hidden="true"></div>
+    {% include 'marketplace/includes/desktop_publisher_card.html' with publisher=publisher publisher_follower_count=publisher_follower_count seller_card_variant='sidebar' %}
+    {% endif %}
+</div>

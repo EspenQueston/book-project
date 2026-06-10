@@ -206,18 +206,22 @@ html[data-theme="dark"] .vs-empty { color: var(--text-tertiary); }
                         {% endif %}
                     </div>
                     <div>
-                        <h1 class="vs-name">{{ vendor.company_name }}</h1>
+                        <h1 class="vs-name">{% if vendor.is_official %}{% trans "Duno360官方店" %}{% else %}{{ vendor.company_name }}{% endif %}</h1>
+                        {% if vendor.is_official %}
+                        <p class="vs-desc mb-0">{% trans "Duno360官方直营店，汇集平台自营图书、商品、课程与超市精选。品质保障，官方售后，值得信赖。" %}</p>
+                        {% else %}
                         <p class="vs-desc mb-0">{{ vendor.description|default:"" }}</p>
+                        {% endif %}
                         <div class="vs-meta-pills">
                             <span class="vs-meta-pill"><i class="fas fa-check-circle"></i>
-                                <span data-zh="认证商家" data-en="Verified Seller" data-fr="Vendeur Vérifié">{% trans "认证商家" %}</span>
+                                {% if vendor.is_official %}{% trans "Duno360官方店" %}{% else %}{% trans "认证商家" %}{% endif %}
                             </span>
                             <span class="vs-meta-pill"><i class="fas fa-calendar-alt"></i>
-                                <span data-zh="入驻" data-en="Since" data-fr="Depuis">{% trans "入驻" %}</span> {{ vendor.created_at|date:"Y" }}
+                                {% trans "入驻" %} {{ vendor.created_at|date:"Y" }}
                             </span>
                             {% if follower_count > 0 %}
                             <span class="vs-meta-pill"><i class="fas fa-users"></i>{{ follower_count }}
-                                <span data-zh="关注" data-en="Followers" data-fr="Abonnés">{% trans "关注" %}</span>
+                                {% trans "粉丝" %}
                             </span>
                             {% endif %}
                         </div>
@@ -229,21 +233,26 @@ html[data-theme="dark"] .vs-empty { color: var(--text-tertiary); }
                     <div class="vs-stat-row">
                         <div class="vs-stat">
                             <div class="vs-stat-val">{{ total_items }}</div>
-                            <div class="vs-stat-lbl" data-zh="全部商品" data-en="Items" data-fr="Articles">{% trans "全部商品" %}</div>
+                            <div class="vs-stat-lbl">{% trans "全部商品" %}</div>
                         </div>
                         <div class="vs-stat">
                             <div class="vs-stat-val">{{ total_sales }}</div>
-                            <div class="vs-stat-lbl" data-zh="总销量" data-en="Sales" data-fr="Ventes">{% trans "总销量" %}</div>
+                            <div class="vs-stat-lbl">{% trans "总销量" %}</div>
                         </div>
                         <div class="vs-stat">
                             <div class="vs-stat-val">{{ follower_count }}</div>
-                            <div class="vs-stat-lbl" data-zh="粉丝" data-en="Fans" data-fr="Fans">{% trans "粉丝" %}</div>
+                            <div class="vs-stat-lbl">{% trans "粉丝" %}</div>
                         </div>
                     </div>
+                    <div class="d-flex flex-column flex-sm-row align-items-stretch gap-2">
+                    <a href="{% url 'manager:start_conversation' %}?vendor_id={{ vendor.id }}&subject={{ vendor.company_name|urlencode }}" class="vs-contact-btn" style="width:auto;padding:10px 20px;white-space:nowrap;">
+                        <i class="fas fa-comment-dots me-1"></i>{% trans "联系卖家" %}
+                    </a>
                     <button class="vs-follow-btn {% if is_following %}following{% endif %}" id="followBtn" onclick="toggleFollow({{ vendor.id }})">
                         <i class="fas {% if is_following %}fa-check{% else %}fa-plus{% endif %}"></i>
-                        <span id="followText">{% if is_following %}<span data-zh="已关注" data-en="Following" data-fr="Suivi">{% trans "已关注" %}</span>{% else %}<span data-zh="关注店铺" data-en="Follow Shop" data-fr="Suivre">{% trans "关注店铺" %}</span>{% endif %}</span>
+                        <span id="followText">{% if is_following %}{% trans "已关注" %}{% else %}{% trans "关注店铺" %}{% endif %}</span>
                     </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -252,18 +261,18 @@ html[data-theme="dark"] .vs-empty { color: var(--text-tertiary); }
     <div class="vs-tabs mt-4">
         <div class="container">
             <ul class="vs-tab-list">
-                <li><a class="vs-tab-item {% if active_tab == 'all' %}active{% endif %}" href="?tab=all" data-zh="全部商品" data-en="All Items" data-fr="Tous">
-                    <i class="fas fa-th-large"></i> <span data-zh="全部" data-en="All" data-fr="Tous">{% trans "全部" %}</span> <span class="vs-tab-count">{{ total_items }}</span></a></li>
-                <li><a class="vs-tab-item {% if active_tab == 'books' %}active{% endif %}" href="?tab=books" data-zh="图书" data-en="Books" data-fr="Livres">
-                    <i class="fas fa-book"></i> <span data-zh="图书" data-en="Books" data-fr="Livres">{% trans "图书" %}</span> <span class="vs-tab-count">{{ vendor_books|length }}</span></a></li>
-                <li><a class="vs-tab-item {% if active_tab == 'products' %}active{% endif %}" href="?tab=products" data-zh="商品" data-en="Products" data-fr="Produits">
-                    <i class="fas fa-box-open"></i> <span data-zh="商品" data-en="Products" data-fr="Produits">{% trans "商品" %}</span> <span class="vs-tab-count">{{ total_products }}</span></a></li>
-                <li><a class="vs-tab-item {% if active_tab == 'courses' %}active{% endif %}" href="?tab=courses" data-zh="课程" data-en="Courses" data-fr="Cours">
-                    <i class="fas fa-graduation-cap"></i> <span data-zh="课程" data-en="Courses" data-fr="Cours">{% trans "课程" %}</span> <span class="vs-tab-count">{{ total_courses }}</span></a></li>
-                <li><a class="vs-tab-item {% if active_tab == 'supermarket' %}active{% endif %}" href="?tab=supermarket" data-zh="超市" data-en="Supermarket" data-fr="Supermarché">
-                    <i class="fas fa-carrot"></i> <span data-zh="超市" data-en="Supermarket" data-fr="Supermarché">{% trans "超市" %}</span> <span class="vs-tab-count">{{ total_supermarket }}</span></a></li>
-                <li><a class="vs-tab-item {% if active_tab == 'shop' %}active{% endif %}" href="?tab=shop" data-zh="店铺" data-en="Shop" data-fr="Boutique">
-                    <i class="fas fa-store-alt"></i> <span data-zh="店铺" data-en="Shop" data-fr="Boutique">{% trans "店铺" %}</span></a></li>
+                <li><a class="vs-tab-item {% if active_tab == 'all' %}active{% endif %}" href="?tab=all">
+                    <i class="fas fa-th-large"></i> {% trans "全部" %} <span class="vs-tab-count">{{ total_items }}</span></a></li>
+                <li><a class="vs-tab-item {% if active_tab == 'books' %}active{% endif %}" href="?tab=books">
+                    <i class="fas fa-book"></i> {% trans "图书" %} <span class="vs-tab-count">{{ vendor_books|length }}</span></a></li>
+                <li><a class="vs-tab-item {% if active_tab == 'products' %}active{% endif %}" href="?tab=products">
+                    <i class="fas fa-box-open"></i> {% trans "商品" %} <span class="vs-tab-count">{{ total_products }}</span></a></li>
+                <li><a class="vs-tab-item {% if active_tab == 'courses' %}active{% endif %}" href="?tab=courses">
+                    <i class="fas fa-graduation-cap"></i> {% trans "课程" %} <span class="vs-tab-count">{{ total_courses }}</span></a></li>
+                <li><a class="vs-tab-item {% if active_tab == 'supermarket' %}active{% endif %}" href="?tab=supermarket">
+                    <i class="fas fa-carrot"></i> {% trans "超市" %} <span class="vs-tab-count">{{ total_supermarket }}</span></a></li>
+                <li><a class="vs-tab-item {% if active_tab == 'shop' %}active{% endif %}" href="?tab=shop">
+                    <i class="fas fa-store-alt"></i> {% trans "店铺" %}</a></li>
             </ul>
         </div>
     </div>
@@ -289,16 +298,16 @@ html[data-theme="dark"] .vs-empty { color: var(--text-tertiary); }
                             <img src="{{ vb.book.get_cover_url }}" alt="{{ vb.book.name }}" class="vs-card-img">
                         </a>
                         <div class="vs-card-body">
-                            <span class="vs-card-type book"><i class="fas fa-book me-1"></i><span data-zh="图书" data-en="Book" data-fr="Livre">{% trans "图书" %}</span></span>
+                            <span class="vs-card-type book"><i class="fas fa-book me-1"></i>{% trans "图书" %}</span>
                             <a href="{% url 'manager:public_book_detail' vb.book.id %}" style="text-decoration:none;">
                                 <div class="vs-card-title">{{ vb.book.name }}</div>
                             </a>
                             <div class="vs-card-footer">
                                 <div>
                                     <div class="vs-card-price">{{ vb.vendor_price|fcfa }}</div>
-                                    <div class="vs-card-sales"><span data-zh="已售" data-en="Sold" data-fr="Vendu">{% trans "已售" %}</span> {{ vb.book.sale_num }}+</div>
+                                    <div class="vs-card-sales">{% trans "已售" %} {{ vb.book.sale_num }}+</div>
                                 </div>
-                                <a href="{% url 'manager:public_book_detail' vb.book.id %}" class="vs-card-btn" data-zh="查看" data-en="View" data-fr="Voir">{% trans "查看" %}</a>
+                                <a href="{% url 'manager:public_book_detail' vb.book.id %}" class="vs-card-btn">{% trans "查看" %}</a>
                             </div>
                         </div>
                     </div>
@@ -312,16 +321,16 @@ html[data-theme="dark"] .vs-empty { color: var(--text-tertiary); }
                             <img src="{{ product.get_image_url }}" alt="{{ product.name }}" class="vs-card-img">
                         </a>
                         <div class="vs-card-body">
-                            <span class="vs-card-type product"><i class="fas fa-box-open me-1"></i><span data-zh="商品" data-en="Product" data-fr="Produit">{% trans "商品" %}</span></span>
+                            <span class="vs-card-type product"><i class="fas fa-box-open me-1"></i>{% trans "商品" %}</span>
                             <a href="{% url 'marketplace:product_detail' product.slug %}" style="text-decoration:none;">
                                 <div class="vs-card-title">{{ product.name }}</div>
                             </a>
                             <div class="vs-card-footer">
                                 <div>
                                     <div class="vs-card-price">{{ product.price|fcfa }}</div>
-                                    <div class="vs-card-sales"><span data-zh="已售" data-en="Sold" data-fr="Vendu">{% trans "已售" %}</span> {{ product.sales_count }}+</div>
+                                    <div class="vs-card-sales">{% trans "已售" %} {{ product.sales_count }}+</div>
                                 </div>
-                                <a href="{% url 'marketplace:product_detail' product.slug %}" class="vs-card-btn" data-zh="查看" data-en="View" data-fr="Voir">{% trans "查看" %}</a>
+                                <a href="{% url 'marketplace:product_detail' product.slug %}" class="vs-card-btn">{% trans "查看" %}</a>
                             </div>
                         </div>
                     </div>
@@ -335,7 +344,7 @@ html[data-theme="dark"] .vs-empty { color: var(--text-tertiary); }
                             <img src="{{ course.get_image_url }}" alt="{{ course.title }}" class="vs-card-img">
                         </a>
                         <div class="vs-card-body">
-                            <span class="vs-card-type course"><i class="fas fa-graduation-cap me-1"></i><span data-zh="课程" data-en="Course" data-fr="Cours">{% trans "课程" %}</span></span>
+                            <span class="vs-card-type course"><i class="fas fa-graduation-cap me-1"></i>{% trans "课程" %}</span>
                             <a href="{% url 'marketplace:course_detail' course.slug %}" style="text-decoration:none;">
                                 <div class="vs-card-title">{{ course.title }}</div>
                             </a>
@@ -344,7 +353,7 @@ html[data-theme="dark"] .vs-empty { color: var(--text-tertiary); }
                                     <div class="vs-card-price">{{ course.price|fcfa }}</div>
                                     <div class="vs-card-sales"><i class="fas fa-user-graduate me-1"></i>{{ course.enrollment_count }}</div>
                                 </div>
-                                <a href="{% url 'marketplace:course_detail' course.slug %}" class="vs-card-btn" data-zh="查看" data-en="View" data-fr="Voir">{% trans "查看" %}</a>
+                                <a href="{% url 'marketplace:course_detail' course.slug %}" class="vs-card-btn">{% trans "查看" %}</a>
                             </div>
                         </div>
                     </div>
@@ -358,7 +367,7 @@ html[data-theme="dark"] .vs-empty { color: var(--text-tertiary); }
                             <img src="{{ sm.get_image_url }}" alt="{{ sm.name }}" class="vs-card-img">
                         </a>
                         <div class="vs-card-body">
-                            <span class="vs-card-type" style="background:linear-gradient(135deg,#65a30d,#84cc16);color:#fff;"><i class="fas fa-carrot me-1"></i><span data-zh="超市" data-en="Supermarket" data-fr="Supermarché">{% trans "超市" %}</span></span>
+                            <span class="vs-card-type" style="background:linear-gradient(135deg,#65a30d,#84cc16);color:#fff;"><i class="fas fa-carrot me-1"></i>{% trans "超市" %}</span>
                             <a href="{% url 'marketplace:supermarket_detail' sm.slug %}" style="text-decoration:none;">
                                 <div class="vs-card-title">{{ sm.name }}</div>
                             </a>
@@ -367,7 +376,7 @@ html[data-theme="dark"] .vs-empty { color: var(--text-tertiary); }
                                     <div class="vs-card-price">{{ sm.price|fcfa }}</div>
                                     <div class="vs-card-sales"><i class="fas fa-shopping-basket me-1"></i>{{ sm.sales_count }}</div>
                                 </div>
-                                <a href="{% url 'marketplace:supermarket_detail' sm.slug %}" class="vs-card-btn" data-zh="查看" data-en="View" data-fr="Voir">{% trans "查看" %}</a>
+                                <a href="{% url 'marketplace:supermarket_detail' sm.slug %}" class="vs-card-btn">{% trans "查看" %}</a>
                             </div>
                         </div>
                     </div>
@@ -379,35 +388,35 @@ html[data-theme="dark"] .vs-empty { color: var(--text-tertiary); }
                 {% if total_items == 0 %}
                 <div class="vs-empty">
                     <i class="fas fa-store-slash"></i>
-                    <p data-zh="该店铺暂无商品" data-en="This shop has no items yet" data-fr="Cette boutique n'a pas encore d'articles">{% trans "该店铺暂无商品" %}</p>
+                    <p>{% trans "该店铺暂无商品" %}</p>
                 </div>
                 {% endif %}
 
                 {% if active_tab == 'books' and not vendor_books %}
                 <div class="vs-empty">
                     <i class="fas fa-book-open"></i>
-                    <p data-zh="暂无图书" data-en="No books available" data-fr="Aucun livre disponible">{% trans "暂无图书" %}</p>
+                    <p>{% trans "暂无图书" %}</p>
                 </div>
                 {% endif %}
 
                 {% if active_tab == 'products' and not vendor_products %}
                 <div class="vs-empty">
                     <i class="fas fa-box-open"></i>
-                    <p data-zh="暂无商品" data-en="No products available" data-fr="Aucun produit disponible">{% trans "暂无商品" %}</p>
+                    <p>{% trans "暂无商品" %}</p>
                 </div>
                 {% endif %}
 
                 {% if active_tab == 'courses' and not vendor_courses %}
                 <div class="vs-empty">
                     <i class="fas fa-graduation-cap"></i>
-                    <p data-zh="暂无课程" data-en="No courses available" data-fr="Aucun cours disponible">{% trans "暂无课程" %}</p>
+                    <p>{% trans "暂无课程" %}</p>
                 </div>
                 {% endif %}
 
                 {% if active_tab == 'supermarket' and not vendor_supermarket %}
                 <div class="vs-empty">
                     <i class="fas fa-carrot"></i>
-                    <p data-zh="暂无超市商品" data-en="No supermarket items available" data-fr="Aucun article de supermarché disponible">{% trans "暂无超市商品" %}</p>
+                    <p>{% trans "暂无超市商品" %}</p>
                 </div>
                 {% endif %}
             </div>
@@ -435,10 +444,7 @@ function toggleFollow(vendorId) {
         if (d.success) {
             btn.classList.toggle('following', d.following);
             btn.querySelector('i').className = d.following ? 'fas fa-check' : 'fas fa-plus';
-            txt.innerHTML = d.following
-                ? '<span data-zh="已关注" data-en="Following" data-fr="Suivi">已关注</span>'
-                : '<span data-zh="关注店铺" data-en="Follow Shop" data-fr="Suivre">关注店铺</span>';
-            if (typeof switchLanguage === 'function') switchLanguage(document.documentElement.getAttribute('data-lang') || 'zh');
+            txt.textContent = d.following ? '{% trans "已关注" %}' : '{% trans "关注店铺" %}';
             if (typeof gToast === 'function') gToast(d.message, 'success');
         }
     }).catch(function() {});

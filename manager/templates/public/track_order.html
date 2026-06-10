@@ -912,7 +912,7 @@ html[data-theme="dark"] .order-btn-cancel {
                     {% trans "Aggregated view of your book and marketplace orders with real-time status tracking." %}
                 </div>
             </div>
-            <a href="{% url 'manager:public_my_profile' %}" class="btn btn-sm btn-outline-primary">
+            <a href="{% url 'manager:user_profile' %}" class="btn btn-sm btn-outline-primary">
                 <i class="fas fa-user me-1"></i>{% trans "Back to Profile" %}
             </a>
         </div>
@@ -1374,7 +1374,11 @@ html[data-theme="dark"] .order-btn-cancel {
         <div class="mt-4 p-3 bg-light rounded">
             <h6><i class="fas fa-phone me-2"></i>{% trans "Need Help?" %}</h6>
             <p class="mb-0">{% trans "If you have any questions, please contact our support" %}：</p>
-            <p class="mb-0">Phone: 400-123-4567 | Email: service@bookstore.com</p>
+            <p class="mb-0">
+                {% trans "电话" %}: <a href="{{ PLATFORM_PHONE_TEL }}">{{ PLATFORM_PHONE_DISPLAY }}</a>
+                · WhatsApp: <a href="{{ PLATFORM_WHATSAPP_URL }}" target="_blank" rel="noopener noreferrer">{{ PLATFORM_PHONE_DISPLAY }}</a>
+                · {% trans "邮箱" %}: <a href="mailto:{{ PLATFORM_CONTACT_EMAIL }}">{{ PLATFORM_CONTACT_EMAIL }}</a>
+            </p>
         </div>
     </div>
     
@@ -1534,7 +1538,11 @@ html[data-theme="dark"] .order-btn-cancel {
         <div class="mt-4 p-3 bg-light rounded">
             <h6><i class="fas fa-phone me-2"></i>{% trans "Need Help?" %}</h6>
             <p class="mb-0">{% trans "If you have any questions, please contact our support" %}：</p>
-            <p class="mb-0">Phone: 400-123-4567 | Email: service@bookstore.com</p>
+            <p class="mb-0">
+                {% trans "电话" %}: <a href="{{ PLATFORM_PHONE_TEL }}">{{ PLATFORM_PHONE_DISPLAY }}</a>
+                · WhatsApp: <a href="{{ PLATFORM_WHATSAPP_URL }}" target="_blank" rel="noopener noreferrer">{{ PLATFORM_PHONE_DISPLAY }}</a>
+                · {% trans "邮箱" %}: <a href="mailto:{{ PLATFORM_CONTACT_EMAIL }}">{{ PLATFORM_CONTACT_EMAIL }}</a>
+            </p>
         </div>
     </div>
     {% endif %}

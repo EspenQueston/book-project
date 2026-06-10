@@ -1,0 +1,63 @@
+{% load i18n %}
+
+<section class="duno-section duno-section-platform visible" aria-label="{% trans '退款政策' %}">
+    <details class="duno-acc-item" id="introduction" open>
+        <summary class="duno-acc-head">
+            <span class="duno-acc-icon"><i class="fas fa-info-circle"></i></span>
+            {% trans "简介" %}
+        </summary>
+        <div class="duno-acc-body">
+            <p>{% trans "DUNO 360 连接卖家与客户。本政策规定平台交易的退款条件。" %}</p>
+            <div class="duno-highlight-legal"><i class="fas fa-handshake me-2"></i>{% trans "DUNO 360 作为中间平台运营。退款主要由卖家处理，如有争议 DUNO 360 将提供支持。" %}</div>
+        </div>
+    </details>
+
+    <details class="duno-acc-item" id="conditions">
+        <summary class="duno-acc-head">
+            <span class="duno-acc-icon"><i class="fas fa-list-check"></i></span>
+            {% trans "退款条件" %}
+        </summary>
+        <div class="duno-acc-body">
+            <h3>{% trans "接受的情况" %}</h3>
+            <ul class="duno-section-list">
+                <li>{% trans "未送达的产品" %}</li>
+                <li>{% trans "与描述不符的产品" %}</li>
+                <li>{% trans "有缺陷或损坏的产品" %}</li>
+                <li>{% trans "账单错误或重复付款" %}</li>
+                <li>{% trans "发货前取消" %}</li>
+            </ul>
+            <h3>{% trans "不接受的情况" %}</h3>
+            <ul class="duno-section-list deny">
+                <li>{% trans "确认后改变主意（除非卖家同意）" %}</li>
+                <li>{% trans "产品使用不当" %}</li>
+                <li>{% trans "定制或个性化产品" %}</li>
+            </ul>
+        </div>
+    </details>
+
+    <details class="duno-acc-item" id="procedure">
+        <summary class="duno-acc-head">
+            <span class="duno-acc-icon"><i class="fas fa-route"></i></span>
+            {% trans "流程与期限" %}
+        </summary>
+        <div class="duno-acc-body">
+            <p>{% trans "索赔期限：收货后 48 小时至 7 天（视产品而定），未送达则为 7 天。" %}</p>
+            <ol class="duno-steps-list">
+                <li>{% trans "通过平台联系卖家" %}</li>
+                <li>{% trans "提供订单号、说明及证据（照片、视频）" %}</li>
+                <li>{% trans "等待确认——DUNO 360 可介入调解" %}</li>
+            </ol>
+            <p>{% trans "确认后 24 小时至 5 个工作日内通过移动支付退款。" %}</p>
+        </div>
+    </details>
+
+    <details class="duno-acc-item" id="litiges" data-single="false">
+        <summary class="duno-acc-head">
+            <span class="duno-acc-icon"><i class="fas fa-scale-balanced"></i></span>
+            {% trans "争议与滥用" %}
+        </summary>
+        <div class="duno-acc-body">
+            <p class="mb-0">{% trans "DUNO 360 可拒绝滥用性请求、暂停欺诈账户，并作为调解方根据证据作出决定。" %}</p>
+        </div>
+    </details>
+</section>

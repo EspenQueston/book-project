@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>联系消息管理</title>
+    <title>联系消息管理 - DUNO 360</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -293,22 +293,23 @@ function toggleRead(id, btn) {
 
 function deleteMsg(id) {
     event.stopPropagation();
-    if (!confirm('确定要删除这条消息吗？')) return;
-    fetch('/manager/admin_messages/delete/', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': CSRF},
-        body: 'id=' + id
-    }).then(r => r.json()).then(data => {
-        if (data.success) {
-            var row = document.getElementById('msgRow' + id);
-            row.style.opacity = '0'; row.style.height = row.offsetHeight + 'px';
-            row.style.transition = 'all 0.3s'; row.style.overflow = 'hidden';
-            setTimeout(() => { row.style.height = '0'; row.style.padding = '0'; }, 50);
-            setTimeout(() => { row.remove(); }, 350);
-            updateNavBadge(data.unread_count);
-            showToast('消息已删除');
-        }
-    });
+    gConfirmAction('确定要删除这条消息吗？', function() {
+        fetch('/manager/admin_messages/delete/', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': CSRF},
+            body: 'id=' + id
+        }).then(r => r.json()).then(data => {
+            if (data.success) {
+                var row = document.getElementById('msgRow' + id);
+                row.style.opacity = '0'; row.style.height = row.offsetHeight + 'px';
+                row.style.transition = 'all 0.3s'; row.style.overflow = 'hidden';
+                setTimeout(() => { row.style.height = '0'; row.style.padding = '0'; }, 50);
+                setTimeout(() => { row.remove(); }, 350);
+                updateNavBadge(data.unread_count);
+                showToast('消息已删除');
+            }
+        });
+    }, { danger: true, title: 'Confirm deletion' });
 }
 
 function toggleSelectMode() {
@@ -331,18 +332,24 @@ function updateBulkUI() {
 function bulkAction(action) {
     var ids = Array.from(document.querySelectorAll('.msg-select:checked')).map(cb => cb.dataset.id);
     if (!ids.length) return;
-    if (action === 'delete' && !confirm('确定要删除选中的 ' + ids.length + ' 条消息吗？')) return;
-    fetch('/manager/admin_messages/bulk/', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': CSRF},
-        body: 'action=' + action + '&ids=' + ids.join(',')
-    }).then(r => r.json()).then(data => {
-        if (data.success) {
-            updateNavBadge(data.unread_count);
-            showToast('操作成功');
-            setTimeout(() => location.reload(), 800);
-        }
-    });
+    var runBulk = function() {
+        fetch('/manager/admin_messages/bulk/', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': CSRF},
+            body: 'action=' + action + '&ids=' + ids.join(',')
+        }).then(r => r.json()).then(data => {
+            if (data.success) {
+                updateNavBadge(data.unread_count);
+                showToast('操作成功');
+                setTimeout(() => location.reload(), 800);
+            }
+        });
+    };
+    if (action === 'delete') {
+        gConfirmAction('确定要删除选中的 ' + ids.length + ' 条消息吗？', runBulk, { danger: true, title: 'Confirm deletion' });
+    } else {
+        runBulk();
+    }
 }
 
 function updateNavBadge(count) {

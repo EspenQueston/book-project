@@ -2,7 +2,7 @@
 {% load i18n %}
 {% load currency_filters %}
 
-{% block title %}{{ book.name }} - {% trans "Book Details" %}{% endblock %}
+{% block title %}{{ book.name }} - {% trans "图书详情" %}{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -107,10 +107,69 @@
 @media (min-width: 769px) {
     .book-mobile-page { display: none !important; }
 }
-/* Desktop: reviews sit in right column under hero, above intro (see book-desk-reviews-strip) */
+/* Desktop: social zone bottom-left under book info */
 @media (min-width: 992px) {
-    .book-desk-reviews-strip .lr-block { margin-bottom: 0; }
-    .book-desk-reviews-strip .lr-card { margin-bottom: 0; }
+    .book-desk-social-wrap {
+        margin-top: 4px;
+        background: linear-gradient(160deg, rgba(255,255,255,0.98) 0%, rgba(248,250,255,0.95) 100%);
+        border: 1px solid rgba(102,126,234,0.12);
+        position: relative;
+        overflow: hidden;
+    }
+    .book-desk-social-wrap::before {
+        content: '';
+        position: absolute;
+        inset: 0 auto auto 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(90deg, #667eea, #764ba2, #10b981);
+        opacity: 0.9;
+    }
+    .book-desk-social-wrap .desk-book-social-zone { gap: 22px; padding-top: 4px; }
+    .book-desk-social-wrap .desk-seller-card { margin-bottom: 0; }
+    .book-desk-social-wrap .lr-card {
+        border-radius: 18px;
+        border: 1px solid rgba(102,126,234,0.1);
+        box-shadow: 0 8px 28px rgba(15,23,42,0.06);
+    }
+}
+/* Mobile + desktop seller buttons — equal horizontal row */
+.bmp-seller-btns,
+.bmp-seller-actions-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 10px;
+}
+.bmp-seller-btns .bmp-seller-btn,
+.bmp-seller-actions-row .bmp-seller-btn {
+    flex: unset;
+    width: 100%;
+    min-height: 40px;
+    padding: 8px 6px;
+    font-size: 0.72rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.bmp-seller-btns .bmp-seller-btn.follow,
+.bmp-seller-actions-row .bmp-seller-btn.follow {
+    flex: unset;
+    padding: 8px 6px;
+    min-height: 40px;
+    font-size: 0.72rem;
+}
+.bmp-seller-btns .bmp-seller-btn:nth-child(2),
+.bmp-seller-actions-row .bmp-seller-btn:nth-child(2) {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 4px 14px rgba(102,126,234,0.32);
+}
+.bmp-seller-section--publisher .bmp-seller-btns .bmp-seller-btn:nth-child(2),
+.bmp-seller-section--publisher .bmp-seller-actions-row .bmp-seller-btn:nth-child(2) {
+    background: linear-gradient(135deg, #10b981, #059669);
+    box-shadow: 0 4px 14px rgba(16,185,129,0.32);
 }
 
 /* === Mobile Taobao Styles === */
@@ -290,28 +349,69 @@
 .bmp-score-val { font-size: 14px; font-weight: 700; color: #E4393C; }
 .bmp-score-lbl { font-size: 10px; color: #999; }
 .bmp-seller-btns {
-    display: flex; gap: 14px; margin-top: 4px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 10px;
 }
 .bmp-seller-btn {
-    flex: 1; padding: 11px 8px; border-radius: 22px;
-    font-size: 13px; font-weight: 700; text-align: center;
-    border: 1.5px solid #667eea; color: #667eea; cursor: pointer;
+    flex: unset;
+    width: 100%;
+    padding: 8px 6px;
+    border-radius: 22px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-align: center;
+    border: 1.5px solid #667eea;
+    color: #667eea;
+    cursor: pointer;
     text-decoration: none;
     background: #fff;
     transition: all 0.25s ease;
-    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 40px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .bmp-seller-btn:active { transform: scale(0.97); }
-.bmp-seller-btn:nth-child(2) {
+.bmp-seller-btns .bmp-seller-btn:nth-child(2) {
     background: linear-gradient(135deg, #667eea, #764ba2);
-    color: #fff; border-color: transparent;
+    color: #fff;
+    border-color: transparent;
     box-shadow: 0 4px 14px rgba(102,126,234,0.32);
 }
 .bmp-seller-btn.follow {
+    background: #fff;
+    color: #667eea;
+    border: 1.5px solid #667eea;
+    min-height: 40px;
+    font-size: 0.72rem;
+}
+.bmp-seller-btn.follow.is-following {
     background: linear-gradient(135deg, #667eea, #764ba2);
-    color: #fff; border-color: transparent;
-    flex: 0 0 auto; padding: 6px 14px; min-height: 32px; font-size: 12px;
+    color: #fff;
+    border-color: transparent;
+}
+.bmp-seller-section--publisher .bmp-seller-btns .bmp-seller-btn:nth-child(2) {
+    background: linear-gradient(135deg, #10b981, #059669);
+    box-shadow: 0 4px 14px rgba(16,185,129,0.32);
+}
+.bmp-seller-section--publisher .bmp-seller-btn {
+    border-color: #10b981;
+    color: #059669;
+}
+.bmp-seller-section--publisher .bmp-seller-btn.follow {
+    border-color: #10b981;
+    color: #059669;
+}
+.bmp-seller-section--publisher .bmp-seller-btn.follow.is-following {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #fff;
+    border-color: transparent;
 }
 
 /* Certifications grid */
@@ -577,6 +677,7 @@ html[data-theme="dark"] .bmp-feed-meta {
     }
 }
 </style>
+{% include 'marketplace/includes/seller_card_theme.html' %}
 {% endblock %}
 
 {% block content %}
@@ -595,7 +696,7 @@ html[data-theme="dark"] .bmp-feed-meta {
             </div>
         </div>
         {% if book.price > 0 and sold_delivered > 0 %}
-        <div class="bmp-promo-badge">{% if sold_delivered > 50 %}🔥 {% trans "Hot" %}{% elif book.inventory <= 5 %}⚡ {% trans "Limited" %}{% else %}📦 {% trans "In Stock" %}{% endif %}</div>
+        <div class="bmp-promo-badge">{% if sold_delivered > 50 %}🔥 {% trans "热卖" %}{% elif book.inventory <= 5 %}⚡ {% trans "限量" %}{% else %}📦 {% trans "有货" %}{% endif %}</div>
         {% endif %}
         <div class="bmp-gallery-counter" id="bmpCounter">1/2</div>
     </div>
@@ -607,10 +708,10 @@ html[data-theme="dark"] .bmp-feed-meta {
             {% if book.price > 0 %}
             <div class="bmp-price-original">{{ book.price|add:30|fcfa }}</div>
             {% endif %}
-            <div class="bmp-price-sold ms-auto">{% trans "Sold" %} {{ sold_delivered }}+</div>
+            <div class="bmp-price-sold ms-auto">{% trans "已售" %} {{ sold_delivered }}+</div>
         </div>
         {% if book.inventory > 0 %}
-        <div><span class="bmp-low-badge">{% trans "Lowest in 30 days" %}</span> <span class="bmp-low-badge" style="margin-left:4px;">{% trans "7-Day Return" %}</span></div>
+        <div><span class="bmp-low-badge">{% trans "30天最低价" %}</span> <span class="bmp-low-badge" style="margin-left:4px;">{% trans "七天退换" %}</span></div>
         {% endif %}
     </div>
 
@@ -618,7 +719,7 @@ html[data-theme="dark"] .bmp-feed-meta {
     <div class="bmp-title-section">
         <div class="bmp-title">{{ book.name }}</div>
         <div class="bmp-tags-row">
-            <span class="bmp-tag" style="background:#fde68a;color:#92400e;">📚 {% trans "Book" %}</span>
+            <span class="bmp-tag" style="background:#fde68a;color:#92400e;">📚 {% trans "图书" %}</span>
             {% for author in book.author_set.all|slice:":2" %}
             <span class="bmp-tag" style="background:#e0e7ff;color:#3730a3;">✍️ {{ author.name }}</span>
             {% endfor %}
@@ -630,147 +731,156 @@ html[data-theme="dark"] .bmp-feed-meta {
     <div class="bmp-delivery-section">
         <div class="bmp-delivery-row">
             <i class="fas fa-truck"></i>
-            <span><span class="bmp-delivery-highlight">{% trans "Express Delivery" %}</span> · {% trans "Est." %} <strong>2-3{% trans "days" %}</strong>{% trans "delivery" %}</span>
+            <span><span class="bmp-delivery-highlight">{% trans "快递配送" %}</span> · {% trans "预计" %} <strong>2-3{% trans "天" %}</strong>{% trans "送达" %}</span>
             <i class="fas fa-chevron-right ms-auto" style="font-size:10px;color:#ccc;"></i>
         </div>
         <div class="bmp-delivery-row">
             <i class="fas fa-map-marker-alt"></i>
-            <span>{% trans "Shipped from" %} <strong>{% trans "Beijing/Dakar" %}</strong> · <span class="bmp-delivery-highlight">{% trans "Free Shipping" %}</span></span>
+            <span>{% trans "发货地" %} <strong>{% trans "北京/达喀尔" %}</strong> · <span class="bmp-delivery-highlight">{% trans "包邮" %}</span></span>
         </div>
         <div class="bmp-delivery-row">
             <i class="fas fa-shield-alt"></i>
-            <span>{% trans "Authentic Guarantee" %} · {% trans "DUNO Platform Guarantee" %}</span>
+            <span>{% trans "正品保证" %} · {% trans "DUNO平台保障" %}</span>
         </div>
     </div>
 
     <!-- E. Guarantee -->
     <div class="bmp-guarantee">
         <i class="fas fa-shield-alt"></i>
-        <span>{% trans "Return Protection" %} | <strong>{% trans "7-Day No-Reason Return" %}</strong> | {% trans "Fast Refund" %}</span>
+        <span>{% trans "退货保障" %} | <strong>{% trans "七天无理由退换" %}</strong> | {% trans "快速退款" %}</span>
     </div>
 
     <!-- F. Specs (scrollable) -->
     <div class="bmp-specs-section">
-        <div class="bmp-specs-label">{% trans "Specifications" %}</div>
+        <div class="bmp-specs-label">{% trans "规格参数" %}</div>
         <div class="bmp-specs-scroll">
             {% if book.author_set.all %}
-            <div class="bmp-spec-chip"><strong>{% trans "Author" %}</strong>{{ book.author_set.first.name|default:"—" }}</div>
+            <div class="bmp-spec-chip"><strong>{% trans "作者" %}</strong>{{ book.author_set.first.name|default:"—" }}</div>
             {% endif %}
-            <div class="bmp-spec-chip"><strong>{% trans "Publisher" %}</strong>{{ book.publisher.publisher_name }}</div>
-            <div class="bmp-spec-chip"><strong>{% trans "Stock" %}</strong>{{ book.inventory }} {% trans "pcs" %}</div>
-            <div class="bmp-spec-chip"><strong>{% trans "Sold" %}</strong>{{ sold_delivered }}+</div>
+            <div class="bmp-spec-chip"><strong>{% trans "出版社" %}</strong>{{ book.publisher.publisher_name }}</div>
+            <div class="bmp-spec-chip"><strong>{% trans "库存" %}</strong>{{ book.inventory }} {% trans "件" %}</div>
+            <div class="bmp-spec-chip"><strong>{% trans "已售" %}</strong>{{ sold_delivered }}+</div>
             {% if book.description %}
-            <div class="bmp-spec-chip"><strong>{% trans "Intro" %}</strong>{{ book.description|truncatechars:15 }}</div>
+            <div class="bmp-spec-chip"><strong>{% trans "简介" %}</strong>{{ book.description|truncatechars:15 }}</div>
             {% endif %}
         </div>
     </div>
 
-    <!-- H. Q&A Section -->
-    <div class="bmp-qa-section">
-        <div class="bmp-qa-title">{% trans "Q&A" %} <span style="font-size:11px;color:#999;font-weight:400;">({{ sold_delivered }} {% trans "people purchased" %})</span></div>
-        <div class="bmp-qa-item">
-            <div class="bmp-qa-q">{% trans "Does this book have an e-version?" %}</div>
-            <div class="bmp-qa-a">{% trans "Yes, contact support for a download code." %}</div>
-        </div>
-        <div class="bmp-qa-item">
-            <div class="bmp-qa-q">{% trans "Does the content match the description?" %}</div>
-            <div class="bmp-qa-a">{% trans "Authentic, great quality, highly recommended!" %}</div>
-        </div>
-        <a href="{% url 'manager:public_contact' %}" style="color:#667eea;font-size:12px;font-weight:600;text-decoration:none;">{% trans "View more >" %}</a>
-    </div>
-
+    <!-- G. Reviews (right after book info) -->
     {% with review_block_uid="book-mob" %}
     {% include 'marketplace/includes/listing_reviews_block.html' %}
     {% endwith %}
 
-    <!-- I. Publisher/Seller Section -->
+    <!-- Vendor + Publisher (mobile) -->
     {% if book_vendor %}
-    <div class="bmp-seller-section">
+    <div class="bmp-seller-section{% if book_vendor.is_official %} bmp-seller-section--official{% endif %}">
         <div class="bmp-seller-header">
             <div class="bmp-seller-logo">
                 {% if book_vendor.get_logo_url %}<img src="{{ book_vendor.get_logo_url }}" style="width:100%;height:100%;object-fit:cover;">{% else %}<i class="fas fa-store"></i>{% endif %}
             </div>
             <div>
-                <a class="bmp-seller-name" style="text-decoration:none;color:#333;" href="{% url 'manager:start_conversation' %}?vendor_id={{ book_vendor.id }}&subject={{ book.name|urlencode }}">{{ book_vendor.company_name }}</a>
+                <a class="bmp-seller-name" style="text-decoration:none;color:#333;" href="{% url 'manager:public_vendor_shop' book_vendor.id %}">{{ book_vendor.company_name }}</a>
                 <div class="bmp-seller-meta">
-                    <i class="fas fa-star" style="color:#f59e0b;"></i> 4.9 · <span>{% trans "Verified Seller" %}</span>
+                    {% if book_vendor.is_official %}
+                    <span class="bmp-seller-badge-official"><i class="fas fa-badge-check"></i>{% trans "官方认证" %}</span>
+                    {% else %}
+                    <span class="verified"><i class="fas fa-shield-alt"></i> {% trans "认证商家" %}</span>
+                    {% endif %}
                 </div>
             </div>
-            <button class="bmp-seller-btn follow ms-auto" onclick="toggleVendorFollow({{ book_vendor.id }})" id="followVendorBtn">
-                <i class="fas fa-plus"></i> <span>{% trans "Follow" %}</span>
-            </button>
-        </div>
-        <div class="bmp-seller-scores">
-            <div class="bmp-score-item"><div class="bmp-score-val">4.9</div><div class="bmp-score-lbl">{% trans "Product Quality" %}</div></div>
-            <div class="bmp-score-item"><div class="bmp-score-val">4.8</div><div class="bmp-score-lbl">{% trans "Delivery Speed" %}</div></div>
-            <div class="bmp-score-item"><div class="bmp-score-val">4.9</div><div class="bmp-score-lbl">{% trans "Service Quality" %}</div></div>
         </div>
         <div class="bmp-seller-btns">
-            <a href="{% url 'manager:public_vendor_shop' book_vendor.id %}" class="bmp-seller-btn">{% trans "Visit Shop" %}</a>
-            <a href="{% url 'manager:start_conversation' %}?subject={{ book_vendor.company_name|urlencode }}" class="bmp-seller-btn">{% trans "Contact Seller" %}</a>
+            <button type="button"
+                    class="bmp-seller-btn follow vendor-follow-btn{% if is_following_vendor %} is-following{% endif %}"
+                    data-vendor-id="{{ book_vendor.id }}"
+                    data-following="{% if is_following_vendor %}1{% else %}0{% endif %}"
+                    data-login-url="{% url 'manager:user_login' %}">
+                <i class="fas {% if is_following_vendor %}fa-check{% else %}fa-plus{% endif %}"></i>
+                <span class="follow-btn-label" data-follow="{% trans '关注店铺' %}" data-following="{% trans '已关注' %}">
+                    {% if is_following_vendor %}{% trans "已关注" %}{% else %}{% trans "关注店铺" %}{% endif %}
+                </span>
+            </button>
+            <a href="{% url 'manager:public_vendor_shop' book_vendor.id %}" class="bmp-seller-btn">{% trans "访问店铺" %}</a>
+            <a href="{% url 'manager:start_conversation' %}?item_type=book&item_id={{ book.id }}&subject={{ book.name|urlencode }}" class="bmp-seller-btn">{% trans "联系卖家" %}</a>
         </div>
     </div>
-    {% else %}
-    <div class="bmp-seller-section">
+    {% endif %}
+
+    <div class="bmp-seller-section bmp-seller-section--publisher">
         <div class="bmp-seller-header">
             <div class="bmp-seller-logo"><i class="fas fa-building"></i></div>
             <div>
                 <div class="bmp-seller-name">{{ book.publisher.publisher_name }}</div>
                 <div class="bmp-seller-meta">
-                    <i class="fas fa-star" style="color:#f59e0b;"></i> 4.9 · <span>{% trans "Official Publisher" %}</span>
+                    <i class="fas fa-star" style="color:#f59e0b;"></i> {% trans "官方出版社" %}
                 </div>
             </div>
-            <button class="bmp-seller-btn follow ms-auto" onclick="followPublisher({{ book.publisher.id }})" id="followPublisherBtn">
-                <i class="fas fa-plus"></i> <span>{% trans "Follow" %}</span>
-            </button>
-        </div>
-        <div class="bmp-seller-scores">
-            <div class="bmp-score-item"><div class="bmp-score-val">4.9</div><div class="bmp-score-lbl">{% trans "Product Quality" %}</div></div>
-            <div class="bmp-score-item"><div class="bmp-score-val">4.8</div><div class="bmp-score-lbl">{% trans "Delivery Speed" %}</div></div>
-            <div class="bmp-score-item"><div class="bmp-score-val">4.9</div><div class="bmp-score-lbl">{% trans "Service Quality" %}</div></div>
         </div>
         <div class="bmp-seller-btns">
-            <a href="{% url 'manager:public_publisher_detail' book.publisher.id %}" class="bmp-seller-btn">{% trans "View Profile" %}</a>
-            <a href="{% url 'manager:public_books' %}" class="bmp-seller-btn">{% trans "All Products" %}</a>
+            <button type="button"
+                    class="bmp-seller-btn follow publisher-follow-btn{% if is_following_publisher %} is-following{% endif %}"
+                    data-publisher-id="{{ book.publisher.id }}"
+                    data-following="{% if is_following_publisher %}1{% else %}0{% endif %}"
+                    data-login-url="{% url 'manager:user_login' %}">
+                <i class="fas {% if is_following_publisher %}fa-check{% else %}fa-plus{% endif %}"></i>
+                <span class="follow-btn-label" data-follow="{% trans '关注出版社' %}" data-following="{% trans '已关注' %}">
+                    {% if is_following_publisher %}{% trans "已关注" %}{% else %}{% trans "关注出版社" %}{% endif %}
+                </span>
+            </button>
+            <a href="{% url 'manager:public_publisher_detail' book.publisher.id %}" class="bmp-seller-btn">{% trans "查看主页" %}</a>
+            <a href="{% url 'manager:public_books' %}?publisher={{ book.publisher.id }}" class="bmp-seller-btn">{% trans "全部图书" %}</a>
         </div>
     </div>
-    {% endif %}
+
+    <!-- H. Q&A Section -->
+    <div class="bmp-qa-section">
+        <div class="bmp-qa-title">{% trans "问答" %} <span style="font-size:11px;color:#999;font-weight:400;">({{ sold_delivered }} {% trans "人已购买" %})</span></div>
+        <div class="bmp-qa-item">
+            <div class="bmp-qa-q">{% trans "本书有电子版吗？" %}</div>
+            <div class="bmp-qa-a">{% trans "有的，请联系客服获取下载码。" %}</div>
+        </div>
+        <div class="bmp-qa-item">
+            <div class="bmp-qa-q">{% trans "内容与描述相符吗？" %}</div>
+            <div class="bmp-qa-a">{% trans "正版保证，品质优秀，强烈推荐！" %}</div>
+        </div>
+        <a href="{% url 'manager:public_contact' %}" style="color:#667eea;font-size:12px;font-weight:600;text-decoration:none;">{% trans "查看更多" %}</a>
+    </div>
 
     <!-- J. Certifications Grid -->
     <div class="bmp-certs-section">
-        <div class="bmp-certs-title">{% trans "Service Guarantee" %}</div>
+        <div class="bmp-certs-title">{% trans "服务保障" %}</div>
         <div class="bmp-certs-grid">
             <div class="bmp-cert-item">
                 <div class="bmp-cert-icon" style="background:linear-gradient(135deg,#667eea,#764ba2);"><i class="fas fa-undo"></i></div>
-                <span class="bmp-cert-label">{% trans "15-Day Return" %}</span>
+                <span class="bmp-cert-label">{% trans "十五天退换" %}</span>
             </div>
             <div class="bmp-cert-item">
                 <div class="bmp-cert-icon" style="background:linear-gradient(135deg,#10b981,#059669);"><i class="fas fa-certificate"></i></div>
-                <span class="bmp-cert-label">{% trans "1-Year Store Warranty" %}</span>
+                <span class="bmp-cert-label">{% trans "正品保证" %}</span>
             </div>
             <div class="bmp-cert-item">
                 <div class="bmp-cert-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);"><i class="fas fa-shipping-fast"></i></div>
-                <span class="bmp-cert-label">{% trans "Shipping Insurance" %}</span>
+                <span class="bmp-cert-label">{% trans "运费险" %}</span>
             </div>
             <div class="bmp-cert-item">
                 <div class="bmp-cert-icon" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8);"><i class="fas fa-check-double"></i></div>
-                <span class="bmp-cert-label">{% trans "50+ Inspections" %}</span>
+                <span class="bmp-cert-label">{% trans "质量检测" %}</span>
             </div>
             <div class="bmp-cert-item">
                 <div class="bmp-cert-icon" style="background:linear-gradient(135deg,#ec4899,#be185d);"><i class="fas fa-exchange-alt"></i></div>
-                <span class="bmp-cert-label">{% trans "1-for-1" %}</span>
+                <span class="bmp-cert-label">{% trans "1赔1" %}</span>
             </div>
             <div class="bmp-cert-item">
                 <div class="bmp-cert-icon" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);"><i class="fas fa-truck"></i></div>
-                <span class="bmp-cert-label">{% trans "Free Shipping" %}</span>
+                <span class="bmp-cert-label">{% trans "包邮" %}</span>
             </div>
             <div class="bmp-cert-item">
                 <div class="bmp-cert-icon" style="background:linear-gradient(135deg,#14b8a6,#0f766e);"><i class="fas fa-tools"></i></div>
-                <span class="bmp-cert-label">{% trans "Lifetime Repair" %}</span>
+                <span class="bmp-cert-label">{% trans "终生维修" %}</span>
             </div>
             <div class="bmp-cert-item">
                 <div class="bmp-cert-icon" style="background:linear-gradient(135deg,#f97316,#ea580c);"><i class="fas fa-gift"></i></div>
-                <span class="bmp-cert-label">{% trans "New Customer Gift" %}</span>
+                <span class="bmp-cert-label">{% trans "新客礼包" %}</span>
             </div>
         </div>
     </div>
@@ -778,7 +888,7 @@ html[data-theme="dark"] .bmp-feed-meta {
     <!-- Description (if any) -->
     {% if book.description %}
     <div style="background:#fff;padding:12px 14px;margin-bottom:6px;">
-        <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:8px;">{% trans "Book Intro" %}</div>
+        <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:8px;">{% trans "图书简介" %}</div>
         <div style="font-size:13px;color:#666;line-height:1.7;">{{ book.description }}</div>
     </div>
     {% endif %}
@@ -813,28 +923,28 @@ html[data-theme="dark"] .bmp-feed-meta {
         <div class="bmp-action-icons">
             <a href="{% if book_vendor %}{% url 'manager:public_vendor_shop' book_vendor.id %}{% else %}{% url 'manager:public_publisher_detail' book.publisher.id %}{% endif %}" class="bmp-action-icon">
                 <i class="fas fa-store"></i>
-                <span>{% trans "Shop" %}</span>
+                <span>{% trans "进店" %}</span>
             </a>
             <a href="{% url 'manager:start_conversation' %}?item_type=book&item_id={{ book.id }}&subject={{ book.name|urlencode }}" class="bmp-action-icon">
                 <i class="fas fa-comments"></i>
-                <span>{% trans "Chat" %}</span>
+                <span>{% trans "在线咨询" %}</span>
             </a>
             <button class="bmp-action-icon" id="bmpWishBtn" onclick="toggleWishlistMobile({{ book.id }})" style="cursor:pointer;">
                 <i class="far fa-heart" id="bmpWishIcon"></i>
-                <span>{% trans "Favorite" %}</span>
+                <span>{% trans "收藏" %}</span>
             </button>
         </div>
         <div class="bmp-buy-btns">
             <button class="bmp-cart-btn" onclick="bmpAddToCart({{ book.id }})">
                 <i class="fas fa-shopping-cart"></i>
-                <span>{% trans "Add to Cart" %}</span>
+                <span>{% trans "加入购物车" %}</span>
             </button>
             <form method="post" action="{% url 'manager:buy_now' book.id %}" style="flex:1;margin:0;">
                 {% csrf_token %}
                 <input type="hidden" name="quantity" value="1">
                 <button type="submit" class="bmp-buy-btn w-100">
                     <i class="fas fa-bolt"></i>
-                    <span>{% trans "Buy Now" %}</span>
+                    <span>{% trans "立即购买" %}</span>
                 </button>
             </form>
         </div>
@@ -867,13 +977,13 @@ html[data-theme="dark"] .bmp-feed-meta {
 
                 <div class="d-flex flex-wrap gap-2 mb-4">
                     <span class="hero-meta-badge"><i class="fas fa-building"></i>{{ book.publisher.publisher_name }}</span>
-                    <span class="hero-meta-badge"><i class="fas fa-chart-line"></i>{% trans "Sold" %} {{ sold_delivered }}</span>
+                    <span class="hero-meta-badge"><i class="fas fa-chart-line"></i>{% trans "已售" %} {{ sold_delivered }}</span>
                     {% if book.inventory > 10 %}
-                    <span class="hero-meta-badge" style="background:rgba(16,185,129,0.25);"><i class="fas fa-check-circle"></i>{% trans "Well Stocked" %}</span>
+                    <span class="hero-meta-badge" style="background:rgba(16,185,129,0.25);"><i class="fas fa-check-circle"></i>{% trans "库存充足" %}</span>
                     {% elif book.inventory > 0 %}
-                    <span class="hero-meta-badge" style="background:rgba(245,158,11,0.25);"><i class="fas fa-exclamation-triangle"></i>{% trans "Low Stock" %}</span>
+                    <span class="hero-meta-badge" style="background:rgba(245,158,11,0.25);"><i class="fas fa-exclamation-triangle"></i>{% trans "库存紧张" %}</span>
                     {% else %}
-                    <span class="hero-meta-badge" style="background:rgba(239,68,68,0.25);"><i class="fas fa-times-circle"></i>{% trans "Temporarily Out of Stock" %}</span>
+                    <span class="hero-meta-badge" style="background:rgba(239,68,68,0.25);"><i class="fas fa-times-circle"></i>{% trans "暂时缺货" %}</span>
                     {% endif %}
                 </div>
                 <div class="price-tag">{{ book.price|fcfa }}</div>
@@ -885,54 +995,46 @@ html[data-theme="dark"] .bmp-feed-meta {
 <!-- Main Content -->
 <div class="main-content">
     <div class="container">
-        <!-- Desktop (lg+): reviews under hero, right column — above 图书简介 -->
-        <div class="row g-4 align-items-start book-desk-reviews-strip d-none d-lg-flex mb-lg-2">
-            <div class="col-lg-8"></div>
-            <div class="col-lg-4">
-                {% with review_block_uid="book-desk" %}
-                {% include 'marketplace/includes/listing_reviews_block.html' %}
-                {% endwith %}
-            </div>
-        </div>
+        {% include 'marketplace/includes/desktop_single_social_styles.html' %}
         <div class="row g-4">
-            <!-- Left Column: Info -->
+            <!-- Left Column: Info + reviews / vendor / publisher -->
             <div class="col-lg-8">
                 <!-- Description -->
                 {% if book.description %}
                 <div class="content-card">
-                    <div class="section-heading"><i class="fas fa-align-left" style="color:#667eea;"></i>{% trans "Book Intro" %}</div>
+                    <div class="section-heading"><i class="fas fa-align-left" style="color:#667eea;"></i>{% trans "图书简介" %}</div>
                     <p style="color:#475569; line-height:1.9; font-size:0.97rem;">{{ book.description }}</p>
                 </div>
                 {% endif %}
 
                 <!-- Details -->
                 <div class="content-card">
-                    <div class="section-heading"><i class="fas fa-info-circle" style="color:#667eea;"></i>{% trans "Book Info" %}</div>
+                    <div class="section-heading"><i class="fas fa-info-circle" style="color:#667eea;"></i>{% trans "图书信息" %}</div>
                     <div class="info-row">
-                        <span class="lbl"><i class="fas fa-building text-primary"></i>{% trans "Publisher" %}</span>
+                        <span class="lbl"><i class="fas fa-building text-primary"></i>{% trans "出版社" %}</span>
                         <span class="val">
                             <a href="{% url 'manager:public_publisher_detail' book.publisher.id %}" style="color:#667eea;text-decoration:none;">{{ book.publisher.publisher_name }}</a>
                         </span>
                     </div>
                     <div class="info-row">
-                        <span class="lbl"><i class="fas fa-map-marker-alt text-danger"></i>{% trans "Address" %}</span>
+                        <span class="lbl"><i class="fas fa-map-marker-alt text-danger"></i>{% trans "地址" %}</span>
                         <span class="val">{{ book.publisher.publisher_address }}</span>
                     </div>
                     <div class="info-row">
-                        <span class="lbl"><i class="fas fa-boxes text-warning"></i>{% trans "Stock" %}</span>
+                        <span class="lbl"><i class="fas fa-boxes text-warning"></i>{% trans "库存" %}</span>
                         <span class="val">
-                            {% if book.inventory > 10 %}<span class="stock-pill stock-ok"><i class="fas fa-check-circle"></i>{{ book.inventory }} {% trans "pcs" %}</span>
-                            {% elif book.inventory > 0 %}<span class="stock-pill stock-low"><i class="fas fa-exclamation-triangle"></i>{{ book.inventory }} {% trans "pcs" %}</span>
-                            {% else %}<span class="stock-pill stock-out"><i class="fas fa-times-circle"></i>{% trans "Out of Stock" %}</span>{% endif %}
+                            {% if book.inventory > 10 %}<span class="stock-pill stock-ok"><i class="fas fa-check-circle"></i>{{ book.inventory }} {% trans "件" %}</span>
+                            {% elif book.inventory > 0 %}<span class="stock-pill stock-low"><i class="fas fa-exclamation-triangle"></i>{{ book.inventory }} {% trans "件" %}</span>
+                            {% else %}<span class="stock-pill stock-out"><i class="fas fa-times-circle"></i>{% trans "缺货" %}</span>{% endif %}
                         </span>
                     </div>
                     <div class="info-row">
-                        <span class="lbl"><i class="fas fa-chart-line" style="color:#10b981;"></i>{% trans "Sold" %}</span>
-                        <span class="val">{{ sold_delivered }} {% trans "pcs" %}</span>
+                        <span class="lbl"><i class="fas fa-chart-line" style="color:#10b981;"></i>{% trans "已售" %}</span>
+                        <span class="val">{{ sold_delivered }} {% trans "件" %}</span>
                     </div>
                     {% if authors %}
                     <div class="info-row">
-                        <span class="lbl"><i class="fas fa-user-pen text-primary"></i>{% trans "Author" %}</span>
+                        <span class="lbl"><i class="fas fa-user-pen text-primary"></i>{% trans "作者" %}</span>
                         <span class="val">
                             <div class="d-flex flex-wrap gap-2">
                                 {% for author in authors %}
@@ -945,9 +1047,14 @@ html[data-theme="dark"] .bmp-feed-meta {
                     </div>
                     {% endif %}
                 </div>
+
+                <!-- Reviews → Vendor → Publisher (desktop bottom-left) -->
+                <div class="content-card book-desk-social-wrap d-none d-lg-block">
+                    {% include 'marketplace/includes/desktop_book_social_zone.html' with review_block_uid='book-desk' seller_vendor=book_vendor seller_item_name=book.name listing_kind='book' listing_id=book.id publisher=book.publisher publisher_follower_count=publisher_follower_count %}
+                </div>
             </div>
 
-            <!-- Right Column: Purchase -->
+            <!-- Right Column: Purchase only -->
             <div class="col-lg-4">
                 <div class="content-card sticky-top" style="top: 90px;">
                     <div class="section-heading"><i class="fas fa-shopping-cart" style="color:#667eea;"></i>{% trans "购买" %}</div>
@@ -994,11 +1101,11 @@ html[data-theme="dark"] .bmp-feed-meta {
                                 {% csrf_token %}
                                 <input type="hidden" name="quantity" value="1" id="buy-quantity">
                                 <button type="submit" class="btn-buy w-100">
-                                    <i class="fas fa-bolt"></i>{% trans "Buy Now" %}
+                                    <i class="fas fa-bolt"></i>{% trans "立即购买" %}
                                 </button>
                             </form>
                             <button onclick="addToCartWithQuantity({{ book.id }})" class="btn-cart w-100" id="add-to-cart-btn">
-                                <i class="fas fa-shopping-cart"></i>{% trans "Add to Cart" %}
+                                <i class="fas fa-shopping-cart"></i>{% trans "加入购物车" %}
                             </button>
                         </div>
                     {% else %}
@@ -1006,33 +1113,33 @@ html[data-theme="dark"] .bmp-feed-meta {
                             <div style="width:80px;height:80px;background:#fee2e2;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;">
                                 <i class="fas fa-times-circle" style="font-size:2rem;color:#ef4444;"></i>
                             </div>
-                            <h6 class="fw-bold" style="color:#ef4444;">{% trans "Temporarily Out of Stock" %}</h6>
-                            <p class="text-muted small">{% trans "This item is temporarily out of stock and cannot be purchased" %}</p>
+                            <h6 class="fw-bold" style="color:#ef4444;">{% trans "暂时缺货" %}</h6>
+                            <p class="text-muted small">{% trans "该商品暂时缺货，无法购买" %}</p>
                         </div>
                     {% endif %}
 
                     <!-- Chat with seller -->
                     <div class="mt-4 pt-3 border-top d-grid gap-2">
                         <a href="{% url 'manager:start_conversation' %}?item_type=book&item_id={{ book.id }}&subject={{ book.name|urlencode }}" class="btn w-100" style="background:linear-gradient(135deg,#f59e0b,#f97316);color:#fff;border:none;border-radius:10px;font-weight:700;padding:11px;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .3s;">
-                            <i class="fas fa-comment-dots"></i>{% trans "Contact Seller" %}
+                            <i class="fas fa-comment-dots"></i>{% trans "联系卖家" %}
                         </a>
                         {% if book_vendor %}
                         <a href="{% url 'manager:public_vendor_shop' book_vendor.id %}" class="btn btn-sm w-100" style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:10px;font-weight:700;padding:11px;display:flex;align-items:center;justify-content:center;gap:8px;">
-                            <i class="fas fa-store"></i>{% trans "Visit Seller Shop" %}
+                            <i class="fas fa-store"></i>{% trans "访问店铺" %}
                         </a>
                         {% endif %}
                         <a href="{% url 'manager:public_publisher_detail' book.publisher.id %}" class="btn btn-outline-secondary btn-sm" style="border-radius:8px;">
-                            <i class="fas fa-building me-1"></i>{% trans "View Publisher" %}
+                            <i class="fas fa-building me-1"></i>{% trans "查看出版社" %}
                         </a>
                         <div class="row g-2">
                             <div class="col-6">
                                 <a href="{% url 'manager:public_books' %}" class="btn btn-outline-secondary btn-sm w-100" style="border-radius:8px;">
-                                    <i class="fas fa-arrow-left me-1"></i>{% trans "Back" %}
+                                    <i class="fas fa-arrow-left me-1"></i>{% trans "返回" %}
                                 </a>
                             </div>
                             <div class="col-6">
                                 <a href="{% url 'manager:view_cart' %}" class="btn btn-outline-primary btn-sm w-100" style="border-radius:8px;">
-                                    <i class="fas fa-shopping-cart me-1"></i>{% trans "Cart" %}
+                                    <i class="fas fa-shopping-cart me-1"></i>{% trans "购物车" %}
                                 </a>
                             </div>
                         </div>
@@ -1209,46 +1316,6 @@ function bmpAddToCart(bookId) {
         if (typeof gToast === 'function') gToast('加入失败，请重试', 'error');
     });
 }
-// ===== Follow publisher =====
-function followPublisher(publisherId) {
-    var btn = document.getElementById('followPublisherBtn');
-    if (!btn) return;
-    var csrf = document.querySelector('[name=csrfmiddlewaretoken]');
-    if (!csrf) { window.location.href = '{% url "manager:user_login" %}'; return; }
-    fetch('/manager/publisher/' + publisherId + '/follow/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrf.value },
-        body: ''
-    }).then(r => r.json()).then(d => {
-        if (d.success) {
-            btn.innerHTML = d.following
-                ? '<i class="fas fa-check"></i> <span>已关注</span>'
-                : '<i class="fas fa-plus"></i> <span>关注</span>';
-            btn.classList.toggle('follow', d.following);
-        }
-        if (typeof gToast === 'function') gToast(d.message, 'success');
-    }).catch(function() {});
-}
-// ===== Follow vendor =====
-function toggleVendorFollow(vendorId) {
-    var btn = document.getElementById('followVendorBtn');
-    if (!btn) return;
-    var csrf = document.querySelector('[name=csrfmiddlewaretoken]');
-    if (!csrf) { window.location.href = '{% url "manager:user_login" %}'; return; }
-    fetch('/manager/vendor/' + vendorId + '/follow/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrf.value },
-        body: ''
-    }).then(r => r.json()).then(d => {
-        if (d.login_required) { window.location.href = '{% url "manager:user_login" %}'; return; }
-        if (d.success) {
-            btn.innerHTML = d.following
-                ? '<i class="fas fa-check"></i> <span>已关注</span>'
-                : '<i class="fas fa-plus"></i> <span>关注</span>';
-            btn.classList.toggle('follow', d.following);
-        }
-        if (typeof gToast === 'function') gToast(d.message, 'success');
-    }).catch(function() {});
-}
 </script>
+<script src="/static/js/listing_follow.js"></script>
 {% endblock %}

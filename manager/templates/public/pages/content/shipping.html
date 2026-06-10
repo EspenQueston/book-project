@@ -1,0 +1,57 @@
+{% load i18n %}
+
+<section class="duno-section duno-section-platform visible" aria-label="{% trans '下单与配送' %}">
+    <details class="duno-acc-item" id="commander" open>
+        <summary class="duno-acc-head">
+            <span class="duno-acc-icon"><i class="fas fa-cart-shopping"></i></span>
+            {% trans "下单" %}
+        </summary>
+        <div class="duno-acc-body">
+            <ol class="duno-steps-list">
+                <li>{% trans "选择您的产品或服务" %}</li>
+                <li>{% trans "如有需要请联系卖家" %}</li>
+                <li>{% trans "确认、付款并选择取货点" %}</li>
+            </ol>
+        </div>
+    </details>
+
+    <details class="duno-acc-item" id="paiement">
+        <summary class="duno-acc-head">
+            <span class="duno-acc-icon"><i class="fas fa-mobile-screen"></i></span>
+            {% trans "支付方式" %}
+        </summary>
+        <div class="duno-acc-body">
+            <div class="duno-cards-grid-legal">
+                <div class="duno-data-card"><i class="fas fa-wallet"></i><h4>Mobile Money</h4><p>{% trans "100% 通过 MoMo 支付（KKiaPay / PawaPay）" %}</p></div>
+                <div class="duno-data-card"><i class="fas fa-percent"></i><h4>{% trans "部分付款" %}</h4><p>{% trans "定金 + 货到付款余额" %}</p></div>
+                <div class="duno-data-card"><i class="fas fa-hand-holding-dollar"></i><h4>{% trans "货到付款" %}</h4><p>{% trans "视卖家供应情况而定" %}</p></div>
+            </div>
+        </div>
+    </details>
+
+    <details class="duno-acc-item" id="livraison">
+        <summary class="duno-acc-head">
+            <span class="duno-acc-icon"><i class="fas fa-location-dot"></i></span>
+            {% trans "配送与取货点" %}
+        </summary>
+        <div class="duno-acc-body">
+            <p>{% trans "每个区设有取货点：配送更快、成本更低、更加安全。" %}</p>
+            <ul class="duno-section-list">
+                <li>{% trans "在取货点自取（推荐）" %}</li>
+                <li>{% trans "如卖家提供则支持送货上门" %}</li>
+                <li>{% trans "通常时效：24 至 72 小时" %}</li>
+            </ul>
+        </div>
+    </details>
+
+    <details class="duno-acc-item" id="suivi" data-single="false">
+        <summary class="duno-acc-head">
+            <span class="duno-acc-icon"><i class="fas fa-bell"></i></span>
+            {% trans "跟踪与问题" %}
+        </summary>
+        <div class="duno-acc-body">
+            <p>{% trans "每个阶段均有通知：确认、备货、到达取货点、配送完成。" %}</p>
+            <div class="duno-highlight-legal warn"><i class="fas fa-clock me-2"></i>{% trans "请在 3 至 7 天内取件。如有问题，请通过平台联系卖家。" %}</div>
+        </div>
+    </details>
+</section>

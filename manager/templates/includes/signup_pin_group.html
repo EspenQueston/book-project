@@ -1,0 +1,20 @@
+{% load i18n %}
+<div class="pin-group mb-3" data-pin-group="{{ pin_group_id|default:'email' }}">
+    <input type="text"
+           class="pin-paste-field auth-field form-control"
+           maxlength="6"
+           inputmode="numeric"
+           pattern="[0-9]*"
+           autocomplete="one-time-code"
+           placeholder="{% trans 'Paste or type 6-digit code' %}"
+           aria-label="{% trans 'Verification code' %}">
+    <div class="pin-inputs {{ pin_inputs_class|default:'email-pin-inputs' }}">
+        <input type="text" class="pin-input {{ pin_input_class|default:'email-pin' }}" maxlength="1" inputmode="numeric" pattern="[0-9]" data-index="0" aria-hidden="true" tabindex="-1">
+        <input type="text" class="pin-input {{ pin_input_class|default:'email-pin' }}" maxlength="1" inputmode="numeric" pattern="[0-9]" data-index="1" aria-hidden="true" tabindex="-1">
+        <input type="text" class="pin-input {{ pin_input_class|default:'email-pin' }}" maxlength="1" inputmode="numeric" pattern="[0-9]" data-index="2" aria-hidden="true" tabindex="-1">
+        <input type="text" class="pin-input {{ pin_input_class|default:'email-pin' }}" maxlength="1" inputmode="numeric" pattern="[0-9]" data-index="3" aria-hidden="true" tabindex="-1">
+        <input type="text" class="pin-input {{ pin_input_class|default:'email-pin' }}" maxlength="1" inputmode="numeric" pattern="[0-9]" data-index="4" aria-hidden="true" tabindex="-1">
+        <input type="text" class="pin-input {{ pin_input_class|default:'email-pin' }}" maxlength="1" inputmode="numeric" pattern="[0-9]" data-index="5" aria-hidden="true" tabindex="-1">
+    </div>
+    <input type="hidden" name="{{ hidden_name|default:'pin' }}" id="{{ hidden_id|default:'pinHidden' }}">
+</div>

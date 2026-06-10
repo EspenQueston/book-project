@@ -1,0 +1,11 @@
+{% load i18n %}
+{# Reviews first, then vendor — Chinese msgids via {% trans %} #}
+<div class="desk-social-zone">
+    {% if review_block_uid %}
+    {% include 'marketplace/includes/listing_reviews_block.html' %}
+    {% endif %}
+    {% if seller_vendor %}
+    <div class="desk-social-divider d-none d-lg-block" aria-hidden="true"></div>
+    {% include 'marketplace/includes/desktop_vendor_card.html' with seller_vendor=seller_vendor seller_item_name=seller_item_name listing_kind=listing_kind listing_id=listing_id seller_card_variant=seller_card_variant seller_chat_url=seller_chat_url %}
+    {% endif %}
+</div>

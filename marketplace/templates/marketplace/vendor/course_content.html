@@ -299,14 +299,15 @@ function saveSection(){
     }).catch(()=>alert('操作失败'));
 }
 function deleteSection(id, name){
-    if(!confirm(`确定删除章节 "${name}" 及其所有课时？`)) return;
-    const fd = new FormData();
-    fd.append('csrfmiddlewaretoken', CSRF);
-    fetch(`/marketplace/vendor/courses/sections/${id}/delete/`, {method:'POST', body:fd})
-    .then(r=>r.json()).then(d=>{
-        if(d.success){ location.reload(); }
-        else { alert(d.message); }
-    });
+    gConfirmAction('{% trans "Delete this section and all its lessons?" %}', function() {
+        const fd = new FormData();
+        fd.append('csrfmiddlewaretoken', CSRF);
+        fetch(`/marketplace/vendor/courses/sections/${id}/delete/`, {method:'POST', body:fd})
+        .then(r=>r.json()).then(d=>{
+            if(d.success){ location.reload(); }
+            else { alert(d.message); }
+        });
+    }, { danger: true });
 }
 
 // Lesson Modal
@@ -400,14 +401,15 @@ function saveLesson(){
     });
 }
 function deleteLesson(id, name){
-    if(!confirm(`确定删除课时 "${name}" ？`)) return;
-    const fd = new FormData();
-    fd.append('csrfmiddlewaretoken', CSRF);
-    fetch(`/marketplace/vendor/courses/lessons/${id}/delete/`, {method:'POST', body:fd})
-    .then(r=>r.json()).then(d=>{
-        if(d.success){ location.reload(); }
-        else { alert(d.message); }
-    });
+    gConfirmAction('{% trans "Delete this lesson?" %}', function() {
+        const fd = new FormData();
+        fd.append('csrfmiddlewaretoken', CSRF);
+        fetch(`/marketplace/vendor/courses/lessons/${id}/delete/`, {method:'POST', body:fd})
+        .then(r=>r.json()).then(d=>{
+            if(d.success){ location.reload(); }
+            else { alert(d.message); }
+        });
+    }, { danger: true });
 }
 </script>
 {% endblock extra_vendor_js %}

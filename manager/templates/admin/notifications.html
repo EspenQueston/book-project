@@ -366,20 +366,22 @@
     }
 
     function deleteNotif(id) {
-        if (!confirm('确定删除此通知？')) return;
-        apiPost('delete', id, function() {
-            var el = document.getElementById('notif-' + id);
-            if (el) { el.style.opacity = '0'; el.style.transform = 'translateX(100px)'; setTimeout(function(){el.remove()}, 300); }
-            gToast('通知已删除','success');
-        });
+        gConfirmAction('确定删除此通知？', function() {
+            apiPost('delete', id, function() {
+                var el = document.getElementById('notif-' + id);
+                if (el) { el.style.opacity = '0'; el.style.transform = 'translateX(100px)'; setTimeout(function(){el.remove()}, 300); }
+                gToast('通知已删除','success');
+            });
+        }, { danger: true, title: 'Confirm deletion' });
     }
 
     function clearRead() {
-        if (!confirm('确定清除所有已读通知？')) return;
-        apiPost('clear_all', null, function() {
-            gToast('已读通知已清除','success');
-            setTimeout(function(){location.reload()},800);
-        });
+        gConfirmAction('确定清除所有已读通知？', function() {
+            apiPost('clear_all', null, function() {
+                gToast('已读通知已清除','success');
+                setTimeout(function(){location.reload()},800);
+            });
+        }, { danger: true, title: 'Confirm deletion' });
     }
 
     // Detail data from server

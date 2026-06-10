@@ -1,0 +1,47 @@
+{% load i18n %}
+
+<section class="duno-section duno-section-platform visible" aria-label="{% trans '客户服务' %}">
+    <details class="duno-acc-item" id="aide" open>
+        <summary class="duno-acc-head">
+            <span class="duno-acc-icon"><i class="fas fa-life-ring"></i></span>
+            {% trans "我们能帮您什么？" %}
+        </summary>
+        <div class="duno-acc-body">
+            <div class="duno-cards-grid-legal">
+                <div class="duno-data-card"><i class="fas fa-shopping-bag"></i><h4>{% trans "订单" %}</h4><p>{% trans "下单、MoMo 支付、订单跟踪。" %}</p></div>
+                <div class="duno-data-card"><i class="fas fa-truck"></i><h4>{% trans "配送" %}</h4><p>{% trans "取货点、延迟、取件。" %}</p></div>
+                <div class="duno-data-card"><i class="fas fa-rotate-left"></i><h4>{% trans "退款" %}</h4><p>{% trans "产品不符、与卖家争议。" %}</p></div>
+                <div class="duno-data-card"><i class="fas fa-user-gear"></i><h4>{% trans "账户" %}</h4><p>{% trans "登录、安全、用户资料。" %}</p></div>
+            </div>
+        </div>
+    </details>
+
+    <details class="duno-acc-item" id="contact">
+        <summary class="duno-acc-head">
+            <span class="duno-acc-icon"><i class="fas fa-phone"></i></span>
+            {% trans "联系我们" %}
+        </summary>
+        <div class="duno-acc-body">
+            <div class="duno-contact-row"><i class="fas fa-envelope text-primary"></i><div><strong>Email</strong><br>{{ PLATFORM_CONTACT_EMAIL|default:"contact@duno360.com" }}</div></div>
+            <div class="duno-contact-row"><i class="fas fa-phone text-primary"></i><div><strong>{% trans "电话" %}</strong><br><a href="{{ PLATFORM_PHONE_TEL }}">{{ PLATFORM_PHONE_DISPLAY }}</a></div></div>
+            <div class="duno-contact-row"><i class="fab fa-whatsapp text-success"></i><div><strong>WhatsApp</strong><br><a href="{{ PLATFORM_WHATSAPP_URL }}" target="_blank" rel="noopener noreferrer">{{ PLATFORM_PHONE_DISPLAY }}</a></div></div>
+            <div class="duno-contact-row"><i class="fas fa-clock text-warning"></i><div><strong>{% trans "营业时间" %}</strong><br>{% trans "周一至周六，08:00 – 18:00" %}</div></div>
+            <div class="duno-highlight-legal"><i class="fas fa-bolt me-2"></i>{% trans "最多 24 小时内回复。紧急情况优先处理。" %}</div>
+            <a href="{% url 'manager:public_contact' %}" class="duno-legal-contact"><i class="fas fa-paper-plane"></i>{% trans "联系表单" %}</a>
+        </div>
+    </details>
+
+    <details class="duno-acc-item" id="conseils" data-single="false">
+        <summary class="duno-acc-head">
+            <span class="duno-acc-icon"><i class="fas fa-lightbulb"></i></span>
+            {% trans "快速获得帮助" %}
+        </summary>
+        <div class="duno-acc-body">
+            <ul class="duno-section-list">
+                <li>{% trans "请提供您的姓名或账户号码" %}</li>
+                <li>{% trans "请注明订单号" %}</li>
+                <li>{% trans "清晰描述问题，必要时附上证据" %}</li>
+            </ul>
+        </div>
+    </details>
+</section>

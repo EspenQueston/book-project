@@ -170,8 +170,9 @@
             height: 42px;
             border-radius: 12px;
             border: none;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.12));
-            color: var(--primary-color);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
         }
 
         .main-wrapper {
@@ -391,6 +392,12 @@
                     <a class="nav-link" href="/manager/admin/vendors/">
                         <i class="fas fa-store-alt"></i><span>卖家管理</span>
                     </a>
+                    <a class="nav-link" href="/manager/inventory/">
+                        <i class="fas fa-boxes"></i><span data-zh="库存管理" data-en="Inventory" data-fr="Inventaire">库存管理</span>
+                    </a>
+                    <a class="nav-link" href="/manager/admin/escrow/">
+                        <i class="fas fa-vault"></i><span data-zh="托管与结算" data-en="Escrow & payouts" data-fr="Escrow & reversements">托管与结算</span>
+                    </a>
                     <a class="nav-link" href="/manager/admin/chatbot/">
                         <i class="fas fa-robot"></i><span>AI 聊天配置</span>
                     </a>
@@ -411,7 +418,7 @@
         <div class="main-wrapper">
             <header class="admin-mobile-topbar d-lg-none">
                 <button type="button" class="btn-icon" id="adminSidebarToggle" aria-controls="adminSidebar" aria-expanded="false" aria-label="打开菜单">
-                    <i class="fas fa-bars"></i>
+                    <i class="fas fa-bars-staggered"></i>
                 </button>
                 <span class="fw-semibold text-secondary small">DUNO 360 · 管理</span>
                 <span style="width:42px;"></span>

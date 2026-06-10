@@ -24,6 +24,10 @@ openpyxl>=3.1.0
 # Utilities
 django-extensions>=3.2.0
 markdown>=3.5.0
+redis>=5.0.0
 
 # Payment Aggregator
 kkiapay>=0.0.6
+
+# Phone verification (Twilio Verify)
+twilio>=9.0.0

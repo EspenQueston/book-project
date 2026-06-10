@@ -1,0 +1,10 @@
+{% load i18n %}
+{% if twilio_sms_enabled %}
+<div class="signup-dual-banner mb-4" role="status">
+    <div class="signup-dual-banner-icon"><i class="fas fa-shield-alt"></i></div>
+    <div>
+        <strong>{% trans "双重验证" %}</strong>
+        <p class="mb-0 small">{% trans "注册后您将收到一封邮件和一个短信，各含一个6位验证码。" %}</p>
+    </div>
+</div>
+{% endif %}

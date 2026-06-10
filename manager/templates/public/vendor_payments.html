@@ -1,0 +1,185 @@
+{% extends 'public/vendor_panel_base.html' %}
+{% load i18n %}
+{% load currency_filters %}
+
+{% block panel_title %}{% trans "付款与托管" %} · {{ vendor.company_name }}{% endblock %}
+
+{% block panel_extra_css %}
+<style>
+    .vpay-head {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        padding: 22px 24px;
+        border-radius: 18px;
+        margin-bottom: 20px;
+        box-shadow: 0 12px 32px rgba(102, 126, 234, 0.28);
+    }
+    .vpay-stat {
+        background: var(--card-bg, #fff);
+        border-radius: 16px;
+        padding: 18px;
+        box-shadow: 0 8px 28px rgba(15, 23, 42, 0.06);
+        border: 1px solid rgba(15, 23, 42, 0.06);
+        height: 100%;
+    }
+    .vpay-stat .lbl { font-size: 0.78rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+    .vpay-stat .val { font-size: 1.35rem; font-weight: 800; margin-top: 4px; }
+    .vpay-stat .sub { font-size: 0.75rem; color: #94a3b8; margin-top: 4px; }
+    .vpay-card {
+        background: var(--card-bg, #fff);
+        border-radius: 16px;
+        box-shadow: 0 8px 28px rgba(15, 23, 42, 0.06);
+        border: 1px solid rgba(15, 23, 42, 0.06);
+        overflow: hidden;
+    }
+    .badge-held { background: #fef3c7; color: #a16207; }
+    .badge-releasable { background: #dbeafe; color: #1d4ed8; }
+    .badge-released { background: #dcfce7; color: #15803d; }
+    .badge-refunded { background: #fee2e2; color: #b91c1c; }
+    .badge-cancelled { background: #f3f4f6; color: #6b7280; }
+    .days-pill { display: inline-flex; align-items: center; gap: 4px; font-size: 0.78rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: #eef2ff; color: #4338ca; }
+    .days-pill.ready { background: #dcfce7; color: #15803d; }
+    .days-pill.wait { background: #fef3c7; color: #a16207; }
+</style>
+{% endblock %}
+
+{% block vendor_panel_content %}
+<div class="vpay-head d-flex flex-wrap justify-content-between align-items-center gap-3">
+    <div>
+        <h4 class="mb-1 fw-bold"><i class="fas fa-wallet me-2"></i>{% trans "付款与托管" %}</h4>
+        <small class="opacity-90">{% trans "跟踪托管资金、待结算与已到账款项" %}</small>
+    </div>
+    {% if vendor_wallet %}
+    <div class="text-end">
+        <div class="small opacity-90">{% trans "可用余额" %}</div>
+        <div class="display-6 fw-bold lh-1">{{ vendor_wallet.balance|fcfa }}</div>
+    </div>
+    {% endif %}
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="vpay-stat">
+            <div class="lbl">{% trans "待释放" %}</div>
+            <div class="val text-warning">{{ escrow_stats.held.s|default:0|fcfa }}</div>
+            <div class="sub">{{ escrow_stats.held.c|default:0 }} {% trans "条" %}</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="vpay-stat">
+            <div class="lbl">{% trans "可结算" %}</div>
+            <div class="val text-primary">{{ escrow_stats.releasable.s|default:0|fcfa }}</div>
+            <div class="sub">{{ escrow_stats.releasable.c|default:0 }} {% trans "条" %}</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="vpay-stat">
+            <div class="lbl">{% trans "已到账" %}</div>
+            <div class="val text-success">{{ escrow_stats.released.s|default:0|fcfa }}</div>
+            <div class="sub">{{ escrow_stats.released.c|default:0 }} {% trans "条" %}</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="vpay-stat">
+            <div class="lbl">{% trans "已退款/取消" %}</div>
+            <div class="val text-muted">{{ escrow_stats.refunded.s|default:0|fcfa }}</div>
+            <div class="sub">{{ escrow_stats.refunded.c|default:0 }} {% trans "条" %}</div>
+        </div>
+    </div>
+</div>
+
+<div class="vpay-card mb-4">
+    <div class="p-3 border-bottom d-flex flex-wrap gap-2 align-items-center justify-content-between">
+        <span class="fw-bold"><i class="fas fa-list me-2 text-primary"></i>{% trans "全部付款明细" %}</span>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'manager:vendor_payments' %}{% if admin_access %}?vendor_id={{ vendor.id }}{% endif %}" class="btn btn-sm {% if not status_filter %}btn-primary{% else %}btn-outline-secondary{% endif %} rounded-pill">{% trans "全部" %}</a>
+            {% for code, label in status_choices %}
+            <a href="?status={{ code }}{% if admin_access %}&vendor_id={{ vendor.id }}{% endif %}" class="btn btn-sm {% if status_filter == code %}btn-primary{% else %}btn-outline-secondary{% endif %} rounded-pill">{{ label }}</a>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>{% trans "交易号" %}</th>
+                    <th>{% trans "订单号" %}</th>
+                    <th>{% trans "商品" %}</th>
+                    <th>{% trans "总额" %}</th>
+                    <th>{% trans "您的净额" %}</th>
+                    <th>{% trans "状态" %}</th>
+                    <th>{% trans "距到账天数" %}</th>
+                    <th>{% trans "托管时间" %}</th>
+                    <th>{% trans "到账时间" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tx in transactions %}
+                <tr>
+                    <td><code class="small">{{ tx.transaction_ref }}</code></td>
+                    <td class="small fw-semibold">{{ tx.order_number }}</td>
+                    <td>
+                        <div class="fw-semibold text-truncate" style="max-width:140px;">{{ tx.item_name }}</div>
+                        <small class="text-muted">{{ tx.get_item_type_display }} ×{{ tx.quantity }}</small>
+                    </td>
+                    <td>{{ tx.gross_amount|fcfa }}</td>
+                    <td class="fw-bold text-success">{{ tx.vendor_payout_amount|fcfa }}</td>
+                    <td><span class="badge rounded-pill badge-{{ tx.status }}">{{ tx.get_status_display }}</span></td>
+                    <td>
+                        {% if tx.status == 'released' %}
+                            <span class="days-pill ready"><i class="fas fa-check"></i> {% trans "已到账" %}</span>
+                        {% elif tx.awaiting_delivery %}
+                            <span class="days-pill wait"><i class="fas fa-truck"></i> {% trans "待发货" %}</span>
+                        {% elif tx.days_until_release is not None %}
+                            {% if tx.days_until_release == 0 %}
+                            <span class="days-pill ready"><i class="fas fa-bolt"></i> {% trans "可立即结算" %}</span>
+                            {% else %}
+                            <span class="days-pill"><i class="fas fa-hourglass-half"></i> {{ tx.days_until_release }} {% trans "天" %}</span>
+                            {% endif %}
+                        {% elif tx.status == 'refunded' or tx.status == 'cancelled' %}
+                            <span class="text-muted">—</span>
+                        {% else %}
+                            <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                    <td><small>{{ tx.held_at|date:"Y-m-d H:i" }}</small></td>
+                    <td><small>{% if tx.released_at %}{{ tx.released_at|date:"Y-m-d H:i" }}{% else %}—{% endif %}</small></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="9" class="text-center text-muted py-5">{% trans "暂无付款记录" %}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if wallet_txns %}
+<div class="vpay-card">
+    <div class="p-3 border-bottom fw-bold"><i class="fas fa-history me-2 text-primary"></i>{% trans "钱包流水" %}</div>
+    <div class="table-responsive">
+        <table class="table table-sm mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>{% trans "Date" %}</th>
+                    <th>{% trans "Type" %}</th>
+                    <th>{% trans "Amount" %}</th>
+                    <th>{% trans "Description" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for w in wallet_txns %}
+                <tr>
+                    <td><small>{{ w.created_at|date:"Y-m-d H:i" }}</small></td>
+                    <td><span class="badge bg-light text-dark">{{ w.get_txn_type_display }}</span></td>
+                    <td class="fw-semibold {% if w.txn_type == 'credit' %}text-success{% else %}text-danger{% endif %}">
+                        {% if w.txn_type == 'credit' %}+{% else %}-{% endif %}{{ w.amount|fcfa }}
+                    </td>
+                    <td class="small text-muted">{{ w.description|default:"—" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

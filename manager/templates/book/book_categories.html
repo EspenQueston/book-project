@@ -124,7 +124,7 @@
                                 <input type="hidden" name="category_id" value="{{ cat.id }}">
                                 <button type="submit" class="btn-icon btn-toggle" title="启用/隐藏"><i class="fas fa-eye"></i></button>
                             </form>
-                            <form method="post" class="d-inline" onsubmit="return confirm('确定删除分类「{{ cat.name }}」吗？关联图书将变为无分类。');">
+                            <form method="post" class="d-inline" data-confirm-message="确定删除分类「{{ cat.name }}」吗？关联图书将变为无分类。">
                                 {% csrf_token %}
                                 <input type="hidden" name="action" value="delete">
                                 <input type="hidden" name="category_id" value="{{ cat.id }}">

@@ -103,8 +103,8 @@ function submitVendorLogin(e) {
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>{% trans "登录" %}';
         }
-    }).catch(() => {
-        gToast('网络错误', 'error');
+    }).catch(function() {
+        gToast('{% trans "Network error" %}', 'error');
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>{% trans "登录" %}';
     });

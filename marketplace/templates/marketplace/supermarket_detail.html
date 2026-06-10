@@ -2,7 +2,7 @@
 {% load i18n %}
 {% load currency_filters %}
 
-{% block title %}{{ item.name }} - {% trans "Supermarket" %}{% endblock %}
+{% block title %}{{ item.name }} - {% trans "超市" %}{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -47,6 +47,53 @@
     .btn-add-cart { padding: 16px 36px; border-radius: 14px; border: 2px solid var(--primary-color); background: #fff; color: var(--primary-color); font-weight: 800; font-size: 1.05rem; cursor: pointer; transition: all 0.3s; }
     .btn-add-cart:hover { background: linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.06)); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(102,126,234,0.2); }
     .btn-add-cart:disabled, .btn-buy-now:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .desk-single-action-row {
+        display: grid;
+        grid-template-columns: minmax(130px, 1.25fr) minmax(130px, 1fr) minmax(100px, 0.85fr) 48px;
+        gap: 12px;
+        align-items: stretch;
+        width: 100%;
+    }
+    .desk-single-action-row .btn-buy-now,
+    .desk-single-action-row .btn-add-cart {
+        width: 100%;
+        margin: 0;
+        box-sizing: border-box;
+        padding: 13px 12px;
+        font-size: 0.84rem;
+        line-height: 1.25;
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        overflow: visible;
+        min-width: 0;
+    }
+    .desk-single-action-row .btn-buy-now {
+        padding: 13px 14px;
+        letter-spacing: -0.01em;
+    }
+    .desk-single-action-row .btn-wishlist-action {
+        width: 48px;
+        height: 48px;
+        align-self: center;
+        margin: 0;
+    }
+    @media (max-width: 991px) {
+        .desk-single-action-row {
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .desk-single-action-row .btn-buy-now {
+            grid-column: 1 / -1;
+        }
+        .desk-single-action-row .btn-wishlist-action {
+            grid-column: 2;
+            grid-row: 2;
+            justify-self: end;
+        }
+    }
     .toast-msg { position: fixed; top: 90px; right: 20px; z-index: 9999; background: #fff; border-radius: 12px; padding: 16px 24px; box-shadow: 0 8px 30px rgba(0,0,0,0.15); display: none; max-width: 320px; }
     .toast-msg.success { border-left: 4px solid #10b981; }
     .toast-msg.error { border-left: 4px solid var(--danger-color); }
@@ -296,8 +343,48 @@
     .pmp-gallery-counter { position: absolute; bottom: 12px; right: 14px; background: rgba(0,0,0,.55); color: #fff; font-size: 11px; padding: 3px 10px; border-radius: 10px; z-index: 10; }
     .pmp-info { background: #fff; padding: 15px; margin-bottom: 12px; }
     .pmp-price { color: #ef4444; font-size: 1.8rem; font-weight: 800; }
-    .pmp-title { font-size: 1.15rem; font-weight: 700; color: #1e293b; margin: 10px 0; }
-    .pmp-seller-row { display:flex; align-items:center; justify-content:space-between; gap:10px; padding-top:10px; border-top:1px solid #f1f5f9; color:#64748b; font-size:.85rem; }
+    .pmp-title { font-size: 1.15rem; font-weight: 700; color: #1e293b; margin: 10px 0 0; }
+    .pmp-reviews-zone {
+        background: #fff;
+        padding: 0;
+        margin-bottom: 12px;
+        overflow: hidden;
+    }
+    .pmp-reviews-zone .lr-block { margin: 0; }
+    .pmp-reviews-zone .lr-card {
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+        padding: 12px 14px 14px;
+        background: transparent;
+    }
+    @media (max-width: 768px) {
+        .pmp-reviews-zone {
+            border-radius: 14px;
+            margin: 8px 8px 0;
+            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+            border: 1px solid rgba(56, 189, 248, 0.18);
+        }
+        .pmp-reviews-zone .lr-card {
+            border-radius: 14px;
+            background: #fff;
+        }
+        .pmp-reviews-zone .lr-head {
+            padding-bottom: 2px;
+            border-bottom: 1px solid rgba(241,245,249,0.95);
+            margin-bottom: 10px;
+        }
+        .pmp-reviews-zone .lr-chips {
+            margin-bottom: 8px;
+        }
+        .pmp-reviews-zone .lr-item {
+            background: #f8fafc;
+            border-color: rgba(226,232,240,0.85);
+        }
+        .pmp-reviews-zone .lr-empty {
+            padding: 14px 8px 6px;
+        }
+    }
     .pmp-bottom-bar {
         position: fixed; bottom: 62px; left: 0; right: 0; background: #fff; height: 60px;
         display: flex; align-items: center; padding: 0 10px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 1000;
@@ -391,9 +478,16 @@
     html[data-theme="dark"] .pmp-title {
         color: var(--text-primary);
     }
-    html[data-theme="dark"] .pmp-seller-row {
-        border-color: var(--border-default);
-        color: var(--text-secondary);
+    html[data-theme="dark"] .pmp-reviews-zone {
+        background: var(--bg-surface);
+        border-color: var(--border-subtle);
+    }
+    html[data-theme="dark"] .pmp-reviews-zone .lr-head {
+        border-bottom-color: var(--border-subtle);
+    }
+    html[data-theme="dark"] .pmp-reviews-zone .lr-item {
+        background: var(--bg-elevated);
+        border-color: var(--border-subtle);
     }
     html[data-theme="dark"] .pmp-delivery-section,
     html[data-theme="dark"] .pmp-specs-section,
@@ -478,6 +572,7 @@
         }
     }
 </style>
+{% include 'marketplace/includes/seller_card_theme.html' %}
 {% endblock %}
 
 {% block content %}
@@ -495,61 +590,51 @@
     <div class="pmp-info">
         <div class="pmp-price">{{ item.price|fcfa }}</div>
         <h1 class="pmp-title">{{ item.name }}</h1>
+    </div>
 
+    <div class="pmp-reviews-zone">
         {% with review_block_uid="sup-mob" %}
         {% include 'marketplace/includes/listing_reviews_block.html' %}
         {% endwith %}
-
-        <div class="pmp-seller-row">
-            <span>
-                <i class="fas fa-store me-1"></i>
-                {% if item.vendor %}
-                <a href="{% url 'manager:start_conversation' %}?vendor_id={{ item.vendor.id }}&subject={{ item.name|urlencode }}" style="text-decoration:none;color:inherit;font-weight:700;">{{ item.vendor.company_name }}</a>
-                {% else %}
-                DUNO 360
-                {% endif %}
-            </span>
-            <span>{% trans "Official Store" %}</span>
-        </div>
     </div>
 
     <!-- Delivery Section -->
     <div class="pmp-delivery-section">
         <div class="pmp-delivery-row">
             <i class="fas fa-truck"></i>
-            <span><span class="pmp-delivery-highlight">{% trans "Local Delivery" %}</span> · {% trans "Est." %} <strong>1-2{% trans "days" %}</strong>{% trans "delivery" %}</span>
+            <span><span class="pmp-delivery-highlight">{% trans "同城配送" %}</span> · {% trans "预计" %} <strong>1-2 {% trans "天" %}</strong> {% trans "送达" %}</span>
             <i class="fas fa-chevron-right ms-auto" style="font-size:10px;color:#ccc;"></i>
         </div>
         <div class="pmp-delivery-row">
             <i class="fas fa-map-marker-alt"></i>
-            <span>{% trans "Shipped from" %} <strong>{% trans "Dakar Warehouse" %}</strong> · <span class="pmp-delivery-highlight">{% trans "Free Shipping" %}</span></span>
+            <span>{% trans "发货地" %} <strong>{% trans "达喀尔仓库" %}</strong> · <span class="pmp-delivery-highlight">{% trans "包邮" %}</span></span>
         </div>
         <div class="pmp-delivery-row">
             <i class="fas fa-shield-alt"></i>
-            <span>{% trans "Quality Guarantee" %} · {% trans "DUNO Platform Guarantee" %}</span>
+            <span>{% trans "品质保障" %} · {% trans "DUNO平台保障" %}</span>
         </div>
     </div>
 
     <!-- Guarantee -->
     <div class="pmp-guarantee">
         <i class="fas fa-shield-alt"></i>
-        <span>{% trans "Return Protection" %} | <strong>{% trans "7-Day No-Reason Return" %}</strong> | {% trans "Fast Refund" %}</span>
+        <span>{% trans "退货保障" %} | <strong>{% trans "七天无理由退换" %}</strong> | {% trans "快速退款" %}</span>
     </div>
 
     <!-- Specs -->
     <div class="pmp-specs-section">
-        <div class="pmp-specs-label">{% trans "Specifications" %}</div>
+        <div class="pmp-specs-label">{% trans "规格参数" %}</div>
         <div class="pmp-specs-scroll">
             {% if item.brand %}
-            <div class="pmp-spec-chip"><strong>{% trans "Brand" %}</strong>{{ item.brand }}</div>
+            <div class="pmp-spec-chip"><strong>{% trans "品牌" %}</strong>{{ item.brand }}</div>
             {% endif %}
             {% if item.origin %}
-            <div class="pmp-spec-chip"><strong>{% trans "Origin" %}</strong>{{ item.origin }}</div>
+            <div class="pmp-spec-chip"><strong>{% trans "产地" %}</strong>{{ item.origin }}</div>
             {% endif %}
-            <div class="pmp-spec-chip"><strong>{% trans "Stock" %}</strong>{{ item.stock }} {{ item.get_unit_display }}</div>
-            <div class="pmp-spec-chip"><strong>{% trans "Sold" %}</strong>{{ sold_delivered }}+</div>
+            <div class="pmp-spec-chip"><strong>{% trans "库存" %}</strong>{{ item.stock }} {{ item.get_unit_display }}</div>
+            <div class="pmp-spec-chip"><strong>{% trans "已售" %}</strong>{{ sold_delivered }}+</div>
             {% if item.is_organic %}
-            <div class="pmp-spec-chip"><strong>{% trans "Organic" %}</strong>{% trans "Organic Food" %}</div>
+            <div class="pmp-spec-chip"><strong>{% trans "有机" %}</strong>{% trans "有机食品" %}</div>
             {% endif %}
             {% for attr in specification_attributes %}
             <div class="pmp-spec-chip"><strong>{{ attr.name }}</strong>{{ attr.display_value }}</div>
@@ -558,57 +643,65 @@
     </div>
 
     <!-- Seller Section -->
-    <div class="pmp-seller-section">
+    <div class="pmp-seller-section{% if seller_vendor.is_official %} pmp-seller-section--official{% endif %}">
         <div class="pmp-seller-header">
             <div class="pmp-seller-logo">
-                {% if item.vendor and item.vendor.get_logo_url %}<img src="{{ item.vendor.get_logo_url }}" style="width:100%;height:100%;object-fit:cover;">{% else %}<i class="fas fa-store"></i>{% endif %}
+                {% if seller_vendor.get_logo_url %}<img src="{{ seller_vendor.get_logo_url }}" style="width:100%;height:100%;object-fit:cover;">{% else %}<i class="fas fa-store"></i>{% endif %}
             </div>
             <div>
-                <div class="pmp-seller-name">{% if item.vendor %}{{ item.vendor.company_name }}{% else %}DUNO 360{% endif %}</div>
+                <div class="pmp-seller-name">{{ seller_vendor.company_name }}</div>
                 <div class="pmp-seller-meta">
-                    <i class="fas fa-star" style="color:#f59e0b;"></i> 4.9 · <span>{% trans "Official Store" %}</span>
+                    {% if seller_vendor.is_official %}
+                    <span class="pmp-seller-badge-official"><i class="fas fa-badge-check"></i>{% trans "官方认证" %}</span>
+                    {% else %}
+                    <span><i class="fas fa-shield-alt" style="color:#667eea;"></i> {% trans "官方旗舰店" %}</span>
+                    {% endif %}
+                    {% if vendor_follower_count %}<span><i class="fas fa-users"></i> {{ vendor_follower_count }} {% trans "粉丝" %}</span>{% endif %}
                 </div>
             </div>
-            {% if item.vendor %}
-            <button class="pmp-seller-btn follow ms-auto" onclick="toggleVendorFollow({{ item.vendor.id }}, this)" id="followVendorBtn">
-                <i class="fas fa-plus"></i> <span>{% trans "Follow" %}</span>
+            <button type="button"
+                    class="pmp-seller-btn follow ms-auto vendor-follow-btn{% if is_following_vendor %} is-following{% endif %}"
+                    data-vendor-id="{{ seller_vendor.id }}"
+                    data-following="{% if is_following_vendor %}1{% else %}0{% endif %}"
+                    data-login-url="{% url 'manager:user_login' %}">
+                <i class="fas {% if is_following_vendor %}fa-check{% else %}fa-plus{% endif %}"></i>
+                <span class="follow-btn-label"
+                      data-follow="{% trans '关注店铺' %}"
+                      data-following="{% trans '已关注' %}">
+                    {% if is_following_vendor %}{% trans "已关注" %}{% else %}{% trans "关注店铺" %}{% endif %}
+                </span>
             </button>
-            {% endif %}
         </div>
         <div class="pmp-seller-scores">
-            <div class="pmp-score-item"><div class="pmp-score-val">4.9</div><div class="pmp-score-lbl">{% trans "Product Quality" %}</div></div>
-            <div class="pmp-score-item"><div class="pmp-score-val">4.8</div><div class="pmp-score-lbl">{% trans "Delivery Speed" %}</div></div>
-            <div class="pmp-score-item"><div class="pmp-score-val">4.9</div><div class="pmp-score-lbl">{% trans "Service Quality" %}</div></div>
+            <div class="pmp-score-item"><div class="pmp-score-val">4.9</div><div class="pmp-score-lbl">{% trans "商品质量" %}</div></div>
+            <div class="pmp-score-item"><div class="pmp-score-val">4.8</div><div class="pmp-score-lbl">{% trans "配送速度" %}</div></div>
+            <div class="pmp-score-item"><div class="pmp-score-val">4.9</div><div class="pmp-score-lbl">{% trans "服务质量" %}</div></div>
         </div>
         <div class="pmp-seller-btns">
-            {% if item.vendor %}
-            <a href="{% url 'manager:public_vendor_shop' item.vendor.id %}" class="pmp-seller-btn">{% trans "Visit Shop" %}</a>
-            {% else %}
-            <a href="{% url 'marketplace:supermarket_list' %}" class="pmp-seller-btn">{% trans "Supermarket Home" %}</a>
-            {% endif %}
-            <a href="{% url 'manager:start_conversation' %}?item_type=supermarket&item_id={{ item.id }}&subject={{ item.name|urlencode }}" class="pmp-seller-btn">{% trans "Contact Seller" %}</a>
+            <a href="{% url 'manager:public_vendor_shop' seller_vendor.id %}" class="pmp-seller-btn">{% trans "访问店铺" %}</a>
+            <a href="{% url 'manager:start_conversation' %}?item_type=supermarket&item_id={{ item.id }}&subject={{ item.name|urlencode }}" class="pmp-seller-btn">{% trans "联系卖家" %}</a>
         </div>
     </div>
 
     <!-- Certifications -->
     <div class="pmp-certs-section">
-        <div class="pmp-certs-title">{% trans "Service Guarantee" %}</div>
+        <div class="pmp-certs-title">{% trans "服务保障" %}</div>
         <div class="pmp-certs-grid">
             <div class="pmp-cert-item">
                 <div class="pmp-cert-icon" style="background:linear-gradient(135deg,#667eea,#764ba2);"><i class="fas fa-undo"></i></div>
-                <span class="pmp-cert-label">{% trans "7-Day Return" %}</span>
+                <span class="pmp-cert-label">{% trans "七天退换" %}</span>
             </div>
             <div class="pmp-cert-item">
                 <div class="pmp-cert-icon" style="background:linear-gradient(135deg,#10b981,#059669);"><i class="fas fa-certificate"></i></div>
-                <span class="pmp-cert-label">{% trans "Authentic Guarantee" %}</span>
+                <span class="pmp-cert-label">{% trans "正品保证" %}</span>
             </div>
             <div class="pmp-cert-item">
                 <div class="pmp-cert-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);"><i class="fas fa-shipping-fast"></i></div>
-                <span class="pmp-cert-label">{% trans "Cold Chain Delivery" %}</span>
+                <span class="pmp-cert-label">{% trans "冷链配送" %}</span>
             </div>
             <div class="pmp-cert-item">
                 <div class="pmp-cert-icon" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);"><i class="fas fa-truck"></i></div>
-                <span class="pmp-cert-label">{% trans "Free Shipping" %}</span>
+                <span class="pmp-cert-label">{% trans "包邮" %}</span>
             </div>
         </div>
     </div>
@@ -616,7 +709,7 @@
     <!-- Description -->
     {% if item.description %}
     <div style="background:#fff;padding:12px 14px;margin-bottom:6px;">
-        <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:8px;">{% trans "Product Description" %}</div>
+        <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:8px;">{% trans "商品描述" %}</div>
         <div style="font-size:13px;color:#666;line-height:1.7;">{{ item.description }}</div>
     </div>
     {% endif %}
@@ -624,7 +717,7 @@
     <!-- Related Items -->
     {% if related_items %}
     <div class="pmp-feed-section">
-        <div class="pmp-feed-title"><i class="fas fa-th-large"></i>{% trans "Related Recommendations" %}</div>
+        <div class="pmp-feed-title"><i class="fas fa-th-large"></i>{% trans "相关推荐" %}</div>
         <div class="pmp-feed-grid">
             {% for r in related_items %}
             <a href="{% url 'marketplace:supermarket_detail' r.slug %}" style="text-decoration:none;color:inherit;">
@@ -640,14 +733,14 @@
     {% endif %}
 
     <div class="pmp-bottom-bar">
-        <a href="{% if item.vendor %}{% url 'manager:public_vendor_shop' item.vendor.id %}{% else %}{% url 'marketplace:supermarket_list' %}{% endif %}" class="pmp-icon-btn"><i class="fas fa-store"></i><span>{% trans "Shop" %}</span></a>
-        <a href="{% url 'manager:start_conversation' %}?item_type=supermarket&item_id={{ item.id }}&subject={{ item.name|urlencode }}" class="pmp-icon-btn"><i class="fas fa-comment-dots"></i><span>{% trans "Chat" %}</span></a>
+        <a href="{% url 'manager:public_vendor_shop' seller_vendor.id %}" class="pmp-icon-btn"><i class="fas fa-store"></i><span>{% trans "进店" %}</span></a>
+        <a href="{% url 'manager:start_conversation' %}?item_type=supermarket&item_id={{ item.id }}&subject={{ item.name|urlencode }}" class="pmp-icon-btn"><i class="fas fa-comment-dots"></i><span>{% trans "在线咨询" %}</span></a>
         <button class="pmp-icon-btn" id="pmpWishBtn" onclick="toggleWishlist()" style="cursor:pointer;">
             <i class="far fa-heart" id="pmpWishIcon"></i>
-            <span>{% trans "Favorite" %}</span>
+            <span>{% trans "收藏" %}</span>
         </button>
-        <button class="pmp-action-btn pmp-cart" onclick="addToCart()">{% trans "Add to Cart" %}</button>
-        <button class="pmp-action-btn pmp-buy" onclick="buyNow()">{% trans "Buy Now" %}</button>
+        <button class="pmp-action-btn pmp-cart" onclick="addToCart()">{% trans "加入购物车" %}</button>
+        <button class="pmp-action-btn pmp-buy" onclick="buyNow()">{% trans "立即购买" %}</button>
     </div>
 </div>
 <div class="desktop-layout">
@@ -655,8 +748,8 @@
     <div class="container">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a href="{% url 'marketplace:home' %}" style="color:var(--primary-color);">{% trans "Market" %}</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'marketplace:supermarket_list' %}" style="color:var(--primary-color);">{% trans "Supermarket" %}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'marketplace:home' %}" style="color:var(--primary-color);">{% trans "市场" %}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'marketplace:supermarket_list' %}" style="color:var(--primary-color);">{% trans "超市" %}</a></li>
                 <li class="breadcrumb-item active">{{ item.name }}</li>
             </ol>
         </nav>
@@ -665,8 +758,9 @@
 
 <div class="container my-5">
     <div class="detail-card p-4 p-md-5">
-        <div class="row g-4">
-            <div class="col-lg-6">
+        {% include 'marketplace/includes/desktop_single_social_styles.html' %}
+        <div class="desk-single-hero">
+            <div class="desk-single-gallery">
                 <img src="{{ item.get_image_url }}" alt="{{ item.name }}" class="detail-img" id="mainImage">
                 {% if item.image_2 or item.image_3 %}
                 <div class="thumb-row" style="display:flex;gap:10px;margin-top:12px;">
@@ -682,17 +776,14 @@
                 </div>
                 {% endif %}
             </div>
-            <div class="col-lg-6">
-                <h1 style="font-weight:800; font-size:1.8rem; margin-bottom:15px;">{{ item.name }}</h1>
 
-                {% with review_block_uid="sup-desk" %}
-                {% include 'marketplace/includes/listing_reviews_block.html' %}
-                {% endwith %}
+            <div class="desk-single-buy">
+                <h1 style="font-weight:800; font-size:1.8rem; margin-bottom:15px;">{{ item.name }}</h1>
 
                 <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
                     {% if item.is_organic %}
                     <span class="badge" style="background:linear-gradient(135deg,#10b981,#34d399); padding:6px 14px; border-radius:25px; font-size:0.8rem;">
-                        <i class="fas fa-leaf me-1"></i>{% trans "Organic Food" %}
+                        <i class="fas fa-leaf me-1"></i>{% trans "有机食品" %}
                     </span>
                     {% endif %}
                     {% if item.category %}
@@ -713,36 +804,36 @@
 
                 <div class="mb-4">
                     {% if item.brand %}
-                    <div class="info-item"><i class="fas fa-award"></i>{% trans "Brand" %}: {{ item.brand }}</div>
+                    <div class="info-item"><i class="fas fa-award"></i>{% trans "品牌" %}: {{ item.brand }}</div>
                     {% endif %}
                     {% if item.origin %}
-                    <div class="info-item"><i class="fas fa-map-marker-alt"></i>{% trans "Origin" %}: {{ item.origin }}</div>
+                    <div class="info-item"><i class="fas fa-map-marker-alt"></i>{% trans "产地" %}: {{ item.origin }}</div>
                     {% endif %}
                     <div class="info-item">
-                        <i class="fas fa-box"></i>{% trans "Stock" %}:
+                        <i class="fas fa-box"></i>{% trans "库存" %}:
                         {% if item.in_stock %}
-                        <span class="text-success fw-bold ms-1">{% trans "In Stock" %} ({{ item.stock }}{{ item.get_unit_display }})</span>
+                        <span class="text-success fw-bold ms-1">{% trans "有货" %} ({{ item.stock }}{{ item.get_unit_display }})</span>
                         {% else %}
-                        <span class="text-danger fw-bold ms-1">{% trans "Out of Stock" %}</span>
+                        <span class="text-danger fw-bold ms-1">{% trans "缺货" %}</span>
                         {% endif %}
                     </div>
-                    <div class="info-item"><i class="fas fa-fire"></i>{% trans "Sold" %}: {{ sold_delivered }}</div>
+                    <div class="info-item"><i class="fas fa-fire"></i>{% trans "已售" %}: {{ sold_delivered }}</div>
                 </div>
 
                 {% if item.description %}
                 <hr>
-                <h5 class="fw-bold mb-3">{% trans "Product Description" %}</h5>
+                <h5 class="fw-bold mb-3">{% trans "商品描述" %}</h5>
                 <div style="line-height:1.8; color:#475569;">{{ item.description|linebreaksbr }}</div>
                 {% endif %}
 
                 {% if selectable_attributes %}
                 <div class="option-panel">
-                    <h5><i class="fas fa-sliders me-2" style="color:#0284c7;"></i>{% trans "Select Specification" %}</h5>
+                    <h5><i class="fas fa-sliders me-2" style="color:#0284c7;"></i>{% trans "选择规格" %}</h5>
                     {% for group in selectable_attributes %}
                     <div class="option-group" data-attribute-name="{{ group.name }}">
                         <label class="option-group-label">{{ group.name }}</label>
                         <select class="option-select" data-attribute-name="{{ group.name }}">
-                            <option value="">{% trans "Choose an option" %}</option>
+                            <option value="">{% trans "请选择" %}</option>
                             {% for value in group.values %}
                             <option value="{{ value }}">{{ value }}</option>
                             {% endfor %}
@@ -754,7 +845,7 @@
 
                 {% if specification_attributes %}
                 <hr>
-                <h5 class="fw-bold mb-3"><i class="fas fa-list-check me-2" style="color:#4facfe;"></i>{% trans "Specifications" %}</h5>
+                <h5 class="fw-bold mb-3"><i class="fas fa-list-check me-2" style="color:#4facfe;"></i>{% trans "规格参数" %}</h5>
                 <div class="table-responsive">
                     <table class="table table-sm mb-0" style="font-size:0.9rem;">
                         <tbody>
@@ -772,34 +863,48 @@
                 <!-- Quantity & Cart Actions -->
                 <hr>
                 <div class="d-flex align-items-center gap-3 mb-3">
-                    <span style="font-weight:600; color:#334155;">{% trans "Quantity" %}:</span>
+                    <span style="font-weight:600; color:#334155;">{% trans "数量" %}:</span>
                     <div class="qty-control">
-                        <button class="qty-btn" onclick="changeQty(-1)" {% if not item.in_stock %}disabled{% endif %}>−</button>
-                        <input type="number" id="qtyInput" class="qty-input" value="1" min="1" max="{{ item.stock }}" readonly>
-                        <button class="qty-btn" onclick="changeQty(1)" {% if not item.in_stock %}disabled{% endif %}>+</button>
+                        <button class="qty-btn" onclick="changeQty(-1)" {% if not item.in_stock or max_purchase_quantity < item.min_order_quantity %}disabled{% endif %}>−</button>
+                        <input type="number" id="qtyInput" class="qty-input" value="{{ item.min_order_quantity|default:'1' }}" min="{{ item.min_order_quantity|default:'1' }}" max="{{ max_purchase_quantity }}" step="{{ item.quantity_step|default:'1' }}" readonly>
+                        <button class="qty-btn" onclick="changeQty(1)" {% if not item.in_stock or max_purchase_quantity < item.min_order_quantity %}disabled{% endif %}>+</button>
                     </div>
                 </div>
-                <div class="d-flex flex-wrap gap-3 align-items-center">
-                    <button class="btn-buy-now" onclick="buyNow()" {% if not item.in_stock %}disabled{% endif %}>
-                        <i class="fas fa-bolt me-2"></i>{% trans "Buy Now" %}
+                {% if item.min_order_quantity > 1 %}
+                <div class="mb-3 text-muted small">{% trans "最低订购量" %}: {{ item.min_order_quantity }} {% trans "件" %}</div>
+                {% endif %}
+                {% if item.quantity_step > 1 %}
+                <div class="mb-3 text-muted small">Vente par multiples de {{ item.quantity_step }}.</div>
+                {% endif %}
+                <div class="desk-single-action-row">
+                    <button class="btn-buy-now" onclick="buyNow()" {% if not item.in_stock or max_purchase_quantity < item.min_order_quantity %}disabled{% endif %}>
+                        <i class="fas fa-bolt"></i> {% trans "立即购买" %}
                     </button>
-                    <button class="btn-add-cart" onclick="addToCart()" {% if not item.in_stock %}disabled{% endif %}>
-                        <i class="fas fa-cart-plus me-2"></i>{% trans "Add to Cart" %}
+                    <button class="btn-add-cart" onclick="addToCart()" {% if not item.in_stock or max_purchase_quantity < item.min_order_quantity %}disabled{% endif %}>
+                        <i class="fas fa-cart-plus"></i> {% trans "加入购物车" %}
                     </button>
                     <a href="{% url 'manager:start_conversation' %}?item_type=supermarket&item_id={{ item.id }}&subject={{ item.name|urlencode }}" class="btn-add-cart text-decoration-none">
-                        <i class="fas fa-comment-dots me-2"></i>{% trans "Chat" %}
+                        <i class="fas fa-comment-dots"></i> {% trans "在线咨询" %}
                     </a>
                     <button class="btn-wishlist-action" id="wishBtn" onclick="toggleWishlist()" title="{% trans 'Favorite' %}" style="width:48px;height:48px;border-radius:50%;background:rgba(102,126,234,0.1);border:2px solid rgba(102,126,234,0.3);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.3s;color:#667eea;font-size:1.2rem;">
                         <i class="far fa-heart" id="wishIcon"></i>
                     </button>
                 </div>
             </div>
+
+            <div class="desk-single-social">
+                {% if seller_vendor %}
+                {% include 'marketplace/includes/desktop_social_zone.html' with review_block_uid='sup-desk' seller_vendor=seller_vendor seller_item_name=item.name listing_kind='supermarket' listing_id=item.id seller_card_variant='sidebar' %}
+                {% else %}
+                {% include 'marketplace/includes/desktop_social_zone.html' with review_block_uid='sup-desk' %}
+                {% endif %}
+            </div>
         </div>
     </div>
 
     {% if related_items %}
     <div class="mt-5">
-        <h3 class="fw-bold mb-4"><i class="fas fa-th-large me-2" style="color:#4facfe;"></i>{% trans "Related Products" %}</h3>
+        <h3 class="fw-bold mb-4"><i class="fas fa-th-large me-2" style="color:#4facfe;"></i>{% trans "相关商品" %}</h3>
         <div class="row g-4">
             {% for r in related_items %}
             <div class="col-sm-6 col-md-3">
@@ -829,11 +934,13 @@
 <div class="toast-msg" id="toastMsg"><span id="toastText"></span></div>
 
 <script>
-const maxItemStock = parseInt('{{ item.stock|default:0 }}', 10) || 0;
+const minItemQty = parseInt('{{ item.min_order_quantity|default:1 }}', 10) || 1;
+const qtyStep = parseInt('{{ item.quantity_step|default:1 }}', 10) || 1;
+const maxItemStock = parseInt('{{ max_purchase_quantity|default:0 }}', 10) || 0;
 function changeQty(d){
     const inp = document.getElementById('qtyInput');
-    let v = parseInt(inp.value, 10) + d;
-    if(v < 1) v = 1;
+    let v = parseInt(inp.value, 10) + (d * qtyStep);
+    if(v < minItemQty) v = minItemQty;
     if(v > maxItemStock) v = maxItemStock;
     inp.value = v;
 }
@@ -850,7 +957,7 @@ function getSelectedAttributes(){
     for (const sel of selects) {
         const name = sel.dataset.attributeName;
         if (!sel.value) {
-            showToast(`请选择${name}`, 'error');
+            showToast('{% trans "请选择" %} ' + name, 'error');
             return null;
         }
         selected[name] = sel.value;
@@ -873,7 +980,7 @@ function addToCart(){
         .then(d=>{
             showToast(d.message, d.success ? 'success' : 'error');
             if(d.cart_count !== undefined) updateBadge(d.cart_count);
-        }).catch(()=> showToast('网络错误', 'error'));
+        }).catch(()=> showToast('{% trans "网络错误" %}', 'error'));
 }
 function buyNow(){
     const selectedAttributes = getSelectedAttributes();
@@ -946,23 +1053,8 @@ function toggleWishlist(){
     });
 })();
 
-// Vendor follow
-function toggleVendorFollow(vendorId, btn){
-    const fd = new FormData();
-    fd.append('csrfmiddlewaretoken', '{{ csrf_token }}');
-    fetch('/manager/vendor/' + vendorId + '/follow/', { method:'POST', body: fd })
-        .then(r=>r.json())
-        .then(d=>{
-            if(d.login_required){ window.location.href='{% url "manager:user_login" %}'; return; }
-            if(typeof showToast==='function') showToast(d.message || 'OK', d.success ? 'success' : 'error');
-            if(d.success && btn){
-                var lbl = btn.querySelector('span');
-                if(lbl) lbl.textContent = d.following ? "{% trans 'Following' %}" : "{% trans 'Follow' %}";
-            }
-        }).catch(()=> { if(typeof showToast==='function') showToast("{% trans 'Network error' %}", 'error'); });
-}
-
-// Desktop thumbnail switcher
+</script>
+<script src="/static/js/listing_follow.js"></script>
 function switchImage(thumb) {
     var main = document.getElementById('mainImage');
     if (!main) return;

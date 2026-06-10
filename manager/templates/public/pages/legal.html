@@ -1,0 +1,183 @@
+{% extends 'public/pages/info_page.html' %}
+
+{% load i18n %}
+
+
+
+{% block page_hero_class %}duno-legal-hero{% endblock %}
+
+{% block page_layout_class %}duno-page-layout--legal{% endblock %}
+
+
+
+{% block extra_css %}
+
+{{ block.super }}
+
+{% include 'public/pages/_legal_styles.html' %}
+
+{% endblock %}
+
+
+
+{% block page_hero_ambient %}
+
+<div class="duno-legal-ambient" aria-hidden="true">
+
+    <span class="hero-text-grid"></span>
+
+    <span class="hero-aurora hero-aurora-a"></span>
+
+    <span class="hero-aurora hero-aurora-b"></span>
+
+</div>
+
+{% endblock %}
+
+
+
+{% block page_hero_extra %}
+
+<div class="duno-legal-trust" data-aos="fade-up" data-aos-delay="100">
+
+    <span class="duno-legal-trust-pill"><i class="fas fa-shield-halved"></i>{% trans "数据受保护" %}</span>
+
+    <span class="duno-legal-trust-pill"><i class="fas fa-ban"></i>{% trans "不出售任何数据" %}</span>
+
+    <span class="duno-legal-trust-pill"><i class="fas fa-mobile-screen"></i>{% trans "安全的移动支付" %}</span>
+
+    <span class="duno-legal-trust-pill"><i class="fas fa-user-check"></i>{% trans "账户由您掌控" %}</span>
+
+</div>
+
+<div class="duno-legal-tabs" data-aos="fade-up" data-aos-delay="160">
+
+    <a href="#confidentialite" class="duno-legal-tab active" data-legal-tab="confidentialite">
+
+        <i class="fas fa-shield-halved me-1"></i>{% trans "隐私政策" %}
+
+    </a>
+
+    <a href="#conditions-utilisation" class="duno-legal-tab" data-legal-tab="conditions-utilisation">
+
+        <i class="fas fa-file-contract me-1"></i>{% trans "使用条款" %}
+
+    </a>
+
+</div>
+
+{% endblock %}
+
+
+
+{% block page_hero_wave %}
+
+<div class="duno-legal-wave" aria-hidden="true">
+
+    <svg viewBox="0 0 1440 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+
+        <path d="M0,48 C320,88 480,8 720,40 C960,72 1120,24 1440,56 L1440,80 L0,80 Z" fill="#f8fafc"/>
+
+    </svg>
+
+</div>
+
+{% endblock %}
+
+
+
+{% block page_content %}
+
+{% include 'public/pages/content/legal_privacy.html' %}
+
+{% include 'public/pages/content/legal_terms.html' %}
+
+{% endblock %}
+
+
+
+{% block extra_js %}
+
+{{ block.super }}
+
+<script>
+
+(function() {
+
+    var tabs = document.querySelectorAll('[data-legal-tab]');
+
+    var accordions = document.querySelectorAll('.duno-acc-item');
+
+
+
+    tabs.forEach(function(tab) {
+
+        tab.addEventListener('click', function(e) {
+
+            var target = document.querySelector(this.getAttribute('href'));
+
+            if (target) {
+
+                e.preventDefault();
+
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            }
+
+        });
+
+    });
+
+
+
+    accordions.forEach(function(item) {
+
+        item.addEventListener('toggle', function() {
+
+            if (this.open) {
+
+                accordions.forEach(function(other) {
+
+                    if (other !== item && other.dataset.single !== 'false') {
+
+                        other.open = false;
+
+                    }
+
+                });
+
+            }
+
+        });
+
+    });
+
+
+
+    function syncTabs() {
+
+        var cgu = document.getElementById('conditions-utilisation');
+
+        var useCgu = cgu && cgu.getBoundingClientRect().top <= 140;
+
+        tabs.forEach(function(tab) {
+
+            var isCgu = tab.getAttribute('data-legal-tab') === 'conditions-utilisation';
+
+            tab.classList.toggle('active', useCgu ? isCgu : !isCgu);
+
+        });
+
+    }
+
+
+
+    window.addEventListener('scroll', syncTabs, { passive: true });
+
+    syncTabs();
+
+})();
+
+</script>
+
+{% endblock %}

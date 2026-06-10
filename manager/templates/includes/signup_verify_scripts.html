@@ -1,0 +1,210 @@
+{% load i18n static %}
+<span id="signupVerifySubmitLabel" class="visually-hidden"><i class="fas fa-check-circle me-2"></i>{% trans "Verify and complete registration" %}</span>
+<span id="signupVerifyVerifyingLabel" class="visually-hidden">{% trans "Verifying..." %}</span>
+<span id="signupMsgNetworkError" class="visually-hidden">{% trans "Network error" %}</span>
+<span id="signupSmsFallbackTitle" class="visually-hidden">{% trans "SMS verification unavailable" %}</span>
+<span id="signupSmsFallbackBody" class="visually-hidden">{% trans "Email verification has been activated automatically. Use the code from your inbox below." %}</span>
+<span id="signupVerifyPendingLabel" class="visually-hidden">{% trans "Sending verification codes…" %}</span>
+
+{% if use_local_static %}
+<script src="/static/js/signup_auth.js" id="signupAuthScript"></script>
+{% else %}
+<script src="{% static 'js/signup_auth.js' %}" id="signupAuthScript"></script>
+{% endif %}
+<script>
+var REQUIRE_SMS = {{ twilio_sms_enabled|yesno:"true,false" }};
+
+var SIGNUP_VERIFY_CFG = {
+    verifyUrl: '{{ verify_submit_url }}',
+    resendPinUrl: '{{ resend_pin_url }}',
+    resendPhoneUrl: '{% url "manager:resend_phone_verification" %}',
+    statusUrl: '{% url "manager:signup_verification_status" %}',
+    verificationType: '{{ verification_type|default:"user" }}',
+    email: '{{ email|escapejs }}',
+    submitLabel: document.getElementById('signupVerifySubmitLabel').innerHTML,
+    verifyingLabel: document.getElementById('signupVerifyVerifyingLabel').textContent,
+    networkError: document.getElementById('signupMsgNetworkError').textContent,
+    smsFallbackTitle: document.getElementById('signupSmsFallbackTitle').textContent,
+    smsFallbackBody: document.getElementById('signupSmsFallbackBody').textContent,
+    pendingLabel: document.getElementById('signupVerifyPendingLabel').textContent
+};
+
+function updateVerifyButton() {
+    var verifyBtn = document.getElementById('verifyBtn');
+    var emailOk = (document.getElementById('pinHidden').value || '').length >= 6;
+    var phoneOk = true;
+    if (REQUIRE_SMS) {
+        var ph = document.getElementById('phonePinHidden');
+        phoneOk = ph && (ph.value || '').length >= 6;
+    }
+    verifyBtn.disabled = !(emailOk && phoneOk);
+}
+
+function showPendingBanner() {
+    var el = document.getElementById('verifyPendingBanner');
+    if (el) el.style.display = 'flex';
+}
+
+function hidePendingBanner() {
+    var el = document.getElementById('verifyPendingBanner');
+    if (el) el.style.display = 'none';
+}
+
+function disableSmsVerificationOnPage() {
+    REQUIRE_SMS = false;
+    var phoneBlock = document.querySelector('.verify-phone-block');
+    if (phoneBlock) phoneBlock.style.display = 'none';
+    if (!document.querySelector('.verify-fallback-banner')) {
+        var card = document.querySelector('.auth-card');
+        if (card) {
+            var el = document.createElement('div');
+            el.className = 'verify-fallback-banner';
+            el.setAttribute('role', 'status');
+            el.innerHTML = '<i class="fas fa-exclamation-triangle"></i><div><strong>'
+                + SIGNUP_VERIFY_CFG.smsFallbackTitle
+                + '</strong><p class="mb-0 small">' + SIGNUP_VERIFY_CFG.smsFallbackBody + '</p></div>';
+            card.insertBefore(el, card.firstChild);
+        }
+    }
+    updateVerifyButton();
+}
+
+function applyVerificationStatus(st) {
+    if (!st || st.pending) return;
+    hidePendingBanner();
+    if (st.error && !st.email_sent) {
+        gToast(SIGNUP_VERIFY_CFG.networkError, 'error');
+        return;
+    }
+    if (st.require_sms && !REQUIRE_SMS) {
+        window.location.reload();
+        return;
+    }
+    if (st.sms_failed || st.sms_disabled) {
+        if (st.sms_error) gToast(st.sms_error, 'error');
+        disableSmsVerificationOnPage();
+        if (st.fallback_message) {
+            setTimeout(function() { gToast(st.fallback_message, 'info'); }, 900);
+        }
+    }
+}
+
+function pollVerificationStatus() {
+    var url = SIGNUP_VERIFY_CFG.statusUrl
+        + '?email=' + encodeURIComponent(SIGNUP_VERIFY_CFG.email)
+        + '&type=' + encodeURIComponent(SIGNUP_VERIFY_CFG.verificationType);
+    fetch(url)
+        .then(function(r) { return r.json(); })
+        .then(function(st) {
+            if (st.pending) {
+                showPendingBanner();
+                setTimeout(pollVerificationStatus, 1500);
+                return;
+            }
+            applyVerificationStatus(st);
+        })
+        .catch(function() { /* ignore poll errors */ });
+}
+
+function initSignupVerifyPage() {
+    if (!window.SignupAuth) return;
+    SignupAuth.initPinGroup('.email-pin', 'pinHidden', updateVerifyButton);
+    if (REQUIRE_SMS) {
+        SignupAuth.initPinGroup('.phone-pin', 'phonePinHidden', updateVerifyButton);
+    }
+    SignupAuth.startResendCooldown('resendLink', 'resendCountdown', 'countdownNum', 60);
+    if (REQUIRE_SMS) {
+        SignupAuth.startResendCooldown('resendPhoneLink', 'resendPhoneCountdown', 'phoneCountdownNum', 60);
+    }
+    var emailPaste = document.querySelector('[data-pin-group="email"] .pin-paste-field');
+    if (emailPaste) emailPaste.focus();
+    pollVerificationStatus();
+}
+
+function loadSignupAuthAndInit() {
+    var scriptEl = document.getElementById('signupAuthScript');
+    function boot() {
+        if (window.SignupAuth) {
+            initSignupVerifyPage();
+            return;
+        }
+        var fallback = document.createElement('script');
+        fallback.src = '/static/js/signup_auth.js';
+        fallback.onload = initSignupVerifyPage;
+        document.head.appendChild(fallback);
+    }
+    if (window.SignupAuth) {
+        initSignupVerifyPage();
+    } else if (scriptEl) {
+        scriptEl.addEventListener('load', boot);
+        scriptEl.addEventListener('error', boot);
+    } else {
+        boot();
+    }
+}
+
+function submitVerify(e) {
+    e.preventDefault();
+    var form = document.getElementById('verifyForm');
+    var btn = document.getElementById('verifyBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>' + SIGNUP_VERIFY_CFG.verifyingLabel;
+    fetch(SIGNUP_VERIFY_CFG.verifyUrl, {
+        method: 'POST',
+        body: new FormData(form)
+    }).then(function(r) { return r.json(); }).then(function(d) {
+        if (d.success) {
+            gToast(d.message, 'success');
+            setTimeout(function() { window.location.href = d.redirect; }, 1000);
+        } else {
+            gToast(d.message, 'error');
+            btn.disabled = false;
+            btn.innerHTML = SIGNUP_VERIFY_CFG.submitLabel;
+            if (window.SignupAuth) {
+                SignupAuth.shakeEl('[data-pin-group="email"]');
+                if (REQUIRE_SMS) SignupAuth.shakeEl('[data-pin-group="phone"]');
+            }
+        }
+    }).catch(function() {
+        gToast(SIGNUP_VERIFY_CFG.networkError, 'error');
+        btn.disabled = false;
+        btn.innerHTML = SIGNUP_VERIFY_CFG.submitLabel;
+    });
+    return false;
+}
+
+function resendPin() {
+    if (window.SignupAuth) {
+        SignupAuth.startResendCooldown('resendLink', 'resendCountdown', 'countdownNum', 60);
+    }
+    var fd = new FormData();
+    fd.append('email', SIGNUP_VERIFY_CFG.email);
+    fd.append('verification_type', SIGNUP_VERIFY_CFG.verificationType);
+    fd.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+    fetch(SIGNUP_VERIFY_CFG.resendPinUrl, { method: 'POST', body: fd })
+        .then(function(r) { return r.json(); })
+        .then(function(d) { gToast(d.message, d.success ? 'success' : 'error'); })
+        .catch(function() { gToast(SIGNUP_VERIFY_CFG.networkError, 'error'); });
+}
+
+function resendPhone() {
+    if (!REQUIRE_SMS) return;
+    if (window.SignupAuth) {
+        SignupAuth.startResendCooldown('resendPhoneLink', 'resendPhoneCountdown', 'phoneCountdownNum', 60);
+    }
+    var fd = new FormData();
+    fd.append('email', SIGNUP_VERIFY_CFG.email);
+    fd.append('verification_type', SIGNUP_VERIFY_CFG.verificationType);
+    fd.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+    fetch(SIGNUP_VERIFY_CFG.resendPhoneUrl, { method: 'POST', body: fd })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            gToast(d.message, d.success ? 'success' : 'error');
+            if (d.sms_disabled) disableSmsVerificationOnPage();
+            if (d.fallback_message) setTimeout(function() { gToast(d.fallback_message, 'info'); }, 900);
+        })
+        .catch(function() { gToast(SIGNUP_VERIFY_CFG.networkError, 'error'); });
+}
+
+document.addEventListener('DOMContentLoaded', loadSignupAuthAndInit);
+</script>

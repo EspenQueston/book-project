@@ -24,12 +24,13 @@
     /* Hero Section - Enhanced */
     .hero-section {
         background: var(--hero-gradient);
-        padding: 120px 0 100px 0;
+        padding: 88px 0 64px 0;
         position: relative;
         overflow: hidden;
-        min-height: 90vh;
+        min-height: 68vh;
         display: flex;
         align-items: center;
+        isolation: isolate;
     }
 
     .hero-section::before {
@@ -39,42 +40,116 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="white" opacity="0.1"><polygon points="0,0 1000,80 1000,100 0,100"/></svg>');
-        background-size: cover;
-        background-position: bottom;
+        background: linear-gradient(180deg, rgba(7,12,33,0.10), rgba(7,12,33,0.22));
+        z-index: 1;
+    }
+
+    .hero-ambient {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+    .hero-spotlight {
+        position: absolute;
+        left: 4%;
+        top: 50%;
+        transform: translateY(-50%);
+        width: min(720px, 78vw);
+        height: 88%;
+        background: radial-gradient(ellipse at 38% 50%, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.05) 38%, transparent 72%);
+        animation: heroSpotlightPulse 8s ease-in-out infinite;
+    }
+
+    .hero-spotlight-right {
+        position: absolute;
+        right: 2%;
+        top: 50%;
+        transform: translateY(-50%);
+        width: min(420px, 42vw);
+        height: 72%;
+        background: radial-gradient(ellipse at center, rgba(255,255,255,0.08) 0%, transparent 68%);
+        animation: heroSpotlightPulse 10s ease-in-out infinite reverse;
+    }
+
+    .hero-aurora {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(90px);
+        opacity: 0.28;
+    }
+
+    .hero-aurora-a {
+        width: 280px;
+        height: 280px;
+        right: -6%;
+        bottom: -14%;
+        background: rgba(118,75,162,0.55);
+        animation: heroAuroraDrift 16s ease-in-out infinite;
+    }
+
+    .hero-aurora-b {
+        width: 220px;
+        height: 220px;
+        left: -8%;
+        top: -10%;
+        background: rgba(99,102,241,0.42);
+        animation: heroAuroraDrift 13s ease-in-out infinite reverse;
+    }
+
+    .hero-text-grid {
+        position: absolute;
+        inset: 0;
+        background-image:
+            linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+        background-size: 52px 52px;
+        mask-image: radial-gradient(ellipse 85% 75% at 32% 48%, black 18%, transparent 78%);
+        -webkit-mask-image: radial-gradient(ellipse 85% 75% at 32% 48%, black 18%, transparent 78%);
+        opacity: 0.55;
     }
 
     .hero-content {
         position: relative;
         z-index: 2;
+        animation: heroContentIn .9s cubic-bezier(.2,.85,.25,1) both;
     }
 
     .hero-title {
         font-size: 3.8rem;
         font-weight: 800;
         margin-bottom: 1.5rem;
-        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        background: linear-gradient(120deg, #ffffff 0%, #f8fafc 42%, #e0e7ff 72%, #ffffff 100%);
+        background-size: 220% auto;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
         line-height: 1.2;
+        text-shadow: none;
+        filter: drop-shadow(0 4px 28px rgba(255,255,255,0.22));
+        animation: heroTextIn .9s cubic-bezier(.2,.85,.25,1) .08s both, heroTitleShine 9s ease-in-out infinite;
     }
 
     .hero-subtitle {
         font-size: 1.4rem;
-        font-weight: 300;
+        font-weight: 400;
         margin-bottom: 2.5rem;
-        opacity: 0.95;
+        opacity: 0.98;
         line-height: 1.6;
         max-width: 600px;
+        color: rgba(255,255,255,0.96);
+        text-shadow: 0 2px 18px rgba(15,23,42,0.28), 0 1px 3px rgba(0,0,0,0.12);
+        animation: heroTextIn .9s cubic-bezier(.2,.85,.25,1) .2s both;
     }
 
     .hero-stats {
-        display: flex;
-        gap: 50px;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
         justify-content: center;
-        margin-top: 60px;
-        flex-wrap: wrap;
+        margin-top: 18px;
     }
 
     .hero-stat {
@@ -83,35 +158,41 @@
         background: var(--glass-bg);
         backdrop-filter: blur(10px);
         border: 1px solid var(--glass-border);
-        border-radius: 20px;
-        padding: 25px 30px;
+        border-radius: 18px;
+        padding: 14px 10px;
         transition: all 0.3s ease;
+        animation: heroStatIn .75s cubic-bezier(.2,.85,.25,1) both;
+        animation-delay: calc(var(--hero-stat-index, 0) * 70ms + .38s);
     }
 
     .hero-stat:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 26px rgba(0,0,0,0.16);
     }
 
     .hero-stat-number {
-        font-size: 2.8rem;
+        font-size: 1.65rem;
         font-weight: 800;
         display: block;
-        margin-bottom: 8px;
+        margin-bottom: 4px;
+        line-height: 1.05;
+        text-shadow: 0 2px 16px rgba(255,255,255,0.28);
     }
 
     .hero-stat-label {
-        font-size: 1rem;
-        opacity: 0.9;
+        font-size: 0.76rem;
+        opacity: 0.96;
         text-transform: uppercase;
-        letter-spacing: 1px;
-        font-weight: 500;
+        letter-spacing: .6px;
+        font-weight: 600;
+        line-height: 1.2;
+        text-shadow: 0 1px 10px rgba(15,23,42,0.18);
     }
 
     .cta-buttons {
-        margin-top: 40px;
+        margin-top: 24px;
         display: flex;
-        gap: 20px;
+        gap: 14px;
         justify-content: flex-start;
         flex-wrap: wrap;
     }
@@ -155,6 +236,35 @@
         color: white;
         transform: translateY(-3px);
         border-color: white;
+    }
+
+    .cta-buttons {
+        animation: heroTextIn .9s cubic-bezier(.2,.85,.25,1) .32s both;
+    }
+
+    @keyframes heroContentIn {
+        from { opacity: 0; transform: translateY(26px) scale(.985); filter: blur(10px); }
+        to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+    }
+    @keyframes heroTextIn {
+        from { opacity: 0; transform: translateY(24px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes heroStatIn {
+        from { opacity: 0; transform: translateY(18px) rotateX(18deg) scale(.96); }
+        to { opacity: 1; transform: translateY(0) rotateX(0) scale(1); }
+    }
+    @keyframes heroTitleShine {
+        0%, 100% { background-position: 0% center; }
+        50% { background-position: 100% center; }
+    }
+    @keyframes heroSpotlightPulse {
+        0%, 100% { opacity: 0.88; transform: translateY(-50%) scale(1); }
+        50% { opacity: 1; transform: translateY(-50%) scale(1.03); }
+    }
+    @keyframes heroAuroraDrift {
+        0%, 100% { transform: translate(0, 0); }
+        50% { transform: translate(12px, -16px); }
     }
 
     /* Features Section - Enhanced */
@@ -324,85 +434,126 @@
     }
 
     .search-form {
-        max-width: 600px;
+        max-width: 640px;
         margin: 0 auto;
         position: relative;
         z-index: 2;
     }
 
-    .search-input {
-        width: 100%;
-        padding: 20px 30px;
-        border: none;
-        border-radius: 50px;
-        font-size: 1.2rem;
-        margin-bottom: 20px;
+    .search-form form {
+        display: flex;
+        align-items: stretch;
         background: rgba(255, 255, 255, 0.95);
         backdrop-filter: blur(10px);
-        transition: all 0.3s ease;
+        border-radius: 50px;
+        overflow: hidden;
+        box-shadow: 0 12px 30px rgba(15,23,42,.12);
+    }
+
+    .search-input {
+        flex: 1;
+        width: auto;
+        height: 58px;
+        min-height: 58px !important;
+        padding: 0 26px !important;
+        border: none !important;
+        border-radius: 0 !important;
+        font-size: 1.05rem !important;
+        margin-bottom: 0;
+        background: transparent !important;
+        box-shadow: none !important;
+        transition: background 0.3s ease;
+        transform: none !important;
+        min-width: 0;
     }
 
     .search-input:focus {
         outline: none;
-        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
-        background: white;
+        box-shadow: none !important;
+        background: transparent !important;
     }
 
     .search-btn {
-        background: var(--glass-bg);
-        color: white;
-        border: 2px solid var(--glass-border);
-        padding: 18px 40px;
-        border-radius: 50px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        transition: all 0.3s ease;
-        backdrop-filter: blur(10px);
-        width: 100%;
+        background: transparent;
+        color: #667eea;
+        border: none;
+        border-left: 1px solid rgba(102, 126, 234, 0.18);
+        padding: 0 28px;
+        border-radius: 0;
+        font-weight: 700;
+        text-transform: none;
+        letter-spacing: 0;
+        transition: background 0.3s ease, color 0.3s ease;
+        width: auto;
+        white-space: nowrap;
+        flex-shrink: 0;
     }
 
     .search-btn:hover {
-        background: white;
-        color: var(--primary-color);
-        transform: translateY(-2px);
+        background: #f8faff;
+        color: #5568d3;
+        transform: none;
     }
 
-    /* Featured Books Section */
-    .featured-section {
-        padding: 120px 0;
-        background: white;
+    /* Popular Picks and New Arrivals — shared premium desktop design */
+    .featured-section,
+    .new-arrivals-section {
+        padding: 88px 0;
+        background:
+            radial-gradient(circle at 12% 12%, rgba(102,126,234,.14), transparent 28%),
+            radial-gradient(circle at 88% 18%, rgba(118,75,162,.12), transparent 24%),
+            linear-gradient(180deg,#f8fafc 0%,#eef2ff 52%,#ffffff 100%);
+        position: relative;
+        overflow: hidden;
     }
+    .featured-section::before,
+    .new-arrivals-section::before {
+        content:'';
+        position:absolute;
+        inset:0;
+        background-image: linear-gradient(rgba(102,126,234,.055) 1px, transparent 1px), linear-gradient(90deg, rgba(102,126,234,.055) 1px, transparent 1px);
+        background-size: 44px 44px;
+        mask-image: linear-gradient(180deg, rgba(0,0,0,.7), transparent 88%);
+        pointer-events:none;
+    }
+    .featured-section .container,
+    .new-arrivals-section .container { position:relative; z-index:1; }
 
-    .showcase-tabs {
+    .showcase-tabs, .na-tabs {
         display: flex;
         justify-content: center;
         gap: 10px;
-        margin-bottom: 50px;
+        margin-bottom: 34px;
+        flex-wrap: wrap;
     }
 
-    .showcase-tab {
-        background: #f1f5f9;
-        border: 2px solid transparent;
+    .showcase-tab, .na-tab {
+        background: rgba(255,255,255,.82);
+        border: 1px solid rgba(102,126,234,.15);
         color: #64748b;
-        padding: 12px 28px;
-        border-radius: 50px;
-        font-weight: 600;
-        font-size: 1rem;
+        padding: 11px 24px;
+        border-radius: 999px;
+        font-weight: 800;
+        font-size: .92rem;
         cursor: pointer;
-        transition: all 0.3s;
+        transition: all 0.28s ease;
+        box-shadow: 0 8px 22px rgba(102,126,234,.07);
+        display:inline-flex;
+        align-items:center;
+        gap:8px;
     }
 
-    .showcase-tab:hover { color: var(--primary-color); background: #ede9fe; }
+    .showcase-tab:hover, .na-tab:hover { color: #667eea; background: #fff; transform: translateY(-2px); border-color:rgba(102,126,234,.32); }
 
-    .showcase-tab.active {
+    .showcase-tab.active, .na-tab.active {
         background: var(--hero-gradient);
         color: white;
-        box-shadow: 0 4px 20px rgba(102,126,234,0.3);
+        border-color: transparent;
+        box-shadow: 0 12px 28px rgba(102,126,234,0.28);
     }
 
     .showcase-panel { display: none; }
-    .showcase-panel.active { display: block; }
+    .showcase-panel.active { display: block; animation: naFadeIn .35s ease; }
 
     .book-card {
         background: white;
@@ -706,6 +857,10 @@
             border-bottom-left-radius: 0;
             border-bottom-right-radius: 0;
         }
+        .hero-spotlight { width: 92vw; left: 4%; opacity: 0.75; }
+        .hero-spotlight-right { width: 55vw; opacity: 0.55; }
+        .hero-aurora-a { width: 180px; height: 180px; opacity: 0.22; }
+        .hero-aurora-b { width: 140px; height: 140px; opacity: 0.18; }
         .hero-title {
             font-size: 2rem;
             line-height: 1.12;
@@ -1002,7 +1157,8 @@
     .pwa-search-bar { display: none; }
     @media (max-width: 768px) {
         .pwa-search-bar {
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr auto;
             align-items: center;
             gap: 10px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -1015,26 +1171,65 @@
         html[data-theme="dark"] .pwa-search-bar {
             background: linear-gradient(135deg, #4338ca 0%, #5b21b6 100%);
         }
-        .pwa-search-inner {
-            flex: 1;
+        .pwa-search-label {
+            grid-column: 1 / -1;
+            color: #fff;
+            font-size: .88rem;
+            font-weight: 900;
+            letter-spacing: .2px;
             display: flex;
             align-items: center;
-            background: rgba(255,255,255,0.92);
-            border-radius: 22px;
-            padding: 0 14px;
-            height: 40px;
             gap: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: -2px;
         }
-        html[data-theme="dark"] .pwa-search-inner { background: rgba(15,23,42,0.8); }
-        .pwa-search-inner input {
-            flex: 1;
-            border: none;
-            background: transparent;
-            font-size: 13.5px;
+        .pwa-search-category {
+            flex: 0 0 auto;
+            height: 40px;
+            min-height: 40px !important;
+            border: 1px solid rgba(255,255,255,.65) !important;
+            border-radius: 18px !important;
+            padding: 0 10px !important;
+            font-size: .76rem !important;
+            font-weight: 800;
+            color: #4f46e5;
+            background: rgba(255,255,255,.95) !important;
+            box-shadow: none !important;
+            outline: none;
+            max-width: 118px;
+            width: auto !important;
+        }
+        .pwa-search-inner {
+            flex: 1 1 auto;
+            min-width: 0;
+            display: flex;
+            align-items: center;
+            background: rgba(255,255,255,0.94) !important;
+            border: 1px solid rgba(255,255,255,0.7) !important;
+            border-radius: 22px !important;
+            padding: 0 12px !important;
+            height: 42px;
+            gap: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+            position: relative;
+            overflow: hidden;
+        }
+        html[data-theme="dark"] .pwa-search-inner { background: rgba(15,23,42,0.86) !important; }
+        .pwa-search-inner input,
+        .pwa-search-inner input.form-control {
+            flex: 1 1 auto;
+            min-width: 0;
+            width: 100%;
+            height: auto !important;
+            min-height: 0 !important;
+            border: 0 !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            font-size: 13.5px !important;
             outline: none;
             color: #1e293b;
-            padding: 0;
+            padding: 0 !important;
+            border-radius: 0 !important;
+            transform: none !important;
         }
         html[data-theme="dark"] .pwa-search-inner input { color: #e2e8f0; }
         .pwa-search-inner i { color: #94a3b8; font-size: 14px; flex-shrink: 0; }
@@ -1145,10 +1340,13 @@
     }
     .bd-tag-pill.bd-carousel-tag-hot { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #b45309; }
     .bd-tag-pill.bd-carousel-tag-deal { background: linear-gradient(135deg, #fecaca, #fca5a5); color: #991b1b; }
+    .bd-tag-pill.bd-carousel-tag-fav { background: linear-gradient(135deg, #fce7f3, #fbcfe8); color: #be185d; }
     .bd-tag-pill.bd-carousel-tag-new { background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: #1d4ed8; }
     html[data-theme="dark"] .bd-tag-pill.bd-carousel-tag-hot { background: rgba(245,158,11,0.2); color: #fcd34d; }
     html[data-theme="dark"] .bd-tag-pill.bd-carousel-tag-deal { background: rgba(239,68,68,0.2); color: #fca5a5; }
     html[data-theme="dark"] .bd-tag-pill.bd-carousel-tag-new { background: rgba(59,130,246,0.2); color: #93c5fd; }
+html[data-theme="dark"] .bd-tag-pill.bd-carousel-tag-fav { background: rgba(236,72,153,0.2); color: #f9a8d4; }
+    html[data-theme="dark"] .bd-tag-pill.bd-carousel-tag-fav { background: rgba(236,72,153,0.2); color: #f9a8d4; }
     .bd-carousel-body { padding: 9px 10px 10px; }
     .bd-carousel-name {
         font-size: 12px;
@@ -1339,38 +1537,25 @@
         box-shadow: 0 4px 15px rgba(102,126,234,0.3);
     }
     #feedLoader { text-align: center; padding: 12px; color: #9ca3af; font-size: 0.85rem; }
+    {% include 'public/includes/feed_view_details_css.html' %}
     @media (min-width: 769px) { .feed-section { display: none; } }
 
-/* ===== New Arrivals Section ===== */
-.new-arrivals-section { padding: 80px 0; background: #fff; }
-.na-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-.na-card { background: #f8fafc; border-radius: 16px; overflow: hidden; transition: all .3s; border: 1px solid #f1f5f9; }
-.na-card:hover { transform: translateY(-6px); box-shadow: 0 12px 35px rgba(102,126,234,.15); }
-.na-cover { height: 220px; background: linear-gradient(135deg, #f0f0ff, #e8e0ff); display: flex; align-items: center; justify-content: center; padding: 16px; overflow: hidden; }
-.na-cover img { max-width: 100%; max-height: 100%; object-fit: contain; transition: transform .4s; }
-.na-card:hover .na-cover img { transform: scale(1.08); }
-.na-body { padding: 16px; }
-.na-badge { font-size: .65rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; background: linear-gradient(135deg,#667eea,#764ba2); color: #fff; display: inline-block; margin-bottom: 8px; }
-.na-title { font-size: .95rem; font-weight: 700; color: #1e293b; margin-bottom: 6px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.na-pub { font-size: .8rem; color: #94a3b8; margin-bottom: 8px; }
-.na-footer { display: flex; justify-content: space-between; align-items: center; }
-.na-price { font-size: 1.15rem; font-weight: 800; color: #667eea; }
-.na-btn { background: linear-gradient(135deg,#667eea,#764ba2); color: #fff; border: none; border-radius: 8px; padding: 6px 14px; font-size: .8rem; font-weight: 600; cursor: pointer; text-decoration: none; transition: all .2s; }
-.na-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102,126,234,.4); color: #fff; }
-
-/* New Arrivals Tabs */
-.na-tabs { display: flex; gap: 8px; justify-content: center; margin-bottom: 32px; flex-wrap: wrap; }
-.na-tab {
-    padding: 10px 24px; border-radius: 50px; font-size: .9rem; font-weight: 700;
-    border: 2px solid transparent; background: #f1f5f9; color: #64748b;
-    cursor: pointer; transition: all .3s ease; display: inline-flex; align-items: center; gap: 8px;
-}
-.na-tab:hover { background: #e2e8f0; color: #475569; transform: translateY(-2px); }
-.na-tab.active {
-    background: linear-gradient(135deg,#667eea,#764ba2);
-    color: #fff; border-color: transparent;
-    box-shadow: 0 4px 15px rgba(102,126,234,.35);
-}
+/* ===== New Arrivals / Popular Picks Cards ===== */
+.na-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
+.na-card { background: rgba(255,255,255,.9); border-radius: 22px; overflow: hidden; transition: all .3s; border: 1px solid rgba(102,126,234,.12); box-shadow:0 14px 36px rgba(102,126,234,.10); position:relative; }
+.na-card:hover { transform: translateY(-8px); box-shadow: 0 24px 54px rgba(102,126,234,.20); border-color:rgba(102,126,234,.28); }
+.na-cover { height: 220px; background: linear-gradient(135deg, #eef2ff, #f5f3ff); display: flex; align-items: center; justify-content: center; padding: 16px; overflow: hidden; position:relative; }
+.na-cover::after { content:''; position:absolute; inset:auto -20% -35% -20%; height:70%; background:radial-gradient(circle, rgba(102,126,234,.16), transparent 65%); }
+.na-cover img { max-width: 100%; max-height: 100%; object-fit: contain; transition: transform .4s; position:relative; z-index:1; }
+.na-card:hover .na-cover img { transform: scale(1.08) rotate(-1deg); }
+.na-body { padding: 17px; }
+.na-badge { font-size: .65rem; font-weight: 800; padding: 4px 11px; border-radius: 20px; background: linear-gradient(135deg,#667eea,#764ba2); color: #fff; display: inline-block; margin-bottom: 9px; }
+.na-title { font-size: .96rem; font-weight: 850; color: #1e293b; margin-bottom: 7px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.na-pub { font-size: .8rem; color: #94a3b8; margin-bottom: 10px; }
+.na-footer { display: flex; justify-content: space-between; align-items: center; gap:10px; }
+.na-price { font-size: 1.15rem; font-weight: 900; color: #667eea; }
+.na-btn { background: linear-gradient(135deg,#667eea,#764ba2); color: #fff; border: none; border-radius: 999px; padding: 7px 15px; font-size: .8rem; font-weight: 800; cursor: pointer; text-decoration: none; transition: all .2s; white-space:nowrap; }
+.na-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(102,126,234,.32); color: #fff; }
 .na-tab i { font-size: .85rem; }
 .na-tab-content { position: relative; }
 .na-tab-panel { display: none; animation: naFadeIn .4s ease; }
@@ -1396,14 +1581,41 @@
 .na-instructor { font-size: .8rem; color: #94a3b8; margin-bottom: 6px; }
 .na-original-price { font-size: .85rem; color: #94a3b8; text-decoration: line-through; margin-right: 6px; }
 
-/* ===== Categories Showcase ===== */
-.categories-showcase { padding: 80px 0; background: linear-gradient(135deg, #f8fafc, #eef2ff); }
-.cat-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; }
-.cat-card { background: #fff; border-radius: 16px; padding: 28px 16px; text-align: center; text-decoration: none; color: #1e293b; transition: all .3s; border: 1px solid rgba(102,126,234,.08); }
-.cat-card:hover { transform: translateY(-6px); box-shadow: 0 12px 30px rgba(102,126,234,.12); color: #1e293b; }
-.cat-icon { width: 60px; height: 60px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 1.5rem; color: #fff; }
-.cat-card h6 { font-weight: 700; margin-bottom: 4px; font-size: .95rem; }
-.cat-card p { font-size: .8rem; color: #94a3b8; margin: 0; }
+/* ===== Home Category Hub ===== */
+.home-category-hub { padding: 42px 0 52px; background: radial-gradient(circle at 14% 8%, rgba(102,126,234,.16), transparent 28%), radial-gradient(circle at 86% 18%, rgba(118,75,162,.12), transparent 26%), linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%); position:relative; overflow:hidden; }
+.home-category-hub::before { content:''; position:absolute; inset:0; background-image:linear-gradient(rgba(102,126,234,.055) 1px, transparent 1px), linear-gradient(90deg, rgba(102,126,234,.055) 1px, transparent 1px); background-size:42px 42px; pointer-events:none; opacity:.7; }
+.home-category-hub::after { content:''; position:absolute; width:280px; height:280px; right:-96px; top:-94px; border-radius:42px; background:linear-gradient(135deg,rgba(102,126,234,.13),rgba(118,75,162,.08)); transform:rotate(28deg); filter:blur(.2px); animation:categoryShapeFloat 10s ease-in-out infinite; pointer-events:none; }
+.home-category-hub .container { position:relative; z-index:1; }
+.home-category-head { display:flex; justify-content:space-between; align-items:flex-end; gap:18px; margin-bottom:24px; }
+.home-category-kicker { color:#667eea; font-weight:900; font-size:.78rem; text-transform:uppercase; letter-spacing:1.6px; margin-bottom:6px; }
+.home-category-title { font-size:2.1rem; font-weight:950; color:#1e293b; margin:0; letter-spacing:-.04em; }
+.home-category-subtitle { color:#64748b; margin:6px 0 0; }
+.home-category-grid { display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); gap:16px; }
+.home-category-card { position:relative; min-height:124px; padding:18px 16px; border-radius:24px; background:rgba(255,255,255,.88); border:1px solid rgba(102,126,234,.12); box-shadow:0 10px 30px rgba(102,126,234,.08); text-decoration:none; color:#1e293b; overflow:hidden; transition:transform .28s ease, box-shadow .28s ease, border-color .28s ease, opacity .45s ease; backdrop-filter:blur(12px); opacity:0; transform:translateY(24px) scale(.965); }
+.home-category-card::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,255,255,.35),transparent 44%,rgba(102,126,234,.055)); opacity:.8; pointer-events:none; }
+.home-category-card::after { content:''; position:absolute; right:-26px; bottom:-26px; width:92px; height:92px; border-radius:50%; background:var(--cat-glow, rgba(102,126,234,.10)); transition:transform .28s ease, opacity .28s ease; }
+.home-category-card.is-visible { opacity:1; transform:translateY(0) scale(1); transition-delay:calc(var(--cat-index, 0) * 55ms); }
+.home-category-card:hover { color:#1e293b; transform:translateY(-7px) scale(1.015); box-shadow:0 22px 50px rgba(102,126,234,.18); border-color:rgba(102,126,234,.30); }
+.home-category-card:hover::after { transform:scale(1.22); opacity:.95; }
+.home-category-icon { width:48px; height:48px; border-radius:17px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:1.18rem; background:var(--cat-bg, linear-gradient(135deg,#667eea,#764ba2)); box-shadow:0 12px 24px rgba(102,126,234,.25); margin-bottom:12px; position:relative; z-index:1; transition:transform .28s ease; }
+.home-category-card:hover .home-category-icon { transform:rotate(-4deg) scale(1.07); }
+.home-category-card h3 { font-size:.96rem; font-weight:900; line-height:1.25; margin:0; position:relative; z-index:1; }
+.home-category-card p { display:none; }
+.home-category-card { min-height:108px; }
+.home-category-card.is-publish { background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; }
+.home-category-card.is-publish h3 { color:#fff; }
+.home-category-card.is-publish .home-category-icon { background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.25); }
+.home-category-extra { display:none; }
+.home-category-card.home-category-final { display:block; }
+.home-category-hub.expanded .home-category-extra { display:block; }
+@media (min-width: 769px) { .home-category-card.home-category-final { grid-column:auto; } }
+.home-category-more { border:0; border-radius:999px; padding:12px 24px; font-weight:850; color:#fff; background:linear-gradient(135deg,#667eea,#764ba2); box-shadow:0 12px 24px rgba(102,126,234,.24); display:inline-flex; align-items:center; gap:8px; }
+.home-category-more i { transition:transform .25s; }
+.home-category-hub.expanded .home-category-more i { transform:rotate(180deg); }
+@keyframes categoryShapeFloat { 0%,100% { transform:rotate(28deg) translate3d(0,0,0); } 50% { transform:rotate(34deg) translate3d(-18px,20px,0); } }
+.home-section-soft { background:linear-gradient(180deg,#ffffff 0%,#f8fafc 100%); }
+.home-section-lavender { background:linear-gradient(180deg,#f8fafc 0%,#eef2ff 100%); }
+.home-section-mint { background:linear-gradient(180deg,#f7fbff 0%,#f0fdf8 100%); }
 
 /* ===== Stats Counter Section ===== */
 .stats-section { padding: 70px 0; background: var(--hero-gradient); position: relative; overflow: hidden; }
@@ -1419,13 +1631,43 @@
     .search-section,
     .featured-section,
     .new-arrivals-section,
-    .categories-showcase,
     .stats-section,
     .cta-section {
         display: none !important;
     }
+    .home-category-hub { padding: 16px 10px 18px; background:#fff; }
+    .home-category-head { display:block; margin-bottom:12px; padding:0 4px; }
+    .home-category-title { font-size:1.08rem; }
+    .home-category-subtitle { font-size:.78rem; }
+    .home-category-grid { grid-template-columns:repeat(4, minmax(0, 1fr)); gap:10px 7px; }
+    .home-category-card { min-height:92px; padding:10px 6px; border-radius:16px; box-shadow:0 4px 14px rgba(102,126,234,.08); text-align:center; }
+    .home-category-card.home-category-final { display:none; }
+    .home-category-hub.expanded .home-category-card.home-category-final { display:block; }
+    .home-category-card::after { width:56px; height:56px; right:-22px; bottom:-22px; }
+    .home-category-icon { width:42px; height:42px; border-radius:14px; margin:0 auto 7px; font-size:1rem; }
+    .home-category-card h3 { font-size:.66rem; line-height:1.16; margin:0; }
+    .home-category-card p { display:none; }
+    .home-category-more { padding:10px 18px; font-size:.82rem; }
+    html[data-theme="dark"] body { background: var(--bg-page); }
     /* Bottom nav padding */
     body { padding-bottom: 64px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-content,
+    .hero-title,
+    .hero-subtitle,
+    .cta-buttons,
+    .hero-stat,
+    .hero-spotlight,
+    .hero-spotlight-right,
+    .hero-aurora,
+    .home-category-hub::after,
+    .home-category-card {
+        animation: none !important;
+        transition: none !important;
+    }
+    .home-category-card { opacity: 1; transform: none; }
 }
 
 /* ===== MOBILE BOTTOM NAVIGATION ===== */
@@ -1593,13 +1835,24 @@ html[data-theme="dark"] .book-price,
 html[data-theme="dark"] .product-price {
     color: var(--brand-primary);
 }
+html[data-theme="dark"] .search-section .search-form form {
+    background: rgba(15, 23, 42, 0.92);
+    box-shadow: 0 12px 30px rgba(0,0,0,.35);
+}
 html[data-theme="dark"] .search-section .search-input {
-    background: rgba(15, 23, 42, 0.85);
+    background: transparent !important;
     color: var(--text-primary);
 }
 html[data-theme="dark"] .search-section .search-input:focus {
-    background: var(--bg-surface);
-    box-shadow: 0 0 0 3px rgba(102,126,234,0.2);
+    background: transparent !important;
+    box-shadow: none !important;
+}
+html[data-theme="dark"] .search-section .search-btn {
+    color: var(--brand-primary);
+    border-left-color: var(--border-default);
+}
+html[data-theme="dark"] .search-section .search-btn:hover {
+    background: rgba(102,126,234,.12);
 }
 html[data-theme="dark"] .search-tab.active {
     background: var(--bg-surface);
@@ -1826,6 +2079,7 @@ html[data-theme="dark"] .flash-card-name { color: var(--text-primary); }
 html[data-theme="dark"] .bd-tag-pill.bd-carousel-tag-hot { background: rgba(245,158,11,0.2); color: #fcd34d; }
 html[data-theme="dark"] .bd-tag-pill.bd-carousel-tag-deal { background: rgba(239,68,68,0.2); color: #fca5a5; }
 html[data-theme="dark"] .bd-tag-pill.bd-carousel-tag-new { background: rgba(59,130,246,0.2); color: #93c5fd; }
+html[data-theme="dark"] .bd-tag-pill.bd-carousel-tag-fav { background: rgba(236,72,153,0.2); color: #f9a8d4; }
 html[data-theme="dark"] .mobile-bottom-nav {
     background: rgba(15,23,42,0.97);
     border-top-color: rgba(255,255,255,0.08);
@@ -1844,12 +2098,50 @@ html[data-theme="dark"] .pwa-search-inner {
 html[data-theme="dark"] .pwa-search-inner input {
     color: var(--text-primary);
 }
+
+/* Categories hub & FAQ — dark mode (hero keeps light appearance) */
+html[data-theme="dark"] .home-category-hub {
+    background: radial-gradient(circle at 14% 8%, rgba(99,102,241,0.10), transparent 28%), radial-gradient(circle at 86% 18%, rgba(139,92,246,0.08), transparent 26%), linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+}
+html[data-theme="dark"] .home-category-hub::before {
+    background-image: linear-gradient(rgba(129,140,248,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(129,140,248,0.06) 1px, transparent 1px);
+}
+html[data-theme="dark"] .home-category-kicker { color: #a5b4fc; }
+html[data-theme="dark"] .home-category-title { color: var(--text-primary); }
+html[data-theme="dark"] .home-category-subtitle { color: var(--text-secondary); }
+html[data-theme="dark"] .home-category-card {
+    background: rgba(30,41,59,0.88);
+    border-color: rgba(129,140,248,0.14);
+    color: var(--text-primary);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.22);
+}
+html[data-theme="dark"] .home-category-card::before {
+    background: linear-gradient(135deg, rgba(129,140,248,0.08), transparent 44%, rgba(99,102,241,0.04));
+}
+html[data-theme="dark"] .home-category-card p { color: var(--text-secondary); }
+html[data-theme="dark"] .home-category-card:hover {
+    color: var(--text-primary);
+    border-color: rgba(129,140,248,0.32);
+    box-shadow: 0 22px 50px rgba(0,0,0,0.32);
+}
+@media (max-width: 768px) {
+    html[data-theme="dark"] .home-category-hub { background: var(--bg-page); }
+}
 </style>
+{% include 'includes/home_faq_styles.html' %}
+{% include 'includes/hero_wave_divider_styles.html' %}
 {% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
 <section class="hero-section">
+    <div class="hero-ambient" aria-hidden="true">
+        <span class="hero-text-grid"></span>
+        <span class="hero-aurora hero-aurora-a"></span>
+        <span class="hero-aurora hero-aurora-b"></span>
+        <span class="hero-spotlight"></span>
+        <span class="hero-spotlight-right"></span>
+    </div>
     <div class="container">
         <div class="hero-content">
             <div class="row align-items-center">
@@ -1871,63 +2163,124 @@ html[data-theme="dark"] .pwa-search-inner input {
                 
                 <div class="col-lg-5" data-aos="fade-left" data-aos-delay="200">
                     <div class="hero-stats">
-                        <div class="hero-stat" data-aos="zoom-in" data-aos-delay="400">
-                            <span class="hero-stat-number">{{ book_count|default:0 }}</span>
-                            <span class="hero-stat-label" data-zh="精选图书" data-en="Books" data-fr="Livres">精选图书</span>
+                        <div class="hero-stat" style="--hero-stat-index:0" data-aos="zoom-in" data-aos-delay="350">
+                            <span class="hero-stat-number">{{ user_count|default:0 }}</span>
+                            <span class="hero-stat-label" data-zh="用户" data-en="Users" data-fr="Utilisateurs">Utilisateurs</span>
                         </div>
-                        <div class="hero-stat" data-aos="zoom-in" data-aos-delay="500">
-                            <span class="hero-stat-number">{{ product_count|default:0 }}</span>
-                            <span class="hero-stat-label" data-zh="商品上架" data-en="Products" data-fr="Produits">商品上架</span>
-                        </div>
-                        <div class="hero-stat" data-aos="zoom-in" data-aos-delay="600">
-                            <span class="hero-stat-number">{{ course_count|default:0 }}</span>
-                            <span class="hero-stat-label" data-zh="在线课程" data-en="Courses" data-fr="Cours en ligne">在线课程</span>
-                        </div>
-                        <div class="hero-stat" data-aos="zoom-in" data-aos-delay="700">
+                        <div class="hero-stat" style="--hero-stat-index:1" data-aos="zoom-in" data-aos-delay="400">
                             <span class="hero-stat-number">{{ vendor_count|default:0 }}</span>
-                            <span class="hero-stat-label" data-zh="合作卖家" data-en="Vendors" data-fr="Vendeurs">合作卖家</span>
+                            <span class="hero-stat-label" data-zh="卖家" data-en="Vendors" data-fr="Vendeurs">Vendeurs</span>
+                        </div>
+                        <div class="hero-stat" style="--hero-stat-index:2" data-aos="zoom-in" data-aos-delay="450">
+                            <span class="hero-stat-number">{{ book_count|default:0 }}</span>
+                            <span class="hero-stat-label" data-zh="图书" data-en="Books" data-fr="Livres">Livres</span>
+                        </div>
+                        <div class="hero-stat" style="--hero-stat-index:3" data-aos="zoom-in" data-aos-delay="500">
+                            <span class="hero-stat-number">{{ product_count|default:0 }}</span>
+                            <span class="hero-stat-label" data-zh="市场商品" data-en="Marketplace products" data-fr="Produits marketplace">Produits marketplace</span>
+                        </div>
+                        <div class="hero-stat" style="--hero-stat-index:4" data-aos="zoom-in" data-aos-delay="550">
+                            <span class="hero-stat-number">{{ course_count|default:0 }}</span>
+                            <span class="hero-stat-label" data-zh="在线课程" data-en="Courses" data-fr="Cours en ligne">Cours en ligne</span>
+                        </div>
+                        <div class="hero-stat" style="--hero-stat-index:5" data-aos="zoom-in" data-aos-delay="600">
+                            <span class="hero-stat-number">{{ supermarket_product_count|default:0 }}</span>
+                            <span class="hero-stat-label" data-zh="超市商品" data-en="Supermarket products" data-fr="Produits supermarché">Produits supermarché</span>
+                        </div>
+                        <div class="hero-stat" style="--hero-stat-index:6" data-aos="zoom-in" data-aos-delay="650">
+                            <span class="hero-stat-number">{{ total_orders_count|default:0 }}</span>
+                            <span class="hero-stat-label" data-zh="订单" data-en="Orders" data-fr="Commandes">Commandes</span>
+                        </div>
+                        <div class="hero-stat" style="--hero-stat-index:7" data-aos="zoom-in" data-aos-delay="700">
+                            <span class="hero-stat-number">{{ total_catalog_items|default:0 }}</span>
+                            <span class="hero-stat-label" data-zh="全部内容" data-en="All items" data-fr="Tous les articles">Tous les articles</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    {% include 'includes/hero_wave_divider.html' with hero_divider_fill='#f8fafc' %}
+</section>
+
+<section class="home-category-hub" id="homeCategoryHub">
+    <div class="container">
+        <div class="home-category-head">
+            <div>
+                <div class="home-category-kicker">Duno360 Market</div>
+                <h2 class="home-category-title">Catégories populaires</h2>
+                <p class="home-category-subtitle">Explorez les annonces, produits et services par univers.</p>
+            </div>
+            <button class="home-category-more d-none d-md-inline-flex" type="button" onclick="toggleHomeCategories(this)">Voir plus <i class="fas fa-chevron-down"></i></button>
+        </div>
+        <div class="home-category-grid">
+            <a href="{% url 'manager:publish_entry' %}" class="home-category-card is-publish"><div class="home-category-icon"><i class="fas fa-plus"></i></div><h3>Publier une annonce</h3><p>Raccourci vendeur</p></a>
+            <a href="/marketplace/" class="home-category-card" style="--cat-bg:linear-gradient(135deg,#f97316,#ea580c);--cat-glow:rgba(249,115,22,.12)"><div class="home-category-icon"><i class="fas fa-store"></i></div><h3>Marché</h3><p>Tous les produits</p></a>
+            <a href="{% url 'manager:public_books' %}" class="home-category-card" style="--cat-bg:linear-gradient(135deg,#6366f1,#4f46e5);--cat-glow:rgba(99,102,241,.14)"><div class="home-category-icon"><i class="fas fa-book-open"></i></div><h3 data-zh="书城" data-en="Books" data-fr="Livres">书城</h3></a>
+            <a href="#bdCarousel" class="home-category-card" style="--cat-bg:linear-gradient(135deg,#ef4444,#dc2626);--cat-glow:rgba(239,68,68,.12)"><div class="home-category-icon"><i class="fas fa-fire"></i></div><h3 data-zh="热门" data-en="Trending" data-fr="Tendance">热门</h3></a>
+            <a href="/marketplace/products/?category=vehicules" class="home-category-card" data-subcats="Pièces & Accessoires, Voitures: Toyota / Audi / BMW, Motos & Scooters, Bus & Microbus, Camions & Remorques, Matériel lourd, Motomarines & Bateaux, Services automobiles"><div class="home-category-icon"><i class="fas fa-car"></i></div><h3>Véhicules</h3><p>Autos, motos, pièces</p></a>
+            <a href="/marketplace/products/?category=propriete" class="home-category-card" data-subcats="Nouvelles constructions, Maisons & Appartements à Louer / à Vendre, Location courte, Terrains & Parcelles, Centres et lieux d'événements, Propriété commerciale"><div class="home-category-icon"><i class="fas fa-building"></i></div><h3>Propriété</h3><p>Immobilier</p></a>
+            <a href="/marketplace/products/?category=telephones-tablettes" class="home-category-card"><div class="home-category-icon"><i class="fas fa-mobile-alt"></i></div><h3>Téléphones & Tablettes</h3><p>Mobiles et accessoires</p></a>
+            <a href="/marketplace/products/?category=electronique" class="home-category-card"><div class="home-category-icon"><i class="fas fa-tv"></i></div><h3>Électronique</h3><p>High-tech</p></a>
+            <a href="/marketplace/products/?category=maison-meubles-electromenager" class="home-category-card"><div class="home-category-icon"><i class="fas fa-couch"></i></div><h3>Maison & Meubles</h3><p>Électroménager</p></a>
+            <a href="/marketplace/products/?category=mode" class="home-category-card"><div class="home-category-icon"><i class="fas fa-tshirt"></i></div><h3>Mode</h3><p>Vêtements et style</p></a>
+            <a href="/marketplace/products/?category=sante-beaute" class="home-category-card"><div class="home-category-icon"><i class="fas fa-spa"></i></div><h3>Santé & Beauté</h3><p>Bien-être</p></a>
+            <a href="/marketplace/products/?category=services" class="home-category-card" data-subcats="Construction & Métiers, Services automobiles, Informatiques, Réparation, Nettoyage, Impression, Fabrication, Logistique, Juridique"><div class="home-category-icon"><i class="fas fa-concierge-bell"></i></div><h3>Prestations de service</h3><p>Services pro</p></a>
+            <a href="/marketplace/products/?category=reparation-construction" class="home-category-card home-category-extra" data-subcats="Équipement électrique, Matériaux de construction, Plomberie & Eau, Outils électriques/manuels, Mesure, Quincaillerie, Portes/Fenêtres"><div class="home-category-icon"><i class="fas fa-hard-hat"></i></div><h3>Réparation & Construction</h3><p>Travaux</p></a>
+            <a href="/marketplace/products/?category=equipement-outils" class="home-category-card home-category-extra" data-subcats="Équipement médical, sécurité, fabrication, magasin, restauration, salon, Papeterie"><div class="home-category-icon"><i class="fas fa-tools"></i></div><h3>Équipement & Outils</h3><p>Matériel</p></a>
+            <a href="/marketplace/products/?category=sports-arts-plein-air" class="home-category-card home-category-extra"><div class="home-category-icon"><i class="fas fa-basketball-ball"></i></div><h3>Sports, arts & plein air</h3><p>Loisirs</p></a>
+            <a href="/marketplace/products/?category=bebes-enfants" class="home-category-card home-category-extra"><div class="home-category-icon"><i class="fas fa-baby"></i></div><h3>Bébés & Enfants</h3><p>Famille</p></a>
+            <a href="/marketplace/supermarket/?category=agriculture-alimentation" class="home-category-card home-category-extra"><div class="home-category-icon"><i class="fas fa-seedling"></i></div><h3>Agriculture & Alimentation</h3><p>Produits frais</p></a>
+            <a href="/marketplace/products/?category=animaux" class="home-category-card home-category-extra"><div class="home-category-icon"><i class="fas fa-paw"></i></div><h3>Animaux</h3><p>Compagnie</p></a>
+            <a href="/marketplace/products/?category=emplois" class="home-category-card home-category-extra"><div class="home-category-icon"><i class="fas fa-briefcase"></i></div><h3>Emplois</h3><p>Opportunités</p></a>
+            <a href="/marketplace/products/?category=recherche" class="home-category-card home-category-extra"><div class="home-category-icon"><i class="fas fa-search-plus"></i></div><h3>À la recherche de...</h3><p>Demandes</p></a>
+            <a href="/marketplace/courses/" class="home-category-card home-category-final" style="--cat-bg:linear-gradient(135deg,#8b5cf6,#6366f1);--cat-glow:rgba(139,92,246,.14)"><div class="home-category-icon"><i class="fas fa-graduation-cap"></i></div><h3>Formations</h3><p>Cours et compétences</p></a>
+            <a href="/marketplace/supermarket/" class="home-category-card home-category-final" style="--cat-bg:linear-gradient(135deg,#10b981,#059669);--cat-glow:rgba(16,185,129,.14)"><div class="home-category-icon"><i class="fas fa-basket-shopping"></i></div><h3>Supermarché</h3><p>Produits du quotidien</p></a>
+            <a href="/manager/public/blog/" class="home-category-card home-category-final" style="--cat-bg:linear-gradient(135deg,#06b6d4,#2563eb);--cat-glow:rgba(6,182,212,.14)"><div class="home-category-icon"><i class="fas fa-newspaper"></i></div><h3>Actualités</h3><p>Guides et tendances</p></a>
+        </div>
+        <div class="text-center mt-3 d-md-none"><button class="home-category-more" type="button" onclick="toggleHomeCategories(this)">Voir plus <i class="fas fa-chevron-down"></i></button></div>
+    </div>
 </section>
 
 <!-- ===== PWA: Mobile Search Bar (sticky, mobile only) ===== -->
 <div class="pwa-search-bar" id="pwaSearchBar">
-    <form class="pwa-search-inner" action="{% url 'manager:public_search' %}" method="get" id="pwaQuickSearchForm">
+    <div class="pwa-search-label"><i class="fas fa-compass"></i><span>Que cherchez-vous ?</span></div>
+    <form class="pwa-search-inner" action="/marketplace/products/" method="get" id="pwaQuickSearchForm">
         <i class="fas fa-search"></i>
-        <input type="text" name="q" id="pwaSearchInput" placeholder="{% trans '搜索图书、商品、课程...' %}" autocomplete="off">
+        <input type="text" name="q" id="pwaSearchInput" placeholder="Produit, marque, annonce..." autocomplete="off">
+        <input type="hidden" name="category" id="pwaSearchCategoryHidden" value="">
     </form>
-    <button class="pwa-scan-btn" onclick="document.getElementById('pwaQuickSearchForm').submit()" aria-label="Search">
-        <i class="fas fa-search"></i>
-    </button>
+    <select class="pwa-search-category" id="pwaSearchCategory" aria-label="Catégorie de recherche">
+        <option value="" data-action="/marketplace/products/" data-category="" data-placeholder="Produit, marque, annonce...">Toutes</option>
+        {% for cat in search_categories %}
+        <option value="{{ cat.slug }}" data-action="/marketplace/products/" data-category="{{ cat.slug }}" data-placeholder="Rechercher dans {{ cat.name }}...">{{ cat.name }}</option>
+        {% endfor %}
+    </select>
 </div>
 
-<!-- ===== Best Deals Auto-Sliding Carousel ===== -->
-{% if best_deals %}
+<!-- ===== Trending Carousel ===== -->
+{% if trending_items %}
 <section class="bd-carousel-section bd-carousel-mobile-only" id="bdCarousel">
     <div class="container">
         <div class="bd-carousel-header">
             <div class="bd-title-wrap">
-                <span class="bd-title" data-zh="🔥 最优惠" data-en="🔥 Best Deals" data-fr="🔥 Meilleures Offres">🔥 Meilleures Offres</span>
-                <span class="bd-subtitle" data-zh="热销 · 低价 · 新品自动轮播" data-en="Top sellers · Best prices · New arrivals" data-fr="Top ventes · Meilleurs prix · Nouveautés">Top ventes · Meilleurs prix · Nouveautés</span>
+                <span class="bd-title" data-zh="🔥 热门趋势" data-en="🔥 Trending" data-fr="🔥 Tendance">🔥 热门趋势</span>
+                <span class="bd-subtitle" data-zh="近30天热销 · 新品 · 收藏最多" data-en="Top sellers · New · Most saved" data-fr="Top ventes · Nouveautés · Favoris">近30天热销 · 新品 · 收藏最多</span>
             </div>
             <a href="{% url 'manager:public_books' %}" data-zh="查看全部 >" data-en="See all >" data-fr="Voir tout >">查看全部 &gt;</a>
         </div>
         <div class="bd-carousel-wrapper" id="bdCarouselWrapper">
             <div class="bd-carousel-track" id="bdCarouselTrack">
-                {% for deal in best_deals %}
+                {% for deal in trending_items %}
                 <a href="{{ deal.detail_url }}" class="bd-carousel-slide">
                     <div class="bd-media">
                         <img src="{{ deal.image_url }}" alt="{{ deal.name }}" loading="lazy" onerror="this.src='/static/img/default_cover.png'">
                         {% if deal.tag %}
                         <span class="bd-tag-pill bd-carousel-tag-{{ deal.tag }}"
-                              data-zh="{% if deal.tag == 'hot' %}热销{% elif deal.tag == 'deal' %}特价{% else %}新品{% endif %}"
-                              data-en="{% if deal.tag == 'hot' %}Hot{% elif deal.tag == 'deal' %}Deal{% else %}New{% endif %}"
-                              data-fr="{% if deal.tag == 'hot' %}Top{% elif deal.tag == 'deal' %}Promo{% else %}Neuf{% endif %}">
-                            {% if deal.tag == 'hot' %}Hot{% elif deal.tag == 'deal' %}Deal{% else %}New{% endif %}
+                              data-zh="{% if deal.tag == 'hot' %}热销{% elif deal.tag == 'fav' %}收藏{% else %}新品{% endif %}"
+                              data-en="{% if deal.tag == 'hot' %}Hot{% elif deal.tag == 'fav' %}Saved{% else %}New{% endif %}"
+                              data-fr="{% if deal.tag == 'hot' %}Top{% elif deal.tag == 'fav' %}Favori{% else %}Neuf{% endif %}">
+                            {% if deal.tag == 'hot' %}热销{% elif deal.tag == 'fav' %}收藏{% else %}新品{% endif %}
                         </span>
                         {% endif %}
                     </div>
@@ -1951,73 +2304,6 @@ html[data-theme="dark"] .pwa-search-inner input {
     </div>
 </section>
 {% endif %}
-
-<!-- ===== PWA: King Kong Category Zone (mobile only, 2×5 icon grid) ===== -->
-<section class="king-kong-zone" id="kingKongZone">
-    <div class="kk-grid">
-        <a href="{% url 'manager:public_books' %}" class="kk-item">
-            <div class="kk-icon" style="background:linear-gradient(135deg,#667eea,#764ba2)">
-                <i class="fas fa-book"></i>
-            </div>
-            <span class="kk-label" data-zh="图书" data-en="Books" data-fr="Livres">图书</span>
-        </a>
-        <a href="/marketplace/products/" class="kk-item">
-            <div class="kk-icon" style="background:linear-gradient(135deg,#f97316,#ea580c)">
-                <i class="fas fa-store"></i>
-            </div>
-            <span class="kk-label" data-zh="商城" data-en="Market" data-fr="Marché">商城</span>
-        </a>
-        <a href="/marketplace/courses/" class="kk-item">
-            <div class="kk-icon" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed)">
-                <i class="fas fa-graduation-cap"></i>
-            </div>
-            <span class="kk-label" data-zh="课程" data-en="Courses" data-fr="Cours">课程</span>
-        </a>
-        <a href="/marketplace/supermarket/" class="kk-item">
-            <div class="kk-icon" style="background:linear-gradient(135deg,#10b981,#059669)">
-                <i class="fas fa-shopping-basket"></i>
-            </div>
-            <span class="kk-label" data-zh="超市" data-en="Grocery" data-fr="Supermarché">超市</span>
-        </a>
-        <a href="#flash-sales" class="kk-item">
-            <div class="kk-icon" style="background:linear-gradient(135deg,#ef4444,#dc2626)" id="kkFlashIcon">
-                <i class="fas fa-bolt"></i>
-                <span class="kk-badge" style="display:none" id="kkFlashBadge">热</span>
-            </div>
-            <span class="kk-label" data-zh="秒杀" data-en="Flash" data-fr="Promos">秒杀</span>
-        </a>
-        <a href="{% url 'manager:public_authors' %}" class="kk-item">
-            <div class="kk-icon" style="background:linear-gradient(135deg,#ec4899,#db2777)">
-                <i class="fas fa-user-edit"></i>
-            </div>
-            <span class="kk-label" data-zh="作者" data-en="Authors" data-fr="Auteurs">作者</span>
-        </a>
-        <a href="{% url 'manager:public_blog' %}" class="kk-item">
-            <div class="kk-icon" style="background:linear-gradient(135deg,#06b6d4,#0891b2)">
-                <i class="fas fa-newspaper"></i>
-            </div>
-            <span class="kk-label" data-zh="博客" data-en="Blog" data-fr="Blog">博客</span>
-        </a>
-        <a href="{% url 'manager:track_order' %}" class="kk-item">
-            <div class="kk-icon" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">
-                <i class="fas fa-receipt"></i>
-            </div>
-            <span class="kk-label" data-zh="订单" data-en="Orders" data-fr="Commandes">订单</span>
-        </a>
-        <a href="{% url 'manager:public_messages' %}" class="kk-item" id="kkMsgItem">
-            <div class="kk-icon" style="background:linear-gradient(135deg,#14b8a6,#0d9488)" id="kkMsgIcon">
-                <i class="fas fa-comments"></i>
-            </div>
-            <span class="kk-label" data-zh="消息" data-en="Messages" data-fr="Messages">消息</span>
-        </a>
-        <a href="{% url 'manager:public_contact' %}" class="kk-item">
-            <div class="kk-icon" style="background:linear-gradient(135deg,#64748b,#475569)">
-                <i class="fas fa-headset"></i>
-            </div>
-            <span class="kk-label" data-zh="客服" data-en="Support" data-fr="Support">客服</span>
-        </a>
-    </div>
-</section>
 
 <!-- ===== Flash Sales Section — Modern Countdown Style ===== -->
 {% if flash_sales %}
@@ -2077,9 +2363,14 @@ html[data-theme="dark"] .pwa-search-inner input {
             </button>
             <div class="feed-card-body">
                 <div class="feed-card-name">{{ book.name|truncatechars:28 }}</div>
-                <div class="feed-card-footer">
-                    <span class="feed-card-price">{{ book.price|fcfa }}</span>
-                    <span class="feed-card-tag" style="background:#ede9fe;color:#7c3aed;" data-zh="图书" data-en="Book" data-fr="Livre">图书</span>
+                <div class="feed-card-actions">
+                    <div class="feed-card-actions-main">
+                        <div class="feed-card-actions-row">
+                            <span class="feed-card-price">{{ book.price|fcfa }}</span>
+                            <span class="feed-card-tag" style="background:#ede9fe;color:#7c3aed;" data-zh="图书" data-en="Book" data-fr="Livre">图书</span>
+                        </div>
+                    </div>
+                    {% include 'public/includes/feed_view_details_btn.html' %}
                 </div>
             </div>
         </a>
@@ -2092,19 +2383,25 @@ html[data-theme="dark"] .pwa-search-inner input {
             </button>
             <div class="feed-card-body">
                 <div class="feed-card-name">{{ product.name|truncatechars:28 }}</div>
-                <div class="feed-card-footer">
-                    <span class="feed-card-price">{{ product.price|fcfa }}</span>
-                    <span class="feed-card-tag" style="background:#fef3c7;color:#d97706;" data-zh="商品" data-en="Product" data-fr="Produit">商品</span>
+                <div class="feed-card-actions">
+                    <div class="feed-card-actions-main">
+                        <div class="feed-card-actions-row">
+                            <span class="feed-card-price">{{ product.price|fcfa }}</span>
+                            <span class="feed-card-tag" style="background:#fef3c7;color:#d97706;" data-zh="商品" data-en="Product" data-fr="Produit">商品</span>
+                        </div>
+                    </div>
+                    {% include 'public/includes/feed_view_details_btn.html' %}
                 </div>
             </div>
         </a>
         {% endfor %}
     </div>
     <div id="feedLoader" style="display:none"><i class="fas fa-spinner fa-spin"></i> <span data-zh="加载中..." data-en="Loading..." data-fr="Chargement...">加载中...</span></div>
+    <template id="feedViewDetailsBtnTpl">{% include 'public/includes/feed_view_details_btn.html' %}</template>
 </section>
 
 <!-- Features Section -->
-<section class="features-section">
+<section class="features-section home-section-soft">
     <div class="container">
         <div class="section-header" data-aos="fade-up">
             <h2 class="section-title"><span data-zh="平台四大核心服务" data-en="Four Core Services" data-fr="Quatre services essentiels">平台四大核心服务</span></h2>
@@ -2200,7 +2497,7 @@ html[data-theme="dark"] .pwa-search-inner input {
 </section>
 
 <!-- Featured Content Showcase -->
-<section class="featured-section">
+<section class="featured-section home-section-lavender">
     <div class="container">
         <div class="section-header" data-aos="fade-up">
             <h2 class="section-title"><span data-zh="热门推荐" data-en="Popular Picks" data-fr="Sélections populaires">热门推荐</span></h2>
@@ -2370,7 +2667,7 @@ html[data-theme="dark"] .pwa-search-inner input {
 </section>
 
 <!-- New Arrivals Section -->
-<section class="new-arrivals-section">
+<section class="new-arrivals-section home-section-mint">
     <div class="container">
         <div class="section-header" data-aos="fade-up">
             <h2 class="section-title"><span data-zh="新书上架" data-en="New Arrivals" data-fr="Nouveautés">新书上架</span></h2>
@@ -2567,7 +2864,7 @@ html[data-theme="dark"] .pwa-search-inner input {
 
 <!-- Latest Blog Posts -->
 {% if latest_blogs %}
-<section class="latest-posts-section" style="padding:80px 0;background:linear-gradient(135deg,#f8fafc,#fff);">
+<section class="latest-posts-section home-section-lavender" style="padding:80px 0;background:linear-gradient(135deg,#f8fafc,#fff);">
     <div class="container">
         <div class="section-header" data-aos="fade-up">
             <h2 class="section-title"><span data-zh="最新动态" data-en="Latest Posts" data-fr="Derniers articles">最新动态</span></h2>
@@ -2604,24 +2901,7 @@ html[data-theme="dark"] .pwa-search-inner input {
 </section>
 {% endif %}
 
-<!-- Categories Showcase -->
-<section class="categories-showcase">
-    <div class="container">
-        <div class="section-header" data-aos="fade-up">
-            <h2 class="section-title"><span data-zh="精选分类" data-en="Browse by Category" data-fr="Parcourir par catégorie">精选分类</span></h2>
-            <p class="section-subtitle"><span data-zh="按兴趣快速找到心仪的内容" data-en="Find what you love — organized by interest" data-fr="Trouvez ce que vous aimez — par intérêt">按兴趣快速找到心仪的内容</span></p>
-        </div>
-        <div class="cat-grid" data-aos="fade-up" data-aos-delay="100">
-            {% for cat in book_categories|slice:":10" %}
-            <a href="{% url 'manager:public_books' %}?category={{ cat.slug }}" class="cat-card">
-                <div class="cat-icon" style="background:{{ cat.color|default:'#667eea' }};"><i class="{{ cat.icon|default:'fas fa-book' }}"></i></div>
-                <h6 data-zh="{{ cat.name }}" data-en="{{ cat.name_en|default:cat.name }}" data-fr="{{ cat.name_fr|default:cat.name_en|default:cat.name }}">{{ cat.name }}</h6>
-                <p>{{ cat.name_en|default:cat.name }}</p>
-            </a>
-            {% endfor %}
-        </div>
-    </div>
-</section>
+{% include 'includes/home_faq_section.html' %}
 
 <!-- Platform Stats -->
 <section class="stats-section">
@@ -2703,6 +2983,51 @@ html[data-theme="dark"] .pwa-search-inner input {
 
 {% block extra_js %}
 <script>
+function toggleHomeCategories(btn) {
+    var hub = document.getElementById('homeCategoryHub');
+    if (!hub) return;
+    hub.classList.toggle('expanded');
+    var expanded = hub.classList.contains('expanded');
+    document.querySelectorAll('.home-category-more').forEach(function(button) {
+        button.innerHTML = (expanded ? 'Voir moins' : 'Voir plus') + ' <i class="fas fa-chevron-down"></i>';
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    var categoryCards = document.querySelectorAll('.home-category-card');
+    categoryCards.forEach(function(card, index) {
+        card.style.setProperty('--cat-index', index);
+    });
+    if ('IntersectionObserver' in window) {
+        var categoryObserver = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    categoryObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.14, rootMargin: '0px 0px -8% 0px' });
+        categoryCards.forEach(function(card) { categoryObserver.observe(card); });
+    } else {
+        categoryCards.forEach(function(card) { card.classList.add('is-visible'); });
+    }
+
+    var selector = document.getElementById('pwaSearchCategory');
+    var form = document.getElementById('pwaQuickSearchForm');
+    var input = document.getElementById('pwaSearchInput');
+    var hiddenCategory = document.getElementById('pwaSearchCategoryHidden');
+    if (selector && form && input && hiddenCategory) {
+        var syncMobileSearchCategory = function() {
+            var option = selector.options[selector.selectedIndex];
+            form.action = option.dataset.action || '/marketplace/products/';
+            input.placeholder = option.dataset.placeholder || 'Produit, marque, annonce...';
+            hiddenCategory.value = option.dataset.category || '';
+        };
+        selector.addEventListener('change', syncMobileSearchCategory);
+        syncMobileSearchCategory();
+    }
+});
+
 // Showcase tab switching
 function showPanel(panelId, tab) {
     document.querySelectorAll('.showcase-panel').forEach(p => p.classList.remove('active'));
@@ -2871,11 +3196,12 @@ function getCsrfToken() {
 // ===== PWA Feature 1: Infinite Feed with Intersection Observer =====
 (function() {
     function fmtFcfa(val) {
-        var n = Math.round(parseFloat(val) * 82);
+        var n = Math.round(parseFloat(val) || 0);
         return n.toLocaleString('fr-FR') + '\u00a0FCFA';
     }
     var feedGrid = document.getElementById('homeFeedGrid');
     var feedLoader = document.getElementById('feedLoader');
+    var feedDetailsBtn = (document.getElementById('feedViewDetailsBtnTpl') || {}).innerHTML || '';
     if (!feedGrid) return;
     var page = 2; // page 1 already rendered server-side
     var loading = false;
@@ -2908,7 +3234,7 @@ function getCsrfToken() {
                             : item.type === 'product'
                             ? 'background:#fef3c7;color:#d97706;'
                             : 'background:#d1fae5;color:#065f46;';
-                        card.innerHTML = '<img class="feed-card-img" src="'+item.image+'" alt="'+item.name+'" loading="lazy" onerror="this.src=\'/static/img/default_cover.png\'"><div class="feed-card-body"><div class="feed-card-name">'+item.name+'</div><div class="feed-card-price">'+fmtFcfa(item.price)+'</div><span class="feed-card-tag" style="'+tagStyle+'">'+item.type_label+'</span></div>';
+                        card.innerHTML = '<img class="feed-card-img" src="'+item.image+'" alt="'+item.name+'" loading="lazy" onerror="this.src=\'/static/img/default_cover.png\'"><div class="feed-card-body"><div class="feed-card-name">'+item.name+'</div><div class="feed-card-actions"><div class="feed-card-actions-main"><div class="feed-card-actions-row"><span class="feed-card-price">'+fmtFcfa(item.price)+'</span><span class="feed-card-tag" style="'+tagStyle+'">'+item.type_label+'</span></div></div>'+feedDetailsBtn+'</div></div>';
                         feedGrid.appendChild(card);
                     });
                     page++;
@@ -3043,6 +3369,7 @@ function switchMobileSearch(target, action, placeholder, inputName, btn) {
         { sel: '#mbnHome', match: ['/manager/public/', '/manager/', '/'] },
         { sel: '#mbnSearch', match: ['/manager/public/books', '/manager/public/search'] },
         { sel: '#mbnCart', match: ['/manager/public/cart'] },
+        { sel: '#mbnShop', match: ['/marketplace/'] },
         { sel: '#mbnMsg', match: ['/manager/public/messages'] },
         { sel: '#mbnMe', match: ['/manager/public/profile', '/manager/public/user'] },
     ];
@@ -3089,11 +3416,11 @@ function toggleWishlistFeed(btn, id, type) {
         <span class="mbn-icon"><i class="fas fa-search"></i></span>
         <span data-zh="搜索" data-en="Search" data-fr="Recherche">搜索</span>
     </a>
-    <a href="/manager/public/" class="mbn-item mbn-center" id="mbnShop" aria-label="Shop">
+    <a href="{% url 'marketplace:home' %}" class="mbn-item mbn-center" id="mbnShop" aria-label="Marché">
         <div class="mbn-icon-wrap">
             <i class="fas fa-store"></i>
         </div>
-        <span class="mbn-center-label" style="font-size:0.58rem;font-weight:700;margin-top:2px;" data-zh="商城" data-en="Shop" data-fr="Boutique">商城</span>
+        <span class="mbn-center-label" style="font-size:0.58rem;font-weight:700;margin-top:2px;" data-zh="市场" data-en="Market" data-fr="Marché">市场</span>
     </a>
     <a href="{% url 'manager:public_messages' %}" class="mbn-item" id="mbnMsg">
         <div class="mbn-active-bar"></div>

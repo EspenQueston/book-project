@@ -122,20 +122,35 @@ def send_payment_confirmation(order):
             logger.warning(f"No email address for order {order.order_number}")
             return
         
-        subject = f"支付确认 - 订单号: {order.order_number}"
+        subject = f'Payment confirmed - Order {order.order_number} / Paiement confirmé - Commande {order.order_number}'
         message = f"""
-亲爱的 {order.customer_name}，
+Hello {order.customer_name},
 
-您的订单已成功支付！
+Your order has been paid successfully!
 
-订单信息：
-订单号：{order.order_number}
-支付金额：¥{order.total_amount}
-支付时间：{timezone.now().strftime('%Y-%m-%d %H:%M:%S')}
+Order details:
+Order number: {order.order_number}
+Amount paid: {order.total_amount}
+Payment time: {timezone.now().strftime('%Y-%m-%d %H:%M:%S')}
 
-我们将尽快为您处理订单，感谢您的购买！
+We will process your order as soon as possible. Thank you for your purchase!
 
-此邮件为系统自动发送，请勿回复。
+This is an automated message — please do not reply.
+
+---
+
+Bonjour {order.customer_name},
+
+Votre commande a été payée avec succès !
+
+Détails de la commande :
+Numéro de commande : {order.order_number}
+Montant payé : {order.total_amount}
+Date de paiement : {timezone.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+Nous traiterons votre commande dans les plus brefs délais. Merci pour votre achat !
+
+Message automatique — merci de ne pas répondre.
         """
         
         send_mail(
@@ -159,22 +174,39 @@ def send_refund_notification(order):
             logger.warning(f"No email address for order {order.order_number}")
             return
         
-        subject = f"退款通知 - 订单号: {order.order_number}"
+        subject = f'Refund processed - Order {order.order_number} / Remboursement - Commande {order.order_number}'
         message = f"""
-亲爱的 {order.customer_name}，
+Hello {order.customer_name},
 
-您的订单退款已处理完成。
+Your order refund has been processed.
 
-订单信息：
-订单号：{order.order_number}
-退款金额：¥{order.total_amount}
-退款时间：{timezone.now().strftime('%Y-%m-%d %H:%M:%S')}
+Order details:
+Order number: {order.order_number}
+Refund amount: {order.total_amount}
+Refund time: {timezone.now().strftime('%Y-%m-%d %H:%M:%S')}
 
-退款将在3-5个工作日内到账，请注意查收。
+The refund should appear within 3–5 business days.
 
-如有疑问，请联系客服。
+If you have any questions, please contact us at admin@duno360.com.
 
-此邮件为系统自动发送，请勿回复。
+This is an automated message — please do not reply.
+
+---
+
+Bonjour {order.customer_name},
+
+Le remboursement de votre commande a été traité.
+
+Détails de la commande :
+Numéro de commande : {order.order_number}
+Montant remboursé : {order.total_amount}
+Date du remboursement : {timezone.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+Le remboursement devrait apparaître sous 3 à 5 jours ouvrables.
+
+Pour toute question, contactez-nous à admin@duno360.com.
+
+Message automatique — merci de ne pas répondre.
         """
         
         send_mail(

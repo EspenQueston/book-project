@@ -1,0 +1,47 @@
+{% load i18n %}
+
+<section class="duno-section duno-section-platform visible" aria-label="{% trans '成为合作伙伴' %}">
+    <details class="duno-acc-item" id="pourquoi" open>
+        <summary class="duno-acc-head">
+            <span class="duno-acc-icon"><i class="fas fa-star"></i></span>
+            {% trans "为什么成为合作伙伴？" %}
+        </summary>
+        <div class="duno-acc-body">
+            <div class="duno-cards-grid-legal">
+                <div class="duno-data-card"><i class="fas fa-chart-line"></i><h4>{% trans "曝光度" %}</h4><p>{% trans "推广您的业务，吸引新客户。" %}</p></div>
+                <div class="duno-data-card"><i class="fas fa-laptop"></i><h4>{% trans "现代化平台" %}</h4><p>{% trans "在线店铺、自主管理、业绩统计。" %}</p></div>
+                <div class="duno-data-card"><i class="fas fa-coins"></i><h4>{% trans "收入" %}</h4><p>{% trans "在线销售、促销与客户留存。" %}</p></div>
+            </div>
+        </div>
+    </details>
+
+    <details class="duno-acc-item" id="types">
+        <summary class="duno-acc-head">
+            <span class="duno-acc-icon"><i class="fas fa-layer-group"></i></span>
+            {% trans "合作类型" %}
+        </summary>
+        <div class="duno-acc-body">
+            <ul class="duno-section-list">
+                <li><strong>{% trans "卖家 / 供应商" %}</strong> — {% trans "商户、创业者、超市" %}</li>
+                <li><strong>{% trans "培训师 / 创作者" %}</strong> — {% trans "培训、在线课程、教育内容" %}</li>
+                <li><strong>{% trans "取货点" %}</strong> — {% trans "接收包裹，方便取件" %}</li>
+                <li><strong>{% trans "商业合作伙伴" %}</strong> — {% trans "企业、广告活动" %}</li>
+            </ul>
+        </div>
+    </details>
+
+    <details class="duno-acc-item" id="inscription" data-single="false">
+        <summary class="duno-acc-head">
+            <span class="duno-acc-icon"><i class="fas fa-user-plus"></i></span>
+            {% trans "如何成为合作伙伴？" %}
+        </summary>
+        <div class="duno-acc-body">
+            <ol class="duno-steps-list">
+                <li>{% trans "在 DUNO 360 创建账户" %}</li>
+                <li>{% trans "选择合作伙伴类型" %}</li>
+                <li>{% trans "完善资料并发布产品" %}</li>
+            </ol>
+            <a href="{% url 'manager:vendor_register' %}" class="duno-legal-contact"><i class="fas fa-store"></i>{% trans "开设我的店铺" %}</a>
+        </div>
+    </details>
+</section>

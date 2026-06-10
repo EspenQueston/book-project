@@ -1,6 +1,9 @@
 import os
+import warnings
 from pathlib import Path
 from urllib.parse import urlparse, unquote, parse_qs
+
+from django.core.exceptions import ImproperlyConfigured
 from django.utils.translation import gettext_lazy as _
 
 # Build paths inside the project
@@ -111,6 +114,9 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.i18n',
                 'django.template.context_processors.media',
+                'manager.context_processors.platform_branding',
+                'manager.context_processors.use_local_static',
+                'manager.context_processors.congo_locations_context',
             ],
         },
     },
@@ -316,6 +322,11 @@ elif _whitenoise_available:
         },
     }
 
+# In development, serve static files locally so new JS/CSS is available
+# without uploading to Supabase/R2 on every change.
+if DEBUG:
+    STATIC_URL = '/static/'
+
 # File upload settings
 FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880   # 5 MB
 # 500 MB in-memory buffer is a DoS risk; cap at 50 MB.
@@ -330,16 +341,47 @@ MAX_IMAGE_SIZE = 5 * 1024 * 1024  # 5MB
 ALLOWED_VIDEO_EXTENSIONS = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv']
 MAX_VIDEO_SIZE = 500 * 1024 * 1024  # 500MB
 
-# Email configuration (ProfitexB2B SMTP with SSL)
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'mail.profitexb2b.com'
-EMAIL_PORT = 465
-EMAIL_USE_TLS = False
-EMAIL_USE_SSL = True
+# Email configuration (Zoho Mail SMTP)
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
-DEFAULT_FROM_EMAIL = 'DUNO 360 <espen@profitexb2b.com>'
-CONTACT_EMAIL = 'espen@profitexb2b.com'
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.zoho.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '465'))
+EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', 'True') == 'True'
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'False') == 'True'
+
+# Fall back to console backend when SMTP credentials are missing (local dev)
+if EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+_PLATFORM_EMAIL = os.environ.get('CONTACT_EMAIL', 'admin@duno360.com')
+DEFAULT_FROM_EMAIL = os.environ.get(
+    'DEFAULT_FROM_EMAIL',
+    f'DUNO 360 <{_PLATFORM_EMAIL}>',
+)
+CONTACT_EMAIL = _PLATFORM_EMAIL
+
+# Platform phone (calls + WhatsApp)
+PLATFORM_PHONE = os.environ.get('PLATFORM_PHONE', '+242066790386')
+
+# Official social media (override via .env if needed)
+SOCIAL_FACEBOOK_URL = os.environ.get(
+    'SOCIAL_FACEBOOK_URL',
+    'https://www.facebook.com/share/1BSHYjDZtN/?mibextid=wwXIfr',
+)
+SOCIAL_INSTAGRAM_URL = os.environ.get(
+    'SOCIAL_INSTAGRAM_URL',
+    'https://www.instagram.com/duno_360?igsh=ZTFiNTMyYXFndmM0&utm_source=qr',
+)
+SOCIAL_TIKTOK_URL = os.environ.get(
+    'SOCIAL_TIKTOK_URL',
+    'https://www.tiktok.com/@duno.360?_r=1&_t=ZS-974QAexSzBZ',
+)
+SOCIAL_YOUTUBE_URL = os.environ.get(
+    'SOCIAL_YOUTUBE_URL',
+    'https://www.youtube.com/@DUNO360',
+)
 
 # Security settings for production
 if not DEBUG:
@@ -407,7 +449,7 @@ AIRTEL_MONEY_CURRENCY = os.environ.get('AIRTEL_MONEY_CURRENCY', 'XAF')
 AIRTEL_MONEY_CALLBACK_URL = os.environ.get('AIRTEL_MONEY_CALLBACK_URL', '')
 
 # ============================================================
-# KKiaPay Payment Aggregator Configuration
+# KKiaPay Payment Aggregator — West Africa
 # ============================================================
 KKIAPAY_PUBLIC_KEY     = os.environ.get('KKIAPAY_PUBLIC_KEY',     '')
 KKIAPAY_PRIVATE_KEY    = os.environ.get('KKIAPAY_PRIVATE_KEY',    '')
@@ -416,10 +458,100 @@ KKIAPAY_SANDBOX        = os.environ.get('KKIAPAY_SANDBOX',        'True') == 'Tr
 KKIAPAY_WEBHOOK_SECRET = os.environ.get('KKIAPAY_WEBHOOK_SECRET', '')
 
 # ============================================================
+# PawaPay — Central Africa mobile money
+# ============================================================
+PAWAPAY_API_TOKEN = os.environ.get('PAWAPAY_API_TOKEN', '')
+PAWAPAY_BASE_URL = os.environ.get(
+    'PAWAPAY_BASE_URL', 'https://api.sandbox.pawapay.io')
+PAWAPAY_SANDBOX = os.environ.get('PAWAPAY_SANDBOX', 'True') == 'True'
+PAWAPAY_ENABLED = os.environ.get('PAWAPAY_ENABLED', 'True') == 'True'
+PAWAPAY_CURRENCY = os.environ.get('PAWAPAY_CURRENCY', 'XAF')
+PAWAPAY_CALLBACK_DEPOSITS = os.environ.get('PAWAPAY_CALLBACK_DEPOSITS', '')
+PAWAPAY_CALLBACK_PAYOUTS = os.environ.get('PAWAPAY_CALLBACK_PAYOUTS', '')
+PAWAPAY_CALLBACK_REFUNDS = os.environ.get('PAWAPAY_CALLBACK_REFUNDS', '')
+
+# Twilio Verify — SMS OTP for signup (optional; set all three vars to enable)
+TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID', '')
+TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN', '')
+TWILIO_VERIFY_SERVICE_SID = os.environ.get('TWILIO_VERIFY_SERVICE_SID', '').strip()
+TWILIO_VERIFY_ENABLED = bool(
+    TWILIO_ACCOUNT_SID
+    and TWILIO_AUTH_TOKEN
+    and TWILIO_VERIFY_SERVICE_SID.startswith('VA')
+)
+
+# ============================================================
+# Cache (live product presence; use Redis in production)
+# ============================================================
+def _build_cache_settings():
+    """Pick Redis when reachable; fall back to LocMem in DEBUG for local dev."""
+    redis_url = os.environ.get('REDIS_URL', '').strip()
+    locmem = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'duno360-default',
+        }
+    }
+    if not redis_url:
+        return locmem
+
+    try:
+        import redis
+    except ImportError:
+        warnings.warn(
+            'REDIS_URL is set but the redis package is not installed; using LocMemCache. '
+            'Run: pip install "redis>=5.0.0"',
+            stacklevel=1,
+        )
+        return locmem
+
+    try:
+        client = redis.from_url(redis_url, socket_connect_timeout=1.5)
+        client.ping()
+    except Exception as exc:
+        if DEBUG:
+            warnings.warn(
+                f'Redis unavailable at {redis_url} ({exc}). '
+                'Using LocMemCache. Start Redis with .\\scripts\\start-redis.ps1 '
+                'or remove REDIS_URL from .env for offline dev.',
+                stacklevel=1,
+            )
+            return locmem
+        raise ImproperlyConfigured(
+            f'REDIS_URL is set but Redis is not reachable at {redis_url}: {exc}'
+        ) from exc
+
+    return {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+            'LOCATION': redis_url,
+        }
+    }
+
+
+CACHES = _build_cache_settings()
+
+# ============================================================
 # ngrok Configuration (auto-tunnel for development callbacks)
 # ============================================================
 NGROK_AUTH_TOKEN = os.environ.get('NGROK_AUTH_TOKEN', '')
 NGROK_ENABLED = os.environ.get('NGROK_ENABLED', 'False') == 'True'
+NGROK_PUBLIC_URL = os.environ.get('NGROK_PUBLIC_URL', '').rstrip('/')
+
+if NGROK_PUBLIC_URL:
+    _ngrok_parsed = urlparse(NGROK_PUBLIC_URL)
+    _ngrok_host = _ngrok_parsed.netloc
+    if _ngrok_host and _ngrok_host not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(_ngrok_host)
+    if NGROK_PUBLIC_URL not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(NGROK_PUBLIC_URL)
+    _ngrok_base = NGROK_PUBLIC_URL + '/manager'
+    if not PAWAPAY_CALLBACK_DEPOSITS:
+        PAWAPAY_CALLBACK_DEPOSITS = f'{_ngrok_base}/api/payment/pawapay/callback/deposits/'
+    if not PAWAPAY_CALLBACK_PAYOUTS:
+        PAWAPAY_CALLBACK_PAYOUTS = f'{_ngrok_base}/api/payment/pawapay/callback/payouts/'
+    if not PAWAPAY_CALLBACK_REFUNDS:
+        PAWAPAY_CALLBACK_REFUNDS = f'{_ngrok_base}/api/payment/pawapay/callback/refunds/'
 
 # Logging configuration for payment callbacks
 os.makedirs(os.path.join(BASE_DIR, 'logs'), exist_ok=True)

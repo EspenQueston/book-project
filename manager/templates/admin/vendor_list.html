@@ -79,8 +79,24 @@
         .vendor-logo-placeholder i { color: rgba(255,255,255,0.7); font-size: 1rem; }
 
         /* Marketplace Overview Cards */
-        .mp-stat-card { background: #fff; border-radius: 14px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 16px; transition: all 0.3s ease; border: 1px solid rgba(0,0,0,0.04); }
+        .mp-stat-card { background: #fff; border-radius: 14px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 16px; transition: all 0.3s ease; border: 1px solid rgba(0,0,0,0.04); min-width: 0; flex: 1 1 0; }
         .mp-stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .mp-stats-row {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            margin-bottom: 1.5rem;
+            -webkit-overflow-scrolling: touch;
+        }
+        .mp-stats-row .mp-stat-card { min-width: 180px; }
+        @media (max-width: 991.98px) {
+            .mp-stats-row { flex-wrap: wrap; }
+            .mp-stats-row .mp-stat-card { flex: 1 1 calc(50% - 8px); min-width: 140px; }
+        }
+        .commission-by-type { font-size: 0.78rem; line-height: 1.45; color: #64748b; }
+        .commission-by-type strong { color: #4338ca; }
         .mp-stat-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: #fff; flex-shrink: 0; }
         .mp-stat-value { font-size: 1.6rem; font-weight: 800; color: #1e293b; line-height: 1; }
         .mp-stat-label { font-size: 0.78rem; color: #94a3b8; font-weight: 500; margin-top: 4px; }
@@ -179,51 +195,60 @@
                 </div>
             </div>
 
+            {% if official_vendor %}
+            <div class="content-card mb-3" style="background:linear-gradient(135deg,rgba(245,158,11,0.08),rgba(102,126,234,0.06));border:1px solid rgba(245,158,11,0.25);">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge" style="background:linear-gradient(135deg,#f59e0b,#667eea);font-size:0.75rem;padding:6px 12px;">官方直营</span>
+                            <strong style="font-size:1.1rem;">{{ official_vendor.company_name }}</strong>
+                        </div>
+                        <p class="text-muted mb-0 small">平台自营商品、课程、超市与图书自动归入此店铺 · 通过后台商品/课程/超市管理即可维护库存</p>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{% url 'manager:public_vendor_shop' official_vendor.id %}" class="btn btn-outline-primary btn-sm" target="_blank"><i class="fas fa-external-link-alt me-1"></i>查看店铺</a>
+                        <a href="?view_vendor={{ official_vendor.id }}#vendor-detail" class="btn btn-primary btn-sm"><i class="fas fa-boxes me-1"></i>管理库存</a>
+                        <a href="/marketplace/admin/products/" class="btn btn-outline-secondary btn-sm"><i class="fas fa-plus me-1"></i>添加商品</a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
             <!-- Marketplace Overview Metrics -->
-            <div class="row g-3 mb-4">
-                <div class="col-6 col-lg-3">
-                    <div class="mp-stat-card">
-                        <div class="mp-stat-icon" style="background:linear-gradient(135deg,#667eea,#764ba2);"><i class="fas fa-store"></i></div>
-                        <div>
-                            <div class="mp-stat-value">{{ total_vendors }}</div>
-                            <div class="mp-stat-label">卖家总数</div>
-                        </div>
+            <div class="mp-stats-row">
+                <div class="mp-stat-card">
+                    <div class="mp-stat-icon" style="background:linear-gradient(135deg,#667eea,#764ba2);"><i class="fas fa-store"></i></div>
+                    <div>
+                        <div class="mp-stat-value">{{ total_vendors }}</div>
+                        <div class="mp-stat-label">卖家总数</div>
                     </div>
                 </div>
-                <div class="col-6 col-lg-3">
-                    <div class="mp-stat-card">
-                        <div class="mp-stat-icon" style="background:linear-gradient(135deg,#06b6d4,#22d3ee);"><i class="fas fa-box"></i></div>
-                        <div>
-                            <div class="mp-stat-value">{{ total_mp_products }}</div>
-                            <div class="mp-stat-label">卖家商品总数</div>
-                        </div>
+                <div class="mp-stat-card">
+                    <div class="mp-stat-icon" style="background:linear-gradient(135deg,#06b6d4,#22d3ee);"><i class="fas fa-box"></i></div>
+                    <div>
+                        <div class="mp-stat-value">{{ total_mp_products }}</div>
+                        <div class="mp-stat-label">卖家商品总数</div>
                     </div>
                 </div>
-                <div class="col-6 col-lg-3">
-                    <div class="mp-stat-card">
-                        <div class="mp-stat-icon" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa);"><i class="fas fa-graduation-cap"></i></div>
-                        <div>
-                            <div class="mp-stat-value">{{ total_mp_courses }}</div>
-                            <div class="mp-stat-label">卖家课程总数</div>
-                        </div>
+                <div class="mp-stat-card">
+                    <div class="mp-stat-icon" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa);"><i class="fas fa-graduation-cap"></i></div>
+                    <div>
+                        <div class="mp-stat-value">{{ total_mp_courses }}</div>
+                        <div class="mp-stat-label">卖家课程总数</div>
                     </div>
                 </div>
-                <div class="col-6 col-lg-3">
-                    <div class="mp-stat-card">
-                        <div class="mp-stat-icon" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);"><i class="fas fa-shopping-basket"></i></div>
-                        <div>
-                            <div class="mp-stat-value">{{ total_mp_supermarket }}</div>
-                            <div class="mp-stat-label">超市商品总数</div>
-                        </div>
+                <div class="mp-stat-card">
+                    <div class="mp-stat-icon" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);"><i class="fas fa-shopping-basket"></i></div>
+                    <div>
+                        <div class="mp-stat-value">{{ total_mp_supermarket }}</div>
+                        <div class="mp-stat-label">超市商品总数</div>
                     </div>
                 </div>
-                <div class="col-6 col-lg-3">
-                    <div class="mp-stat-card">
-                        <div class="mp-stat-icon" style="background:linear-gradient(135deg,#10b981,#34d399);"><i class="fas fa-chart-line"></i></div>
-                        <div>
-                            <div class="mp-stat-value">{{ total_mp_sales }}</div>
-                            <div class="mp-stat-label">总销量</div>
-                        </div>
+                <div class="mp-stat-card">
+                    <div class="mp-stat-icon" style="background:linear-gradient(135deg,#10b981,#34d399);"><i class="fas fa-chart-line"></i></div>
+                    <div>
+                        <div class="mp-stat-value">{{ total_mp_sales }}</div>
+                        <div class="mp-stat-label">总销量</div>
                     </div>
                 </div>
             </div>
@@ -351,10 +376,22 @@
                                     <div class="vendor-logo-placeholder"><i class="fas fa-store"></i></div>
                                     {% endif %}
                                 </td>
-                                <td class="fw-bold">{{ vendor.company_name }}</td>
+                                <td class="fw-bold">
+                                    {{ vendor.company_name }}
+                                    {% if vendor.is_official %}
+                                    <span class="badge ms-1" style="background:linear-gradient(135deg,#f59e0b,#667eea);font-size:0.65rem;">官方</span>
+                                    {% endif %}
+                                </td>
                                 <td>{{ vendor.contact_name }}</td>
                                 <td>{{ vendor.email }}</td>
-                                <td>{{ vendor.commission_rate }}%</td>
+                                <td>
+                                    <div class="commission-by-type">
+                                        <div><strong>Boutique</strong> 10%</div>
+                                        <div><strong>Supermarché</strong> 12%</div>
+                                        <div><strong>Livres</strong> 9%</div>
+                                        <div><strong>Cours</strong> 10%</div>
+                                    </div>
+                                </td>
                                 <td>
                                     <span class="v-metric prod"><i class="fas fa-box"></i> {{ vendor.product_count|default:0 }}</span>
                                     <span class="v-metric course"><i class="fas fa-play"></i> {{ vendor.course_count|default:0 }}</span>
@@ -384,9 +421,11 @@
                                             <li><a class="dropdown-item" href="#" onclick="setStatus({{ vendor.id }},'suspended')"><i class="fas fa-ban text-secondary me-2"></i>暂停</a></li>
                                         </ul>
                                     </div>
+                                    {% if not vendor.is_official %}
                                     <button class="btn btn-action btn-delete btn-sm" onclick="deleteVendor({{ vendor.id }}, '{{ vendor.company_name|escapejs }}')" title="删除">
                                         <i class="fas fa-trash"></i>
                                     </button>
+                                    {% endif %}
                                 </td>
                             </tr>
                             {% endfor %}
@@ -608,10 +647,6 @@
                             <input type="password" class="form-control" id="vendorPassword" name="password" style="border-radius:10px;">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">佣金率 (%)</label>
-                            <input type="number" step="0.01" min="0" max="100" class="form-control" id="commissionRate" name="commission_rate" value="10.00" style="border-radius:10px;">
-                        </div>
-                        <div class="col-md-6">
                             <label class="form-label fw-bold">状态</label>
                             <select class="form-select" id="vendorStatus" name="status" style="border-radius:10px;">
                                 <option value="pending">待审核</option>
@@ -740,7 +775,6 @@
         document.getElementById('passwordGroup').style.display = '';
         document.getElementById('pwdRequired').style.display = '';
         document.getElementById('vendorPassword').required = true;
-        document.getElementById('commissionRate').value = '10.00';
         document.getElementById('vendorStatus').value = 'approved';
         document.getElementById('editModalOverlay').style.display = 'flex';
     }
@@ -763,7 +797,6 @@
                     document.getElementById('vendorEmail').value = v.email;
                     document.getElementById('vendorPhone').value = v.phone || '';
                     document.getElementById('vendorDescription').value = v.description || '';
-                    document.getElementById('commissionRate').value = v.commission_rate;
                     document.getElementById('vendorStatus').value = v.status;
                     document.getElementById('editModalOverlay').style.display = 'flex';
                 } else { gToast('加载失败', 'error'); }

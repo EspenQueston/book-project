@@ -1,60 +1,55 @@
 import os
 
-AFRICAN_COUNTRIES = {
-    'Benin', 'Burkina Faso', 'Cape Verde', "Côte d'Ivoire", 'Gambia', 'Ghana', 'Guinea',
-    'Guinea-Bissau', 'Liberia', 'Mali', 'Mauritania', 'Niger', 'Nigeria', 'Senegal',
-    'Sierra Leone', 'Togo', 'Angola', 'Cameroon', 'Central African Republic', 'Chad',
-    'Congo', 'Democratic Republic of the Congo', 'Equatorial Guinea', 'Gabon',
-    'São Tomé and Príncipe', 'Rwanda', 'Uganda', 'Kenya', 'Tanzania', 'Zambia', 'Malawi',
-    # KKiaPay expanded coverage
-    'Bénin', "Côte d'Ivoire", 'Sénégal', 'Guinée',
+# ---------------------------------------------------------------------------
+# Geographic regions — KKiaPay (West Africa) · PawaPay (Central Africa)
+# ---------------------------------------------------------------------------
+WEST_AFRICAN_COUNTRIES = {
+    'Benin', 'Burkina Faso', 'Cape Verde', "Côte d'Ivoire", 'Gambia', 'Ghana',
+    'Guinea', 'Guinea-Bissau', 'Liberia', 'Mali', 'Mauritania', 'Niger',
+    'Nigeria', 'Senegal', 'Sierra Leone', 'Togo',
+    'Bénin', 'Sénégal', 'Guinée',
 }
 
-# ISO codes for the KKiaPay widget 'countries' parameter (9 supported markets)
-KKIAPAY_COUNTRY_CODES = ['BJ', 'CI', 'TG', 'SN', 'NE', 'GN', 'BF', 'ML', 'CM']
+CENTRAL_AFRICAN_COUNTRIES = {
+    'Angola', 'Cameroon', 'Central African Republic', 'Chad', 'Congo',
+    'Democratic Republic of the Congo', 'Equatorial Guinea', 'Gabon',
+    'São Tomé and Príncipe',
+    'Cameroun', 'République centrafricaine', 'République du Congo',
+    'République démocratique du Congo', 'Guinée équatoriale', 'Gabon',
+}
+
 GREATER_CHINA_COUNTRIES = {'China', 'Hong Kong', 'Taiwan'}
 
+# ISO codes — KKiaPay West Africa (CM removed → PawaPay)
+KKIAPAY_COUNTRY_CODES = ['BJ', 'CI', 'TG', 'SN', 'NE', 'GN', 'BF', 'ML']
+
+# ISO codes — PawaPay Central Africa (CEMAC + common coverage)
+PAWAPAY_COUNTRY_CODES = ['CM', 'CG', 'CF', 'TD', 'GQ', 'GA', 'AO', 'CD', 'ST']
+
 PAYMENT_METHODS = {
-    # --------------------------------------------------------
-    # KKiaPay — Aggregator for Africa (MTN, Moov, Orange, Wave…)
-    # --------------------------------------------------------
     'kkiapay': {
         'label': 'Mobile Money (KKiaPay)',
+        'label_zh': '移动支付 (KKiaPay)',
         'icon': 'fas fa-mobile-alt',
         'accent': '#e85d04',
         'provider': 'kkiapay',
         'mode': 'widget',
         'enabled': os.environ.get('KKIAPAY_ENABLED', 'True') == 'True',
         'requires_manual_review': False,
-        'description': 'MTN, Moov, Orange, Wave, T-Money, Airtel…',
+        'description': 'MTN, Moov, Orange, Wave, T-Money…',
+        'region_label': '西非',
     },
-    'mtn_money': {
-        'label': 'MTN Money',
-        'icon': 'fas fa-signal',
-        'accent': '#ffcb05',
-        'provider': os.environ.get('PAYMENT_MTN_PROVIDER', 'mtn_momo_api'),
-        'mode': os.environ.get('PAYMENT_MTN_MODE', 'direct_api'),
-        'enabled': os.environ.get('PAYMENT_MTN_ENABLED', 'True') == 'True',
-        'requires_manual_review': os.environ.get('PAYMENT_MTN_MANUAL_REVIEW', 'False') == 'True',
-    },
-    'orange_money': {
-        'label': 'Orange Money',
-        'icon': 'fas fa-mobile-screen-button',
-        'accent': '#ff7900',
-        'provider': os.environ.get('PAYMENT_ORANGE_PROVIDER', 'cinetpay'),
-        'mode': os.environ.get('PAYMENT_ORANGE_MODE', 'redirect_api'),
-        'enabled': os.environ.get('PAYMENT_ORANGE_ENABLED', 'True') == 'True',
-        'requires_manual_review': os.environ.get('PAYMENT_ORANGE_MANUAL_REVIEW', 'False') == 'True',
-        # 'instructions': 'Renseignez vos identifiants Orange Money ou agrégateur.',
-    },
-    'airtel_money': {
-        'label': 'Airtel Money',
-        'icon': 'fas fa-tower-cell',
-        'accent': '#ed1c24',
-        'provider': os.environ.get('PAYMENT_AIRTEL_PROVIDER', 'airtel_money_api'),
-        'mode': os.environ.get('PAYMENT_AIRTEL_MODE', 'direct_api'),
-        'enabled': os.environ.get('PAYMENT_AIRTEL_ENABLED', 'True') == 'True',
-        'requires_manual_review': os.environ.get('PAYMENT_AIRTEL_MANUAL_REVIEW', 'False') == 'True',
+    'pawapay': {
+        'label': 'Mobile Money (PawaPay)',
+        'label_zh': '移动支付 (PawaPay)',
+        'icon': 'fas fa-wallet',
+        'accent': '#059669',
+        'provider': 'pawapay',
+        'mode': 'api',
+        'enabled': os.environ.get('PAWAPAY_ENABLED', 'True') == 'True',
+        'requires_manual_review': False,
+        'description': 'MTN, Orange, Airtel — Afrique centrale',
+        'region_label': '中非',
     },
     'wechat_pay': {
         'label': '微信支付',
@@ -64,7 +59,6 @@ PAYMENT_METHODS = {
         'mode': os.environ.get('PAYMENT_WECHAT_MODE', 'manual_qr'),
         'enabled': os.environ.get('PAYMENT_WECHAT_ENABLED', 'True') == 'True',
         'requires_manual_review': os.environ.get('PAYMENT_WECHAT_MANUAL_REVIEW', 'True') == 'True',
-        # 'instructions': 'Par défaut en QR manuel. Remplacez par votre provider PSP si vous avez un contrat marchand.',
     },
     'alipay': {
         'label': '支付宝',
@@ -74,7 +68,6 @@ PAYMENT_METHODS = {
         'mode': os.environ.get('PAYMENT_ALIPAY_MODE', 'manual_qr'),
         'enabled': os.environ.get('PAYMENT_ALIPAY_ENABLED', 'True') == 'True',
         'requires_manual_review': os.environ.get('PAYMENT_ALIPAY_MANUAL_REVIEW', 'True') == 'True',
-
     },
     'paypal': {
         'label': 'PayPal',
@@ -84,7 +77,6 @@ PAYMENT_METHODS = {
         'mode': os.environ.get('PAYMENT_PAYPAL_MODE', 'redirect_api'),
         'enabled': os.environ.get('PAYMENT_PAYPAL_ENABLED', 'True') == 'True',
         'requires_manual_review': os.environ.get('PAYMENT_PAYPAL_MANUAL_REVIEW', 'False') == 'True',
-        # 'instructions': 'Ajoutez PAYPAL_CLIENT_ID et PAYPAL_CLIENT_SECRET pour le live.',
     },
     'credit_card': {
         'label': 'Visa / Mastercard',
@@ -94,7 +86,6 @@ PAYMENT_METHODS = {
         'mode': os.environ.get('PAYMENT_CARD_MODE', 'redirect_api'),
         'enabled': os.environ.get('PAYMENT_CARD_ENABLED', 'True') == 'True',
         'requires_manual_review': os.environ.get('PAYMENT_CARD_MANUAL_REVIEW', 'False') == 'True',
-        # 'instructions': 'Ajoutez STRIPE_SECRET_KEY et STRIPE_PUBLISHABLE_KEY, ou remplacez par votre PSP.',
     },
     'bank_transfer': {
         'label': 'Bank Transfer',
@@ -109,34 +100,44 @@ PAYMENT_METHODS = {
 }
 
 PAYMENT_METHODS_BY_REGION = {
-    'africa': ['kkiapay', 'mtn_money', 'orange_money', 'airtel_money'],
+    'west_africa': ['kkiapay'],
+    'central_africa': ['pawapay'],
     'china': ['wechat_pay', 'alipay'],
     'others': ['paypal', 'credit_card', 'bank_transfer'],
 }
 
 
 def resolve_payment_region(country):
-    if country in AFRICAN_COUNTRIES:
-        return 'africa'
+    if country in WEST_AFRICAN_COUNTRIES:
+        return 'west_africa'
+    if country in CENTRAL_AFRICAN_COUNTRIES:
+        return 'central_africa'
     if country in GREATER_CHINA_COUNTRIES:
         return 'china'
     return 'others'
 
 
 def get_kkiapay_country_codes():
-    """Returns KKiaPay ISO country codes, preferring DB values if available."""
     try:
         from manager.models import KkiapayCountry
         codes = KkiapayCountry.get_active_iso_codes()
-        return codes if codes else KKIAPAY_COUNTRY_CODES
+        filtered = [c for c in codes if c in KKIAPAY_COUNTRY_CODES]
+        return filtered if filtered else KKIAPAY_COUNTRY_CODES
     except Exception:
         return KKIAPAY_COUNTRY_CODES
 
 
+def get_pawapay_country_codes():
+    return PAWAPAY_COUNTRY_CODES
+
 
 def build_payment_options(country=None):
     region = resolve_payment_region(country) if country else None
-    region_map = PAYMENT_METHODS_BY_REGION if region is None else {region: PAYMENT_METHODS_BY_REGION[region]}
+    region_map = (
+        PAYMENT_METHODS_BY_REGION
+        if region is None
+        else {region: PAYMENT_METHODS_BY_REGION.get(region, [])}
+    )
     result = {}
 
     for region_key, method_keys in region_map.items():
@@ -153,7 +154,8 @@ def build_payment_options(country=None):
                 'provider': method['provider'],
                 'mode': method['mode'],
                 'requires_manual_review': method['requires_manual_review'],
-                'instructions': method.get('instructions', ''),
+                'instructions': method.get('description') or method.get('instructions', ''),
+                'region': region_key,
             })
         result[region_key] = options
 

@@ -256,7 +256,7 @@ msgstr "Video course learning"
 #: .\manager\templates\public\about.html:417
 #: .\manager\templates\public\services.html:282
 msgid "综合市场"
-msgstr "Comprehensive marketplace"
+msgstr "Marketplace"
 
 #: .\manager\templates\public\about.html:417
 msgid "商品与生鲜超市"
@@ -690,7 +690,7 @@ msgstr "Author List"
 #: .\manager\templates\public\track_order.html:4
 #: .\manager\templates\public\track_order.html:214
 msgid "订单跟踪"
-msgstr "Order Tracking"
+msgstr "Order tracking"
 
 #: .\manager\templates\public\base.html:942
 #: .\manager\templates\public\services.html:4
@@ -978,7 +978,7 @@ msgstr "Back"
 #: .\marketplace\templates\marketplace\cart.html:4
 #: .\marketplace\templates\marketplace\cart.html:70
 msgid "购物车"
-msgstr "Shopping Cart"
+msgstr "Cart"
 
 #: .\manager\templates\public\book_detail.html:284
 #: .\manager\templates\public\book_detail_old.html:267
@@ -1347,7 +1347,7 @@ msgstr "Please select a country"
 #: .\manager\templates\public\track_order.html:760
 #: .\marketplace\templates\marketplace\checkout.html:158
 msgid "支付方式"
-msgstr "Payment method"
+msgstr "Payment methods"
 
 #: .\manager\templates\public\checkout.html:270
 #: .\manager\templates\public\checkout.html:383
@@ -2465,7 +2465,7 @@ msgstr "No account?"
 #: .\manager\templates\public\user_register.html:119
 #: .\manager\templates\public\vendor_login.html:79
 msgid "注册"
-msgstr "Register"
+msgstr "Registration"
 
 #: .\manager\templates\public\user_login.html:96
 #: .\manager\templates\public\vendor_login.html:94
@@ -2539,7 +2539,7 @@ msgstr "Browse Courses"
 
 #: .\manager\templates\public\user_register.html:49
 msgid "创建账户"
-msgstr "Create Account"
+msgstr "Create an account"
 
 #: .\manager\templates\public\user_register.html:50
 msgid "注册后可跟踪订单、管理收藏和个人资料"
@@ -2877,7 +2877,7 @@ msgstr "Saving..."
 #: .\manager\templates\public\vendor_login.html:4
 #: .\manager\templates\public\vendor_login.html:47
 msgid "卖家登录"
-msgstr "Seller Login"
+msgstr "Seller login"
 
 #: .\manager\templates\public\vendor_login.html:48
 msgid "登录卖家后台管理您的图书"
@@ -3263,7 +3263,7 @@ msgstr "Order Number"
 
 #: .\marketplace\templates\marketplace\product_detail.html:188
 msgid "浏览"
-msgstr "Browse"
+msgstr "views"
 
 #: .\marketplace\templates\marketplace\product_detail.html:204
 msgid "状况"
@@ -3358,7 +3358,8 @@ msgid "订单中心"
 msgstr "Order hub"
 
 msgid "图书、商城商品与课程订单统一管理"
-msgstr "Unified management for book and marketplace (products & courses) orders"
+msgstr ""
+"Unified management for book and marketplace (products & courses) orders"
 
 msgid "待支付(图)"
 msgstr "Pending pay (books)"
@@ -3370,7 +3371,8 @@ msgid "商城"
 msgstr "Marketplace"
 
 msgid "图书与商城共用相近状态键时可联合筛选"
-msgstr "Book and mall orders share similar status keys — combined filtering applies"
+msgstr ""
+"Book and mall orders share similar status keys — combined filtering applies"
 
 msgid "图书订单专页"
 msgstr "Books orders page"
@@ -3452,7 +3454,8 @@ msgstr "Edit customer & shipping details"
 
 msgid "用于更正买家联系方式或配送地址（订单未取消 / 未退款时可编辑）。"
 msgstr ""
-"Correct buyer contact or shipping address (editable unless cancelled/refunded)."
+"Correct buyer contact or shipping address (editable unless "
+"cancelled/refunded)."
 
 msgid "更正联系方式或收货地址（订单未取消 / 未退款时可编辑）。"
 msgstr ""
@@ -3504,7 +3507,7 @@ msgid "Items awaiting your review"
 msgstr "Items awaiting your review"
 
 msgid "关注店铺"
-msgstr "Followed shops"
+msgstr "Follow Shop"
 
 msgid "关注的卖家"
 msgstr "Followed sellers"
@@ -3918,10 +3921,10 @@ msgid "正规出版商"
 msgstr "Certified Publisher"
 
 msgid "查看主页"
-msgstr "View Shop"
+msgstr "View Profile"
 
 msgid "全部商品"
-msgstr "All Books"
+msgstr "All Articles"
 
 msgid "服务保障"
 msgstr "Service Guarantee"
@@ -3979,3 +3982,1594 @@ msgstr "Cold chain delivery"
 
 msgid "商品简介"
 msgstr "Product description"
+
+# --- Vendor panel i18n batch (2026-06) ---
+msgid "付款与托管"
+msgstr "Payments & escrow"
+
+msgid "跟踪托管资金、待结算与已到账款项"
+msgstr "Track held funds, pending release and completed payouts"
+
+msgid "图书、商城（商品 / 课程 / 超市）订单统一管理"
+msgstr ""
+"Unified orders: books and marketplace (products / courses / supermarket)"
+
+msgid "修改"
+msgstr "Edit"
+
+msgid "详情"
+msgstr "Details"
+
+msgid "订单与支付状态"
+msgstr "Order & payment status"
+
+msgid "仅对您店铺相关的订单生效。"
+msgstr "Applies only to orders linked to your shop."
+
+msgid "商品+课程"
+msgstr "Products + courses"
+
+msgid "管理生鲜与日用品上架、库存与规格"
+msgstr "Manage fresh & daily goods, stock and specifications"
+
+msgid "搜索名称或品牌…"
+msgstr "Search name or brand…"
+
+msgid "全部商品"
+msgstr "All listings"
+
+msgid "总览"
+msgstr "Overview"
+
+msgid "未付款订单（已下单未支付）"
+msgstr "Unpaid orders (placed, not paid)"
+
+msgid "暂无未付款订单"
+msgstr "No unpaid orders"
+
+msgid "近7天市场订单收入"
+msgstr "Marketplace revenue — last 7 days"
+
+msgid "最近市场订单"
+msgstr "Recent marketplace orders"
+
+msgid "保存状态"
+msgstr "Save status"
+
+msgid "保存联系信息"
+msgstr "Save contact info"
+
+msgid "编辑客户与收货信息"
+msgstr "Edit customer & shipping info"
+
+msgid "电话 / 微信"
+msgstr "Phone / WeChat"
+
+msgid "国家 / 地区"
+msgstr "Country / region"
+
+msgid "客户备注"
+msgstr "Customer notes"
+
+msgid "备注记录"
+msgstr "Notes log"
+
+msgid "备注（可选）"
+msgstr "Note (optional)"
+
+msgid "用于更正买家联系方式或配送地址（订单未取消 / 未退款时可编辑）。"
+msgstr ""
+"Correct buyer contact or shipping address (editable unless "
+"cancelled/refunded)."
+
+msgid "更正联系方式或收货地址（订单未取消 / 未退款时可编辑）。"
+msgstr "Correct contact or shipping address (unless cancelled/refunded)."
+
+msgid "全部付款明细"
+msgstr "All payment lines"
+
+msgid "您的净额"
+msgstr "Your net"
+
+msgid "距到账天数"
+msgstr "Days until payout"
+
+msgid "托管时间"
+msgstr "Held at"
+
+msgid "到账时间"
+msgstr "Paid out at"
+
+msgid "可立即结算"
+msgstr "Ready now"
+
+msgid "暂无付款记录"
+msgstr "No payment lines yet"
+
+msgid "钱包流水"
+msgstr "Wallet history"
+
+msgid "已退款/取消"
+msgstr "Refunded / cancelled"
+
+msgid "待释放"
+msgstr "On hold"
+
+msgid "可结算"
+msgstr "Ready to pay out"
+
+msgid "已到账"
+msgstr "Paid out"
+
+msgid "待发货"
+msgstr "Awaiting delivery"
+
+msgid "托管与卖家余额"
+msgstr "Escrow & vendor balance"
+
+msgid "Create account"
+msgstr "Create account"
+
+msgid "We will send verification codes by email and SMS"
+msgstr "We will send verification codes by email and SMS"
+
+msgid "Track orders, manage favorites and your profile"
+msgstr "Track orders, manage favorites and your profile"
+
+msgid "Full name"
+msgstr "Full name"
+
+msgid "Email address"
+msgstr "Email address"
+
+msgid "Phone (+242 06 123 4567)"
+msgstr "Phone (+242 06 123 4567)"
+
+msgid "Select your department"
+msgstr "Select your department"
+
+msgid "Select your city"
+msgstr "Select your city"
+
+msgid "Department"
+msgstr "Department"
+
+msgid "City"
+msgstr "City"
+
+msgid "Password (min. 6 characters)"
+msgstr "Password (min. 6 characters)"
+
+msgid "Confirm password"
+msgstr "Confirm password"
+
+msgid "Continue — send codes"
+msgstr "Continue — send codes"
+
+msgid "Sign up"
+msgstr "Sign up"
+
+msgid "or"
+msgstr "or"
+
+msgid "Already have an account?"
+msgstr "Already have an account?"
+
+msgid "Sign in"
+msgstr "Sign in"
+
+msgid "Please select your city"
+msgstr "Please select your city"
+
+msgid "Passwords do not match"
+msgstr "Passwords do not match"
+
+msgid "Network error"
+msgstr "Network error"
+
+msgid "Sending codes..."
+msgstr "Sending codes..."
+
+msgid "Open your shop"
+msgstr "Open your shop"
+
+msgid "Sell books and products on DUNO 360"
+msgstr "Sell books and products on DUNO 360"
+
+msgid "Shop name"
+msgstr "Shop name"
+
+msgid "Contact name"
+msgstr "Contact name"
+
+msgid "Shop description (optional)"
+msgstr "Shop description (optional)"
+
+msgid "Shop logo"
+msgstr "Shop logo"
+
+msgid "Register as vendor"
+msgstr "Register as vendor"
+
+msgid "Already a vendor?"
+msgstr "Already a vendor?"
+
+msgid "Vendor registration"
+msgstr "Vendor registration"
+
+msgid "Verify account"
+msgstr "Verify account"
+
+msgid "Enter the codes from your email and SMS"
+msgstr "Enter the codes from your email and SMS"
+
+msgid "Enter the 6-digit code sent to your email"
+msgstr "Enter the 6-digit code sent to your email"
+
+msgid "SMS verification unavailable"
+msgstr "SMS verification unavailable"
+
+msgid ""
+"Email verification has been activated automatically. Use the code from your "
+"inbox below."
+msgstr ""
+"Email verification has been activated automatically. Use the code from your "
+"inbox below."
+
+msgid "Email code"
+msgstr "Email code"
+
+msgid "Sent to"
+msgstr "Sent to"
+
+msgid "Paste or type 6-digit code"
+msgstr "Paste or type 6-digit code"
+
+msgid "Verification code"
+msgstr "Verification code"
+
+msgid "Resend email"
+msgstr "Resend email"
+
+msgid "Verify and complete registration"
+msgstr "Verify and complete registration"
+
+msgid "Back to registration"
+msgstr "Back to registration"
+
+msgid "Verifying..."
+msgstr "Verifying..."
+
+msgid "SMS code"
+msgstr "SMS code"
+
+msgid "Resend SMS"
+msgstr "Resend SMS"
+
+msgid "Unable to send SMS. Check your number or try again later."
+msgstr "Unable to send SMS. Check your number or try again later."
+
+msgid ""
+"Email verification has been started automatically. Enter the 6-digit code "
+"from your inbox."
+msgstr ""
+"Email verification has been started automatically. Enter the 6-digit code "
+"from your inbox."
+
+msgid "SMS could not be sent. Use the email code or try again later."
+msgstr "SMS could not be sent. Use the email code or try again later."
+
+msgid "Verification codes sent by SMS and email."
+msgstr "Verification codes sent by SMS and email."
+
+msgid "Verification code sent to your email."
+msgstr "Verification code sent to your email."
+
+msgid "Enter the code received by SMS."
+msgstr "Enter the code received by SMS."
+
+msgid "Seller registration"
+msgstr "Seller registration"
+
+msgid "Please fill in all required fields, including phone."
+msgstr "Please fill in all required fields, including phone."
+
+msgid "Password must be at least 6 characters."
+msgstr "Password must be at least 6 characters."
+
+msgid "This email is already registered."
+msgstr "This email is already registered."
+
+msgid "Please enter the verification code."
+msgstr "Please enter the verification code."
+
+msgid "Verification record not found. Please register again."
+msgstr "Verification record not found. Please register again."
+
+msgid "Code expired. Please request a new one."
+msgstr "Code expired. Please request a new one."
+
+msgid "Incorrect verification code."
+msgstr "Incorrect verification code."
+
+msgid "Verification successful. Registration complete!"
+msgstr "Verification successful. Registration complete!"
+
+msgid "Email is required."
+msgstr "Email is required."
+
+msgid "No pending verification found. Please register again."
+msgstr "No pending verification found. Please register again."
+
+msgid "A new verification code has been sent."
+msgstr "A new verification code has been sent."
+
+msgid "Invalid request."
+msgstr "Invalid request."
+
+msgid "Verification expired. Please register again."
+msgstr "Verification expired. Please register again."
+
+msgid "New SMS code sent."
+msgstr "New SMS code sent."
+
+msgid "Please enter email and password."
+msgstr "Please enter email and password."
+
+msgid "Incorrect email or password."
+msgstr "Incorrect email or password."
+
+msgid "Login successful."
+msgstr "Login successful."
+
+msgid "Please fill in all required fields."
+msgstr "Please fill in all required fields."
+
+msgid "This email is already registered as a vendor."
+msgstr "This email is already registered as a vendor."
+
+msgid "Phone number is required."
+msgstr "Phone number is required."
+
+msgid "Verification successful. Your vendor account is pending approval."
+msgstr "Verification successful. Your vendor account is pending approval."
+
+msgid "Please enter your email."
+msgstr "Please enter your email."
+
+msgid "No vendor account found for this email."
+msgstr "No vendor account found for this email."
+
+msgid "No user account found for this email."
+msgstr "No user account found for this email."
+
+msgid "Development mode: your code is %(code)s"
+msgstr "Development mode: your code is %(code)s"
+
+msgid "Please fill in all fields."
+msgstr "Please fill in all fields."
+
+msgid "Invalid verification code."
+msgstr "Invalid verification code."
+
+msgid "Password reset successful. Please sign in with your new password."
+msgstr "Password reset successful. Please sign in with your new password."
+
+msgid "Account not found or has been disabled."
+msgstr "Account not found or has been disabled."
+
+msgid "Please select your department."
+msgstr "Please select your department."
+
+msgid "Redirecting to verification…"
+msgstr "Redirecting to verification…"
+
+msgid "Sending verification codes…"
+msgstr "Sending verification codes…"
+
+msgid "Sending..."
+msgstr "Sending..."
+
+msgid "Send code"
+msgstr "Send code"
+
+msgid "Resetting..."
+msgstr "Resetting..."
+
+msgid "Reset password"
+msgstr "Reset password"
+
+msgid "Failed to send verification email. Please try again later."
+msgstr "Failed to send verification email. Please try again later."
+
+msgid "销售店铺"
+msgstr "Sold by"
+
+msgid "粉丝"
+msgstr "followers"
+
+msgid "访问店铺"
+msgstr "Visit Shop"
+
+msgid "出版方"
+msgstr "Published by"
+
+msgid "官方出版社"
+msgstr "Official Publisher"
+
+msgid "关注出版社"
+msgstr "Follow Publisher"
+
+msgid "请选择"
+msgstr "Please select"
+
+msgid "关注的店铺"
+msgstr "Followed Shops"
+
+msgid "全部商品"
+msgstr "All Products"
+
+msgid "在线咨询"
+msgstr "Chat Now"
+
+msgid "规格参数"
+msgstr "Specifications"
+
+msgid "最低订购量"
+msgstr "Minimum order"
+
+msgid "热卖"
+msgstr "Hot"
+
+msgid "人气推荐"
+msgstr "Trending"
+
+msgid "限量"
+msgstr "Limited"
+
+msgid "成色"
+msgstr "Condition"
+
+msgid "进店"
+msgstr "Shop"
+
+msgid "已报名"
+msgstr "Enrolled"
+
+msgid "课节"
+msgstr "Lessons"
+
+msgid "等级"
+msgstr "Level"
+
+msgid "结业证书"
+msgstr "Certificate"
+
+msgid "终身畅学"
+msgstr "Lifetime Access"
+
+msgid "购买后随时学习"
+msgstr "Learn anytime after purchase"
+
+msgid "七天退款"
+msgstr "7-Day Refund"
+
+msgid "课程大纲"
+msgstr "Course Curriculum"
+
+msgid "您的浏览器不支持视频播放"
+msgstr "Your browser does not support video playback"
+
+msgid "选择课节开始学习"
+msgstr "Select a lesson to start learning"
+
+msgid "课时描述"
+msgstr "Lesson Description"
+
+msgid "课程PDF"
+msgstr "Course PDF"
+
+msgid "本课暂无描述"
+msgstr "No description for this lesson"
+
+msgid "下载PDF"
+msgstr "Download PDF"
+
+msgid "课程大纲即将上线"
+msgstr "Course curriculum coming soon"
+
+msgid "七天退换"
+msgstr "7-Day Return"
+
+msgid "正品保证"
+msgstr "Authentic Guarantee"
+
+msgid "快递配送"
+msgstr "Express Delivery"
+
+msgid "天"
+msgstr "days"
+
+msgid "DUNO平台正品保障"
+msgstr "DUNO Platform Guarantee · Authentic"
+
+msgid "DUNO平台保障"
+msgstr "DUNO Platform Guarantee"
+
+msgid "退货保障"
+msgstr "Return Protection"
+
+msgid "七天无理由退换"
+msgstr "7-Day No-Reason Return"
+
+msgid "快速退款"
+msgstr "Fast Refund"
+
+msgid "十五天退换"
+msgstr "15-Day Return"
+
+msgid "运费险"
+msgstr "Shipping Insurance"
+
+msgid "质量检测"
+msgstr "Quality Inspection"
+
+msgid "官方旗舰店"
+msgstr "Official Store"
+
+msgid "同城配送"
+msgstr "Local Delivery"
+
+msgid "发货地"
+msgstr "Shipped from"
+
+msgid "达喀尔仓库"
+msgstr "Dakar Warehouse"
+
+msgid "配送速度"
+msgstr "Delivery Speed"
+
+msgid "服务质量"
+msgstr "Service Quality"
+
+msgid "新品"
+msgstr "New"
+
+msgid "人正在看这件商品"
+msgstr "people are viewing this product right now"
+
+msgid "件已售出（已完成订单）"
+msgstr "units sold (delivered orders)"
+
+msgid "仅剩"
+msgstr "Only"
+
+msgid "件，速抢！"
+msgstr "left — order soon!"
+
+msgid "官方直营"
+msgstr "Official Store"
+
+msgid "Duno360官方店"
+msgstr "Duno360 Official Store"
+
+msgid "全部图书"
+msgstr "All Books"
+
+# Book detail page — additional i18n
+msgid "库存充足"
+msgstr "Well Stocked"
+
+msgid "问答"
+msgstr "Q&A"
+
+msgid "人已购买"
+msgstr "people purchased"
+
+msgid "本书有电子版吗？"
+msgstr "Does this book have a digital edition?"
+
+msgid "有的，请联系客服获取下载码。"
+msgstr "Yes — contact support for a download code."
+
+msgid "内容与描述相符吗？"
+msgstr "Does the content match the description?"
+
+msgid "正版保证，品质优秀，强烈推荐！"
+msgstr "Authentic guarantee, excellent quality — highly recommended!"
+
+msgid "查看更多"
+msgstr "View more"
+
+msgid "30天最低价"
+msgstr "30-day lowest price"
+
+# Vendor shop page (vendor_shop.html)
+msgid "店铺首页"
+msgstr "Shop Home"
+
+msgid "入驻"
+msgstr "Since"
+
+msgid "店铺"
+msgstr "Shop"
+
+msgid "该店铺暂无商品"
+msgstr "This shop has no items yet"
+
+msgid "暂无图书"
+msgstr "No books available"
+
+msgid "暂无超市商品"
+msgstr "No supermarket items available"
+
+msgid "店铺评分"
+msgstr "Shop Ratings"
+
+msgid "服务态度"
+msgstr "Customer Service"
+
+msgid "店铺信息"
+msgstr "Shop Info"
+
+msgid "商品数"
+msgstr "Items"
+
+msgid "粉丝数"
+msgstr "Followers"
+
+msgid "15天无理由退换"
+msgstr "15-day easy returns"
+
+msgid "极速发货"
+msgstr "Fast shipping"
+
+msgid "专属客服"
+msgstr "Dedicated support"
+
+msgid "Duno360官方直营店，汇集平台自营图书、商品、课程与超市精选。品质保障，官方售后，值得信赖。"
+msgstr ""
+"Duno360 official store — platform-owned books, products, courses and "
+"supermarket picks. Quality guaranteed, official after-sales support you can "
+"trust."
+
+msgid "西非 — KKiaPay"
+msgstr "West Africa — KKiaPay"
+
+msgid "中非 — PawaPay"
+msgstr "Central Africa — PawaPay"
+
+msgid "西非地区：通过 KKiaPay 安全支付（MTN、Orange、Wave…）"
+msgstr "West Africa: pay securely via KKiaPay (MTN, Orange, Wave…)"
+
+msgid "中非地区：通过 PawaPay 安全支付（MTN、Orange、Airtel…）"
+msgstr "Central Africa: pay securely via PawaPay (MTN, Orange, Airtel…)"
+
+msgid "当前国家暂不支持在线支付"
+msgstr "Online payment is not available for this country"
+
+msgid "中非"
+msgstr "Central Africa"
+
+msgid "沙盒模式"
+msgstr "Sandbox mode"
+
+msgid "请输入您的 Mobile Money 号码以接收支付确认。"
+msgstr "Enter your Mobile Money number to receive the payment prompt."
+
+msgid "例：2376XXXXXXXX"
+msgstr "e.g. 2376XXXXXXXX"
+
+msgid "立即支付"
+msgstr "Pay now"
+
+msgid "正在发起支付…"
+msgstr "Initiating payment…"
+
+msgid "请在手机上确认支付…"
+msgstr "Confirm the payment on your phone…"
+
+msgid "支付成功！正在跳转…"
+msgstr "Payment successful! Redirecting…"
+
+msgid "支付失败"
+msgstr "Payment failed"
+
+msgid "请输入电话号码"
+msgstr "Please enter a phone number"
+
+msgid "发起失败"
+msgstr "Failed to initiate payment"
+
+msgid "网络错误，请重试"
+msgstr "Network error — please try again"
+
+msgid "中非共和国"
+msgstr "Central African Republic"
+
+msgid "乍得"
+msgstr "Chad"
+
+msgid "赤道几内亚"
+msgstr "Equatorial Guinea"
+
+msgid "城市"
+msgstr "City"
+
+msgid "详细地址"
+msgstr "Detailed address"
+
+msgid "请输入您的城市"
+msgstr "Enter your city"
+
+msgid "街道、门牌号、小区等"
+msgstr "Street, building number, neighborhood, etc."
+
+msgid "号码（不含国家码）"
+msgstr "Number (without country code)"
+
+msgid "中非 Mobile Money — PawaPay"
+msgstr "Central Africa Mobile Money — PawaPay"
+
+msgid "西非 Mobile Money — KKiaPay"
+msgstr "West Africa Mobile Money — KKiaPay"
+
+msgid "亚洲"
+msgstr "Asia"
+
+msgid "其他"
+msgstr "Other"
+
+msgid "其他国家"
+msgstr "Other country"
+
+msgid "西非 — KKiaPay"
+msgstr "West Africa — KKiaPay"
+
+msgid "中非 — PawaPay"
+msgstr "Central Africa — PawaPay"
+
+msgid "请先选择国家"
+msgstr "Please select a country first"
+
+msgid "请选择城市"
+msgstr "Please select a city"
+
+msgid "该国家暂无城市列表"
+msgstr "No city list available for this country"
+
+msgid "请选择有效的城市。"
+msgstr "Please select a valid city."
+
+msgid "100% 通过 MoMo 支付（KKiaPay / PawaPay）"
+msgstr "100% paid via MoMo (KKiaPay / PawaPay)"
+
+msgid "24 小时内回复"
+msgstr "Reply within 24 hours"
+
+msgid "5 个工作日内退款"
+msgstr "Refund within 5 business days"
+
+msgid "Best Deals 是什么意思？"
+msgstr "What does Best Deals mean?"
+
+msgid "Cookie"
+msgstr ""
+
+msgid "DUNO 360 不出售任何个人数据。"
+msgstr "DUNO 360 does not sell any personal data."
+
+msgid "DUNO 360 不对用户间争议、产品缺陷或延迟负责"
+msgstr ""
+"DUNO 360 is not liable for disputes between users, product defects or delays"
+
+msgid "DUNO 360 作为中间平台运营。退款主要由卖家处理，如有争议 DUNO 360 将提供支持。"
+msgstr ""
+"DUNO 360 operates as an intermediary. Refunds are mainly handled by sellers;"
+" DUNO 360 supports in case of dispute."
+
+msgid "DUNO 360 作为技术中介，不保证产品质量、配送或卖家履约。"
+msgstr ""
+"As a technical intermediary, DUNO 360 does not guarantee product quality, "
+"delivery or seller fulfillment."
+
+msgid "DUNO 360 使用 Cookie 改善浏览体验、分析使用情况并个性化内容。"
+msgstr ""
+"DUNO 360 uses cookies to improve browsing, analyze usage and personalize "
+"content."
+
+msgid "DUNO 360 可在违规时暂停账户或删除内容"
+msgstr "DUNO 360 may suspend accounts or remove content in case of violation"
+
+msgid "DUNO 360 可拒绝滥用性请求、暂停欺诈账户，并作为调解方根据证据作出决定。"
+msgstr ""
+"DUNO 360 may reject abusive requests, suspend fraudulent accounts and "
+"mediate based on evidence."
+
+msgid "DUNO 360 将卖家、创业者和消费者连接在一个简单、快速、易用的生态系统中。我们促进本地贸易，提升企业曝光度，加速非洲数字化转型。"
+msgstr ""
+"DUNO 360 connects sellers, entrepreneurs and consumers in a simple, fast "
+"ecosystem. We boost local trade, business visibility and Africa's digital "
+"transformation."
+
+msgid "DUNO 360 平台承诺保护用户（客户、卖家、访客）的个人数据。本政策说明我们如何收集、使用和保护您的数据。"
+msgstr ""
+"DUNO 360 is committed to protecting personal data of users (customers, "
+"sellers, visitors). This policy explains how we collect, use and protect "
+"your data."
+
+msgid "DUNO 360 平台退款条件与争议处理流程。"
+msgstr "Refund conditions and dispute procedures on DUNO 360."
+
+msgid "DUNO 360 数据保护及使用条款说明。"
+msgstr "Data protection and terms of use for DUNO 360."
+
+msgid "DUNO 360 调解"
+msgstr "DUNO 360 mediation"
+
+msgid "DUNO 360 连接卖家与客户。本政策规定平台交易的退款条件。"
+msgstr ""
+"DUNO 360 connects sellers and customers. This policy defines refund "
+"conditions for platform transactions."
+
+msgid "Devenir Premium"
+msgstr "Go Premium"
+
+msgid "Duno360 常见问题"
+msgstr "Duno360 FAQ"
+
+msgid "En bref"
+msgstr "In brief"
+
+msgid "Premium 专属优势"
+msgstr "Premium exclusive benefits"
+
+msgid "Premium 合作伙伴"
+msgstr "Premium Partner"
+
+msgid "Premium 套餐"
+msgstr "Premium plans"
+
+msgid "Premium 徽章"
+msgstr "Premium badge"
+
+msgid "Premium 认证卖家徽章、横幅及高级统计。"
+msgstr "Premium verified seller badge, banners and advanced analytics."
+
+msgid "WhatsApp 与邮件"
+msgstr "WhatsApp & email"
+
+msgid "一个账户可以同时买卖吗？"
+msgstr "Can one account buy and sell?"
+
+msgid "下单、MoMo 支付、订单跟踪。"
+msgstr "Place orders, pay via MoMo, track orders."
+
+msgid "下单、移动支付及取货点自提指南。"
+msgstr "Guide to ordering, Mobile Money payment and pickup points."
+
+msgid "下单与配送"
+msgstr "Order & Delivery"
+
+msgid "不出售任何数据"
+msgstr "No data reselling"
+
+msgid "不接受的情况"
+msgstr "Non-eligible cases"
+
+msgid "与描述不符的产品"
+msgstr "Product not as described"
+
+msgid "专业店铺"
+msgstr "Professional store"
+
+msgid "专属支持"
+msgstr "Dedicated support"
+
+msgid "个人数据"
+msgstr "Personal data"
+
+msgid "为什么"
+msgstr "Why"
+
+msgid "为什么必须填写手机号？"
+msgstr "Why is a phone number required?"
+
+msgid "为什么成为合作伙伴？"
+msgstr "Why become a partner?"
+
+msgid "为非洲打造的数字市场 — 本地贸易、移动支付与取货点。"
+msgstr ""
+"Digital marketplace built for Africa — local trade, Mobile Money and pickup "
+"points."
+
+msgid "为非洲而生"
+msgstr "Built for Africa"
+
+msgid "买卖产品、发布广告。"
+msgstr "Buy and sell products, publish listings."
+
+msgid "争议与滥用"
+msgstr "Disputes & abuse"
+
+msgid "交易"
+msgstr "Transactions"
+
+msgid "交易通过移动支付或所选方式（部分或全额付款）进行。"
+msgstr ""
+"Transactions are made via Mobile Money or chosen method (partial or full "
+"payment)."
+
+msgid "产品、价格、描述、图片、评价和评论。"
+msgstr "Products, prices, descriptions, images, ratings and reviews."
+
+msgid "产品不符、与卖家争议。"
+msgstr "Product mismatch, dispute with seller."
+
+msgid "产品使用不当"
+msgstr "Improper product use"
+
+msgid "什么是 DUNO 360？"
+msgstr "What is DUNO 360?"
+
+msgid "以卖家、培训师或取货点身份加入 DUNO 360 生态。"
+msgstr "Join the DUNO 360 ecosystem as a seller, trainer or pickup point."
+
+msgid "企业、广告活动"
+msgstr "Businesses & campaigns"
+
+msgid "优先展示"
+msgstr "Priority visibility"
+
+msgid "优先支持"
+msgstr "Priority support"
+
+msgid "优先曝光、增强推广及专业工具。"
+msgstr "Priority visibility, boosted promotions and pro tools."
+
+msgid "优势"
+msgstr "Benefits"
+
+msgid "使命"
+msgstr "Mission"
+
+msgid "使用"
+msgstr "Usage"
+
+msgid "使用站内消息、聊天机器人或联系页面。附带订单号的紧急请求会优先处理。"
+msgstr ""
+"Use messaging, the chatbot or the Contact page. Urgent requests with an "
+"order number are prioritized."
+
+msgid "使用订单跟踪标签或进入个人资料，查看付款、备货、配送或下载状态。"
+msgstr ""
+"Use order tracking or your profile to see payment, preparation, delivery or "
+"download status."
+
+msgid "保障安全并防范欺诈"
+msgstr "Ensure security and prevent fraud"
+
+msgid "共享"
+msgstr "Sharing"
+
+msgid "关于 DUNO 360"
+msgstr "About DUNO 360"
+
+msgid "准备下单？"
+msgstr "Ready to order?"
+
+msgid "几分钟内完成卖家注册。"
+msgstr "Seller registration in minutes."
+
+msgid "分享知识和在线课程。"
+msgstr "Share knowledge and online courses."
+
+msgid "创建账户或开设您的店铺。"
+msgstr "Create your account or open your store."
+
+msgid "删除您的账户"
+msgstr "Delete your account"
+
+msgid "加入 DUNO 360"
+msgstr "Join DUNO 360"
+
+msgid "升级 Premium"
+msgstr "Go Premium"
+
+msgid "卖家 / 供应商"
+msgstr "Sellers / suppliers"
+
+msgid "卖家与合作伙伴"
+msgstr "Sellers & Partners"
+
+msgid "卖家：发布、店铺管理、内容责任"
+msgstr "Sellers: listings, store management, content responsibility"
+
+msgid "反对某些数据处理"
+msgstr "Object to certain data processing"
+
+msgid "发货前取消"
+msgstr "Cancellation before shipping"
+
+msgid "发送通知（优惠、促销、新消息）"
+msgstr "Send notifications (offers, promotions, new messages)"
+
+msgid "取货点"
+msgstr "Pickup points"
+
+msgid "取货点、延迟、取件。"
+msgstr "Pickup points, delays, collection."
+
+msgid "可以。在产品页或店铺页，登录账户后可直接与卖家发起对话。"
+msgstr ""
+"Yes. From product or store pages, start a direct conversation when logged "
+"in."
+
+msgid "可以。所有账户默认为买家。首次发布时自动激活卖家角色。"
+msgstr ""
+"Yes. All accounts are buyers by default. Seller role activates on first "
+"listing."
+
+msgid "可以联系卖家吗？"
+msgstr "Can I contact a seller?"
+
+msgid "可浏览车辆、房产、手机、电子产品、时尚、服务、工具、农业、招聘等丰富品类。"
+msgstr ""
+"Browse vehicles, property, phones, electronics, fashion, services, tools, "
+"agriculture, jobs and more."
+
+msgid "可见页面"
+msgstr "visible pages"
+
+msgid "合作类型"
+msgstr "Partner types"
+
+msgid "周一至周六，08:00 – 18:00"
+msgstr "Mon–Sat, 08:00 – 18:00"
+
+msgid "商业合作伙伴"
+msgstr "Business partners"
+
+msgid "商业数据"
+msgstr "Business data"
+
+msgid "商户、创业者、超市"
+msgstr "Merchants, entrepreneurs, supermarkets"
+
+msgid "商户、批发商和手工艺人。"
+msgstr "Merchants, wholesalers and artisans."
+
+msgid "在 DUNO 360 上提升您的曝光度。"
+msgstr "Boost your visibility on DUNO 360."
+
+msgid "在 DUNO 360 创建账户"
+msgstr "Create an account on DUNO 360"
+
+msgid "在取货点自取（推荐）"
+msgstr "Pickup at a relay point (recommended)"
+
+msgid "在移动端，使用搜索栏下拉菜单预选市场、车辆、房产、图书或课程分类。"
+msgstr ""
+"On mobile, use the search bar dropdown to preselect Market, Vehicles, "
+"Property, Books or Courses."
+
+msgid "在线店铺"
+msgstr "Online store"
+
+msgid "在线店铺、自主管理、业绩统计。"
+msgstr "Online store, self-management, performance stats."
+
+msgid "在线销售、促销与客户留存。"
+msgstr "Online sales, promotions and customer retention."
+
+msgid "在账户活跃期间或根据法律义务保存"
+msgstr "Retained while account is active or as required by law"
+
+msgid "培训、在线课程、教育内容"
+msgstr "Training, online courses, educational content"
+
+msgid "培训师 / 创作者"
+msgstr "Trainers / creators"
+
+msgid "培训课程"
+msgstr "Training courses"
+
+msgid "增强推广"
+msgstr "Boosted promotion"
+
+msgid "套餐"
+msgstr "Plans"
+
+msgid "如何发布广告？"
+msgstr "How do I publish a listing?"
+
+msgid "如何快速获得帮助？"
+msgstr "How do I get help quickly?"
+
+msgid "如何成为合作伙伴？"
+msgstr "How to become a partner?"
+
+msgid "如何订阅？"
+msgstr "How to subscribe?"
+
+msgid "如何跟踪订单？"
+msgstr "How do I track an order?"
+
+msgid "如卖家提供则支持送货上门"
+msgstr "Home delivery if offered by seller"
+
+msgid "如有需要请联系卖家"
+msgstr "Contact the seller if needed"
+
+msgid "姓名、电话、邮箱、地址（城市、街区、省份）。"
+msgstr "Name, phone, email, address (city, district, province)."
+
+msgid "安全"
+msgstr "Security"
+
+msgid "安全与保存"
+msgstr "Security & retention"
+
+msgid "安全的移动支付"
+msgstr "Secure Mobile Money"
+
+msgid "安全身份验证"
+msgstr "Secure authentication"
+
+msgid "完善资料并发布产品"
+msgstr "Complete profile and publish products"
+
+msgid "定制或个性化产品"
+msgstr "Custom or personalized products"
+
+msgid "定金 + 货到付款余额"
+msgstr "Deposit + balance on delivery"
+
+msgid "实时跟踪"
+msgstr "Real-time tracking"
+
+msgid "客户服务"
+msgstr "Customer Service"
+
+msgid "客户：购买、发布广告、与卖家互动"
+msgstr "Customers: buy, post ads, interact with sellers"
+
+msgid "对您的数据有疑问？"
+msgstr "Questions about your data?"
+
+msgid "对您的账户负责"
+msgstr "You are responsible for your account"
+
+msgid "市场上有什么产品？"
+msgstr "What products are on the marketplace?"
+
+msgid "帮助"
+msgstr "Help"
+
+msgid "常见问题"
+msgstr "FAQ"
+
+msgid "平台"
+msgstr "Platform"
+
+msgid "平台标识、设计及内容受保护"
+msgstr "Platform branding, design and content are protected"
+
+msgid "建议"
+msgstr "Tips"
+
+msgid "开设店铺"
+msgstr "Open a store"
+
+msgid "开设您的店铺"
+msgstr "Launch your store"
+
+msgid "开设我的店铺"
+msgstr "Open my store"
+
+msgid "快速协助及争议优先处理。"
+msgstr "Fast assistance and priority dispute handling."
+
+msgid "快速获得帮助"
+msgstr "Get help quickly"
+
+msgid "快速访问"
+msgstr "Quick access"
+
+msgid "快速访问 DUNO 360 平台的所有版块。"
+msgstr "Quick access to all sections of the DUNO 360 platform."
+
+msgid "您的数据可能会与其他用户（卖家公开信息）、支付合作伙伴、技术服务提供商共享，或在法律要求的情况下共享。"
+msgstr ""
+"Your data may be shared with other users (public seller info), payment "
+"partners, tech providers, or when required by law."
+
+msgid "您的权利"
+msgstr "Your rights"
+
+msgid "愿景"
+msgstr "Vision"
+
+msgid "愿景与信任"
+msgstr "Vision & Trust"
+
+msgid "成为 Premium"
+msgstr "Go Premium"
+
+msgid "成为卖家"
+msgstr "Become a Seller"
+
+msgid "成为合作伙伴"
+msgstr "Become a Partner"
+
+msgid "我们的使命"
+msgstr "Our Mission"
+
+msgid "我们的团队将在 24 小时内回复。"
+msgstr "Our team replies within 24 hours."
+
+msgid "我们的团队随时为您提供平台导航指导。"
+msgstr "Our team can guide you through the platform."
+
+msgid "我们的客户服务团队随时为您服务。"
+msgstr "Our customer service team is here for you."
+
+msgid "我们相信每位创业者都能在线销售，数字化将成为经济增长的杠杆。DUNO 360 致力于成为非洲数字商务的参考平台。"
+msgstr ""
+"We believe every entrepreneur can sell online. DUNO 360 aims to be Africa's "
+"reference digital commerce platform."
+
+msgid "我们能帮您什么？"
+msgstr "How can we help?"
+
+msgid "手机号增强账户安全，便于买卖双方沟通，并改善订单跟踪体验。"
+msgstr ""
+"Phone numbers improve security, buyer-seller communication and order "
+"tracking."
+
+msgid "按区设置取货点"
+msgstr "Pickup points by district"
+
+msgid "按城市和街区组织"
+msgstr "Organized by city and district"
+
+msgid "探索 DUNO 360 综合市场。"
+msgstr "Explore the DUNO 360 marketplace."
+
+msgid "接受的情况"
+msgstr "Eligible cases"
+
+msgid "接收包裹，方便取件"
+msgstr "Receive parcels for easy pickup"
+
+msgid "推广您的业务，吸引新客户。"
+msgstr "Promote your business and reach new customers."
+
+msgid "提供 DUNO 360 服务"
+msgstr "Provide DUNO 360 services"
+
+msgid "提供准确信息，不得冒用他人身份"
+msgstr "Provide accurate information; do not impersonate others"
+
+msgid "提供订单号、说明及证据（照片、视频）"
+msgstr "Provide order number, description and evidence (photos, videos)"
+
+msgid "搜索前如何选择分类？"
+msgstr "How do I pick a category before searching?"
+
+msgid "搜索结果置顶"
+msgstr "Top search results"
+
+msgid "搜索结果置顶及每日精选产品专区。"
+msgstr "Top search results and daily featured products."
+
+msgid "搜索页面"
+msgstr "Search pages"
+
+msgid "搜索页面..."
+msgstr "Search a page..."
+
+msgid "支付数据"
+msgstr "Payment data"
+
+msgid "收集的数据"
+msgstr "Data collected"
+
+msgid "改善用户体验"
+msgstr "Improve user experience"
+
+msgid "敏感数据加密"
+msgstr "Encryption of sensitive data"
+
+msgid "数字收入"
+msgstr "Digital revenue"
+
+msgid "数字目录与出版社。"
+msgstr "Digital catalog and publishers."
+
+msgid "数据"
+msgstr "Data"
+
+msgid "数据使用"
+msgstr "Data usage"
+
+msgid "数据共享"
+msgstr "Data sharing"
+
+msgid "数据受保护"
+msgstr "Data protected"
+
+msgid "是的。Duno360 将图书、在线课程、综合市场与超市整合于同一平台。"
+msgstr ""
+"Yes. Duno360 combines books, online courses, marketplace and supermarket in "
+"one experience."
+
+msgid "曝光度"
+msgstr "Visibility"
+
+msgid "最多 24 小时内回复。紧急情况优先处理。"
+msgstr "Reply within 24 hours. Urgent cases prioritized."
+
+msgid "最大曝光——低至 500 非洲法郎/月"
+msgstr "Maximum visibility — from 500 CFA/month"
+
+msgid "有缺陷或损坏的产品"
+msgstr "Defective or damaged products"
+
+msgid "未找到页面"
+msgstr "No pages found"
+
+msgid "未送达的产品"
+msgstr "Undelivered products"
+
+msgid "本地曝光"
+msgstr "Local visibility"
+
+msgid "本条款规定 DUNO 360 的访问和使用规则：产品销售、广告发布、知识分享及客户/卖家对接。"
+msgstr ""
+"These terms govern access and use of DUNO 360: product sales, ads, knowledge"
+" sharing and buyer/seller connections."
+
+msgid "核心功能——低至 200 非洲法郎/月"
+msgstr "Core features — from 200 CFA/month"
+
+msgid "概要"
+msgstr "Overview"
+
+msgid "每个区设有取货点：配送更快、成本更低、更加安全。"
+msgstr "Pickup points in each district: faster, cheaper, safer delivery."
+
+msgid "每个阶段均有通知：确认、备货、到达取货点、配送完成。"
+msgstr ""
+"Notifications at each stage: confirmation, preparation, arrival at pickup "
+"point, delivery complete."
+
+msgid "每位用户对其发布内容、交易及法律遵守负责"
+msgstr ""
+"Each user is responsible for their content, transactions and legal "
+"compliance"
+
+msgid "法律信息"
+msgstr "Legal information"
+
+msgid "注册与账户"
+msgstr "Registration & account"
+
+msgid "流程与期限"
+msgstr "Procedure & timelines"
+
+msgid "清晰描述问题，必要时附上证据"
+msgstr "Describe the issue clearly; attach evidence if needed"
+
+msgid "版块"
+msgstr "Sections"
+
+msgid "现代化平台"
+msgstr "Modern platform"
+
+msgid "用户通知及赞助推广活动。"
+msgstr "User notifications and sponsored promotions."
+
+msgid "登录、安全、用户资料。"
+msgstr "Login, security, user profile."
+
+msgid "登录凭证、账户类型、活动历史。"
+msgstr "Login credentials, account type, activity history."
+
+msgid "登录后点击「发布」。您的买家账户将同时成为卖家账户，并可访问卖家控制台。"
+msgstr ""
+"Log in and click Publish. Your buyer account becomes a seller account and "
+"you access the vendor dashboard."
+
+msgid "登录后进入「成为 Premium」，选择套餐并通过移动支付付款。即时激活。"
+msgstr ""
+"After login go to Go Premium, choose a plan and pay via Mobile Money. "
+"Instant activation."
+
+msgid "目录"
+msgstr "Table of contents"
+
+msgid "确认、付款并选择取货点"
+msgstr "Confirm, pay and choose pickup point"
+
+msgid "确认后 24 小时至 5 个工作日内通过移动支付退款。"
+msgstr ""
+"Refund via Mobile Money within 24 hours to 5 business days after "
+"confirmation."
+
+msgid "确认后改变主意（除非卖家同意）"
+msgstr "Change of mind after confirmation (unless seller agrees)"
+
+msgid "禁止内容"
+msgstr "Prohibited content"
+
+msgid "移动支付"
+msgstr "Mobile Money"
+
+msgid "移动支付交易及支付历史。"
+msgstr "Mobile Money transactions and payment history."
+
+msgid "立足刚果共和国，放眼国际扩展。"
+msgstr "Based in the Republic of Congo, with international ambitions."
+
+msgid "等待确认——DUNO 360 可介入调解"
+msgstr "Awaiting confirmation — DUNO 360 may mediate"
+
+msgid "简要说明"
+msgstr "In brief"
+
+msgid "管理订单和交易"
+msgstr "Manage orders and transactions"
+
+msgid "索赔期限：收货后 48 小时至 7 天（视产品而定），未送达则为 7 天。"
+msgstr ""
+"Claim window: 48 hours to 7 days after receipt (product-dependent); 7 days "
+"if not delivered."
+
+msgid "联系"
+msgstr "Contact"
+
+msgid "联系表单"
+msgstr "Contact form"
+
+msgid "联系表单全天候可用。"
+msgstr "Contact form available 24/7."
+
+msgid "营业时间"
+msgstr "Business hours"
+
+msgid "行使您的权利"
+msgstr "Exercise your rights"
+
+msgid "视卖家供应情况而定"
+msgstr "Subject to seller availability"
+
+msgid "订单、配送、退款及账户协助。"
+msgstr "Help with orders, delivery, refunds and your account."
+
+msgid "订阅"
+msgstr "Subscribe"
+
+msgid "访问并修改您的数据"
+msgstr "Access and modify your data"
+
+msgid "评价与评分系统——禁止任何操纵行为"
+msgstr "Reviews & ratings — manipulation is prohibited"
+
+msgid "评分、暂停与知识产权"
+msgstr "Ratings, suspension & intellectual property"
+
+msgid "该板块展示近期最畅销商品，优先显示最近两个月已付款订单中的热门商品。"
+msgstr ""
+"This section shows recently best-selling items, prioritizing paid orders "
+"from the last two months."
+
+msgid "请在 3 至 7 天内取件。如有问题，请通过平台联系卖家。"
+msgstr ""
+"Pick up within 3–7 days. For issues, contact the seller via the platform."
+
+msgid "请尝试其他关键词。"
+msgstr "Try another keyword."
+
+msgid "请提供您的姓名或账户号码"
+msgstr "Please provide your name or account number"
+
+msgid "请注明订单号"
+msgstr "Please include the order number"
+
+msgid "课程和图书包含在内吗？"
+msgstr "Are courses and books included?"
+
+msgid "责任"
+msgstr "Liability"
+
+msgid "账单错误或重复付款"
+msgstr "Billing error or duplicate payment"
+
+msgid "账户与购买"
+msgstr "Account & Purchase"
+
+msgid "账户数据"
+msgstr "Account data"
+
+msgid "账户由您掌控"
+msgstr "Control your account"
+
+msgid "货到付款"
+msgstr "Cash on delivery"
+
+msgid "购买、销售、发布和订单跟踪的实用解答。"
+msgstr ""
+"Practical answers for buying, selling, publishing and tracking orders."
+
+msgid "跟踪与问题"
+msgstr "Tracking & issues"
+
+msgid "违禁产品或冒犯性内容"
+msgstr "Prohibited products or offensive content"
+
+msgid "退款"
+msgstr "Refund"
+
+msgid "退款政策"
+msgstr "Refund Policy"
+
+msgid "退款条件"
+msgstr "Refund conditions"
+
+msgid "适用法律：刚果共和国"
+msgstr "Applicable law: Republic of Congo"
+
+msgid "选择合作伙伴类型"
+msgstr "Choose partner type"
+
+msgid "选择您的产品或服务"
+msgstr "Choose your product or service"
+
+msgid "通常时效：24 至 72 小时"
+msgstr "Typical timeframe: 24 to 72 hours"
+
+msgid "通用使用条款"
+msgstr "General terms of use"
+
+msgid "通过平台联系卖家"
+msgstr "Contact seller via platform"
+
+msgid "部分付款"
+msgstr "Partial payment"
+
+msgid "配送"
+msgstr "Delivery"
+
+msgid "配送与取货点"
+msgstr "Delivery & pickup points"
+
+msgid "针对 3G 及不稳定网络优化"
+msgstr "Optimized for 3G and unstable networks"
+
+msgid "链接"
+msgstr "links"
+
+msgid "隐私详情"
+msgstr "Privacy details"
+
+msgid "集成移动支付（KKiaPay、PawaPay）"
+msgstr "Integrated Mobile Money (KKiaPay, PawaPay)"
+
+msgid "需要帮助导航吗？"
+msgstr "Need help navigating?"
+
+msgid "非法、欺诈或误导性内容"
+msgstr "Illegal, fraudulent or misleading content"
+
+msgid "非洲"
+msgstr "Africa"
+
+msgid "页面"
+msgstr "Pages"
+
+msgid "高级统计 + 推广——低至 250 非洲法郎/月"
+msgstr "Advanced stats + promotion — from 250 CFA/month"
+
+msgid "官方认证"
+msgstr "Official"

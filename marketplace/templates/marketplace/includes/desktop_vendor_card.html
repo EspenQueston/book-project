@@ -1,0 +1,64 @@
+{% load i18n %}
+{% include 'marketplace/includes/seller_card_theme.html' %}
+{% if seller_vendor %}
+<div class="desk-seller-card{% if seller_vendor.is_official %} desk-seller-card--official{% endif %}{% if seller_card_variant == 'sidebar' %} desk-seller-card--sidebar{% endif %}">
+    <div class="desk-seller-card-inner">
+        <div class="d-flex align-items-center gap-3 w-100{% if seller_card_variant == 'sidebar' %} mb-1{% endif %}">
+            <div class="desk-seller-avatar">
+                {% if seller_vendor.get_logo_url %}
+                <img src="{{ seller_vendor.get_logo_url }}" alt="{{ seller_vendor.company_name }}">
+                {% else %}
+                {{ seller_vendor.company_name|first|upper }}
+                {% endif %}
+            </div>
+            <div class="desk-seller-body">
+                <div class="desk-seller-kicker">
+                    {% if seller_vendor.is_official %}{% trans "官方直营" %}{% else %}{% trans "销售店铺" %}{% endif %}
+                </div>
+                <a href="{% url 'manager:public_vendor_shop' seller_vendor.id %}" class="desk-seller-name">{{ seller_vendor.company_name }}</a>
+                <div class="desk-seller-meta">
+                    {% if seller_vendor.is_official %}
+                    <span class="desk-seller-badge-official"><i class="fas fa-badge-check"></i>{% trans "官方认证" %}</span>
+                    {% else %}
+                    <span class="verified"><i class="fas fa-shield-alt"></i> {% trans "认证商家" %}</span>
+                    {% endif %}
+                    {% if vendor_follower_count %}
+                    <span><i class="fas fa-users"></i> {{ vendor_follower_count }} {% trans "粉丝" %}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="desk-seller-actions">
+            <button type="button"
+                    class="vendor-follow-btn{% if is_following_vendor %} is-following{% endif %}"
+                    data-vendor-id="{{ seller_vendor.id }}"
+                    data-following="{% if is_following_vendor %}1{% else %}0{% endif %}"
+                    data-login-url="{% url 'manager:user_login' %}"
+                    aria-pressed="{% if is_following_vendor %}true{% else %}false{% endif %}">
+                <i class="fas {% if is_following_vendor %}fa-check{% else %}fa-plus{% endif %}"></i>
+                <span class="follow-btn-label"
+                      data-follow="{% trans '关注店铺' %}"
+                      data-following="{% trans '已关注' %}">
+                    {% if is_following_vendor %}{% trans "已关注" %}{% else %}{% trans "关注店铺" %}{% endif %}
+                </span>
+            </button>
+            <a href="{% url 'manager:public_vendor_shop' seller_vendor.id %}" class="desk-seller-link">
+                <i class="fas fa-store"></i> <span>{% trans "访问店铺" %}</span>
+            </a>
+            {% if seller_chat_url %}
+            <a href="{{ seller_chat_url }}" class="desk-seller-link primary">
+                <i class="fas fa-comment-dots"></i> <span>{% trans "联系卖家" %}</span>
+            </a>
+            {% elif listing_kind and listing_id %}
+            <a href="{% url 'manager:start_conversation' %}?item_type={{ listing_kind }}&item_id={{ listing_id }}{% if seller_item_name %}&subject={{ seller_item_name|urlencode }}{% endif %}" class="desk-seller-link primary">
+                <i class="fas fa-comment-dots"></i> <span>{% trans "联系卖家" %}</span>
+            </a>
+            {% elif seller_vendor %}
+            <a href="{% url 'manager:start_conversation' %}?vendor_id={{ seller_vendor.id }}{% if seller_item_name %}&subject={{ seller_item_name|urlencode }}{% endif %}" class="desk-seller-link primary">
+                <i class="fas fa-comment-dots"></i> <span>{% trans "联系卖家" %}</span>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}

@@ -56,36 +56,103 @@
     /* Search Bar */
     .blog-search {
         margin-top: 30px;
-        max-width: 500px;
+        max-width: 520px;
+        position: relative;
+        z-index: 2;
     }
 
-    .blog-search .input-group {
-        background: rgba(255,255,255,0.15);
+    .blog-search-bar {
+        display: flex;
+        align-items: stretch;
+        background: #fff;
         border-radius: 50px;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255,255,255,0.2);
         overflow: hidden;
+        box-shadow: 0 10px 32px rgba(15, 23, 42, 0.14);
     }
 
-    .blog-search input {
-        background: transparent;
+    .blog-search-field {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 18px;
+        min-width: 0;
+        margin: 0;
+    }
+
+    .blog-search-field i {
+        color: #667eea;
+        font-size: .95rem;
+        flex-shrink: 0;
+    }
+
+    .blog-search-bar input[type="search"] {
+        flex: 1;
+        border: none !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        color: #334155 !important;
+        padding: 14px 0 !important;
+        font-size: 1rem;
+        min-width: 0;
+        min-height: 0 !important;
+        box-shadow: none !important;
+        transform: none !important;
+    }
+
+    .blog-search-bar input[type="search"]::placeholder { color: #94a3b8; }
+    .blog-search-bar input[type="search"]:focus {
+        outline: none;
+        box-shadow: none !important;
+        transform: none !important;
+        background: transparent !important;
+    }
+
+    .blog-search-submit {
+        background: #fff;
         border: none;
-        color: #fff;
-        padding: 14px 25px;
+        border-left: 1px solid #e2e8f0;
+        color: #667eea;
+        padding: 10px 22px;
+        font-weight: 700;
+        border-radius: 0 !important;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .blog-search-submit:hover {
+        background: #f8faff;
+        color: #5568d3;
+    }
+
+    .blog-results-banner {
+        border-radius: 18px;
+        padding: 16px 20px;
+        margin-bottom: 22px;
+        background: linear-gradient(135deg, rgba(102,126,234,.08), rgba(118,75,162,.06));
+        border: 1px solid rgba(102,126,234,.14);
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .blog-results-banner h5 {
+        margin: 0;
+        color: #1e293b;
+        font-weight: 700;
         font-size: 1rem;
     }
 
-    .blog-search input::placeholder { color: rgba(255,255,255,0.7); }
-    .blog-search input:focus { box-shadow: none; color: #fff; background: transparent; }
-
-    .blog-search button {
-        background: #fff;
-        border: none;
+    .blog-clear-search {
         color: #667eea;
-        padding: 10px 25px;
         font-weight: 700;
-        border-radius: 0 50px 50px 0 !important;
+        text-decoration: none;
+        font-size: .88rem;
     }
+
+    .blog-clear-search:hover { color: #5568d3; }
 
     /* Featured Posts */
     .featured-section {
@@ -455,9 +522,9 @@
         .category-list a { padding: 8px 12px; font-size: 0.88rem; }
 
         /* Search bar */
-        .blog-search { margin-top: 20px; }
-        .blog-search input { padding: 12px 18px; font-size: 0.92rem; }
-        .blog-search button { padding: 8px 18px; }
+        .blog-search { margin-top: 20px; max-width: 100%; }
+        .blog-search-bar input[type="search"] { padding: 12px 0 !important; font-size: 0.92rem; }
+        .blog-search-submit { padding: 8px 16px; font-size: .85rem; }
     }
 
     /* Tablet: 2-column vertical cards */
@@ -525,6 +592,7 @@
         color: var(--text-secondary);
     }
 </style>
+{% include 'includes/hero_wave_divider_styles.html' %}
 {% endblock %}
 
 {% block content %}
@@ -541,11 +609,15 @@
                 <p>{% trans "探索我们的博客，获取图书推荐、阅读技巧、行业动态等精彩内容。" %}</p>
 
                 <div class="blog-search">
-                    <form method="get">
-                        <div class="input-group">
-                            <input type="text" name="search" value="{{ search_query }}" class="form-control" placeholder="{% trans '搜索文章...' %}">
-                            <button type="submit"><i class="fas fa-search me-1"></i>{% trans "搜索" %}</button>
+                    <form method="get" action="{% url 'manager:public_blog' %}" id="blogSearchForm">
+                        <div class="blog-search-bar">
+                            <label class="blog-search-field" for="blogSearchInput">
+                                <i class="fas fa-search" aria-hidden="true"></i>
+                                <input type="search" name="search" id="blogSearchInput" value="{{ search_query }}" placeholder="{% trans '搜索文章...' %}" autocomplete="off">
+                            </label>
+                            <button type="submit" class="blog-search-submit"><i class="fas fa-search me-1"></i>{% trans "搜索" %}</button>
                         </div>
+                        {% if current_category %}<input type="hidden" name="category" value="{{ current_category }}">{% endif %}
                     </form>
                 </div>
             </div>
@@ -554,6 +626,7 @@
             </div>
         </div>
     </div>
+    {% include 'includes/hero_wave_divider.html' with hero_divider_fill='#f8f9ff' %}
 </section>
 
 <!-- Featured Posts -->
@@ -597,17 +670,21 @@
 {% endif %}
 
 <!-- Blog Posts Grid -->
-<section class="blog-grid">
+<section class="blog-grid" id="blog-results">
     <div class="container">
         <div class="row g-4">
             <!-- Main Content -->
             <div class="col-lg-8">
                 {% if search_query %}
-                <div class="mb-4">
-                    <h5 style="color: #1a1a2e; font-weight: 600;">
-                        {% trans "搜索结果" %}: "{{ search_query }}"
-                        <small class="text-muted">({{ posts|length }} {% trans "篇文章" %})</small>
+                <div class="blog-results-banner" data-aos="fade-up">
+                    <h5>
+                        <i class="fas fa-search me-2 text-primary"></i>
+                        {% trans "搜索结果" %}: « {{ search_query }} »
+                        <small class="text-muted fw-normal">({{ results_count }} {% trans "篇文章" %})</small>
                     </h5>
+                    <a href="{% url 'manager:public_blog' %}{% if current_category %}?category={{ current_category }}{% endif %}" class="blog-clear-search">
+                        <i class="fas fa-times me-1"></i>{% trans "Effacer la recherche" %}
+                    </a>
                 </div>
                 {% endif %}
 
@@ -643,9 +720,17 @@
                 </div>
                 {% else %}
                 <div class="empty-blog">
-                    <i class="fas fa-newspaper d-block"></i>
+                    <i class="fas fa-{% if search_query %}search{% else %}newspaper{% endif %} d-block"></i>
+                    {% if search_query %}
+                    <h4>{% trans "Aucun article trouvé" %}</h4>
+                    <p class="text-muted">{% trans "Essayez d'autres mots-clés ou parcourez toutes les catégories." %}</p>
+                    <a href="{% url 'manager:public_blog' %}" class="btn btn-sm mt-2" style="background: linear-gradient(135deg, #667eea, #764ba2); color:#fff; border-radius:999px; padding:8px 18px; font-weight:700;">
+                        {% trans "Voir tous les articles" %}
+                    </a>
+                    {% else %}
                     <h4>{% trans "暂无文章" %}</h4>
                     <p class="text-muted">{% trans "敬请期待更多精彩内容" %}</p>
+                    {% endif %}
                 </div>
                 {% endif %}
             </div>
@@ -657,14 +742,14 @@
                     <h5><i class="fas fa-tags me-2"></i>{% trans "文章分类" %}</h5>
                     <ul class="category-list">
                         <li>
-                            <a href="{% url 'manager:public_blog' %}" {% if not current_category %}class="active"{% endif %}>
+                            <a href="{% url 'manager:public_blog' %}{% if search_query %}?search={{ search_query|urlencode }}{% endif %}" {% if not current_category %}class="active"{% endif %}>
                                 <span><i class="fas fa-th-large me-2"></i>{% trans "全部文章" %}</span>
-                                <span class="category-count">{{ posts|length }}</span>
+                                <span class="category-count">{{ total_posts_count }}</span>
                             </a>
                         </li>
                         {% for cat in categories %}
                         <li>
-                            <a href="?category={{ cat.slug }}" {% if current_category == cat.slug %}class="active"{% endif %}>
+                            <a href="?category={{ cat.slug }}{% if search_query %}&amp;search={{ search_query|urlencode }}{% endif %}" {% if current_category == cat.slug %}class="active"{% endif %}>
                                 <span><i class="{{ cat.icon }} me-2"></i>{{ cat.name }}</span>
                                 <span class="category-count">{{ cat.post_count }}</span>
                             </a>
@@ -679,20 +764,28 @@
                     <p style="color: #6c757d; line-height: 1.7; font-size: 0.92rem;">
                         {% trans "在这里，我们分享关于图书、阅读和技术的最新资讯。关注我们，获取更多精彩内容。" %}
                     </p>
-                    <div class="d-flex gap-2 mt-3">
-                        <a href="https://github.com/EspenQueston" target="_blank" rel="noopener noreferrer" class="btn btn-sm" style="background: #333; color: #fff; border-radius: 8px;">
-                            <i class="fab fa-github"></i>
-                        </a>
-                        <a href="https://www.facebook.com/poires.gomai" target="_blank" rel="noopener noreferrer" class="btn btn-sm" style="background: #1877f2; color: #fff; border-radius: 8px;">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-                        <a href="https://wa.me/8613520646854" target="_blank" rel="noopener noreferrer" class="btn btn-sm" style="background: #25d366; color: #fff; border-radius: 8px;">
-                            <i class="fab fa-whatsapp"></i>
-                        </a>
+                    <div class="d-flex gap-2 mt-3 flex-wrap">
+                        {% include 'includes/social_links_blog.html' %}
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('search') || params.get('q')) {
+        var results = document.getElementById('blog-results');
+        if (results) {
+            window.requestAnimationFrame(function() {
+                results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        }
+    }
+})();
+</script>
 {% endblock %}

@@ -1,0 +1,33 @@
+{% load i18n %}
+<section class="duno-section" id="mission">
+    <h2><span class="sec-icon"><i class="fas fa-rocket"></i></span>{% trans "我们的使命" %}</h2>
+    <p>{% trans "DUNO 360 将卖家、创业者和消费者连接在一个简单、快速、易用的生态系统中。我们促进本地贸易，提升企业曝光度，加速非洲数字化转型。" %}</p>
+</section>
+
+<section class="duno-section" id="plateforme">
+    <h2><span class="sec-icon"><i class="fas fa-store"></i></span>{% trans "什么是 DUNO 360？" %}</h2>
+    <div class="duno-cards-grid">
+        <div class="duno-mini-card"><i class="fas fa-shopping-bag"></i><h4>{% trans "综合市场" %}</h4><p>{% trans "买卖产品、发布广告。" %}</p></div>
+        <div class="duno-mini-card"><i class="fas fa-graduation-cap"></i><h4>{% trans "培训课程" %}</h4><p>{% trans "分享知识和在线课程。" %}</p></div>
+        <div class="duno-mini-card"><i class="fas fa-basket-shopping"></i><h4>{% trans "超市" %}</h4><p>{% trans "商户、批发商和手工艺人。" %}</p></div>
+        <div class="duno-mini-card"><i class="fas fa-book"></i><h4>{% trans "图书" %}</h4><p>{% trans "数字目录与出版社。" %}</p></div>
+    </div>
+</section>
+
+<section class="duno-section" id="afrique">
+    <h2><span class="sec-icon"><i class="fas fa-mobile-screen"></i></span>{% trans "为非洲而生" %}</h2>
+    <ul>
+        <li>{% trans "针对 3G 及不稳定网络优化" %}</li>
+        <li>{% trans "集成移动支付（KKiaPay、PawaPay）" %}</li>
+        <li>{% trans "按城市和街区组织" %}</li>
+        <li>{% trans "按区设置取货点" %}</li>
+    </ul>
+</section>
+
+<section class="duno-section" id="vision">
+    <h2><span class="sec-icon"><i class="fas fa-eye"></i></span>{% trans "愿景与信任" %}</h2>
+    <p>{% trans "我们相信每位创业者都能在线销售，数字化将成为经济增长的杠杆。DUNO 360 致力于成为非洲数字商务的参考平台。" %}</p>
+    <div class="duno-highlight"><i class="fas fa-map-marker-alt me-2"></i>{% trans "立足刚果共和国，放眼国际扩展。" %}</div>
+</section>
+
+{% include 'includes/home_faq_section.html' %}

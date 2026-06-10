@@ -1,0 +1,110 @@
+{% load i18n %}
+
+<div class="duno-legal-summary duno-section visible" id="confidentialite">
+    <div class="duno-legal-summary-label">
+        <i class="fas fa-shield-halved"></i>{% trans "概要" %}
+    </div>
+    <p>{% trans "DUNO 360 平台承诺保护用户（客户、卖家、访客）的个人数据。本政策说明我们如何收集、使用和保护您的数据。" %}</p>
+</div>
+
+<section class="duno-section duno-section-legal visible" aria-label="{% trans '隐私详情' %}">
+    <details class="duno-acc-item" id="donnees-collectees" open>
+        <summary class="duno-acc-head">
+            <span class="duno-acc-icon"><i class="fas fa-database"></i></span>
+            {% trans "收集的数据" %}
+        </summary>
+        <div class="duno-acc-body">
+            <div class="duno-cards-grid-legal">
+                <div class="duno-data-card">
+                    <i class="fas fa-user"></i>
+                    <h4>{% trans "个人数据" %}</h4>
+                    <p>{% trans "姓名、电话、邮箱、地址（城市、街区、省份）。" %}</p>
+                </div>
+                <div class="duno-data-card">
+                    <i class="fas fa-id-card"></i>
+                    <h4>{% trans "账户数据" %}</h4>
+                    <p>{% trans "登录凭证、账户类型、活动历史。" %}</p>
+                </div>
+                <div class="duno-data-card">
+                    <i class="fas fa-store"></i>
+                    <h4>{% trans "商业数据" %}</h4>
+                    <p>{% trans "产品、价格、描述、图片、评价和评论。" %}</p>
+                </div>
+                <div class="duno-data-card">
+                    <i class="fas fa-wallet"></i>
+                    <h4>{% trans "支付数据" %}</h4>
+                    <p>{% trans "移动支付交易及支付历史。" %}</p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <details class="duno-acc-item" id="utilisation-donnees">
+        <summary class="duno-acc-head">
+            <span class="duno-acc-icon"><i class="fas fa-gears"></i></span>
+            {% trans "数据使用" %}
+        </summary>
+        <div class="duno-acc-body">
+            <ul class="duno-section-list">
+                <li>{% trans "提供 DUNO 360 服务" %}</li>
+                <li>{% trans "管理订单和交易" %}</li>
+                <li>{% trans "改善用户体验" %}</li>
+                <li>{% trans "发送通知（优惠、促销、新消息）" %}</li>
+                <li>{% trans "保障安全并防范欺诈" %}</li>
+            </ul>
+        </div>
+    </details>
+
+    <details class="duno-acc-item" id="partage-donnees">
+        <summary class="duno-acc-head">
+            <span class="duno-acc-icon"><i class="fas fa-share-nodes"></i></span>
+            {% trans "数据共享" %}
+        </summary>
+        <div class="duno-acc-body">
+            <p>{% trans "您的数据可能会与其他用户（卖家公开信息）、支付合作伙伴、技术服务提供商共享，或在法律要求的情况下共享。" %}</p>
+            <div class="duno-highlight-legal"><i class="fas fa-check-circle me-2"></i>{% trans "DUNO 360 不出售任何个人数据。" %}</div>
+        </div>
+    </details>
+
+    <details class="duno-acc-item" id="securite-conservation">
+        <summary class="duno-acc-head">
+            <span class="duno-acc-icon"><i class="fas fa-lock"></i></span>
+            {% trans "安全与保存" %}
+        </summary>
+        <div class="duno-acc-body">
+            <ul class="duno-section-list">
+                <li>{% trans "敏感数据加密" %}</li>
+                <li>{% trans "安全身份验证" %}</li>
+                <li>{% trans "在账户活跃期间或根据法律义务保存" %}</li>
+            </ul>
+        </div>
+    </details>
+
+    <details class="duno-acc-item" id="vos-droits">
+        <summary class="duno-acc-head">
+            <span class="duno-acc-icon"><i class="fas fa-user-shield"></i></span>
+            {% trans "您的权利" %}
+        </summary>
+        <div class="duno-acc-body">
+            <ul class="duno-section-list">
+                <li>{% trans "访问并修改您的数据" %}</li>
+                <li>{% trans "删除您的账户" %}</li>
+                <li>{% trans "反对某些数据处理" %}</li>
+            </ul>
+            <a href="{% url 'manager:public_contact' %}" class="duno-legal-contact">
+                <i class="fas fa-envelope"></i>{% trans "行使您的权利" %}
+            </a>
+        </div>
+    </details>
+
+    <details class="duno-acc-item" id="cookies" data-single="false">
+        <summary class="duno-acc-head">
+            <span class="duno-acc-icon"><i class="fas fa-cookie-bite"></i></span>
+            {% trans "Cookie" %}
+        </summary>
+        <div class="duno-acc-body">
+            <p>{% trans "DUNO 360 使用 Cookie 改善浏览体验、分析使用情况并个性化内容。" %}</p>
+            <p class="mb-0"><i class="fas fa-envelope me-2" style="color:#667eea;"></i><strong>{% trans "联系" %}:</strong> {{ PLATFORM_CONTACT_EMAIL|default:"contact@duno360.com" }}</p>
+        </div>
+    </details>
+</section>

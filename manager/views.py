@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.http import JsonResponse, HttpResponse, HttpResponseNotAllowed, FileResponse, Http404
 from django.contrib import messages
 from django.db import transaction
@@ -38,6 +39,7 @@ from marketplace.utils import (
     normalize_selected_attributes,
     validate_selected_attributes,
 )
+from marketplace.pricing_rules import validate_quantity
 from book_Project.payment_config import build_payment_options
 import hashlib
 import logging
@@ -359,6 +361,15 @@ def add_book(request):
             authors = models.Author.objects.filter(id__in=author_ids)
             for author in authors:
                 author.book.add(book)
+
+        from manager.official_store import get_official_vendor
+        official = get_official_vendor(create=True)
+        if official:
+            models.VendorBook.objects.get_or_create(
+                vendor=official,
+                book=book,
+                defaults={'vendor_price': book.price, 'is_active': True},
+            )
         
         # 3重定向到图书列表页面
         return redirect('/manager/book_list/')
@@ -541,185 +552,229 @@ def delete_author(request):
 # ====================   PUBLIC USER INTERFACE  ===========================
 
 
-def _build_best_deals_feed(max_items=24):
-    """Build a balanced mobile rail: best sellers, best prices, and newest items."""
-    cache_key = f'home:best_deals:v2:{max_items}'
+def _build_trending_feed(max_items=24):
+    """Trending carousel: top sellers (30d), new listings (30d), most wishlisted."""
+    since = timezone.now() - timedelta(days=30)
+    cache_key = f'home:trending:v1:{max_items}:{since.date().isoformat()}'
     cached = cache.get(cache_key)
     if cached:
         return cached
 
-    buckets = {'hot': [], 'deal': [], 'new': []}
-    seen = set()
+    tag_rank = {'hot': 3, 'fav': 2, 'new': 1}
+    items = {}
 
-    def _latest_order(qs):
-        for field in ('created_at', 'created', 'published_at', 'id'):
-            try:
-                qs.model._meta.get_field(field)
-                return qs.order_by(f'-{field}')
-            except Exception:
-                continue
-        return qs.order_by('-pk')
-
-    def push(item_type, pk, name, price, image_url, detail_url, tag, rank_score=0):
-        key = (item_type, pk)
-        if key in seen:
-            return
-        if tag not in buckets:
-            tag = 'hot'
-        seen.add(key)
-        buckets[tag].append({
+    def upsert(item_type, pk, name, price, image_url, detail_url, tag, score):
+        key = (item_type, int(pk))
+        entry = {
             'item_type': item_type,
             'name': name,
             'price': str(price) if price is not None else '0',
             'image_url': image_url or '/static/img/default_cover.png',
             'detail_url': detail_url,
             'tag': tag,
-            'rank_score': int(rank_score or 0),
-        })
+            'rank_score': int(score or 0),
+        }
+        existing = items.get(key)
+        if not existing:
+            items[key] = entry
+            return
+        if tag_rank.get(tag, 0) > tag_rank.get(existing['tag'], 0):
+            existing['tag'] = tag
+        existing['rank_score'] = max(existing['rank_score'], int(score or 0))
+
+    paid_book_statuses = ['paid', 'confirmed', 'processing', 'shipped', 'delivered']
+    paid_mkt_statuses = ['paid', 'processing', 'shipped', 'delivered']
+    per_bucket = max(8, max_items // 3)
 
     try:
-        from marketplace.models import Product, Course, SupermarketItem
+        book_sales = models.OrderItem.objects.filter(
+            order__created_at__gte=since,
+            order__payment_status='completed',
+            order__status__in=paid_book_statuses,
+            book__is_active=True,
+        ).values('book_id').annotate(sold=Sum('quantity')).order_by('-sold')[:per_bucket]
+        book_ids = [row['book_id'] for row in book_sales]
+        books = {b.id: b for b in models.Book.objects.filter(id__in=book_ids)}
+        for row in book_sales:
+            b = books.get(row['book_id'])
+            if b:
+                upsert('book', b.id, b.name, b.price, b.get_cover_url(), f'/manager/public/books/{b.id}/', 'hot', row['sold'])
 
-        # HOT: most sold / most enrolled.
-        for b in models.Book.objects.filter(is_active=True).order_by('-sale_num')[:14]:
-            push('book', b.id, b.name, b.price, b.get_cover_url(), f'/manager/public/books/{b.id}/', 'hot', b.sale_num)
-        for p in Product.objects.filter(is_active=True).order_by('-sales_count')[:14]:
-            push('product', p.id, p.name, p.price, p.get_image_url(), f'/marketplace/products/{p.slug}/', 'hot', p.sales_count)
-        for c in Course.objects.filter(is_active=True).order_by('-enrollment_count')[:14]:
-            push('course', c.id, c.title, c.price, c.get_image_url(), f'/marketplace/courses/{c.slug}/', 'hot', c.enrollment_count)
-        for si in SupermarketItem.objects.filter(is_active=True).order_by('-sales_count')[:14]:
-            push('supermarket', si.id, si.name, si.price, si.get_image_url(), f'/marketplace/supermarket/{si.slug}/', 'hot', si.sales_count)
+        marketplace_sales = MarketplaceOrderItem.objects.filter(
+            order__created_at__gte=since,
+            order__payment_status='completed',
+            order__status__in=paid_mkt_statuses,
+        ).values('item_type', 'item_id').annotate(sold=Sum('quantity')).order_by('-sold')[:per_bucket * 3]
+        product_ids = [row['item_id'] for row in marketplace_sales if row['item_type'] == 'product']
+        course_ids = [row['item_id'] for row in marketplace_sales if row['item_type'] == 'course']
+        supermarket_ids = [row['item_id'] for row in marketplace_sales if row['item_type'] == 'supermarket']
+        products = {p.id: p for p in Product.objects.filter(id__in=product_ids, is_active=True)}
+        courses = {c.id: c for c in Course.objects.filter(id__in=course_ids, is_active=True)}
+        supermarket_items = {s.id: s for s in SupermarketItem.objects.filter(id__in=supermarket_ids, is_active=True)}
+        for row in marketplace_sales:
+            if row['item_type'] == 'product':
+                item = products.get(row['item_id'])
+                if item:
+                    upsert('product', item.id, item.name, item.price, item.get_image_url(), f'/marketplace/products/{item.slug}/', 'hot', row['sold'])
+            elif row['item_type'] == 'course':
+                item = courses.get(row['item_id'])
+                if item:
+                    upsert('course', item.id, item.title, item.price, item.get_image_url(), f'/marketplace/courses/{item.slug}/', 'hot', row['sold'])
+            elif row['item_type'] == 'supermarket':
+                item = supermarket_items.get(row['item_id'])
+                if item:
+                    upsert('supermarket', item.id, item.name, item.price, item.get_image_url(), f'/marketplace/supermarket/{item.slug}/', 'hot', row['sold'])
 
-        # DEAL: lowest prices, but keep only active purchasable items.
-        for b in models.Book.objects.filter(is_active=True, price__gt=0).order_by('price')[:14]:
-            push('book', b.id, b.name, b.price, b.get_cover_url(), f'/manager/public/books/{b.id}/', 'deal')
-        for p in Product.objects.filter(is_active=True, price__gt=0).order_by('price')[:14]:
-            push('product', p.id, p.name, p.price, p.get_image_url(), f'/marketplace/products/{p.slug}/', 'deal')
-        for c in Course.objects.filter(is_active=True, price__gt=0).order_by('price')[:14]:
-            push('course', c.id, c.title, c.price, c.get_image_url(), f'/marketplace/courses/{c.slug}/', 'deal')
-        for si in SupermarketItem.objects.filter(is_active=True, price__gt=0).order_by('price')[:14]:
-            push('supermarket', si.id, si.name, si.price, si.get_image_url(), f'/marketplace/supermarket/{si.slug}/', 'deal')
+        recent_book_ids = models.VendorBook.objects.filter(
+            created_at__gte=since, is_active=True, book__is_active=True,
+        ).order_by('-created_at').values_list('book_id', flat=True)[:per_bucket]
+        for b in models.Book.objects.filter(id__in=list(recent_book_ids)):
+            upsert('book', b.id, b.name, b.price, b.get_cover_url(), f'/manager/public/books/{b.id}/', 'new', 1)
+        for p in Product.objects.filter(is_active=True, created_at__gte=since).order_by('-created_at')[:per_bucket]:
+            upsert('product', p.id, p.name, p.price, p.get_image_url(), f'/marketplace/products/{p.slug}/', 'new', 1)
+        for c in Course.objects.filter(is_active=True, created_at__gte=since).order_by('-created_at')[:per_bucket]:
+            upsert('course', c.id, c.title, c.price, c.get_image_url(), f'/marketplace/courses/{c.slug}/', 'new', 1)
+        for s in SupermarketItem.objects.filter(is_active=True, created_at__gte=since).order_by('-created_at')[:per_bucket]:
+            upsert('supermarket', s.id, s.name, s.price, s.get_image_url(), f'/marketplace/supermarket/{s.slug}/', 'new', 1)
 
-        # NEW: recent inventory additions.
-        for b in _latest_order(models.Book.objects.filter(is_active=True))[:14]:
-            push('book', b.id, b.name, b.price, b.get_cover_url(), f'/manager/public/books/{b.id}/', 'new')
-        for p in _latest_order(Product.objects.filter(is_active=True))[:14]:
-            push('product', p.id, p.name, p.price, p.get_image_url(), f'/marketplace/products/{p.slug}/', 'new')
-        for c in _latest_order(Course.objects.filter(is_active=True))[:14]:
-            push('course', c.id, c.title, c.price, c.get_image_url(), f'/marketplace/courses/{c.slug}/', 'new')
-        for si in _latest_order(SupermarketItem.objects.filter(is_active=True))[:14]:
-            push('supermarket', si.id, si.name, si.price, si.get_image_url(), f'/marketplace/supermarket/{si.slug}/', 'new')
-    except Exception:
-        pass
+        book_favs = models.Wishlist.objects.filter(
+            item_type='book', book__is_active=True,
+        ).values('book_id').annotate(fav_count=Count('id')).order_by('-fav_count')[:per_bucket]
+        fav_book_ids = [row['book_id'] for row in book_favs if row['book_id']]
+        fav_books = {b.id: b for b in models.Book.objects.filter(id__in=fav_book_ids)}
+        for row in book_favs:
+            b = fav_books.get(row['book_id'])
+            if b:
+                upsert('book', b.id, b.name, b.price, b.get_cover_url(), f'/manager/public/books/{b.id}/', 'fav', row['fav_count'])
 
-    # Keep each bucket internally sorted (hot by score desc, deal/new keep query order).
-    buckets['hot'].sort(key=lambda x: x.get('rank_score', 0), reverse=True)
+        mkt_favs = models.Wishlist.objects.exclude(item_type='book').filter(
+            item_id__isnull=False,
+        ).values('item_type', 'item_id').annotate(fav_count=Count('id')).order_by('-fav_count')[:per_bucket * 3]
+        fav_product_ids = [row['item_id'] for row in mkt_favs if row['item_type'] == 'product']
+        fav_course_ids = [row['item_id'] for row in mkt_favs if row['item_type'] == 'course']
+        fav_super_ids = [row['item_id'] for row in mkt_favs if row['item_type'] == 'supermarket']
+        fav_products = {p.id: p for p in Product.objects.filter(id__in=fav_product_ids, is_active=True)}
+        fav_courses = {c.id: c for c in Course.objects.filter(id__in=fav_course_ids, is_active=True)}
+        fav_super = {s.id: s for s in SupermarketItem.objects.filter(id__in=fav_super_ids, is_active=True)}
+        for row in mkt_favs:
+            if row['item_type'] == 'product':
+                item = fav_products.get(row['item_id'])
+                if item:
+                    upsert('product', item.id, item.name, item.price, item.get_image_url(), f'/marketplace/products/{item.slug}/', 'fav', row['fav_count'])
+            elif row['item_type'] == 'course':
+                item = fav_courses.get(row['item_id'])
+                if item:
+                    upsert('course', item.id, item.title, item.price, item.get_image_url(), f'/marketplace/courses/{item.slug}/', 'fav', row['fav_count'])
+            elif row['item_type'] == 'supermarket':
+                item = fav_super.get(row['item_id'])
+                if item:
+                    upsert('supermarket', item.id, item.name, item.price, item.get_image_url(), f'/marketplace/supermarket/{item.slug}/', 'fav', row['fav_count'])
+    except Exception as exc:
+        logger.warning(f'Failed to build trending feed: {exc}')
 
-    merged = []
-    ptr = {'hot': 0, 'deal': 0, 'new': 0}
-    order = ('hot', 'deal', 'new', 'hot', 'new', 'deal')
-    while len(merged) < max_items:
-        progressed = False
-        for tag in order:
-            lst = buckets[tag]
-            i = ptr[tag]
-            if i < len(lst):
-                merged.append(lst[i])
-                ptr[tag] = i + 1
-                progressed = True
-                if len(merged) >= max_items:
-                    break
-        if not progressed:
-            break
-
-    cache.set(cache_key, merged, 300)
-    return merged
+    trending = list(items.values())
+    trending.sort(key=lambda x: (tag_rank.get(x['tag'], 0), x['rank_score']), reverse=True)
+    trending = trending[:max_items]
+    cache.set(cache_key, trending, 300)
+    return trending
 
 
 def public_home(request):
     """Public homepage with platform statistics and featured content."""
-    from django.utils import translation
-    lang = translation.get_language() or 'zh-hans'
-    cache_key = f'public_home:ctx:v5:{lang}'
-    ctx = cache.get(cache_key)
-    if ctx is None:
-        book_count = models.Book.objects.filter(is_active=True).count()
-        author_count = models.Author.objects.count()
-        publisher_count = models.Publisher.objects.count()
+    book_count = models.Book.objects.filter(is_active=True).count()
+    author_count = models.Author.objects.count()
+    publisher_count = models.Publisher.objects.count()
+    user_count = models.SiteUser.objects.filter(is_active=True).count()
 
-        featured_products = []
-        featured_courses = []
-        flash_sales = []
-        flash_sale_end = None
-        try:
-            from marketplace.models import Product, Course, SupermarketItem, FlashSale
-            from django.utils import timezone as tz
-            product_count = Product.objects.filter(is_active=True).count()
-            course_count = Course.objects.filter(is_active=True).count()
-            vendor_count = models.Vendor.objects.filter(is_active=True).count()
-            featured_products = list(
-                _annotate_product_delivered(
-                    Product.objects.filter(is_active=True).select_related('category')
-                ).order_by('-sold_delivered', '-sales_count')[:6]
-            )
-            featured_courses = list(
-                _annotate_course_delivered(Course.objects.filter(is_active=True)).order_by(
-                    '-sold_delivered', '-enrollment_count'
-                )[:6]
-            )
-            recent_products = list(
-                Product.objects.filter(is_active=True).select_related('category').order_by('-id')[:4]
-            )
-            recent_courses = list(
-                Course.objects.filter(is_active=True).order_by('-id')[:4]
-            )
-            now = tz.now()
-            flash_sales = list(FlashSale.objects.filter(
-                is_active=True, start_time__lte=now, end_time__gte=now
-            ).select_related('product', 'course', 'supermarket_item').order_by('end_time')[:10])
-            if flash_sales:
-                flash_sale_end = flash_sales[0].end_time
-        except Exception:
-            product_count = 0
-            course_count = 0
-            vendor_count = 0
-            recent_products = []
-            recent_courses = []
-
-        featured_books = list(
-            _annotate_book_delivered(
-                models.Book.objects.filter(is_active=True).select_related('publisher', 'category')
-            ).order_by('-sold_delivered', '-sale_num')[:6]
+    featured_products = []
+    featured_courses = []
+    flash_sales = []
+    flash_sale_end = None
+    search_categories = []
+    try:
+        from marketplace.models import Category, Product, Course, SupermarketItem, FlashSale
+        from django.utils import timezone as tz
+        product_count = Product.objects.filter(is_active=True).count()
+        course_count = Course.objects.filter(is_active=True).count()
+        supermarket_product_count = SupermarketItem.objects.filter(is_active=True).count()
+        vendor_count = models.Vendor.objects.filter(is_active=True).count()
+        total_orders_count = models.Order.objects.count()
+        featured_products = list(
+            _annotate_product_delivered(
+                Product.objects.filter(is_active=True).select_related('category')
+            ).order_by('-sold_delivered', '-sales_count')[:6]
         )
-        recent_books = list(
-            _annotate_book_delivered(
-                models.Book.objects.filter(is_active=True).select_related('publisher', 'category')
-            ).order_by('-id')[:8]
+        featured_courses = list(
+            _annotate_course_delivered(Course.objects.filter(is_active=True)).order_by(
+                '-sold_delivered', '-enrollment_count'
+            )[:6]
         )
-        book_categories = list(models.BookCategory.objects.filter(is_active=True, parent__isnull=True)[:12])
-        latest_blogs = list(models.BlogPost.objects.filter(status='published').order_by('-created_at')[:3])
-        best_deals = _build_best_deals_feed(24)
+        recent_products = list(
+            Product.objects.filter(is_active=True).select_related('category').order_by('-id')[:4]
+        )
+        recent_courses = list(
+            Course.objects.filter(is_active=True).order_by('-id')[:4]
+        )
+        now = tz.now()
+        flash_sales = list(FlashSale.objects.filter(
+            is_active=True, start_time__lte=now, end_time__gte=now
+        ).select_related('product', 'course', 'supermarket_item').order_by('end_time')[:10])
+        if flash_sales:
+            flash_sale_end = flash_sales[0].end_time
+        search_categories = list(
+            Category.objects.filter(is_active=True, section='products', parent__isnull=True)
+            .order_by('display_order', 'name')
+            .values('name', 'slug')
+        )
+    except Exception:
+        product_count = 0
+        course_count = 0
+        supermarket_product_count = 0
+        vendor_count = 0
+        total_orders_count = models.Order.objects.count()
+        recent_products = []
+        recent_courses = []
 
-        ctx = {
-            'book_count': book_count,
-            'author_count': author_count,
-            'publisher_count': publisher_count,
-            'product_count': product_count,
-            'course_count': course_count,
-            'vendor_count': vendor_count,
-            'featured_books': featured_books,
-            'featured_products': featured_products,
-            'featured_courses': featured_courses,
-            'recent_books': recent_books,
-            'recent_products': recent_products,
-            'recent_courses': recent_courses,
-            'book_categories': book_categories,
-            'flash_sales': flash_sales,
-            'flash_sale_end': flash_sale_end,
-            'latest_blogs': latest_blogs,
-            'best_deals': best_deals,
-        }
-        cache.set(cache_key, ctx, 600)
+    featured_books = list(
+        _annotate_book_delivered(
+            models.Book.objects.filter(is_active=True).select_related('publisher', 'category')
+        ).order_by('-sold_delivered', '-sale_num')[:6]
+    )
+    recent_books = list(
+        _annotate_book_delivered(
+            models.Book.objects.filter(is_active=True).select_related('publisher', 'category')
+        ).order_by('-id')[:8]
+    )
+    book_categories = list(models.BookCategory.objects.filter(is_active=True, parent__isnull=True)[:12])
+    latest_blogs = list(models.BlogPost.objects.filter(status='published').order_by('-created_at')[:3])
+    trending_items = _build_trending_feed(24)
+
+    total_catalog_items = book_count + product_count + course_count + supermarket_product_count + author_count + publisher_count + vendor_count + user_count
+
+    ctx = {
+        'book_count': book_count,
+        'author_count': author_count,
+        'publisher_count': publisher_count,
+        'product_count': product_count,
+        'course_count': course_count,
+        'supermarket_product_count': supermarket_product_count,
+        'total_catalog_items': total_catalog_items,
+        'vendor_count': vendor_count,
+        'user_count': user_count,
+        'total_orders_count': total_orders_count,
+        'featured_books': featured_books,
+        'featured_products': featured_products,
+        'featured_courses': featured_courses,
+        'recent_books': recent_books,
+        'recent_products': recent_products,
+        'recent_courses': recent_courses,
+        'book_categories': book_categories,
+        'flash_sales': flash_sales,
+        'flash_sale_end': flash_sale_end,
+        'latest_blogs': latest_blogs,
+        'trending_items': trending_items,
+        'search_categories': search_categories,
+    }
 
     return render(request, 'public/home.html', ctx)
 
@@ -1254,8 +1309,9 @@ def public_my_profile(request):
     ).select_related('publisher')[:20]
     wishlist_items = _build_user_wishlist_items(user)
 
-    # Auto-follow admin vendor (first vendor or create placeholder)
-    admin_vendor = models.Vendor.objects.filter(is_active=True).order_by('id').first()
+    # Auto-follow official Duno360 store
+    from manager.official_store import get_official_vendor
+    admin_vendor = get_official_vendor(create=True)
     if admin_vendor and not models.UserFollowedVendor.objects.filter(user=user, vendor=admin_vendor).exists():
         models.UserFollowedVendor.objects.create(user=user, vendor=admin_vendor)
         followed_vendors = models.UserFollowedVendor.objects.filter(user=user).select_related('vendor')[:20]
@@ -1370,6 +1426,16 @@ def follow_vendor(request, vendor_id):
         if not created:
             follow_obj.delete()
             return JsonResponse({'success': True, 'following': False, 'message': f'已取消关注 {vendor.company_name}'})
+        create_vendor_notification(
+            vendor.id,
+            'new_follower',
+            f'{user.name} follows your shop',
+            f'{user.name} ({user.email}) started following {vendor.company_name}.',
+            icon='fas fa-user-plus',
+            color='#8b5cf6',
+            link='/manager/vendor/dashboard/',
+            related_id=follow_obj.id,
+        )
         return JsonResponse({'success': True, 'following': True, 'message': f'已关注 {vendor.company_name}'})
     except models.Vendor.DoesNotExist:
         return JsonResponse({'success': False, 'message': '卖家不存在'}, status=404)
@@ -1509,14 +1575,37 @@ def public_book_detail(request, book_id):
     # Find the vendor selling this book (if any)
     vendor_book = models.VendorBook.objects.filter(book=book, is_active=True).select_related('vendor').first()
     book_vendor = vendor_book.vendor if vendor_book else None
+    if not book_vendor:
+        from manager.official_store import get_official_vendor
+        book_vendor = get_official_vendor(create=True)
 
     from marketplace.review_service import reviews_for_listing, review_summary
+
+    is_following_vendor = False
+    is_following_publisher = False
+    vendor_follower_count = 0
+    user_id = request.session.get('site_user_id')
+    if book_vendor:
+        vendor_follower_count = models.UserFollowedVendor.objects.filter(vendor=book_vendor).count()
+        if user_id:
+            is_following_vendor = models.UserFollowedVendor.objects.filter(
+                user_id=user_id, vendor=book_vendor
+            ).exists()
+    if user_id:
+        is_following_publisher = models.UserFollowedShop.objects.filter(
+            user_id=user_id, publisher=book.publisher
+        ).exists()
+    publisher_follower_count = models.UserFollowedShop.objects.filter(publisher=book.publisher).count()
 
     context = {
         'book': book,
         'authors': authors,
         'related_books': related_books,
         'book_vendor': book_vendor,
+        'is_following_vendor': is_following_vendor,
+        'is_following_publisher': is_following_publisher,
+        'vendor_follower_count': vendor_follower_count,
+        'publisher_follower_count': publisher_follower_count,
         'sold_delivered': book.get_units_sold_delivered(),
         'listing_reviews_preview': list(reviews_for_listing('book', book.pk)[:3]),
         'listing_review_summary': review_summary('book', book.pk),
@@ -1607,16 +1696,24 @@ def public_publisher_detail(request, publisher_id):
     """Public publisher detail view"""
     publisher = get_object_or_404(models.Publisher, id=publisher_id)
     books = models.Book.objects.filter(publisher=publisher).order_by('name')
-    
+
     # Calculate statistics
     total_sales = sum(book.sale_num for book in books)
     total_inventory = sum(book.inventory for book in books)
     avg_price = sum(book.price for book in books) / len(books) if books else 0
     total_revenue = sum(book.price * book.sale_num for book in books)
-    
+
     # Count unique authors
     author_count = models.Author.objects.filter(book__publisher=publisher).distinct().count()
-    
+
+    is_following_publisher = False
+    publisher_follower_count = models.UserFollowedShop.objects.filter(publisher=publisher).count()
+    user_id = request.session.get('site_user_id')
+    if user_id:
+        is_following_publisher = models.UserFollowedShop.objects.filter(
+            user_id=user_id, publisher=publisher
+        ).exists()
+
     context = {
         'publisher': publisher,
         'books': books,
@@ -1625,6 +1722,8 @@ def public_publisher_detail(request, publisher_id):
         'avg_price': avg_price,
         'total_revenue': total_revenue,
         'author_count': author_count,
+        'is_following_publisher': is_following_publisher,
+        'publisher_follower_count': publisher_follower_count,
     }
     return render(request, 'public/publisher_detail.html', context)
 
@@ -1696,6 +1795,7 @@ def _build_unified_cart(session_key):
                 'cart_item': ci,
                 'selected_attributes': ci.selected_attributes or {},
                 'selected_attribute_list': ci.get_selected_attributes_display(),
+                'pricing_rule_log': ci.pricing_rule_log or {},
             })
 
     return items
@@ -1767,8 +1867,12 @@ def add_marketplace_item_to_cart(request):
             return JsonResponse({'success': False, 'message': '商品不存在或已下架'})
 
         # Validate stock
-        if item_type in ('product', 'supermarket') and quantity > item.stock:
-            return JsonResponse({'success': False, 'message': f'库存不足！当前库存：{item.stock}'})
+        if item_type in ('product', 'supermarket'):
+            qty_check = validate_quantity(item, quantity)
+            if not qty_check.is_valid:
+                return JsonResponse({'success': False, 'message': qty_check.message, 'suggested_quantity': qty_check.suggested_quantity})
+            if quantity > item.stock:
+                return JsonResponse({'success': False, 'message': f'库存不足！当前库存：{item.stock}'})
         if item_type == 'course':
             quantity = 1
 
@@ -1804,8 +1908,12 @@ def add_marketplace_item_to_cart(request):
             if item_type == 'course':
                 return JsonResponse({'success': False, 'message': '该课程已在购物车中'})
             new_qty = cart_item.quantity + quantity
-            if item_type in ('product', 'supermarket') and new_qty > item.stock:
-                return JsonResponse({'success': False, 'message': f'库存不足！购物车已有{cart_item.quantity}件'})
+            if item_type in ('product', 'supermarket'):
+                qty_check = validate_quantity(item, new_qty)
+                if not qty_check.is_valid:
+                    return JsonResponse({'success': False, 'message': qty_check.message, 'suggested_quantity': qty_check.suggested_quantity})
+                if new_qty > item.stock:
+                    return JsonResponse({'success': False, 'message': f'库存不足！购物车已有{cart_item.quantity}件'})
             cart_item.quantity = new_qty
             cart_item.save()
 
@@ -1877,8 +1985,12 @@ def update_cart(request):
                 return JsonResponse({'success': False, 'message': '商品不在购物车中'})
 
             item = cart_item.get_item()
-            if item_type in ('product', 'supermarket') and item and quantity > item.stock:
-                return JsonResponse({'success': False, 'message': f'库存不足！最大可购买：{item.stock}'})
+            if quantity > 0 and item_type in ('product', 'supermarket') and item:
+                qty_check = validate_quantity(item, quantity)
+                if not qty_check.is_valid:
+                    return JsonResponse({'success': False, 'message': qty_check.message, 'suggested_quantity': qty_check.suggested_quantity})
+                if quantity > item.stock:
+                    return JsonResponse({'success': False, 'message': f'库存不足！最大可购买：{item.stock}'})
             
             item_name = cart_item.get_item_name()
             if quantity <= 0:
@@ -2032,8 +2144,15 @@ def checkout(request):
             customer_email = request.POST.get('customer_email')
             customer_phone = request.POST.get('customer_phone')
             country = request.POST.get('country', 'China')
+            city = request.POST.get('city', '').strip()
+            shipping_address = request.POST.get('shipping_address', '').strip()
             payment_method = request.POST.get('payment_method')
             customer_notes = request.POST.get('customer_notes', '')
+
+            from book_Project.checkout_cities import is_valid_checkout_city
+            if not is_valid_checkout_city(country, city):
+                messages.error(request, '请选择有效的城市。')
+                return redirect('manager:checkout')
 
             available_methods = {
                 option['method']
@@ -2055,6 +2174,8 @@ def checkout(request):
                     customer_email=customer_email,
                     customer_phone=customer_phone,
                     country=country,
+                    city=city,
+                    shipping_address=shipping_address,
                     payment_method=payment_method,
                     total_amount=book_total,
                     status=initial_status,
@@ -2090,17 +2211,28 @@ def checkout(request):
 
             # Create marketplace order if there are marketplace items
             if marketplace_items:
+                for item in marketplace_items:
+                    obj = item['item_obj']
+                    if item['item_type'] in ('product', 'supermarket'):
+                        qty_check = validate_quantity(obj, item['quantity'])
+                        if not qty_check.is_valid:
+                            messages.error(request, qty_check.message)
+                            return redirect('manager:checkout')
+                        if item['quantity'] > obj.stock:
+                            messages.error(request, f'库存不足！当前库存：{obj.stock}')
+                            return redirect('manager:checkout')
                 mkt_total = sum(i['total_price'] for i in marketplace_items)
                 mkt_order = MarketplaceOrder(
                     user_name=customer_name,
                     user_email=customer_email,
                     customer_phone=customer_phone,
                     country=country,
+                    city=city,
                     payment_method=payment_method,
                     total_amount=mkt_total,
                     status=initial_status,
                     payment_status=payment_status,
-                    shipping_address=request.POST.get('shipping_address', ''),
+                    shipping_address=shipping_address or request.POST.get('shipping_address', ''),
                     notes=customer_notes,
                     customer_notes=customer_notes,
                     payment_transaction_id=kkiapay_transaction_id or None,
@@ -2117,6 +2249,7 @@ def checkout(request):
                         quantity=item['quantity'],
                         unit_price=item['price'],
                         selected_attributes=item.get('selected_attributes', {}),
+                        pricing_rule_log=item.get('pricing_rule_log', {}),
                     )
                     # Update stock/sales
                     obj = item['item_obj']
@@ -2154,6 +2287,10 @@ def checkout(request):
             if payment_method == 'kkiapay':
                 target_order = book_order if book_order else mkt_order
                 return redirect('manager:kkiapay_pay', order_number=target_order.order_number)
+
+            if payment_method == 'pawapay':
+                target_order = book_order if book_order else mkt_order
+                return redirect('manager:pawapay_pay', order_number=target_order.order_number)
             
             target_order_for_redirect = book_order if book_order else mkt_order
             return redirect('manager:order_confirmation', order_number=target_order_for_redirect.order_number)
@@ -2163,10 +2300,10 @@ def checkout(request):
     
     payment_methods_by_region = build_payment_options()
 
-    from manager.templatetags.currency_filters import CNY_TO_XAF
-    total_amount_fcfa = round(float(total_amount) * CNY_TO_XAF)
+    total_amount_fcfa = round(float(total_amount))
 
     from book_Project.payment_config import get_kkiapay_country_codes
+    from book_Project.checkout_cities import get_checkout_cities_by_country
     kkiapay_countries = get_kkiapay_country_codes()
 
     from manager.models import KkiapayCountry
@@ -2184,6 +2321,7 @@ def checkout(request):
         'KKIAPAY_SANDBOX': django_settings.KKIAPAY_SANDBOX,
         'kkiapay_countries': kkiapay_countries,
         'kkiapay_countries_data': kkiapay_countries_data,
+        'checkout_cities_by_country': get_checkout_cities_by_country(),
     }
     
     response = render(request, 'public/checkout.html', context)
@@ -2235,6 +2373,43 @@ def kkiapay_pay(request, order_number):
     }
     
     return render(request, 'public/kkiapay_pay.html', context)
+
+
+def pawapay_pay(request, order_number):
+    """Dedicated PawaPay payment page — Central Africa mobile money."""
+    from django.conf import settings as django_settings
+
+    accessible = request.session.get('accessible_orders', [])
+    if str(order_number) not in accessible:
+        messages.warning(request, 'Non autorisé ou session expirée.')
+        return redirect('manager:public_home')
+
+    order = None
+    try:
+        order = models.Order.objects.get(order_number=order_number)
+    except models.Order.DoesNotExist:
+        try:
+            from marketplace.models import MarketplaceOrder
+            order = MarketplaceOrder.objects.get(order_number=order_number)
+        except MarketplaceOrder.DoesNotExist:
+            messages.error(request, 'Commande non trouvée.')
+            return redirect('manager:public_home')
+
+    if order.payment_status == 'completed':
+        messages.info(request, 'Commande déjà payée.')
+        return redirect('manager:order_confirmation', order_number=order.order_number)
+
+    context = {
+        'order': order,
+        'order_number': order.order_number,
+        'total_amount_fcfa': int(order.total_amount),
+        'customer_name': order.customer_name if hasattr(order, 'customer_name') else getattr(order, 'user_name', ''),
+        'customer_email': order.customer_email if hasattr(order, 'customer_email') else getattr(order, 'user_email', ''),
+        'customer_phone': order.customer_phone or '',
+        'pawapay_sandbox': django_settings.PAWAPAY_SANDBOX,
+        'pawapay_currency': django_settings.PAWAPAY_CURRENCY,
+    }
+    return render(request, 'public/pawapay_pay.html', context)
 
 
 def kkiapay_success_redirect(request, order_number):
@@ -3663,15 +3838,137 @@ def delete_order(request, order_id):
 
 
 # ====================   Public Static Pages  ===========================
-def public_about(request):
-    """About Us page"""
-    context = {
-        'book_count': models.Book.objects.count(),
-        'author_count': models.Author.objects.count(),
-        'publisher_count': models.Publisher.objects.count(),
-        'total_sales': models.Book.objects.aggregate(total=Sum('sale_num'))['total'] or 0,
+def _build_info_page_context(page_meta, extra=None):
+    """Build template context for modern info/legal pages."""
+    from django.urls import reverse
+
+    ctx = {
+        'page_title': page_meta['title'],
+        'page_subtitle': page_meta.get('subtitle', ''),
+        'page_icon': page_meta.get('icon', 'fa-circle-info'),
+        'page_gradient': page_meta.get('gradient', ('#667eea', '#764ba2')),
+        'page_sections': page_meta.get('sections', []),
+        'page_breadcrumb': page_meta.get('breadcrumb', []),
+        'content_template': page_meta.get('content_template'),
+        'page_highlights': page_meta.get('highlights', []),
     }
-    return render(request, 'public/about.html', context)
+    cta = page_meta.get('cta')
+    if cta:
+        url = cta.get('url')
+        if not url and cta.get('url_name'):
+            url = reverse(cta['url_name'], kwargs=cta.get('url_kwargs') or None)
+        ctx['page_cta'] = {
+            'title': cta['title'],
+            'text': cta['text'],
+            'button': cta['button'],
+            'url': url,
+            'icon': cta.get('icon', 'fa-arrow-right'),
+        }
+    if extra:
+        ctx.update(extra)
+    return ctx
+
+
+def public_legal_privacy(request):
+    """Politique de confidentialité + CGU (document légal regroupé)."""
+    from django.urls import reverse
+    from django.utils.translation import gettext_lazy as _
+    from manager.info_pages import LEGAL_PAGE
+
+    meta = dict(LEGAL_PAGE)
+    meta['breadcrumb'] = [
+        {'label': _('首页'), 'url': reverse('manager:public_home')},
+        {'label': LEGAL_PAGE['title'], 'url': ''},
+    ]
+    return render(request, 'public/pages/legal.html', _build_info_page_context(meta))
+
+
+def public_legal_terms(request):
+    """Redirect to CGU section on the legal page."""
+    from django.shortcuts import redirect
+    from django.urls import reverse
+    return redirect(reverse('manager:legal_privacy') + '#conditions-utilisation')
+
+
+def public_info_page(request, slug):
+    """Dynamic info pages (refund, shipping, partner, premium, support)."""
+    from django.http import Http404
+    from django.urls import reverse
+    from django.utils.translation import gettext_lazy as _
+    from manager.info_pages import get_info_page
+
+    page = get_info_page(slug)
+    if not page:
+        raise Http404
+    meta = dict(page)
+    meta['breadcrumb'] = [
+        {'label': _('首页'), 'url': reverse('manager:public_home')},
+        {'label': page['title'], 'url': ''},
+    ]
+    ctx = _build_info_page_context(meta)
+    return render(request, 'public/pages/info_page_content.html', ctx)
+
+
+def public_site_map(request):
+    """Interactive site map."""
+    from django.urls import reverse
+    from django.utils.translation import gettext_lazy as _
+    from manager.info_pages import get_sitemap_sections
+
+    sections = []
+    total_links = 0
+    for group in get_sitemap_sections():
+        links = []
+        for link in group['links']:
+            url_name = link['url_name']
+            kwargs = link.get('url_kwargs')
+            links.append({
+                'label': link['label'],
+                'url': reverse(url_name, kwargs=kwargs) if kwargs else reverse(url_name),
+            })
+        total_links += len(links)
+        sections.append({
+            'slug': group.get('slug', group['title']),
+            'title': group['title'],
+            'icon': group['icon'],
+            'color': group.get('color', '#667eea'),
+            'links': links,
+            'link_count': len(links),
+        })
+    return render(request, 'public/pages/sitemap.html', {
+        'sitemap_sections': sections,
+        'total_links': total_links,
+        'section_count': len(sections),
+        'page_breadcrumb': [
+            {'label': _('首页'), 'url': reverse('manager:public_home')},
+            {'label': _('网站地图'), 'url': ''},
+        ],
+    })
+
+
+def public_about(request):
+    """About Us page — content from PAGES DUNO 360."""
+    from django.urls import reverse
+    from django.utils.translation import gettext_lazy as _
+    from manager.info_pages import ABOUT_PAGE
+
+    meta = dict(ABOUT_PAGE)
+    meta['breadcrumb'] = [
+        {'label': _('首页'), 'url': reverse('manager:public_home')},
+        {'label': ABOUT_PAGE['title'], 'url': ''},
+    ]
+    meta['cta'] = {
+        'title': _('加入 DUNO 360'),
+        'text': _('创建账户或开设您的店铺。'),
+        'button': _('创建账户'),
+        'url_name': 'manager:user_register',
+        'icon': 'fa-user-plus',
+    }
+    ctx = _build_info_page_context(meta)
+    ctx['book_count'] = models.Book.objects.count()
+    ctx['author_count'] = models.Author.objects.count()
+    ctx['publisher_count'] = models.Publisher.objects.count()
+    return render(request, 'public/pages/info_page_content.html', ctx)
 
 
 def public_services(request):
@@ -3720,37 +4017,21 @@ def public_contact(request):
             f'Sent from DUNO 360 contact form\n'
         )
 
-        # Send notification to all active email accounts (or default)
+        # Notify platform inbox via Zoho SMTP (admin@duno360.com)
         sent_ok = False
-        accounts = models.EmailAccount.objects.filter(is_active=True)
-        if accounts.exists():
-            # Use default account to send, deliver to all active account addresses
-            sender_account = accounts.filter(is_default=True).first() or accounts.first()
-            recipient_emails = list(accounts.values_list('email_address', flat=True))
-            try:
-                _send_email(
-                    account=sender_account,
-                    to=', '.join(recipient_emails),
-                    subject=email_subject,
-                    body=email_body,
-                )
-                sent_ok = True
-            except Exception as e:
-                logger.warning(f'Contact form email via EmailAccount failed (msg #{contact_msg.id}): {e}')
-
-        # Fallback to Django send_mail if no EmailAccount configured or sending failed
-        if not sent_ok:
-            try:
-                send_mail(
-                    subject=email_subject,
-                    message=email_body,
-                    from_email=django_settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[django_settings.CONTACT_EMAIL],
-                    fail_silently=False,
-                )
-                sent_ok = True
-            except Exception as e:
-                logger.warning(f'Contact form Django email failed (msg #{contact_msg.id}): {e}')
+        try:
+            from django.core.mail import EmailMessage
+            msg = EmailMessage(
+                subject=email_subject,
+                body=email_body,
+                from_email=django_settings.DEFAULT_FROM_EMAIL,
+                to=[django_settings.CONTACT_EMAIL],
+                reply_to=[email] if email else None,
+            )
+            msg.send(fail_silently=False)
+            sent_ok = True
+        except Exception as e:
+            logger.warning(f'Contact form email failed (msg #{contact_msg.id}): {e}')
 
         if sent_ok:
             contact_msg.email_sent = True
@@ -3764,13 +4045,19 @@ def public_contact(request):
 # ====================   Public Blog  ===========================
 def public_blog(request):
     """Blog listing page"""
-    search = request.GET.get('search', '')
-    category_slug = request.GET.get('category', '')
+    search = request.GET.get('search', request.GET.get('q', '')).strip()
+    category_slug = request.GET.get('category', '').strip()
 
     posts = models.BlogPost.objects.filter(status='published').select_related('category')
 
     if search:
-        posts = posts.filter(Q(title__icontains=search) | Q(content__icontains=search))
+        posts = posts.filter(
+            Q(title__icontains=search)
+            | Q(excerpt__icontains=search)
+            | Q(content__icontains=search)
+            | Q(author_name__icontains=search)
+            | Q(category__name__icontains=search)
+        )
 
     if category_slug:
         posts = posts.filter(category__slug=category_slug)
@@ -3781,6 +4068,7 @@ def public_blog(request):
     featured_posts = models.BlogPost.objects.filter(
         status='published', is_featured=True
     ).select_related('category')[:3]
+    total_published = models.BlogPost.objects.filter(status='published').count()
 
     context = {
         'posts': posts,
@@ -3788,6 +4076,8 @@ def public_blog(request):
         'featured_posts': featured_posts,
         'search_query': search,
         'current_category': category_slug,
+        'total_posts_count': total_published,
+        'results_count': posts.count(),
     }
     return render(request, 'public/blog.html', context)
 
@@ -4074,6 +4364,9 @@ def admin_message_detail(request, msg_id):
     """Admin: view single message detail — auto marks as read"""
     if "name" not in request.session:
         return redirect('/manager/login/')
+
+    from manager.email_utils import ensure_platform_email_account
+    ensure_platform_email_account()
 
     msg = get_object_or_404(models.ContactMessage, id=msg_id)
     if not msg.is_read:
@@ -4402,6 +4695,9 @@ def email_dashboard(request):
     """Unified mail/message management dashboard"""
     if "name" not in request.session:
         return redirect('/manager/login/')
+
+    from manager.email_utils import ensure_platform_email_account
+    ensure_platform_email_account()
 
     folder = request.GET.get('folder', 'inbox')
     account_id = request.GET.get('account', '')
@@ -4864,6 +5160,9 @@ def email_accounts(request):
     if "name" not in request.session:
         return redirect('/manager/login/')
 
+    from manager.email_utils import ensure_platform_email_account
+    ensure_platform_email_account()
+
     if request.method == 'POST':
         action = request.POST.get('action', '')
 
@@ -5061,10 +5360,14 @@ def email_rules(request):
 # Site User Authentication Views
 # ==========================================
 
-def _hash_password(password):
-    """Hash password with SHA-256 + salt"""
-    salt = 'book_project_salt_2024'
-    return hashlib.sha256(f'{salt}{password}'.encode()).hexdigest()
+from manager.auth_password import (
+    hash_password as _hash_password,
+    set_unified_password as _set_unified_password,
+    sync_password_by_email as _sync_password_by_email,
+    check_email_password as _check_email_password,
+    link_dual_accounts_by_email as _link_dual_accounts_by_email,
+    get_linked_site_user_and_vendor as _get_linked_site_user_and_vendor,
+)
 
 
 import random
@@ -5077,33 +5380,38 @@ def _generate_pin():
 
 
 def _send_verification_email(email, pin_code, name):
-    """Send verification PIN code via Django's email backend"""
-    subject = 'DUNO 360 - 邮箱验证码 / Email Verification'
+    """Send verification PIN code via Django's email backend (English + French)."""
+    subject = 'DUNO 360 - Email Verification / Vérification e-mail'
     html_body = f'''
     <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:520px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
         <div style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:32px 28px;text-align:center;">
-            <h1 style="color:#fff;margin:0;font-size:1.5rem;">📚 ScholarQuest</h1>
-            <p style="color:rgba(255,255,255,0.85);margin:8px 0 0;font-size:0.95rem;">邮箱验证 / Email Verification</p>
+            <h1 style="color:#fff;margin:0;font-size:1.5rem;">DUNO 360</h1>
+            <p style="color:rgba(255,255,255,0.85);margin:8px 0 0;font-size:0.95rem;">Email &amp; phone verification / Vérification e-mail et téléphone</p>
         </div>
         <div style="padding:32px 28px;">
-            <p style="color:#333;font-size:1rem;margin:0 0 8px;">你好，<strong>{name}</strong>！</p>
+            <p style="color:#333;font-size:1rem;margin:0 0 8px;">Hello <strong>{name}</strong>! / Bonjour <strong>{name}</strong>&nbsp;!</p>
+            <p style="color:#666;font-size:0.93rem;line-height:1.7;margin:0 0 12px;">
+                Thank you for registering on DUNO 360. Please use the verification code below to complete your account setup:
+            </p>
             <p style="color:#666;font-size:0.93rem;line-height:1.7;margin:0 0 24px;">
-                感谢您注册我们的图书平台。请使用以下验证码完成注册：<br>
-                Thank you for registering. Please use the PIN code below to verify your account:
+                Merci de vous être inscrit sur DUNO 360. Utilisez le code ci-dessous pour finaliser la création de votre compte&nbsp;:
             </p>
             <div style="background:linear-gradient(135deg,rgba(102,126,234,0.08),rgba(118,75,162,0.08));border:2px dashed #667eea;border-radius:14px;padding:24px;text-align:center;margin:0 0 24px;">
                 <span style="font-size:2.5rem;font-weight:800;letter-spacing:12px;color:#667eea;">{pin_code}</span>
             </div>
             <p style="color:#999;font-size:0.85rem;text-align:center;margin:0;">
-                ⏰ 验证码有效期为 <strong>15分钟</strong> / This code expires in <strong>15 minutes</strong>
+                ⏰ This code expires in <strong>15 minutes</strong>. / Ce code expire dans <strong>15 minutes</strong>.
             </p>
         </div>
         <div style="background:#f8f9ff;padding:16px 28px;text-align:center;border-top:1px solid #eee;">
-            <p style="color:#aaa;font-size:0.8rem;margin:0;">如果您没有注册，请忽略此邮件。<br>If you did not register, please ignore this email.</p>
+            <p style="color:#aaa;font-size:0.8rem;margin:0;">If you did not register, please ignore this email.<br>Si vous ne vous êtes pas inscrit, ignorez cet e-mail.</p>
         </div>
     </div>
     '''
-    plain_body = f'你好 {name}，你的验证码是: {pin_code}。有效期15分钟。\nHi {name}, your verification code is: {pin_code}. Valid for 15 minutes.'
+    plain_body = (
+        f'Hello {name}, your verification code is: {pin_code}. Valid for 15 minutes.\n\n'
+        f'Bonjour {name}, votre code de vérification est : {pin_code}. Valide 15 minutes.'
+    )
 
     try:
         from django.core.mail import EmailMultiAlternatives
@@ -5116,22 +5424,166 @@ def _send_verification_email(email, pin_code, name):
         return False
 
 
+def _send_registration_phone_otp(phone: str):
+    """Send Twilio Verify SMS if configured. Returns (ok, error_message)."""
+    from manager.twilio_verify import (
+        is_twilio_verify_enabled,
+        normalize_phone_e164,
+        send_verification_sms,
+        validate_phone_e164,
+    )
+    phone_e164 = normalize_phone_e164(phone)
+    valid, err = validate_phone_e164(phone_e164)
+    if not valid:
+        return False, err
+    if not is_twilio_verify_enabled():
+        return True, ''
+    return send_verification_sms(phone_e164)
+
+
+def _check_registration_phone_otp(phone: str, code: str):
+    """Validate phone OTP via Twilio. Returns (ok, error_message)."""
+    from manager.twilio_verify import (
+        check_verification_sms,
+        is_twilio_verify_enabled,
+        normalize_phone_e164,
+    )
+    if not is_twilio_verify_enabled():
+        return True, ''
+    phone_e164 = normalize_phone_e164(phone)
+    return check_verification_sms(phone_e164, code)
+
+
+def _verify_phone_otp_if_required(verification, phone_pin: str):
+    """Check SMS OTP only when this signup session requires it."""
+    from django.utils.translation import gettext as _
+    if not getattr(verification, 'require_sms_verification', False):
+        return True, ''
+    if not (phone_pin or '').strip():
+        return False, _('Enter the code received by SMS.')
+    return _check_registration_phone_otp(verification.phone, phone_pin)
+
+
+def _dispatch_signup_verification(verification, redirect_url: str, lang_code: str | None = None) -> dict:
+    """Start phone-first verification asynchronously and return redirect immediately."""
+    from manager.signup_verification import start_signup_verification_async
+    return start_signup_verification_async(verification, redirect_url, lang_code)
+
+
+def signup_verification_status(request):
+    """Poll async signup verification dispatch (SMS + email)."""
+    from django.utils.translation import gettext as _
+    from manager.signup_verification import get_signup_verification_status
+    from manager.twilio_verify import is_twilio_verify_enabled
+
+    email = (request.GET.get('email') or '').strip()
+    verification_type = (request.GET.get('type') or 'user').strip() or 'user'
+    if not email:
+        return JsonResponse({'pending': True})
+
+    status = get_signup_verification_status(email, verification_type)
+    if status:
+        return JsonResponse(status)
+
+    verification = models.EmailVerification.objects.filter(
+        email=email, is_verified=False, verification_type=verification_type,
+    ).first()
+    if not verification:
+        return JsonResponse({'pending': True})
+
+    require_sms = bool(verification.require_sms_verification)
+    sms_failed = is_twilio_verify_enabled() and not require_sms
+    return JsonResponse({
+        'pending': False,
+        'email_sent': True,
+        'require_sms': require_sms,
+        'sms_failed': sms_failed,
+        'sms_error': '',
+        'fallback_message': _(
+            'Email verification has been started automatically. '
+            'Enter the 6-digit code from your inbox.'
+        ) if sms_failed else '',
+    })
+
+
+def _verification_page_context(email, verification_type='user', request=None):
+    from manager.twilio_verify import is_twilio_verify_enabled, mask_phone, normalize_phone_e164
+    verification = models.EmailVerification.objects.filter(
+        email=email, is_verified=False, verification_type=verification_type,
+    ).first()
+    phone_e164 = normalize_phone_e164(verification.phone) if verification else ''
+    require_sms = bool(verification and verification.require_sms_verification)
+    sms_fallback = False
+    if request:
+        sms_fallback = request.GET.get('sms_fallback') == '1'
+    if verification and is_twilio_verify_enabled() and not require_sms:
+        sms_fallback = True
+    return {
+        'email': email,
+        'phone_masked': mask_phone(phone_e164) if phone_e164 else '',
+        'twilio_sms_enabled': require_sms,
+        'require_sms_verification': require_sms,
+        'sms_fallback': sms_fallback,
+        'verification_type': verification_type,
+    }
+
+
+def _parse_signup_location(request):
+    """Validate Congo department + city from POST data."""
+    from django.utils.translation import gettext as _
+    from manager.congo_locations import (
+        normalize_congo_city,
+        normalize_congo_location,
+    )
+    dept = normalize_congo_location(request.POST.get('location', ''))
+    city = normalize_congo_city(dept, request.POST.get('city', ''))
+    if not dept:
+        return None, None, _('Please select your department.')
+    if not city:
+        return None, None, _('Please select your city.')
+    return dept, city, None
+
+
+def _signup_page_context():
+    from manager.twilio_verify import is_twilio_verify_enabled
+    return {'twilio_sms_enabled': is_twilio_verify_enabled()}
+
+
 def user_register(request):
     """Public user registration - Step 1: collect info & send PIN"""
+    from django.utils import translation
+    from django.utils.translation import gettext as _
+
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
         email = request.POST.get('email', '').strip()
         password = request.POST.get('password', '').strip()
         password2 = request.POST.get('password2', '').strip()
+        phone = request.POST.get('phone', '').strip()
+        location, city, loc_err = _parse_signup_location(request)
+        if loc_err:
+            return JsonResponse({'success': False, 'message': loc_err})
 
-        if not all([name, email, password]):
-            return JsonResponse({'success': False, 'message': '请填写所有必填字段'})
+        if not all([name, email, phone, password]):
+            return JsonResponse({
+                'success': False,
+                'message': _('Please fill in all required fields, including phone.'),
+            })
         if password != password2:
-            return JsonResponse({'success': False, 'message': '两次密码不一致'})
+            return JsonResponse({'success': False, 'message': _('Passwords do not match.')})
         if len(password) < 6:
-            return JsonResponse({'success': False, 'message': '密码至少6位'})
+            return JsonResponse({
+                'success': False,
+                'message': _('Password must be at least 6 characters.'),
+            })
         if models.SiteUser.objects.filter(email=email).exists():
-            return JsonResponse({'success': False, 'message': '该邮箱已注册'})
+            return JsonResponse({'success': False, 'message': _('This email is already registered.')})
+
+        from manager.twilio_verify import normalize_phone_e164, validate_phone_e164
+        phone_e164 = normalize_phone_e164(phone)
+        phone_valid, phone_err = validate_phone_e164(phone_e164)
+        if not phone_valid:
+            return JsonResponse({'success': False, 'message': phone_err})
 
         # Generate PIN and store pending registration
         pin_code = _generate_pin()
@@ -5145,60 +5597,78 @@ def user_register(request):
             pin_code=pin_code,
             name=name,
             password=_hash_password(password),
-            phone=request.POST.get('phone', '').strip(),
+            phone=phone_e164 or phone,
+            location=location,
+            city=city,
             expires_at=expires_at,
         )
 
-        # Send PIN via email
-        sent = _send_verification_email(email, pin_code, name)
-        if not sent:
-            return JsonResponse({'success': False, 'message': '验证邮件发送失败，请稍后重试'})
+        verification = models.EmailVerification.objects.get(
+            email=email, is_verified=False, verification_type='user',
+        )
+        result = _dispatch_signup_verification(
+            verification,
+            f'/manager/public/user/verify-email/?email={email}',
+            translation.get_language(),
+        )
+        return JsonResponse(result)
 
-        return JsonResponse({
-            'success': True,
-            'message': '验证码已发送到您的邮箱',
-            'redirect': f'/manager/public/user/verify-email/?email={email}',
-        })
-
-    return render(request, 'public/user_register.html')
+    return render(request, 'public/user_register.html', _signup_page_context())
 
 
 def verify_email_pin(request):
     """Step 2: User enters PIN to complete registration"""
+    from django.utils.translation import gettext as _
+
     email = request.GET.get('email', '') or request.POST.get('email', '')
 
     if request.method == 'POST':
         pin = request.POST.get('pin', '').strip()
+        phone_pin = request.POST.get('phone_pin', '').strip()
         email = request.POST.get('email', '').strip()
 
         if not pin or not email:
-            return JsonResponse({'success': False, 'message': '请输入验证码'})
+            return JsonResponse({'success': False, 'message': _('Please enter the verification code.')})
 
         try:
             verification = models.EmailVerification.objects.get(
                 email=email, is_verified=False
             )
         except models.EmailVerification.DoesNotExist:
-            return JsonResponse({'success': False, 'message': '验证记录不存在，请重新注册'})
+            return JsonResponse({
+                'success': False,
+                'message': _('Verification record not found. Please register again.'),
+            })
 
         if verification.is_expired():
-            return JsonResponse({'success': False, 'message': '验证码已过期，请重新发送'})
+            return JsonResponse({
+                'success': False,
+                'message': _('Code expired. Please request a new one.'),
+            })
 
         if verification.pin_code != pin:
-            return JsonResponse({'success': False, 'message': '验证码不正确'})
+            return JsonResponse({'success': False, 'message': _('Incorrect verification code.')})
 
-        # PIN is correct — create the actual user account
+        phone_ok, phone_err = _verify_phone_otp_if_required(verification, phone_pin)
+        if not phone_ok:
+            return JsonResponse({'success': False, 'message': phone_err})
+
         if models.SiteUser.objects.filter(email=email).exists():
-            return JsonResponse({'success': False, 'message': '该邮箱已注册'})
+            return JsonResponse({'success': False, 'message': _('This email is already registered.')})
 
         user = models.SiteUser.objects.create(
             name=verification.name,
             email=verification.email,
             password=verification.password,
             phone=verification.phone,
+            location=verification.location or 'Brazzaville',
+            city=verification.city or 'Brazzaville',
         )
+        _sync_password_by_email(verification.email, verification.password)
+        _link_dual_accounts_by_email(verification.email)
         verification.is_verified = True
-        verification.save(update_fields=['is_verified'])
+        verification.phone_verified = True
+        verification.save(update_fields=['is_verified', 'phone_verified'])
 
         # Create notification for new user
         create_notification(
@@ -5217,28 +5687,36 @@ def verify_email_pin(request):
 
         return JsonResponse({
             'success': True,
-            'message': '验证成功，注册完成！',
+            'message': _('Verification successful. Registration complete!'),
             'redirect': '/manager/public/user/profile/',
         })
 
-    return render(request, 'public/verify_email.html', {'email': email})
+    ctx = _verification_page_context(email, verification_type='user', request=request)
+    return render(request, 'public/verify_email.html', ctx)
 
 
 def resend_verification_pin(request):
     """Resend a new PIN code for pending registration"""
+    from django.utils.translation import gettext as _
+
     if request.method != 'POST':
-        return JsonResponse({'success': False, 'message': 'Invalid request'})
+        return JsonResponse({'success': False, 'message': _('Invalid request.')})
 
     email = request.POST.get('email', '').strip()
+    verification_type = request.POST.get('verification_type', 'user').strip() or 'user'
     if not email:
-        return JsonResponse({'success': False, 'message': '缺少邮箱'})
+        return JsonResponse({'success': False, 'message': _('Email is required.')})
 
     try:
-        verification = models.EmailVerification.objects.get(email=email, is_verified=False)
+        verification = models.EmailVerification.objects.get(
+            email=email, is_verified=False, verification_type=verification_type,
+        )
     except models.EmailVerification.DoesNotExist:
-        return JsonResponse({'success': False, 'message': '没有找到待验证记录，请重新注册'})
+        return JsonResponse({
+            'success': False,
+            'message': _('No pending verification found. Please register again.'),
+        })
 
-    # Generate new PIN
     new_pin = _generate_pin()
     verification.pin_code = new_pin
     verification.expires_at = timezone.now() + timedelta(minutes=15)
@@ -5246,9 +5724,56 @@ def resend_verification_pin(request):
 
     sent = _send_verification_email(email, new_pin, verification.name)
     if not sent:
-        return JsonResponse({'success': False, 'message': '邮件发送失败，请稍后重试'})
+        return JsonResponse({
+            'success': False,
+            'message': _('Failed to send email. Please try again later.'),
+        })
 
-    return JsonResponse({'success': True, 'message': '新验证码已发送'})
+    return JsonResponse({'success': True, 'message': _('A new verification code has been sent.')})
+
+
+def resend_phone_verification(request):
+    """Resend Twilio Verify SMS for pending registration."""
+    from django.utils.translation import gettext as _
+
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': _('Invalid request.')})
+
+    email = request.POST.get('email', '').strip()
+    verification_type = request.POST.get('verification_type', 'user').strip() or 'user'
+    if not email:
+        return JsonResponse({'success': False, 'message': _('Email is required.')})
+
+    try:
+        verification = models.EmailVerification.objects.get(
+            email=email, is_verified=False, verification_type=verification_type,
+        )
+    except models.EmailVerification.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'message': _('No pending verification found. Please register again.'),
+        })
+
+    if verification.is_expired():
+        return JsonResponse({
+            'success': False,
+            'message': _('Verification expired. Please register again.'),
+        })
+
+    sms_ok, sms_err = _send_registration_phone_otp(verification.phone)
+    if not sms_ok:
+        verification.require_sms_verification = False
+        verification.save(update_fields=['require_sms_verification'])
+        return JsonResponse({
+            'success': False,
+            'message': sms_err,
+            'sms_disabled': True,
+            'fallback_message': _(
+                'SMS could not be sent. Use the email code or try again later.'
+            ),
+        })
+
+    return JsonResponse({'success': True, 'message': _('New SMS code sent.')})
 
 
 def _is_likely_desktop_browser(request):
@@ -5264,31 +5789,39 @@ def _is_likely_desktop_browser(request):
 
 def user_login(request):
     """Public user login"""
+    from django.utils.translation import gettext as _
+
     if request.method == 'POST':
         email = request.POST.get('email', '').strip()
         password = request.POST.get('password', '').strip()
 
         if not all([email, password]):
-            return JsonResponse({'success': False, 'message': '请输入邮箱和密码'})
+            return JsonResponse({
+                'success': False,
+                'message': _('Please enter email and password.'),
+            })
 
         try:
-            user = models.SiteUser.objects.get(email=email, is_active=True)
+            user = models.SiteUser.objects.get(email__iexact=email, is_active=True)
         except models.SiteUser.DoesNotExist:
-            return JsonResponse({'success': False, 'message': '邮箱或密码错误'})
+            return JsonResponse({'success': False, 'message': _('Incorrect email or password.')})
 
-        if user.password != _hash_password(password):
-            return JsonResponse({'success': False, 'message': '邮箱或密码错误'})
+        if not _check_email_password(email, password):
+            return JsonResponse({'success': False, 'message': _('Incorrect email or password.')})
+
+        _link_dual_accounts_by_email(email)
 
         request.session['site_user_id'] = user.id
         request.session['site_user_name'] = user.name
         next_url = (request.POST.get('next') or '').strip()
         if not next_url:
+            from django.urls import reverse
             next_url = (
-                '/manager/public/my-profile/'
+                reverse('manager:user_profile')
                 if _is_likely_desktop_browser(request)
                 else '/manager/public/'
             )
-        return JsonResponse({'success': True, 'message': '登录成功', 'redirect': next_url})
+        return JsonResponse({'success': True, 'message': _('Login successful.'), 'redirect': next_url})
 
     return render(request, 'public/user_login.html')
 
@@ -5311,6 +5844,13 @@ def user_profile(request):
     if request.method == 'POST':
         user.name = request.POST.get('name', user.name).strip()
         user.phone = request.POST.get('phone', '').strip()
+        from manager.congo_locations import normalize_congo_city, normalize_congo_location
+        dept = normalize_congo_location(request.POST.get('location', ''))
+        city = normalize_congo_city(dept, request.POST.get('city', ''))
+        if dept:
+            user.location = dept
+        if city:
+            user.city = city
         if 'avatar' in request.FILES:
             user.avatar = request.FILES['avatar']
         user.save()
@@ -5491,6 +6031,26 @@ def user_toggle_wishlist(request):
     if not created:
         wish.delete()
         return JsonResponse({'success': True, 'wishlisted': False, 'message': '已取消收藏'})
+
+    user = models.SiteUser.objects.filter(pk=user_id).first()
+    from manager.escrow_service import resolve_vendor_for_item
+    if item_type == 'book':
+        item_name = book.name
+        vendor = resolve_vendor_for_item('book', item_id)
+    else:
+        item_name = getattr(item, 'name', None) or getattr(item, 'title', 'Item')
+        vendor = resolve_vendor_for_item(item_type, item_id)
+    if vendor:
+        create_vendor_notification(
+            vendor.id,
+            'wishlist_add',
+            f'{user.name if user else "A customer"} added an item to favorites',
+            f'{item_name} was added to a customer wishlist.',
+            icon='fas fa-heart',
+            color='#ec4899',
+            link='/manager/vendor/dashboard/',
+            related_id=wish.id,
+        )
     return JsonResponse({'success': True, 'wishlisted': True, 'message': '已添加到收藏'})
 
 
@@ -5565,6 +6125,9 @@ def admin_delete_user(request):
 
 def vendor_register(request):
     """Vendor registration page - Step 1: collect info & send PIN"""
+    from django.utils import translation
+    from django.utils.translation import gettext as _
+
     if request.method == 'POST':
         company_name = request.POST.get('company_name', '').strip()
         contact_name = request.POST.get('contact_name', '').strip()
@@ -5573,13 +6136,39 @@ def vendor_register(request):
         password2 = request.POST.get('password2', '').strip()
 
         if not all([company_name, contact_name, email, password]):
-            return JsonResponse({'success': False, 'message': '请填写所有必填字段'})
+            return JsonResponse({
+                'success': False,
+                'message': _('Please fill in all required fields.'),
+            })
         if password != password2:
-            return JsonResponse({'success': False, 'message': '两次密码不一致'})
+            return JsonResponse({'success': False, 'message': _('Passwords do not match.')})
         if len(password) < 6:
-            return JsonResponse({'success': False, 'message': '密码至少6位'})
+            return JsonResponse({
+                'success': False,
+                'message': _('Password must be at least 6 characters.'),
+            })
         if models.Vendor.objects.filter(email=email).exists():
-            return JsonResponse({'success': False, 'message': '该邮箱已注册为卖家'})
+            return JsonResponse({
+                'success': False,
+                'message': _('This email is already registered as a vendor.'),
+            })
+
+        phone = request.POST.get('phone', '').strip()
+        if not phone:
+            return JsonResponse({
+                'success': False,
+                'message': _('Phone number is required.'),
+            })
+
+        location, city, loc_err = _parse_signup_location(request)
+        if loc_err:
+            return JsonResponse({'success': False, 'message': loc_err})
+
+        from manager.twilio_verify import normalize_phone_e164, validate_phone_e164
+        phone_e164 = normalize_phone_e164(phone)
+        phone_valid, phone_err = validate_phone_e164(phone_e164)
+        if not phone_valid:
+            return JsonResponse({'success': False, 'message': phone_err})
 
         pin_code = _generate_pin()
         expires_at = timezone.now() + timedelta(minutes=15)
@@ -5592,7 +6181,9 @@ def vendor_register(request):
             pin_code=pin_code,
             name=contact_name,
             password=_hash_password(password),
-            phone=request.POST.get('phone', '').strip(),
+            phone=phone_e164 or phone,
+            location=location,
+            city=city,
             verification_type='vendor',
             company_name=company_name,
             description=request.POST.get('description', '').strip(),
@@ -5613,45 +6204,61 @@ def vendor_register(request):
             request.session['vendor_tmp_logo'] = tmp_path
             request.session['vendor_tmp_logo_name'] = logo_file.name
 
-        sent = _send_verification_email(email, pin_code, contact_name)
-        if not sent:
-            return JsonResponse({'success': False, 'message': '验证邮件发送失败，请稍后重试'})
+        verification = models.EmailVerification.objects.get(
+            email=email, is_verified=False, verification_type='vendor',
+        )
+        result = _dispatch_signup_verification(
+            verification,
+            f'/manager/vendor/verify-email/?email={email}',
+            translation.get_language(),
+        )
+        return JsonResponse(result)
 
-        return JsonResponse({
-            'success': True,
-            'message': '验证码已发送到您的邮箱',
-            'redirect': f'/manager/vendor/verify-email/?email={email}',
-        })
-
-    return render(request, 'public/vendor_register.html')
+    return render(request, 'public/vendor_register.html', _signup_page_context())
 
 
 def verify_vendor_pin(request):
     """Step 2: Vendor enters PIN to complete registration"""
+    from django.utils.translation import gettext as _
+
     email = request.GET.get('email', '') or request.POST.get('email', '')
 
     if request.method == 'POST':
         pin = request.POST.get('pin', '').strip()
+        phone_pin = request.POST.get('phone_pin', '').strip()
         email = request.POST.get('email', '').strip()
 
         if not pin or not email:
-            return JsonResponse({'success': False, 'message': '请输入验证码'})
+            return JsonResponse({'success': False, 'message': _('Please enter the verification code.')})
 
         try:
             verification = models.EmailVerification.objects.get(
                 email=email, is_verified=False, verification_type='vendor'
             )
         except models.EmailVerification.DoesNotExist:
-            return JsonResponse({'success': False, 'message': '验证记录不存在，请重新注册'})
+            return JsonResponse({
+                'success': False,
+                'message': _('Verification record not found. Please register again.'),
+            })
 
         if verification.is_expired():
-            return JsonResponse({'success': False, 'message': '验证码已过期，请重新发送'})
+            return JsonResponse({
+                'success': False,
+                'message': _('Code expired. Please request a new one.'),
+            })
 
         if verification.pin_code != pin:
-            return JsonResponse({'success': False, 'message': '验证码不正确'})
+            return JsonResponse({'success': False, 'message': _('Incorrect verification code.')})
+
+        phone_ok, phone_err = _verify_phone_otp_if_required(verification, phone_pin)
+        if not phone_ok:
+            return JsonResponse({'success': False, 'message': phone_err})
 
         if models.Vendor.objects.filter(email=email).exists():
-            return JsonResponse({'success': False, 'message': '该邮箱已注册为卖家'})
+            return JsonResponse({
+                'success': False,
+                'message': _('This email is already registered as a vendor.'),
+            })
 
         vendor = models.Vendor.objects.create(
             company_name=verification.company_name,
@@ -5659,8 +6266,21 @@ def verify_vendor_pin(request):
             email=verification.email,
             password=verification.password,
             phone=verification.phone,
+            location=verification.location or 'Brazzaville',
+            city=verification.city or 'Brazzaville',
             description=verification.description,
         )
+        site_user = models.SiteUser.objects.filter(email__iexact=email, is_active=True).first()
+        if site_user:
+            vendor.user = site_user
+            vendor.save(update_fields=['user', 'updated_at'])
+            site_user.promote_to_seller()
+            if verification.location:
+                site_user.location = verification.location
+                site_user.city = verification.city or verification.location
+                site_user.save(update_fields=['location', 'city', 'updated_at'])
+        _sync_password_by_email(email, verification.password)
+        _link_dual_accounts_by_email(email)
 
         # Handle temporary logo file
         tmp_logo = request.session.pop('vendor_tmp_logo', None)
@@ -5674,7 +6294,8 @@ def verify_vendor_pin(request):
                 os.remove(tmp_logo)
 
         verification.is_verified = True
-        verification.save(update_fields=['is_verified'])
+        verification.phone_verified = True
+        verification.save(update_fields=['is_verified', 'phone_verified'])
 
         create_notification(
             'vendor_registered',
@@ -5691,33 +6312,45 @@ def verify_vendor_pin(request):
 
         return JsonResponse({
             'success': True,
-            'message': '验证成功，注册完成！请等待审核',
+            'message': _('Verification successful. Your vendor account is pending approval.'),
             'redirect': '/manager/vendor/dashboard/',
         })
 
-    return render(request, 'public/verify_vendor_email.html', {'email': email})
+    return render(request, 'public/verify_vendor_email.html', _verification_page_context(email, verification_type='vendor', request=request))
 
 
 def vendor_login(request):
     """Vendor login"""
+    from django.utils.translation import gettext as _
+
     if request.method == 'POST':
         email = request.POST.get('email', '').strip()
         password = request.POST.get('password', '').strip()
 
         if not all([email, password]):
-            return JsonResponse({'success': False, 'message': '请输入邮箱和密码'})
+            return JsonResponse({
+                'success': False,
+                'message': _('Please enter email and password.'),
+            })
 
         try:
-            vendor = models.Vendor.objects.get(email=email, is_active=True)
+            vendor = models.Vendor.objects.get(email__iexact=email, is_active=True)
         except models.Vendor.DoesNotExist:
-            return JsonResponse({'success': False, 'message': '邮箱或密码错误'})
+            return JsonResponse({'success': False, 'message': _('Incorrect email or password.')})
 
-        if vendor.password != _hash_password(password):
-            return JsonResponse({'success': False, 'message': '邮箱或密码错误'})
+        if not _check_email_password(email, password):
+            return JsonResponse({'success': False, 'message': _('Incorrect email or password.')})
+
+        vendor.refresh_from_db()
+        _link_dual_accounts_by_email(email)
 
         request.session['vendor_id'] = vendor.id
         request.session['vendor_name'] = vendor.company_name
-        return JsonResponse({'success': True, 'message': '登录成功', 'redirect': '/manager/vendor/dashboard/'})
+        return JsonResponse({
+            'success': True,
+            'message': _('Login successful.'),
+            'redirect': '/manager/vendor/dashboard/',
+        })
 
     return render(request, 'public/vendor_login.html')
 
@@ -5734,33 +6367,38 @@ def vendor_logout(request):
 # ==========================================
 
 def _send_reset_email(email, pin_code, name):
-    """Send password reset PIN code"""
-    subject = 'DUNO 360 - 密码重置验证码 / Password Reset'
+    """Send password reset PIN code (English + French)."""
+    subject = 'DUNO 360 - Password Reset / Réinitialisation du mot de passe'
     html_body = f'''
     <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:520px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
         <div style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:32px 28px;text-align:center;">
             <h1 style="color:#fff;margin:0;font-size:1.5rem;">🔐 DUNO 360</h1>
-            <p style="color:rgba(255,255,255,0.85);margin:8px 0 0;font-size:0.95rem;">密码重置 / Password Reset</p>
+            <p style="color:rgba(255,255,255,0.85);margin:8px 0 0;font-size:0.95rem;">Password Reset / Réinitialisation du mot de passe</p>
         </div>
         <div style="padding:32px 28px;">
-            <p style="color:#333;font-size:1rem;margin:0 0 8px;">你好，<strong>{name}</strong>！</p>
-            <p style="color:#666;font-size:0.93rem;line-height:1.7;margin:0 0 24px;">
-                您申请了密码重置，请使用以下验证码：<br>
+            <p style="color:#333;font-size:1rem;margin:0 0 8px;">Hello <strong>{name}</strong>! / Bonjour <strong>{name}</strong>&nbsp;!</p>
+            <p style="color:#666;font-size:0.93rem;line-height:1.7;margin:0 0 12px;">
                 You requested a password reset. Use the code below:
+            </p>
+            <p style="color:#666;font-size:0.93rem;line-height:1.7;margin:0 0 24px;">
+                Vous avez demandé une réinitialisation de mot de passe. Utilisez le code ci-dessous&nbsp;:
             </p>
             <div style="background:linear-gradient(135deg,rgba(102,126,234,0.08),rgba(118,75,162,0.08));border:2px dashed #667eea;border-radius:14px;padding:24px;text-align:center;margin:0 0 24px;">
                 <span style="font-size:2.5rem;font-weight:800;letter-spacing:12px;color:#667eea;">{pin_code}</span>
             </div>
             <p style="color:#999;font-size:0.85rem;text-align:center;margin:0;">
-                ⏰ 验证码有效期为 <strong>15分钟</strong> / This code expires in <strong>15 minutes</strong>
+                ⏰ This code expires in <strong>15 minutes</strong>. / Ce code expire dans <strong>15 minutes</strong>.
             </p>
         </div>
         <div style="background:#f8f9ff;padding:16px 28px;text-align:center;border-top:1px solid #eee;">
-            <p style="color:#aaa;font-size:0.8rem;margin:0;">如果您没有申请密码重置，请忽略此邮件。<br>If you did not request a password reset, please ignore this email.</p>
+            <p style="color:#aaa;font-size:0.8rem;margin:0;">If you did not request a password reset, please ignore this email.<br>Si vous n'avez pas demandé de réinitialisation, ignorez cet e-mail.</p>
         </div>
     </div>
     '''
-    plain_body = f'你好 {name}，你的密码重置验证码是: {pin_code}。有效期15分钟。\nHi {name}, your password reset code is: {pin_code}. Valid for 15 minutes.'
+    plain_body = (
+        f'Hello {name}, your password reset code is: {pin_code}. Valid for 15 minutes.\n\n'
+        f'Bonjour {name}, votre code de réinitialisation est : {pin_code}. Valide 15 minutes.'
+    )
 
     try:
         from django.core.mail import EmailMultiAlternatives
@@ -5775,58 +6413,79 @@ def _send_reset_email(email, pin_code, name):
 
 def forgot_password(request):
     """Step 1: User/Vendor enters email to receive reset PIN"""
-    account_type = request.GET.get('type', 'user')  # 'user' or 'vendor'
+    from django.utils.translation import gettext as _
+
+    account_type = request.GET.get('type', 'user')
 
     if request.method == 'POST':
         email = request.POST.get('email', '').strip()
         account_type = request.POST.get('account_type', 'user')
 
         if not email:
-            return JsonResponse({'success': False, 'message': '请输入邮箱'})
+            return JsonResponse({'success': False, 'message': _('Please enter your email.')})
 
-        # Check if account exists
         name = ''
         if account_type == 'vendor':
             try:
                 vendor = models.Vendor.objects.get(email=email, is_active=True)
                 name = vendor.contact_name
             except models.Vendor.DoesNotExist:
-                return JsonResponse({'success': False, 'message': '未找到该邮箱对应的卖家账户'})
+                return JsonResponse({
+                    'success': False,
+                    'message': _('No vendor account found for this email.'),
+                })
         else:
             try:
                 user = models.SiteUser.objects.get(email=email, is_active=True)
                 name = user.name
             except models.SiteUser.DoesNotExist:
-                return JsonResponse({'success': False, 'message': '未找到该邮箱对应的用户账户'})
+                return JsonResponse({
+                    'success': False,
+                    'message': _('No user account found for this email.'),
+                })
 
-        # Clean old reset verifications for this email
         models.EmailVerification.objects.filter(
             email=email, verification_type='password_reset', is_verified=False
         ).delete()
 
-        # Create reset verification
         pin_code = _generate_pin()
         models.EmailVerification.objects.create(
             email=email,
             pin_code=pin_code,
             name=name,
-            password='',  # Not used for reset
+            password='',
             verification_type='password_reset',
-            company_name=account_type,  # Reuse field to store account type
+            company_name=account_type,
             expires_at=timezone.now() + timezone.timedelta(minutes=15),
         )
 
         sent = _send_reset_email(email, pin_code, name)
         if sent:
-            return JsonResponse({'success': True, 'message': '验证码已发送到您的邮箱', 'email': email, 'account_type': account_type})
-        else:
-            return JsonResponse({'success': True, 'message': '验证码已生成（开发模式：' + pin_code + '）', 'email': email, 'account_type': account_type})
+            return JsonResponse({
+                'success': True,
+                'message': _('Verification code sent to your email.'),
+                'email': email,
+                'account_type': account_type,
+            })
+        if django_settings.DEBUG:
+            return JsonResponse({
+                'success': True,
+                'message': _('Development mode: your code is %(code)s') % {'code': pin_code},
+                'email': email,
+                'account_type': account_type,
+            })
+        return JsonResponse({
+            'success': False,
+            'message': _('Failed to send email. Please try again later.'),
+        })
 
     return render(request, 'public/forgot_password.html', {'account_type': account_type})
 
 
 def reset_password_verify(request):
     """Step 2: Verify PIN and set new password"""
+    from django.utils.translation import gettext as _
+
     if request.method == 'POST':
         email = request.POST.get('email', '').strip()
         pin_code = request.POST.get('pin_code', '').strip()
@@ -5834,12 +6493,14 @@ def reset_password_verify(request):
         account_type = request.POST.get('account_type', 'user')
 
         if not all([email, pin_code, new_password]):
-            return JsonResponse({'success': False, 'message': '请填写所有字段'})
+            return JsonResponse({'success': False, 'message': _('Please fill in all fields.')})
 
         if len(new_password) < 6:
-            return JsonResponse({'success': False, 'message': '密码长度至少6个字符'})
+            return JsonResponse({
+                'success': False,
+                'message': _('Password must be at least 6 characters.'),
+            })
 
-        # Find the verification record
         try:
             verification = models.EmailVerification.objects.get(
                 email=email,
@@ -5848,39 +6509,387 @@ def reset_password_verify(request):
                 is_verified=False,
             )
         except models.EmailVerification.DoesNotExist:
-            return JsonResponse({'success': False, 'message': '验证码无效'})
+            return JsonResponse({'success': False, 'message': _('Invalid verification code.')})
 
         if verification.is_expired():
             verification.delete()
-            return JsonResponse({'success': False, 'message': '验证码已过期，请重新获取'})
+            return JsonResponse({
+                'success': False,
+                'message': _('Code expired. Please request a new one.'),
+            })
 
-        # Update password
-        hashed = _hash_password(new_password)
-        if account_type == 'vendor':
-            updated = models.Vendor.objects.filter(email=email, is_active=True).update(password=hashed)
-        else:
-            updated = models.SiteUser.objects.filter(email=email, is_active=True).update(password=hashed)
-
-        if updated:
+        hashed = _set_unified_password(email, new_password)
+        user, vendor = _get_linked_site_user_and_vendor(email)
+        if user or vendor:
+            _link_dual_accounts_by_email(email)
             verification.is_verified = True
             verification.save()
             redirect_url = '/manager/vendor/login/' if account_type == 'vendor' else '/manager/public/user/login/'
-            return JsonResponse({'success': True, 'message': '密码重置成功！请用新密码登录', 'redirect': redirect_url})
-        else:
-            return JsonResponse({'success': False, 'message': '账户不存在或已被禁用'})
+            return JsonResponse({
+                'success': True,
+                'message': _('Password reset successful. Please sign in with your new password.'),
+                'redirect': redirect_url,
+            })
+        return JsonResponse({
+            'success': False,
+            'message': _('Account not found or has been disabled.'),
+        })
 
-    return JsonResponse({'success': False, 'message': '无效请求'})
+    return JsonResponse({'success': False, 'message': _('Invalid request.')})
 
 
 def _get_vendor(request):
     """Get the currently logged-in vendor or None"""
     vendor_id = request.session.get('vendor_id')
-    if not vendor_id:
-        return None
-    try:
-        return models.Vendor.objects.get(id=vendor_id, is_active=True)
-    except models.Vendor.DoesNotExist:
-        return None
+    if vendor_id:
+        try:
+            return models.Vendor.objects.get(id=vendor_id, is_active=True)
+        except models.Vendor.DoesNotExist:
+            return None
+
+    site_user_id = request.session.get('site_user_id')
+    if site_user_id:
+        return models.Vendor.objects.filter(user_id=site_user_id, is_active=True).first()
+    return None
+
+
+def publish_entry(request):
+    """Guided publish entry with confirmation and item-type selection."""
+    site_user_id = request.session.get('site_user_id')
+    if not site_user_id:
+        return redirect(f'/manager/public/user/login/?next=/manager/public/publish/')
+
+    user = get_object_or_404(models.SiteUser, pk=site_user_id, is_active=True)
+    vendor = models.Vendor.objects.filter(user=user).first()
+
+    if request.method == 'POST':
+        action = request.POST.get('action', '').strip()
+        if action == 'activate_vendor':
+            if not vendor:
+                vendor = models.Vendor.objects.create(
+                    user=user,
+                    company_name=f'Boutique de {user.name}',
+                    contact_name=user.name,
+                    email=user.email,
+                    phone=user.phone,
+                    password=user.password,
+                    description='Vendeur Duno360',
+                    status='approved',
+                    is_active=True,
+                )
+                create_notification(
+                    'vendor_registered',
+                    f'Nouveau vendeur: {user.name}',
+                    f'{user.name} ({user.email}) a activé la publication depuis son compte acheteur.',
+                    icon='fas fa-store',
+                    color='#10b981',
+                    link='/manager/admin/vendors/',
+                    related_id=vendor.id,
+                )
+            elif vendor.status == 'pending':
+                vendor.status = 'approved'
+                vendor.save(update_fields=['status', 'updated_at'])
+
+            user.promote_to_seller()
+            request.session['vendor_id'] = vendor.id
+            request.session['vendor_name'] = vendor.company_name
+            return JsonResponse({'success': True, 'vendor_name': vendor.company_name})
+
+        if action == 'choose_type':
+            if not vendor:
+                return JsonResponse({'success': False, 'message': 'Veuillez activer votre espace vendeur d’abord.'}, status=400)
+            item_type = request.POST.get('item_type', '').strip()
+            target_map = {
+                'product': '/marketplace/vendor/products/add/',
+                'supermarket': '/marketplace/vendor/supermarket/add/',
+                'course': '/marketplace/vendor/courses/add/',
+                'book': '/manager/vendor/add-book/',
+            }
+            target = target_map.get(item_type)
+            if not target:
+                return JsonResponse({'success': False, 'message': 'Type de publication invalide.'}, status=400)
+            return JsonResponse({'success': True, 'redirect_url': target})
+
+    if vendor and vendor.is_active:
+        request.session['vendor_id'] = vendor.id
+        request.session['vendor_name'] = vendor.company_name
+        return render(request, 'public/publish_entry.html', {
+            'site_user': user,
+            'already_vendor': True,
+            'vendor': vendor,
+            'direct_type_choice': True,
+        })
+
+    context = {
+        'site_user': user,
+        'already_vendor': bool(vendor and vendor.is_active),
+        'vendor': vendor,
+        'direct_type_choice': False,
+    }
+    return render(request, 'public/publish_entry.html', context)
+
+
+def _admin_apply_inventory_stock(item_type, item_id, action, delta, manual_value):
+    """Update stock for a single admin inventory item."""
+    if item_type == 'book' and item_id:
+        item = models.Book.objects.get(id=item_id)
+        if action == 'set' and manual_value is not None:
+            item.inventory = max(0, int(manual_value))
+        else:
+            item.inventory = max(0, item.inventory + delta)
+        item.save(update_fields=['inventory'])
+    elif item_type == 'product' and item_id:
+        item = Product.objects.get(id=item_id)
+        if action == 'set' and manual_value is not None:
+            item.stock = max(0, int(manual_value))
+        else:
+            item.stock = max(0, item.stock + delta)
+        item.save(update_fields=['stock'])
+    elif item_type == 'course' and item_id:
+        item = Course.objects.get(id=item_id)
+        if action == 'set' and manual_value is not None:
+            item.stock = max(0, int(manual_value))
+        else:
+            item.stock = max(0, item.stock + delta)
+        item.save(update_fields=['stock'])
+    elif item_type == 'supermarket' and item_id:
+        item = SupermarketItem.objects.get(id=item_id)
+        if action == 'set' and manual_value is not None:
+            item.stock = max(0, int(manual_value))
+        else:
+            item.stock = max(0, item.stock + delta)
+        item.save(update_fields=['stock'])
+    else:
+        raise ValueError('Invalid inventory item.')
+
+
+def _vendor_apply_inventory_stock(vendor, item_type, item_id, action, delta, manual_value):
+    """Update stock for a single vendor inventory item."""
+    if item_type == 'book' and item_id:
+        vb = models.VendorBook.objects.get(id=item_id, vendor=vendor)
+        if action == 'set' and manual_value is not None:
+            vb.book.inventory = max(0, int(manual_value))
+        else:
+            vb.book.inventory = max(0, vb.book.inventory + delta)
+        vb.book.save(update_fields=['inventory'])
+    elif item_type == 'product' and item_id:
+        p = Product.objects.get(id=item_id, vendor=vendor)
+        if action == 'set' and manual_value is not None:
+            p.stock = max(0, int(manual_value))
+        else:
+            p.stock = max(0, p.stock + delta)
+        p.save(update_fields=['stock'])
+    elif item_type == 'course' and item_id:
+        c = Course.objects.get(id=item_id, vendor=vendor)
+        if action == 'set' and manual_value is not None:
+            c.stock = max(0, int(manual_value))
+        else:
+            c.stock = max(0, c.stock + delta)
+        c.save(update_fields=['stock'])
+    elif item_type == 'supermarket' and item_id:
+        s = SupermarketItem.objects.get(id=item_id, vendor=vendor)
+        if action == 'set' and manual_value is not None:
+            s.stock = max(0, int(manual_value))
+        else:
+            s.stock = max(0, s.stock + delta)
+        s.save(update_fields=['stock'])
+    else:
+        raise ValueError('Invalid inventory item.')
+
+
+def _process_bulk_inventory(request, apply_fn, success_msg):
+    """Apply bulk stock updates from POST data."""
+    selected = request.POST.getlist('selected_items')
+    action = request.POST.get('action')
+    delta = int(request.POST.get('delta', 0) or 0)
+    manual_value = request.POST.get('manual_value')
+    if action == 'subtract':
+        action = 'add'
+        delta = -abs(delta)
+    if not selected:
+        messages.error(request, _('Select at least one item.'))
+        return
+    if action not in ('set', 'add'):
+        messages.error(request, _('Invalid bulk action.'))
+        return
+    if action == 'add' and delta == 0:
+        messages.error(request, _('Enter a quantity to add or subtract.'))
+        return
+    if action == 'set' and manual_value is None:
+        messages.error(request, _('Enter a stock value to set.'))
+        return
+    updated = 0
+    errors = []
+    for key in selected:
+        parts = key.split(':', 1)
+        if len(parts) != 2:
+            continue
+        item_type, item_id = parts[0], parts[1]
+        try:
+            apply_fn(item_type, item_id, action, delta, manual_value)
+            updated += 1
+        except Exception as exc:
+            errors.append(str(exc))
+    if updated:
+        messages.success(request, success_msg.format(count=updated))
+    if errors:
+        messages.error(request, '; '.join(errors[:3]))
+
+
+def admin_inventory(request):
+    """Admin inventory management for books, products, courses and supermarket items."""
+    if 'name' not in request.session:
+        return redirect('/manager/login')
+
+    if request.method == 'POST':
+        if request.POST.get('bulk') == '1':
+            _process_bulk_inventory(
+                request,
+                lambda t, i, a, d, m: _admin_apply_inventory_stock(t, i, a, d, m),
+                _('Stock updated for {count} item(s).'),
+            )
+            return redirect('manager:admin_inventory')
+
+        item_type = request.POST.get('item_type')
+        item_id = request.POST.get('item_id')
+        action = request.POST.get('action')
+        delta = int(request.POST.get('delta', 0) or 0)
+        manual_value = request.POST.get('manual_value')
+        try:
+            _admin_apply_inventory_stock(item_type, item_id, action, delta, manual_value)
+            messages.success(request, 'Stock mis à jour avec succès.')
+        except Exception as exc:
+            messages.error(request, str(exc))
+        return redirect('manager:admin_inventory')
+
+    books = models.Book.objects.select_related('publisher').all().order_by('-id')
+    products = Product.objects.select_related('vendor').all().order_by('-id')
+    courses = Course.objects.select_related('vendor').all().order_by('-id')
+    supermarket_items = SupermarketItem.objects.select_related('vendor').all().order_by('-id')
+    context = {
+        'name': request.session['name'],
+        'books': books,
+        'products': products,
+        'courses': courses,
+        'supermarket_items': supermarket_items,
+        'total_books': books.count(),
+        'total_products': products.count(),
+        'total_courses': courses.count(),
+        'total_supermarket': supermarket_items.count(),
+        'admin_mode': True,
+    }
+    return render(request, 'admin/inventory.html', context)
+
+
+def admin_escrow_transactions(request):
+    """Admin view: platform escrow holds and vendor payout releases."""
+    if 'name' not in request.session:
+        return redirect('/manager/login')
+
+    from manager.escrow_service import (
+        process_due_escrow_releases,
+        admin_mark_escrow_delivered,
+        admin_force_release_escrow,
+        admin_cancel_escrow,
+        admin_wallet_adjust,
+    )
+    from manager.commission import COMMISSION_RATES, COMMISSION_LABELS
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        tx_id = request.POST.get('tx_id')
+        if action == 'release_due':
+            count = process_due_escrow_releases()
+            messages.success(request, _('{count} payout(s) released to vendors.').format(count=count))
+        elif action == 'release_one' and tx_id:
+            ok = admin_force_release_escrow(tx_id)
+            messages.success(request, _('Payout released.')) if ok else messages.error(request, _('Could not release this payout.'))
+        elif action == 'mark_delivered' and tx_id:
+            ok = admin_mark_escrow_delivered(tx_id)
+            messages.success(request, _('Marked as delivered — refund hold started.')) if ok else messages.error(request, _('Could not update this line.'))
+        elif action == 'cancel' and tx_id:
+            admin_cancel_escrow(tx_id, 'cancelled')
+            messages.success(request, _('Escrow line cancelled.'))
+        elif action == 'refund' and tx_id:
+            admin_cancel_escrow(tx_id, 'refunded')
+            messages.success(request, _('Escrow line marked as refunded.'))
+        elif action == 'save_note' and tx_id:
+            note = request.POST.get('notes', '').strip()
+            models.PlatformEscrowTransaction.objects.filter(pk=tx_id).update(notes=note)
+            messages.success(request, _('Note saved.'))
+        elif action == 'wallet_adjust':
+            vid = request.POST.get('vendor_id')
+            amount = request.POST.get('amount')
+            desc = request.POST.get('description', '').strip()
+            try:
+                ok = admin_wallet_adjust(int(vid), Decimal(amount), desc)
+                if ok:
+                    messages.success(request, _('Wallet updated.'))
+                else:
+                    messages.error(request, _('Wallet adjustment failed (check balance).'))
+            except (TypeError, ValueError):
+                messages.error(request, _('Invalid wallet adjustment.'))
+        return redirect(request.get_full_path() or reverse('manager:admin_escrow'))
+
+    status_filter = request.GET.get('status', '').strip()
+    vendor_filter = request.GET.get('vendor_id', '').strip()
+    item_type_filter = request.GET.get('item_type', '').strip()
+    search_q = request.GET.get('q', '').strip()
+
+    base_qs = models.PlatformEscrowTransaction.objects.all()
+    qs = base_qs.select_related('vendor').order_by('-held_at')
+    if status_filter:
+        qs = qs.filter(status=status_filter)
+    if vendor_filter:
+        qs = qs.filter(vendor_id=vendor_filter)
+    if item_type_filter:
+        qs = qs.filter(item_type=item_type_filter)
+    if search_q:
+        qs = qs.filter(
+            Q(transaction_ref__icontains=search_q)
+            | Q(order_number__icontains=search_q)
+            | Q(buyer_email__icontains=search_q)
+            | Q(buyer_name__icontains=search_q)
+            | Q(item_name__icontains=search_q)
+        )
+
+    stats = {}
+    for row in base_qs.values('status').annotate(cnt=Count('id'), gross=Sum('gross_amount'), net=Sum('vendor_payout_amount')):
+        stats[row['status']] = {'count': row['cnt'], 'gross': row['gross'], 'net': row['net']}
+
+    wallet_totals = models.VendorWallet.objects.aggregate(
+        total_balance=Sum('balance'),
+        total_earned=Sum('total_earned'),
+    )
+
+    context = {
+        'name': request.session['name'],
+        'transactions': qs[:300],
+        'status_filter': status_filter,
+        'vendor_filter': vendor_filter,
+        'item_type_filter': item_type_filter,
+        'search_q': search_q,
+        'status_choices': models.PlatformEscrowTransaction.STATUS_CHOICES,
+        'item_type_choices': models.PlatformEscrowTransaction.ITEM_TYPE_CHOICES,
+        'vendors': models.Vendor.objects.filter(is_active=True).order_by('company_name')[:200],
+        'commission_rates': [
+            {'type': k, 'label': COMMISSION_LABELS[k], 'rate': COMMISSION_RATES[k]}
+            for k in ('product', 'book', 'course', 'supermarket')
+        ],
+        'stats': stats,
+        'stats_by_status': [
+            {
+                'code': code,
+                'label': label,
+                'count': stats.get(code, {}).get('count', 0),
+                'net': stats.get(code, {}).get('net', 0) or 0,
+            }
+            for code, label in models.PlatformEscrowTransaction.STATUS_CHOICES
+        ],
+        'wallet_totals': wallet_totals,
+        'refund_hold_days': 14,
+    }
+    return render(request, 'admin/escrow_transactions.html', context)
 
 
 def public_vendor_shop(request, vendor_id):
@@ -6335,6 +7344,20 @@ def vendor_dashboard(request):
     hub_mkt_ids = _vendor_marketplace_order_ids_hub(vendor)
     hub_mkt_order_count = MarketplaceOrder.objects.filter(id__in=hub_mkt_ids).count() if hub_mkt_ids else 0
 
+    from manager.commission import COMMISSION_RATES, COMMISSION_LABELS
+    escrow_qs = models.PlatformEscrowTransaction.objects.filter(vendor=vendor)
+    escrow_stats = {
+        'held': escrow_qs.filter(status='held').aggregate(s=Sum('vendor_payout_amount'))['s'] or Decimal('0'),
+        'releasable': escrow_qs.filter(status='releasable').aggregate(s=Sum('vendor_payout_amount'))['s'] or Decimal('0'),
+        'released': escrow_qs.filter(status='released').aggregate(s=Sum('vendor_payout_amount'))['s'] or Decimal('0'),
+    }
+    vendor_wallet = models.VendorWallet.objects.filter(vendor=vendor).first()
+    recent_escrow = list(escrow_qs.order_by('-held_at')[:8])
+    commission_rates = [
+        {'type': key, 'label': COMMISSION_LABELS[key], 'rate': COMMISSION_RATES[key]}
+        for key in ('product', 'book', 'course', 'supermarket')
+    ]
+
     total_supermarket_stock = vendor_supermarket.aggregate(s=Sum('stock'))['s'] or 0
 
     context = {
@@ -6382,6 +7405,10 @@ def vendor_dashboard(request):
         'hub_book_order_count': hub_book_order_count,
         'hub_mkt_order_count': hub_mkt_order_count,
         'hub_orders_total': hub_book_order_count + hub_mkt_order_count,
+        'escrow_stats': escrow_stats,
+        'vendor_wallet': vendor_wallet,
+        'recent_escrow': recent_escrow,
+        'commission_rates': commission_rates,
     }
     context.update(_vendor_marketplace_insights_dict(vendor))
     return render(request, 'public/vendor_dashboard.html', context)
@@ -6420,9 +7447,28 @@ def vendor_books(request):
     return render(request, 'public/vendor_books.html', context)
 
 
+def vendor_settings(request):
+    """Dedicated store settings page (sidebar)."""
+    admin_access = request.session.get('name')
+    vendor = _get_vendor(request)
+    if not vendor and not admin_access:
+        return redirect('/manager/vendor/login/')
+    if admin_access and not vendor:
+        vendor_id = request.GET.get('vendor_id')
+        if vendor_id:
+            vendor = get_object_or_404(models.Vendor, id=vendor_id)
+        else:
+            return redirect('/manager/vendor/dashboard/')
+
+    return render(request, 'public/vendor_settings.html', {
+        'vendor': vendor,
+        'admin_access': admin_access,
+    })
+
+
 @require_POST
 def vendor_settings_save(request):
-    """Save vendor store settings from the dashboard settings tab."""
+    """Save vendor store settings."""
     admin_access = request.session.get('name')
     vendor = _get_vendor(request)
     if not vendor and not admin_access:
@@ -6438,6 +7484,9 @@ def vendor_settings_save(request):
     description = request.POST.get('description', '').strip()
     phone = request.POST.get('phone', '').strip()
     email = request.POST.get('email', '').strip()
+    from manager.congo_locations import normalize_congo_city, normalize_congo_location
+    dept = normalize_congo_location(request.POST.get('location', ''))
+    city = normalize_congo_city(dept, request.POST.get('city', ''))
 
     if company_name:
         vendor.company_name = company_name
@@ -6447,13 +7496,25 @@ def vendor_settings_save(request):
         vendor.phone = phone
     if email:
         vendor.email = email
+    if dept:
+        vendor.location = dept
+    if city:
+        vendor.city = city
+        if vendor.user_id:
+            vendor.user.location = dept or vendor.user.location
+            vendor.user.city = city
+            vendor.user.save(update_fields=['location', 'city', 'updated_at'])
 
     if 'logo' in request.FILES:
         vendor.logo = request.FILES['logo']
 
     vendor.save()
     messages.success(request, _('店铺设置已保存'))
-    return redirect('manager:vendor_dashboard') + '#dtab-settings'
+    vid = request.POST.get('vendor_id') or request.GET.get('vendor_id')
+    redirect_url = reverse('manager:vendor_settings')
+    if vid:
+        redirect_url = f'{redirect_url}?vendor_id={vid}'
+    return redirect(redirect_url)
 
 
 def vendor_inventory(request):
@@ -6470,48 +7531,32 @@ def vendor_inventory(request):
             return redirect('/manager/vendor/dashboard/')
 
     if request.method == 'POST':
+        if request.POST.get('bulk') == '1':
+            _process_bulk_inventory(
+                request,
+                lambda t, i, a, d, m: _vendor_apply_inventory_stock(vendor, t, i, a, d, m),
+                _('Stock updated for {count} item(s).'),
+            )
+            redirect_url = reverse('manager:vendor_inventory')
+            if admin_access and vendor:
+                redirect_url = f'{redirect_url}?vendor_id={vendor.id}'
+            return redirect(redirect_url)
+
         item_type = request.POST.get('item_type')
         item_id = request.POST.get('item_id')
         action = request.POST.get('action')
-        delta = int(request.POST.get('delta', 0))
+        delta = int(request.POST.get('delta', 0) or 0)
         manual_value = request.POST.get('manual_value')
 
         try:
-            if item_type == 'book' and item_id:
-                vb = models.VendorBook.objects.get(id=item_id, vendor=vendor)
-                if action == 'set' and manual_value is not None:
-                    vb.book.inventory = max(0, int(manual_value))
-                elif action == 'add':
-                    vb.book.inventory = max(0, vb.book.inventory + delta)
-                vb.book.save(update_fields=['inventory'])
-            elif item_type == 'product' and item_id:
-                from marketplace.models import Product
-                p = Product.objects.get(id=item_id, vendor=vendor)
-                if action == 'set' and manual_value is not None:
-                    p.stock = max(0, int(manual_value))
-                elif action == 'add':
-                    p.stock = max(0, p.stock + delta)
-                p.save(update_fields=['stock'])
-            elif item_type == 'course' and item_id:
-                from marketplace.models import Course
-                c = Course.objects.get(id=item_id, vendor=vendor)
-                if action == 'set' and manual_value is not None:
-                    c.stock = max(0, int(manual_value))
-                elif action == 'add':
-                    c.stock = max(0, c.stock + delta)
-                c.save(update_fields=['stock'])
-            elif item_type == 'supermarket' and item_id:
-                from marketplace.models import SupermarketItem
-                s = SupermarketItem.objects.get(id=item_id, vendor=vendor)
-                if action == 'set' and manual_value is not None:
-                    s.stock = max(0, int(manual_value))
-                elif action == 'add':
-                    s.stock = max(0, s.stock + delta)
-                s.save(update_fields=['stock'])
+            _vendor_apply_inventory_stock(vendor, item_type, item_id, action, delta, manual_value)
             messages.success(request, _('库存已更新'))
         except Exception as e:
             messages.error(request, str(e))
-        return redirect('manager:vendor_inventory')
+        redirect_url = reverse('manager:vendor_inventory')
+        if admin_access and vendor:
+            redirect_url = f'{redirect_url}?vendor_id={vendor.id}'
+        return redirect(redirect_url)
 
     from marketplace.models import Product, Course, SupermarketItem
     vendor_books = models.VendorBook.objects.filter(vendor=vendor).select_related('book')
@@ -6530,6 +7575,7 @@ def vendor_inventory(request):
         'total_products': products.count(),
         'total_courses': courses.count(),
         'total_supermarket': supermarket.count(),
+        'bulk_action_url': reverse('manager:vendor_inventory') + (f'?vendor_id={vendor.id}' if admin_access else ''),
     }
     return render(request, 'public/vendor_inventory.html', context)
 
@@ -8001,7 +9047,7 @@ def admin_vendor_list(request):
     if status_filter in dict(models.VENDOR_STATUS_CHOICES):
         vendors = vendors.filter(status=status_filter)
 
-    # Annotate vendors with marketplace metrics
+    vendors = vendors.order_by('-is_official', '-created_at')
     from django.db.models import Sum, Count, Avg
     vendors = vendors.annotate(
         product_count=Count('products', distinct=True),
@@ -8048,8 +9094,12 @@ def admin_vendor_list(request):
             vendor_books_list = models.VendorBook.objects.filter(vendor=viewed_vendor).select_related('book', 'book__publisher').order_by('-created_at')[:50]
             vendor_supermarket_list = SupermarketItem.objects.filter(vendor=viewed_vendor).select_related('category').order_by('-created_at')[:50]
 
+    from manager.official_store import get_official_vendor
+    official_vendor = get_official_vendor(create=False)
+
     return render(request, 'admin/vendor_list.html', {
         'vendors': vendors,
+        'official_vendor': official_vendor,
         'total_vendors': models.Vendor.objects.count(),
         'search_query': search,
         'status_filter': status_filter,
@@ -8141,9 +9191,13 @@ def create_vendor_notification(vendor_id, ntype, title, message, icon='fas fa-be
     )
 
 
-def _check_vendor_notifications(vendor_id):
-    """Generate pending notifications for a vendor (new orders, messages)."""
+def _check_vendor_notifications(vendor_id, lookback_days=30):
+    """Generate pending notifications for a vendor (scoped to vendor_id only)."""
+    from datetime import timedelta
+    from marketplace.models import Product, Course, SupermarketItem
+
     now = timezone.now()
+    cutoff = now - timedelta(days=lookback_days)
     vendor = models.Vendor.objects.filter(pk=vendor_id).first()
     if not vendor:
         return
@@ -8155,13 +9209,13 @@ def _check_vendor_notifications(vendor_id):
     ).exclude(
         direct_messages__sender_type='vendor',
     ).distinct()
-    for convo in unread_convos[:10]:
+    for convo in unread_convos[:15]:
         unread_count = convo.direct_messages.filter(is_read=False).exclude(sender_type='vendor').count()
         if unread_count > 0:
             buyer_name = convo.buyer.name if convo.buyer else 'Customer'
             create_vendor_notification(
                 vendor_id, 'new_message',
-                f'{buyer_name} sent you a message',
+                f'New message from {buyer_name}',
                 f'{unread_count} unread message(s) about: {convo.subject or "General"}',
                 icon='fas fa-comment-dots',
                 color='#3b82f6',
@@ -8169,44 +9223,249 @@ def _check_vendor_notifications(vendor_id):
                 related_id=convo.id,
             )
 
-    # 2. New book orders (last 24h, not yet notified)
-    from datetime import timedelta
-    recent_cutoff = now - timedelta(hours=24)
-    vendor_books = models.VendorBook.objects.filter(vendor=vendor, is_active=True).values_list('book_id', flat=True)
+    vendor_books = list(models.VendorBook.objects.filter(vendor=vendor, is_active=True).values_list('book_id', flat=True))
+    product_ids = list(Product.objects.filter(vendor=vendor).values_list('id', flat=True))
+    course_ids = list(Course.objects.filter(vendor=vendor).values_list('id', flat=True))
+    supermarket_ids = list(SupermarketItem.objects.filter(vendor=vendor).values_list('id', flat=True))
+
+    # 2. Paid book orders
     if vendor_books:
-        new_book_orders = models.OrderItem.objects.filter(
+        paid_book_order_ids = models.OrderItem.objects.filter(
             book_id__in=vendor_books,
-            order__created_at__gte=recent_cutoff,
-        ).select_related('order').values_list('order_id', flat=True).distinct()
-        for oid in new_book_orders[:20]:
+            order__created_at__gte=cutoff,
+            order__payment_status='completed',
+        ).values_list('order_id', flat=True).distinct()
+        for oid in paid_book_order_ids[:30]:
+            order = models.Order.objects.filter(pk=oid).first()
+            if not order:
+                continue
             create_vendor_notification(
                 vendor_id, 'new_order',
-                'New book order received',
-                f'Order #{oid} contains your books',
+                'New book purchase',
+                f'Order {order.order_number} — {order.customer_name} · {order.total_amount}',
                 icon='fas fa-shopping-bag',
+                color='#10b981',
+                link=f'/manager/vendor/orders/books/{oid}/',
+                related_id=oid,
+            )
+        abandoned_book_ids = models.OrderItem.objects.filter(
+            book_id__in=vendor_books,
+            order__created_at__gte=cutoff,
+            order__payment_status='pending',
+            order__status__in=['pending', 'payment_pending'],
+        ).values_list('order_id', flat=True).distinct()
+        for oid in abandoned_book_ids[:20]:
+            order = models.Order.objects.filter(pk=oid).first()
+            if not order:
+                continue
+            create_vendor_notification(
+                vendor_id, 'abandoned_checkout',
+                'Checkout without payment',
+                f'Order {order.order_number} — {order.customer_name} did not complete payment.',
+                icon='fas fa-cart-arrow-down',
                 color='#f59e0b',
                 link=f'/manager/vendor/orders/books/{oid}/',
                 related_id=oid,
             )
 
-    # 3. New marketplace orders (last 24h)
-    try:
-        mkt_orders = MarketplaceOrderItem.objects.filter(
-            product__vendor=vendor,
-            order__created_at__gte=recent_cutoff,
+    # 3. Paid marketplace orders touching this vendor
+    mkt_q = Q()
+    if product_ids:
+        mkt_q |= Q(item_type='product', item_id__in=product_ids)
+    if course_ids:
+        mkt_q |= Q(item_type='course', item_id__in=course_ids)
+    if supermarket_ids:
+        mkt_q |= Q(item_type='supermarket', item_id__in=supermarket_ids)
+    if mkt_q:
+        paid_mkt_ids = MarketplaceOrderItem.objects.filter(
+            mkt_q,
+            order__created_at__gte=cutoff,
+            order__payment_status='completed',
         ).values_list('order_id', flat=True).distinct()
-        for oid in mkt_orders[:20]:
+        for oid in paid_mkt_ids[:30]:
+            order = MarketplaceOrder.objects.filter(pk=oid).first()
+            if not order:
+                continue
             create_vendor_notification(
                 vendor_id, 'new_order',
-                'New marketplace order',
-                f'Marketplace order #{oid}',
+                'New marketplace purchase',
+                f'Order {order.order_number} — {order.user_name or order.user_email}',
                 icon='fas fa-store',
-                color='#f59e0b',
-                link='/manager/vendor/orders/',
+                color='#10b981',
+                link=reverse('marketplace:vendor_marketplace_order_detail', args=[oid]),
                 related_id=oid,
             )
-    except Exception:
-        pass
+        abandoned_mkt_ids = MarketplaceOrderItem.objects.filter(
+            mkt_q,
+            order__created_at__gte=cutoff,
+            order__payment_status='pending',
+            order__status__in=['pending', 'payment_pending'],
+        ).values_list('order_id', flat=True).distinct()
+        for oid in abandoned_mkt_ids[:20]:
+            order = MarketplaceOrder.objects.filter(pk=oid).first()
+            if not order:
+                continue
+            create_vendor_notification(
+                vendor_id, 'abandoned_checkout',
+                'Checkout without payment',
+                f'Order {order.order_number} — payment not completed.',
+                icon='fas fa-cart-arrow-down',
+                color='#f59e0b',
+                link=reverse('marketplace:vendor_marketplace_order_detail', args=[oid]),
+                related_id=oid,
+            )
+
+    # 4. New followers (last month)
+    for follow in models.UserFollowedVendor.objects.filter(vendor=vendor, followed_at__gte=cutoff).select_related('user')[:30]:
+        create_vendor_notification(
+            vendor_id, 'new_follower',
+            f'{follow.user.name} follows your shop',
+            f'{follow.user.email} subscribed to {vendor.company_name}.',
+            icon='fas fa-user-plus',
+            color='#8b5cf6',
+            link='/manager/vendor/dashboard/',
+            related_id=follow.id,
+        )
+
+    # 5. Wishlist adds (last month)
+    for wish in models.Wishlist.objects.filter(created_at__gte=cutoff).select_related('user', 'book')[:50]:
+        if wish.item_type == 'book' and wish.book_id in vendor_books:
+            create_vendor_notification(
+                vendor_id, 'wishlist_add',
+                f'{wish.user.name} favorited a book',
+                wish.book.name,
+                icon='fas fa-heart',
+                color='#ec4899',
+                link='/manager/vendor/dashboard/',
+                related_id=wish.id,
+            )
+        elif wish.item_type == 'product' and wish.item_id in product_ids:
+            p = Product.objects.filter(pk=wish.item_id).first()
+            create_vendor_notification(
+                vendor_id, 'wishlist_add',
+                f'{wish.user.name} favorited a product',
+                p.name if p else 'Product',
+                icon='fas fa-heart',
+                color='#ec4899',
+                link='/manager/vendor/dashboard/',
+                related_id=wish.id,
+            )
+        elif wish.item_type == 'course' and wish.item_id in course_ids:
+            c = Course.objects.filter(pk=wish.item_id).first()
+            create_vendor_notification(
+                vendor_id, 'wishlist_add',
+                f'{wish.user.name} favorited a course',
+                c.title if c else 'Course',
+                icon='fas fa-heart',
+                color='#ec4899',
+                link='/manager/vendor/dashboard/',
+                related_id=wish.id,
+            )
+        elif wish.item_type == 'supermarket' and wish.item_id in supermarket_ids:
+            s = SupermarketItem.objects.filter(pk=wish.item_id).first()
+            create_vendor_notification(
+                vendor_id, 'wishlist_add',
+                f'{wish.user.name} favorited a supermarket item',
+                s.name if s else 'Item',
+                icon='fas fa-heart',
+                color='#ec4899',
+                link='/manager/vendor/dashboard/',
+                related_id=wish.id,
+            )
+
+
+@ensure_csrf_cookie
+def vendor_notifications_page(request):
+    """Full notifications page for vendor — last 30 days, vendor-scoped only."""
+    from datetime import timedelta
+
+    admin_access = request.session.get('name')
+    vendor = _get_vendor(request)
+    if not vendor and not admin_access:
+        return redirect('/manager/vendor/login/')
+    if admin_access and not vendor:
+        vid = request.GET.get('vendor_id')
+        if vid:
+            vendor = get_object_or_404(models.Vendor, id=vid)
+        else:
+            return redirect('/manager/vendor/dashboard/')
+
+    cutoff = timezone.now() - timedelta(days=30)
+    _check_vendor_notifications(vendor.id, lookback_days=30)
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'mark_all_read':
+            models.VendorNotification.objects.filter(vendor=vendor, is_read=False).update(is_read=True)
+            messages.success(request, _('All notifications marked as read.'))
+        elif action == 'clear_read':
+            models.VendorNotification.objects.filter(vendor=vendor, is_read=True, created_at__gte=cutoff).delete()
+            messages.success(request, _('Read notifications cleared.'))
+        redirect_url = reverse('manager:vendor_notifications')
+        if admin_access:
+            redirect_url = f'{redirect_url}?vendor_id={vendor.id}'
+        return redirect(redirect_url)
+
+    notifs = models.VendorNotification.objects.filter(
+        vendor=vendor,
+        created_at__gte=cutoff,
+    ).order_by('-created_at')
+    unread_count = notifs.filter(is_read=False).count()
+
+    context = {
+        'vendor': vendor,
+        'admin_access': admin_access,
+        'notifications': notifs,
+        'unread_count': unread_count,
+        'lookback_days': 30,
+    }
+    return render(request, 'public/vendor_notifications.html', context)
+
+
+@ensure_csrf_cookie
+def vendor_payments_page(request):
+    """Vendor escrow & payout tracking — pending, releasable, released."""
+    admin_access = request.session.get('name')
+    vendor = _get_vendor(request)
+    if not vendor and not admin_access:
+        return redirect('/manager/vendor/login/')
+    if admin_access and not vendor:
+        vid = request.GET.get('vendor_id')
+        if vid:
+            vendor = get_object_or_404(models.Vendor, id=vid)
+        else:
+            return redirect('/manager/vendor/dashboard/')
+
+    status_filter = request.GET.get('status', '').strip()
+    qs = models.PlatformEscrowTransaction.objects.filter(vendor=vendor).order_by('-held_at')
+    if status_filter:
+        qs = qs.filter(status=status_filter)
+
+    escrow_stats = {
+        'held': qs.filter(status='held').aggregate(c=Count('id'), s=Sum('vendor_payout_amount')),
+        'releasable': qs.filter(status='releasable').aggregate(c=Count('id'), s=Sum('vendor_payout_amount')),
+        'released': qs.filter(status='released').aggregate(c=Count('id'), s=Sum('vendor_payout_amount')),
+        'refunded': qs.filter(status__in=('refunded', 'cancelled')).aggregate(c=Count('id'), s=Sum('vendor_payout_amount')),
+    }
+    vendor_wallet = models.VendorWallet.objects.filter(vendor=vendor).first()
+    wallet_txns = []
+    if vendor_wallet:
+        wallet_txns = list(
+            models.VendorWalletTransaction.objects.filter(vendor=vendor).order_by('-created_at')[:30]
+        )
+
+    context = {
+        'vendor': vendor,
+        'admin_access': admin_access,
+        'transactions': qs[:200],
+        'status_filter': status_filter,
+        'status_choices': models.PlatformEscrowTransaction.STATUS_CHOICES,
+        'escrow_stats': escrow_stats,
+        'vendor_wallet': vendor_wallet,
+        'wallet_txns': wallet_txns,
+        'refund_hold_days': 14,
+    }
+    return render(request, 'public/vendor_payments.html', context)
 
 
 @ensure_csrf_cookie
@@ -8217,8 +9476,13 @@ def vendor_notifications_api(request):
         return JsonResponse({'success': False, 'message': 'Not logged in'}, status=401)
 
     if request.method == 'GET':
-        _check_vendor_notifications(vendor_id)
-        notifs = models.VendorNotification.objects.filter(vendor_id=vendor_id).order_by('-created_at')[:50]
+        _check_vendor_notifications(vendor_id, lookback_days=7)
+        from datetime import timedelta
+        cutoff = timezone.now() - timedelta(days=30)
+        notifs = models.VendorNotification.objects.filter(
+            vendor_id=vendor_id,
+            created_at__gte=cutoff,
+        ).order_by('-created_at')[:50]
         unread_count = models.VendorNotification.objects.filter(vendor_id=vendor_id, is_read=False).count()
         data = [{
             'id': n.id,
@@ -8503,7 +9767,7 @@ def admin_add_user(request):
             name=name,
             email=email,
             phone=phone,
-            password=_hash_password(password),
+            password=_set_unified_password(email, password),
             is_active=True,
         )
         create_notification(
@@ -8538,7 +9802,6 @@ def admin_edit_vendor(request):
                 'email': vendor.email,
                 'phone': vendor.phone,
                 'description': vendor.description,
-                'commission_rate': str(vendor.commission_rate),
                 'status': vendor.status,
                 'is_active': vendor.is_active,
             }
@@ -8552,9 +9815,6 @@ def admin_edit_vendor(request):
         vendor.email = request.POST.get('email', vendor.email).strip()
         vendor.phone = request.POST.get('phone', vendor.phone).strip()
         vendor.description = request.POST.get('description', vendor.description).strip()
-        commission = request.POST.get('commission_rate')
-        if commission:
-            vendor.commission_rate = Decimal(commission)
         status = request.POST.get('status')
         if status and status in dict(models.VENDOR_STATUS_CHOICES):
             vendor.status = status
@@ -8589,15 +9849,21 @@ def admin_add_vendor(request):
         if models.Vendor.objects.filter(email=email).exists():
             return JsonResponse({'success': False, 'message': '该邮箱已被注册'})
 
+        hashed = _set_unified_password(email, password)
+        site_user = models.SiteUser.objects.filter(email__iexact=email, is_active=True).first()
         vendor = models.Vendor.objects.create(
             company_name=company_name,
             contact_name=contact_name,
             email=email,
             phone=phone,
-            password=_hash_password(password),
+            password=hashed,
             description=description,
             status=status,
+            user=site_user,
         )
+        if site_user:
+            site_user.promote_to_seller()
+        _link_dual_accounts_by_email(email)
         if 'logo' in request.FILES:
             vendor.logo = request.FILES['logo']
             vendor.save()
@@ -8621,6 +9887,8 @@ def admin_delete_vendor(request):
         vid = request.POST.get('id')
         vendor = models.Vendor.objects.filter(id=vid).first()
         if vendor:
+            if vendor.is_official:
+                return JsonResponse({'success': False, 'message': '官方直营店无法删除'})
             name = vendor.company_name
             vendor.delete()
             return JsonResponse({'success': True, 'message': f'卖家 {name} 已删除'})

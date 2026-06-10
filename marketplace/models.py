@@ -56,6 +56,10 @@ class Product(models.Model):
     image_3 = models.ImageField(upload_to='marketplace/products/', blank=True, null=True, verbose_name='图片3')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='products')
     stock = models.PositiveIntegerField(default=0, verbose_name='库存')
+    min_order_quantity = models.PositiveIntegerField(default=1, verbose_name='最低购买数量')
+    max_order_quantity = models.PositiveIntegerField(null=True, blank=True, verbose_name='最高购买数量')
+    quantity_step = models.PositiveIntegerField(default=1, verbose_name='购买数量步长')
+    pricing_rules = models.JSONField(default=dict, blank=True, verbose_name='动态价格规则')
     sku = models.CharField(max_length=50, unique=True, blank=True, verbose_name='SKU')
     brand = models.CharField(max_length=100, blank=True, verbose_name='品牌')
     condition = models.CharField(max_length=20, choices=CONDITION_CHOICES, default='new', verbose_name='状况')
@@ -201,6 +205,10 @@ class SupermarketItem(models.Model):
     image_3 = models.ImageField(upload_to='marketplace/supermarket/', blank=True, null=True, verbose_name='图片3')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='supermarket_items')
     stock = models.PositiveIntegerField(default=0, verbose_name='库存')
+    min_order_quantity = models.PositiveIntegerField(default=1, verbose_name='最低购买数量')
+    max_order_quantity = models.PositiveIntegerField(null=True, blank=True, verbose_name='最高购买数量')
+    quantity_step = models.PositiveIntegerField(default=1, verbose_name='购买数量步长')
+    pricing_rules = models.JSONField(default=dict, blank=True, verbose_name='动态价格规则')
     unit = models.CharField(max_length=20, choices=UNIT_CHOICES, default='piece', verbose_name='单位')
     brand = models.CharField(max_length=100, blank=True, verbose_name='品牌')
     origin = models.CharField(max_length=100, blank=True, verbose_name='产地')
@@ -327,6 +335,7 @@ class MarketplaceOrder(models.Model):
     user_name = models.CharField(max_length=100, blank=True, verbose_name='用户名')
     customer_phone = models.CharField(max_length=20, blank=True, default='', verbose_name='微信/电话号码')
     country = models.CharField(max_length=50, default='China', verbose_name='国家')
+    city = models.CharField(max_length=100, blank=True, default='', verbose_name='城市')
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, default='wechat_pay', verbose_name='支付方式')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name='订单状态')
     total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'), verbose_name='总金额')
@@ -409,6 +418,13 @@ class MarketplaceOrder(models.Model):
 
         if changed_fields:
             self.save(update_fields=list(dict.fromkeys(changed_fields)) + ['updated_at'])
+            if 'status' in changed_fields and self.status == 'delivered':
+                try:
+                    from manager.escrow_service import mark_order_escrow_delivered, process_due_escrow_releases
+                    mark_order_escrow_delivered('marketplace', self.id)
+                    process_due_escrow_releases()
+                except Exception:
+                    pass
             return True
         return False
 
@@ -457,6 +473,7 @@ class MarketplaceOrderItem(models.Model):
     unit_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='单价')
     subtotal = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='小计')
     selected_attributes = models.JSONField(default=dict, blank=True, verbose_name='已选属性')
+    pricing_rule_log = models.JSONField(default=dict, blank=True, verbose_name='价格规则日志')
 
     class Meta:
         db_table = 'marketplace_order_item'
@@ -507,6 +524,7 @@ class MarketplaceCartItem(models.Model):
     item_id = models.PositiveIntegerField(verbose_name='商品ID')
     quantity = models.PositiveIntegerField(default=1, verbose_name='数量')
     selected_attributes = models.JSONField(default=dict, blank=True, verbose_name='已选属性')
+    pricing_rule_log = models.JSONField(default=dict, blank=True, verbose_name='价格规则日志')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -533,13 +551,25 @@ class MarketplaceCartItem(models.Model):
 
     def get_item_price(self):
         item = self.get_item()
-        return item.price if item else Decimal('0')
+        if not item:
+            return Decimal('0')
+        if self.item_type not in ('product', 'supermarket'):
+            return item.price
+        from .pricing_rules import evaluate_pricing
+        result = evaluate_pricing(item, self.item_type, self.quantity)
+        return result.unit_price
 
     def get_item_image_url(self):
         item = self.get_item()
         return item.get_image_url() if item else '/static/img/default_product.png'
 
     def get_total_price(self):
+        item = self.get_item()
+        if item and self.item_type in ('product', 'supermarket'):
+            from .pricing_rules import evaluate_pricing
+            result = evaluate_pricing(item, self.item_type, self.quantity)
+            self.pricing_rule_log = result.log
+            return result.subtotal
         return self.get_item_price() * self.quantity
 
     def get_selected_attributes_display(self):

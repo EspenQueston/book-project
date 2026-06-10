@@ -1,0 +1,133 @@
+    /* Feed card — View details button (include inside an existing <style> block only) */
+    .feed-card,
+    .bmf-card,
+    .rec-feed-card {
+        display: flex;
+        flex-direction: column;
+    }
+    .feed-card-body,
+    .bmf-body,
+    .rec-feed-body,
+    .product-card .product-card-body.feed-card-body-stretch,
+    .course-card .course-card-body.feed-card-body-stretch,
+    .item-card .item-card-body.feed-card-body-stretch {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .product-card.feed-card-stretch,
+    .course-card.feed-card-stretch,
+    .item-card.feed-card-stretch {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    .feed-card-actions {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 8px;
+        margin-top: auto;
+        padding-top: 8px;
+    }
+    .feed-card-actions-main {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .feed-card-actions-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+    .feed-view-details {
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        padding: 7px 11px;
+        border-radius: 10px;
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        color: #fff;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        box-shadow: 0 4px 14px rgba(102, 126, 234, 0.28);
+        transition: transform 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
+        pointer-events: none;
+        line-height: 1.15;
+        white-space: nowrap;
+    }
+    .feed-view-details i {
+        font-size: 0.58rem;
+        opacity: 0.95;
+        transition: transform 0.22s ease;
+    }
+    .feed-card:hover .feed-view-details,
+    .rec-feed-card:hover .feed-view-details,
+    .bmf-card:hover .feed-view-details,
+    a:hover .product-card .feed-view-details,
+    a:hover .course-card .feed-view-details,
+    a:hover .item-card .feed-view-details {
+        box-shadow: 0 8px 22px rgba(102, 126, 234, 0.42);
+        transform: translateY(-2px);
+        background: linear-gradient(135deg, #5a6fd6 0%, #6a4196 100%);
+    }
+    .feed-card:hover .feed-view-details i,
+    .rec-feed-card:hover .feed-view-details i,
+    .bmf-card:hover .feed-view-details i,
+    a:hover .product-card .feed-view-details i,
+    a:hover .course-card .feed-view-details i,
+    a:hover .item-card .feed-view-details i {
+        transform: translateX(3px);
+    }
+    .feed-card:active .feed-view-details,
+    .rec-feed-card:active .feed-view-details,
+    .bmf-card:active .feed-view-details,
+    a:active .product-card .feed-view-details,
+    a:active .course-card .feed-view-details,
+    a:active .item-card .feed-view-details {
+        transform: scale(0.96);
+    }
+    html[data-theme="dark"] .feed-view-details {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+    }
+    @media (max-width: 768px) {
+        .feed-card-body { padding: 8px 9px 10px; }
+        .feed-card-name { font-size: 0.76rem; min-height: 2em; }
+        .feed-card-price { font-size: 0.88rem; }
+        .feed-card-tag { font-size: 0.52rem; padding: 2px 6px; }
+        .feed-card-actions { padding-top: 6px; gap: 6px; }
+        .feed-view-details {
+            font-size: 0.54rem;
+            padding: 5px 8px;
+            border-radius: 8px;
+            gap: 4px;
+        }
+        .feed-view-details i { font-size: 0.5rem; }
+        .bmf-body { padding: 7px 8px 9px; }
+        .bmf-title { font-size: 11px; }
+        .bmf-price { font-size: 13px; margin-top: 3px; }
+        .bmf-badge-type { font-size: 9px; margin-top: 2px; }
+        .rec-feed-name { font-size: 0.82rem; }
+        .rec-feed-price { font-size: 0.92rem; margin-top: 4px; }
+        .rec-feed-meta { font-size: 0.7rem; }
+    }
+    @media (min-width: 769px) {
+        .feed-view-details {
+            font-size: 0.68rem;
+            padding: 8px 14px;
+            border-radius: 11px;
+        }
+        .feed-view-details i { font-size: 0.62rem; }
+        #productsGrid .feed-view-details,
+        #coursesGrid .feed-view-details,
+        #supermarketGrid .feed-view-details {
+            display: none !important;
+        }
+    }

@@ -1,0 +1,55 @@
+<style>
+.duno-hero-divider {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    z-index: 5;
+    line-height: 0;
+    pointer-events: none;
+}
+.duno-hero-divider svg {
+    display: block;
+    width: 100%;
+    height: clamp(52px, 9vw, 96px);
+}
+.duno-hero-divider-shadow {
+    animation: dunoDividerGlow 6s ease-in-out infinite alternate;
+}
+.duno-hero-divider-main {
+    animation: dunoDividerFloat 8s ease-in-out infinite;
+    transform-origin: center bottom;
+}
+.duno-hero-divider-accent {
+    animation: dunoDividerFloat 11s ease-in-out infinite reverse;
+    transform-origin: center bottom;
+}
+@keyframes dunoDividerFloat {
+    0%, 100% { transform: translateY(0) scaleY(1); }
+    50% { transform: translateY(-3px) scaleY(1.02); }
+}
+@keyframes dunoDividerGlow {
+    0% { opacity: 0.4; }
+    100% { opacity: 0.65; }
+}
+.hero-section,
+.blog-hero,
+.srv-hero,
+.ct-hero,
+.books-desktop-hero {
+    position: relative;
+    overflow: hidden;
+}
+html[data-theme="dark"] .duno-hero-divider-main,
+html[data-theme="dark"] .duno-hero-divider-accent {
+    fill: var(--bg-page, #141422);
+}
+@media (prefers-reduced-motion: reduce) {
+    .duno-hero-divider-shadow,
+    .duno-hero-divider-main,
+    .duno-hero-divider-accent { animation: none; }
+}
+@media (max-width: 767px) {
+    .duno-hero-divider svg { height: 48px; }
+}
+</style>

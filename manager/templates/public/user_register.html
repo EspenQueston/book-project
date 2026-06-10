@@ -1,9 +1,10 @@
 {% extends 'public/base.html' %}
-{% load i18n %}
+{% load i18n static %}
 
-{% block title %}{% trans "注册" %} - {% trans "DUNO 360" %}{% endblock %}
+{% block title %}{% trans "Create account" %} - {% trans "DUNO 360" %}{% endblock %}
 
 {% block extra_css %}
+{% include 'includes/signup_register_styles.html' %}
 <style>
     .auth-hero {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -21,23 +22,19 @@
         padding: 48px 40px; margin-top: -40px;
         position: relative; z-index: 2;
     }
-    .auth-card .form-control {
-        border: 2px solid var(--input-border, #e8ecf1); border-radius: 14px;
-        padding: 14px 20px; font-size: 1rem; transition: all 0.3s;
-        background: var(--input-bg, #fff); color: var(--dark-text, #333);
-    }
-    .auth-card .form-control:focus {
-        border-color: #667eea; box-shadow: 0 0 0 4px rgba(102,126,234,0.1);
-    }
     .btn-auth {
         background: linear-gradient(135deg, #667eea, #764ba2); color: #fff;
         border: none; border-radius: 14px; padding: 14px; font-weight: 700;
         font-size: 1rem; width: 100%; transition: all 0.3s;
     }
-    .btn-auth:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.35); }
+    .btn-auth:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.35); color: #fff; }
     .auth-divider { text-align: center; margin: 24px 0; position: relative; }
     .auth-divider::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: var(--input-border, #e8ecf1); }
     .auth-divider span { background: var(--card-bg, #fff); position: relative; padding: 0 16px; color: var(--muted-text, #94a3b8); font-size: 0.9rem; }
+    html[data-theme="dark"] .auth-card { background: var(--bg-surface); box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    html[data-theme="dark"] .auth-divider::before { background: var(--border-default); }
+    html[data-theme="dark"] .auth-divider span { background: var(--bg-surface); color: var(--text-tertiary); }
+    html[data-theme="dark"] .auth-card a { color: #a5b4fc !important; }
 </style>
 {% endblock %}
 
@@ -46,8 +43,14 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-6 text-center">
-                <h1 class="display-5 fw-bold mb-3" data-aos="fade-up">{% trans "创建账户" %}</h1>
-                <p class="lead" style="opacity:0.9;" data-aos="fade-up" data-aos-delay="100">{% trans "注册后可跟踪订单、管理收藏和个人资料" %}</p>
+                <h1 class="display-5 fw-bold mb-3" data-aos="fade-up">{% trans "Create account" %}</h1>
+                <p class="lead" style="opacity:0.9;" data-aos="fade-up" data-aos-delay="100">
+                    {% if twilio_sms_enabled %}
+                        {% trans "We will send verification codes by email and SMS" %}
+                    {% else %}
+                        {% trans "Track orders, manage favorites and your profile" %}
+                    {% endif %}
+                </p>
             </div>
         </div>
     </div>
@@ -57,35 +60,41 @@
     <div class="row justify-content-center">
         <div class="col-lg-5 col-md-7">
             <div class="auth-card" data-aos="fade-up">
-                <form id="registerForm" onsubmit="return submitRegister(event)">
+                {% include 'includes/signup_i18n_hidden.html' %}
+                {% include 'includes/congo_locations_data.html' %}
+                <form id="registerForm" onsubmit="return submitRegister(event)" novalidate>
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label class="form-label fw-bold">{% trans "姓名" %} <span class="text-danger">*</span></label>
-                        <input type="text" name="name" class="form-control" placeholder="{% trans '请输入姓名' %}" required>
+                        <input type="text" name="name" id="regName" class="form-control auth-field" placeholder="{% trans 'Full name' %}" required autocomplete="name">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold">{% trans "邮箱" %} <span class="text-danger">*</span></label>
-                        <input type="email" name="email" class="form-control" placeholder="{% trans '请输入邮箱' %}" required>
+                        <input type="email" name="email" id="regEmail" class="form-control auth-field" placeholder="{% trans 'Email address' %}" required autocomplete="email">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold">{% trans "电话" %}</label>
-                        <input type="text" name="phone" class="form-control" placeholder="{% trans '选填' %}">
+                        <div class="phone-input-wrap">
+                            <span class="phone-input-prefix"><i class="fas fa-phone-alt"></i></span>
+                            <input type="tel" name="phone" id="regPhone" class="form-control auth-field" placeholder="{% trans 'Phone (+242 06 123 4567)' %}" required autocomplete="tel" inputmode="tel">
+                        </div>
                     </div>
+                    {% include 'includes/congo_location_select.html' with select_id='regLocation' city_id='regCity' placeholders_only=True %}
                     <div class="mb-3">
-                        <label class="form-label fw-bold">{% trans "密码" %} <span class="text-danger">*</span></label>
-                        <input type="password" name="password" class="form-control" placeholder="{% trans '至少6位' %}" required minlength="6">
+                        <input type="password" name="password" id="regPassword" class="form-control auth-field" placeholder="{% trans 'Password (min. 6 characters)' %}" required minlength="6" autocomplete="new-password">
                     </div>
                     <div class="mb-4">
-                        <label class="form-label fw-bold">{% trans "确认密码" %} <span class="text-danger">*</span></label>
-                        <input type="password" name="password2" class="form-control" placeholder="{% trans '再次输入密码' %}" required>
+                        <input type="password" name="password2" id="regPassword2" class="form-control auth-field" placeholder="{% trans 'Confirm password' %}" required autocomplete="new-password">
                     </div>
+                    {% include 'includes/signup_terms_checkbox.html' %}
                     <button type="submit" class="btn-auth" id="submitBtn">
-                        <i class="fas fa-user-plus me-2"></i>{% trans "注册" %}
+                        {% if twilio_sms_enabled %}
+                            <i class="fas fa-paper-plane me-2"></i>{% trans "Continue — send codes" %}
+                        {% else %}
+                            <i class="fas fa-user-plus me-2"></i>{% trans "Sign up" %}
+                        {% endif %}
                     </button>
                 </form>
-                <div class="auth-divider"><span>{% trans "或" %}</span></div>
+                <div class="auth-divider"><span>{% trans "or" %}</span></div>
                 <p class="text-center mb-0">
-                    {% trans "已有账户？" %} <a href="{% url 'manager:user_login' %}" style="color:#667eea;font-weight:600;">{% trans "登录" %}</a>
+                    {% trans "Already have an account?" %} <a href="{% url 'manager:user_login' %}" style="color:#667eea;font-weight:600;">{% trans "Sign in" %}</a>
                 </p>
             </div>
         </div>
@@ -94,31 +103,92 @@
 {% endblock %}
 
 {% block extra_js %}
+{% if use_local_static %}
+<script src="/static/js/signup_auth.js"></script>
+<script src="/static/js/signup_location.js"></script>
+{% else %}
+<script src="{% static 'js/signup_auth.js' %}"></script>
+<script src="{% static 'js/signup_location.js' %}"></script>
+{% endif %}
 <script>
-function submitRegister(e) {
-    e.preventDefault();
-    var form = document.getElementById('registerForm');
-    var btn = document.getElementById('submitBtn');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{% trans "注册中..." %}';
-    fetch('{% url "manager:user_register" %}', {
-        method: 'POST',
-        body: new FormData(form)
-    }).then(r => r.json()).then(d => {
-        if (d.success) {
-            gToast(d.message, 'success');
-            setTimeout(() => { window.location.href = d.redirect; }, 800);
-        } else {
-            gToast(d.message, 'error');
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-user-plus me-2"></i>{% trans "注册" %}';
+(function() {
+    var submitBtn = document.getElementById('submitBtn');
+    var SUBMIT_LABEL = submitBtn ? submitBtn.innerHTML : '';
+    var LOADING_LABEL = document.getElementById('signupLoadingLabel') ? document.getElementById('signupLoadingLabel').innerHTML : '';
+    var MSG_PASSWORD_MISMATCH = document.getElementById('signupMsgPasswordMismatch').textContent;
+    var MSG_NETWORK_ERROR = document.getElementById('signupMsgNetworkError').textContent;
+
+    window.submitRegister = function(e) {
+        e.preventDefault();
+        var form = document.getElementById('registerForm');
+        var btn = document.getElementById('submitBtn');
+        var phoneInput = document.getElementById('regPhone');
+        var citySelect = document.getElementById('regCity');
+        var pw1 = document.getElementById('regPassword').value;
+        var pw2 = document.getElementById('regPassword2').value;
+
+        phoneInput.classList.remove('is-invalid');
+        if (citySelect) citySelect.classList.remove('is-invalid');
+        if (window.SignupAuth) {
+            var pv = SignupAuth.validatePhoneE164(phoneInput.value);
+            if (!pv.ok) {
+                phoneInput.classList.add('is-invalid');
+                gToast(pv.message, 'error');
+                phoneInput.focus();
+                return false;
+            }
+            phoneInput.value = pv.phone;
         }
-    }).catch(() => {
-        gToast('网络错误', 'error');
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-user-plus me-2"></i>{% trans "注册" %}';
-    });
-    return false;
-}
+        if (!citySelect || !citySelect.value) {
+            if (citySelect) citySelect.classList.add('is-invalid');
+            gToast('{% trans "Please select your city" %}', 'error');
+            return false;
+        }
+        if (pw1 !== pw2) {
+            gToast(MSG_PASSWORD_MISMATCH, 'error');
+            return false;
+        }
+        var terms = document.getElementById('acceptTerms');
+        if (terms && !terms.checked) {
+            gToast("{% filter escapejs %}{% trans 'Veuillez accepter la politique de confidentialité et les conditions d utilisation.' %}{% endfilter %}", 'warning');
+            return false;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = LOADING_LABEL;
+        fetch('{% url "manager:user_register" %}', {
+            method: 'POST',
+            body: new FormData(form)
+        }).then(function(r) { return r.json(); }).then(function(d) {
+            if (d.success) {
+                var modalEl = document.getElementById('signupSuccessModal');
+                var msgEl = document.getElementById('signupSuccessMsg');
+                if (msgEl) msgEl.textContent = d.message || '';
+                var redirectUrl = d.redirect;
+                if (modalEl && window.bootstrap) {
+                    var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                    document.getElementById('signupSuccessContinue').onclick = function() {
+                        modal.hide();
+                        window.location.href = redirectUrl;
+                    };
+                    modal.show();
+                    setTimeout(function() { window.location.href = redirectUrl; }, 4500);
+                } else {
+                    gToast(d.message, 'success');
+                    setTimeout(function() { window.location.href = redirectUrl; }, 350);
+                }
+            } else {
+                gToast(d.message, 'error');
+                btn.disabled = false;
+                btn.innerHTML = SUBMIT_LABEL;
+            }
+        }).catch(function() {
+            gToast(MSG_NETWORK_ERROR, 'error');
+            btn.disabled = false;
+            btn.innerHTML = SUBMIT_LABEL;
+        });
+        return false;
+    };
+})();
 </script>
 {% endblock %}

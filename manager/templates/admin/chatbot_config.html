@@ -1,4 +1,4 @@
-﻿{% load i18n %}
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="zh-hans">
 <head>
@@ -792,11 +792,12 @@ function loadContextPreview() {
 }
 
 function clearSessions() {
-    if (!confirm(_t('确认清除所有对话记录？此操作不可撤销。','Clear all records? This cannot be undone.'))) return;
-    var fd = new FormData(); fd.append('action','clear_sessions'); fd.append('csrfmiddlewaretoken',getCsrf());
-    fetch('/manager/admin/chatbot/', { method:'POST', body:fd })
-        .then(r => r.json())
-        .then(d => { if(d.success){ showToast(d.message,'success'); setTimeout(() => location.reload(), 1200); } else showToast(_t('清除失败','Clear failed'),'error'); });
+    gConfirmAction(_t('确认清除所有对话记录？此操作不可撤销。','Clear all records? This cannot be undone.'), function() {
+        var fd = new FormData(); fd.append('action','clear_sessions'); fd.append('csrfmiddlewaretoken',getCsrf());
+        fetch('/manager/admin/chatbot/', { method:'POST', body:fd })
+            .then(r => r.json())
+            .then(d => { if(d.success){ showToast(d.message,'success'); setTimeout(() => location.reload(), 1200); } else showToast(_t('清除失败','Clear failed'),'error'); });
+    }, { danger: true, title: 'Confirm deletion' });
 }
 
 function applyModel(modelId) {

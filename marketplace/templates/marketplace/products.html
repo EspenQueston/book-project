@@ -127,6 +127,7 @@
     html[data-theme="dark"] .empty-state {
         color: var(--text-tertiary);
     }
+    {% include 'public/includes/feed_view_details_css.html' %}
 </style>
 {% endblock %}
 
@@ -177,7 +178,7 @@
         {% for product in products %}
         <div class="col-6 col-md-4 col-lg-3" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:0 }}0">
             <a href="{% url 'marketplace:product_detail' product.slug %}" style="text-decoration:none; color:inherit;">
-                <div class="product-card">
+                <div class="product-card feed-card-stretch">
                     <div style="position:relative;">
                         <img src="{{ product.get_image_url }}" alt="{{ product.name }}" class="product-card-img">
                         {% if product.get_discount_percent %}
@@ -187,7 +188,7 @@
                         <span class="position-absolute top-0 start-0 m-2 badge" style="background:linear-gradient(135deg,#f59e0b,#f97316);font-size:0.7rem;"><i class="fas fa-star me-1"></i>{% trans "推荐" %}</span>
                         {% endif %}
                     </div>
-                    <div class="product-card-body">
+                    <div class="product-card-body feed-card-body-stretch">
                         <h5>{{ product.name }}</h5>
                         {% if product.category %}
                         <span class="category-badge mb-2 d-inline-block">{{ product.category.name }}</span>
@@ -195,18 +196,23 @@
                         {% if product.brand %}
                         <small class="text-muted d-block mb-1">{{ product.brand }}</small>
                         {% endif %}
-                        <div class="d-flex align-items-center justify-content-between mt-2">
-                            <div>
-                                <span class="product-price">{{ product.price|fcfa }}</span>
-                                {% if product.original_price %}
-                                <span class="product-price-original">{{ product.original_price|fcfa }}</span>
-                                {% endif %}
+                        <div class="feed-card-actions">
+                            <div class="feed-card-actions-main">
+                                <div class="d-flex align-items-center justify-content-between mt-2">
+                                    <div>
+                                        <span class="product-price">{{ product.price|fcfa }}</span>
+                                        {% if product.original_price %}
+                                        <span class="product-price-original">{{ product.original_price|fcfa }}</span>
+                                        {% endif %}
+                                    </div>
+                                    {% if product.in_stock %}
+                                    <span class="badge bg-success stock-badge">{% trans "有货" %}</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary stock-badge">{% trans "缺货" %}</span>
+                                    {% endif %}
+                                </div>
                             </div>
-                            {% if product.in_stock %}
-                            <span class="badge bg-success stock-badge">{% trans "有货" %}</span>
-                            {% else %}
-                            <span class="badge bg-secondary stock-badge">{% trans "缺货" %}</span>
-                            {% endif %}
+                            {% include 'public/includes/feed_view_details_btn.html' %}
                         </div>
                     </div>
                 </div>
@@ -248,17 +254,22 @@
     </div>
     {% endif %}
 </div>
+<template id="feedViewDetailsBtnTpl">{% include 'public/includes/feed_view_details_btn.html' %}</template>
 <script>
 (function() {
     if (window.innerWidth > 768) return;
     var grid = document.getElementById('productsGrid');
     var loader = document.getElementById('productsFeedLoader');
     var sentinel = document.getElementById('productsFeedSentinel');
+    var feedDetailsBtn = (document.getElementById('feedViewDetailsBtnTpl') || {}).innerHTML || '';
     if (!grid || !sentinel) return;
 
-    var page = {{ products.number|default:1 }} + 1;
-    var hasMore = {{ products.has_next|yesno:"true,false" }};
+    var page = 1;
+    var hasMore = true;
     var loading = false;
+    var params = new URLSearchParams(window.location.search);
+    params.set('format', 'json');
+    params.set('recommend', '1');
 
     function escHtml(str) {
         var d = document.createElement('div');
@@ -267,19 +278,21 @@
     }
 
     function fmtFcfa(val) {
-        var n = Math.round(parseFloat(val) * 82);
+        var n = Math.round(parseFloat(val) || 0);
         return n.toLocaleString('fr-FR') + '\u00a0FCFA';
     }
 
     function buildCard(item) {
         return '<div class="col-6">'
             + '<a href="' + item.url + '" style="text-decoration:none; color:inherit;">'
-            + '<div class="product-card">'
+            + '<div class="product-card feed-card-stretch">'
             + '<div style="position:relative;"><img src="' + item.image + '" alt="' + escHtml(item.name) + '" class="product-card-img"></div>'
-            + '<div class="product-card-body">'
+            + '<div class="product-card-body feed-card-body-stretch">'
             + '<h5>' + escHtml(item.name) + '</h5>'
+            + '<div class="feed-card-actions"><div class="feed-card-actions-main">'
             + '<div class="d-flex align-items-center justify-content-between mt-2"><span class="product-price">' + fmtFcfa(item.price) + '</span>'
             + '<span class="badge ' + (item.in_stock ? 'bg-success' : 'bg-secondary') + ' stock-badge">' + escHtml(item.stock_text || '') + '</span></div>'
+            + '</div>' + feedDetailsBtn + '</div>'
             + '</div></div></a></div>';
     }
 
@@ -287,8 +300,6 @@
         if (!hasMore || loading) return;
         loading = true;
         if (loader) loader.style.display = 'block';
-        var params = new URLSearchParams(window.location.search);
-        params.set('format', 'json');
         params.set('page', page);
         fetch(window.location.pathname + '?' + params.toString())
             .then(function(r) { return r.json(); })
@@ -310,8 +321,8 @@
                     tmp.innerHTML = buildCard(item);
                     grid.appendChild(tmp.firstElementChild);
                 });
-                hasMore = !!data.has_more;
-                page = hasMore ? page + 1 : page;
+                hasMore = true;
+                page = page + 1;
                 loading = false;
                 if (loader) loader.style.display = 'none';
             })

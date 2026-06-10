@@ -1,0 +1,187 @@
+{% extends 'public/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "网站地图" %} - DUNO 360{% endblock %}
+
+{% block extra_css %}
+{% include 'public/pages/_sitemap_styles.html' %}
+{% endblock %}
+
+{% block content %}
+<section class="duno-sitemap-hero">
+    <div class="duno-sitemap-ambient" aria-hidden="true">
+        <span class="hero-text-grid"></span>
+        <span class="hero-aurora hero-aurora-a"></span>
+        <span class="hero-aurora hero-aurora-b"></span>
+    </div>
+    <div class="container duno-sitemap-hero-inner">
+        {% if page_breadcrumb %}
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb mb-0" style="--bs-breadcrumb-divider: '›';">
+                {% for crumb in page_breadcrumb %}
+                <li class="breadcrumb-item {% if forloop.last %}active text-white-50{% endif %}">
+                    {% if crumb.url %}
+                    <a href="{{ crumb.url }}" class="text-white text-decoration-none opacity-75">{{ crumb.label }}</a>
+                    {% else %}
+                    <span class="text-white-50">{{ crumb.label }}</span>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ol>
+        </nav>
+        {% endif %}
+        <span class="duno-page-badge" data-aos="fade-up"><i class="fas fa-sitemap"></i> DUNO 360</span>
+        <h1 data-aos="fade-up" data-aos-delay="60">{% trans "网站地图" %}</h1>
+        <p class="lead" data-aos="fade-up" data-aos-delay="100">
+            {% trans "快速访问 DUNO 360 平台的所有版块。" %}
+        </p>
+
+        <div class="duno-sitemap-stats" data-aos="fade-up" data-aos-delay="140">
+            <div class="duno-sitemap-stat">
+                <span class="duno-sitemap-stat-num">{{ section_count }}</span>
+                <span class="duno-sitemap-stat-label">{% trans "版块" %}</span>
+            </div>
+            <div class="duno-sitemap-stat">
+                <span class="duno-sitemap-stat-num">{{ total_links }}</span>
+                <span class="duno-sitemap-stat-label">{% trans "页面" %}</span>
+            </div>
+        </div>
+
+        <nav class="duno-sitemap-jump" aria-label="{% trans '快速访问' %}" data-aos="fade-up" data-aos-delay="180">
+            {% for group in sitemap_sections %}
+            <a href="#sitemap-{{ group.slug }}" data-sitemap-jump="{{ group.slug }}">
+                <i class="fas {{ group.icon }}"></i>{{ group.title }}
+            </a>
+            {% endfor %}
+        </nav>
+    </div>
+    <div class="duno-sitemap-wave" aria-hidden="true">
+        <svg viewBox="0 0 1440 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0,48 C320,88 480,8 720,40 C960,72 1120,24 1440,56 L1440,80 L0,80 Z" fill="#f8fafc"/>
+        </svg>
+    </div>
+</section>
+
+<div class="container duno-sitemap-body">
+    <div class="duno-sitemap-toolbar" data-aos="fade-up">
+        <div class="duno-sitemap-search-wrap">
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <input type="search" id="sitemapSearch" placeholder="{% trans '搜索页面...' %}" autocomplete="off" aria-label="{% trans '搜索页面' %}">
+        </div>
+        <div class="duno-sitemap-filter-hint">
+            <span id="sitemapVisibleCount">{{ total_links }}</span> / {{ total_links }} {% trans "可见页面" %}
+        </div>
+    </div>
+
+    <div class="duno-sitemap-grid" id="sitemapGrid">
+        {% for group in sitemap_sections %}
+        <article class="duno-sitemap-card" id="sitemap-{{ group.slug }}" data-sitemap-section="{{ group.slug }}" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:1 }}0">
+            <div class="duno-sitemap-card-head">
+                <h2>
+                    <span class="duno-sitemap-card-icon"><i class="fas {{ group.icon }}"></i></span>
+                    {{ group.title }}
+                </h2>
+                <span class="duno-sitemap-card-count">{{ group.link_count }} {% trans "链接" %}</span>
+            </div>
+            <ul>
+                {% for link in group.links %}
+                <li data-sitemap-link>
+                    <a href="{{ link.url }}">
+                        <span class="link-label">
+                            <i class="fas fa-circle link-dot"></i>{{ link.label }}
+                        </span>
+                        <span class="link-arrow"><i class="fas fa-arrow-right"></i></span>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </article>
+        {% endfor %}
+    </div>
+
+    <div class="duno-sitemap-empty" id="sitemapEmpty">
+        <i class="fas fa-search d-block"></i>
+        <h3>{% trans "未找到页面" %}</h3>
+        <p>{% trans "请尝试其他关键词。" %}</p>
+    </div>
+
+    <div class="duno-sitemap-cta" data-aos="fade-up">
+        <div>
+            <h3>{% trans "需要帮助导航吗？" %}</h3>
+            <p>{% trans "我们的团队随时为您提供平台导航指导。" %}</p>
+        </div>
+        <a href="{% url 'manager:public_contact' %}" class="btn btn-light">
+            <i class="fas fa-envelope me-2"></i>{% trans "联系我们" %}
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    var searchInput = document.getElementById('sitemapSearch');
+    var visibleCount = document.getElementById('sitemapVisibleCount');
+    var emptyState = document.getElementById('sitemapEmpty');
+    var cards = document.querySelectorAll('[data-sitemap-section]');
+    var totalLinks = {{ total_links }};
+
+    function normalize(str) {
+        return (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+
+    function filterSitemap() {
+        var query = normalize(searchInput.value.trim());
+        var visible = 0;
+
+        cards.forEach(function(card) {
+            var sectionVisible = false;
+            card.querySelectorAll('[data-sitemap-link]').forEach(function(item) {
+                var label = normalize(item.textContent);
+                var match = !query || label.indexOf(query) !== -1;
+                item.classList.toggle('is-hidden', !match);
+                if (match) {
+                    sectionVisible = true;
+                    visible += 1;
+                }
+            });
+            card.classList.toggle('is-hidden', !sectionVisible);
+        });
+
+        if (visibleCount) visibleCount.textContent = visible;
+        if (emptyState) emptyState.classList.toggle('is-visible', visible === 0 && query.length > 0);
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', filterSitemap);
+    }
+
+    document.querySelectorAll('[data-sitemap-jump]').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            var target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                e.preventDefault();
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                target.style.transition = 'box-shadow .4s ease';
+                target.style.boxShadow = '0 0 0 3px rgba(102,126,234,.35), 0 22px 56px rgba(102,126,234,.16)';
+                setTimeout(function() { target.style.boxShadow = ''; }, 1200);
+            }
+        });
+    });
+
+    function syncJumpTabs() {
+        var activeSlug = '';
+        cards.forEach(function(card) {
+            if (card.getBoundingClientRect().top <= 160) {
+                activeSlug = card.getAttribute('data-sitemap-section');
+            }
+        });
+        document.querySelectorAll('[data-sitemap-jump]').forEach(function(link) {
+            link.classList.toggle('active', link.getAttribute('data-sitemap-jump') === activeSlug);
+        });
+    }
+    window.addEventListener('scroll', syncJumpTabs, { passive: true });
+    syncJumpTabs();
+})();
+</script>
+{% endblock %}

@@ -152,6 +152,122 @@
             color: var(--text-primary);
         }
 
+        /* Global premium form effects */
+        .platform-form-surface,
+        form:not(.m-0):not(.d-inline):not(.d-inline-block):not(.ajax-exempt-form) {
+            position: relative;
+        }
+        .platform-form-card,
+        .content-card,
+        .form-card,
+        .vendor-form-card,
+        .vp-card,
+        .toolbar {
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(102,126,234,0.10);
+            box-shadow: 0 18px 48px rgba(102,126,234,0.08), 0 6px 18px rgba(15,23,42,0.05);
+            backdrop-filter: blur(10px);
+        }
+        .platform-form-card::before,
+        .content-card::before,
+        .form-card::before,
+        .vendor-form-card::before,
+        .vp-card::before,
+        .toolbar::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: linear-gradient(135deg, rgba(255,255,255,0.18), transparent 38%, transparent 62%, rgba(118,75,162,0.06));
+        }
+        .platform-form-card::after,
+        .content-card::after,
+        .form-card::after,
+        .vendor-form-card::after,
+        .vp-card::after,
+        .toolbar::after {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: inherit;
+            pointer-events: none;
+            border: 1px solid rgba(255,255,255,0.28);
+            opacity: 0.55;
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            padding: 1px;
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+        }
+        .form-control, .form-select, textarea, input[type="text"], input[type="email"], input[type="password"], input[type="number"], input[type="url"], input[type="tel"], input[type="search"] {
+            border-radius: 14px !important;
+            border: 1.5px solid rgba(102,126,234,0.14) !important;
+            background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(248,250,252,0.92)) !important;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.85), 0 1px 2px rgba(15,23,42,0.03);
+            min-height: 46px;
+            transition: transform .18s ease, box-shadow .22s ease, border-color .22s ease, background-color .22s ease;
+        }
+        textarea.form-control { min-height: 120px; }
+        .form-control:hover, .form-select:hover, textarea:hover {
+            border-color: rgba(102,126,234,0.24) !important;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 6px 18px rgba(102,126,234,0.08);
+        }
+        .form-control:focus, .form-select:focus, textarea:focus {
+            border-color: rgba(102,126,234,0.65) !important;
+            box-shadow: 0 0 0 4px rgba(102,126,234,0.14), 0 16px 30px rgba(102,126,234,0.10) !important;
+            transform: translateY(-1px);
+            background: linear-gradient(180deg, rgba(255,255,255,1), rgba(248,250,252,0.96)) !important;
+        }
+        .input-group-text {
+            border-radius: 14px !important;
+            border: 1.5px solid rgba(102,126,234,0.14) !important;
+            background: linear-gradient(135deg, rgba(102,126,234,0.10), rgba(118,75,162,0.08)) !important;
+            color: var(--text-secondary);
+            font-weight: 700;
+        }
+        .btn, button[type="submit"], input[type="submit"] {
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-primary, .btn-primary-gradient, .btn-submit, .btn-primary-modern {
+            box-shadow: 0 10px 25px rgba(102,126,234,0.22);
+        }
+        .btn-primary:hover, .btn-primary-gradient:hover, .btn-submit:hover, .btn-primary-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 32px rgba(102,126,234,0.28);
+        }
+        .page-header-card, .mv-page-header-card, .vp-page-head, .header-card {
+            position: relative;
+            overflow: hidden;
+        }
+        .page-header-card::before, .mv-page-header-card::before, .vp-page-head::before, .header-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top left, rgba(255,255,255,0.20), transparent 32%), radial-gradient(circle at bottom right, rgba(255,255,255,0.10), transparent 28%);
+            pointer-events: none;
+        }
+        html[data-theme="dark"] .form-control, html[data-theme="dark"] .form-select, html[data-theme="dark"] textarea {
+            background: linear-gradient(180deg, rgba(30,41,59,0.92), rgba(15,23,42,0.96)) !important;
+            border-color: rgba(129,140,248,0.20) !important;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 2px rgba(0,0,0,0.18);
+        }
+        html[data-theme="dark"] .form-control:focus, html[data-theme="dark"] .form-select:focus, html[data-theme="dark"] textarea:focus {
+            border-color: rgba(129,140,248,0.72) !important;
+            box-shadow: 0 0 0 4px rgba(129,140,248,0.18), 0 14px 26px rgba(79,70,229,0.14) !important;
+            background: linear-gradient(180deg, rgba(30,41,59,0.98), rgba(15,23,42,1)) !important;
+        }
+        html[data-theme="dark"] .platform-form-card,
+        html[data-theme="dark"] .content-card,
+        html[data-theme="dark"] .form-card,
+        html[data-theme="dark"] .vendor-form-card,
+        html[data-theme="dark"] .vp-card,
+        html[data-theme="dark"] .toolbar {
+            border-color: rgba(129,140,248,0.12);
+            box-shadow: 0 20px 54px rgba(0,0,0,0.32), 0 10px 28px rgba(79,70,229,0.10);
+        }
+
         /* Component overrides */
         html[data-theme="dark"] .card, html[data-theme="dark"] .card-modern {
             background: var(--bg-surface) !important;
@@ -583,26 +699,6 @@
             color: #b8c6db;
             font-size: 0.9rem;
             line-height: 1.4;
-        }
-        
-        .admin-access {
-            margin-top: 25px;
-        }
-        
-        .admin-access .btn {
-            border: 2px solid var(--secondary-color);
-            color: var(--secondary-color);
-            padding: 10px 20px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.3s ease;
-        }
-        
-        .admin-access .btn:hover {
-            background: var(--secondary-color);
-            color: #ffffff;
-            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
         }
         
         .footer-divider {
@@ -1061,6 +1157,11 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link px-3 py-2" href="{% url 'manager:publish_entry' %}" style="font-weight: 800; font-size: 0.9rem; transition: all 0.3s ease; border-radius: 999px; background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.25);">
+                            <i class="fas fa-bullhorn me-1"></i><span>{% trans "Publier" %}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link px-2 py-2" href="{% url 'manager:public_blog' %}" style="font-weight: 500; font-size: 0.9rem; transition: all 0.3s ease; border-radius: 8px;">
                             <i class="fas fa-blog me-1"></i><span>{% trans "博客" %}</span>
                         </a>
@@ -1505,21 +1606,7 @@
                             <span data-zh="综合性数字平台，融合图书、在线课程、电商市场与生鲜超市，为您提供一站式的知识获取与购物体验。" data-en="A comprehensive digital platform combining books, online courses, e-commerce marketplace and fresh supermarket — your one-stop destination for knowledge and shopping." data-fr="Plateforme numérique complète combinant livres, cours en ligne, marketplace e-commerce et supermarché — votre destination unique pour le savoir et le shopping.">综合性数字平台，融合图书、在线课程、电商市场与生鲜超市，为您提供一站式的知识获取与购物体验。</span>
                         </p>
                         <div class="social-links">
-                            <a href="https://www.facebook.com/poires.gomai" class="social-link" title="Facebook" target="_blank" rel="noopener noreferrer">
-                                <i class="fab fa-facebook-f"></i>
-                            </a>
-                            <a href="#" class="social-link" title="{% trans '微信' %}: bizkey2025" onclick="document.getElementById('wechatModal').style.display='flex'; return false;">
-                                <i class="fab fa-weixin"></i>
-                            </a>
-                            <a href="https://github.com/EspenQueston" class="social-link" title="GitHub" target="_blank" rel="noopener noreferrer">
-                                <i class="fab fa-github"></i>
-                            </a>
-                            <a href="mailto:bizkey2024@gmail.com" class="social-link" title="{% trans '邮箱' %}">
-                                <i class="fas fa-envelope"></i>
-                            </a>
-                            <a href="https://wa.me/8613520646854" class="social-link" title="WhatsApp" target="_blank" rel="noopener noreferrer">
-                                <i class="fab fa-whatsapp"></i>
-                            </a>
+                            {% include 'includes/social_links_footer.html' %}
                         </div>
                     </div>
                 </div>
@@ -1548,6 +1635,10 @@
                             <li><a href="{% url 'manager:public_services' %}"><i class="fas fa-chevron-right"></i><span>{% trans "我们的服务" %}</span></a></li>
                             <li><a href="{% url 'manager:public_contact' %}"><i class="fas fa-chevron-right"></i><span>{% trans "联系我们" %}</span></a></li>
                             <li><a href="{% url 'manager:public_blog' %}"><i class="fas fa-chevron-right"></i><span>{% trans "博客" %}</span></a></li>
+                            <li><a href="{% url 'manager:info_page' slug='commande-livraison' %}"><i class="fas fa-chevron-right"></i><span>{% trans "Commande & livraison" %}</span></a></li>
+                            <li><a href="{% url 'manager:info_page' slug='service-client' %}"><i class="fas fa-chevron-right"></i><span>{% trans "Service client" %}</span></a></li>
+                            <li><a href="{% url 'manager:info_page' slug='politique-remboursement' %}"><i class="fas fa-chevron-right"></i><span>{% trans "Politique de remboursement" %}</span></a></li>
+                            <li><a href="{% url 'manager:info_page' slug='devenir-partenaire' %}"><i class="fas fa-chevron-right"></i><span>{% trans "Devenir partenaire" %}</span></a></li>
                         </ul>
                     </div>
                 </div>
@@ -1565,19 +1656,13 @@
                                 </div>
                             </div>
                             <div class="contact-item">
-                                <i class="fas fa-phone"></i>
-                                <div class="contact-details">
-                                    <strong>{% trans "电话" %}</strong>
-                                    <span>+86 135 2064 6854</span>
-                                </div>
-                            </div>
-                            <div class="contact-item">
                                 <i class="fas fa-envelope"></i>
                                 <div class="contact-details">
                                     <strong>{% trans "邮箱" %}</strong>
-                                    <span>bizkey2024@gmail.com</span>
+                                    <span>{{ PLATFORM_CONTACT_EMAIL }}</span>
                                 </div>
                             </div>
+                            {% include 'includes/platform_contact_phone.html' %}
                             <div class="contact-item">
                                 <i class="fas fa-clock"></i>
                                 <div class="contact-details">
@@ -1585,13 +1670,6 @@
                                     <span>{% trans "周一至周五 9:00-18:00" %}</span>
                                 </div>
                             </div>
-                        </div>
-                        
-                        <!-- Management Access -->
-                        <div class="admin-access">
-                            <a href="/manager/login/" class="btn btn-outline-light btn-sm">
-                                <i class="fas fa-user-shield"></i> <span>{% trans "管理员入口" %}</span>
-                            </a>
                         </div>
                     </div>
                 </div>
@@ -1605,11 +1683,11 @@
                         <div class="copyright">
                             <p>&copy; 2024 <span>DUNO 360</span>. <span data-zh="保留所有权利" data-en="All rights reserved" data-fr="Tous droits réservés">保留所有权利</span>.</p>
                             <div class="legal-links">
-                                <a href="#">{% trans "隐私政策" %}</a>
+                                <a href="{% url 'manager:legal_privacy' %}">{% trans "隐私政策" %}</a>
                                 <span>|</span>
-                                <a href="#">{% trans "使用条款" %}</a>
+                                <a href="{% url 'manager:legal_terms' %}">{% trans "使用条款" %}</a>
                                 <span>|</span>
-                                <a href="#">{% trans "网站地图" %}</a>
+                                <a href="{% url 'manager:site_map' %}">{% trans "网站地图" %}</a>
                             </div>
                         </div>
                     </div>
@@ -1699,6 +1777,13 @@
 
     <!-- Global Toast Container -->
     <div id="gToastContainer" class="g-toast-container"></div>
+    <span id="gI18nConfirmTitle" class="visually-hidden">{% trans "确认操作" %}</span>
+    <span id="gI18nConfirmOk" class="visually-hidden">{% trans "确认" %}</span>
+    <span id="gI18nInfoTitle" class="visually-hidden">{% trans "提示" %}</span>
+    <span id="gI18nLogoutTitle" class="visually-hidden">{% trans "Sign out" %}</span>
+    <span id="gI18nLogoutMessage" class="visually-hidden">{% trans "Are you sure you want to sign out?" %}</span>
+    <span id="gI18nDeleteTitle" class="visually-hidden">{% trans "Confirm deletion" %}</span>
+    <span id="gI18nDeleteMessage" class="visually-hidden">{% trans "Are you sure you want to delete this item?" %}</span>
 
     <!-- Global Confirm Modal -->
     <div id="gConfirmModal" class="g-modal-overlay" onclick="if(event.target===this)gModalClose()">
@@ -1764,17 +1849,26 @@
 
     /* ===== Global Confirm Modal ===== */
     var _gConfirmCb = null;
+    var _G_I18N = {
+        confirmTitle: document.getElementById('gI18nConfirmTitle') ? document.getElementById('gI18nConfirmTitle').textContent : 'Confirm',
+        confirmOk: document.getElementById('gI18nConfirmOk') ? document.getElementById('gI18nConfirmOk').textContent : 'OK',
+        infoTitle: document.getElementById('gI18nInfoTitle') ? document.getElementById('gI18nInfoTitle').textContent : 'Notice',
+        logoutTitle: document.getElementById('gI18nLogoutTitle') ? document.getElementById('gI18nLogoutTitle').textContent : 'Sign out',
+        logoutMessage: document.getElementById('gI18nLogoutMessage') ? document.getElementById('gI18nLogoutMessage').textContent : 'Are you sure you want to sign out?',
+        deleteTitle: document.getElementById('gI18nDeleteTitle') ? document.getElementById('gI18nDeleteTitle').textContent : 'Confirm deletion',
+        deleteMessage: document.getElementById('gI18nDeleteMessage') ? document.getElementById('gI18nDeleteMessage').textContent : 'Are you sure you want to delete this item?',
+    };
     function gConfirm(msg, callback, opts) {
         opts = opts || {};
         var modal = document.getElementById('gConfirmModal');
         var iconEl = document.getElementById('gConfirmIcon');
         var okBtn = document.getElementById('gConfirmOk');
-        document.getElementById('gConfirmTitle').textContent = opts.title || '{% trans "确认操作" %}';
+        document.getElementById('gConfirmTitle').textContent = opts.title || _G_I18N.confirmTitle;
         document.getElementById('gConfirmText').textContent = msg;
         iconEl.className = 'g-modal-icon ' + (opts.danger ? 'danger-icon' : 'confirm-icon');
         iconEl.innerHTML = '<i class="fas ' + (opts.danger ? 'fa-exclamation-triangle' : 'fa-question') + '"></i>';
         okBtn.className = 'g-modal-btn ' + (opts.danger ? 'g-modal-btn-danger' : 'g-modal-btn-confirm');
-        okBtn.textContent = opts.okText || '{% trans "确认" %}';
+        okBtn.textContent = opts.okText || _G_I18N.confirmOk;
         _gConfirmCb = callback;
         okBtn.onclick = function(){ var cb = _gConfirmCb; gModalClose(); if(cb) cb(); };
         modal.classList.add('show');
@@ -1786,7 +1880,7 @@
         opts = opts || {};
         var modal = document.getElementById('gInfoModal');
         var iconEl = document.getElementById('gInfoIcon');
-        document.getElementById('gInfoTitle').textContent = opts.title || '{% trans "提示" %}';
+        document.getElementById('gInfoTitle').textContent = opts.title || _G_I18N.infoTitle;
         document.getElementById('gInfoText').textContent = msg;
         var iconType = opts.type || 'info';
         var iconClasses = {info:'info-icon',success:'success-icon',error:'danger-icon',warning:'confirm-icon'};
@@ -1796,6 +1890,11 @@
         modal.classList.add('show');
     }
     </script>
+    {% if use_local_static %}
+    <script src="/static/js/destructive_action_guards.js"></script>
+    {% else %}
+    <script src="{% static 'js/destructive_action_guards.js' %}"></script>
+    {% endif %}
 
     <!-- Update cart badge on every page -->
     <script>
@@ -2100,9 +2199,9 @@ document.addEventListener('DOMContentLoaded', function() {
             <i class="fas fa-home"></i>
             <span data-zh="首页" data-en="Home" data-fr="Accueil">首页</span>
         </a>
-        <a href="{% url 'manager:public_books' %}" class="pwa-tab" id="pwaTabBooks">
-            <i class="fas fa-book-open"></i>
-            <span data-zh="图书" data-en="Books" data-fr="Livres">图书</span>
+        <a href="{% url 'marketplace:home' %}" class="pwa-tab" id="pwaTabBooks">
+            <i class="fas fa-store"></i>
+            <span data-zh="市场" data-en="Market" data-fr="Marché">市场</span>
         </a>
         <a href="{% url 'manager:public_messages' %}" class="pwa-tab" id="pwaTabMessages">
             <i class="fas fa-comment-dots"></i>
@@ -2133,7 +2232,7 @@ document.addEventListener('DOMContentLoaded', function() {
             { id: 'pwaTabMessages', prefixes: ['/manager/public/messages/'] },
             { id: 'pwaTabOrders', prefixes: ['/manager/track-order/', '/manager/public/orders/'] },
             { id: 'pwaTabProfile', prefixes: ['/manager/public/user/profile/', '/manager/public/user/login/', '/manager/public/my-profile/'] },
-            { id: 'pwaTabBooks', prefixes: ['/manager/public/books/'] },
+            { id: 'pwaTabBooks', prefixes: ['/marketplace/'] },
             { id: 'pwaTabHome', exact: ['/', '/manager/public/', '/manager/public'] }
         ];
 

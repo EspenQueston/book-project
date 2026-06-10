@@ -1,0 +1,143 @@
+{% extends 'public/vendor_panel_base.html' %}
+{% load i18n %}
+
+{% block panel_title %}<span data-zh="店铺设置" data-en="Store settings" data-fr="Paramètres boutique">{% trans "店铺设置" %}</span> · {{ vendor.company_name }}{% endblock %}
+
+{% block panel_extra_css %}
+<style>
+    .vs-page-head {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        padding: 20px 22px;
+        border-radius: 15px;
+        margin-bottom: 20px;
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.28);
+    }
+    .vs-card {
+        background: var(--card-bg, #fff);
+        border-radius: 18px;
+        box-shadow: 0 8px 28px rgba(0,0,0,0.06);
+        padding: 22px;
+        border: 1px solid rgba(0,0,0,0.05);
+        margin-bottom: 16px;
+    }
+    .vs-card h5 {
+        font-weight: 800;
+        margin-bottom: 18px;
+    }
+    .btn-vendor {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 20px;
+        border-radius: 12px;
+        border: none;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        font-weight: 700;
+        text-decoration: none;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-vendor:hover { color: #fff; transform: translateY(-1px); box-shadow: 0 8px 22px rgba(102,126,234,0.35); }
+    html[data-theme="dark"] .vs-card { background: var(--bg-surface, #1e293b); border-color: rgba(255,255,255,0.08); }
+</style>
+{% endblock %}
+
+{% block vendor_panel_content %}
+<section class="container-fluid py-3">
+    {% include 'includes/congo_locations_data.html' %}
+    <div class="vs-page-head">
+        <h4 class="mb-1 fw-bold"><i class="fas fa-cog me-2"></i><span data-zh="店铺设置" data-en="Store settings" data-fr="Paramètres boutique">{% trans "店铺设置" %}</span></h4>
+        <p class="mb-0 opacity-75 small"><span data-zh="定制您的店铺信息、联系方式与 Logo" data-en="Customize your shop details, contact info and logo" data-fr="Personnalisez votre boutique, vos contacts et votre logo">{% trans "定制您的店铺信息、联系方式与 Logo" %}</span></p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="vs-card">
+                <h5><i class="fas fa-palette me-2" style="color:#667eea;"></i><span data-zh="店铺定制" data-en="Shop customization" data-fr="Personnalisation boutique">{% trans "店铺定制" %}</span></h5>
+                <form id="shopSettingsForm" method="post" action="{% url 'manager:vendor_settings_save' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {% if admin_access %}
+                    <input type="hidden" name="vendor_id" value="{{ vendor.id }}">
+                    {% endif %}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" style="font-size:0.88rem;"><span data-zh="店铺名称" data-en="Shop name" data-fr="Nom de la boutique">{% trans "店铺名称" %}</span></label>
+                        <input type="text" class="form-control" value="{{ vendor.company_name }}" name="company_name" style="border-radius:10px;">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" style="font-size:0.88rem;"><span data-zh="店铺描述" data-en="Shop description" data-fr="Description boutique">{% trans "店铺描述" %}</span></label>
+                        <textarea class="form-control" rows="4" name="description" style="border-radius:10px;">{{ vendor.description }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" style="font-size:0.88rem;"><span data-zh="联系电话" data-en="Phone number" data-fr="Téléphone">{% trans "联系电话" %}</span></label>
+                        <input type="text" class="form-control" value="{{ vendor.phone }}" name="phone" style="border-radius:10px;">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" style="font-size:0.88rem;"><span data-zh="联系邮箱" data-en="Contact email" data-fr="E-mail de contact">{% trans "联系邮箱" %}</span></label>
+                        <input type="email" class="form-control" value="{{ vendor.email }}" name="email" style="border-radius:10px;">
+                    </div>
+                    <div class="mb-3">
+                        {% include 'includes/congo_location_select.html' with select_id='vendorShopLocation' city_id='vendorShopCity' selected_location=vendor.location selected_city=vendor.city %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" style="font-size:0.88rem;"><span data-zh="店铺 Logo" data-en="Shop logo" data-fr="Logo boutique">{% trans "店铺 Logo" %}</span></label>
+                        <div class="d-flex align-items-center gap-3">
+                            {% if vendor.get_logo_url %}
+                            <img src="{{ vendor.get_logo_url }}" style="width:60px;height:60px;border-radius:12px;object-fit:cover;" alt="">
+                            {% else %}
+                            <div style="width:60px;height:60px;border-radius:12px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.5rem;">
+                                <i class="fas fa-store"></i>
+                            </div>
+                            {% endif %}
+                            <input type="file" class="form-control" name="logo" accept="image/*" style="border-radius:10px;">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-vendor" style="width:100%;">
+                        <i class="fas fa-save"></i><span data-zh="保存设置" data-en="Save settings" data-fr="Enregistrer">{% trans "保存设置" %}</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="vs-card">
+                <h5><i class="fas fa-link me-2" style="color:#667eea;"></i><span data-zh="店铺链接" data-en="Shop link" data-fr="Lien boutique">{% trans "店铺链接" %}</span></h5>
+                <p style="font-size:0.85rem;color:var(--muted-text, #64748b);" data-zh="分享您的店铺链接给客户" data-en="Share your shop link with customers" data-fr="Partagez votre lien boutique avec vos clients">{% trans "分享您的店铺链接给客户" %}</p>
+                <div style="background:var(--section-bg, #f8f9fa);padding:12px;border-radius:10px;word-break:break-all;font-size:0.82rem;font-family:monospace;" id="shopUrl">
+                    {{ request.scheme }}://{{ request.get_host }}{% url 'manager:public_vendor_shop' vendor.id %}
+                </div>
+                <button class="btn btn-sm btn-outline-primary mt-2 w-100" style="border-radius:8px;" onclick="copyShopUrl()">
+                    <i class="fas fa-copy me-1"></i><span data-zh="复制链接" data-en="Copy link" data-fr="Copier le lien">{% trans "复制链接" %}</span>
+                </button>
+            </div>
+            <div class="vs-card">
+                <h5><i class="fas fa-qrcode me-2" style="color:#667eea;"></i><span data-zh="店铺预览" data-en="Shop preview" data-fr="Aperçu boutique">{% trans "店铺预览" %}</span></h5>
+                <a href="{% url 'manager:public_vendor_shop' vendor.id %}" target="_blank" class="btn-vendor d-block text-center" style="font-size:0.88rem;">
+                    <i class="fas fa-external-link-alt"></i><span data-zh="打开店铺主页" data-en="Open shop page" data-fr="Ouvrir la boutique">{% trans "打开店铺主页" %}</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock vendor_panel_content %}
+
+{% block panel_extra_js %}
+{% load static %}
+{% if use_local_static %}
+<script src="/static/js/signup_location.js"></script>
+{% else %}
+<script src="{% static 'js/signup_location.js' %}"></script>
+{% endif %}
+<script>
+function copyShopUrl() {
+    var url = document.getElementById('shopUrl').innerText.trim();
+    navigator.clipboard.writeText(url).then(function() {
+        var okEn = 'Link copied!';
+        var okFr = 'Lien copié !';
+        var lang = (window.adminI18n && window.adminI18n.getLang) ? window.adminI18n.getLang() : 'en';
+        var ok = lang === 'fr' ? okFr : okEn;
+        if (typeof gToast === 'function') gToast(ok, 'success');
+    });
+}
+</script>
+{% endblock %}

@@ -4,6 +4,8 @@ from decimal import Decimal
 import os
 import uuid
 
+from manager.congo_locations import CONGO_DEPARTMENT_CHOICES, DEFAULT_CONGO_LOCATION, DEFAULT_CONGO_CITY
+
 
 # 创建数据库对象模型
 # 管理员登录类
@@ -229,6 +231,7 @@ class Order(models.Model):
     
     # 国家信息 (仅用于数字产品)
     country = models.CharField(max_length=50, default='China', verbose_name="国家")
+    city = models.CharField(max_length=100, blank=True, default='', verbose_name="城市")
     shipping_address = models.TextField(blank=True, default='', verbose_name="收货地址")
       # 订单详情
     payment_method = models.CharField(
@@ -372,6 +375,13 @@ class Order(models.Model):
 
         if changed_fields:
             self.save(update_fields=list(dict.fromkeys(changed_fields)) + ['updated_at'])
+            if 'status' in changed_fields and self.status == 'delivered':
+                try:
+                    from manager.escrow_service import mark_order_escrow_delivered, process_due_escrow_releases
+                    mark_order_escrow_delivered('book', self.id)
+                    process_due_escrow_releases()
+                except Exception:
+                    pass
             return True
         return False
 
@@ -728,10 +738,24 @@ class EmailAutoRule(models.Model):
 
 class SiteUser(models.Model):
     """Public site user model for optional user accounts"""
+    ROLE_CHOICES = [
+        ('buyer', 'Acheteur'),
+        ('seller', 'Acheteur & vendeur'),
+    ]
+
     email = models.EmailField(unique=True, verbose_name='邮箱')
     password = models.CharField(max_length=128, verbose_name='密码')
     name = models.CharField(max_length=100, verbose_name='姓名')
-    phone = models.CharField(max_length=20, blank=True, default='', verbose_name='电话')
+    phone = models.CharField(max_length=20, verbose_name='电话')
+    location = models.CharField(
+        max_length=64,
+        choices=CONGO_DEPARTMENT_CHOICES,
+        default=DEFAULT_CONGO_LOCATION,
+        verbose_name='Localisation',
+    )
+    city = models.CharField(max_length=64, default=DEFAULT_CONGO_CITY, verbose_name='Ville')
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='buyer', db_index=True, verbose_name='角色')
+    seller_activated_at = models.DateTimeField(null=True, blank=True, verbose_name='卖家激活时间')
     avatar = models.ImageField(upload_to='user_avatars/', blank=True, null=True, verbose_name='头像')
     is_active = models.BooleanField(default=True, verbose_name='启用')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='注册时间')
@@ -751,6 +775,16 @@ class SiteUser(models.Model):
             return self.avatar.url
         return None
 
+    @property
+    def is_seller(self):
+        return self.role == 'seller' or hasattr(self, 'vendor_profile')
+
+    def promote_to_seller(self):
+        if self.role != 'seller':
+            self.role = 'seller'
+            self.seller_activated_at = timezone.now()
+            self.save(update_fields=['role', 'seller_activated_at', 'updated_at'])
+
 
 VERIFICATION_TYPE_CHOICES = [
     ('user', '用户注册'),
@@ -766,10 +800,19 @@ class EmailVerification(models.Model):
     name = models.CharField(max_length=100, verbose_name='姓名')
     password = models.CharField(max_length=128, verbose_name='密码(已加密)')
     phone = models.CharField(max_length=20, blank=True, default='', verbose_name='电话')
+    location = models.CharField(
+        max_length=64,
+        choices=CONGO_DEPARTMENT_CHOICES,
+        default=DEFAULT_CONGO_LOCATION,
+        verbose_name='Localisation',
+    )
+    city = models.CharField(max_length=64, default=DEFAULT_CONGO_CITY, verbose_name='Ville')
     verification_type = models.CharField(max_length=20, choices=VERIFICATION_TYPE_CHOICES, default='user', verbose_name='验证类型')
     company_name = models.CharField(max_length=200, blank=True, default='', verbose_name='公司名称')
     description = models.TextField(blank=True, default='', verbose_name='描述')
     is_verified = models.BooleanField(default=False, verbose_name='已验证')
+    phone_verified = models.BooleanField(default=False, verbose_name='Téléphone vérifié')
+    require_sms_verification = models.BooleanField(default=False, verbose_name='SMS OTP requis')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     expires_at = models.DateTimeField(verbose_name='过期时间')
 
@@ -871,12 +914,19 @@ class Vendor(models.Model):
     contact_name = models.CharField(max_length=100, verbose_name='联系人')
     email = models.EmailField(verbose_name='邮箱')
     phone = models.CharField(max_length=20, blank=True, default='', verbose_name='电话')
+    location = models.CharField(
+        max_length=64,
+        choices=CONGO_DEPARTMENT_CHOICES,
+        default=DEFAULT_CONGO_LOCATION,
+        verbose_name='Localisation',
+    )
+    city = models.CharField(max_length=64, default=DEFAULT_CONGO_CITY, verbose_name='Ville')
     password = models.CharField(max_length=128, verbose_name='密码')
     description = models.TextField(blank=True, default='', verbose_name='店铺描述')
     logo = models.ImageField(upload_to='vendor_logos/', blank=True, null=True, verbose_name='Logo')
     status = models.CharField(max_length=20, choices=VENDOR_STATUS_CHOICES, default='pending', verbose_name='状态')
-    commission_rate = models.DecimalField(max_digits=5, decimal_places=2, default=10.00, verbose_name='佣金比例(%)')
     is_active = models.BooleanField(default=True, verbose_name='启用')
+    is_official = models.BooleanField(default=False, verbose_name='官方直营店', db_index=True)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='注册时间')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='更新时间')
 
@@ -967,6 +1017,9 @@ VENDOR_NOTIFICATION_TYPE_CHOICES = [
     ('new_order', '新订单'),
     ('new_message', '新消息'),
     ('order_paid', '订单已付款'),
+    ('abandoned_checkout', '未付款订单'),
+    ('new_follower', '新关注'),
+    ('wishlist_add', '收藏商品'),
     ('order_shipped', '订单已发货'),
     ('low_stock', '库存不足'),
     ('new_review', '新评价'),
@@ -1466,6 +1519,172 @@ class TopUpOrder(models.Model):
 
     def __str__(self):
         return f'{self.order_number} — {self.amount} ({self.get_status_display()})'
+
+
+# ==========================================
+# Escrow & vendor payouts (platform holds → release to vendor)
+# ==========================================
+
+class PlatformEscrowTransaction(models.Model):
+    """One escrow row per order line — platform holds funds until release rules pass."""
+    ORDER_SOURCE_CHOICES = [
+        ('book', '图书订单'),
+        ('marketplace', '商城订单'),
+    ]
+    ITEM_TYPE_CHOICES = [
+        ('book', '图书'),
+        ('product', '商品'),
+        ('course', '课程'),
+        ('supermarket', '超市'),
+    ]
+    STATUS_CHOICES = [
+        ('held', '托管中'),
+        ('releasable', '可结算'),
+        ('released', '已到账'),
+        ('refunded', '已退款'),
+        ('cancelled', '已取消'),
+    ]
+
+    transaction_ref = models.CharField(max_length=40, unique=True, verbose_name='ID transaction escrow')
+    order_source = models.CharField(max_length=20, choices=ORDER_SOURCE_CHOICES, verbose_name='Source commande')
+    order_id = models.PositiveIntegerField(verbose_name='ID commande')
+    order_number = models.CharField(max_length=32, db_index=True, verbose_name='N° commande')
+    order_item_id = models.PositiveIntegerField(verbose_name='ID ligne commande')
+
+    vendor = models.ForeignKey(
+        'Vendor', on_delete=models.PROTECT, null=True, blank=True,
+        related_name='escrow_transactions', verbose_name='Vendeur',
+    )
+    buyer_user_id = models.IntegerField(null=True, blank=True, verbose_name='ID acheteur')
+    buyer_email = models.EmailField(verbose_name='Email acheteur')
+    buyer_name = models.CharField(max_length=100, blank=True, default='', verbose_name='Nom acheteur')
+
+    item_type = models.CharField(max_length=20, choices=ITEM_TYPE_CHOICES, verbose_name='Type article')
+    item_id = models.PositiveIntegerField(verbose_name='ID article')
+    item_name = models.CharField(max_length=200, verbose_name='Nom article')
+    quantity = models.PositiveIntegerField(default=1, verbose_name='Quantité')
+    unit_price = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Prix unitaire')
+    gross_amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Montant brut')
+    commission_rate = models.DecimalField(max_digits=5, decimal_places=2, verbose_name='Commission (%)')
+    commission_amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Montant commission')
+    vendor_payout_amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Net vendeur')
+
+    payment_transaction_id = models.CharField(max_length=100, blank=True, default='', verbose_name='Réf. paiement externe')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='held', verbose_name='Statut escrow')
+    held_at = models.DateTimeField(auto_now_add=True, verbose_name='Date réception plateforme')
+    delivered_at = models.DateTimeField(null=True, blank=True, verbose_name='Date livraison confirmée')
+    release_eligible_at = models.DateTimeField(null=True, blank=True, verbose_name='Éligible reversement après')
+    released_at = models.DateTimeField(null=True, blank=True, verbose_name='Date reversement vendeur')
+    notes = models.TextField(blank=True, default='', verbose_name='Notes')
+
+    class Meta:
+        db_table = 'platform_escrow_transaction'
+        ordering = ['-held_at']
+        verbose_name = 'Transaction escrow'
+        verbose_name_plural = 'Transactions escrow'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['order_source', 'order_item_id'],
+                name='uniq_escrow_order_line',
+            ),
+        ]
+        indexes = [
+            models.Index(fields=['vendor', 'status']),
+            models.Index(fields=['order_number']),
+            models.Index(fields=['buyer_email']),
+        ]
+
+    def __str__(self):
+        return f'{self.transaction_ref} — {self.item_name} ({self.get_status_display()})'
+
+    @property
+    def days_until_release(self):
+        """Days until payout is eligible; 0 = ready now; None = not applicable."""
+        if self.status in ('released', 'refunded', 'cancelled'):
+            return None
+        if self.status == 'held' and not self.delivered_at:
+            return None
+        if not self.release_eligible_at:
+            return None
+        diff = self.release_eligible_at - timezone.now()
+        if diff.total_seconds() <= 0:
+            return 0
+        return diff.days + (1 if diff.seconds else 0)
+
+    @property
+    def awaiting_delivery(self):
+        return self.status == 'held' and not self.delivered_at
+
+
+class VendorWallet(models.Model):
+    """Vendor balance from released escrow payouts."""
+    vendor = models.OneToOneField(
+        Vendor, on_delete=models.CASCADE, related_name='wallet', verbose_name='Vendeur',
+    )
+    balance = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'), verbose_name='Solde')
+    total_earned = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'), verbose_name='Total gagné')
+    total_paid_out = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'), verbose_name='Total retiré')
+    is_active = models.BooleanField(default=True, verbose_name='Actif')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'vendor_wallet'
+        verbose_name = 'Portefeuille vendeur'
+        verbose_name_plural = 'Portefeuilles vendeur'
+
+    def __str__(self):
+        return f'{self.vendor.company_name} — {self.balance}'
+
+    def credit(self, amount, source, description='', source_id=None):
+        amount = Decimal(str(amount))
+        if amount <= 0:
+            return False
+        self.balance += amount
+        self.total_earned += amount
+        self.save(update_fields=['balance', 'total_earned', 'updated_at'])
+        VendorWalletTransaction.objects.create(
+            vendor=self.vendor,
+            amount=amount,
+            txn_type='credit',
+            source=source,
+            description=description,
+            source_id=source_id or '',
+        )
+        return True
+
+
+class VendorWalletTransaction(models.Model):
+    TXN_TYPE_CHOICES = [
+        ('credit', '入账'),
+        ('debit', '出账'),
+        ('payout', '提现'),
+    ]
+    SOURCE_CHOICES = [
+        ('escrow_release', '托管释放'),
+        ('admin_adjust', '管理员调整'),
+        ('payout_request', '提现申请'),
+    ]
+
+    vendor = models.ForeignKey(
+        Vendor, on_delete=models.CASCADE, related_name='wallet_transactions', verbose_name='Vendeur',
+    )
+    amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Montant')
+    txn_type = models.CharField(max_length=20, choices=TXN_TYPE_CHOICES, verbose_name='Type')
+    source = models.CharField(max_length=30, choices=SOURCE_CHOICES, verbose_name='Source')
+    description = models.CharField(max_length=255, blank=True, default='', verbose_name='Description')
+    source_id = models.CharField(max_length=50, blank=True, default='', verbose_name='Réf. liée')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'vendor_wallet_transaction'
+        ordering = ['-created_at']
+        verbose_name = 'Mouvement portefeuille vendeur'
+        verbose_name_plural = 'Mouvements portefeuille vendeur'
+
+    def __str__(self):
+        sign = '+' if self.amount > 0 else ''
+        return f'{self.vendor.company_name} {sign}{self.amount}'
 
 
 # 创建(同步)数据表命令

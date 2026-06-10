@@ -72,6 +72,7 @@
     html[data-theme="dark"] .empty-state {
         color: var(--text-tertiary);
     }
+    {% include 'public/includes/feed_view_details_css.html' %}
 </style>
 {% endblock %}
 
@@ -119,7 +120,7 @@
         {% for item in items %}
         <div class="col-6 col-md-4 col-lg-3" data-aos="fade-up">
             <a href="{% url 'marketplace:supermarket_detail' item.slug %}" style="text-decoration:none; color:inherit;">
-                <div class="item-card">
+                <div class="item-card feed-card-stretch">
                     <div style="position:relative;">
                         <img src="{{ item.get_image_url }}" alt="{{ item.name }}" class="item-card-img">
                         {% if item.is_organic %}
@@ -129,21 +130,26 @@
                         <span class="position-absolute top-0 end-0 m-2 badge" style="background:linear-gradient(135deg,#ef4444,#f97316);font-size:0.7rem;">-{{ item.get_discount_percent }}%</span>
                         {% endif %}
                     </div>
-                    <div class="item-card-body">
+                    <div class="item-card-body feed-card-body-stretch">
                         <h5>{{ item.name }}</h5>
                         {% if item.brand %}
                         <small class="text-muted d-block mb-1">{{ item.brand }}</small>
                         {% endif %}
-                        <div class="d-flex align-items-baseline justify-content-between">
-                            <div>
-                                <span class="item-price">{{ item.price|fcfa }}</span>
-                                <span class="item-unit">/{{ item.get_unit_display }}</span>
+                        <div class="feed-card-actions">
+                            <div class="feed-card-actions-main">
+                                <div class="d-flex align-items-baseline justify-content-between">
+                                    <div>
+                                        <span class="item-price">{{ item.price|fcfa }}</span>
+                                        <span class="item-unit">/{{ item.get_unit_display }}</span>
+                                    </div>
+                                    {% if item.in_stock %}
+                                    <span class="badge bg-success" style="font-size:0.65rem;">{% trans "有货" %}</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary" style="font-size:0.65rem;">{% trans "缺货" %}</span>
+                                    {% endif %}
+                                </div>
                             </div>
-                            {% if item.in_stock %}
-                            <span class="badge bg-success" style="font-size:0.65rem;">{% trans "有货" %}</span>
-                            {% else %}
-                            <span class="badge bg-secondary" style="font-size:0.65rem;">{% trans "缺货" %}</span>
-                            {% endif %}
+                            {% include 'public/includes/feed_view_details_btn.html' %}
                         </div>
                     </div>
                 </div>
@@ -184,17 +190,22 @@
     </div>
     {% endif %}
 </div>
+<template id="feedViewDetailsBtnTpl">{% include 'public/includes/feed_view_details_btn.html' %}</template>
 <script>
 (function() {
     if (window.innerWidth > 768) return;
     var grid = document.getElementById('supermarketGrid');
     var loader = document.getElementById('supermarketFeedLoader');
     var sentinel = document.getElementById('supermarketFeedSentinel');
+    var feedDetailsBtn = (document.getElementById('feedViewDetailsBtnTpl') || {}).innerHTML || '';
     if (!grid || !sentinel) return;
 
-    var page = {{ items.number|default:1 }} + 1;
-    var hasMore = {{ items.has_next|yesno:"true,false" }};
+    var page = 1;
+    var hasMore = true;
     var loading = false;
+    var params = new URLSearchParams(window.location.search);
+    params.set('format', 'json');
+    params.set('recommend', '1');
 
     function escHtml(str) {
         var d = document.createElement('div');
@@ -203,28 +214,28 @@
     }
 
     function fmtFcfa(val) {
-        var n = Math.round(parseFloat(val) * 82);
+        var n = Math.round(parseFloat(val) || 0);
         return n.toLocaleString('fr-FR') + '\u00a0FCFA';
     }
 
     function buildCard(item) {
         return '<div class="col-6">'
             + '<a href="' + item.url + '" style="text-decoration:none; color:inherit;">'
-            + '<div class="item-card">'
+            + '<div class="item-card feed-card-stretch">'
             + '<div style="position:relative;"><img src="' + item.image + '" alt="' + escHtml(item.name) + '" class="item-card-img"></div>'
-            + '<div class="item-card-body"><h5>' + escHtml(item.name) + '</h5>'
+            + '<div class="item-card-body feed-card-body-stretch"><h5>' + escHtml(item.name) + '</h5>'
+            + '<div class="feed-card-actions"><div class="feed-card-actions-main">'
             + '<div class="d-flex align-items-baseline justify-content-between"><div>'
             + '<span class="item-price">' + fmtFcfa(item.price) + '</span><span class="item-unit">/' + escHtml(item.unit || '') + '</span>'
             + '</div><span class="badge ' + (item.stock_text === '有货' ? 'bg-success' : 'bg-secondary') + '" style="font-size:0.65rem;">' + item.stock_text + '</span>'
-            + '</div></div></div></a></div>';
+            + '</div></div>' + feedDetailsBtn + '</div>'
+            + '</div></div></a></div>';
     }
 
     function loadMore() {
         if (!hasMore || loading) return;
         loading = true;
         if (loader) loader.style.display = 'block';
-        var params = new URLSearchParams(window.location.search);
-        params.set('format', 'json');
         params.set('page', page);
         fetch(window.location.pathname + '?' + params.toString())
             .then(function(r) { return r.json(); })
@@ -246,9 +257,8 @@
                     tmp.innerHTML = buildCard(item);
                     grid.appendChild(tmp.firstElementChild);
                 });
-                hasMore = !!data.has_more;
-                page = hasMore ? page + 1 : 1;
-                if (!hasMore) hasMore = true;
+                hasMore = true;
+                page = page + 1;
                 loading = false;
                 if (loader) loader.style.display = 'none';
             })

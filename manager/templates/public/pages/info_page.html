@@ -1,0 +1,99 @@
+{% extends 'public/base.html' %}
+{% load i18n %}
+
+{% block title %}{{ page_title }} - DUNO 360{% endblock %}
+
+{% block extra_css %}
+{% include 'public/pages/_shell_styles.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="duno-read-progress" id="dunoReadProgress" aria-hidden="true"></div>
+
+<section class="duno-page-hero {% block page_hero_class %}{% endblock %}" style="--dp-grad-a: {{ page_gradient.0 }}; --dp-grad-b: {{ page_gradient.1 }};">
+    {% block page_hero_ambient %}{% endblock %}
+    <div class="container duno-page-hero-inner">
+        {% if page_breadcrumb %}
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb mb-0" style="--bs-breadcrumb-divider: '›';">
+                {% for crumb in page_breadcrumb %}
+                <li class="breadcrumb-item {% if forloop.last %}active text-white-50{% endif %}">
+                    {% if crumb.url %}<a href="{{ crumb.url }}" class="text-white text-decoration-none opacity-75">{{ crumb.label }}</a>
+                    {% else %}<span class="text-white-50">{{ crumb.label }}</span>{% endif %}
+                </li>
+                {% endfor %}
+            </ol>
+        </nav>
+        {% endif %}
+        <span class="duno-page-badge"><i class="fas {{ page_icon }}"></i> DUNO 360</span>
+        <h1 data-aos="fade-up">{{ page_title }}</h1>
+        {% if page_subtitle %}<p class="lead" data-aos="fade-up" data-aos-delay="80">{{ page_subtitle }}</p>{% endif %}
+        {% block page_hero_extra %}{% endblock %}
+    </div>
+    {% block page_hero_wave %}{% endblock %}
+</section>
+
+<div class="container duno-page-layout {% block page_layout_class %}{% endblock %}">
+    {% if page_sections %}
+    <nav class="duno-page-nav" id="dunoPageNav" aria-label="{% trans '目录' %}">
+        <div class="duno-page-nav-title">{% trans "目录" %}</div>
+        {% for sec in page_sections %}
+        <a href="#{{ sec.id }}" data-section-nav="{{ sec.id }}">
+            <i class="fas {{ sec.icon|default:'fa-circle-dot' }}"></i>{{ sec.label }}
+        </a>
+        {% endfor %}
+    </nav>
+    {% endif %}
+
+    <div class="duno-page-body">
+        {% block page_content %}{% endblock %}
+        {% if page_cta %}
+        <div class="duno-page-cta" data-aos="fade-up">
+            <div>
+                <h3>{{ page_cta.title }}</h3>
+                <p>{{ page_cta.text }}</p>
+            </div>
+            <a href="{{ page_cta.url }}" class="btn btn-light">
+                <i class="fas {{ page_cta.icon|default:'fa-arrow-right' }} me-2"></i>{{ page_cta.button }}
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    const sections = document.querySelectorAll('.duno-section[id], .duno-section-platform .duno-acc-item[id], .duno-legal-summary[id], .duno-legal-intro[id], .duno-section-legal[id]');
+    const navLinks = document.querySelectorAll('[data-section-nav]');
+    const progress = document.getElementById('dunoReadProgress');
+    const io = new IntersectionObserver(function(entries) {
+        entries.forEach(function(e) { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+    sections.forEach(function(s) { io.observe(s); });
+    function onScroll() {
+        const doc = document.documentElement;
+        const height = doc.scrollHeight - doc.clientHeight;
+        if (progress && height > 0) progress.style.width = ((doc.scrollTop / height) * 100) + '%';
+        let current = '';
+        sections.forEach(function(sec) { if (sec.getBoundingClientRect().top <= 120) current = sec.id; });
+        navLinks.forEach(function(link) {
+            link.classList.toggle('active', link.getAttribute('data-section-nav') === current);
+        });
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    navLinks.forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                e.preventDefault();
+                if (target.tagName === 'DETAILS') target.open = true;
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
+})();
+</script>
+{% endblock %}

@@ -9,4 +9,5 @@ class ManagerConfig(AppConfig):
     
     def ready(self):
         """Import signals when app is ready"""
-        import manager.signals
+        import manager.signals  # noqa: F401
+        import manager.escrow_signals  # noqa: F401

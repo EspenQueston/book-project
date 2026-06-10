@@ -23,15 +23,50 @@
     /* Payment methods */
     .payment-methods { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; }
     .payment-option {
+        position: relative;
         display: flex; flex-direction: column; align-items: center; padding: 20px 12px;
         border: 2px solid #e2e8f0; border-radius: 14px; cursor: pointer;
-        transition: all 0.3s; text-align: center; background: #fff;
+        transition: all 0.28s cubic-bezier(.4,0,.2,1); text-align: center; background: #fff;
+        opacity: 0.92; transform: scale(0.98);
     }
-    .payment-option:hover { border-color: var(--primary-color); background: rgba(102,126,234,0.03); }
+    .payment-option .pm-check {
+        position: absolute; top: 8px; right: 8px; width: 24px; height: 24px;
+        border-radius: 50%; border: 2px solid #e2e8f0; background: #fff;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.65rem; color: transparent; transition: all 0.25s ease;
+    }
+    .payment-option:hover { border-color: var(--primary-color); transform: translateY(-2px); }
     .payment-option.selected {
+        opacity: 1; transform: scale(1);
         border-color: var(--primary-color); background: rgba(102,126,234,0.07);
-        box-shadow: 0 0 0 3px rgba(102,126,234,0.18);
+        box-shadow: 0 12px 36px rgba(102,126,234,0.2);
     }
+    .payment-option.selected .pm-check {
+        color: #fff; border-color: transparent;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        animation: pm-pop 0.35s ease;
+    }
+    .payment-option[data-method="pawapay"].selected { border-color: #059669; }
+    .payment-option[data-method="pawapay"].selected .pm-check {
+        background: linear-gradient(135deg, #059669, #10b981);
+    }
+    .payment-option[data-method="kkiapay"].selected { border-color: #e85d04; }
+    .payment-option[data-method="kkiapay"].selected .pm-check {
+        background: linear-gradient(135deg, #e85d04, #f59e0b);
+    }
+    @keyframes pm-pop {
+        0% { transform: scale(0.6); }
+        60% { transform: scale(1.15); }
+        100% { transform: scale(1); }
+    }
+    .ck-phone-prefix {
+        min-width: 76px; justify-content: center;
+        background: linear-gradient(135deg, #667eea, #764ba2) !important;
+        color: #fff !important; font-weight: 800 !important; font-size: 0.92rem !important;
+        border: none !important;
+    }
+    .ck-phone-prefix.pawapay { background: linear-gradient(135deg, #059669, #10b981) !important; }
+    .ck-phone-prefix.kkiapay { background: linear-gradient(135deg, #e85d04, #f59e0b) !important; }
     .payment-icon { font-size: 1.6rem; margin-bottom: 8px; }
     .payment-name { font-weight: 600; font-size: 0.85rem; color: #334155; }
     .payment-provider { font-size: 0.72rem; color: #94a3b8; margin-top: 4px; }
@@ -176,20 +211,65 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-floating">
-                                <input type="tel" class="form-control" id="customerPhone" name="customer_phone" placeholder="电话" required style="border-radius:12px;">
-                                <label for="customerPhone">{% trans "电话" %} *</label>
-                            </div>
-                        </div>
-                        <div class="col-12">
-                            <div class="form-floating">
                                 <input type="email" class="form-control" id="customerEmail" name="customer_email" placeholder="邮箱" style="border-radius:12px;">
                                 <label for="customerEmail">{% trans "邮箱" %} ({% trans "选填" %})</label>
                             </div>
                         </div>
-                        <div class="col-12">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-secondary" style="font-size:.85rem;">{% trans "国家" %} *</label>
+                            <select name="country" id="countrySelect" class="form-select" required style="border-radius:12px;">
+                                <option value="">{% trans "请选择国家" %}</option>
+                                <optgroup label="{% trans '西非 — KKiaPay' %}">
+                                    <option value="Benin" data-phone="+229" data-kkiapay="1">🇧🇯 Bénin (+229)</option>
+                                    <option value="Burkina Faso" data-phone="+226" data-kkiapay="1">🇧🇫 Burkina Faso (+226)</option>
+                                    <option value="Côte d'Ivoire" data-phone="+225" data-kkiapay="1">🇨🇮 Côte d'Ivoire (+225)</option>
+                                    <option value="Guinea" data-phone="+224" data-kkiapay="1">🇬🇳 Guinée (+224)</option>
+                                    <option value="Mali" data-phone="+223" data-kkiapay="1">🇲🇱 Mali (+223)</option>
+                                    <option value="Niger" data-phone="+227" data-kkiapay="1">🇳🇪 Niger (+227)</option>
+                                    <option value="Senegal" data-phone="+221" data-kkiapay="1">🇸🇳 Sénégal (+221)</option>
+                                    <option value="Togo" data-phone="+228" data-kkiapay="1">🇹🇬 Togo (+228)</option>
+                                </optgroup>
+                                <optgroup label="{% trans '中非 — PawaPay' %}">
+                                    <option value="Angola" data-phone="+244" data-pawapay="1">🇦🇴 Angola (+244)</option>
+                                    <option value="Cameroon" data-phone="+237" data-pawapay="1">🇨🇲 Cameroun (+237)</option>
+                                    <option value="Central African Republic" data-phone="+236" data-pawapay="1">🇨🇫 {% trans "中非共和国" %} (+236)</option>
+                                    <option value="Chad" data-phone="+235" data-pawapay="1">🇹🇩 {% trans "乍得" %} (+235)</option>
+                                    <option value="Congo" data-phone="+242" data-pawapay="1">🇨🇬 Congo (+242)</option>
+                                    <option value="Democratic Republic of the Congo" data-phone="+243" data-pawapay="1">🇨🇩 RDC (+243)</option>
+                                    <option value="Equatorial Guinea" data-phone="+240" data-pawapay="1">🇬🇶 {% trans "赤道几内亚" %} (+240)</option>
+                                    <option value="Gabon" data-phone="+241" data-pawapay="1">🇬🇦 Gabon (+241)</option>
+                                    <option value="São Tomé and Príncipe" data-phone="+239" data-pawapay="1">🇸🇹 São Tomé (+239)</option>
+                                </optgroup>
+                                <optgroup label="{% trans '亚洲' %}">
+                                    <option value="China" data-phone="+86">🇨🇳 China (+86)</option>
+                                    <option value="Hong Kong" data-phone="+852">🇭🇰 Hong Kong (+852)</option>
+                                    <option value="Taiwan" data-phone="+886">🇹🇼 Taiwan (+886)</option>
+                                    <option value="Japan" data-phone="+81">🇯🇵 Japan (+81)</option>
+                                </optgroup>
+                                <optgroup label="{% trans '其他' %}">
+                                    <option value="Other">{% trans "其他国家" %}</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-secondary" style="font-size:.85rem;">{% trans "城市" %} *</label>
+                            <select name="city" id="checkoutCity" class="form-select" disabled style="border-radius:12px;" aria-disabled="true">
+                                <option value="">{% trans "请先选择国家" %}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-secondary" style="font-size:.85rem;">{% trans "微信/电话号码" %} *</label>
+                            <div class="input-group">
+                                <span class="input-group-text ck-phone-prefix" id="phone-prefix-badge"><span id="phone-prefix-text">+</span></span>
+                                <input type="tel" class="form-control" id="customerPhone" name="customer_phone" required style="border-radius:0 12px 12px 0;"
+                                       placeholder="{% trans '号码（不含国家码）' %}">
+                            </div>
+                            <small id="phone-prefix-hint" class="text-muted d-none" style="font-size:0.78rem;font-weight:600;"></small>
+                        </div>
+                        <div class="col-md-6">
                             <div class="form-floating">
-                                <textarea class="form-control" id="shippingAddress" name="shipping_address" placeholder="地址" style="height:80px;border-radius:12px;"></textarea>
-                                <label for="shippingAddress">{% trans "收货地址" %} ({% trans "选填" %})</label>
+                                <input type="text" class="form-control" id="shippingAddress" name="shipping_address" placeholder="地址" required style="border-radius:12px;">
+                                <label for="shippingAddress">{% trans "详细地址" %} *</label>
                             </div>
                         </div>
                         <div class="col-12">
@@ -197,51 +277,6 @@
                                 <textarea class="form-control" id="notes" name="notes" placeholder="备注" style="height:60px;border-radius:12px;"></textarea>
                                 <label for="notes">{% trans "备注" %} ({% trans "选填" %})</label>
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold text-secondary" style="font-size:.85rem;">{% trans "国家" %} *</label>
-                            <select name="country" id="countrySelect" class="form-select" required style="border-radius:12px;">
-                                <option value="">{% trans "请选择国家" %} / Select Country</option>
-                                <optgroup label="West Africa / 西非">
-                                    <option value="Benin">Benin / 贝宁</option>
-                                    <option value="Burkina Faso">Burkina Faso</option>
-                                    <option value="Cape Verde">Cape Verde / 佛得角</option>
-                                    <option value="Côte d'Ivoire">Côte d'Ivoire / 科特迪瓦</option>
-                                    <option value="Gambia">Gambia / 冈比亚</option>
-                                    <option value="Ghana">Ghana / 加纳</option>
-                                    <option value="Guinea">Guinea / 几内亚</option>
-                                    <option value="Guinea-Bissau">Guinea-Bissau</option>
-                                    <option value="Liberia">Liberia / 利比里亚</option>
-                                    <option value="Mali">Mali / 马里</option>
-                                    <option value="Mauritania">Mauritania / 毛里塔尼亚</option>
-                                    <option value="Niger">Niger / 尼日尔</option>
-                                    <option value="Nigeria">Nigeria / 尼日利亚</option>
-                                    <option value="Senegal">Senegal / 塞内加尔</option>
-                                    <option value="Sierra Leone">Sierra Leone / 塞拉利昂</option>
-                                    <option value="Togo">Togo / 多哥</option>
-                                </optgroup>
-                                <optgroup label="Central Africa / 中非">
-                                    <option value="Angola">Angola / 安哥拉</option>
-                                    <option value="Cameroon">Cameroon / 喀麦隆</option>
-                                    <option value="Central African Republic">Central African Republic / 中非共和国</option>
-                                    <option value="Chad">Chad / 乍得</option>
-                                    <option value="Congo">Congo / 刚果</option>
-                                    <option value="Democratic Republic of the Congo">DR Congo / 刚果民主共和国</option>
-                                    <option value="Equatorial Guinea">Equatorial Guinea / 赤道几内亚</option>
-                                    <option value="Gabon">Gabon / 加蓬</option>
-                                    <option value="Rwanda">Rwanda / 卢旺达</option>
-                                    <option value="Uganda">Uganda / 乌干达</option>
-                                </optgroup>
-                                <optgroup label="Asia / 亚洲">
-                                    <option value="China">China / 中国</option>
-                                    <option value="Hong Kong">Hong Kong / 香港</option>
-                                    <option value="Taiwan">Taiwan / 台湾</option>
-                                    <option value="Japan">Japan / 日本</option>
-                                </optgroup>
-                                <optgroup label="Other / 其他">
-                                    <option value="Other">Other Country / 其他国家</option>
-                                </optgroup>
-                            </select>
                         </div>
                     </div>
                 </div>
@@ -256,7 +291,8 @@
                     </div>
                     {% if wallet_balance is not None %}
                     <div class="payment-methods mt-2" id="walletPaymentContainer">
-                        <div class="payment-option" data-method="wallet">
+                        <div class="payment-option" data-method="wallet" role="button" tabindex="0" aria-pressed="false">
+                            <span class="pm-check"><i class="fas fa-check"></i></span>
                             <i class="fas fa-wallet payment-icon" style="color:#667eea;"></i>
                             <span class="payment-name">{% trans "Wallet / Store Credit" %}</span>
                             <span class="payment-provider">{% trans "Balance" %}: {{ wallet_balance|fcfa }}</span>
@@ -301,6 +337,7 @@
 </div>
 
 {{ payment_methods|json_script:"payment-method-catalog" }}
+{{ checkout_cities_by_country|json_script:"checkout-cities-catalog" }}
 
 <!-- QR Code Payment Modal -->
 <div id="qrCodeModal" style="display:none;position:fixed;z-index:10000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.7);overflow-y:auto;">
@@ -333,36 +370,45 @@
 
 {% block extra_js %}
 <script>
-const africanCountries = [
-    'Benin','Burkina Faso','Cape Verde',"Côte d'Ivoire",'Gambia','Ghana','Guinea',
-    'Guinea-Bissau','Liberia','Mali','Mauritania','Niger','Nigeria','Senegal',
-    'Sierra Leone','Togo','Angola','Cameroon','Central African Republic','Chad',
-    'Congo','Democratic Republic of the Congo','Equatorial Guinea','Gabon','Rwanda','Uganda'
-];
+const CK_I18N = {
+    selectCountryFirst: "{% filter escapejs %}{% trans '请先选择国家' %}{% endfilter %}",
+    selectCity: "{% filter escapejs %}{% trans '请选择城市' %}{% endfilter %}",
+    noCitiesForCountry: "{% filter escapejs %}{% trans '该国家暂无城市列表' %}{% endfilter %}",
+    selectCountryForPayment: "{% filter escapejs %}{% trans '请先选择国家以显示可用的支付方式' %}{% endfilter %}",
+    selectPaymentMethod: "{% filter escapejs %}{% trans '请选择支付方式' %}{% endfilter %}",
+    pawapayHint: "{% filter escapejs %}{% trans '中非 Mobile Money — PawaPay' %}{% endfilter %}",
+    kkiapayHint: "{% filter escapejs %}{% trans '西非 Mobile Money — KKiaPay' %}{% endfilter %}",
+};
+
+const westAfricanCountries = ['Benin','Burkina Faso',"Côte d'Ivoire",'Guinea','Mali','Niger','Senegal','Togo'];
+const centralAfricanCountries = ['Angola','Cameroon','Central African Republic','Chad','Congo','Democratic Republic of the Congo','Equatorial Guinea','Gabon','São Tomé and Príncipe'];
 
 const paymentMethodsByRegion = JSON.parse(document.getElementById('payment-method-catalog').textContent);
+const checkoutCitiesByCountry = JSON.parse(document.getElementById('checkout-cities-catalog').textContent);
+
+function resolveRegion(country) {
+    if (westAfricanCountries.includes(country)) return 'west_africa';
+    if (centralAfricanCountries.includes(country)) return 'central_africa';
+    if (country === 'China' || country === 'Hong Kong' || country === 'Taiwan') return 'china';
+    return 'others';
+}
 
 function updatePaymentMethods(country) {
     const container = document.getElementById('paymentMethodsContainer');
     if (!country) {
-        container.innerHTML = '<p class="text-muted text-center py-3">请先选择国家以显示可用的支付方式</p>';
+        container.innerHTML = '<p class="text-muted text-center py-3">' + CK_I18N.selectCountryForPayment + '</p>';
         return;
     }
-    let methods = [];
-    if (africanCountries.includes(country)) {
-        methods = paymentMethodsByRegion.africa || [];
-    } else if (country === 'China' || country === 'Hong Kong' || country === 'Taiwan') {
-        methods = paymentMethodsByRegion.china || [];
-    } else {
-        methods = paymentMethodsByRegion.others || [];
-    }
+    const region = resolveRegion(country);
+    let methods = paymentMethodsByRegion[region] || paymentMethodsByRegion.others || [];
     if (!methods.length) {
         container.innerHTML = '<p class="text-muted text-center py-3">该国家暂无可用支付方式</p>';
         return;
     }
     let html = '';
     methods.forEach(pm => {
-        html += `<div class="payment-option" data-method="${pm.method}">
+        html += `<div class="payment-option" data-method="${pm.method}" role="button" tabindex="0" aria-pressed="false">
+            <span class="pm-check"><i class="fas fa-check"></i></span>
             <i class="${pm.icon} payment-icon" style="color:${pm.color};"></i>
             <span class="payment-name">${pm.name}</span>
             <span class="payment-provider">${pm.provider} · ${pm.mode}</span>
@@ -370,43 +416,111 @@ function updatePaymentMethods(country) {
         </div>`;
     });
     container.innerHTML = html;
-    attachPaymentOptionListeners();
+    attachPaymentOptionListeners(container);
+    if (methods.length === 1) {
+        const sole = container.querySelector('.payment-option');
+        if (sole) sole.click();
+    }
 }
 
-function attachPaymentOptionListeners() {
-    document.querySelectorAll('.payment-option').forEach(opt => {
-        opt.addEventListener('click', function() {
-            document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
-            this.classList.add('selected');
-            document.getElementById('selectedPaymentMethod').value = this.dataset.method;
+function selectPaymentOption(option) {
+    document.querySelectorAll('.payment-option').forEach(o => {
+        o.classList.remove('selected');
+        o.setAttribute('aria-pressed', 'false');
+    });
+    option.classList.add('selected');
+    option.setAttribute('aria-pressed', 'true');
+    document.getElementById('selectedPaymentMethod').value = option.dataset.method;
+}
+
+function attachPaymentOptionListeners(root) {
+    const scope = root || document;
+    scope.querySelectorAll('.payment-option').forEach(opt => {
+        opt.addEventListener('click', () => selectPaymentOption(opt));
+        opt.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectPaymentOption(opt); }
         });
     });
 }
 
-// Attach wallet option listener immediately
-(function() {
-    const walletContainer = document.getElementById('walletPaymentContainer');
-    if (walletContainer) {
-        walletContainer.querySelectorAll('.payment-option').forEach(opt => {
-            opt.addEventListener('click', function() {
-                document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
-                this.classList.add('selected');
-                document.getElementById('selectedPaymentMethod').value = this.dataset.method;
-            });
-        });
+const walletContainer = document.getElementById('walletPaymentContainer');
+if (walletContainer) attachPaymentOptionListeners(walletContainer);
+
+function updateCityOptions(country) {
+    const citySelect = document.getElementById('checkoutCity');
+    if (!citySelect) return;
+
+    citySelect.innerHTML = '';
+    citySelect.disabled = true;
+    citySelect.removeAttribute('required');
+    citySelect.setAttribute('aria-disabled', 'true');
+
+    if (!country) {
+        citySelect.innerHTML = '<option value="">' + CK_I18N.selectCountryFirst + '</option>';
+        return;
     }
-})();
+
+    const cities = checkoutCitiesByCountry[country] || [];
+    if (!cities.length) {
+        citySelect.innerHTML = '<option value="">' + CK_I18N.noCitiesForCountry + '</option>';
+        return;
+    }
+
+    citySelect.innerHTML = '<option value="">' + CK_I18N.selectCity + '</option>';
+    cities.forEach(city => {
+        const opt = document.createElement('option');
+        opt.value = city;
+        opt.textContent = city;
+        citySelect.appendChild(opt);
+    });
+    citySelect.disabled = false;
+    citySelect.setAttribute('required', 'required');
+    citySelect.removeAttribute('aria-disabled');
+}
+
+function updatePhonePrefix() {
+    const countrySelect = document.getElementById('countrySelect');
+    const prefixBadge = document.getElementById('phone-prefix-badge');
+    const prefixText = document.getElementById('phone-prefix-text');
+    const prefixHint = document.getElementById('phone-prefix-hint');
+    const phoneInput = document.getElementById('customerPhone');
+    if (!countrySelect || !prefixText) return;
+    const selected = countrySelect.options[countrySelect.selectedIndex];
+    const phoneCode = selected ? selected.getAttribute('data-phone') : null;
+    const isKkiapay = selected && selected.getAttribute('data-kkiapay') === '1';
+    const isPawapay = selected && selected.getAttribute('data-pawapay') === '1';
+    prefixBadge.classList.remove('kkiapay', 'pawapay');
+    if (phoneCode && (isKkiapay || isPawapay)) {
+        prefixText.textContent = phoneCode;
+        prefixBadge.classList.add(isPawapay ? 'pawapay' : 'kkiapay');
+        prefixHint.classList.remove('d-none');
+        prefixHint.innerHTML = isPawapay
+            ? '<i class="fas fa-wallet"></i> ' + CK_I18N.pawapayHint
+            : '<i class="fas fa-mobile-alt"></i> ' + CK_I18N.kkiapayHint;
+        prefixHint.style.color = isPawapay ? '#059669' : '#c2410c';
+    } else if (phoneCode) {
+        prefixText.textContent = phoneCode;
+        prefixHint.classList.add('d-none');
+    } else {
+        prefixText.textContent = '+';
+        prefixHint.classList.add('d-none');
+    }
+}
 
 document.getElementById('countrySelect').addEventListener('change', function() {
     updatePaymentMethods(this.value);
     document.getElementById('selectedPaymentMethod').value = '';
+    updatePhonePrefix();
+    updateCityOptions(this.value);
 });
+updatePhonePrefix();
+updateCityOptions(document.getElementById('countrySelect').value);
 
 document.getElementById('checkoutForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const pm = document.getElementById('selectedPaymentMethod').value;
     if (!pm) {
-        alert('请选择支付方式');
+        alert(CK_I18N.selectPaymentMethod);
         return;
     }
     if (pm === 'wechat_pay' || pm === 'alipay') {

@@ -29,11 +29,11 @@
                 </div>
                 <div class="row g-3">
                     <div class="col-md-4">
-                        <label class="form-label fw-bold">价格 <span class="text-danger">*</span></label>
+                        <label class="form-label fw-bold">价格 (FCFA) <span class="text-danger">*</span></label>
                         <input type="number" name="price" class="form-control" step="0.01" value="{{ course.price|default:'' }}" required style="border-radius:10px;">
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label fw-bold">原价</label>
+                        <label class="form-label fw-bold">原价 (FCFA)</label>
                         <input type="number" name="original_price" class="form-control" step="0.01" value="{{ course.original_price|default:'' }}" style="border-radius:10px;">
                     </div>
                     <div class="col-md-4">

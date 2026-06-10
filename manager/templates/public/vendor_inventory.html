@@ -112,7 +112,56 @@
     .stock-bar-fill {
         height: 100%; border-radius: 10px; transition: width 0.3s ease;
     }
+
+    html[data-theme="dark"] .vp-card {
+        background: #0f172a;
+        border-color: rgba(255,255,255,0.06);
+        box-shadow: 0 8px 28px rgba(0,0,0,0.35);
+    }
+    html[data-theme="dark"] .inv-section-title {
+        color: #f1f5f9;
+    }
+    html[data-theme="dark"] .inv-row {
+        background: #1e293b;
+        border-color: rgba(255,255,255,0.05);
+    }
+    html[data-theme="dark"] .inv-row:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    }
+    html[data-theme="dark"] .inv-tab {
+        background: #1e293b;
+        color: #cbd5e1;
+        border-color: rgba(102,126,234,0.2);
+    }
+    html[data-theme="dark"] .inv-input {
+        background: #0f172a;
+        border-color: #334155;
+        color: #f1f5f9;
+    }
+    html[data-theme="dark"] .inv-btn-set {
+        background: #334155;
+        color: #e2e8f0;
+        border-color: #475569;
+    }
+    html[data-theme="dark"] .inv-btn-set:hover {
+        background: #475569;
+    }
+    html[data-theme="dark"] .inv-empty {
+        color: #64748b;
+    }
+    html[data-theme="dark"] .stock-bar-wrap {
+        background: #334155;
+    }
+    html[data-theme="dark"] .inv-row .text-muted,
+    html[data-theme="dark"] .inv-row small {
+        color: #94a3b8 !important;
+    }
+    html[data-theme="dark"] .inv-row strong,
+    html[data-theme="dark"] .inv-row .fw-bold {
+        color: #f1f5f9;
+    }
 </style>
+<link href="/static/css/inventory_grid.css" rel="stylesheet">
 {% endblock %}
 
 {% block vendor_panel_content %}
@@ -142,7 +191,10 @@
 
 <!-- Category Tabs -->
 <div class="inv-tabs">
-    <button type="button" class="inv-tab active" onclick="switchInvTab('books', this)">
+    <button type="button" class="inv-tab active" onclick="switchInvTab('all', this)">
+        <i class="fas fa-layer-group"></i>{% trans "All" %} <span class="badge bg-light text-dark ms-1">{{ total_books|add:total_products|add:total_courses|add:total_supermarket }}</span>
+    </button>
+    <button type="button" class="inv-tab" onclick="switchInvTab('books', this)">
         <i class="fas fa-book text-primary"></i>{% trans "Books" %} <span class="badge bg-light text-dark ms-1">{{ total_books }}</span>
     </button>
     <button type="button" class="inv-tab" onclick="switchInvTab('products', this)">
@@ -156,13 +208,90 @@
     </button>
 </div>
 
+{% include "includes/inventory_bulk_bar.html" with bulk_form_action=bulk_action_url %}
+
+<div class="inv-panel active" id="inv-panel-all">
+    <div class="vp-card">
+        <div class="inv-section-title"><i class="fas fa-layer-group text-primary"></i>{% trans "All Inventory" %}</div>
+        <div class="inv-grid-toolbar">
+            <span class="inv-grid-meta-line" id="invGridMetaAll">—</span>
+            <div class="inv-grid-pages" id="invGridPagesAll"></div>
+        </div>
+        <div class="inv-grid-scroll">
+            <div class="inv-grid" id="invGridAll" data-page-size="24">
+                {% for vb in vendor_books %}
+                <article class="inv-grid-card">
+                    <label class="inv-grid-select inv-select-wrap"><input type="checkbox" class="inv-select" value="book:{{ vb.id }}"></label>
+                    <div class="inv-grid-thumb">
+                        <img src="{{ vb.book.get_cover_url }}" alt="" class="inv-cover-ratio">
+                        <span class="inv-grid-type type-book">{% trans "Book" %}</span>
+                    </div>
+                    <h6 class="inv-grid-name">{{ vb.book.name }}</h6>
+                    <p class="inv-grid-price">{% trans "Price" %} {{ vb.vendor_price|fcfa }}</p>
+                    <div class="inv-grid-stock">
+                        <span class="num {% if vb.book.inventory == 0 %}out{% elif vb.book.inventory < 5 %}low{% else %}ok{% endif %}">{{ vb.book.inventory }}</span>
+                        <small>{% trans "In Stock" %}</small>
+                    </div>
+                </article>
+                {% endfor %}
+                {% for p in products %}
+                <article class="inv-grid-card">
+                    <label class="inv-grid-select inv-select-wrap"><input type="checkbox" class="inv-select" value="product:{{ p.id }}"></label>
+                    <div class="inv-grid-thumb">
+                        <img src="{{ p.get_image_url }}" alt="">
+                        <span class="inv-grid-type type-product">{% trans "Product" %}</span>
+                    </div>
+                    <h6 class="inv-grid-name">{{ p.name }}</h6>
+                    <p class="inv-grid-price">{% trans "Price" %} {{ p.price|fcfa }}</p>
+                    <div class="inv-grid-stock">
+                        <span class="num {% if p.stock == 0 %}out{% elif p.stock < 5 %}low{% else %}ok{% endif %}">{{ p.stock|default:0 }}</span>
+                        <small>{% trans "In Stock" %}</small>
+                    </div>
+                </article>
+                {% endfor %}
+                {% for c in courses %}
+                <article class="inv-grid-card">
+                    <label class="inv-grid-select inv-select-wrap"><input type="checkbox" class="inv-select" value="course:{{ c.id }}"></label>
+                    <div class="inv-grid-thumb">
+                        <img src="{{ c.get_image_url }}" alt="">
+                        <span class="inv-grid-type type-course">{% trans "Course" %}</span>
+                    </div>
+                    <h6 class="inv-grid-name">{{ c.title }}</h6>
+                    <p class="inv-grid-price">{% trans "Price" %} {{ c.price|fcfa }}</p>
+                    <div class="inv-grid-stock">
+                        <span class="num {% if c.stock == 0 %}out{% elif c.stock < 5 %}low{% else %}ok{% endif %}">{{ c.stock|default:0 }}</span>
+                        <small>{% trans "Seats" %}</small>
+                    </div>
+                </article>
+                {% endfor %}
+                {% for s in supermarket_items %}
+                <article class="inv-grid-card">
+                    <label class="inv-grid-select inv-select-wrap"><input type="checkbox" class="inv-select" value="supermarket:{{ s.id }}"></label>
+                    <div class="inv-grid-thumb">
+                        <img src="{{ s.get_image_url }}" alt="">
+                        <span class="inv-grid-type type-supermarket">{% trans "Supermarket" %}</span>
+                    </div>
+                    <h6 class="inv-grid-name">{{ s.name }}</h6>
+                    <p class="inv-grid-price">{% trans "Price" %} {{ s.price|fcfa }}</p>
+                    <div class="inv-grid-stock">
+                        <span class="num {% if s.stock == 0 %}out{% elif s.stock < 5 %}low{% else %}ok{% endif %}">{{ s.stock|default:0 }}</span>
+                        <small>{% trans "In Stock" %}</small>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Books Panel -->
-<div class="inv-panel active" id="inv-panel-books">
+<div class="inv-panel" id="inv-panel-books">
     <div class="vp-card">
         <div class="inv-section-title"><i class="fas fa-book text-primary"></i>{% trans "Book Stock" %}</div>
         {% if vendor_books %}
         {% for vb in vendor_books %}
         <div class="inv-row">
+            <label class="inv-select-wrap"><input type="checkbox" class="inv-select" value="book:{{ vb.id }}"></label>
             <img src="{{ vb.book.get_cover_url }}" alt="" class="inv-cover">
             <div class="flex-grow-1" style="min-width:0;">
                 <div class="fw-bold text-truncate">{{ vb.book.name }}</div>
@@ -222,6 +351,7 @@
         {% if products %}
         {% for p in products %}
         <div class="inv-row">
+            <label class="inv-select-wrap"><input type="checkbox" class="inv-select" value="product:{{ p.id }}"></label>
             <img src="{{ p.get_image_url }}" alt="" class="inv-img">
             <div class="flex-grow-1" style="min-width:0;">
                 <div class="fw-bold text-truncate">{{ p.name }}</div>
@@ -277,6 +407,7 @@
         {% if courses %}
         {% for c in courses %}
         <div class="inv-row">
+            <label class="inv-select-wrap"><input type="checkbox" class="inv-select" value="course:{{ c.id }}"></label>
             <img src="{{ c.get_image_url }}" alt="" class="inv-img">
             <div class="flex-grow-1" style="min-width:0;">
                 <div class="fw-bold text-truncate">{{ c.title }}</div>
@@ -332,6 +463,7 @@
         {% if supermarket_items %}
         {% for s in supermarket_items %}
         <div class="inv-row">
+            <label class="inv-select-wrap"><input type="checkbox" class="inv-select" value="supermarket:{{ s.id }}"></label>
             <img src="{{ s.get_image_url }}" alt="" class="inv-img">
             <div class="flex-grow-1" style="min-width:0;">
                 <div class="fw-bold text-truncate">{{ s.name }}</div>
@@ -391,14 +523,15 @@ function switchInvTab(tabId, btn) {
     if (btn) btn.classList.add('active');
     // Persist active tab in URL hash
     history.replaceState(null, '', '#inv-' + tabId);
+    if (window.invBulkRefresh) window.invBulkRefresh();
+    if (tabId === 'all' && window.invGridRefresh) window.invGridRefresh('invGridAll');
 }
 // Restore tab from hash on load
 (function() {
-    var hash = window.location.hash.replace('#inv-', '');
-    if (hash) {
-        var btn = document.querySelector('.inv-tab[onclick*="' + hash + '"]');
-        if (btn) switchInvTab(hash, btn);
-    }
+    var hash = window.location.hash.replace('#inv-', '') || 'all';
+    var btn = document.querySelector('.inv-tab[onclick*="' + hash + '"]') || document.querySelector('.inv-tab');
+    if (btn) switchInvTab(hash, btn);
 })();
 </script>
+<script src="/static/js/inventory_grid.js" defer></script>
 {% endblock %}

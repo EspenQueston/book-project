@@ -56,7 +56,7 @@
                     </td>
                     <td>
                         <a href="{% url 'marketplace:admin_supermarket_edit' item.pk %}" class="btn btn-sm btn-outline-primary rounded-pill"><i class="fas fa-edit"></i></a>
-                        <form method="post" action="{% url 'marketplace:admin_supermarket_delete' item.pk %}" style="display:inline;" onsubmit="return confirm('确定删除？')">
+                        <form method="post" action="{% url 'marketplace:admin_supermarket_delete' item.pk %}" style="display:inline;">
                             {% csrf_token %}
                             <button class="btn btn-sm btn-outline-danger rounded-pill"><i class="fas fa-trash"></i></button>
                         </form>

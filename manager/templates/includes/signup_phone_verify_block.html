@@ -1,0 +1,46 @@
+{% load i18n %}
+
+{% if twilio_sms_enabled %}
+
+<div class="verify-phone-block mt-4 pt-4" style="border-top:1px solid var(--input-border, #e8ecf1);">
+
+    <div class="text-center mb-3">
+
+        <div class="email-icon-box" style="width:64px;height:64px;margin-bottom:12px;">
+
+            <i class="fas fa-mobile-alt"></i>
+
+        </div>
+
+        <h6 class="fw-bold mb-1">{% trans "SMS code" %}</h6>
+
+        <p class="text-muted mb-0" style="font-size:0.88rem;">
+
+            {% trans "Sent to" %} <strong style="color:#667eea;">{{ phone_masked }}</strong>
+
+        </p>
+
+    </div>
+
+    {% include 'includes/signup_pin_group.html' with pin_group_id='phone' pin_inputs_class='phone-pin-inputs' pin_input_class='phone-pin' hidden_name='phone_pin' hidden_id='phonePinHidden' %}
+
+    <div class="text-center mt-3">
+
+        <a href="#" class="resend-link" id="resendPhoneLink" onclick="resendPhone(); return false;">
+
+            <i class="fas fa-sms me-1"></i>{% trans "Resend SMS" %}
+
+        </a>
+
+        <span id="resendPhoneCountdown" style="display:none;" class="text-muted small">
+
+            {% trans "Resend SMS" %} (<span class="countdown" id="phoneCountdownNum">60</span>s)
+
+        </span>
+
+    </div>
+
+</div>
+
+{% endif %}
+

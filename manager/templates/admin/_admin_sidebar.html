@@ -60,14 +60,55 @@
     .admin-sidebar-wrap .sidebar-footer .nav-link {
         color: rgba(255,255,255,0.72); font-size: 0.84rem;
     }
-    .admin-main-offset { margin-left: 268px; min-height: 100vh; padding: 20px; }
+    .admin-main-offset { margin-left: 268px; min-height: 100vh; padding: 20px; transition: margin-left 0.28s ease; }
+    .admin-top-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 12px;
+        min-height: 42px;
+    }
+    .admin-sidebar-toggle {
+        width: 42px;
+        height: 42px;
+        border: 0;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
+        font-size: 1rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, left 0.28s ease;
+    }
+    .admin-sidebar-toggle:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 28px rgba(102, 126, 234, 0.45);
+        color: #fff;
+    }
+    body.admin-sidebar-collapsed .admin-sidebar-toggle {
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    }
+    .admin-sidebar-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(15,23,42,0.42);
+        z-index: 1040;
+    }
+    body.admin-sidebar-collapsed .admin-sidebar-wrap { transform: translateX(-100%); }
+    body.admin-sidebar-collapsed .admin-main-offset { margin-left: 0; }
     @media (max-width: 991.98px) {
         .admin-sidebar-wrap { transform: translateX(-100%); }
         .admin-sidebar-wrap.open { transform: translateX(0); }
         .admin-main-offset { margin-left: 0; }
+        .admin-sidebar-backdrop.show { display: block; }
     }
 </style>
-
 <aside class="admin-sidebar-wrap" id="adminSidebar" aria-label="管理导航">
     <div class="sidebar-brand">
         <div class="d-flex align-items-center gap-3">
@@ -119,6 +160,12 @@
             <a class="nav-link {% if request.path == '/manager/admin/vendors/' %}active{% endif %}" href="/manager/admin/vendors/">
                 <i class="fas fa-store-alt"></i><span>卖家管理</span>
             </a>
+            <a class="nav-link {% if request.path == '/manager/inventory/' %}active{% endif %}" href="/manager/inventory/">
+                <i class="fas fa-boxes"></i><span data-zh="库存管理" data-en="Inventory" data-fr="Inventaire">库存管理</span>
+            </a>
+            <a class="nav-link {% if request.path == '/manager/admin/escrow/' %}active{% endif %}" href="/manager/admin/escrow/">
+                <i class="fas fa-vault"></i><span data-zh="托管与结算" data-en="Escrow & payouts" data-fr="Escrow & reversements">托管与结算</span>
+            </a>
             <a class="nav-link {% if request.path == '/manager/admin/chatbot/' %}active{% endif %}" href="/manager/admin/chatbot/">
                 <i class="fas fa-robot"></i><span>AI 聊天配置</span>
             </a>
@@ -135,3 +182,77 @@
         </nav>
     </div>
 </aside>
+<div class="admin-sidebar-backdrop" id="adminSidebarBackdrop" aria-hidden="true"></div>
+<script>
+(function() {
+    var sidebar = document.getElementById('adminSidebar');
+    var backdrop = document.getElementById('adminSidebarBackdrop');
+    if (!sidebar || !backdrop) return;
+    var storageKey = 'adminSidebarCollapsed';
+    var toggle = null;
+
+    function mountToolbarToggle() {
+        var main = document.querySelector('.admin-main-offset');
+        if (!main || document.getElementById('adminSidebarToggle')) {
+            toggle = document.getElementById('adminSidebarToggle');
+            return !!toggle;
+        }
+        var toolbar = document.createElement('div');
+        toolbar.className = 'admin-top-toolbar';
+        toolbar.innerHTML = '<button type="button" class="admin-sidebar-toggle" id="adminSidebarToggle" aria-controls="adminSidebar" aria-expanded="true" title="Afficher / cacher le menu"><i class="fas fa-bars-staggered"></i></button>';
+        main.insertBefore(toolbar, main.firstChild);
+        toggle = document.getElementById('adminSidebarToggle');
+        return !!toggle;
+    }
+
+    function isMobile() {
+        return window.innerWidth <= 991;
+    }
+    function closeMobile() {
+        sidebar.classList.remove('open');
+        backdrop.classList.remove('show');
+        if (toggle) toggle.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+    }
+    function openMobile() {
+        sidebar.classList.add('open');
+        backdrop.classList.add('show');
+        if (toggle) toggle.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
+    }
+    function applyDesktopState(collapsed) {
+        document.body.classList.toggle('admin-sidebar-collapsed', collapsed && !isMobile());
+        if (!toggle) return;
+        toggle.setAttribute('aria-expanded', collapsed && !isMobile() ? 'false' : 'true');
+        var icon = toggle.querySelector('i');
+        if (icon) icon.className = collapsed && !isMobile() ? 'fas fa-bars' : 'fas fa-bars-staggered';
+    }
+    function onToggleClick() {
+        if (isMobile()) {
+            if (sidebar.classList.contains('open')) closeMobile(); else openMobile();
+            return;
+        }
+        var collapsed = !document.body.classList.contains('admin-sidebar-collapsed');
+        localStorage.setItem(storageKey, collapsed ? '1' : '0');
+        applyDesktopState(collapsed);
+    }
+    function init() {
+        if (!mountToolbarToggle()) return;
+        if (toggle.dataset.bound !== '1') {
+            toggle.dataset.bound = '1';
+            toggle.addEventListener('click', onToggleClick);
+        }
+        applyDesktopState(localStorage.getItem(storageKey) === '1');
+    }
+    backdrop.addEventListener('click', closeMobile);
+    window.addEventListener('resize', function() {
+        closeMobile();
+        applyDesktopState(localStorage.getItem(storageKey) === '1');
+    });
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
+</script>

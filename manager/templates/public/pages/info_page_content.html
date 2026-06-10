@@ -1,0 +1,58 @@
+{% extends 'public/pages/info_page.html' %}
+{% load i18n %}
+
+{% block page_hero_class %}duno-platform-hero{% endblock %}
+{% block page_layout_class %}duno-page-layout--platform{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+{% include 'public/pages/_legal_styles.html' %}
+{% include 'includes/home_faq_styles.html' %}
+{% endblock %}
+
+{% block page_hero_ambient %}
+<div class="duno-platform-ambient duno-legal-ambient" aria-hidden="true">
+    <span class="hero-text-grid"></span>
+    <span class="hero-aurora hero-aurora-a"></span>
+    <span class="hero-aurora hero-aurora-b"></span>
+</div>
+{% endblock %}
+
+{% block page_hero_extra %}
+{% if page_highlights %}
+<div class="duno-platform-trust duno-legal-trust" data-aos="fade-up" data-aos-delay="120">
+    {% for item in page_highlights %}
+    <span class="duno-legal-trust-pill"><i class="fas {{ item.icon }}"></i>{{ item.text }}</span>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block page_hero_wave %}
+<div class="duno-platform-wave duno-legal-wave" aria-hidden="true">
+    <svg viewBox="0 0 1440 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0,48 C320,88 480,8 720,40 C960,72 1120,24 1440,56 L1440,80 L0,80 Z" fill="#f8fafc"/>
+    </svg>
+</div>
+{% endblock %}
+
+{% block page_content %}
+{% include content_template %}
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+(function() {
+    document.querySelectorAll('.duno-acc-item').forEach(function(item) {
+        item.addEventListener('toggle', function() {
+            if (this.open && this.dataset.single !== 'false') {
+                document.querySelectorAll('.duno-acc-item').forEach(function(other) {
+                    if (other !== item && other.dataset.single !== 'false') other.open = false;
+                });
+            }
+        });
+    });
+})();
+</script>
+{% endblock %}

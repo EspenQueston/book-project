@@ -1,0 +1,274 @@
+<style>
+    .pricing-rules-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+        border: 1px solid rgba(102, 126, 234, 0.14);
+        border-radius: 20px;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.07);
+        overflow: hidden;
+    }
+    .pricing-rules-trigger {
+        width: 100%;
+        border: 0;
+        padding: 18px 20px;
+        background: linear-gradient(135deg, rgba(102,126,234,.12), rgba(118,75,162,.08));
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        border-bottom: 1px solid rgba(102,126,234,.12);
+        text-align: left;
+        cursor: pointer;
+        transition: background .25s ease, transform .25s ease;
+    }
+    .pricing-rules-trigger:hover {
+        background: linear-gradient(135deg, rgba(102,126,234,.18), rgba(118,75,162,.12));
+    }
+    .pricing-rules-title {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        font-weight: 900;
+        color: #172554;
+    }
+    .pricing-rules-title .rule-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: #fff;
+        box-shadow: 0 12px 24px rgba(102,126,234,.28);
+    }
+    .pricing-rules-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-shrink: 0;
+    }
+    .rule-open-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border-radius: 999px;
+        padding: 10px 14px;
+        color: #fff;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        font-weight: 900;
+        font-size: .78rem;
+        box-shadow: 0 12px 26px rgba(102,126,234,.28);
+    }
+    .pricing-rules-chevron {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: rgba(255,255,255,.72);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #4338ca;
+        transition: transform .25s ease;
+    }
+    .pricing-rules-card.is-open .pricing-rules-chevron { transform: rotate(180deg); }
+    .pricing-rules-body {
+        display: none;
+        padding: 20px;
+        animation: pricingRulesIn .24s ease;
+    }
+    .pricing-rules-card.is-open .pricing-rules-body { display: block; }
+    @keyframes pricingRulesIn {
+        from { opacity: 0; transform: translateY(-8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .rule-section {
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 16px;
+        background: rgba(255,255,255,.84);
+        margin-bottom: 14px;
+    }
+    .rule-section-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: .95rem;
+        font-weight: 850;
+        color: #1e293b;
+        margin-bottom: 12px;
+    }
+    .tier-row {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 12px;
+        margin-bottom: 10px;
+    }
+    .rule-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border-radius: 999px;
+        padding: 8px 12px;
+        background: #eef2ff;
+        color: #4338ca;
+        font-weight: 800;
+        font-size: .76rem;
+    }
+    .rules-add-btn, .rules-remove-btn {
+        border-radius: 999px;
+        font-weight: 800;
+    }
+    .rules-preview {
+        border-radius: 16px;
+        background: linear-gradient(135deg, #ecfeff, #eef2ff);
+        color: #0f172a;
+        padding: 14px 16px;
+        font-size: .86rem;
+        border: 1px solid rgba(59,130,246,.18);
+    }
+    .pricing-rules-card .form-control,
+    .pricing-rules-card .form-select {
+        min-height: 44px;
+        border-radius: 12px;
+    }
+    @media (max-width: 767.98px) {
+        .pricing-rules-card { border-radius: 18px; }
+        .pricing-rules-trigger { align-items: flex-start; flex-direction: column; padding: 16px; }
+        .pricing-rules-title { align-items: flex-start; }
+        .pricing-rules-title .rule-icon { width: 40px; height: 40px; border-radius: 13px; }
+        .pricing-rules-actions { width: 100%; justify-content: space-between; }
+        .rule-open-pill { width: calc(100% - 46px); justify-content: center; padding: 11px 12px; }
+        .pricing-rules-body { padding: 14px; }
+        .rule-section { padding: 14px; }
+        .tier-row { padding: 12px; }
+        .rules-remove-btn { min-height: 42px; }
+    }
+</style>
+
+<div class="pricing-rules-card" data-pricing-rules-card>
+    <button type="button" class="pricing-rules-trigger" onclick="togglePricingRules(this)" aria-expanded="false">
+        <div class="pricing-rules-title">
+            <span class="rule-icon"><i class="fas fa-wand-magic-sparkles"></i></span>
+            <div>
+                <div data-zh="高级批发规则" data-en="Advanced Wholesale Rules" data-fr="Règles de vente en gros">高级批发规则</div>
+                <small class="text-muted fw-semibold" data-zh="需要批发价时点击打开，不使用可保持关闭" data-en="Open only when you need wholesale pricing" data-fr="Ouvrez uniquement si vous avez besoin du prix de gros">需要批发价时点击打开，不使用可保持关闭</small>
+            </div>
+        </div>
+        <span class="pricing-rules-actions">
+            {% if pricing_rule_form.has_rules %}
+            <span class="rule-chip"><i class="fas fa-check-circle"></i><span data-zh="已配置" data-en="Configured" data-fr="Configuré">已配置</span></span>
+            {% endif %}
+            <span class="rule-open-pill"><i class="fas fa-sliders"></i><span data-zh="设置批发规则" data-en="Set Wholesale Rules" data-fr="Configurer les règles">设置批发规则</span></span>
+            <span class="pricing-rules-chevron"><i class="fas fa-chevron-down"></i></span>
+        </span>
+    </button>
+
+    <div class="pricing-rules-body">
+        <div class="rules-preview mb-3">
+            <strong data-zh="提示" data-en="Tip" data-fr="Conseil">提示</strong>:
+            <span data-zh="如果你不需要批发价，保留空白即可。你可以添加多个价格等级，例如 10 件起一个价格，50 件起另一个价格。" data-en="Leave this empty if you do not need wholesale pricing. You can add several tiers, for example one price from 10 units and another from 50 units." data-fr="Laissez cette zone vide si vous n’avez pas besoin de prix de gros. Vous pouvez ajouter plusieurs paliers, par exemple un prix dès 10 pièces et un autre dès 50 pièces.">如果你不需要批发价，保留空白即可。你可以添加多个价格等级，例如 10 件起一个价格，50 件起另一个价格。</span>
+        </div>
+
+        <div class="rule-section">
+            <div class="rule-section-title"><i class="fas fa-layer-group text-primary"></i><span data-zh="价格等级" data-en="Price Tiers" data-fr="Paliers de prix">价格等级</span></div>
+            <div id="pricingTierList">
+                {% for tier in pricing_rule_form.tiers %}
+                <div class="tier-row">
+                    <div class="row g-2 align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label" data-zh="从数量" data-en="From quantity" data-fr="À partir de">从数量</label>
+                            <input type="number" name="tier_min" min="1" class="form-control" value="{{ tier.min|default:'' }}" data-ph-zh="例：10" data-ph-en="e.g. 10" data-ph-fr="ex. 10" placeholder="例：10">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" data-zh="到数量" data-en="To quantity" data-fr="Jusqu’à">到数量</label>
+                            <input type="number" name="tier_max" min="1" class="form-control" value="{{ tier.max|default:'' }}" data-ph-zh="可留空" data-ph-en="Optional" data-ph-fr="Optionnel" placeholder="可留空">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" data-zh="批发单价" data-en="Wholesale unit price" data-fr="Prix unitaire gros">批发单价</label>
+                            <input type="number" name="tier_unit_price" min="0" step="0.01" class="form-control" value="{{ tier.unit_price|default:'' }}" data-ph-zh="例：8000" data-ph-en="e.g. 8000" data-ph-fr="ex. 8000" placeholder="例：8000">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-outline-danger w-100 rules-remove-btn" onclick="removePricingTier(this)"><i class="fas fa-trash-alt"></i></button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <button type="button" class="btn btn-outline-primary rules-add-btn" onclick="addPricingTier()">
+                <i class="fas fa-plus me-1"></i><span data-zh="添加价格等级" data-en="Add price tier" data-fr="Ajouter un palier">添加价格等级</span>
+            </button>
+        </div>
+
+        <div class="rule-section">
+            <div class="rule-section-title"><i class="fas fa-percent text-success"></i><span data-zh="自动折扣" data-en="Automatic Discount" data-fr="Remise automatique">自动折扣</span></div>
+            <div class="row g-2">
+                <div class="col-md-3">
+                    <label class="form-label" data-zh="折扣类型" data-en="Discount type" data-fr="Type de remise">折扣类型</label>
+                    <select name="discount_type" class="form-select">
+                        <option value="percent" {% if pricing_rule_form.discount.type != 'fixed' %}selected{% endif %} data-zh="百分比" data-en="Percent" data-fr="Pourcentage">百分比</option>
+                        <option value="fixed" {% if pricing_rule_form.discount.type == 'fixed' %}selected{% endif %} data-zh="固定金额" data-en="Fixed amount" data-fr="Montant fixe">固定金额</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" data-zh="折扣值" data-en="Discount value" data-fr="Valeur">折扣值</label>
+                    <input type="number" name="discount_value" min="0" step="0.01" class="form-control" value="{{ pricing_rule_form.discount.value|default:'' }}" data-ph-zh="例：5" data-ph-en="e.g. 5" data-ph-fr="ex. 5" placeholder="例：5">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" data-zh="订单最低金额" data-en="Minimum cart total" data-fr="Minimum panier">订单最低金额</label>
+                    <input type="number" name="discount_min_total" min="0" step="0.01" class="form-control" value="{{ pricing_rule_form.discount.min_cart_total|default:'' }}" data-ph-zh="可选" data-ph-en="Optional" data-ph-fr="Optionnel" placeholder="可选">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label" data-zh="优先级" data-en="Priority" data-fr="Priorité">优先级</label>
+                    <input type="number" name="discount_priority" min="1" class="form-control" value="{{ pricing_rule_form.discount.priority|default:'1' }}">
+                </div>
+            </div>
+        </div>
+
+        <div class="rule-section mb-0">
+            <div class="rule-section-title"><i class="fas fa-gift text-warning"></i><span data-zh="买 X 送 Y" data-en="Buy X Get Y" data-fr="Acheter X, recevoir Y">买 X 送 Y</span></div>
+            <div class="row g-2">
+                <div class="col-md-4">
+                    <label class="form-label" data-zh="购买数量 X" data-en="Buy quantity X" data-fr="Quantité achetée X">购买数量 X</label>
+                    <input type="number" name="bogo_buy_qty" min="1" class="form-control" value="{{ pricing_rule_form.bogo.buy_qty|default:'' }}" data-ph-zh="例：10" data-ph-en="e.g. 10" data-ph-fr="ex. 10" placeholder="例：10">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" data-zh="赠送数量 Y" data-en="Free quantity Y" data-fr="Quantité offerte Y">赠送数量 Y</label>
+                    <input type="number" name="bogo_get_qty" min="1" class="form-control" value="{{ pricing_rule_form.bogo.get_qty|default:'' }}" data-ph-zh="例：1" data-ph-en="e.g. 1" data-ph-fr="ex. 1" placeholder="例：1">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" data-zh="折扣百分比" data-en="Discount percent" data-fr="Pourcentage remise">折扣百分比</label>
+                    <input type="number" name="bogo_discount_percent" min="0" max="100" step="0.01" class="form-control" value="{{ pricing_rule_form.bogo.discount_percent|default:'100' }}">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function addPricingTier() {
+    const list = document.getElementById('pricingTierList');
+    if (!list) return;
+    const first = list.querySelector('.tier-row');
+    const row = first ? first.cloneNode(true) : null;
+    if (!row) return;
+    row.querySelectorAll('input').forEach(function (input) { input.value = ''; });
+    list.appendChild(row);
+}
+function removePricingTier(button) {
+    const list = document.getElementById('pricingTierList');
+    const row = button.closest('.tier-row');
+    if (!list || !row) return;
+    if (list.querySelectorAll('.tier-row').length <= 1) {
+        row.querySelectorAll('input').forEach(function (input) { input.value = ''; });
+        return;
+    }
+    row.remove();
+}
+function togglePricingRules(trigger) {
+    const card = trigger.closest('[data-pricing-rules-card]');
+    if (!card) return;
+    const isOpen = card.classList.toggle('is-open');
+    trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+}
+</script>

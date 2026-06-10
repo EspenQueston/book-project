@@ -82,10 +82,11 @@
 {% with rn=request.resolver_match %}
 <aside class="vp-sidebar-inner" aria-label="{% trans '卖家导航' %}">
     <div class="vp-sn-brand">
-        <div class="vp-sn-name">{{ vendor.company_name }}</div>
-        <div class="vp-sn-sub">{% trans "卖家中心" %}</div>
+        <div class="vp-sn-name">{% if vendor %}{{ vendor.company_name }}{% else %}DUNO 360 Admin{% endif %}</div>
+        <div class="vp-sn-sub">{% if vendor %}{% trans "卖家中心" %}{% else %}{% trans "Admin Panel" %}{% endif %}</div>
     </div>
     <nav class="vp-sn-scroll">
+        {% if vendor %}
         <div class="vp-sn-label">{% trans "概览" %}</div>
         <a class="vp-sn-link {% if rn.namespace == 'manager' and rn.url_name == 'vendor_dashboard' %}nav-active{% endif %}"
            href="{% url 'manager:vendor_dashboard' %}">
@@ -94,6 +95,7 @@
         <a class="vp-sn-link" href="{% url 'manager:public_vendor_shop' vendor.id %}" target="_blank" rel="noopener">
             <i class="fas fa-store"></i>{% trans "店铺前台" %}
         </a>
+        {% endif %}
 
         <div class="vp-sn-label">{% trans "订单" %}</div>
         <a class="vp-sn-link {% if rn.namespace == 'manager' and rn.url_name == 'vendor_orders_hub' or rn.namespace == 'manager' and rn.url_name == 'vendor_book_order_detail' or rn.namespace == 'marketplace' and rn.url_name == 'vendor_marketplace_orders' or rn.namespace == 'marketplace' and rn.url_name == 'vendor_marketplace_order_detail' %}nav-active{% endif %}"
@@ -149,11 +151,21 @@
         </a>
         <div class="vp-sn-divider"></div>
         <div class="vp-sn-label">{% trans "设置" %}</div>
-        <a class="vp-sn-link" href="{% url 'manager:vendor_dashboard' %}#dtab-settings">
+        <a class="vp-sn-link {% if rn.namespace == 'manager' and rn.url_name == 'vendor_settings' %}nav-active{% endif %}"
+           href="{% url 'manager:vendor_settings' %}">
             <i class="fas fa-cog"></i>{% trans "店铺设置" %}
+        </a>
+        <div class="vp-sn-label">{% trans "财务" %}</div>
+        <a class="vp-sn-link {% if rn.namespace == 'manager' and rn.url_name == 'vendor_payments' %}nav-active{% endif %}"
+           href="{% url 'manager:vendor_payments' %}{% if admin_access and vendor %}?vendor_id={{ vendor.id }}{% endif %}">
+            <i class="fas fa-wallet"></i>{% trans "付款与托管" %}
         </a>
         <div class="vp-sn-divider"></div>
         <div class="vp-sn-label">{% trans "客户" %}</div>
+        <a class="vp-sn-link {% if rn.namespace == 'manager' and rn.url_name == 'vendor_notifications' %}nav-active{% endif %}"
+           href="{% url 'manager:vendor_notifications' %}{% if admin_access and vendor %}?vendor_id={{ vendor.id }}{% endif %}">
+            <i class="fas fa-bell"></i>{% trans "Notifications" %}
+        </a>
         <a class="vp-sn-link {% if rn.namespace == 'manager' and rn.url_name == 'vendor_messages' %}nav-active{% endif %}"
            href="{% url 'manager:vendor_messages' %}">
             <i class="fas fa-comments"></i>{% trans "客户消息" %}

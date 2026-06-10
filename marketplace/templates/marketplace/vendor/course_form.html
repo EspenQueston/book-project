@@ -1,147 +1,147 @@
 {% extends "marketplace/vendor/base.html" %}
-{% load currency_filters %}
-
-{% block title %}{% if course %}编辑课程{% else %}添加课程{% endif %} - {{ vendor.company_name }}{% endblock %}
+{% block title %}{% if course %}Modifier le cours{% else %}Ajouter un cours{% endif %} - {{ vendor.company_name }}{% endblock %}
 {% block nav_courses %}active{% endblock %}
 
 {% block extra_vendor_css %}
 <style>
-    .form-card { background: #fff; border-radius: 15px; padding: 28px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); margin-bottom: 24px; }
-    .form-card h6 { font-weight: 700; color: #1e293b; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid rgba(102,126,234,0.1); }
-    .form-label { font-weight: 600; font-size: 0.85rem; color: #374151; }
-    .form-control, .form-select { border-radius: 10px; border: 1.5px solid #e2e8f0; padding: 10px 14px; font-size: 0.9rem; transition: all 0.2s; }
-    .form-control:focus, .form-select:focus { border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,0.12); }
-    .img-preview { width: 160px; height: 100px; border-radius: 12px; object-fit: cover; border: 2px dashed #e2e8f0; }
-    .btn-submit { background: linear-gradient(135deg, #667eea, #764ba2); border: none; border-radius: 10px; padding: 12px 36px; font-weight: 600; color: #fff; }
-    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102,126,234,0.3); color: #fff; }
+    .vendor-form-shell { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(320px,.85fr); gap:24px; }
+    .vendor-form-card { background:#fff; border-radius:18px; padding:24px; box-shadow:0 8px 24px rgba(15,23,42,.06); border:1px solid rgba(245,158,11,.12); }
+    .vendor-form-title { font-size:1.05rem; font-weight:800; color:#1e293b; margin-bottom:18px; display:flex; align-items:center; gap:10px; }
+    .vendor-form-title i { color:#f59e0b; }
+    .vendor-form-card .form-label { font-weight:700; color:#334155; font-size:.88rem; }
+    .vendor-form-card .form-control, .vendor-form-card .form-select, .vendor-form-card .input-group-text { border-radius:12px; min-height:46px; }
+    .vendor-form-card textarea.form-control { min-height:140px; }
+    .vendor-form-card .form-control, .vendor-form-card .form-select { border:1.5px solid #fde68a; box-shadow:none; }
+    .vendor-form-card .form-control:focus, .vendor-form-card .form-select:focus { border-color:#f59e0b; box-shadow:0 0 0 3px rgba(245,158,11,.14); }
+    .vendor-side-stack { display:flex; flex-direction:column; gap:24px; }
+    .switch-card { background:linear-gradient(135deg,#fff7ed,#fef3c7); border:1px solid #fde68a; border-radius:16px; padding:16px; }
+    .preview-box { border:1.5px dashed #fcd34d; border-radius:16px; padding:14px; text-align:center; background:#fffaf0; }
+    .preview-thumb { width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:12px; margin-bottom:10px; background:#fffbeb; }
+    .mini-note { font-size:.8rem; color:#64748b; }
+    .form-actions { display:flex; gap:12px; flex-wrap:wrap; }
+    .form-actions .btn { border-radius:999px; padding:12px 24px; font-weight:700; }
+    .detail-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+    @media (max-width: 991.98px) {
+        .vendor-form-shell { grid-template-columns:1fr; }
+        .vendor-side-stack { order:-1; }
+    }
+    @media (max-width: 767.98px) {
+        .vendor-form-card { padding:18px; border-radius:16px; }
+        .detail-grid { grid-template-columns:1fr; }
+        .form-actions { flex-direction:column-reverse; }
+        .form-actions .btn { width:100%; justify-content:center; }
+        .page-header-card .d-flex { flex-direction:column; align-items:flex-start !important; gap:12px; }
+    }
 </style>
 {% endblock %}
 
 {% block vendor_content %}
 <div class="page-header-card">
-    <div class="d-flex align-items-center justify-content-between">
+    <div class="d-flex justify-content-between align-items-center gap-3">
         <div>
-            <h4><i class="fas fa-{% if course %}edit{% else %}plus-circle{% endif %} me-2"></i>{% if course %}编辑课程{% else %}添加课程{% endif %}</h4>
-            <p class="mb-0 opacity-75" style="font-size:0.9rem;">{% if course %}修改 "{{ course.title }}"{% else %}填写课程信息{% endif %}</p>
+            <h4><i class="fas fa-{% if course %}edit{% else %}plus-circle{% endif %} me-2"></i>{% if course %}Modifier le cours{% else %}Ajouter un cours{% endif %}</h4>
+            <p class="mb-0 opacity-75" style="font-size:.92rem;">Interface alignée sur l’admin marketplace, optimisée pour desktop et mobile.</p>
         </div>
-        <a href="{% url 'marketplace:vendor_courses' %}" class="btn btn-light btn-sm px-3"><i class="fas fa-arrow-left me-1"></i>返回列表</a>
+        <a href="{% url 'marketplace:vendor_courses' %}" class="btn btn-light rounded-pill px-4"><i class="fas fa-arrow-left me-2"></i>Retour à la liste</a>
     </div>
 </div>
 
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
-
-    <!-- Basic Info -->
-    <div class="form-card">
-        <h6><i class="fas fa-info-circle me-2" style="color:var(--primary-color);"></i>基本信息</h6>
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label class="form-label">课程标题 <span class="text-danger">*</span></label>
-                <input type="text" name="title" class="form-control" required value="{{ course.title|default:'' }}">
+    <div class="vendor-form-shell">
+        <div class="vendor-form-card">
+            <div class="vendor-form-title"><i class="fas fa-graduation-cap"></i><span>Informations du cours</span></div>
+            <div class="mb-3">
+                <label class="form-label fw-bold">Titre du cours <span class="text-danger">*</span></label>
+                <input type="text" name="title" class="form-control" value="{{ course.title|default:'' }}" required>
             </div>
-            <div class="col-md-6">
-                <label class="form-label">英文标题</label>
+            <div class="mb-3">
+                <label class="form-label fw-bold">Titre anglais</label>
                 <input type="text" name="title_en" class="form-control" value="{{ course.title_en|default:'' }}">
             </div>
-            <div class="col-md-6">
-                <label class="form-label">分类</label>
-                <select name="category" class="form-select">
-                    <option value="">选择分类</option>
-                    {% for cat in categories %}
-                    <option value="{{ cat.pk }}" {% if course and course.category_id == cat.pk %}selected{% endif %}>{{ cat.name }}</option>
-                    {% endfor %}
-                </select>
+            <div class="mb-3">
+                <label class="form-label fw-bold">Description</label>
+                <textarea name="description" class="form-control" rows="5">{{ course.description|default:'' }}</textarea>
             </div>
-            <div class="col-md-6">
-                <label class="form-label">讲师名称</label>
-                <input type="text" name="instructor" class="form-control" value="{{ course.instructor|default:'' }}" placeholder="{{ vendor.company_name }}">
-            </div>
-            <div class="col-12">
-                <label class="form-label">课程描述</label>
-                <textarea name="description" class="form-control" rows="4">{{ course.description|default:'' }}</textarea>
-            </div>
-        </div>
-    </div>
-
-    <!-- Pricing -->
-    <div class="form-card">
-        <h6><i class="fas fa-yen-sign me-2" style="color:#10b981;"></i>价格信息</h6>
-        <div class="row g-3">
-            <div class="col-md-4">
-                <label class="form-label">课程价格 <span class="text-danger">*</span></label>
-                <div class="input-group">
-                    <span class="input-group-text">FCFA</span>
-                    <input type="number" step="0.01" name="price" class="form-control" required value="{{ course.price|default:'' }}">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Prix <span class="text-danger">*</span></label>
+                    <input type="number" name="price" class="form-control" step="0.01" value="{{ course.price|default:'' }}" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Prix original</label>
+                    <input type="number" name="original_price" class="form-control" step="0.01" value="{{ course.original_price|default:'' }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Instructeur <span class="text-danger">*</span></label>
+                    <input type="text" name="instructor" class="form-control" value="{{ course.instructor|default:'' }}" required>
                 </div>
             </div>
-            <div class="col-md-4">
-                <label class="form-label">原价</label>
-                <div class="input-group">
-                    <span class="input-group-text">FCFA</span>
-                    <input type="number" step="0.01" name="original_price" class="form-control" value="{{ course.original_price|default:'' }}">
+        </div>
+
+        <div class="vendor-side-stack">
+            <div class="vendor-form-card">
+                <div class="vendor-form-title"><i class="fas fa-sliders-h"></i><span>Réglages du cours</span></div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Catégorie</label>
+                    <select name="category" class="form-select">
+                        <option value="">-- Choisir une catégorie --</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.id }}" {% if course.category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="detail-grid">
+                    <div>
+                        <label class="form-label fw-bold">Durée (heures)</label>
+                        <input type="number" name="duration_hours" class="form-control" step="0.1" value="{{ course.duration_hours|default:'0' }}">
+                    </div>
+                    <div>
+                        <label class="form-label fw-bold">Nombre de leçons</label>
+                        <input type="number" name="lessons_count" class="form-control" value="{{ course.lessons_count|default:'0' }}">
+                    </div>
+                </div>
+                <div class="mb-3 mt-3">
+                    <label class="form-label fw-bold">Niveau</label>
+                    <select name="level" class="form-select">
+                        <option value="all" {% if course.level == 'all' %}selected{% endif %}>Tous niveaux</option>
+                        <option value="beginner" {% if course.level == 'beginner' %}selected{% endif %}>Débutant</option>
+                        <option value="intermediate" {% if course.level == 'intermediate' %}selected{% endif %}>Intermédiaire</option>
+                        <option value="advanced" {% if course.level == 'advanced' %}selected{% endif %}>Avancé</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Langue</label>
+                    <input type="text" name="language" class="form-control" value="{{ course.language|default:'Français' }}">
+                </div>
+                <div class="mb-0">
+                    <label class="form-label fw-bold">Lien de prévisualisation</label>
+                    <input type="url" name="preview_url" class="form-control" value="{{ course.preview_url|default:'' }}">
                 </div>
             </div>
-            <div class="col-md-4">
-                <label class="form-label">语言</label>
-                <input type="text" name="language" class="form-control" value="{{ course.language|default:'中文' }}">
-            </div>
-        </div>
-    </div>
 
-    <!-- Course Details -->
-    <div class="form-card">
-        <h6><i class="fas fa-cog me-2" style="color:#f59e0b;"></i>课程详情</h6>
-        <div class="row g-3">
-            <div class="col-md-4">
-                <label class="form-label">难度级别</label>
-                <select name="level" class="form-select">
-                    <option value="all" {% if course.level == 'all' %}selected{% endif %}>全部级别</option>
-                    <option value="beginner" {% if course.level == 'beginner' %}selected{% endif %}>入门</option>
-                    <option value="intermediate" {% if course.level == 'intermediate' %}selected{% endif %}>中级</option>
-                    <option value="advanced" {% if course.level == 'advanced' %}selected{% endif %}>高级</option>
-                </select>
+            <div class="vendor-form-card">
+                <div class="vendor-form-title"><i class="fas fa-image"></i><span>Couverture</span></div>
+                <div class="preview-box">
+                    {% if course and course.image %}<img src="{{ course.image.url }}" class="preview-thumb" alt="Cover">{% else %}<div class="preview-thumb d-flex align-items-center justify-content-center"><i class="fas fa-image text-muted"></i></div>{% endif %}
+                    <label class="form-label small fw-bold">Image du cours</label>
+                    <input type="file" name="image" class="form-control mt-2" accept="image/*">
+                    <div class="mini-note mt-2">Recommandé : format 16:9 pour un meilleur rendu desktop/mobile.</div>
+                </div>
             </div>
-            <div class="col-md-4">
-                <label class="form-label">课程时长 (小时)</label>
-                <input type="number" step="0.1" name="duration_hours" class="form-control" value="{{ course.duration_hours|default:'0' }}">
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">课程节数</label>
-                <input type="number" name="lessons_count" class="form-control" value="{{ course.lessons_count|default:'0' }}">
-            </div>
-            <div class="col-12">
-                <label class="form-label">预览视频URL</label>
-                <input type="url" name="preview_url" class="form-control" placeholder="https://..." value="{{ course.preview_url|default:'' }}">
-            </div>
-        </div>
-    </div>
 
-    <!-- Image -->
-    <div class="form-card">
-        <h6><i class="fas fa-image me-2" style="color:#f093fb;"></i>课程封面</h6>
-        <div class="row align-items-center gap-3">
-            {% if course and course.image %}
-            <div class="col-auto">
-                <img src="{{ course.image.url }}" class="img-preview">
-            </div>
-            {% endif %}
-            <div class="col">
-                <input type="file" name="image" class="form-control" accept="image/*">
-                <small class="text-muted">推荐尺寸: 800×450px, 最大5MB</small>
-            </div>
-        </div>
-    </div>
-
-    <!-- Status & Submit -->
-    <div class="form-card">
-        <div class="d-flex align-items-center justify-content-between">
-            <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" name="is_active" id="isActive" {% if not course or course.is_active %}checked{% endif %}>
-                <label class="form-check-label fw-bold" for="isActive">立即发布</label>
-            </div>
-            <div class="d-flex gap-2">
-                <a href="{% url 'marketplace:vendor_courses' %}" class="btn btn-outline-secondary px-4" style="border-radius:10px;">取消</a>
-                <button type="submit" class="btn btn-submit"><i class="fas fa-save me-1"></i>{% if course %}保存修改{% else %}添加课程{% endif %}</button>
+            <div class="vendor-form-card">
+                <div class="vendor-form-title"><i class="fas fa-check-circle"></i><span>Publication</span></div>
+                <div class="switch-card mb-3">
+                    <div class="form-check form-switch">
+                        <input type="checkbox" name="is_active" class="form-check-input" id="isActive" {% if course.is_active or not course %}checked{% endif %}>
+                        <label class="form-check-label fw-bold" for="isActive">Publier le cours</label>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-warning text-white"><i class="fas fa-save me-2"></i>{% if course %}Enregistrer les modifications{% else %}Créer le cours{% endif %}</button>
+                    <a href="{% url 'marketplace:vendor_courses' %}" class="btn btn-outline-secondary">Annuler</a>
+                </div>
             </div>
         </div>
     </div>

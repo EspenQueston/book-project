@@ -29,6 +29,7 @@
         .vp-sidebar-host {
             width: 260px;
             flex-shrink: 0;
+            transition: width 0.28s ease, transform 0.28s ease;
         }
         .vp-main {
             flex: 1;
@@ -37,6 +38,41 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            transition: margin-left 0.28s ease;
+        }
+        .vp-top-toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 4px 0 8px;
+        }
+        .vp-sidebar-toggle {
+            width: 42px;
+            height: 42px;
+            border: 0;
+            border-radius: 12px;
+            background: var(--vp-gradient);
+            color: #fff;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+        }
+        .vp-sidebar-toggle:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 28px rgba(102, 126, 234, 0.45);
+            color: #fff;
+        }
+        body.vp-sidebar-collapsed .vp-sidebar-toggle {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+        body.vp-sidebar-collapsed .vp-sidebar-host {
+            width: 0;
+            transform: translateX(-100%);
+            overflow: hidden;
         }
         .vp-scroll {
             flex: 1;
@@ -48,11 +84,47 @@
         @media (max-width: 991px) {
             .vp-sidebar-host { display: none; width: 0; }
             .vp-scroll { padding: 14px 14px 40px; }
+            .vp-sidebar-toggle { display: none; }
         }
         .vp-scroll::-webkit-scrollbar { width: 6px; }
         .vp-scroll::-webkit-scrollbar-thumb {
             background: var(--vp-secondary);
             border-radius: 6px;
+        }
+        .vp-form-ambient {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .vp-form-ambient::before,
+        .vp-form-ambient::after {
+            content: '';
+            position: absolute;
+            border-radius: 999px;
+            filter: blur(80px);
+            opacity: .18;
+            animation: vpGlowFloat 9s ease-in-out infinite;
+        }
+        .vp-form-ambient::before {
+            width: 38vw;
+            height: 38vw;
+            top: -10vw;
+            left: -8vw;
+            background: rgba(102,126,234,.45);
+        }
+        .vp-form-ambient::after {
+            width: 34vw;
+            height: 34vw;
+            right: -8vw;
+            bottom: -10vw;
+            background: rgba(118,75,162,.42);
+            animation-delay: -3s;
+        }
+        @keyframes vpGlowFloat {
+            0%,100% { transform: translate3d(0,0,0) scale(1); }
+            50% { transform: translate3d(0,-18px,0) scale(1.06); }
         }
         /* Shared vendor stat cards (dashboard, orders hub, includes) */
         .vp-glow-card {
@@ -72,7 +144,8 @@
     {% block panel_extra_css %}{% endblock %}
 </head>
 <body class="vp-body">
-<div class="vp-layout">
+<div class="vp-form-ambient" aria-hidden="true"></div>
+<div class="vp-layout" style="position:relative;z-index:1;">
     <div class="vp-sidebar-host" aria-hidden="false">
         {% include 'public/_vendor_seller_nav.html' %}
     </div>
@@ -80,8 +153,12 @@
         {% include 'public/_vendor_seller_mobile_nav.html' %}
         <div class="vp-scroll">
             {% get_current_language as CURRENT_LANG %}
-            <!-- Language + notifications on one horizontal row -->
-            <div class="d-flex align-items-center justify-content-end flex-wrap gap-2 mb-3 vp-top-toolbar">
+            <!-- Toolbar: sidebar toggle (left) + language & notifications (right) -->
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3 vp-top-toolbar">
+                <button type="button" class="vp-sidebar-toggle" id="vpSidebarToggle" aria-label="{% trans 'Afficher / cacher le menu' %}" aria-expanded="true">
+                    <i class="fas fa-bars-staggered"></i>
+                </button>
+                <div class="d-flex align-items-center flex-wrap gap-2 ms-auto">
                 <div class="dropdown">
                     <button class="btn btn-sm btn-white bg-white border shadow-sm dropdown-toggle d-flex align-items-center gap-2 rounded-pill px-3 py-1 fw-semibold text-dark" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="vpLanguageDropdown">
                         <i class="fas fa-globe text-primary"></i>
@@ -121,7 +198,11 @@
                             <i class="fas fa-check-circle text-success d-block mb-1" style="font-size:1.5rem;opacity:0.4;"></i>
                             No new notifications
                         </div>
+                        <div class="p-2 border-top text-center">
+                            <a href="{% url 'manager:vendor_notifications' %}{% if admin_access and vendor %}?vendor_id={{ vendor.id }}{% endif %}" class="small fw-semibold text-decoration-none" style="color:#059669;">{% trans "View all notifications" %}</a>
+                        </div>
                     </div>
+                </div>
                 </div>
             </div>
             {% if messages %}
@@ -137,21 +218,43 @@
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="{% static 'js/admin_i18n.js' %}"></script>
 <script>
 (function() {
     var djangoLang = '{{ LANGUAGE_CODE|default:"zh-hans" }}';
     var jsLang = djangoLang === 'zh-hans' ? 'zh' : djangoLang;
-    var storedLang = localStorage.getItem('adminLang');
-    if (storedLang && storedLang !== jsLang) {
-        localStorage.setItem('adminLang', jsLang);
+    window.__ADMIN_I18N_LANG__ = jsLang;
+    localStorage.setItem('adminLang', jsLang);
+})();
+</script>
+<script src="{% static 'js/admin_i18n.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var floatBtn = document.getElementById('adminLangToggle');
+    if (floatBtn) floatBtn.style.display = 'none';
+});
+</script>
+<script>
+(function() {
+    var toggle = document.getElementById('vpSidebarToggle');
+    if (!toggle) return;
+    var storageKey = 'vendorPanelSidebarCollapsed';
+    function isMobile() {
+        return window.innerWidth <= 991;
     }
-    document.addEventListener('DOMContentLoaded', function() {
-        if (window.adminI18n && typeof window.adminI18n.setLang === 'function') {
-            window.adminI18n.setLang(jsLang);
-        }
-        var floatBtn = document.getElementById('adminLangToggle');
-        if (floatBtn) floatBtn.style.display = 'none';
+    function applyState(collapsed) {
+        document.body.classList.toggle('vp-sidebar-collapsed', collapsed && !isMobile());
+        var icon = toggle.querySelector('i');
+        if (icon) icon.className = collapsed && !isMobile() ? 'fas fa-bars' : 'fas fa-bars-staggered';
+        toggle.setAttribute('aria-expanded', collapsed && !isMobile() ? 'false' : 'true');
+    }
+    applyState(localStorage.getItem(storageKey) === '1');
+    toggle.addEventListener('click', function() {
+        var collapsed = !document.body.classList.contains('vp-sidebar-collapsed');
+        localStorage.setItem(storageKey, collapsed ? '1' : '0');
+        applyState(collapsed);
+    });
+    window.addEventListener('resize', function() {
+        applyState(localStorage.getItem(storageKey) === '1');
     });
 })();
 </script>
@@ -228,17 +331,21 @@
         }).then(function() { loadVpNotifs(); });
     };
     window.vpNotifDelete = function(id) {
-        fetch('/manager/api/vendor/notifications/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCSRF() },
-            body: 'action=delete&id=' + id,
-            credentials: 'same-origin'
-        }).then(function() { loadVpNotifs(); });
+        gConfirmAction((window._G_I18N && window._G_I18N.deleteMessage) || '{% trans "Are you sure you want to delete this item?" %}', function() {
+            fetch('/manager/api/vendor/notifications/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCSRF() },
+                body: 'action=delete&id=' + id,
+                credentials: 'same-origin'
+            }).then(function() { loadVpNotifs(); });
+        }, { danger: true });
     };
     loadVpNotifs();
     setInterval(loadVpNotifs, 30000);
 })();
 </script>
+{% include 'includes/global_popups.html' %}
+<script src="{% static 'js/destructive_action_guards.js' %}"></script>
 {% block panel_extra_js %}{% endblock %}
 </body>
 </html>

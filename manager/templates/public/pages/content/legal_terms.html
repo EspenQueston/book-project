@@ -1,0 +1,159 @@
+{% load i18n %}
+
+
+
+<section class="duno-section duno-section-legal visible" id="conditions-utilisation">
+
+    <details class="duno-acc-item" id="cgu-intro" open data-single="false">
+
+        <summary class="duno-acc-head">
+
+            <span class="duno-acc-icon"><i class="fas fa-file-contract"></i></span>
+
+            {% trans "通用使用条款" %}
+
+        </summary>
+
+        <div class="duno-acc-body">
+
+            <p>{% trans "本条款规定 DUNO 360 的访问和使用规则：产品销售、广告发布、知识分享及客户/卖家对接。" %}</p>
+
+        </div>
+
+    </details>
+
+
+
+    <details class="duno-acc-item" id="cgu-comptes">
+
+        <summary class="duno-acc-head">
+
+            <span class="duno-acc-icon"><i class="fas fa-user-plus"></i></span>
+
+            {% trans "注册与账户" %}
+
+        </summary>
+
+        <div class="duno-acc-body">
+
+            <ul class="duno-section-list">
+
+                <li>{% trans "提供准确信息，不得冒用他人身份" %}</li>
+
+                <li>{% trans "对您的账户负责" %}</li>
+
+                <li>{% trans "客户：购买、发布广告、与卖家互动" %}</li>
+
+                <li>{% trans "卖家：发布、店铺管理、内容责任" %}</li>
+
+            </ul>
+
+        </div>
+
+    </details>
+
+
+
+    <details class="duno-acc-item" id="cgu-interdits">
+
+        <summary class="duno-acc-head">
+
+            <span class="duno-acc-icon"><i class="fas fa-ban"></i></span>
+
+            {% trans "禁止内容" %}
+
+        </summary>
+
+        <div class="duno-acc-body">
+
+            <ul class="duno-section-list deny">
+
+                <li>{% trans "非法、欺诈或误导性内容" %}</li>
+
+                <li>{% trans "违禁产品或冒犯性内容" %}</li>
+
+            </ul>
+
+        </div>
+
+    </details>
+
+
+
+    <details class="duno-acc-item" id="cgu-transactions">
+
+        <summary class="duno-acc-head">
+
+            <span class="duno-acc-icon"><i class="fas fa-credit-card"></i></span>
+
+            {% trans "交易" %}
+
+        </summary>
+
+        <div class="duno-acc-body">
+
+            <p>{% trans "交易通过移动支付或所选方式（部分或全额付款）进行。" %}</p>
+
+            <div class="duno-highlight-legal warn"><i class="fas fa-info-circle me-2"></i>{% trans "DUNO 360 作为技术中介，不保证产品质量、配送或卖家履约。" %}</div>
+
+        </div>
+
+    </details>
+
+
+
+    <details class="duno-acc-item" id="cgu-responsabilite">
+
+        <summary class="duno-acc-head">
+
+            <span class="duno-acc-icon"><i class="fas fa-scale-balanced"></i></span>
+
+            {% trans "责任" %}
+
+        </summary>
+
+        <div class="duno-acc-body">
+
+            <ul class="duno-section-list">
+
+                <li>{% trans "DUNO 360 不对用户间争议、产品缺陷或延迟负责" %}</li>
+
+                <li>{% trans "每位用户对其发布内容、交易及法律遵守负责" %}</li>
+
+            </ul>
+
+        </div>
+
+    </details>
+
+
+
+    <details class="duno-acc-item" id="cgu-propriete" data-single="false">
+
+        <summary class="duno-acc-head">
+
+            <span class="duno-acc-icon"><i class="fas fa-gavel"></i></span>
+
+            {% trans "评分、暂停与知识产权" %}
+
+        </summary>
+
+        <div class="duno-acc-body">
+
+            <ul class="duno-section-list">
+
+                <li>{% trans "评价与评分系统——禁止任何操纵行为" %}</li>
+
+                <li>{% trans "DUNO 360 可在违规时暂停账户或删除内容" %}</li>
+
+                <li>{% trans "平台标识、设计及内容受保护" %}</li>
+
+            </ul>
+
+            <p class="mb-0 mt-2"><i class="fas fa-gavel me-2" style="color:#667eea;"></i>{% trans "适用法律：刚果共和国" %} · {{ PLATFORM_CONTACT_EMAIL|default:"contact@duno360.com" }}</p>
+
+        </div>
+
+    </details>
+
+</section>

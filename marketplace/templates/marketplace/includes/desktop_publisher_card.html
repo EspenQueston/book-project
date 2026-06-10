@@ -1,0 +1,44 @@
+{% load i18n %}
+{% include 'marketplace/includes/seller_card_theme.html' %}
+{% if publisher %}
+<div class="desk-seller-card desk-seller-card--publisher{% if seller_card_variant == 'sidebar' %} desk-seller-card--sidebar{% endif %}">
+    <div class="desk-seller-card-inner">
+        <div class="d-flex align-items-center gap-3 w-100{% if seller_card_variant == 'sidebar' %} mb-1{% endif %}">
+            <div class="desk-seller-avatar">
+                {{ publisher.publisher_name|first|upper }}
+            </div>
+            <div class="desk-seller-body">
+                <div class="desk-seller-kicker">{% trans "出版方" %}</div>
+                <a href="{% url 'manager:public_publisher_detail' publisher.id %}" class="desk-seller-name">{{ publisher.publisher_name }}</a>
+                <div class="desk-seller-meta">
+                    <span class="verified"><i class="fas fa-building"></i> {% trans "官方出版社" %}</span>
+                    {% if publisher_follower_count %}
+                    <span><i class="fas fa-users"></i> {{ publisher_follower_count }} {% trans "粉丝" %}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="desk-seller-actions">
+            <button type="button"
+                    class="publisher-follow-btn{% if is_following_publisher %} is-following{% endif %}"
+                    data-publisher-id="{{ publisher.id }}"
+                    data-following="{% if is_following_publisher %}1{% else %}0{% endif %}"
+                    data-login-url="{% url 'manager:user_login' %}"
+                    aria-pressed="{% if is_following_publisher %}true{% else %}false{% endif %}">
+                <i class="fas {% if is_following_publisher %}fa-check{% else %}fa-plus{% endif %}"></i>
+                <span class="follow-btn-label"
+                      data-follow="{% trans '关注出版社' %}"
+                      data-following="{% trans '已关注' %}">
+                    {% if is_following_publisher %}{% trans "已关注" %}{% else %}{% trans "关注出版社" %}{% endif %}
+                </span>
+            </button>
+            <a href="{% url 'manager:public_publisher_detail' publisher.id %}" class="desk-seller-link">
+                <i class="fas fa-book-open"></i> <span>{% trans "查看主页" %}</span>
+            </a>
+            <a href="{% url 'manager:public_books' %}?publisher={{ publisher.id }}" class="desk-seller-link primary">
+                <i class="fas fa-th-large"></i> <span>{% trans "全部图书" %}</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}

@@ -466,7 +466,7 @@ function updateQuantity(itemId, itemType, newQuantity) {
     .then(function(data) {
         if (data.success) {
             var itemTotal = document.getElementById('item-total-' + itemType + '-' + itemId);
-            if (itemTotal) itemTotal.textContent = Math.round(parseFloat(data.item_total) * 82).toLocaleString('fr-FR') + '\u00a0FCFA';
+            if (itemTotal) itemTotal.textContent = Math.round(parseFloat(data.item_total) || 0).toLocaleString('fr-FR') + '\u00a0FCFA';
             updateCartSummary(data.cart_total, data.total_items);
             gToast(data.message, 'success');
         } else {
@@ -538,8 +538,8 @@ function updateCartSummary(totalAmount, totalItems) {
     var st = document.getElementById('summary-total');
     var ti = document.getElementById('total-items');
     if (si) si.textContent = totalItems + ' 件';
-    if (ss) ss.textContent = Math.round(parseFloat(totalAmount) * 82).toLocaleString('fr-FR') + '\u00a0FCFA';
-    if (st) st.textContent = Math.round(parseFloat(totalAmount) * 82).toLocaleString('fr-FR') + '\u00a0FCFA';
+    if (ss) ss.textContent = Math.round(parseFloat(totalAmount) || 0).toLocaleString('fr-FR') + '\u00a0FCFA';
+    if (st) st.textContent = Math.round(parseFloat(totalAmount) || 0).toLocaleString('fr-FR') + '\u00a0FCFA';
     if (ti) ti.textContent = totalItems;
 }
 

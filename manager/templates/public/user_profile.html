@@ -225,7 +225,12 @@
             </div>
             <div>
                 <h2 class="fw-bold mb-1">{{ site_user.name }}</h2>
-                <p class="mb-0" style="opacity:0.85;">{{ site_user.email }}</p>
+                <p class="mb-1" style="opacity:0.85;">{{ site_user.email }}</p>
+                {% if site_user.location %}
+                <p class="mb-0 small" style="opacity:0.9;">
+                    <i class="fas fa-map-marker-alt me-1"></i>{{ site_user.city }}, {{ site_user.get_location_display }}
+                </p>
+                {% endif %}
             </div>
             <div class="ms-auto">
                 <a href="{% url 'manager:user_logout' %}" class="btn btn-outline-light btn-sm" style="border-radius:10px;">
@@ -237,6 +242,7 @@
 </section>
 
 <section class="container-fluid px-3 px-lg-4 px-xl-5 py-4">
+    {% include 'includes/congo_locations_data.html' %}
     <div class="profile-body-inner">
     <!-- Tabs -->
     <div class="d-flex gap-2 mb-4 flex-wrap align-items-center" data-aos="fade-up">
@@ -244,7 +250,7 @@
         <button type="button" class="tab-btn" data-tab="orders" onclick="showTab('orders', this)"><i class="fas fa-shopping-bag me-1"></i>{% trans "订单" %} ({{ all_orders|length }})</button>
         <button type="button" class="tab-btn" data-tab="courses" onclick="showTab('courses', this)"><i class="fas fa-graduation-cap me-1"></i>{% trans "课程" %} ({{ courses_progress|length }})</button>
         <button type="button" class="tab-btn d-none d-lg-inline-flex align-items-center" data-tab="follows" onclick="showTab('follows', this)" style="gap:6px;">
-            <i class="fas fa-store me-1"></i>{% trans "关注店铺" %}
+            <i class="fas fa-store me-1"></i>{% trans "关注的店铺" %}
             <span class="badge bg-secondary rounded-pill follows-tab-badge" style="font-size:0.7rem;">{{ followed_total_count }}</span>
         </button>
         <button type="button" class="tab-btn" data-tab="wishlist" onclick="showTab('wishlist', this)"><i class="fas fa-heart me-1"></i>{% trans "收藏" %} ({{ wishlist_data|length }})</button>
@@ -265,6 +271,9 @@
                     <div class="col-md-6">
                         <label class="form-label fw-bold">{% trans "电话" %}</label>
                         <input type="text" name="phone" class="form-control" value="{{ site_user.phone }}">
+                    </div>
+                    <div class="col-md-6">
+                        {% include 'includes/congo_location_select.html' with select_id='profileLocation' city_id='profileCity' selected_location=site_user.location selected_city=site_user.city %}
                     </div>
                     <div class="col-12">
                         <label class="form-label fw-bold">{% trans "头像" %}</label>
@@ -644,6 +653,12 @@
 {% endblock %}
 
 {% block extra_js %}
+{% load static %}
+{% if use_local_static %}
+<script src="/static/js/signup_location.js"></script>
+{% else %}
+<script src="{% static 'js/signup_location.js' %}"></script>
+{% endif %}
 <script>
 function showTab(name, btn) {
     document.querySelectorAll('.tab-content').forEach(el => { el.style.display = 'none'; });
@@ -670,44 +685,50 @@ function decFollowBadge() {
 document.addEventListener('click', function(e) {
     var vb = e.target.closest('.unfollow-vendor-btn');
     if (vb) {
+        e.preventDefault();
         var vid = vb.getAttribute('data-vendor-id');
-        vb.disabled = true;
-        fetch('/manager/vendor/' + vid + '/follow/', {
-            method: 'POST',
-            headers: {'X-CSRFToken': getProfileCsrf()},
-        }).then(function(r) { return r.json(); }).then(function(d) {
-            if (d.success) {
-                var row = document.getElementById('follow-vendor-' + vid);
-                if (row) row.remove();
-                decFollowBadge();
-                if (typeof gToast === 'function') gToast(d.message || 'OK', 'success');
-            } else {
-                vb.disabled = false;
-                if (d.login_required) window.location.href = '/manager/public/user/login/';
-                else if (typeof gToast === 'function') gToast(d.message || 'Error', 'error');
-            }
-        }).catch(function() { vb.disabled = false; });
+        gConfirmAction('{% trans "Unfollow this vendor?" %}', function() {
+            vb.disabled = true;
+            fetch('/manager/vendor/' + vid + '/follow/', {
+                method: 'POST',
+                headers: {'X-CSRFToken': getProfileCsrf()},
+            }).then(function(r) { return r.json(); }).then(function(d) {
+                if (d.success) {
+                    var row = document.getElementById('follow-vendor-' + vid);
+                    if (row) row.remove();
+                    decFollowBadge();
+                    if (typeof gToast === 'function') gToast(d.message || 'OK', 'success');
+                } else {
+                    vb.disabled = false;
+                    if (d.login_required) window.location.href = '/manager/public/user/login/';
+                    else if (typeof gToast === 'function') gToast(d.message || 'Error', 'error');
+                }
+            }).catch(function() { vb.disabled = false; });
+        }, { danger: true, title: '{% trans "Confirm deletion" %}' });
         return;
     }
     var pb = e.target.closest('.unfollow-publisher-btn');
     if (pb) {
+        e.preventDefault();
         var pid = pb.getAttribute('data-publisher-id');
-        pb.disabled = true;
-        fetch('/manager/publisher/' + pid + '/follow/', {
-            method: 'POST',
-            headers: {'X-CSRFToken': getProfileCsrf()},
-        }).then(function(r) { return r.json(); }).then(function(d) {
-            if (d.success) {
-                var row = document.getElementById('follow-publisher-' + pid);
-                if (row) row.remove();
-                decFollowBadge();
-                if (typeof gToast === 'function') gToast(d.message || 'OK', 'success');
-            } else {
-                pb.disabled = false;
-                if (d.login_required) window.location.href = '/manager/public/user/login/';
-                else if (typeof gToast === 'function') gToast(d.message || 'Error', 'error');
-            }
-        }).catch(function() { pb.disabled = false; });
+        gConfirmAction('{% trans "Unfollow this publisher?" %}', function() {
+            pb.disabled = true;
+            fetch('/manager/publisher/' + pid + '/follow/', {
+                method: 'POST',
+                headers: {'X-CSRFToken': getProfileCsrf()},
+            }).then(function(r) { return r.json(); }).then(function(d) {
+                if (d.success) {
+                    var row = document.getElementById('follow-publisher-' + pid);
+                    if (row) row.remove();
+                    decFollowBadge();
+                    if (typeof gToast === 'function') gToast(d.message || 'OK', 'success');
+                } else {
+                    pb.disabled = false;
+                    if (d.login_required) window.location.href = '/manager/public/user/login/';
+                    else if (typeof gToast === 'function') gToast(d.message || 'Error', 'error');
+                }
+            }).catch(function() { pb.disabled = false; });
+        }, { danger: true, title: '{% trans "Confirm deletion" %}' });
     }
 });
 

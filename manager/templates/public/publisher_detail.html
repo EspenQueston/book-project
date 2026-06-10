@@ -36,6 +36,17 @@
 .badge-stock-out { background:#fee2e2; color:#991b1b; }
 .btn-primary-grad { background:linear-gradient(135deg,#667eea,#764ba2); color:white; border:none; border-radius:8px; padding:7px 16px; font-size:0.85rem; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:all 0.2s; }
 .btn-primary-grad:hover { transform:translateY(-2px); box-shadow:0 5px 15px rgba(102,126,234,0.35); color:white; }
+.pub-follow-btn {
+    display:inline-flex; align-items:center; gap:8px; padding:10px 22px;
+    border-radius:999px; border:2px solid rgba(255,255,255,0.85);
+    background:rgba(255,255,255,0.12); color:#fff; font-weight:700; font-size:0.9rem;
+    cursor:pointer; transition:all 0.22s ease; backdrop-filter:blur(8px);
+}
+.pub-follow-btn:hover { background:rgba(255,255,255,0.22); transform:translateY(-1px); }
+.pub-follow-btn.is-following {
+    background:linear-gradient(135deg,#10b981,#059669); border-color:transparent;
+    box-shadow:0 6px 20px rgba(16,185,129,0.35);
+}
 
 /* ===== Mobile Publisher Detail (≤768px) ===== */
 @media (max-width: 768px) {
@@ -143,13 +154,31 @@ html[data-theme="dark"] .publisher-detail-wrap {
                         <i class="fas fa-map-marker-alt me-1"></i>{{ publisher.publisher_address }}
                     </span>
                 </div>
-                <div class="d-flex flex-wrap gap-2">
+                <div class="d-flex flex-wrap gap-2 align-items-center">
                     <span style="background:rgba(255,255,255,0.15);padding:5px 14px;border-radius:20px;font-size:0.85rem;backdrop-filter:blur(10px);">
                         <i class="fas fa-book me-1"></i>{{ books|length }} {% trans "本图书" %}
                     </span>
                     <span style="background:rgba(255,255,255,0.15);padding:5px 14px;border-radius:20px;font-size:0.85rem;backdrop-filter:blur(10px);">
                         <i class="fas fa-chart-line me-1"></i>{% trans "总销量" %} {{ total_sales }}
                     </span>
+                    {% if publisher_follower_count %}
+                    <span style="background:rgba(255,255,255,0.15);padding:5px 14px;border-radius:20px;font-size:0.85rem;backdrop-filter:blur(10px);">
+                        <i class="fas fa-users me-1"></i>{{ publisher_follower_count }} {% trans "粉丝" %}
+                    </span>
+                    {% endif %}
+                    <button type="button"
+                            class="pub-follow-btn publisher-follow-btn{% if is_following_publisher %} is-following{% endif %}"
+                            data-publisher-id="{{ publisher.id }}"
+                            data-following="{% if is_following_publisher %}1{% else %}0{% endif %}"
+                            data-login-url="{% url 'manager:user_login' %}"
+                            aria-pressed="{% if is_following_publisher %}true{% else %}false{% endif %}">
+                        <i class="fas {% if is_following_publisher %}fa-check{% else %}fa-plus{% endif %}"></i>
+                        <span class="follow-btn-label"
+                              data-follow="{% trans '关注出版社' %}"
+                              data-following="{% trans '已关注' %}">
+                            {% if is_following_publisher %}{% trans "已关注" %}{% else %}{% trans "关注出版社" %}{% endif %}
+                        </span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -326,4 +355,6 @@ html[data-theme="dark"] .publisher-detail-wrap {
         </div>
     </div>
 </div>
+{% csrf_token %}
+<script src="/static/js/listing_follow.js"></script>
 {% endblock %}

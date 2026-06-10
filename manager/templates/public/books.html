@@ -91,35 +91,53 @@
 
         /* Mobile search bar - themed style */
         .books-mobile-search {
-            display: flex !important;
-            align-items: center;
-            gap: 8px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 10px 12px;
+            display: block !important;
             position: sticky;
             top: 56px;
             z-index: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 10px 12px;
         }
-        .books-search-inner {
+        .books-search-bar {
+            display: flex;
+            align-items: stretch;
+            width: 100%;
+            background: #fff;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.1);
+        }
+        .books-search-field {
             flex: 1;
             display: flex;
             align-items: center;
-            background: #fff;
-            border-radius: 16px;
-            padding: 0 12px;
-            height: 42px;
-            gap: 6px;
+            gap: 8px;
+            padding: 0 14px;
+            min-width: 0;
+            margin: 0;
         }
-        .books-search-inner i { color: #667eea; font-size: 14px; }
-        .books-search-inner input {
-            flex: 1; border: none; background: transparent;
-            font-size: 13px; outline: none; color: #334155; padding: 0;
+        .books-search-field i { color: #667eea; font-size: 14px; flex-shrink: 0; }
+        .books-search-field input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 13px;
+            outline: none;
+            color: #334155;
+            padding: 11px 0;
+            min-width: 0;
         }
         .books-search-btn {
-            background: #fff; color: #667eea;
-            border: none; border-radius: 18px;
-            padding: 6px 14px; font-size: 12px; font-weight: 700;
+            background: #fff;
+            color: #667eea;
+            border: none;
+            border-left: 1px solid #e2e8f0;
+            border-radius: 0;
+            padding: 0 16px;
+            font-size: 12px;
+            font-weight: 700;
             white-space: nowrap;
+            flex-shrink: 0;
         }
         .books-search-suggest {
             position: absolute;
@@ -276,6 +294,7 @@
             display: inline-block; font-size: 10px; font-weight: 700;
             padding: 1px 6px; border-radius: 6px; margin-top: 3px;
         }
+        {% include 'public/includes/feed_view_details_css.html' %}
         /* Hide desktop grid on mobile */
         .books-desktop-grid { display: none !important; }
         /* Hide desktop quick links on mobile */
@@ -376,17 +395,20 @@
         box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
 </style>
+{% include 'includes/hero_wave_divider_styles.html' %}
 {% endblock %}
 
 {% block content %}
 
 <!-- ===== MOBILE ONLY: Books PWA Search Bar (orange) ===== -->
 <div class="books-mobile-search" style="display:none;">
-    <form class="books-search-inner" action="{% url 'manager:public_books' %}" method="get" id="booksMobileForm">
-        <i class="fas fa-search"></i>
-        <input type="text" name="search" id="booksMobileSearchInput" placeholder="{% trans '搜索图书、作者、出版社...' %}" value="{{ search_query }}" autocomplete="off">
+    <form class="books-search-bar" action="{% url 'manager:public_books' %}" method="get" id="booksMobileForm">
+        <label class="books-search-field" for="booksMobileSearchInput">
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <input type="search" name="search" id="booksMobileSearchInput" placeholder="{% trans '搜索图书、作者、出版社...' %}" value="{{ search_query }}" autocomplete="off">
+        </label>
+        <button type="submit" class="books-search-btn">{% trans "搜索" %}</button>
     </form>
-    <button class="books-search-btn" onclick="document.getElementById('booksMobileForm').submit()">{% trans "搜索" %}</button>
     <div id="booksSearchSuggest" class="books-search-suggest"></div>
 </div>
 
@@ -436,12 +458,18 @@
             {% else %}
             <div class="bmf-price">{{ book.price|fcfa }}</div>
             {% endif %}
-            <span class="bmf-badge-type" style="background:#ede9fe;color:#7c3aed;" data-zh="{% trans 'Book' %}" data-en="{% trans 'Book' %}" data-fr="{% trans 'Book' %}">{% trans "Book" %}</span>
+            <div class="feed-card-actions">
+                <div class="feed-card-actions-main">
+                    <span class="bmf-badge-type" style="background:#ede9fe;color:#7c3aed;" data-zh="{% trans 'Book' %}" data-en="{% trans 'Book' %}" data-fr="{% trans 'Book' %}">{% trans "Book" %}</span>
+                </div>
+                {% include 'public/includes/feed_view_details_btn.html' %}
+            </div>
         </div>
     </a>
     {% endfor %}
 </div>
 <div id="booksFeedLoader" style="display:none;text-align:center;padding:12px;color:#999;font-size:.85rem;"><i class="fas fa-spinner fa-spin"></i> <span>{% trans "Loading..." %}</span></div>
+<template id="feedViewDetailsBtnTpl">{% include 'public/includes/feed_view_details_btn.html' %}</template>
 
 <!-- ===== DESKTOP: Page Header ===== -->
 <section class="books-desktop-hero hero-section text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 0; margin-bottom: 30px;">
@@ -453,6 +481,7 @@
             </div>
         </div>
     </div>
+    {% include 'includes/hero_wave_divider.html' with hero_divider_fill='#f8f9fa' %}
 </section>
 
 <!-- Search and Filter Section -->
@@ -744,9 +773,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if (window.innerWidth > 768) return;
     var feedDiv = document.getElementById('booksMobileFeed');
     var loader = document.getElementById('booksFeedLoader');
+    var feedDetailsBtn = (document.getElementById('feedViewDetailsBtnTpl') || {}).innerHTML || '';
     if (!feedDiv) return;
     var page = 2;
     var loading = false;
+    var activeCategory = '{{ current_category|default:""|escapejs }}';
     var sentinel = document.createElement('div');
     feedDiv.parentElement.insertBefore(sentinel, feedDiv.nextSibling);
     var observer = new IntersectionObserver(function(entries) {
@@ -759,25 +790,31 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function fmtFcfa(val) {
-        var n = Math.round(parseFloat(val) * 82);
+        var n = Math.round(parseFloat(val) || 0);
         return n.toLocaleString('fr-FR') + '\u00a0FCFA';
     }
 
     function loadBooks() {
         loading = true;
         if (loader) loader.style.display = 'block';
-        var __url = '/manager/public/books/?format=json&page=' + page;
-        if ('{{ current_category|default:""|escapejs }}') __url += '&category=' + encodeURIComponent('{{ current_category|default:""|escapejs }}');
+        var params = new URLSearchParams(window.location.search);
+        params.set('format', 'json');
+        params.set('recommend', '1');
+        params.set('page', page);
+        var __url = window.location.pathname + '?' + params.toString();
         fetch(__url)
             .then(r => r.json())
             .then(data => {
-                var items = data.items || [];
+                var items = data.items || data.books || [];
                 if (!items.length || items.length === 0) { page = 1; loading = false; if (loader) loader.style.display='none'; return; }
                 items.forEach(function(item) {
                     var card = document.createElement('a');
                     card.href = item.url;
                     card.className = 'bmf-card';
-                    card.innerHTML = '<img class="bmf-cover" src="'+item.image+'" alt="'+item.name+'" loading="lazy" onerror="this.src=\'\'/static/img/default_cover.png\'\'"><div class="bmf-body"><div class="bmf-title">'+item.name+'</div><div class="bmf-price">'+fmtFcfa(item.price)+'</div><span class="bmf-badge-type" style="'+tagStyle(item.type)+'">'+item.type_label+'</span></div>';
+                    var img = item.image || item.cover_url || '/static/img/default_cover.png';
+                    var type = item.type || 'book';
+                    var label = item.type_label || 'Livre';
+                    card.innerHTML = '<img class="bmf-cover" src="'+img+'" alt="'+item.name+'" loading="lazy" onerror="this.src=\'/static/img/default_cover.png\'"><div class="bmf-body"><div class="bmf-title">'+item.name+'</div><div class="bmf-price">'+fmtFcfa(item.price)+'</div><div class="feed-card-actions"><div class="feed-card-actions-main"><span class="bmf-badge-type" style="'+tagStyle(type)+'">'+label+'</span></div>'+feedDetailsBtn+'</div></div>';
                     feedDiv.appendChild(card);
                 });
                 page = data.has_more ? page + 1 : 1;
@@ -806,7 +843,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function escHtml(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
     function fmtFcfa(val) {
-        var n = Math.round(parseFloat(val) * 82);
+        var n = Math.round(parseFloat(val) || 0);
         return n.toLocaleString('fr-FR') + '\u00a0FCFA';
     }
 
@@ -954,10 +991,11 @@ document.addEventListener('DOMContentLoaded', function() {
     var tabs = document.getElementById('booksFilterTabs');
     var feedDiv = document.getElementById('booksMobileFeed');
     var loader = document.getElementById('booksFeedLoader');
+    var feedDetailsBtn = (document.getElementById('feedViewDetailsBtnTpl') || {}).innerHTML || '';
     if (!tabs || !feedDiv) return;
 
     function fmtFcfa(val) {
-        var n = Math.round(parseFloat(val) * 82);
+        var n = Math.round(parseFloat(val) || 0);
         return n.toLocaleString('fr-FR') + '\u00a0FCFA';
     }
 
@@ -971,7 +1009,7 @@ document.addEventListener('DOMContentLoaded', function() {
             + '<div class="bmf-body">'
             + '<div class="bmf-title">'+book.name+'</div>'
             + priceHtml
-            + '<span class="bmf-badge-type" style="background:#ede9fe;color:#7c3aed;">{% trans "Book" %}</span>'
+            + '<div class="feed-card-actions"><div class="feed-card-actions-main"><span class="bmf-badge-type" style="'+(book.type === 'course' ? 'background:#e0e7ff;color:#3730a3;' : book.type === 'product' ? 'background:#fef3c7;color:#d97706;' : book.type === 'supermarket' ? 'background:#d1fae5;color:#065f46;' : 'background:#ede9fe;color:#7c3aed;')+'">'+(book.type_label || '{% trans "Book" %}')+'</span></div>'+feedDetailsBtn+'</div>'
             + '</div></a>';
     }
 
@@ -990,16 +1028,23 @@ document.addEventListener('DOMContentLoaded', function() {
             var catHeader = document.querySelector('.books-mobile-cat-header');
             if (catHeader) catHeader.style.display = newCat ? 'flex' : 'none';
 
+            activeCategory = newCat;
+            page = 1;
             feedDiv.innerHTML = '';
             if (loader) loader.style.display = 'block';
-            var url = '/manager/public/books/?format=json&page=1' + (newCat ? '&category=' + encodeURIComponent(newCat) : '');
-            fetch(url)
+            var params = new URLSearchParams(window.location.search);
+            if (newCat) params.set('category', newCat); else params.delete('category');
+            params.set('format', 'json');
+            params.set('recommend', '1');
+            params.set('page', '1');
+            fetch(window.location.pathname + '?' + params.toString())
                 .then(function(r) { return r.json(); })
                 .then(function(data) {
-                    var books = data.books || [];
+                    var books = data.items || data.books || [];
                     books.forEach(function(book) {
                         feedDiv.insertAdjacentHTML('beforeend', buildBookCard(book));
                     });
+                    page = 2;
                     if (loader) loader.style.display = 'none';
                     try { history.pushState(null, '', href); } catch(e){}
                 })
