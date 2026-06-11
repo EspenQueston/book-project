@@ -2,6 +2,7 @@
 
 # Deploy logs / snapshots (may contain secrets)
 deploy/*.json
+!deploy/.env.local.example
 # Auto-generated deploy scripts with hardcoded DB values -- do not commit
 deploy/apply_translations_prod.py
 deploy/translation_sync.sql
@@ -10,8 +11,8 @@ deploy/cloudflare_origin.crt
 deploy/cloudflare_origin.key
 # Local env file for deploy script
 deploy/.env.local
-# Deployment script with hardcoded credentials (should use env vars)
-deploy/vps_deploy_full.py
+# Catalog sync exports (may contain vendor credentials)
+deploy/catalog_export.json
 
 # Python
 __pycache__/
