@@ -956,8 +956,12 @@
                 <i class="fas fa-globe"></i>
                 <span class="duno-brand-text">DUNO 360</span>
             </a>
-            
-            <button class="mobile-menu-toggle" type="button" id="mobileMenuToggle" aria-label="{% trans '打开菜单' %}">
+            <a href="{% url 'manager:view_cart' %}" class="navbar-mobile-cart d-lg-none" aria-label="{% trans '购物车' %}">
+                <i class="fas fa-shopping-cart"></i>
+                <span id="navbarMobileCartBadge" class="navbar-mobile-cart-badge" style="display:none;">0</span>
+            </a>
+
+            <button class="mobile-menu-toggle ms-auto" type="button" id="mobileMenuToggle" aria-label="{% trans '打开菜单' %}">
                 <span class="hamburger-line"></span>
                 <span class="hamburger-line"></span>
                 <span class="hamburger-line"></span>
@@ -1567,6 +1571,41 @@
             text-align: center;
             box-shadow: 0 2px 6px rgba(231,76,60,0.4);
         }
+        .navbar-mobile-cart {
+            display: none;
+            position: relative;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            margin-left: 8px;
+            color: #fff;
+            text-decoration: none;
+            background: rgba(255,255,255,0.14);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 11px;
+            flex-shrink: 0;
+            transition: background 0.2s ease;
+        }
+        .navbar-mobile-cart i { font-size: 1.05rem; }
+        .navbar-mobile-cart:active { background: rgba(255,255,255,0.24); }
+        .navbar-mobile-cart-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            min-width: 17px;
+            height: 17px;
+            padding: 0 4px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: #fff;
+            font-size: 0.58rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(239,68,68,0.45);
+        }
 
         /* Hide on desktop */
         @media (min-width: 992px) {
@@ -1575,7 +1614,10 @@
 
         /* Mobile Responsive Navbar */
         @media (max-width: 991px) {
+            .navbar > .container { display: flex; align-items: center; flex-wrap: nowrap; }
             .mobile-menu-toggle { display: flex; }
+            .navbar-mobile-cart { display: flex; }
+            .duno-brand { margin-right: 0; }
             .duno-brand i { font-size: 1.35rem; }
             .duno-brand-text {
                 font-size: 1.85rem;
@@ -1899,12 +1941,22 @@
     <!-- Update cart badge on every page -->
     <script>
     (function() {
+        function applyCartCount(count) {
+            var cnt = String(count || 0);
+            var show = cnt !== '0' && cnt !== '';
+            ['cart-badge', 'navbarMobileCartBadge', 'pwaCartBadge', 'mobileCartBadgeInline'].forEach(function(id) {
+                var el = document.getElementById(id);
+                if (!el) return;
+                el.textContent = cnt;
+                if (id === 'cart-badge') return;
+                el.style.display = show ? (id === 'mobileCartBadgeInline' ? 'inline-block' : 'flex') : 'none';
+            });
+        }
         fetch('/manager/cart/count/')
             .then(function(r){ return r.json(); })
-            .then(function(d){
-                var b = document.getElementById('cart-badge');
-                if (b) b.textContent = d.cart_count || 0;
-            }).catch(function(){});
+            .then(function(d){ applyCartCount(d.cart_count); })
+            .catch(function(){});
+        window.syncAllCartBadges = applyCartCount;
     })();
     </script>
 
@@ -2057,19 +2109,21 @@
         // Sync cart badge
         function syncMobileCartBadge() {
             const mainBadge = document.getElementById('cart-badge');
-            const mobileBadge = document.getElementById('mobileCartBadge');
-            const mobileBadgeInline = document.getElementById('mobileCartBadgeInline');
-            if (mainBadge) {
-                if (mobileBadge) {
-                    mobileBadge.textContent = mainBadge.textContent;
-                    mobileBadge.style.display = mainBadge.textContent.trim() === '0' ? 'none' : 'block';
+            if (!mainBadge) return;
+            const cnt = mainBadge.textContent.trim();
+            const show = cnt !== '0' && cnt !== '';
+            ['mobileCartBadge', 'mobileCartBadgeInline', 'navbarMobileCartBadge', 'pwaCartBadge'].forEach(function(id) {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.textContent = cnt;
+                if (id === 'mobileCartBadgeInline') {
+                    el.style.display = show ? 'inline-block' : 'none';
+                } else {
+                    el.style.display = show ? 'flex' : 'none';
                 }
-                if (mobileBadgeInline) {
-                    mobileBadgeInline.textContent = mainBadge.textContent;
-                    mobileBadgeInline.style.display = mainBadge.textContent.trim() === '0' ? 'none' : 'inline-block';
-                }
-            }
+            });
         }
+        window.syncMobileCartBadge = syncMobileCartBadge;
         syncMobileCartBadge();
         setInterval(syncMobileCartBadge, 2000);
 
@@ -2124,7 +2178,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     .mobile-floating-cart i { font-size: 1.2rem; }
     @media (max-width: 768px) {
-        body:not(.me-page) .mobile-floating-cart { display: flex; }
+        body:not(.me-page) .mobile-floating-cart { display: none !important; }
+        .cart-fab { display: none !important; }
     }
     .pwa-bottom-nav {
         display: none;
@@ -2254,18 +2309,11 @@ document.addEventListener('DOMContentLoaded', function() {
             var targetTab = document.getElementById(matchedTabId);
             if (targetTab) targetTab.classList.add('active');
         }
-        // Sync cart badge with main badge
+        // Sync cart badge with all mobile badges
         var mainBadge = document.getElementById('cart-badge');
-        var pwaBadge = document.getElementById('pwaCartBadge');
-        if (mainBadge && pwaBadge) {
+        if (mainBadge) {
             var observer = new MutationObserver(function() {
-                var cnt = mainBadge.textContent.trim();
-                if (cnt && cnt !== '0') {
-                    pwaBadge.textContent = cnt;
-                    pwaBadge.style.display = 'flex';
-                } else {
-                    pwaBadge.style.display = 'none';
-                }
+                if (typeof window.syncMobileCartBadge === 'function') window.syncMobileCartBadge();
             });
             observer.observe(mainBadge, {childList: true, characterData: true, subtree: true});
         }

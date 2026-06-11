@@ -100,22 +100,46 @@
     @media (max-width: 768px) {
         .feed-card-body { padding: 8px 9px 10px; }
         .feed-card-name { font-size: 0.76rem; min-height: 2em; }
-        .feed-card-price { font-size: 0.88rem; }
+        .feed-card-price { font-size: 0.78rem; line-height: 1.2; }
         .feed-card-tag { font-size: 0.52rem; padding: 2px 6px; }
-        .feed-card-actions { padding-top: 6px; gap: 6px; }
-        .feed-view-details {
-            font-size: 0.54rem;
-            padding: 5px 8px;
-            border-radius: 8px;
-            gap: 4px;
+        .feed-card-actions {
+            flex-direction: column;
+            align-items: stretch;
+            padding-top: 6px;
+            gap: 8px;
         }
-        .feed-view-details i { font-size: 0.5rem; }
+        .feed-card-actions-main { width: 100%; }
+        .feed-card-actions-row { gap: 4px; }
+        .feed-card-actions .product-price,
+        .feed-card-actions .item-price,
+        .feed-card-actions .bmf-price,
+        .feed-card-actions .rec-feed-price {
+            font-size: 0.78rem !important;
+            line-height: 1.2;
+        }
+        .feed-card-actions .product-price-original,
+        .feed-card-actions .item-price-original {
+            font-size: 0.62rem !important;
+            margin-left: 4px !important;
+        }
+        .feed-card-actions .stock-badge {
+            font-size: 0.58rem !important;
+            padding: 2px 6px !important;
+        }
+        .feed-view-details {
+            width: 100%;
+            font-size: 0.68rem;
+            padding: 8px 10px;
+            border-radius: 10px;
+            gap: 5px;
+        }
+        .feed-view-details i { font-size: 0.62rem; }
         .bmf-body { padding: 7px 8px 9px; }
         .bmf-title { font-size: 11px; }
-        .bmf-price { font-size: 13px; margin-top: 3px; }
+        .bmf-price { font-size: 11px; margin-top: 3px; }
         .bmf-badge-type { font-size: 9px; margin-top: 2px; }
         .rec-feed-name { font-size: 0.82rem; }
-        .rec-feed-price { font-size: 0.92rem; margin-top: 4px; }
+        .rec-feed-price { font-size: 0.78rem; margin-top: 4px; }
         .rec-feed-meta { font-size: 0.7rem; }
     }
     @media (min-width: 769px) {

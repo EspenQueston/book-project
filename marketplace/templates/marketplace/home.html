@@ -15,11 +15,23 @@
     }
     .marketplace-hero {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 70px 0 50px;
+        padding: 70px 0 72px;
         color: #fff;
         text-align: center;
         position: relative;
         overflow: hidden;
+        margin-bottom: 0;
+    }
+    .marketplace-hero::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 48px;
+        background: linear-gradient(180deg, transparent 0%, #f8f9ff 100%);
+        pointer-events: none;
+        z-index: 1;
     }
     .marketplace-hero::before {
         content: '';
@@ -32,16 +44,17 @@
     .marketplace-hero h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: .8rem; position: relative; }
     .marketplace-hero p { font-size: 1.1rem; opacity: 0.9; max-width: 600px; margin: 0 auto; position: relative; }
     .stats-banner {
-        background: rgba(255,255,255,0.97);
+        background: rgba(255,255,255,0.98);
         border-radius: 16px;
         padding: 24px;
-        margin: -35px auto 35px;
+        margin: -46px auto 35px;
         position: relative; z-index: 2;
         max-width: 800px;
-        box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+        box-shadow: 0 8px 30px rgba(102,126,234,0.12);
+        border: 1px solid rgba(255,255,255,0.85);
     }
-    .section-stat { font-size: 1.8rem; font-weight: 800; color: var(--primary-color); }
-    .section-stat-label { color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
+    .section-stat { font-size: 1.8rem; font-weight: 800; color: var(--primary-color); line-height: 1.1; }
+    .section-stat-label { color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.6px; }
     .section-card {
         background: #fff;
         border-radius: 16px;
@@ -125,6 +138,29 @@
     .rec-feed-loader, .rec-feed-end { text-align:center; padding:16px 10px; color:#64748b; font-size:.86rem; }
     {% include 'public/includes/feed_view_details_css.html' %}
     @media (max-width:768px) {
+        .marketplace-hero { padding: 36px 0 68px; }
+        .marketplace-hero h1 { font-size: 1.55rem; margin-bottom: 0.5rem; }
+        .marketplace-hero p { font-size: 0.88rem; padding: 0 12px; }
+        .marketplace-hero::after { height: 36px; }
+        .stats-banner {
+            margin: -34px 12px 22px;
+            padding: 14px 8px;
+            border-radius: 14px;
+            position: relative;
+            z-index: 4;
+        }
+        .section-stat { font-size: 1.28rem; }
+        .section-stat-label {
+            font-size: 0.58rem;
+            letter-spacing: 0.3px;
+            line-height: 1.2;
+            white-space: normal;
+        }
+        .section-card-header { padding: 22px 16px; }
+        .section-card-header i { font-size: 2rem; }
+        .section-card-header h3 { font-size: 1.05rem; }
+        .section-card-body { padding: 14px 16px 18px; }
+        .section-card-body p { font-size: 0.82rem; }
         .rec-feed-section { margin-top:-6px; margin-bottom:28px; }
         .rec-feed-title { font-size:1.05rem; }
         .rec-feed-subtitle { font-size:.78rem; margin:2px 0 0; }
@@ -138,7 +174,12 @@
 
     /* ========== DARK MODE ========== */
     html[data-theme="dark"] .marketplace-hero {
-        background: linear-gradient(135deg, #4338ca 0%, #5b21b6 100%);
+        background:
+            linear-gradient(180deg, transparent 72%, var(--bg-page) 100%),
+            linear-gradient(135deg, #4338ca 0%, #5b21b6 100%);
+    }
+    html[data-theme="dark"] .marketplace-hero::after {
+        background: linear-gradient(180deg, transparent 0%, var(--bg-page) 100%);
     }
     html[data-theme="dark"] .stats-banner {
         background: var(--bg-surface);
