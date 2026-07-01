@@ -1,19 +1,5 @@
 # Django Book Management System - Git Ignore File
 
-# Deploy logs / snapshots (may contain secrets)
-deploy/*.json
-!deploy/.env.local.example
-# Auto-generated deploy scripts with hardcoded DB values -- do not commit
-deploy/apply_translations_prod.py
-deploy/translation_sync.sql
-# Local TLS cert files for Cloudflare Origin Certificate (NEVER commit private keys)
-deploy/cloudflare_origin.crt
-deploy/cloudflare_origin.key
-# Local env file for deploy script
-deploy/.env.local
-# Catalog sync exports (may contain vendor credentials)
-deploy/catalog_export.json
-
 # Python
 __pycache__/
 *.py[cod]
@@ -99,6 +85,23 @@ logs/
 # Secret files
 secrets.py
 
+# --- Security: deploy secrets & credential-bearing dumps (NEVER commit) ---
+# Local TLS cert files for Cloudflare Origin Certificate (private keys)
+deploy/cloudflare_origin.crt
+deploy/cloudflare_origin.key
+# Local env file for deploy script
+deploy/.env.local
+# Deploy logs / snapshots that may contain secrets (allow the example)
+deploy/*.json
+!deploy/.env.local.example
+# Auto-generated deploy scripts with hardcoded DB values
+deploy/apply_translations_prod.py
+deploy/translation_sync.sql
+# Django dumpdata / DB dumps -- contain user records & password hashes
+prod_data.json
+*.sql
+duno360_backup.sql
+
 # Documentation (allow deployment files)
 *.md
 *.txt
@@ -106,4 +109,7 @@ secrets.py
 !README.txt
 !requirements.txt
 !.env.example
+
+# Catalog sync exports (may contain vendor credentials)
+deploy/catalog_export.json
 

@@ -5,7 +5,7 @@ Usage (do not commit secrets):
   set DUNO360_ROOT_PASS=...   # Windows PowerShell: $env:DUNO360_ROOT_PASS='...'
   python deploy/remote_prod_update.py
 
-Optional: DUNO360_VPS_HOST (default 142.93.45.77)
+Optional: DUNO360_VPS_HOST (default 217.160.36.235)
 """
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ def main() -> int:
     if not pw:
         print("Set environment variable DUNO360_ROOT_PASS", file=sys.stderr)
         return 2
-    host = os.environ.get("DUNO360_VPS_HOST", "142.93.45.77").strip()
+    host = os.environ.get("DUNO360_VPS_HOST", "217.160.36.235").strip()
 
     cmd = r"""set -e
 chown -R duno360:www-data /opt/duno360/app || true
