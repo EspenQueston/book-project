@@ -1021,6 +1021,17 @@
         '付款与托管': 'Payments & escrow',
         '财务': 'Finance',
         '跟踪托管资金、待结算与已到账款项': 'Track held funds, pending release and completed payouts',
+        '结算规则': 'Payout rules',
+        '商品总额': 'Gross amount',
+        '平台佣金 (%)': 'Platform fee (%)',
+        '您的净收入': 'Your net payout',
+        '订单送达后': 'After delivery',
+        '天退款保护期结束 → 净收入自动到账': 'days after refund window → net payout released',
+        '等待发货/送达': 'Awaiting shipment/delivery',
+        '天保护期内': 'day protection window',
+        '距到账': 'Until payout',
+        '佣金': 'Fee',
+        '待送达': 'Awaiting delivery',
         '已到账': 'Paid out',
         '已退款/取消': 'Refunded / cancelled',
         '全部付款明细': 'All payment lines',
@@ -1077,21 +1088,6 @@
         '托管释放': 'Escrow release',
         '管理员调整': 'Admin adjustment',
         '提现申请': 'Payout request',
-        'En attente (escrow)': 'On hold (escrow)',
-        'Éligible au reversement': 'Ready to pay out',
-        'Reversé au vendeur': 'Paid to vendor',
-        'Remboursé': 'Refunded',
-        'Annulé': 'Cancelled',
-        'Livre': 'Book',
-        'Boutique': 'Product',
-        'Cours': 'Course',
-        'Supermarché': 'Supermarket',
-        'Crédit': 'Credit',
-        'Débit': 'Debit',
-        'Retrait': 'Withdrawal',
-        'Reversement escrow': 'Escrow release',
-        'Ajustement admin': 'Admin adjustment',
-        'Demande retrait': 'Payout request',
 
         // ---------- Vendor store settings ----------
         '店铺设置': 'Store settings',
@@ -1446,6 +1442,96 @@
         // ---------- Marketplace title (dashboard standalone) ----------
         '市场管理 - Dashboard': 'Marketplace - Dashboard',
         'Marketplace Admin': 'Marketplace Admin',
+
+        // ---------- Book list / category ----------
+        '未分类': 'Uncategorized',
+        '仪表盘': 'Dashboard',
+        '图书中心': 'Books Center',
+        '运营管理': 'Operations',
+        '图书数量': 'Book Count',
+        '家出版社': ' publishers',
+        '位作者': ' authors',
+        '本图书': ' books',
+
+        // ---------- Publisher pages ----------
+        '添加新出版社': 'Add New Publisher',
+        '为系统添加新的出版社信息': 'Add new publisher information to the system',
+        '管理系统中的所有出版社信息': 'Manage all publishers in the system',
+        '编辑出版社信息': 'Edit Publisher Info',
+        '当前名称:': 'Current Name:',
+        '当前地址:': 'Current Address:',
+        '出版社ID:': 'Publisher ID:',
+        '出版图书:': 'Published Books:',
+        '修改出版社信息': 'Update Publisher Info',
+        '修改 "': 'Edit "',
+        '" 的详细信息': '" details',
+        '暂无出版社信息': 'No publishers yet',
+        '点击上方按钮添加第一家出版社': 'Click the button above to add your first publisher',
+        '您确定要删除出版社 "': 'Are you sure you want to delete publisher "',
+        '" 吗？': '"?',
+        '删除后将无法恢复，请谨慎操作！': 'This cannot be undone. Please proceed carefully!',
+        '出版社 "': 'Publisher "',
+        '确认删除': 'Confirm Delete',
+        '出版社信息': 'Publisher Info',
+        '当前信息': 'Current Info',
+
+        // ---------- Author pages ----------
+        '添加新作者': 'Add New Author',
+        '编辑作者信息': 'Edit Author Info',
+        '修改作者 "': 'Edit author "',
+        '" 的信息': '" info',
+        '作者列表': 'Author List',
+        '作者姓名': 'Author Name',
+        '作者ID': 'Author ID',
+        '相关图书': 'Associated Books',
+        '著作数量': 'Book Count',
+        '暂无关联图书': 'No books',
+        '管理系统中的所有作者信息': 'Manage all authors in the system',
+        '系统中还没有添加任何作者信息': 'No authors have been added yet',
+        '添加第一个作者': 'Add First Author',
+        '暂无作者数据': 'No authors yet',
+        '作者姓名至少需要2个字符': 'Author name must be at least 2 characters',
+        '请输入作者姓名': 'Enter author name',
+        '勾选需要关联的图书': 'Check books to associate',
+        '暂无图书可供选择': 'No books available',
+        '已选 ': 'Selected: ',
+        '已选': 'Selected',
+        ' 本': ' book(s)',
+        '搜索图书名称...': 'Search books...',
+
+        // ---------- Blog pages ----------
+        '文章列表': 'Post List',
+        '搜索文章标题或内容...': 'Search by title or content...',
+        '浏览': 'Views',
+        '精选': 'Featured',
+        '管理博客文章分类': 'Manage blog categories',
+        '返回博客管理': 'Back to Blog',
+        '分类名称': 'Category Name',
+        '创建分类': 'Create Category',
+        '现有分类': 'Existing Categories',
+        '暂无描述': 'No description',
+        '暂无分类，请在左侧添加': 'No categories yet — add one on the left',
+        '确定删除分类「': 'Delete category "',
+        '」吗？': '"?',
+        '关联文章将归为无分类。': 'Associated posts will become uncategorized.',
+        '删除分类': 'Delete Category',
+        '图标 (Font Awesome CSS类)': 'Icon (Font Awesome CSS class)',
+        '如：fas fa-book': 'e.g. fas fa-book',
+        '参考': 'See',
+        '输入分类名称...': 'Enter category name...',
+        '简短描述（可选）': 'Short description (optional)',
+        '暂无分类': 'No categories',
+        '所有状态': 'All Status',
+        '所有文章': 'All Posts',
+        '搜索文章标题...': 'Search post title...',
+        '已归档': 'Archived',
+        '封面': 'Cover',
+        '浏览次数': 'Views',
+        '序号': 'No.',
+        '标题': 'Title',
+        '分类': 'Category',
+        '作者': 'Author',
+        '状态': 'Status',
     };
 
     /* ============================
@@ -2451,6 +2537,17 @@
         '付款与托管': 'Paiements & escrow',
         '财务': 'Finance',
         '跟踪托管资金、待结算与已到账款项': 'Suivre les fonds en escrow, en attente et versés',
+        '结算规则': 'Règles de reversement',
+        '商品总额': 'Montant brut',
+        '平台佣金 (%)': 'Commission plateforme (%)',
+        '您的净收入': 'Votre net',
+        '订单送达后': 'Après livraison',
+        '天退款保护期结束 → 净收入自动到账': 'jours après remboursement → versement net',
+        '等待发货/送达': 'En attente expédition/livraison',
+        '天保护期内': 'jours de protection',
+        '距到账': 'Avant versement',
+        '佣金': 'Commission',
+        '待送达': 'En attente livraison',
         '已到账': 'Versé',
         '已退款/取消': 'Remboursé / annulé',
         '全部付款明细': 'Toutes les lignes de paiement',
@@ -2866,6 +2963,81 @@
         // ---------- Marketplace title (dashboard standalone) ----------
         '市场管理 - Dashboard': 'Marché - Tableau de bord',
         'Marketplace Admin': 'Admin du marché',
+
+        // ---------- Book list / category ----------
+        '未分类': 'Non classé',
+        '仪表盘': 'Tableau de bord',
+        '图书中心': 'Centre livres',
+        '运营管理': 'Opérations',
+        '图书数量': 'Nbre de livres',
+        '家出版社': ' éditeurs',
+        '位作者': ' auteurs',
+        '本图书': ' livres',
+
+        // ---------- Publisher pages ----------
+        '添加新出版社': 'Ajouter un éditeur',
+        '为系统添加新的出版社信息': 'Ajouter un nouvel éditeur au système',
+        '管理系统中的所有出版社信息': 'Gérer tous les éditeurs du système',
+        '编辑出版社信息': 'Modifier l\'éditeur',
+        '当前名称:': 'Nom actuel :',
+        '当前地址:': 'Adresse actuelle :',
+        '出版社ID:': 'ID éditeur :',
+        '出版图书:': 'Livres publiés :',
+        '修改出版社信息': 'Mettre à jour l\'éditeur',
+        '修改 "': 'Modifier "',
+        '" 的详细信息': '" – détails',
+        '暂无出版社信息': 'Aucun éditeur',
+        '点击上方按钮添加第一家出版社': 'Cliquez sur le bouton ci-dessus pour ajouter un éditeur',
+        '您确定要删除出版社 "': 'Supprimer l\'éditeur "',
+        '" 吗？': '" ?',
+        '删除后将无法恢复，请谨慎操作！': 'Cette action est irréversible. Veuillez confirmer.',
+        '出版社 "': 'Éditeur "',
+        '确认删除': 'Confirmer la suppression',
+        '出版社信息': 'Infos éditeur',
+        '当前信息': 'Informations actuelles',
+
+        // ---------- Author pages ----------
+        '添加新作者': 'Ajouter un auteur',
+        '编辑作者信息': 'Modifier l\'auteur',
+        '修改作者 "': 'Modifier l\'auteur "',
+        '" 的信息': '" – infos',
+        '作者列表': 'Liste des auteurs',
+        '作者姓名': 'Nom de l\'auteur',
+        '作者姓名至少需要2个字符': 'Le nom doit comporter au moins 2 caractères',
+        '请输入作者姓名': 'Saisir le nom',
+        '勾选需要关联的图书': 'Cocher les livres à associer',
+        '暂无图书可供选择': 'Aucun livre disponible',
+        '已选 ': 'Sélectionné(s) : ',
+        '已选': 'Sélectionné',
+        ' 本': ' livre(s)',
+        '搜索图书名称...': 'Rechercher des livres...',
+
+        // ---------- Blog pages ----------
+        '文章列表': 'Articles',
+        '搜索文章标题或内容...': 'Rechercher par titre ou contenu...',
+        '浏览': 'Vues',
+        '精选': 'En vedette',
+        '管理博客文章分类': 'Gérer les catégories du blog',
+        '返回博客管理': 'Retour au blog',
+        '分类名称': 'Nom de la catégorie',
+        '创建分类': 'Créer une catégorie',
+        '现有分类': 'Catégories existantes',
+        '暂无描述': 'Sans description',
+        '暂无分类，请在左侧添加': 'Aucune catégorie — ajoutez-en une à gauche',
+        '确定删除分类「': 'Supprimer la catégorie "',
+        '」吗？': '" ?',
+        '关联文章将归为无分类。': 'Les articles associés seront déclassés.',
+        '删除分类': 'Supprimer la catégorie',
+        '图标 (Font Awesome CSS类)': 'Icône (classe CSS Font Awesome)',
+        '如：fas fa-book': 'ex. : fas fa-book',
+        '参考': 'Voir',
+        '输入分类名称...': 'Saisir le nom de la catégorie...',
+        '简短描述（可选）': 'Courte description (facultatif)',
+        '暂无分类': 'Aucune catégorie',
+        '所有状态': 'Tous les statuts',
+        '所有文章': 'Tous les articles',
+        '搜索文章标题...': 'Rechercher par titre...',
+        '已归档': 'Archivé',
     };
 
     // Sort keys longest-first for proper substring matching
@@ -2875,6 +3047,21 @@
     var allKeys = Object.keys(T);
     Object.keys(F).forEach(function(k) { if (allKeys.indexOf(k) === -1) allKeys.push(k); });
     sortedKeys = allKeys.sort(function (a, b) { return b.length - a.length; });
+
+    /** Only translate using Chinese source keys — prevents corrupting English/French output (e.g. Cours → Course inside "Courses"). */
+    function isChineseSourceKey(k) {
+        return /[\u4e00-\u9fff]/.test(k);
+    }
+
+    function replaceWithDict(text, D) {
+        var out = text;
+        for (var i = 0; i < sortedKeys.length; i++) {
+            var k = sortedKeys[i];
+            if (!isChineseSourceKey(k) || !D[k]) continue;
+            if (out.indexOf(k) !== -1) out = out.split(k).join(D[k]);
+        }
+        return out;
+    }
 
     // Active dictionary based on language
     function getDict() { return lang === 'fr' ? F : T; }
@@ -2897,14 +3084,7 @@
         if (lang !== 'zh') {
             var D = getDict();
             if (!originalMap.has(node)) originalMap.set(node, text);
-            var out = text;
-            for (var i = 0; i < sortedKeys.length; i++) {
-                var k = sortedKeys[i];
-                if (out.indexOf(k) !== -1 && D[k]) {
-                    out = out.split(k).join(D[k]);
-                }
-            }
-            node.textContent = out;
+            node.textContent = replaceWithDict(text, D);
         } else {
             var orig = originalMap.get(node);
             if (orig !== undefined) node.textContent = orig;
@@ -2912,26 +3092,39 @@
     }
 
     /* ---- walk the DOM ---- */
+    var isTranslating = false;
+
+    function setTextIfChanged(el, value) {
+        if (el && el.textContent !== value) el.textContent = value;
+    }
+
+    function setPlaceholderIfChanged(el, value) {
+        if (el && el.placeholder !== value) el.placeholder = value;
+    }
+
     function translatePage() {
+        if (isTranslating) return;
+        isTranslating = true;
+        try {
         // 1. Handle data-zh / data-en / data-fr elements
         document.querySelectorAll('[data-zh][data-en]').forEach(function (el) {
             if (lang === 'fr' && el.getAttribute('data-fr')) {
-                el.textContent = el.getAttribute('data-fr');
+                setTextIfChanged(el, el.getAttribute('data-fr'));
             } else if (lang === 'en') {
-                el.textContent = el.getAttribute('data-en');
+                setTextIfChanged(el, el.getAttribute('data-en'));
             } else {
-                el.textContent = el.getAttribute('data-zh');
+                setTextIfChanged(el, el.getAttribute('data-zh'));
             }
         });
 
         // 2. Handle placeholder attributes
         document.querySelectorAll('[data-ph-zh][data-ph-en]').forEach(function (el) {
             if (lang === 'fr' && el.getAttribute('data-ph-fr')) {
-                el.placeholder = el.getAttribute('data-ph-fr');
+                setPlaceholderIfChanged(el, el.getAttribute('data-ph-fr'));
             } else if (lang === 'en') {
-                el.placeholder = el.getAttribute('data-ph-en');
+                setPlaceholderIfChanged(el, el.getAttribute('data-ph-en'));
             } else {
-                el.placeholder = el.getAttribute('data-ph-zh');
+                setPlaceholderIfChanged(el, el.getAttribute('data-ph-zh'));
             }
         });
 
@@ -2963,13 +3156,7 @@
         if (lang !== 'zh') {
             var D = getDict();
             if (!titleOriginal) titleOriginal = document.title;
-            var t = document.title;
-            for (var j = 0; j < sortedKeys.length; j++) {
-                if (t.indexOf(sortedKeys[j]) !== -1 && D[sortedKeys[j]]) {
-                    t = t.split(sortedKeys[j]).join(D[sortedKeys[j]]);
-                }
-            }
-            document.title = t;
+            document.title = replaceWithDict(document.title, D);
         } else if (titleOriginal) {
             document.title = titleOriginal;
         }
@@ -2980,12 +3167,7 @@
             if (lang !== 'zh') {
                 var D = getDict();
                 if (!opt.getAttribute('data-orig')) opt.setAttribute('data-orig', opt.textContent);
-                for (var k = 0; k < sortedKeys.length; k++) {
-                    if (txt.indexOf(sortedKeys[k]) !== -1 && D[sortedKeys[k]]) {
-                        txt = txt.split(sortedKeys[k]).join(D[sortedKeys[k]]);
-                    }
-                }
-                opt.textContent = txt;
+                opt.textContent = replaceWithDict(txt, D);
             } else {
                 var orig = opt.getAttribute('data-orig');
                 if (orig) opt.textContent = orig;
@@ -2998,12 +3180,7 @@
             if (lang !== 'zh') {
                 var D = getDict();
                 if (!inp.getAttribute('data-ph-orig')) inp.setAttribute('data-ph-orig', ph);
-                for (var k = 0; k < sortedKeys.length; k++) {
-                    if (ph.indexOf(sortedKeys[k]) !== -1 && D[sortedKeys[k]]) {
-                        ph = ph.split(sortedKeys[k]).join(D[sortedKeys[k]]);
-                    }
-                }
-                inp.placeholder = ph;
+                inp.placeholder = replaceWithDict(ph, D);
             } else {
                 var origPh = inp.getAttribute('data-ph-orig');
                 if (origPh) inp.placeholder = origPh;
@@ -3014,6 +3191,9 @@
         document.body.classList.remove('lang-en', 'lang-fr');
         if (lang !== 'zh') document.body.classList.add('lang-' + lang);
         document.documentElement.lang = lang === 'en' ? 'en' : (lang === 'fr' ? 'fr' : 'zh-Hans');
+        } finally {
+            isTranslating = false;
+        }
     }
 
     /* ---- toggle button ---- */

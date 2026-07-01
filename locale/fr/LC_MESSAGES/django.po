@@ -3890,6 +3890,78 @@ msgstr "Aucune donnée de catégorie"
 msgid "数据概览 · 店铺与货架 · 订单与设置"
 msgstr "Aperçu · Boutique & Stock · Commandes & Paramètres"
 
+msgid "课程管理中心"
+msgstr "Centre de gestion des cours"
+
+msgid "以现代化方式管理课程、讲师、内容与发布状态。"
+msgstr "Gérez les cours, instructeurs, contenus et statuts de publication de façon moderne."
+
+msgid "新增课程"
+msgstr "Ajouter un cours"
+
+msgid "全部课程"
+msgstr "Tous les cours"
+
+msgid "当前页"
+msgstr "Page actuelle"
+
+msgid "搜索状态"
+msgstr "État de recherche"
+
+msgid "管理模式"
+msgstr "Mode de gestion"
+
+msgid "搜索课程标题、讲师或关键词…"
+msgstr "Rechercher un titre, un instructeur ou des mots-clés…"
+
+msgid "内容管理"
+msgstr "Gestion du contenu"
+
+msgid "专业讲师视图"
+msgstr "Vue instructeur professionnelle"
+
+msgid "商品管理中心"
+msgstr "Centre de gestion des produits"
+
+msgid "以更专业、更清晰的方式管理商品、库存、销量与展示状态。"
+msgstr "Gérez les produits, stocks, ventes et statuts d’affichage de manière plus claire et professionnelle."
+
+msgid "新增商品"
+msgstr "Ajouter un article"
+
+msgid "已上架"
+msgstr "Actif"
+
+msgid "总库存"
+msgstr "Stock total"
+
+msgid "搜索商品名称、SKU 或分类…"
+msgstr "Rechercher nom du produit, SKU ou catégorie…"
+
+msgid "智能管理"
+msgstr "Gestion intelligente"
+
+msgid "实时状态"
+msgstr "Statut en temps réel"
+
+msgid "超市管理中心"
+msgstr "Centre de gestion supermarché"
+
+msgid "统一管理商品、库存、价格、状态与展示质量。"
+msgstr "Gérez les articles, stocks, prix, statuts et qualité d’affichage au même endroit."
+
+msgid "搜索名称、品牌或产地…"
+msgstr "Rechercher nom, marque ou origine…"
+
+msgid "现代化库存视图"
+msgstr "Vue stock moderne"
+
+msgid "Inventory Management"
+msgstr "Gestion du stock"
+
+msgid "Manage stock levels for all your items in one place"
+msgstr "Gérez les niveaux de stock de tous vos articles au même endroit"
+
 msgid "操作失败"
 msgstr "Échec de l'opération"
 

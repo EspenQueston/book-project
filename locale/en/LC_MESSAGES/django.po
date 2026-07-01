@@ -3848,6 +3848,78 @@ msgstr "No category data"
 msgid "数据概览 · 店铺与货架 · 订单与设置"
 msgstr "Overview · Store & Inventory · Orders & Settings"
 
+msgid "课程管理中心"
+msgstr "Course management center"
+
+msgid "以现代化方式管理课程、讲师、内容与发布状态。"
+msgstr "Manage courses, instructors, content and publishing status in a modern way."
+
+msgid "新增课程"
+msgstr "Add course"
+
+msgid "全部课程"
+msgstr "All courses"
+
+msgid "当前页"
+msgstr "Current page"
+
+msgid "搜索状态"
+msgstr "Search status"
+
+msgid "管理模式"
+msgstr "Management mode"
+
+msgid "搜索课程标题、讲师或关键词…"
+msgstr "Search course title, instructor or keywords…"
+
+msgid "内容管理"
+msgstr "Content management"
+
+msgid "专业讲师视图"
+msgstr "Professional instructor view"
+
+msgid "商品管理中心"
+msgstr "Product management center"
+
+msgid "以更专业、更清晰的方式管理商品、库存、销量与展示状态。"
+msgstr "Manage products, stock, sales and display status more professionally and clearly."
+
+msgid "新增商品"
+msgstr "Add item"
+
+msgid "已上架"
+msgstr "Active"
+
+msgid "总库存"
+msgstr "Total stock"
+
+msgid "搜索商品名称、SKU 或分类…"
+msgstr "Search product name, SKU or category…"
+
+msgid "智能管理"
+msgstr "Smart management"
+
+msgid "实时状态"
+msgstr "Live status"
+
+msgid "超市管理中心"
+msgstr "Supermarket management center"
+
+msgid "统一管理商品、库存、价格、状态与展示质量。"
+msgstr "Manage items, stock, prices, status and display quality in one place."
+
+msgid "搜索名称、品牌或产地…"
+msgstr "Search name, brand or origin…"
+
+msgid "现代化库存视图"
+msgstr "Modern inventory view"
+
+msgid "Inventory Management"
+msgstr "Inventory Management"
+
+msgid "Manage stock levels for all your items in one place"
+msgstr "Manage stock levels for all your items in one place"
+
 msgid "操作失败"
 msgstr "Operation failed"
 
