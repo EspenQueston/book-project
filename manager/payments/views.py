@@ -617,7 +617,10 @@ def pawapay_callback(request):
     try:
         body = json.loads(request.body)
         logger.info('PawaPay callback received: %s', json.dumps(body))
-        _pawapay_process_callback(body)
+        payloads = body if isinstance(body, list) else [body]
+        for payload in payloads:
+            if isinstance(payload, dict):
+                _pawapay_process_callback(payload)
         return JsonResponse({'status': 'ok'}, status=200)
     except json.JSONDecodeError:
         logger.error('PawaPay callback: invalid JSON')
@@ -646,12 +649,14 @@ def pawapay_initiate(request):
             return JsonResponse({'success': False, 'error': 'Order not found'}, status=404)
 
         amount = body.get('amount') or float(order.total_amount)
+        order_country = getattr(order, 'country', None) or body.get('country')
         from manager.payments.pawapay import create_deposit
         result = create_deposit(
             amount=amount,
             phone_number=phone_number,
             order_number=order_number,
             provider=body.get('provider'),
+            country=order_country,
         )
         if result.get('deposit_id'):
             order.payment_transaction_id = result['deposit_id']
@@ -691,6 +696,13 @@ def pawapay_verify(request):
 
         from manager.payments.pawapay import get_deposit_status, normalize_pawapay_status
         result = get_deposit_status(deposit_id)
+        if result.get('error') and result.get('status') == 'UNKNOWN':
+            return JsonResponse({
+                'success': False,
+                'payment_status': 'pending',
+                'message': result.get('error', 'Unable to reach PawaPay'),
+            })
+
         internal = normalize_pawapay_status(result.get('status', 'PENDING'))
 
         if internal == 'SUCCESSFUL':

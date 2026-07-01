@@ -11,7 +11,7 @@ from manager.commission import split_gross_amount
 
 logger = logging.getLogger(__name__)
 
-REFUND_HOLD_DAYS = 14
+REFUND_HOLD_DAYS = 7
 
 
 def generate_escrow_ref():

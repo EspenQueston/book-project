@@ -14,6 +14,18 @@ OFFICIAL_STORE_DESCRIPTION = (
 )
 
 
+def _get_platform_admin_identity():
+    """Return the administrator identity used to own the official platform store."""
+    from manager.models import Manager
+
+    admin = Manager.objects.filter(is_admin=True).order_by('id').first()
+    if not admin:
+        return 'Duno360 Admin', 'admin@duno360.com'
+    label = admin.name or admin.number or 'Duno360 Admin'
+    email = admin.number if '@' in (admin.number or '') else OFFICIAL_STORE_EMAIL
+    return label, email
+
+
 def get_official_vendor(*, create: bool = False):
     """Return the platform official vendor, optionally creating it."""
     from manager.models import Vendor
@@ -50,6 +62,7 @@ def ensure_official_store(*, backfill: bool = True):
     from manager.models import Vendor, VendorBook, Book
     from marketplace.models import Product, Course, SupermarketItem
 
+    admin_name, admin_email = _get_platform_admin_identity()
     vendor = Vendor.objects.filter(is_official=True).first()
     created = False
     if not vendor:
@@ -59,12 +72,12 @@ def ensure_official_store(*, backfill: bool = True):
             vendor.status = 'approved'
             vendor.is_active = True
             vendor.description = OFFICIAL_STORE_DESCRIPTION
-            vendor.save()
+            created = False
         else:
             vendor = Vendor.objects.create(
                 company_name=OFFICIAL_STORE_NAME,
-                contact_name='Duno360',
-                email=OFFICIAL_STORE_EMAIL,
+                contact_name=admin_name,
+                email=admin_email,
                 phone='',
                 password=make_password(secrets.token_urlsafe(24)),
                 description=OFFICIAL_STORE_DESCRIPTION,
@@ -73,6 +86,17 @@ def ensure_official_store(*, backfill: bool = True):
                 is_official=True,
             )
             created = True
+    vendor.company_name = OFFICIAL_STORE_NAME
+    vendor.contact_name = admin_name
+    vendor.email = admin_email
+    vendor.status = 'approved'
+    vendor.is_active = True
+    vendor.is_official = True
+    vendor.is_certified = False
+    vendor.certified_at = None
+    vendor.description = OFFICIAL_STORE_DESCRIPTION
+    vendor.user = None
+    vendor.save()
 
     if backfill:
         Product.objects.filter(vendor__isnull=True).update(vendor=vendor)

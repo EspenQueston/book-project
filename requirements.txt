@@ -10,11 +10,13 @@ django-storages>=1.14.0
 boto3>=1.34.0
 whitenoise>=6.7.0
 gunicorn>=22.0.0
+requests>=2.30.0,<3
 
 # Translation
 django-rosetta>=0.10.0
 django-modeltranslation>=0.20.0
 polib>=1.2.0
+translatebot-django>=1.3.0
 
 # Data & Analytics
 pandas>=2.0.0
@@ -27,7 +29,8 @@ markdown>=3.5.0
 redis>=5.0.0
 
 # Payment Aggregator
-kkiapay>=0.0.6
+# kkiapay metadata pins requests==2.22.0 (conflicts with django-rosetta).
+# Install after main deps: pip install 'kkiapay>=0.0.6' --no-deps
 
 # Phone verification (Twilio Verify)
 twilio>=9.0.0

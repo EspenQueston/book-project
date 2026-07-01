@@ -4,6 +4,8 @@ from django.http import JsonResponse, FileResponse, Http404
 from django.db.models import Q, Sum, Count, Avg, OuterRef, Subquery, Value, IntegerField, F
 from django.db.models.functions import Coalesce, TruncMonth
 from django.core.paginator import Paginator
+from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
 from django.contrib import messages
 from django.utils.text import slugify
 from django.utils import timezone
@@ -111,6 +113,13 @@ def _positive_int(value, default=1):
         return default
 
 
+def _non_negative_int(value, default=0):
+    try:
+        return max(0, int(value))
+    except (TypeError, ValueError):
+        return default
+
+
 def _optional_positive_int(value):
     if value in (None, ''):
         return None
@@ -118,6 +127,26 @@ def _optional_positive_int(value):
         return max(1, int(value))
     except (TypeError, ValueError):
         return None
+
+
+def _positive_decimal(value, default=None):
+    try:
+        decimal_value = Decimal(str(value))
+        return decimal_value if decimal_value > 0 else default
+    except Exception:
+        return default
+
+
+def _valid_url_or_blank(value):
+    value = (value or '').strip()
+    if not value:
+        return True
+    validator = URLValidator()
+    try:
+        validator(value)
+        return True
+    except ValidationError:
+        return False
 
 
 def _minimum_quantity_message(item):
@@ -206,6 +235,93 @@ def _form_context_with_pricing(context, obj=None):
     context['pricing_rule_form'] = _pricing_rule_form(obj)
     context['pricing_rules_json'] = _rules_json_for_form(obj)
     return context
+
+
+def _field_error_map(request):
+    if not hasattr(request, '_field_errors'):
+        request._field_errors = {}
+    return request._field_errors
+
+
+def _add_field_error(request, field_name, message):
+    _field_error_map(request)[field_name] = message
+    messages.error(request, message)
+
+
+def _posted_value(request, field_name, default=''):
+    return request.POST.get(field_name, default)
+
+
+def _posted_list(request, field_name):
+    return request.POST.getlist(field_name)
+
+
+def _required_text(request, field_name, label, min_length=1):
+    value = (request.POST.get(field_name) or '').strip()
+    if not value:
+        _add_field_error(request, field_name, f'{label} est obligatoire.')
+        return None
+    if len(value) < min_length:
+        _add_field_error(request, field_name, f'{label} doit contenir au moins {min_length} caractères.')
+        return None
+    return value
+
+
+def _required_category(request, section, redirect_name, pk=None):
+    category_id = (request.POST.get('category') or '').strip()
+    if not category_id:
+        _add_field_error(request, 'category', 'La catégorie est obligatoire.')
+        return None
+    category = Category.objects.filter(pk=category_id, section=section, is_active=True).first()
+    if not category:
+        _add_field_error(request, 'category', 'Catégorie invalide.')
+        return None
+    return category
+
+
+def _build_marketplace_form_state(request, base_obj=None):
+    return {
+        'values': dict(request.POST.items()),
+        'lists': {key: request.POST.getlist(key) for key in request.POST.keys()},
+        'errors': _field_error_map(request),
+        'base_obj': base_obj,
+    }
+
+
+def _validate_marketplace_business_rules(request, require_images=0, allow_existing_images=False):
+    price = _positive_decimal(request.POST.get('price'))
+    if price is None:
+        _add_field_error(request, 'price', _('价格必须大于 0。'))
+
+    stock_raw = request.POST.get('stock')
+    if stock_raw not in (None, ''):
+        try:
+            if int(stock_raw) < 0:
+                _add_field_error(request, 'stock', _('库存不能小于 0。'))
+        except (TypeError, ValueError):
+            _add_field_error(request, 'stock', _('库存格式无效。'))
+
+    min_qty = _positive_int(request.POST.get('min_order_quantity'), 1)
+    max_qty = _optional_positive_int(request.POST.get('max_order_quantity'))
+    step_qty = _positive_int(request.POST.get('quantity_step'), 1)
+    if max_qty and max_qty < min_qty:
+        _add_field_error(request, 'max_order_quantity', _('最大购买量必须大于或等于最小购买量。'))
+    if step_qty > min_qty and min_qty % step_qty != 0:
+        _add_field_error(request, 'quantity_step', _('购买步长必须与最小购买量逻辑一致。'))
+
+    preview_url = request.POST.get('preview_url')
+    if preview_url is not None and not _valid_url_or_blank(preview_url):
+        _add_field_error(request, 'preview_url', _('请输入有效的 URL。'))
+
+    download_link = request.POST.get('download_link')
+    if download_link is not None and not _valid_url_or_blank(download_link):
+        _add_field_error(request, 'download_link', _('请输入有效的 URL。'))
+
+    image_count = sum(1 for key in ['image', 'image_2', 'image_3', 'cover_image'] if request.FILES.get(key))
+    if require_images and image_count < require_images and not allow_existing_images:
+        _add_field_error(request, 'image', _('请至少上传一张图片。') if require_images == 1 else _('请至少上传所需数量的图片。'))
+
+    return len(_field_error_map(request)) == 0
 
 
 def _max_purchase_quantity(item):
@@ -1218,7 +1334,7 @@ def admin_product_add(request):
             name=name,
             name_en=request.POST.get('name_en', '').strip(),
             slug=slugify(name) or f'product-{uuid.uuid4().hex[:8]}',
-            description=request.POST.get('description', ''),
+            description=description,
             price=request.POST.get('price', 0),
             original_price=request.POST.get('original_price') or None,
             stock=request.POST.get('stock', 0),
@@ -1276,9 +1392,15 @@ def admin_product_edit(request, pk):
 
     product = get_object_or_404(Product, pk=pk)
     if request.method == 'POST':
-        product.name = request.POST.get('name', product.name).strip()
+        product_name = _required_text(request, 'name', '商品名称', min_length=3)
+        product_description = _required_text(request, 'description', '商品描述', min_length=12)
+        if not product_name or not product_description or not _validate_marketplace_business_rules(request, require_images=0, allow_existing_images=bool(product.image or product.image_2 or product.image_3)):
+            categories = Category.objects.filter(section='products', is_active=True)
+            context = _form_context_with_pricing({'vendor': vendor, 'product': product, 'categories': categories, 'form_state': _build_marketplace_form_state(request, product)}, product)
+            return render(request, 'marketplace/vendor/product_form.html', context)
+        product.name = product_name
         product.name_en = request.POST.get('name_en', '').strip()
-        product.description = request.POST.get('description', '')
+        product.description = product_description
         product.price = request.POST.get('price', product.price)
         product.original_price = request.POST.get('original_price') or None
         product.stock = request.POST.get('stock', product.stock)
@@ -1304,6 +1426,24 @@ def admin_product_edit(request, pk):
 
         # Update dynamic attributes: clear old, save new
         product.attributes.all().delete()
+        dynamic_fields = {
+            'seller_name': 'Nom du vendeur',
+            'seller_phone': 'Téléphone vendeur',
+            'delivery_available': 'Livraison',
+        }
+        for field_name, label in dynamic_fields.items():
+            raw_value = request.POST.get(field_name, '')
+            value = raw_value.strip() if isinstance(raw_value, str) else str(raw_value).strip()
+            if value:
+                ProductAttribute.objects.create(product=product, name=label, value=value)
+        phone = request.POST.get('seller_phone', '').strip()
+        if phone and vendor.phone != phone:
+            vendor.phone = phone
+            vendor.save(update_fields=['phone'])
+        if phone and vendor.user_id and vendor.user.phone != phone:
+            vendor.user.phone = phone
+            vendor.user.save(update_fields=['phone', 'updated_at'])
+
         attr_names = request.POST.getlist('attr_name')
         attr_values = request.POST.getlist('attr_value')
         for a_name, a_val in zip(attr_names, attr_values):
@@ -1378,9 +1518,7 @@ def admin_course_add(request):
             is_featured=request.POST.get('is_featured') == 'on',
             is_active=request.POST.get('is_active', 'on') == 'on',
         )
-        cat_id = request.POST.get('category')
-        if cat_id:
-            course.category_id = int(cat_id)
+        course.category = category
         if 'image' in request.FILES:
             course.image = request.FILES['image']
 
@@ -1420,8 +1558,7 @@ def admin_course_edit(request, pk):
         course.preview_url = request.POST.get('preview_url', '')
         course.is_featured = request.POST.get('is_featured') == 'on'
         course.is_active = request.POST.get('is_active', 'on') == 'on'
-        cat_id = request.POST.get('category')
-        course.category_id = int(cat_id) if cat_id else None
+        course.category = category
         if 'image' in request.FILES:
             course.image = request.FILES['image']
         assign_official_vendor(course)
@@ -1671,9 +1808,7 @@ def admin_supermarket_add(request):
             is_featured=request.POST.get('is_featured') == 'on',
             is_active=request.POST.get('is_active', 'on') == 'on',
         )
-        cat_id = request.POST.get('category')
-        if cat_id:
-            item.category_id = int(cat_id)
+        item.category = category
         vendor_id = request.POST.get('vendor')
         if vendor_id:
             item.vendor_id = int(vendor_id)
@@ -1716,9 +1851,16 @@ def admin_supermarket_edit(request, pk):
 
     item = get_object_or_404(SupermarketItem, pk=pk)
     if request.method == 'POST':
-        item.name = request.POST.get('name', item.name).strip()
+        item_name = _required_text(request, 'name', '商品名称', min_length=3)
+        item_description = _required_text(request, 'description', '商品描述', min_length=12)
+        category = _required_category(request, 'supermarket', 'marketplace:vendor_supermarket_edit', pk=item.pk)
+        if not item_name or not item_description or not category or not _validate_marketplace_business_rules(request, require_images=0, allow_existing_images=bool(item.image or item.image_2 or item.image_3)):
+            categories = Category.objects.filter(section='supermarket', is_active=True)
+            context = _form_context_with_pricing({'vendor': vendor, 'categories': categories, 'item': item, 'unit_choices': SupermarketItem.UNIT_CHOICES, 'form_state': _build_marketplace_form_state(request, item)}, item)
+            return render(request, 'marketplace/vendor/supermarket_form.html', context)
+        item.name = item_name
         item.name_en = request.POST.get('name_en', '').strip()
-        item.description = request.POST.get('description', '')
+        item.description = item_description
         item.price = request.POST.get('price', item.price)
         item.original_price = request.POST.get('original_price') or None
         item.stock = request.POST.get('stock', item.stock)
@@ -1732,8 +1874,7 @@ def admin_supermarket_edit(request, pk):
         item.is_organic = request.POST.get('is_organic') == 'on'
         item.is_featured = request.POST.get('is_featured') == 'on'
         item.is_active = request.POST.get('is_active', 'on') == 'on'
-        cat_id = request.POST.get('category')
-        item.category_id = int(cat_id) if cat_id else None
+        item.category = category
         vendor_id = request.POST.get('vendor')
         if vendor_id:
             item.vendor_id = int(vendor_id)
@@ -2045,16 +2186,39 @@ def admin_delete_order(request, pk):
 # ─── Vendor Helper ────────────────────────────────────────────────────────────
 
 def _vendor_required(request):
-    """Return vendor object or redirect response."""
+    """Return vendor object or redirect response (aligned with manager._get_vendor)."""
     from manager.models import Vendor
+
+    admin_access = request.session.get('name')
+    vendor = None
+
     vendor_id = request.session.get('vendor_id')
-    if not vendor_id:
+    if vendor_id:
+        vendor = Vendor.objects.filter(id=vendor_id, is_active=True).first()
+        if not vendor:
+            request.session.pop('vendor_id', None)
+            request.session.pop('vendor_name', None)
+
+    if not vendor:
+        site_user_id = request.session.get('site_user_id')
+        if site_user_id:
+            vendor = Vendor.objects.filter(user_id=site_user_id, is_active=True).first()
+            if vendor and vendor.status == 'approved':
+                request.session['vendor_id'] = vendor.id
+                request.session['vendor_name'] = vendor.company_name
+
+    if not vendor and admin_access:
+        vid = (request.GET.get('vendor_id') or request.POST.get('vendor_id') or '').strip()
+        if vid:
+            vendor = Vendor.objects.filter(pk=vid, is_active=True).first()
+
+    if not vendor:
         return None, redirect('/manager/vendor/login/')
-    try:
-        vendor = Vendor.objects.get(id=vendor_id, is_active=True, status='approved')
-        return vendor, None
-    except Vendor.DoesNotExist:
+
+    if vendor.status == 'rejected' and not admin_access:
         return None, redirect('/manager/vendor/login/')
+
+    return vendor, None
 
 
 # ─── Vendor Dashboard ────────────────────────────────────────────────────────
@@ -2088,9 +2252,8 @@ def _vendor_marketplace_order_ids(vendor):
 
 
 def _vendor_mkt_order_can_update_fulfillment(order):
-    if order.status in ('cancelled', 'refunded'):
-        return False
-    return order.payment_status == 'completed'
+    """Vendors may update status/payment unless the order is closed."""
+    return order.status not in ('cancelled', 'refunded')
 
 
 VENDOR_MKT_ORDER_ALLOWED_STATUSES = frozenset({'processing', 'shipped', 'delivered'})
@@ -2180,7 +2343,7 @@ def vendor_marketplace_order_detail(request, pk):
         'vendor_items': vendor_items,
         'vendor_subtotal': vendor_subtotal,
         'can_update_fulfillment': _vendor_mkt_order_can_update_fulfillment(order),
-        'fulfillment_statuses': [(k, v) for k, v in MarketplaceOrder.STATUS_CHOICES if k in VENDOR_MKT_ORDER_ALLOWED_STATUSES],
+        'fulfillment_statuses': [(k, v) for k, v in MarketplaceOrder.STATUS_CHOICES if k not in ('cancelled', 'refunded')],
         'status_choices': MarketplaceOrder.STATUS_CHOICES,
         'payment_status_choices': MarketplaceOrder.PAYMENT_STATUS_CHOICES,
         'can_edit_customer': _vendor_mkt_order_customer_editable(order),
@@ -2207,7 +2370,7 @@ def vendor_marketplace_order_update_status(request):
         return JsonResponse({'success': False, 'message': '无权操作此订单'})
 
     if not _vendor_mkt_order_can_update_fulfillment(order):
-        return JsonResponse({'success': False, 'message': '订单尚未支付完成或已关闭'})
+        return JsonResponse({'success': False, 'message': '订单已关闭，无法更新状态'})
 
     order.status = new_status
     if note:
@@ -2226,12 +2389,12 @@ def vendor_marketplace_order_update_status(request):
 
 
 @require_POST
-def vendor_marketplace_order_update_customer(request):
+def vendor_marketplace_order_update_customer(request, pk):
     vendor, redir = _vendor_required(request)
     if redir:
         return JsonResponse({'success': False, 'message': str(_('请以卖家身份登录'))}, status=403)
 
-    order_id = request.POST.get('order_id')
+    order_id = request.POST.get('order_id') or pk
     allowed_ids = set(_vendor_marketplace_order_ids(vendor))
     order = get_object_or_404(MarketplaceOrder, id=order_id)
     if order.id not in allowed_ids:
@@ -2345,7 +2508,9 @@ def vendor_publish_product(request):
     request.session['user_role'] = 'seller'
 
     if request.method == 'POST':
-        return _handle_vendor_product_form_submission(request, vendor, redirect_name='marketplace:vendor_publish_product')
+        return _handle_vendor_product_form_submission(
+            request, vendor, redirect_name='marketplace:vendor_publish_product', min_images=2,
+        )
 
     categories = Category.objects.filter(section='products', is_active=True)
     context = {
@@ -2358,33 +2523,33 @@ def vendor_publish_product(request):
     return render(request, 'marketplace/vendor/product_form.html', context)
 
 
-def _handle_vendor_product_form_submission(request, vendor, redirect_name='marketplace:vendor_products'):
-    title = (request.POST.get('title') or request.POST.get('name') or '').strip()
-    category_id = request.POST.get('category', '').strip()
-    phone = request.POST.get('seller_phone', '').strip()
-    description = (request.POST.get('description', '') or '').strip()[:850]
+def _handle_vendor_product_form_submission(request, vendor, redirect_name='marketplace:vendor_products', min_images=1):
+    title = _required_text(request, 'name', '商品标题', min_length=3)
+    phone = _required_text(request, 'seller_phone', '卖家电话', min_length=6)
+    description = _required_text(request, 'description', '商品描述', min_length=12)
+    if description:
+        description = description[:850]
     image_count = sum(1 for key in ['image', 'image_2', 'image_3'] if request.FILES.get(key))
 
-    if not title:
-        messages.error(request, 'Le titre est obligatoire.')
-        return redirect(redirect_name)
-    if len(title) > 70:
-        messages.error(request, 'Le titre ne doit pas dépasser 70 caractères.')
-        return redirect(redirect_name)
-    if not category_id:
-        messages.error(request, 'La catégorie est obligatoire.')
-        return redirect(redirect_name)
-    if not phone:
-        messages.error(request, 'Le numéro de téléphone est obligatoire.')
-        return redirect(redirect_name)
-    if image_count < 2:
-        messages.error(request, 'Veuillez ajouter au moins 2 photos.')
-        return redirect(redirect_name)
+    categories = Category.objects.filter(section='products', is_active=True)
+    form_state = _build_marketplace_form_state(request)
 
-    category = Category.objects.filter(pk=category_id, section='products', is_active=True).first()
+    if not title or not phone or not description or not _validate_marketplace_business_rules(request, require_images=min_images):
+        context = _form_context_with_pricing({'vendor': vendor, 'product': None, 'categories': categories, 'form_state': _build_marketplace_form_state(request)}, None)
+        return render(request, 'marketplace/vendor/product_form.html', context)
+    if len(title) > 70:
+        _add_field_error(request, 'name', 'Le titre ne doit pas dépasser 70 caractères.')
+        context = _form_context_with_pricing({'vendor': vendor, 'product': None, 'categories': categories, 'form_state': _build_marketplace_form_state(request)}, None)
+        return render(request, 'marketplace/vendor/product_form.html', context)
+    if image_count < min_images:
+        _add_field_error(request, 'image', 'Veuillez ajouter au moins 2 photos.' if min_images >= 2 else 'Veuillez ajouter au moins une photo.')
+        context = _form_context_with_pricing({'vendor': vendor, 'categories': categories, 'form_state': _build_marketplace_form_state(request)}, None)
+        return render(request, 'marketplace/vendor/product_form.html', context)
+
+    category = _required_category(request, 'products', redirect_name)
     if not category:
-        messages.error(request, 'Catégorie invalide.')
-        return redirect(redirect_name)
+        context = _form_context_with_pricing({'vendor': vendor, 'categories': categories, 'form_state': _build_marketplace_form_state(request)}, None)
+        return render(request, 'marketplace/vendor/product_form.html', context)
 
     with transaction.atomic():
         product = Product(
@@ -2476,12 +2641,22 @@ def vendor_product_add(request):
     vendor, redir = _vendor_required(request)
     if redir:
         return redir
+    if vendor.status == 'suspended':
+        messages.warning(request, _('您的店铺当前处于暂停状态，暂时不能发布新商品。'))
+        return redirect('marketplace:vendor_products')
 
     if request.method == 'POST':
-        return _handle_vendor_product_form_submission(request, vendor)
+        return _handle_vendor_product_form_submission(request, vendor, redirect_name='marketplace:vendor_product_add', min_images=1)
 
     categories = Category.objects.filter(section='products', is_active=True)
-    context = _form_context_with_pricing({'vendor': vendor, 'categories': categories})
+    context = _form_context_with_pricing({
+        'vendor': vendor,
+        'product': None,
+        'categories': categories,
+        'form_state': _build_marketplace_form_state(request),
+        'seller_phone': vendor.phone or '',
+        'seller_name': vendor.contact_name or vendor.company_name,
+    }, None)
     return render(request, 'marketplace/vendor/product_form.html', context)
 
 
@@ -2508,8 +2683,12 @@ def vendor_product_edit(request, pk):
         product.condition = request.POST.get('condition', 'new')
         product.weight = request.POST.get('weight') or None
         product.is_active = request.POST.get('is_active', 'on') == 'on'
-        cat_id = request.POST.get('category')
-        product.category_id = int(cat_id) if cat_id else None
+        category = _required_category(request, 'products', 'marketplace:vendor_product_edit', pk=product.pk)
+        if not category:
+            categories = Category.objects.filter(section='products', is_active=True)
+            context = _form_context_with_pricing({'vendor': vendor, 'product': product, 'categories': categories, 'form_state': _build_marketplace_form_state(request, product)}, product)
+            return render(request, 'marketplace/vendor/product_form.html', context)
+        product.category = category
         if 'image' in request.FILES:
             product.image = request.FILES['image']
         if 'image_2' in request.FILES:
@@ -2530,7 +2709,7 @@ def vendor_product_edit(request, pk):
         return redirect('marketplace:vendor_products')
 
     categories = Category.objects.filter(section='products', is_active=True)
-    context = _form_context_with_pricing({'vendor': vendor, 'product': product, 'categories': categories}, product)
+    context = _form_context_with_pricing({'vendor': vendor, 'product': product, 'categories': categories, 'form_state': {}}, product)
     return render(request, 'marketplace/vendor/product_form.html', context)
 
 
@@ -2586,20 +2765,24 @@ def vendor_course_add(request):
         return redir
 
     if request.method == 'POST':
-        title = request.POST.get('title', '').strip()
-        if not title:
-            messages.error(request, '课程标题不能为空')
-            return redirect('marketplace:vendor_course_add')
+        title = _required_text(request, 'title', '课程标题', min_length=3)
+        description = _required_text(request, 'description', '课程描述', min_length=12)
+        instructor = _required_text(request, 'instructor', '讲师姓名', min_length=2)
+        category = _required_category(request, 'courses', 'marketplace:vendor_course_add')
+        if not title or not description or not instructor or not category or not _validate_marketplace_business_rules(request, require_images=1):
+            categories = Category.objects.filter(section='courses', is_active=True)
+            context = {'vendor': vendor, 'categories': categories, 'form_state': _build_marketplace_form_state(request)}
+            return render(request, 'marketplace/vendor/course_form.html', context)
 
         course = Course(
             vendor_id=vendor.pk,
             title=title,
             title_en=request.POST.get('title_en', '').strip(),
             slug=slugify(title) or f'course-{uuid.uuid4().hex[:8]}',
-            description=request.POST.get('description', ''),
+            description=description,
             price=request.POST.get('price', 0),
             original_price=request.POST.get('original_price') or None,
-            instructor=request.POST.get('instructor', vendor.company_name),
+            instructor=instructor,
             duration_hours=request.POST.get('duration_hours', 0) or 0,
             lessons_count=request.POST.get('lessons_count', 0) or 0,
             level=request.POST.get('level', 'all'),
@@ -2625,7 +2808,12 @@ def vendor_course_add(request):
         return redirect('marketplace:vendor_courses')
 
     categories = Category.objects.filter(section='courses', is_active=True)
-    context = {'vendor': vendor, 'categories': categories}
+    context = {
+        'vendor': vendor,
+        'course': None,
+        'categories': categories,
+        'form_state': _build_marketplace_form_state(request),
+    }
     return render(request, 'marketplace/vendor/course_form.html', context)
 
 
@@ -2638,12 +2826,20 @@ def vendor_course_edit(request, pk):
     course = get_object_or_404(Course, pk=pk, vendor=vendor)
 
     if request.method == 'POST':
-        course.title = request.POST.get('title', course.title).strip()
+        course_title = _required_text(request, 'title', '课程标题', min_length=3)
+        course_description = _required_text(request, 'description', '课程描述', min_length=12)
+        instructor = _required_text(request, 'instructor', '讲师姓名', min_length=2)
+        category = _required_category(request, 'courses', 'marketplace:vendor_course_edit', pk=course.pk)
+        if not course_title or not course_description or not instructor or not category or not _validate_marketplace_business_rules(request, require_images=0, allow_existing_images=bool(course.image)):
+            categories = Category.objects.filter(section='courses', is_active=True)
+            context = {'vendor': vendor, 'course': course, 'categories': categories, 'form_state': _build_marketplace_form_state(request, course)}
+            return render(request, 'marketplace/vendor/course_form.html', context)
+        course.title = course_title
         course.title_en = request.POST.get('title_en', '').strip()
-        course.description = request.POST.get('description', '')
+        course.description = course_description
         course.price = request.POST.get('price', course.price)
         course.original_price = request.POST.get('original_price') or None
-        course.instructor = request.POST.get('instructor', course.instructor)
+        course.instructor = instructor
         course.duration_hours = request.POST.get('duration_hours', 0) or 0
         course.lessons_count = request.POST.get('lessons_count', 0) or 0
         course.level = request.POST.get('level', 'all')
@@ -2660,7 +2856,7 @@ def vendor_course_edit(request, pk):
         return redirect('marketplace:vendor_courses')
 
     categories = Category.objects.filter(section='courses', is_active=True)
-    context = {'vendor': vendor, 'course': course, 'categories': categories}
+    context = {'vendor': vendor, 'course': course, 'categories': categories, 'form_state': {}}
     return render(request, 'marketplace/vendor/course_form.html', context)
 
 
@@ -2871,12 +3067,18 @@ def vendor_supermarket_add(request):
     vendor, redir = _vendor_required(request)
     if redir:
         return redir
+    if vendor.status == 'suspended':
+        messages.warning(request, _('您的店铺当前处于暂停状态，暂时不能发布新的超市商品。'))
+        return redirect('marketplace:vendor_supermarket')
 
     if request.method == 'POST':
-        name = request.POST.get('name', '').strip()
-        if not name:
-            messages.error(request, _('名称不能为空'))
-            return redirect('marketplace:vendor_supermarket_add')
+        name = _required_text(request, 'name', '商品名称', min_length=3)
+        description = _required_text(request, 'description', '商品描述', min_length=12)
+        category = _required_category(request, 'supermarket', 'marketplace:vendor_supermarket_add')
+        if not name or not description or not category or not _validate_marketplace_business_rules(request, require_images=1):
+            categories = Category.objects.filter(section='supermarket', is_active=True)
+            context = _form_context_with_pricing({'vendor': vendor, 'item': None, 'categories': categories, 'unit_choices': SupermarketItem.UNIT_CHOICES, 'form_state': _build_marketplace_form_state(request)}, None)
+            return render(request, 'marketplace/vendor/supermarket_form.html', context)
 
         item = SupermarketItem(
             vendor_id=vendor.pk,
@@ -2898,9 +3100,7 @@ def vendor_supermarket_add(request):
             is_featured=False,
             is_active=request.POST.get('is_active', 'on') == 'on',
         )
-        cat_id = request.POST.get('category')
-        if cat_id:
-            item.category_id = int(cat_id)
+        item.category = category
         if 'image' in request.FILES:
             item.image = request.FILES['image']
         if 'image_2' in request.FILES:
@@ -2930,10 +3130,11 @@ def vendor_supermarket_add(request):
     categories = Category.objects.filter(section='supermarket', is_active=True)
     context = _form_context_with_pricing({
         'vendor': vendor,
-        'categories': categories,
         'item': None,
+        'categories': categories,
         'unit_choices': SupermarketItem.UNIT_CHOICES,
-    })
+        'form_state': _build_marketplace_form_state(request),
+    }, None)
     return render(request, 'marketplace/vendor/supermarket_form.html', context)
 
 
@@ -2960,8 +3161,7 @@ def vendor_supermarket_edit(request, pk):
         item.origin = request.POST.get('origin', '').strip()
         item.is_organic = request.POST.get('is_organic') == 'on'
         item.is_active = request.POST.get('is_active', 'on') == 'on'
-        cat_id = request.POST.get('category')
-        item.category_id = int(cat_id) if cat_id else None
+        item.category = category
         if 'image' in request.FILES:
             item.image = request.FILES['image']
         if 'image_2' in request.FILES:
@@ -2988,6 +3188,7 @@ def vendor_supermarket_edit(request, pk):
         'categories': categories,
         'item': item,
         'unit_choices': SupermarketItem.UNIT_CHOICES,
+        'form_state': {},
     }, item)
     return render(request, 'marketplace/vendor/supermarket_form.html', context)
 

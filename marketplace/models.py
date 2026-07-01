@@ -44,7 +44,7 @@ class Product(models.Model):
         ('refurbished', '翻新'),
     ]
 
-    vendor = models.ForeignKey('manager.Vendor', on_delete=models.SET_NULL, null=True, blank=True,
+    vendor = models.ForeignKey('manager.Vendor', on_delete=models.CASCADE, null=True, blank=True,
                                 related_name='products', verbose_name='卖家')
     name = models.CharField(max_length=200, verbose_name='商品名称')
     slug = models.SlugField(max_length=220, unique=True)
@@ -189,7 +189,7 @@ class SupermarketItem(models.Model):
 
     vendor = models.ForeignKey(
         'manager.Vendor',
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         null=True,
         blank=True,
         related_name='supermarket_items',

@@ -89,16 +89,17 @@ SEQUENCE_TABLES = [
 
 
 def _reset_sequences() -> None:
+    """Reset Postgres serial sequences after fixture import (whitelist table names only)."""
     with connection.cursor() as cursor:
         for table, column in SEQUENCE_TABLES:
+            # Table/column names come from a fixed whitelist — safe to embed as identifiers.
             cursor.execute(
-                """
+                f"""
                 SELECT setval(
-                    pg_get_serial_sequence(%s, %s),
-                    COALESCE((SELECT MAX(%s) FROM %s), 1)
+                    pg_get_serial_sequence('{table}', '{column}'),
+                    COALESCE((SELECT MAX({column}) FROM {table}), 1)
                 )
-                """,
-                [table, column, column, table],
+                """
             )
 
 
@@ -180,7 +181,8 @@ class Command(BaseCommand):
                 self._purge_catalog(export_siteuser_ids, export_siteuser_emails)
             for obj in serializers.deserialize('json', json.dumps(payload)):
                 obj.save()
-            _reset_sequences()
+
+        _reset_sequences()
 
         self.stdout.write(self.style.SUCCESS(
             f'Imported {len(payload)} objects from {path}'

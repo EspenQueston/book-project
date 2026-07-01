@@ -38,6 +38,10 @@ def get_checkout_cities_by_country():
 
 def is_valid_checkout_city(country, city):
     """True if city is in the known list for the given checkout country."""
+    city = (city or '').strip()
     if not country or not city:
         return False
-    return city in CHECKOUT_CITIES_BY_COUNTRY.get(country, [])
+    known = CHECKOUT_CITIES_BY_COUNTRY.get(country)
+    if not known:
+        return len(city) >= 2
+    return city in known
