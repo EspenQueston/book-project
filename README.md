@@ -93,7 +93,7 @@ Full-stack Django commerce platform for **DUNO 360**: bookstore, multi-vendor ma
 | **SMS** | Twilio Verify |
 | **Payments** | kkiapay SDK, custom PawaPay / MTN MoMo / Airtel Money clients |
 | **Dev tooling** | django-extensions, python-dotenv, ngrok (callbacks) |
-| **Deployment** | Gunicorn, Nginx, DigitalOcean VPS; cPanel assets (`passenger_wsgi.py`, `.cpanel.yml`) |
+| **Deployment** | Gunicorn, Nginx, IONOS VPS (Ubuntu 24.04); optional cPanel assets |
 
 ---
 
@@ -274,7 +274,7 @@ book_Project/
 ├── manager/               # Bookstore, vendor center, admin, payments, messaging
 ├── marketplace/           # Products, courses, supermarket, pricing rules
 ├── locale/                # en/fr translation files
-├── deploy/                # DigitalOcean bootstrap, production env template
+├── deploy/                # IONOS bootstrap scripts, production env template
 ├── manager/static/        # admin_i18n.js, inventory_grid.js/css, assets
 ├── manager/templates/     # public, admin, vendor templates
 └── requirements.txt
@@ -291,20 +291,35 @@ book_Project/
 
 ## Deployment
 
-### DigitalOcean + Supabase (recommended)
+See **[deploy/README.md](deploy/README.md)** for full IONOS instructions.
 
-1. Provision Ubuntu VPS; point domain A-record to server IP.
-2. Clone to `/opt/duno360/app`.
-3. Run `sudo bash deploy/setup_digitalocean.sh`.
-4. Copy `deploy/production.env.example` → `/opt/duno360/.env` and fill **real** secrets.
-5. Restart services:
+### IONOS VPS + Supabase (production)
+
+| | |
+|---|---|
+| Provider | IONOS |
+| IP | `217.160.36.235` |
+| OS | Ubuntu 24.04 LTS |
+| SSH | `root@217.160.36.235` |
+
+1. Point `duno360.com` A-record to **217.160.36.235** (remove old DigitalOcean IP).
+2. SSH into the server and clone the repo to `/opt/duno360/app`.
+3. Copy `deploy/production.env.example` → `/opt/duno360/.env` and fill secrets.
+4. Run `sudo bash deploy/setup_ionos.sh`.
+5. Enable HTTPS: `certbot --nginx -d duno360.com -d www.duno360.com`
+6. Restart: `systemctl restart duno360 nginx`
+
+Automated deploy from your PC (SSH key recommended):
 
 ```bash
-sudo systemctl restart duno360
-sudo systemctl restart nginx
+python deploy/deploy_ionos.py
 ```
 
-6. Enable HTTPS (Certbot). Keep `DEBUG=False` and `FORCE_HTTPS=True`.
+### Migrate off DigitalOcean
+
+- Update DNS to the IONOS IP above.
+- Decommission the old DigitalOcean droplet when verified.
+- Remove `142.93.45.77` from any firewall or `ALLOWED_HOSTS` entries.
 
 ### Supabase notes
 - Use `DATABASE_URL` with `sslmode=require`.
