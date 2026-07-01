@@ -6,6 +6,25 @@
 
 {% block extra_css %}
 <style>
+.cart-desktop-header {
+    background: radial-gradient(circle at 18% 18%, rgba(96,165,250,.28), transparent 24%), radial-gradient(circle at 84% 18%, rgba(14,165,233,.16), transparent 22%), linear-gradient(135deg, #14245f 0%, #1d4ed8 100%) !important;
+    position: relative;
+    overflow: hidden;
+    border-radius: 0 0 28px 28px;
+    box-shadow: 0 22px 56px rgba(20,36,95,.22);
+}
+.cart-desktop-header::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    right: -8%;
+    width: 420px;
+    height: 420px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 50%;
+    pointer-events: none;
+}
+.cart-desktop-header .container { position: relative; z-index: 1; }
 @media (max-width: 768px) {
     body.cart-mobile-active { background: #f4f6fb !important; }
     .cart-desktop-header { display: none !important; }
@@ -22,7 +41,7 @@
     }
     .cart-desktop-content .card-header {
         border-radius: 16px 16px 0 0 !important;
-        background: linear-gradient(135deg,#667eea,#764ba2) !important;
+        background: linear-gradient(135deg,#14245f,#1d4ed8) !important;
         color: #fff !important;
         border: none !important;
         padding: 12px 14px !important;
@@ -139,12 +158,6 @@
 
     /* Prevent overlap with mobile floating cart/chat controls on this page */
     body.cart-mobile-active .mobile-floating-cart,
-    body.cart-mobile-active .chatbot-widget,
-    body.cart-mobile-active #chatbotWidget,
-    body.cart-mobile-active #chatbot-toggle,
-    body.cart-mobile-active .chatbot-toggle {
-        display: none !important;
-    }
 }
 
 /* ========== DARK MODE ========== */
@@ -183,7 +196,7 @@ html[data-theme="dark"] .cart-summary-card .summary-row strong.h5 {
 
 {% block content %}
 <!-- Cart Header -->
-<section class="py-4 bg-primary text-white cart-desktop-header">
+<section class="py-4 text-white cart-desktop-header">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-md-8">

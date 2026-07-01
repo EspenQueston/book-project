@@ -197,6 +197,7 @@ urlpatterns = [
     # =========================Admin Vendor Management========================
     path('admin/vendors/', views.admin_vendor_list, name='admin_vendor_list'),
     path('admin/vendors/status/', views.admin_vendor_status, name='admin_vendor_status'),
+    path('admin/vendors/certify/', views.admin_vendor_certify, name='admin_vendor_certify'),
     path('admin/vendors/edit/', views.admin_edit_vendor, name='admin_edit_vendor'),
     path('admin/vendors/add/', views.admin_add_vendor, name='admin_add_vendor'),
     path('admin/vendors/delete/', views.admin_delete_vendor, name='admin_delete_vendor'),
@@ -221,13 +222,5 @@ urlpatterns = [
     path('api/payment/pawapay/callback/payouts/', pawapay_callback, name='pawapay_callback_payouts'),
     path('api/payment/pawapay/callback/refunds/', pawapay_callback, name='pawapay_callback_refunds'),
 
-    # =========================AI Chatbot========================
-    path('chatbot/send/', views.chatbot_send, name='chatbot_send'),
-    path('chatbot/stream/', views.chatbot_send_stream, name='chatbot_send_stream'),
-    path('chatbot/config/', views.chatbot_config_api, name='chatbot_config_api'),
-    path('chatbot/history/', views.chatbot_history, name='chatbot_history'),
-    path('chatbot/contact/', views.chatbot_contact_send, name='chatbot_contact_send'),
-    path('chatbot/contact/replies/', views.chatbot_contact_replies, name='chatbot_contact_replies'),
-    path('admin/chatbot/', views.admin_chatbot_config, name='admin_chatbot_config'),
     path('admin/contact-reply/', views.admin_contact_quick_reply, name='admin_contact_quick_reply'),
 ]

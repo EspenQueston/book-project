@@ -271,7 +271,10 @@ def delete_publisher(request):
     if request.method != 'POST':
         return HttpResponseNotAllowed(['POST'])
     pub_id = request.POST.get('id')
-    models.Publisher.objects.filter(id=pub_id).delete()
+    try:
+        models.Publisher.objects.filter(id=pub_id).delete()
+    except Exception as exc:
+        logger.error("delete_publisher failed id=%s: %s", pub_id, exc)
     return redirect('/manager/publisher_list')
 
 
@@ -453,8 +456,11 @@ def delete_book(request):
     if request.method != 'POST':
         return HttpResponseNotAllowed(['POST'])
     book_id = request.POST.get('id')
-    models.Book.objects.filter(id=book_id).delete()
-    return redirect('/manager/book_list')
+    try:
+        models.Book.objects.filter(id=book_id).delete()
+    except Exception as exc:
+        logger.error("delete_book failed id=%s: %s", book_id, exc)
+    return redirect('/manager/book_list/')
 
 
 # ================================  三、作者操作模块  =============================
@@ -545,8 +551,11 @@ def delete_author(request):
     if request.method != 'POST':
         return HttpResponseNotAllowed(['POST'])
     author_id = request.POST.get('id')
-    models.Author.objects.filter(id=author_id).delete()
-    return redirect('/manager/author_list')
+    try:
+        models.Author.objects.filter(id=author_id).delete()
+    except Exception as exc:
+        logger.error("delete_author failed id=%s: %s", author_id, exc)
+    return redirect('/manager/author_list/')
 
 
 # ====================   PUBLIC USER INTERFACE  ===========================
@@ -709,11 +718,17 @@ def public_home(request):
                 '-sold_delivered', '-enrollment_count'
             )[:6]
         )
+        featured_supermarket = list(
+            SupermarketItem.objects.filter(is_active=True).select_related('category').order_by('-sales_count', '-id')[:6]
+        )
         recent_products = list(
             Product.objects.filter(is_active=True).select_related('category').order_by('-id')[:4]
         )
         recent_courses = list(
             Course.objects.filter(is_active=True).order_by('-id')[:4]
+        )
+        recent_supermarket = list(
+            SupermarketItem.objects.filter(is_active=True).select_related('category').order_by('-id')[:4]
         )
         now = tz.now()
         flash_sales = list(FlashSale.objects.filter(
@@ -732,8 +747,10 @@ def public_home(request):
         supermarket_product_count = 0
         vendor_count = 0
         total_orders_count = models.Order.objects.count()
+        featured_supermarket = []
         recent_products = []
         recent_courses = []
+        recent_supermarket = []
 
     featured_books = list(
         _annotate_book_delivered(
@@ -765,9 +782,11 @@ def public_home(request):
         'featured_books': featured_books,
         'featured_products': featured_products,
         'featured_courses': featured_courses,
+        'featured_supermarket': featured_supermarket,
         'recent_books': recent_books,
         'recent_products': recent_products,
         'recent_courses': recent_courses,
+        'recent_supermarket': recent_supermarket,
         'book_categories': book_categories,
         'flash_sales': flash_sales,
         'flash_sale_end': flash_sale_end,
@@ -2399,6 +2418,14 @@ def pawapay_pay(request, order_number):
         messages.info(request, 'Commande déjà payée.')
         return redirect('manager:order_confirmation', order_number=order.order_number)
 
+    order_country = getattr(order, 'country', '') or ''
+    from manager.payments.pawapay import (
+        COUNTRY_DIAL_CODES, get_country_correspondents, get_default_correspondent
+    )
+    dial_code = COUNTRY_DIAL_CODES.get(order_country, '')
+    correspondents = get_country_correspondents(order_country)   # [(label, code), ...]
+    default_correspondent = get_default_correspondent(order_country)
+
     context = {
         'order': order,
         'order_number': order.order_number,
@@ -2406,8 +2433,12 @@ def pawapay_pay(request, order_number):
         'customer_name': order.customer_name if hasattr(order, 'customer_name') else getattr(order, 'user_name', ''),
         'customer_email': order.customer_email if hasattr(order, 'customer_email') else getattr(order, 'user_email', ''),
         'customer_phone': order.customer_phone or '',
-        'pawapay_sandbox': django_settings.PAWAPAY_SANDBOX,
-        'pawapay_currency': django_settings.PAWAPAY_CURRENCY,
+        'order_country': order_country,
+        'phone_dial_code': dial_code,
+        'correspondents': correspondents,
+        'default_correspondent': default_correspondent,
+        'pawapay_sandbox': getattr(django_settings, 'PAWAPAY_SANDBOX', True),
+        'pawapay_currency': getattr(django_settings, 'PAWAPAY_CURRENCY', 'XAF'),
     }
     return render(request, 'public/pawapay_pay.html', context)
 
@@ -2526,13 +2557,12 @@ def track_order(request):
                 all_mkt_orders = None
 
             if status_filter:
-                if status_filter == 'pending':
-                    pending_codes = ['pending', 'payment_pending']
-                    orders = all_orders.filter(status__in=pending_codes)
-                    mkt_orders = all_mkt_orders.filter(status__in=pending_codes) if all_mkt_orders is not None else None
-                else:
-                    orders = all_orders.filter(status=status_filter)
-                    mkt_orders = all_mkt_orders.filter(status=status_filter) if all_mkt_orders is not None else None
+                from manager.order_status import filter_orders_by_bucket
+                orders = filter_orders_by_bucket(all_orders, status_filter)
+                mkt_orders = (
+                    filter_orders_by_bucket(all_mkt_orders, status_filter)
+                    if all_mkt_orders is not None else None
+                )
 
             if orders.exists():
                 _accessible = request.session.get('accessible_orders', [])
@@ -2571,28 +2601,38 @@ def track_order(request):
         search_type = request.POST.get('search_type', 'order_number')
         
         if search_type == 'email':
-            # Search by email - return all orders from both systems
-            customer_email = request.POST.get('customer_email')
-            if customer_email:
-                orders = models.Order.objects.filter(
-                    customer_email=customer_email
-                ).order_by('-created_at')
-                
-                # Also search marketplace orders
+            customer_email = (request.POST.get('customer_email') or '').strip().lower()
+            order_proof = (request.POST.get('email_order_number') or '').strip()
+            if customer_email and order_proof:
+                verified_book_order = models.Order.objects.filter(
+                    order_number__iexact=order_proof,
+                    customer_email__iexact=customer_email,
+                ).first()
+                verified_mkt_order = None
                 try:
-                    mkt_orders = MarketplaceOrder.objects.filter(
-                        user_email=customer_email
-                    ).order_by('-created_at')
-                    if not mkt_orders.exists():
-                        mkt_orders = None
+                    verified_mkt_order = MarketplaceOrder.objects.filter(
+                        order_number__iexact=order_proof,
+                        user_email__iexact=customer_email,
+                    ).first()
                 except Exception:
-                    mkt_orders = None
-                
-                if not orders.exists() and not mkt_orders:
-                    messages.error(request, f'未找到与邮箱 {customer_email} 相关的订单')
+                    verified_mkt_order = None
+
+                if not verified_book_order and not verified_mkt_order:
+                    messages.error(request, _('For your security, the email and order number do not match any order.'))
                     orders = None
+                    mkt_orders = None
                 else:
-                    # Grant session access to all orders verified by email
+                    orders = models.Order.objects.filter(
+                        customer_email__iexact=customer_email
+                    ).order_by('-created_at')
+                    try:
+                        mkt_orders = MarketplaceOrder.objects.filter(
+                            user_email__iexact=customer_email
+                        ).order_by('-created_at')
+                        if not mkt_orders.exists():
+                            mkt_orders = None
+                    except Exception:
+                        mkt_orders = None
                     _accessible = request.session.get('accessible_orders', [])
                     for _o in (orders if orders.exists() else []):
                         if str(_o.order_number) not in _accessible:
@@ -2601,6 +2641,12 @@ def track_order(request):
                         if str(_o.order_number) not in _accessible:
                             _accessible.append(str(_o.order_number))
                     request.session['accessible_orders'] = _accessible
+                    if not orders.exists():
+                        orders = None
+            else:
+                messages.error(request, _('Enter both your email and one order number linked to that email.'))
+                orders = None
+                mkt_orders = None
         else:
             # Search by order number - return single order
             order_number = request.POST.get('order_number')
@@ -2641,10 +2687,11 @@ def track_order(request):
     }
     source_orders = all_orders if all_orders is not None else orders
     source_mkt_orders = all_mkt_orders if all_mkt_orders is not None else mkt_orders
+    from manager.order_status import order_status_bucket, order_matches_bucket
     for o in (source_orders or []):
-        normalized = 'pending' if o.status in ['pending', 'payment_pending'] else o.status
-        if normalized in status_counts:
-            status_counts[normalized] += 1
+        bucket = order_status_bucket(o.status)
+        if bucket in status_counts:
+            status_counts[bucket] += 1
         status_counts['all'] += 1
         desktop_order_rows.append({
             'kind': 'book',
@@ -2661,9 +2708,9 @@ def track_order(request):
             'detail_url': f'/manager/order-confirmation/{o.order_number}/',
         })
     for o in (source_mkt_orders or []):
-        normalized = 'pending' if o.status in ['pending', 'payment_pending'] else o.status
-        if normalized in status_counts:
-            status_counts[normalized] += 1
+        bucket = order_status_bucket(o.status)
+        if bucket in status_counts:
+            status_counts[bucket] += 1
         status_counts['all'] += 1
         desktop_order_rows.append({
             'kind': 'marketplace',
@@ -2681,13 +2728,10 @@ def track_order(request):
         })
     desktop_order_rows.sort(key=lambda x: x['created_at'], reverse=True)
     if status_filter:
-        if status_filter == 'pending':
-            desktop_order_rows = [
-                r for r in desktop_order_rows
-                if r['status'] in ['pending', 'payment_pending']
-            ]
-        else:
-            desktop_order_rows = [r for r in desktop_order_rows if r['status'] == status_filter]
+        desktop_order_rows = [
+            r for r in desktop_order_rows
+            if order_matches_bucket(r['status'], status_filter)
+        ]
 
     from . import views_review
 
@@ -5792,6 +5836,13 @@ def user_login(request):
     from django.utils.translation import gettext as _
 
     if request.method == 'POST':
+        ip = _get_client_ip(request)
+        if _is_rate_limited(ip):
+            return JsonResponse({
+                'success': False,
+                'message': _('Too many login attempts. Please try again in 5 minutes.'),
+            }, status=429)
+
         email = request.POST.get('email', '').strip()
         password = request.POST.get('password', '').strip()
 
@@ -5804,15 +5855,27 @@ def user_login(request):
         try:
             user = models.SiteUser.objects.get(email__iexact=email, is_active=True)
         except models.SiteUser.DoesNotExist:
+            _record_login_failure(ip)
             return JsonResponse({'success': False, 'message': _('Incorrect email or password.')})
 
         if not _check_email_password(email, password):
+            _record_login_failure(ip)
             return JsonResponse({'success': False, 'message': _('Incorrect email or password.')})
 
+        _reset_login_failures(ip)
         _link_dual_accounts_by_email(email)
 
+        request.session.cycle_key()
         request.session['site_user_id'] = user.id
         request.session['site_user_name'] = user.name
+        request.session['auth_scope'] = 'user'
+        linked_vendor = models.Vendor.objects.filter(
+            user_id=user.id, is_active=True, status='approved',
+        ).first()
+        request.session['has_vendor_access'] = bool(linked_vendor)
+        if linked_vendor:
+            request.session['vendor_id'] = linked_vendor.id
+            request.session['vendor_name'] = linked_vendor.company_name
         next_url = (request.POST.get('next') or '').strip()
         if not next_url:
             from django.urls import reverse
@@ -5827,9 +5890,15 @@ def user_login(request):
 
 
 def user_logout(request):
-    """Public user logout"""
-    request.session.pop('site_user_id', None)
-    request.session.pop('site_user_name', None)
+    """Public user logout — flush the whole session to prevent fixation."""
+    # Preserve vendor session if this is a dual-role account logging out of user scope only
+    vendor_id = request.session.get('vendor_id')
+    vendor_name = request.session.get('vendor_name')
+    request.session.flush()
+    if vendor_id:
+        request.session['vendor_id'] = vendor_id
+        request.session['vendor_name'] = vendor_name
+        request.session['auth_scope'] = 'vendor'
     return redirect('/manager/public/')
 
 
@@ -6109,13 +6178,33 @@ def admin_toggle_user(request):
     return JsonResponse({'success': False})
 
 
+def _detach_vendor_protected_relations(vendor):
+    """Detach historical records that must remain after a vendor account is removed."""
+    if not vendor:
+        return 0
+    return models.PlatformEscrowTransaction.objects.filter(vendor=vendor).update(vendor=None)
+
+
 def admin_delete_user(request):
     """Delete a site user"""
-    if "name" not in request.session:
+    if not request.session.get('is_admin') or 'name' not in request.session:
         return JsonResponse({'success': False, 'message': '未授权'})
     if request.method == 'POST':
-        models.SiteUser.objects.filter(id=request.POST.get('id')).delete()
-        return JsonResponse({'success': True, 'message': '用户已删除'})
+        user_id = request.POST.get('id')
+        user = models.SiteUser.objects.filter(id=user_id).first()
+        if not user:
+            return JsonResponse({'success': False, 'message': '用户不存在'})
+        # Prevent deleting the last active user
+        if models.SiteUser.objects.filter(is_active=True).count() <= 1:
+            return JsonResponse({'success': False, 'message': '无法删除最后一个用户'})
+        deleted_vendor_count = 0
+        vendor = getattr(user, 'vendor_profile', None)
+        if vendor:
+            _detach_vendor_protected_relations(vendor)
+            vendor.delete()
+            deleted_vendor_count = 1
+        user.delete()
+        return JsonResponse({'success': True, 'message': '用户已删除，关联卖家与店铺也已删除' if deleted_vendor_count else '用户已删除'})
     return JsonResponse({'success': False})
 
 
@@ -6324,6 +6413,13 @@ def vendor_login(request):
     from django.utils.translation import gettext as _
 
     if request.method == 'POST':
+        ip = _get_client_ip(request)
+        if _is_rate_limited(ip):
+            return JsonResponse({
+                'success': False,
+                'message': _('Too many login attempts. Please try again in 5 minutes.'),
+            }, status=429)
+
         email = request.POST.get('email', '').strip()
         password = request.POST.get('password', '').strip()
 
@@ -6336,16 +6432,25 @@ def vendor_login(request):
         try:
             vendor = models.Vendor.objects.get(email__iexact=email, is_active=True)
         except models.Vendor.DoesNotExist:
+            _record_login_failure(ip)
             return JsonResponse({'success': False, 'message': _('Incorrect email or password.')})
 
         if not _check_email_password(email, password):
+            _record_login_failure(ip)
             return JsonResponse({'success': False, 'message': _('Incorrect email or password.')})
 
+        _reset_login_failures(ip)
         vendor.refresh_from_db()
         _link_dual_accounts_by_email(email)
 
+        request.session.cycle_key()
         request.session['vendor_id'] = vendor.id
         request.session['vendor_name'] = vendor.company_name
+        request.session['auth_scope'] = 'vendor'
+        if vendor.user_id and vendor.user and vendor.user.is_active:
+            request.session['site_user_id'] = vendor.user_id
+            request.session['site_user_name'] = vendor.user.name
+            request.session['has_vendor_access'] = True
         return JsonResponse({
             'success': True,
             'message': _('Login successful.'),
@@ -6356,9 +6461,14 @@ def vendor_login(request):
 
 
 def vendor_logout(request):
-    """Vendor logout"""
-    request.session.pop('vendor_id', None)
-    request.session.pop('vendor_name', None)
+    """Vendor logout — keeps user session alive for dual-role accounts."""
+    site_user_id = request.session.get('site_user_id')
+    site_user_name = request.session.get('site_user_name')
+    request.session.flush()
+    if site_user_id:
+        request.session['site_user_id'] = site_user_id
+        request.session['site_user_name'] = site_user_name
+        request.session['auth_scope'] = 'user'
     return redirect('/manager/public/')
 
 
@@ -6539,65 +6649,117 @@ def reset_password_verify(request):
 
 
 def _get_vendor(request):
-    """Get the currently logged-in vendor or None"""
+    """Get the active vendor profile without blocking ordinary user features."""
     vendor_id = request.session.get('vendor_id')
     if vendor_id:
-        try:
-            return models.Vendor.objects.get(id=vendor_id, is_active=True)
-        except models.Vendor.DoesNotExist:
-            return None
+        vendor = models.Vendor.objects.filter(id=vendor_id, is_active=True).first()
+        if vendor:
+            return vendor
+        request.session.pop('vendor_id', None)
+        request.session.pop('vendor_name', None)
 
     site_user_id = request.session.get('site_user_id')
     if site_user_id:
-        return models.Vendor.objects.filter(user_id=site_user_id, is_active=True).first()
+        vendor = models.Vendor.objects.filter(user_id=site_user_id, is_active=True, status='approved').first()
+        if vendor:
+            request.session['vendor_id'] = vendor.id
+            request.session['vendor_name'] = vendor.company_name
+            request.session['has_vendor_access'] = True
+            return vendor
     return None
 
 
 def publish_entry(request):
-    """Guided publish entry with confirmation and item-type selection."""
+    """Guided publish entry with paid seller activation and item-type selection."""
     site_user_id = request.session.get('site_user_id')
     if not site_user_id:
         return redirect(f'/manager/public/user/login/?next=/manager/public/publish/')
 
     user = get_object_or_404(models.SiteUser, pk=site_user_id, is_active=True)
     vendor = models.Vendor.objects.filter(user=user).first()
+    pending_payment = models.SellerActivationPayment.objects.filter(user=user, status__in=['pending', 'processing']).order_by('-created_at').first()
 
     if request.method == 'POST':
         action = request.POST.get('action', '').strip()
         if action == 'activate_vendor':
+            phone = request.POST.get('payer_phone', '').strip() or user.phone
+            payer_name = request.POST.get('payer_name', '').strip() or user.name
+            if not phone:
+                return JsonResponse({'success': False, 'message': '请输入付款手机号。'}, status=400)
+            payment = models.SellerActivationPayment.objects.create(
+                user=user,
+                vendor=vendor,
+                order_number=f'SVP-{timezone.now().strftime("%Y%m%d%H%M%S")}-{user.id}',
+                amount=Decimal('100.00'),
+                currency='XAF',
+                provider='pawapay',
+                status='processing',
+                payer_phone=phone,
+                payer_name=payer_name,
+                external_reference=f'PAWA-SELLER-{user.id}-{uuid.uuid4().hex[:10]}',
+                external_status='queued',
+                provider_message='模拟 pawaPay 初始化成功，待确认。',
+            )
+            request.session['pending_seller_activation_payment_id'] = payment.id
+            return JsonResponse({
+                'success': True,
+                'requires_payment': True,
+                'payment_order': payment.order_number,
+                'amount': str(payment.amount),
+                'currency': payment.currency,
+                'provider': 'pawaPay',
+                'message': '卖家激活支付已创建，请完成 100 FCFA 支付后继续。',
+            })
+
+        if action == 'confirm_vendor_activation_payment':
+            payment_id = request.session.get('pending_seller_activation_payment_id') or request.POST.get('payment_id')
+            payment = get_object_or_404(models.SellerActivationPayment, id=payment_id, user=user)
+            payment.status = 'paid'
+            payment.external_status = 'completed'
+            payment.provider_message = '支付确认成功。'
+            payment.paid_at = timezone.now()
+            payment.save(update_fields=['status', 'external_status', 'provider_message', 'paid_at', 'updated_at'])
+
             if not vendor:
                 vendor = models.Vendor.objects.create(
                     user=user,
-                    company_name=f'Boutique de {user.name}',
+                    company_name=f'{user.name} 的店铺',
                     contact_name=user.name,
                     email=user.email,
                     phone=user.phone,
                     password=user.password,
-                    description='Vendeur Duno360',
+                    description='Duno360 卖家',
                     status='approved',
                     is_active=True,
                 )
-                create_notification(
-                    'vendor_registered',
-                    f'Nouveau vendeur: {user.name}',
-                    f'{user.name} ({user.email}) a activé la publication depuis son compte acheteur.',
-                    icon='fas fa-store',
-                    color='#10b981',
-                    link='/manager/admin/vendors/',
-                    related_id=vendor.id,
-                )
             elif vendor.status == 'pending':
                 vendor.status = 'approved'
-                vendor.save(update_fields=['status', 'updated_at'])
+                vendor.is_active = True
+                vendor.save(update_fields=['status', 'is_active', 'updated_at'])
+
+            payment.vendor = vendor
+            payment.save(update_fields=['vendor', 'updated_at'])
 
             user.promote_to_seller()
             request.session['vendor_id'] = vendor.id
             request.session['vendor_name'] = vendor.company_name
-            return JsonResponse({'success': True, 'vendor_name': vendor.company_name})
+            create_notification(
+                'vendor_registered',
+                f'卖家激活成功: {user.name}',
+                f'{user.name} ({user.email}) 已完成 100 FCFA 的卖家激活支付并成功开通卖家身份。',
+                icon='fas fa-store',
+                color='#10b981',
+                link='/manager/admin/vendors/',
+                related_id=vendor.id,
+            )
+            return JsonResponse({'success': True, 'vendor_name': vendor.company_name, 'message': '支付成功，卖家身份已激活。'})
 
         if action == 'choose_type':
             if not vendor:
                 return JsonResponse({'success': False, 'message': 'Veuillez activer votre espace vendeur d’abord.'}, status=400)
+            paid_activation = models.SellerActivationPayment.objects.filter(user=user, status='paid').exists()
+            if not paid_activation:
+                return JsonResponse({'success': False, 'message': '请先完成 100 FCFA 卖家激活支付。'}, status=400)
             item_type = request.POST.get('item_type', '').strip()
             target_map = {
                 'product': '/marketplace/vendor/products/add/',
@@ -6610,7 +6772,8 @@ def publish_entry(request):
                 return JsonResponse({'success': False, 'message': 'Type de publication invalide.'}, status=400)
             return JsonResponse({'success': True, 'redirect_url': target})
 
-    if vendor and vendor.is_active:
+    seller_paid = models.SellerActivationPayment.objects.filter(user=user, status='paid').exists()
+    if vendor and vendor.is_active and seller_paid:
         request.session['vendor_id'] = vendor.id
         request.session['vendor_name'] = vendor.company_name
         return render(request, 'public/publish_entry.html', {
@@ -6618,13 +6781,18 @@ def publish_entry(request):
             'already_vendor': True,
             'vendor': vendor,
             'direct_type_choice': True,
+            'seller_activation_paid': True,
+            'pending_activation_payment': pending_payment,
         })
 
     context = {
         'site_user': user,
-        'already_vendor': bool(vendor and vendor.is_active),
+        'already_vendor': bool(vendor and vendor.is_active and seller_paid),
         'vendor': vendor,
         'direct_type_choice': False,
+        'seller_activation_paid': seller_paid,
+        'pending_activation_payment': pending_payment,
+        'seller_activation_fee': Decimal('100.00'),
     }
     return render(request, 'public/publish_entry.html', context)
 
@@ -6792,8 +6960,9 @@ def admin_escrow_transactions(request):
         admin_force_release_escrow,
         admin_cancel_escrow,
         admin_wallet_adjust,
+        REFUND_HOLD_DAYS,
     )
-    from manager.commission import COMMISSION_RATES, COMMISSION_LABELS
+    from manager.commission import commission_rates_for_display
 
     if request.method == 'POST':
         action = request.POST.get('action')
@@ -6872,10 +7041,7 @@ def admin_escrow_transactions(request):
         'status_choices': models.PlatformEscrowTransaction.STATUS_CHOICES,
         'item_type_choices': models.PlatformEscrowTransaction.ITEM_TYPE_CHOICES,
         'vendors': models.Vendor.objects.filter(is_active=True).order_by('company_name')[:200],
-        'commission_rates': [
-            {'type': k, 'label': COMMISSION_LABELS[k], 'rate': COMMISSION_RATES[k]}
-            for k in ('product', 'book', 'course', 'supermarket')
-        ],
+        'commission_rates': commission_rates_for_display(),
         'stats': stats,
         'stats_by_status': [
             {
@@ -6887,7 +7053,7 @@ def admin_escrow_transactions(request):
             for code, label in models.PlatformEscrowTransaction.STATUS_CHOICES
         ],
         'wallet_totals': wallet_totals,
-        'refund_hold_days': 14,
+        'refund_hold_days': REFUND_HOLD_DAYS,
     }
     return render(request, 'admin/escrow_transactions.html', context)
 
@@ -6914,6 +7080,12 @@ def public_vendor_shop(request, vendor_id):
     total_items = vendor_books.count() + total_products + total_courses + total_supermarket
 
     tab = request.GET.get('tab', 'all')
+    if vendor.can_receive_certification() and not vendor.is_certified:
+        vendor.is_certified = True
+        if not vendor.certified_at:
+            vendor.certified_at = timezone.now()
+        vendor.save(update_fields=['is_certified', 'certified_at'])
+
     context = {
         'vendor': vendor,
         'vendor_books': vendor_books,
@@ -6928,6 +7100,8 @@ def public_vendor_shop(request, vendor_id):
         'total_courses': total_courses,
         'total_supermarket': total_supermarket,
         'total_items': total_items,
+        'certification_score': vendor.get_certification_score(),
+        'certification_state': vendor.get_certification_state(),
     }
     return render(request, 'public/vendor_shop.html', context)
 
@@ -7165,8 +7339,8 @@ def vendor_dashboard(request):
     combined_sales = total_sales + total_product_sales + total_course_enrollments + total_supermarket_sales_count
 
     price_samples = []
-    for vb in vendor_books:
-        price_samples.append(float(vb.vendor_price))
+    for vb in vendor_books.select_related('book'):
+        price_samples.append(float(vb.book.price or 0))
     for p in vendor_products:
         price_samples.append(float(p.price))
     for c in vendor_courses:
@@ -7344,7 +7518,7 @@ def vendor_dashboard(request):
     hub_mkt_ids = _vendor_marketplace_order_ids_hub(vendor)
     hub_mkt_order_count = MarketplaceOrder.objects.filter(id__in=hub_mkt_ids).count() if hub_mkt_ids else 0
 
-    from manager.commission import COMMISSION_RATES, COMMISSION_LABELS
+    from manager.commission import commission_rates_for_display
     escrow_qs = models.PlatformEscrowTransaction.objects.filter(vendor=vendor)
     escrow_stats = {
         'held': escrow_qs.filter(status='held').aggregate(s=Sum('vendor_payout_amount'))['s'] or Decimal('0'),
@@ -7353,10 +7527,8 @@ def vendor_dashboard(request):
     }
     vendor_wallet = models.VendorWallet.objects.filter(vendor=vendor).first()
     recent_escrow = list(escrow_qs.order_by('-held_at')[:8])
-    commission_rates = [
-        {'type': key, 'label': COMMISSION_LABELS[key], 'rate': COMMISSION_RATES[key]}
-        for key in ('product', 'book', 'course', 'supermarket')
-    ]
+    commission_rates = commission_rates_for_display()
+    from manager.escrow_service import REFUND_HOLD_DAYS
 
     total_supermarket_stock = vendor_supermarket.aggregate(s=Sum('stock'))['s'] or 0
 
@@ -7409,6 +7581,7 @@ def vendor_dashboard(request):
         'vendor_wallet': vendor_wallet,
         'recent_escrow': recent_escrow,
         'commission_rates': commission_rates,
+        'refund_hold_days': REFUND_HOLD_DAYS,
     }
     context.update(_vendor_marketplace_insights_dict(vendor))
     return render(request, 'public/vendor_dashboard.html', context)
@@ -7592,9 +7765,8 @@ def _vendor_book_order_ids(vendor):
 
 
 def _vendor_book_order_can_update_fulfillment(order):
-    if order.status in ('cancelled', 'refunded'):
-        return False
-    return order.payment_status == 'completed'
+    """Vendors may update status/payment unless the order is closed."""
+    return order.status not in ('cancelled', 'refunded')
 
 
 VENDOR_BOOK_ORDER_ALLOWED_STATUSES = frozenset({'confirmed', 'processing', 'shipped', 'delivered'})
@@ -7654,7 +7826,7 @@ def vendor_book_orders(request):
         'total_orders': total_orders,
         'pending_pay': pending_pay,
         'paid_completed': paid_completed,
-        'fulfillment_statuses': [(k, v) for k, v in models.ORDER_STATUS_CHOICES if k in VENDOR_BOOK_ORDER_ALLOWED_STATUSES],
+        'fulfillment_statuses': [(k, v) for k, v in models.ORDER_STATUS_CHOICES if k not in ('cancelled', 'refunded')],
     }
     return render(request, 'public/vendor_book_orders.html', context)
 
@@ -7689,7 +7861,7 @@ def vendor_book_order_detail(request, order_id):
         'order_items': order_items,
         'vendor_lines_total': vendor_lines_total,
         'can_update_fulfillment': _vendor_book_order_can_update_fulfillment(order),
-        'fulfillment_statuses': [(k, v) for k, v in models.ORDER_STATUS_CHOICES if k in VENDOR_BOOK_ORDER_ALLOWED_STATUSES],
+        'fulfillment_statuses': [(k, v) for k, v in models.ORDER_STATUS_CHOICES if k not in ('cancelled', 'refunded')],
         'status_choices': models.ORDER_STATUS_CHOICES,
         'payment_status_choices': models.PAYMENT_STATUS_CHOICES,
         'can_edit_customer': _vendor_book_order_customer_editable(order),
@@ -7716,7 +7888,7 @@ def vendor_book_order_update_status(request):
         return JsonResponse({'success': False, 'message': '无权操作此订单'})
 
     if not _vendor_book_order_can_update_fulfillment(order):
-        return JsonResponse({'success': False, 'message': '订单尚未支付完成或已关闭，无法更新履约状态'})
+        return JsonResponse({'success': False, 'message': '订单已关闭，无法更新状态'})
 
     old = order.status
     order.status = new_status
@@ -7913,7 +8085,12 @@ def vendor_book_order_update_customer(request):
 @require_POST
 def vendor_hub_order_update(request):
     """Update order status and/or payment status from vendor order hub (owned orders only)."""
+    admin_access = request.session.get('name')
     vendor = _get_vendor(request)
+    if admin_access and not vendor:
+        vid = request.POST.get('vendor_id') or request.GET.get('vendor_id')
+        if vid:
+            vendor = models.Vendor.objects.filter(id=vid, is_active=True).first()
     if not vendor:
         return JsonResponse({'success': False, 'message': str(_('请以卖家身份登录'))}, status=403)
 
@@ -7991,807 +8168,6 @@ def vendor_hub_order_update(request):
     return JsonResponse({'success': False, 'message': str(_('参数无效'))}, status=400)
 
 
-# ==========================================
-# AI Chatbot System
-# ==========================================
-
-
-# Cache for platform context (avoids rebuilding on every message)
-_platform_context_cache = {'text': None, 'stats': None, 'ts': 0}
-_CONTEXT_CACHE_TTL = 60  # seconds
-
-
-def _build_platform_context():
-    """Build a detailed system prompt with real-time platform data. Cached for 60s."""
-    import time
-    now = time.time()
-    if _platform_context_cache['text'] and (now - _platform_context_cache['ts']) < _CONTEXT_CACHE_TTL:
-        return _platform_context_cache['text'], _platform_context_cache['stats']
-
-    from django.db.models import Avg, Sum, Count, Q
-
-    # --- Books ---
-    books = models.Book.objects.select_related('publisher').prefetch_related('author_set').all()
-    total_books = books.count()
-    book_lines = []
-    for b in books[:80]:  # cap for token budget
-        authors = ', '.join(a.name for a in b.author_set.all()[:3])
-        pub = b.publisher.publisher_name if b.publisher else '—'
-        desc = b.get_short_description(60) if hasattr(b, 'get_short_description') else ''
-        book_lines.append(
-            f"  • 《{b.name}》| 价格: ¥{b.price} | 库存: {b.inventory} | "
-            f"销量: {b.sale_num} | 作者: {authors or '—'} | 出版社: {pub}"
-            + (f" | 简介: {desc}" if desc and desc != '暂无描述' else '')
-        )
-    book_section = '\n'.join(book_lines) if book_lines else '  （暂无图书数据）'
-
-    # --- Authors ---
-    authors_qs = models.Author.objects.prefetch_related('book').all()
-    total_authors = authors_qs.count()
-    author_lines = []
-    for a in authors_qs[:40]:
-        book_count = a.book.count()
-        book_titles = '、'.join(b.name for b in a.book.all()[:3])
-        author_lines.append(f"  • {a.name} | 作品({book_count}): {book_titles or '—'}")
-    author_section = '\n'.join(author_lines) if author_lines else '  （暂无作者数据）'
-
-    # --- Publishers ---
-    publishers = models.Publisher.objects.annotate(book_count=Count('book')).all()
-    total_publishers = publishers.count()
-    pub_lines = []
-    for p in publishers[:30]:
-        pub_lines.append(f"  • {p.publisher_name} | 地址: {p.publisher_address} | 图书数: {p.book_count}")
-    pub_section = '\n'.join(pub_lines) if pub_lines else '  （暂无出版社数据）'
-
-    # --- Stats ---
-    stats = books.aggregate(
-        avg_price=Avg('price'),
-        total_sales=Sum('sale_num'),
-        total_inventory=Sum('inventory'),
-    )
-    avg_price = round(stats['avg_price'] or 0, 2)
-    total_sales = stats['total_sales'] or 0
-    total_inventory = stats['total_inventory'] or 0
-
-    # --- Book Orders ---
-    order_count = 0
-    recent_order_info = ''
-    try:
-        order_qs = models.Order.objects.all()
-        order_count = order_qs.count()
-        recent_orders = order_qs.order_by('-created_at')[:5]
-        order_lines = []
-        for o in recent_orders:
-            order_lines.append(f"  • 订单 {o.order_number} | ¥{o.total_amount} | 状态: {o.get_status_display()}")
-        recent_order_info = '\n'.join(order_lines) if order_lines else '  （暂无订单）'
-    except Exception:
-        recent_order_info = '  （订单模块未启用）'
-
-    # --- Bestsellers ---
-    bestsellers = books.order_by('-sale_num')[:5]
-    best_lines = []
-    for i, b in enumerate(bestsellers, 1):
-        best_lines.append(f"  {i}. 《{b.name}》— 销量 {b.sale_num}")
-    bestseller_section = '\n'.join(best_lines) if best_lines else '  （暂无销量数据）'
-
-    # --- Marketplace Data ---
-    mkt_product_section = '  （市场模块未启用）'
-    mkt_course_section = '  （课程模块未启用）'
-    mkt_supermarket_section = '  （超市模块未启用）'
-    mkt_order_section = '  （市场订单模块未启用）'
-    total_products = 0
-    total_courses = 0
-    total_supermarket = 0
-    mkt_order_count = 0
-
-    try:
-        from marketplace.models import Product, Course, SupermarketItem, MarketplaceOrder
-
-        # Products
-        products = Product.objects.filter(is_active=True)
-        total_products = products.count()
-        prod_lines = []
-        for p in products[:30]:
-            prod_lines.append(
-                f"  • {p.name} | 价格: ¥{p.price} | 库存: {p.stock} | "
-                f"品牌: {p.brand or '—'} | 销量: {p.sales_count}"
-            )
-        mkt_product_section = '\n'.join(prod_lines) if prod_lines else '  （暂无商品）'
-
-        # Courses
-        courses = Course.objects.filter(is_active=True)
-        total_courses = courses.count()
-        course_lines = []
-        for c in courses[:20]:
-            course_lines.append(
-                f"  • {c.title} | 价格: ¥{c.price} | 讲师: {c.instructor} | "
-                f"时长: {c.duration_hours}h | 级别: {c.get_level_display()} | 注册: {c.enrollment_count}"
-            )
-        mkt_course_section = '\n'.join(course_lines) if course_lines else '  （暂无课程）'
-
-        # Supermarket
-        supermarket = SupermarketItem.objects.filter(is_active=True)
-        total_supermarket = supermarket.count()
-        sm_lines = []
-        for s in supermarket[:30]:
-            sm_lines.append(
-                f"  • {s.name} | 价格: ¥{s.price} | 库存: {s.stock} | "
-                f"品牌: {s.brand or '—'} | 产地: {s.origin or '—'}"
-            )
-        mkt_supermarket_section = '\n'.join(sm_lines) if sm_lines else '  （暂无超市商品）'
-
-        # Marketplace Orders
-        mkt_orders = MarketplaceOrder.objects.all()
-        mkt_order_count = mkt_orders.count()
-        recent_mkt = mkt_orders.order_by('-created_at')[:5]
-        mkt_order_lines = []
-        for o in recent_mkt:
-            mkt_order_lines.append(
-                f"  • 订单 {o.order_number} | ¥{o.total_amount} | 状态: {o.get_status_display()} | 支付: {o.get_payment_status_display()}"
-            )
-        mkt_order_section = '\n'.join(mkt_order_lines) if mkt_order_lines else '  （暂无市场订单）'
-
-    except Exception:
-        pass  # Marketplace not available
-
-    context_text = f"""===== 综合平台实时数据 =====
-（以下数据来自数据库，实时更新）
-
-【平台概况】
-  图书数: {total_books} | 作者数: {total_authors} | 出版社数: {total_publishers}
-  市场商品: {total_products} | 在线课程: {total_courses} | 超市商品: {total_supermarket}
-  图书均价: ¥{avg_price} | 图书总销量: {total_sales} | 图书库存: {total_inventory}
-  图书订单数: {order_count} | 市场订单数: {mkt_order_count}
-
-【图书热销排行 TOP 5】
-{bestseller_section}
-
-【图书目录】
-{book_section}
-
-【作者列表】
-{author_section}
-
-【出版社列表】
-{pub_section}
-
-【市场商品】
-{mkt_product_section}
-
-【在线课程】
-{mkt_course_section}
-
-【超市商品】
-{mkt_supermarket_section}
-
-【最近图书订单】
-{recent_order_info}
-
-【最近市场订单】
-{mkt_order_section}
-
-【平台功能说明】
-  • 图书商店：浏览、搜索、购买电子书，付款后可直接下载
-  • 综合市场：包含商品、在线课程、生鲜超市三大板块
-  • 统一购物车：图书和市场商品共享同一购物车和结算流程
-  • 订单跟踪：支持通过订单号或邮箱查询订单状态（图书和市场订单均可）
-  • 支付方式：微信支付、支付宝、PayPal、信用卡、MTN Money、Orange Money、Airtel Money、银行转账
-  • AI智能助手：本聊天机器人，可回答平台相关问题
-  • 多语言：支持中文、英文、法文三种语言
-  • 收藏夹/心愿单：用户可收藏喜欢的图书
-  • 博客系统：平台资讯和文章
-  • 联系我们：可通过网站表单、邮件、微信、WhatsApp联系
-  • 导航结构：首页、图书（下拉菜单含图书目录/作者/出版社）、市场、跟踪订单、博客、更多（下拉菜单含关于我们/服务/联系我们）
-===== 数据结束 ====="""
-    stats = {
-        'total_books': total_books,
-        'total_authors': total_authors,
-        'total_publishers': total_publishers,
-        'total_sales': total_sales,
-        'avg_price': avg_price,
-        'order_count': order_count,
-        'total_products': total_products,
-        'total_courses': total_courses,
-        'total_supermarket': total_supermarket,
-        'mkt_order_count': mkt_order_count,
-    }
-    # Update cache
-    import time
-    _platform_context_cache['text'] = context_text
-    _platform_context_cache['stats'] = stats
-    _platform_context_cache['ts'] = time.time()
-    return context_text, stats
-
-def _get_or_create_chat_session(request):
-    """Get or create a ChatSession for this browser session."""
-    config = models.ChatbotConfig.objects.filter(is_active=True).first()
-    session_key = request.session.session_key
-    if not session_key:
-        request.session.create()
-        session_key = request.session.session_key
-
-    session, created = models.ChatSession.objects.get_or_create(
-        session_key=session_key,
-        defaults={'config': config},
-    )
-    # Link to user if logged in
-    user_id = request.session.get('user_id')
-    if user_id and not session.user_id:
-        try:
-            session.user = models.SiteUser.objects.get(id=user_id)
-            session.save(update_fields=['user'])
-        except models.SiteUser.DoesNotExist:
-            pass
-    return session
-
-
-def _call_ai_api(config, messages_history):
-    """
-    Call the configured AI provider API.
-    Returns (reply_text, tokens_used, error_message)
-    """
-    import urllib.request
-    import urllib.error
-    import ssl
-
-    if not config or not config.api_key:
-        return None, 0, '未配置 API Key，请在管理后台设置'
-
-    provider = config.provider
-    api_key = config.api_key
-    model = config.get_default_model()
-    max_tokens = config.max_tokens
-    temperature = config.temperature
-
-    # Build message list including system prompt + platform context
-    platform_ctx, _ = _build_platform_context()
-    base_prompt = config.system_prompt or (
-        '你是一个友好、专业的综合平台智能助手。我们的平台集合了图书商店（电子书购买和下载）、'
-        '综合市场（商品、在线视频课程、生鲜超市）、博客系统于一体。你帮助用户了解图书、课程、'
-        '商品信息，回答关于购物、支付、订单跟踪等问题。用户可以通过订单号或邮箱查询图书和市场的订单。'
-        '支付方式包含微信支付、支付宝、PayPal、信用卡、MTN/Orange/Airtel Money、银行转账等。'
-        '请用简洁、友好的语言回答。如果用户的问题与平台数据有关，请基于下方提供的实时数据来回答。'
-    )
-    # Auto language detection instruction
-    lang_instruction = (
-        '\n\nIMPORTANT LANGUAGE RULE: You MUST detect the language of the user\'s message and '
-        'reply in the SAME language. If the user writes in English, reply in English. '
-        'If the user writes in French, reply in French. If the user writes in Chinese, reply in Chinese. '
-        'If the user writes in any other language, reply in that language. '
-        'Always match the user\'s language automatically.'
-    )
-    full_system_prompt = f"{base_prompt}{lang_instruction}\n\n{platform_ctx}"
-
-    msgs = [{'role': 'system', 'content': full_system_prompt}]
-    msgs.extend(messages_history)
-
-    # --- OpenAI-compatible providers (OpenAI, DeepSeek, Qwen, OpenRouter, Custom) ---
-    if provider in ('openai', 'deepseek', 'qwen', 'openrouter', 'custom'):
-        if provider == 'openai':
-            endpoint = config.api_endpoint or 'https://api.openai.com/v1/chat/completions'
-        elif provider == 'deepseek':
-            endpoint = config.api_endpoint or 'https://api.deepseek.com/chat/completions'
-        elif provider == 'qwen':
-            endpoint = config.api_endpoint or 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions'
-        elif provider == 'openrouter':
-            endpoint = config.api_endpoint or 'https://openrouter.ai/api/v1/chat/completions'
-        else:
-            endpoint = config.api_endpoint
-            if not endpoint:
-                return None, 0, '自定义 API 需要填写 API 地址'
-
-        payload = {
-            'model': model,
-            'messages': msgs,
-            'max_tokens': max_tokens,
-            'temperature': temperature,
-            'stream': False,
-        }
-        headers = {
-            'Content-Type': 'application/json',
-            'Authorization': f'Bearer {api_key}',
-        }
-        if provider == 'openrouter':
-            headers['HTTP-Referer'] = 'http://localhost:8000'
-            headers['X-Title'] = 'DUNO 360'
-        try:
-            ctx = ssl.create_default_context()
-            data = json.dumps(payload).encode('utf-8')
-            req = urllib.request.Request(endpoint, data=data, headers=headers, method='POST')
-            with urllib.request.urlopen(req, timeout=30, context=ctx) as resp:
-                result = json.loads(resp.read().decode('utf-8'))
-            text = result['choices'][0]['message']['content']
-            tokens = result.get('usage', {}).get('total_tokens', 0)
-            return text, tokens, None
-        except urllib.error.HTTPError as e:
-            body = e.read().decode('utf-8', errors='replace')
-            return None, 0, f'API 错误 {e.code}: {body[:200]}'
-        except Exception as e:
-            return None, 0, f'请求失败: {str(e)[:200]}'
-
-    # --- Anthropic Claude ---
-    elif provider == 'anthropic':
-        endpoint = config.api_endpoint or 'https://api.anthropic.com/v1/messages'
-        # Anthropic uses system as separate field
-        system_content = full_system_prompt
-        user_msgs = [m for m in messages_history]  # without system
-        payload = {
-            'model': model,
-            'max_tokens': max_tokens,
-            'system': system_content,
-            'messages': user_msgs,
-        }
-        headers = {
-            'Content-Type': 'application/json',
-            'x-api-key': api_key,
-            'anthropic-version': '2023-06-01',
-        }
-        try:
-            ctx = ssl.create_default_context()
-            data = json.dumps(payload).encode('utf-8')
-            req = urllib.request.Request(endpoint, data=data, headers=headers, method='POST')
-            with urllib.request.urlopen(req, timeout=30, context=ctx) as resp:
-                result = json.loads(resp.read().decode('utf-8'))
-            text = result['content'][0]['text']
-            tokens = result.get('usage', {}).get('input_tokens', 0) + result.get('usage', {}).get('output_tokens', 0)
-            return text, tokens, None
-        except urllib.error.HTTPError as e:
-            body = e.read().decode('utf-8', errors='replace')
-            return None, 0, f'API 错误 {e.code}: {body[:200]}'
-        except Exception as e:
-            return None, 0, f'请求失败: {str(e)[:200]}'
-
-    # --- Google Gemini ---
-    elif provider == 'google':
-        endpoint = config.api_endpoint or f'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent'
-        # Convert messages to Gemini format
-        gemini_msgs = []
-        for m in messages_history:
-            role = 'user' if m['role'] == 'user' else 'model'
-            gemini_msgs.append({'role': role, 'parts': [{'text': m['content']}]})
-        payload = {
-            'contents': gemini_msgs,
-            'generationConfig': {
-                'maxOutputTokens': max_tokens,
-                'temperature': temperature,
-            },
-            'systemInstruction': {'parts': [{'text': full_system_prompt}]},
-        }
-        url = f'{endpoint}?key={api_key}'
-        headers = {'Content-Type': 'application/json'}
-        try:
-            ctx = ssl.create_default_context()
-            data = json.dumps(payload).encode('utf-8')
-            req = urllib.request.Request(url, data=data, headers=headers, method='POST')
-            with urllib.request.urlopen(req, timeout=30, context=ctx) as resp:
-                result = json.loads(resp.read().decode('utf-8'))
-            text = result['candidates'][0]['content']['parts'][0]['text']
-            tokens = result.get('usageMetadata', {}).get('totalTokenCount', 0)
-            return text, tokens, None
-        except urllib.error.HTTPError as e:
-            body = e.read().decode('utf-8', errors='replace')
-            return None, 0, f'API 错误 {e.code}: {body[:200]}'
-        except Exception as e:
-            return None, 0, f'请求失败: {str(e)[:200]}'
-
-    return None, 0, f'不支持的 AI 提供商: {provider}'
-
-
-def chatbot_send(request):
-    """Handle user message, call AI, return response."""
-    if request.method != 'POST':
-        return JsonResponse({'success': False, 'message': '仅支持 POST'})
-
-    user_message = request.POST.get('message', '').strip()
-    if not user_message:
-        return JsonResponse({'success': False, 'message': '请输入消息'})
-    if len(user_message) > 2000:
-        return JsonResponse({'success': False, 'message': '消息太长（最多2000字符）'})
-
-    config = models.ChatbotConfig.objects.filter(is_active=True).first()
-    if not config:
-        return JsonResponse({'success': False, 'message': '聊天机器人暂未配置'})
-
-    session = _get_or_create_chat_session(request)
-
-    # Check rate limit
-    if session.message_count >= config.max_messages_per_session:
-        return JsonResponse({'success': False, 'message': '本次会话消息已达上限，请刷新页面开始新会话'})
-
-    # Save user message
-    models.ChatMessage.objects.create(session=session, role='user', content=user_message)
-
-    # Build history (last 10 turns = 20 messages)
-    recent_msgs = list(models.ChatMessage.objects.filter(
-        session=session, role__in=['user', 'assistant']
-    ).order_by('-created_at')[:20])
-    recent_msgs.reverse()
-    history = [{'role': m.role, 'content': m.content} for m in recent_msgs]
-
-    # Call AI
-    reply, tokens_used, error = _call_ai_api(config, history)
-
-    if error:
-        return JsonResponse({'success': False, 'message': error})
-
-    # Save assistant response
-    models.ChatMessage.objects.create(session=session, role='assistant', content=reply, tokens_used=tokens_used)
-    session.message_count += 2
-    session.save(update_fields=['message_count', 'last_active'])
-
-    return JsonResponse({
-        'success': True,
-        'reply': reply,
-        'message_count': session.message_count,
-    })
-
-
-def chatbot_send_stream(request):
-    """Stream AI response via Server-Sent Events for lower perceived latency."""
-    from django.http import StreamingHttpResponse
-    import urllib.request
-    import urllib.error
-    import ssl
-
-    if request.method != 'POST':
-        return JsonResponse({'success': False, 'message': 'POST only'})
-
-    user_message = request.POST.get('message', '').strip()
-    if not user_message:
-        return JsonResponse({'success': False, 'message': 'Empty message'})
-    if len(user_message) > 2000:
-        return JsonResponse({'success': False, 'message': 'Message too long'})
-
-    config = models.ChatbotConfig.objects.filter(is_active=True).first()
-    if not config:
-        return JsonResponse({'success': False, 'message': 'Chatbot not configured'})
-
-    session = _get_or_create_chat_session(request)
-    if session.message_count >= config.max_messages_per_session:
-        return JsonResponse({'success': False, 'message': 'Session limit reached'})
-
-    # Save user message
-    models.ChatMessage.objects.create(session=session, role='user', content=user_message)
-
-    # Build history
-    recent_msgs = list(models.ChatMessage.objects.filter(
-        session=session, role__in=['user', 'assistant']
-    ).order_by('-created_at')[:20])
-    recent_msgs.reverse()
-    history = [{'role': m.role, 'content': m.content} for m in recent_msgs]
-
-    # Build system prompt
-    platform_ctx, _ = _build_platform_context()
-    base_prompt = config.system_prompt or (
-        '你是一个友好、专业的综合平台智能助手。我们的平台集合了图书商店（电子书购买和下载）、'
-        '综合市场（商品、在线视频课程、生鲜超市）、博客系统于一体。你帮助用户了解图书、课程、'
-        '商品信息，回答关于购物、支付、订单跟踪等问题。用户可以通过订单号或邮箱查询图书和市场的订单。'
-        '支付方式包含微信支付、支付宝、PayPal、信用卡、MTN/Orange/Airtel Money、银行转账等。'
-        '请用简洁、友好的语言回答。如果用户的问题与平台数据有关，请基于下方提供的实时数据来回答。'
-    )
-    lang_instruction = (
-        '\n\nIMPORTANT LANGUAGE RULE: You MUST detect the language of the user\'s message and '
-        'reply in the SAME language. If the user writes in English, reply in English. '
-        'If the user writes in French, reply in French. If the user writes in Chinese, reply in Chinese. '
-        'If the user writes in any other language, reply in that language. '
-        'Always match the user\'s language automatically.'
-    )
-    full_system_prompt = f"{base_prompt}{lang_instruction}\n\n{platform_ctx}"
-
-    provider = config.provider
-    api_key = config.api_key
-    model = config.get_default_model()
-
-    # Only OpenAI-compatible providers support streaming
-    if provider not in ('openai', 'deepseek', 'qwen', 'openrouter', 'custom'):
-        # Fallback to non-streaming
-        reply, tokens_used, error = _call_ai_api(config, history)
-        if error:
-            return JsonResponse({'success': False, 'message': error})
-        models.ChatMessage.objects.create(session=session, role='assistant', content=reply, tokens_used=tokens_used)
-        session.message_count += 2
-        session.save(update_fields=['message_count', 'last_active'])
-        return JsonResponse({'success': True, 'reply': reply, 'message_count': session.message_count})
-
-    # Streaming for OpenAI-compatible APIs
-    endpoints = {
-        'openai': 'https://api.openai.com/v1/chat/completions',
-        'deepseek': 'https://api.deepseek.com/chat/completions',
-        'qwen': 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
-        'openrouter': 'https://openrouter.ai/api/v1/chat/completions',
-    }
-    endpoint = config.api_endpoint or endpoints.get(provider, '')
-    if not endpoint:
-        return JsonResponse({'success': False, 'message': 'No API endpoint configured'})
-
-    msgs = [{'role': 'system', 'content': full_system_prompt}] + history
-    payload = {
-        'model': model,
-        'messages': msgs,
-        'max_tokens': config.max_tokens,
-        'temperature': config.temperature,
-        'stream': True,
-    }
-    headers = {
-        'Content-Type': 'application/json',
-        'Authorization': f'Bearer {api_key}',
-    }
-    if provider == 'openrouter':
-        headers['HTTP-Referer'] = 'http://localhost:8000'
-        headers['X-Title'] = 'DUNO 360'
-
-    _session_ref = session  # closure reference
-
-    def event_stream():
-        full_reply = []
-        try:
-            ctx = ssl.create_default_context()
-            data = json.dumps(payload).encode('utf-8')
-            req = urllib.request.Request(endpoint, data=data, headers=headers, method='POST')
-            resp = urllib.request.urlopen(req, timeout=60, context=ctx)
-
-            # Read in larger chunks for efficiency, split on newlines
-            leftover = b''
-            while True:
-                chunk = resp.read(4096)
-                if not chunk:
-                    break
-                chunk = leftover + chunk
-                parts = chunk.split(b'\n')
-                leftover = parts.pop()  # may be incomplete line
-                for raw_line in parts:
-                    line = raw_line.decode('utf-8', errors='replace').strip()
-                    if not line or not line.startswith('data: '):
-                        continue
-                    data_str = line[6:]
-                    if data_str == '[DONE]':
-                        leftover = b''
-                        break
-                    try:
-                        obj = json.loads(data_str)
-                        delta = obj.get('choices', [{}])[0].get('delta', {})
-                        token = delta.get('content', '')
-                        if token:
-                            full_reply.append(token)
-                            yield f"data: {json.dumps({'token': token})}\n\n"
-                    except (json.JSONDecodeError, IndexError, KeyError):
-                        continue
-            resp.close()
-        except Exception as e:
-            yield f"data: {json.dumps({'error': str(e)[:200]})}\n\n"
-
-        # Save complete reply
-        complete_text = ''.join(full_reply)
-        if complete_text:
-            models.ChatMessage.objects.create(
-                session=_session_ref, role='assistant',
-                content=complete_text, tokens_used=0
-            )
-            _session_ref.message_count += 2
-            _session_ref.save(update_fields=['message_count', 'last_active'])
-        yield f"data: {json.dumps({'done': True})}\n\n"
-
-    response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
-    response['Cache-Control'] = 'no-cache'
-    response['X-Accel-Buffering'] = 'no'
-    return response
-
-
-def chatbot_config_api(request):
-    """Return public chatbot config (non-sensitive)."""
-    config = models.ChatbotConfig.objects.filter(is_active=True).first()
-    if not config:
-        return JsonResponse({'active': False})
-    return JsonResponse({
-        'active': True,
-        'widget_title': config.widget_title,
-        'widget_subtitle': config.widget_subtitle,
-        'welcome_message': config.welcome_message,
-        'show_on_public': config.show_on_public,
-        'show_on_admin': config.show_on_admin,
-        'provider': config.get_provider_display(),
-        'model': config.get_default_model(),
-    })
-
-
-def chatbot_history(request):
-    """Return chat history for current session."""
-    session_key = request.session.session_key
-    if not session_key:
-        return JsonResponse({'messages': []})
-    try:
-        session = models.ChatSession.objects.get(session_key=session_key)
-        msgs = list(session.messages.filter(role__in=['user', 'assistant']).order_by('created_at')[:50].values(
-            'role', 'content', 'created_at'
-        ))
-        for m in msgs:
-            m['created_at'] = m['created_at'].strftime('%H:%M')
-        return JsonResponse({'messages': msgs})
-    except models.ChatSession.DoesNotExist:
-        return JsonResponse({'messages': []})
-
-
-# ==========================================
-# Admin Chatbot Management
-# ==========================================
-
-def admin_chatbot_config(request):
-    """Admin chatbot configuration page."""
-    if 'name' not in request.session:
-        return redirect('/manager/login/')
-
-    config = models.ChatbotConfig.objects.filter(is_active=True).first()
-    if not config:
-        config = models.ChatbotConfig.objects.create()
-
-    if request.method == 'POST':
-        action = request.POST.get('action', 'save')
-
-        if action == 'save':
-            config.name = request.POST.get('name', config.name)
-            config.provider = request.POST.get('provider', config.provider)
-            new_key = request.POST.get('api_key', '').strip()
-            if new_key and '*' not in new_key:
-                config.api_key = new_key
-            config.model_name = request.POST.get('model_name', '').strip()
-            config.api_endpoint = request.POST.get('api_endpoint', '').strip()
-            config.system_prompt = request.POST.get('system_prompt', '').strip()
-            config.widget_title = request.POST.get('widget_title', config.widget_title)
-            config.widget_subtitle = request.POST.get('widget_subtitle', config.widget_subtitle)
-            config.welcome_message = request.POST.get('welcome_message', config.welcome_message)
-            config.show_on_public = request.POST.get('show_on_public') == 'on'
-            config.show_on_admin = request.POST.get('show_on_admin') == 'on'
-            config.is_active = request.POST.get('is_active') == 'on'
-            try:
-                config.max_tokens = int(request.POST.get('max_tokens', config.max_tokens))
-                config.temperature = float(request.POST.get('temperature', config.temperature))
-                config.max_messages_per_session = int(request.POST.get('max_messages_per_session', config.max_messages_per_session))
-            except (ValueError, TypeError):
-                pass
-            config.save()
-            return JsonResponse({'success': True, 'message': '配置已保存'})
-
-        elif action == 'test':
-            test_msg = request.POST.get('test_message', '你好，请介绍一下自己。')
-            reply, tokens, error = _call_ai_api(config, [{'role': 'user', 'content': test_msg}])
-            if error:
-                return JsonResponse({'success': False, 'message': error})
-            return JsonResponse({'success': True, 'reply': reply, 'tokens': tokens})
-
-        elif action == 'get_context':
-            ctx_text, _ = _build_platform_context()
-            return JsonResponse({'success': True, 'context': ctx_text})
-
-        elif action == 'clear_sessions':
-            models.ChatSession.objects.all().delete()
-            return JsonResponse({'success': True, 'message': '已清除所有聊天会话'})
-
-    # Platform stats
-    _, platform_stats = _build_platform_context()
-    total_sessions = models.ChatSession.objects.count()
-    total_messages = models.ChatMessage.objects.count()
-    active_sessions = models.ChatSession.objects.filter(is_closed=False).count()
-    tokens_used = models.ChatMessage.objects.aggregate(t=Sum('tokens_used'))['t'] or 0
-    recent_sessions = models.ChatSession.objects.order_by('-last_active')[:20]
-
-    # Free API providers list
-    free_providers = [
-        {'name': 'OpenRouter', 'models': 'Llama 3.3, Nemotron, Qwen3, Mistral, Gemma…', 'note': '聚合网关，1 个 Key 访问 20+ 免费模型', 'url': 'https://openrouter.ai/keys'},
-        {'name': 'Google AI Studio', 'models': 'Gemini 2.0 Flash, Gemini 1.5 Pro', 'note': '免费额度丰富，1500 次/天', 'url': 'https://aistudio.google.com/apikey'},
-        {'name': 'Groq', 'models': 'Llama 3.3 70B, Mixtral, Gemma 2', 'note': '超快推理，免费每天 14400 请求', 'url': 'https://console.groq.com/keys'},
-        {'name': 'Together AI', 'models': 'Llama 3, Mixtral, CodeLlama', 'note': '注册送 $25 免费额度', 'url': 'https://api.together.xyz/settings/api-keys'},
-        {'name': 'DeepSeek', 'models': 'DeepSeek-V3, DeepSeek-R1', 'note': '价格极低，注册送 ¥10', 'url': 'https://platform.deepseek.com/api_keys'},
-        {'name': 'Alibaba Qwen', 'models': 'Qwen-Plus, Qwen-Turbo, Qwen-Max', 'note': '中文优化，阿里云免费额度', 'url': 'https://dashscope.console.aliyun.com/apiKey'},
-        {'name': 'Mistral AI', 'models': 'Mistral Small, Codestral', 'note': '欧洲 AI，免费试用', 'url': 'https://console.mistral.ai/api-keys/'},
-        {'name': 'GitHub Models', 'models': 'GPT-4o, Llama 3, Phi-4', 'note': 'GitHub 账号免费使用', 'url': 'https://github.com/marketplace/models'},
-    ]
-
-    # Free OpenRouter models
-    free_models_list = [
-        ('nvidia/nemotron-3-super-120b-a12b:free', 'NVIDIA Nemotron 3 Super 120B', '高质量通用模型，推荐'),
-        ('qwen/qwen3-next-80b-a3b-instruct:free', 'Qwen3 Next 80B', '中文优化，适合中文平台'),
-        ('mistralai/mistral-small-3.1-24b-instruct:free', 'Mistral Small 3.1 24B', '快速响应，欧洲 AI'),
-        ('qwen/qwen3-coder:free', 'Qwen3 Coder 480B', '编程与技术问答'),
-        ('nvidia/nemotron-3-nano-30b-a3b:free', 'NVIDIA Nemotron Nano 30B', '轻量快速'),
-        ('minimax/minimax-m2.5:free', 'MiniMax M2.5', '多语言支持'),
-        ('stepfun/step-3.5-flash:free', 'StepFun Step 3.5 Flash', '超快推理'),
-        ('openai/gpt-oss-120b:free', 'OpenAI GPT-OSS 120B', '开源 GPT 模型'),
-        ('google/gemma-3n-e4b-it:free', 'Google Gemma 3n 4B', '轻量 Google 模型'),
-    ]
-
-    context = {
-        'config': config,
-        'total_sessions': total_sessions,
-        'total_messages': total_messages,
-        'active_sessions': active_sessions,
-        'tokens_used': f'{tokens_used:,}',
-        'recent_sessions': recent_sessions,
-        'ai_providers': models.AI_PROVIDER_CHOICES,
-        'free_providers': free_providers,
-        'free_models_list': free_models_list,
-        'total_books': platform_stats['total_books'],
-        'total_authors': platform_stats['total_authors'],
-        'total_publishers': platform_stats['total_publishers'],
-        'total_products': platform_stats.get('total_products', 0),
-        'total_courses': platform_stats.get('total_courses', 0),
-        'total_supermarket': platform_stats.get('total_supermarket', 0),
-        'mkt_order_count': platform_stats.get('mkt_order_count', 0),
-        'name': request.session.get('name', ''),
-    }
-    return render(request, 'admin/chatbot_config.html', context)
-
-
-def chatbot_contact_send(request):
-    """User sends a customer service message from the chatbot widget"""
-    if request.method != 'POST':
-        return JsonResponse({'success': False, 'message': 'POST required'})
-
-    name = request.POST.get('name', '').strip() or '匿名用户'
-    email = request.POST.get('email', '').strip() or 'anonymous@chat.local'
-    message = request.POST.get('message', '').strip()
-
-    if not message:
-        return JsonResponse({'success': False, 'message': '消息内容不能为空'})
-
-    # Use session key to group messages from the same user
-    if not request.session.session_key:
-        request.session.create()
-    session_key = request.session.session_key
-
-    contact_msg = models.ContactMessage.objects.create(
-        name=name,
-        email=email,
-        subject='[客服聊天] ' + message[:50],
-        message=message,
-        session_key=session_key,
-    )
-
-    # Create admin notification for CS chat message
-    create_notification(
-        'cs_chat',
-        f'客服消息 - {name}',
-        f'{message[:80]}',
-        icon='fas fa-headset',
-        color='#667eea',
-        link=f'/manager/email/?folder=contact',
-        related_id=contact_msg.id,
-    )
-
-    return JsonResponse({'success': True, 'message': '消息已发送，客服将尽快回复您'})
-
-
-def chatbot_contact_replies(request):
-    """User polls for admin replies to their customer service messages"""
-    if not request.session.session_key:
-        return JsonResponse({'success': True, 'replies': []})
-
-    session_key = request.session.session_key
-    # Get messages from this session that have admin replies
-    replied_msgs = models.ContactMessage.objects.filter(
-        session_key=session_key,
-        replied=True,
-    ).exclude(admin_reply='').order_by('replied_at')
-
-    # Return only replies not yet seen (tracked via query param)
-    last_seen = request.GET.get('after', '')
-    if last_seen:
-        try:
-            from datetime import datetime
-            last_dt = datetime.fromisoformat(last_seen)
-            if timezone.is_naive(last_dt):
-                last_dt = timezone.make_aware(last_dt)
-            replied_msgs = replied_msgs.filter(replied_at__gt=last_dt)
-        except (ValueError, TypeError):
-            pass
-
-    replies = [{
-        'id': m.id,
-        'original_message': m.message[:100],
-        'reply': m.admin_reply,
-        'replied_at': m.replied_at.isoformat() if m.replied_at else '',
-    } for m in replied_msgs[:20]]
-
-    return JsonResponse({'success': True, 'replies': replies})
 
 
 def admin_contact_quick_reply(request):
@@ -8814,6 +8190,10 @@ def admin_contact_quick_reply(request):
     msg.save(update_fields=['admin_reply', 'replied', 'replied_at', 'is_read'])
 
     return JsonResponse({'success': True, 'message': '回复已发送'})
+
+
+def _vendor_book_error(field, message):
+    return {'success': False, 'message': message, 'field': field}
 
 
 def vendor_add_book(request):
@@ -8846,7 +8226,6 @@ def vendor_add_book(request):
 
         name = request.POST.get('name', '').strip()
         price = request.POST.get('price', '0')
-        vendor_price = request.POST.get('vendor_price', price)
         inventory = request.POST.get('inventory', '0')
         description = request.POST.get('description', '').strip()
         publisher_id = request.POST.get('publisher_id')
@@ -8855,7 +8234,17 @@ def vendor_add_book(request):
         download_link = request.POST.get('download_link', '').strip()
 
         if not name:
-            return JsonResponse({'success': False, 'message': '请填写图书名称'})
+            return JsonResponse(_vendor_book_error('name', 'Le titre du livre est obligatoire.'))
+        if len(name) < 3:
+            return JsonResponse(_vendor_book_error('name', 'Le titre du livre doit contenir au moins 3 caractères.'))
+        if not description:
+            return JsonResponse(_vendor_book_error('description', 'La description du livre est obligatoire.'))
+        if len(description) < 12:
+            return JsonResponse(_vendor_book_error('description', 'La description du livre doit contenir au moins 12 caractères.'))
+        if not publisher_id:
+            return JsonResponse(_vendor_book_error('publisher_id', 'La maison d’édition est obligatoire.'))
+        if not author_ids:
+            return JsonResponse(_vendor_book_error('author_ids', 'Veuillez sélectionner au moins un auteur.'))
 
         book = models.Book.objects.create(
             name=name,
@@ -8891,9 +8280,8 @@ def vendor_add_book(request):
         models.VendorBook.objects.create(
             vendor=vendor,
             book=book,
-            vendor_price=Decimal(vendor_price),
         )
-        return JsonResponse({'success': True, 'message': '图书已上架'})
+        return JsonResponse({'success': True, 'message': '图书已上架', 'redirect_url': reverse('manager:vendor_books')})
 
     publishers = models.Publisher.objects.all()
     authors = models.Author.objects.all()
@@ -8975,14 +8363,51 @@ def vendor_edit_book(request):
         book = vb.book
         name = request.POST.get('name', '').strip()
         price = request.POST.get('price', '0')
-        vendor_price = request.POST.get('vendor_price', price)
         inventory = request.POST.get('inventory', '0')
         description = request.POST.get('description', '').strip()
         publisher_id = request.POST.get('publisher_id')
         author_ids = request.POST.getlist('author_ids')
 
         if not name:
-            return JsonResponse({'success': False, 'message': '请填写图书名称'})
+            return JsonResponse({'success': False, 'message': '图书标题不能为空。', 'field': 'name'})
+        if len(name) < 3:
+            return JsonResponse({'success': False, 'message': '图书标题至少需要 3 个字符。', 'field': 'name'})
+        if not description:
+            return JsonResponse({'success': False, 'message': '图书描述不能为空。', 'field': 'description'})
+        if len(description) < 12:
+            return JsonResponse({'success': False, 'message': '图书描述至少需要 12 个字符。', 'field': 'description'})
+        if not publisher_id:
+            return JsonResponse({'success': False, 'message': '出版社不能为空。', 'field': 'publisher_id'})
+        if not author_ids:
+            return JsonResponse({'success': False, 'message': '请至少选择一位作者。', 'field': 'author_ids'})
+        try:
+            if Decimal(price) <= 0:
+                return JsonResponse({'success': False, 'message': '价格必须大于 0。', 'field': 'price'})
+        except Exception:
+            return JsonResponse({'success': False, 'message': '价格格式无效。', 'field': 'price'})
+        try:
+            if int(inventory) < 0:
+                return JsonResponse({'success': False, 'message': '库存不能小于 0。', 'field': 'inventory'})
+        except Exception:
+            return JsonResponse({'success': False, 'message': '库存格式无效。', 'field': 'inventory'})
+        try:
+            if Decimal(price) <= 0:
+                return JsonResponse({'success': False, 'message': '价格必须大于 0。', 'field': 'price'})
+        except Exception:
+            return JsonResponse({'success': False, 'message': '价格格式无效。', 'field': 'price'})
+        try:
+            if int(inventory) < 0:
+                return JsonResponse({'success': False, 'message': '库存不能小于 0。', 'field': 'inventory'})
+        except Exception:
+            return JsonResponse({'success': False, 'message': '库存格式无效。', 'field': 'inventory'})
+        if download_link:
+            from django.core.validators import URLValidator
+            from django.core.exceptions import ValidationError
+            validator = URLValidator()
+            try:
+                validator(download_link)
+            except ValidationError:
+                return JsonResponse({'success': False, 'message': '请输入有效的下载链接 URL。', 'field': 'download_link'})
 
         book.name = name
         book.price = Decimal(price)
@@ -9008,10 +8433,7 @@ def vendor_edit_book(request):
             for author in authors:
                 author.book.add(book)
 
-        vb.vendor_price = Decimal(vendor_price)
-        vb.save(update_fields=['vendor_price'])
-
-        return JsonResponse({'success': True, 'message': '图书信息已更新'})
+        return JsonResponse({'success': True, 'message': '图书信息已更新', 'redirect_url': reverse('manager:vendor_books')})
 
     return JsonResponse({'success': False})
 
@@ -9034,6 +8456,7 @@ def vendor_delete_book(request):
 
 
 # Admin vendor management
+@ensure_csrf_cookie
 def admin_vendor_list(request):
     """Admin view all vendors with marketplace metrics"""
     if "name" not in request.session:
@@ -9053,6 +8476,7 @@ def admin_vendor_list(request):
         product_count=Count('products', distinct=True),
         course_count=Count('courses', distinct=True),
         supermarket_count=Count('supermarket_items', distinct=True),
+        book_count=Count('vendorbook', distinct=True),
         mp_total_sales=Sum('products__sales_count'),
         mp_total_stock=Sum('products__stock'),
         mp_total_enrollments=Sum('courses__enrollment_count'),
@@ -9060,6 +8484,7 @@ def admin_vendor_list(request):
 
     # Global marketplace metrics
     all_vendors = models.Vendor.objects.all()
+    total_vendor_books = models.VendorBook.objects.filter(vendor__isnull=False).count()
     total_mp_products = Product.objects.filter(vendor__isnull=False).count()
     total_mp_courses = Course.objects.filter(vendor__isnull=False).count()
     total_mp_supermarket = SupermarketItem.objects.filter(vendor__isnull=False).count()
@@ -9095,6 +8520,7 @@ def admin_vendor_list(request):
             vendor_supermarket_list = SupermarketItem.objects.filter(vendor=viewed_vendor).select_related('category').order_by('-created_at')[:50]
 
     from manager.official_store import get_official_vendor
+    from manager.commission import commission_rates_for_display
     official_vendor = get_official_vendor(create=False)
 
     return render(request, 'admin/vendor_list.html', {
@@ -9105,6 +8531,7 @@ def admin_vendor_list(request):
         'status_filter': status_filter,
         'name': request.session.get('name', ''),
         'total_mp_products': total_mp_products,
+        'total_vendor_books': total_vendor_books,
         'total_mp_courses': total_mp_courses,
         'total_mp_supermarket': total_mp_supermarket,
         'total_mp_sales': total_mp_sales,
@@ -9117,6 +8544,7 @@ def admin_vendor_list(request):
         'vendor_courses_list': vendor_courses_list,
         'vendor_books_list': vendor_books_list,
         'vendor_supermarket_list': vendor_supermarket_list,
+        'commission_rates': commission_rates_for_display(),
     })
 
 
@@ -9129,39 +8557,74 @@ def admin_vendor_status(request):
         new_status = request.POST.get('status')
         if new_status in dict(models.VENDOR_STATUS_CHOICES):
             vendor.status = new_status
-            vendor.save(update_fields=['status'])
+            update_fields = ['status']
+            if new_status != 'approved' and vendor.is_certified:
+                vendor.is_certified = False
+                vendor.certified_at = None
+                update_fields.extend(['is_certified', 'certified_at'])
+            vendor.save(update_fields=update_fields)
             return JsonResponse({'success': True, 'message': f'状态已更新为 {vendor.get_status_display()}'})
     return JsonResponse({'success': False})
 
 
-def admin_delete_vendor_item(request):
-    """Admin delete a vendor's product, course, book, or supermarket item from the platform"""
+@require_POST
+def admin_vendor_certify(request):
+    """Grant or revoke certified seller badge (approved vendors only)."""
     if "name" not in request.session:
-        return JsonResponse({'success': False, 'message': '未授权'})
-    if request.method == 'POST':
-        item_type = request.POST.get('type')
-        item_id = request.POST.get('id')
-        if item_type == 'product':
-            item = get_object_or_404(Product, id=item_id)
-            name = item.name
-            item.delete()
-            return JsonResponse({'success': True, 'message': f'商品 "{name}" 已删除'})
-        elif item_type == 'course':
-            item = get_object_or_404(Course, id=item_id)
-            name = item.title
-            item.delete()
-            return JsonResponse({'success': True, 'message': f'课程 "{name}" 已删除'})
-        elif item_type == 'book':
-            item = get_object_or_404(models.VendorBook, id=item_id)
-            name = item.book.name
-            item.delete()
-            return JsonResponse({'success': True, 'message': f'图书 "{name}" 已从卖家下架'})
-        elif item_type == 'supermarket':
-            item = get_object_or_404(SupermarketItem, id=item_id)
-            name = item.name
-            item.delete()
-            return JsonResponse({'success': True, 'message': f'超市商品 "{name}" 已删除'})
-    return JsonResponse({'success': False, 'message': '无效请求'})
+        return JsonResponse({'success': False, 'message': '未授权'}, status=403)
+    vendor = get_object_or_404(models.Vendor, id=request.POST.get('id'))
+    if vendor.is_official:
+        return JsonResponse({'success': False, 'message': '官方直营店无需认证'})
+    want_certified = request.POST.get('certified', '1') == '1'
+    if want_certified:
+        if not vendor.can_receive_certification():
+            return JsonResponse({
+                'success': False,
+                'message': '仅已批准且启用的卖家可授予认证徽章',
+            })
+        vendor.is_certified = True
+        vendor.certified_at = timezone.now()
+        vendor.save(update_fields=['is_certified', 'certified_at'])
+        return JsonResponse({'success': True, 'message': f'已认证卖家「{vendor.company_name}」'})
+    vendor.is_certified = False
+    vendor.certified_at = None
+    vendor.save(update_fields=['is_certified', 'certified_at'])
+    return JsonResponse({'success': True, 'message': f'已取消「{vendor.company_name}」的认证'})
+
+
+@require_POST
+def admin_delete_vendor_item(request):
+    """Admin remove a vendor's non-compliant listing from the platform."""
+    if "name" not in request.session:
+        return JsonResponse({'success': False, 'message': '未授权'}, status=403)
+    item_type = request.POST.get('type')
+    item_id = request.POST.get('id')
+    try:
+        with transaction.atomic():
+            if item_type == 'product':
+                item = get_object_or_404(Product, id=item_id)
+                name = item.name
+                item.delete()
+                return JsonResponse({'success': True, 'message': f'商品 "{name}" 已删除'})
+            if item_type == 'course':
+                item = get_object_or_404(Course, id=item_id)
+                name = item.title
+                item.delete()
+                return JsonResponse({'success': True, 'message': f'课程 "{name}" 已删除'})
+            if item_type == 'book':
+                item = get_object_or_404(models.VendorBook, id=item_id)
+                name = item.book.name
+                item.delete()
+                return JsonResponse({'success': True, 'message': f'图书 "{name}" 已从卖家下架'})
+            if item_type == 'supermarket':
+                item = get_object_or_404(SupermarketItem, id=item_id)
+                name = item.name
+                item.delete()
+                return JsonResponse({'success': True, 'message': f'超市商品 "{name}" 已删除'})
+    except Exception as exc:
+        logger.exception('Admin failed to delete vendor item type=%s id=%s', item_type, item_id)
+        return JsonResponse({'success': False, 'message': f'删除失败：{exc}'}, status=400)
+    return JsonResponse({'success': False, 'message': '不支持的内容类型'}, status=400)
 
 
 # ==========================================
@@ -9436,6 +8899,9 @@ def vendor_payments_page(request):
         else:
             return redirect('/manager/vendor/dashboard/')
 
+    from manager.commission import commission_rates_for_display
+    from manager.escrow_service import REFUND_HOLD_DAYS
+
     status_filter = request.GET.get('status', '').strip()
     qs = models.PlatformEscrowTransaction.objects.filter(vendor=vendor).order_by('-held_at')
     if status_filter:
@@ -9463,7 +8929,8 @@ def vendor_payments_page(request):
         'escrow_stats': escrow_stats,
         'vendor_wallet': vendor_wallet,
         'wallet_txns': wallet_txns,
-        'refund_hold_days': 14,
+        'refund_hold_days': REFUND_HOLD_DAYS,
+        'commission_rates': commission_rates_for_display(),
     }
     return render(request, 'public/vendor_payments.html', context)
 
@@ -9804,6 +9271,8 @@ def admin_edit_vendor(request):
                 'description': vendor.description,
                 'status': vendor.status,
                 'is_active': vendor.is_active,
+                'is_certified': vendor.is_certified,
+                'is_official': vendor.is_official,
             }
         })
 
@@ -9821,6 +9290,12 @@ def admin_edit_vendor(request):
         is_active = request.POST.get('is_active')
         if is_active is not None:
             vendor.is_active = is_active == 'true'
+        if not vendor.is_official:
+            certified_raw = request.POST.get('is_certified')
+            if certified_raw is not None:
+                wants_certified = certified_raw in ('1', 'true', 'on', 'yes')
+                vendor.is_certified = wants_certified and vendor.status == 'approved'
+                vendor.certified_at = timezone.now() if vendor.is_certified else None
         if 'logo' in request.FILES:
             vendor.logo = request.FILES['logo']
         vendor.save()
@@ -9881,7 +9356,7 @@ def admin_add_vendor(request):
 
 def admin_delete_vendor(request):
     """Admin delete vendor"""
-    if "name" not in request.session:
+    if not request.session.get('is_admin') or 'name' not in request.session:
         return JsonResponse({'success': False, 'message': '未授权'})
     if request.method == 'POST':
         vid = request.POST.get('id')
@@ -9890,8 +9365,12 @@ def admin_delete_vendor(request):
             if vendor.is_official:
                 return JsonResponse({'success': False, 'message': '官方直营店无法删除'})
             name = vendor.company_name
+            detached_escrow_count = _detach_vendor_protected_relations(vendor)
             vendor.delete()
-            return JsonResponse({'success': True, 'message': f'卖家 {name} 已删除'})
+            message = f'卖家 {name} 及其店铺内容已删除'
+            if detached_escrow_count:
+                message += f'，{detached_escrow_count} 条历史托管记录已保留并解除关联'
+            return JsonResponse({'success': True, 'message': message})
         return JsonResponse({'success': False, 'message': '卖家不存在'})
     return JsonResponse({'success': False})
 

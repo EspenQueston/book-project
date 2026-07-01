@@ -1,9 +1,9 @@
-<!-- Comprehensive admin sidebar — include this in any admin page that lacks a sidebar -->
+﻿<!-- Comprehensive admin sidebar — include this in any admin page that lacks a sidebar -->
 <style>
     .admin-sidebar-wrap {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
         height: 100vh;
-        box-shadow: 4px 0 28px rgba(102, 126, 234, 0.28);
+        box-shadow: 4px 0 28px rgba(29, 78, 216, 0.28);
         position: fixed;
         width: 268px;
         z-index: 1050;
@@ -75,9 +75,9 @@
         height: 42px;
         border: 0;
         border-radius: 12px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
         color: #fff;
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
+        box-shadow: 0 6px 20px rgba(29, 78, 216, 0.35);
         font-size: 1rem;
         display: inline-flex;
         align-items: center;
@@ -87,11 +87,11 @@
     }
     .admin-sidebar-toggle:hover {
         transform: translateY(-1px);
-        box-shadow: 0 10px 28px rgba(102, 126, 234, 0.45);
+        box-shadow: 0 10px 28px rgba(29, 78, 216, 0.45);
         color: #fff;
     }
     body.admin-sidebar-collapsed .admin-sidebar-toggle {
-        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        background: linear-gradient(135deg, #14245f 0%, #1d4ed8 100%);
     }
     .admin-sidebar-backdrop {
         display: none;
@@ -165,9 +165,6 @@
             </a>
             <a class="nav-link {% if request.path == '/manager/admin/escrow/' %}active{% endif %}" href="/manager/admin/escrow/">
                 <i class="fas fa-vault"></i><span data-zh="托管与结算" data-en="Escrow & payouts" data-fr="Escrow & reversements">托管与结算</span>
-            </a>
-            <a class="nav-link {% if request.path == '/manager/admin/chatbot/' %}active{% endif %}" href="/manager/admin/chatbot/">
-                <i class="fas fa-robot"></i><span>AI 聊天配置</span>
             </a>
         </nav>
     </div>

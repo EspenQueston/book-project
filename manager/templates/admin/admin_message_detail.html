@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -13,10 +13,10 @@
             min-height: 100vh; font-family: 'Segoe UI', sans-serif; padding-top: 76px;
         }
         .top-navbar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
             position: fixed; top: 0; left: 0; right: 0; z-index: 1030;
             height: 76px; display: flex; align-items: center; padding: 0 24px;
-            box-shadow: 0 4px 20px rgba(102,126,234,0.4);
+            box-shadow: 0 4px 20px rgba(29,78,216,0.4);
         }
         .nav-brand { color: white; font-size: 1.3rem; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 10px; }
         .nav-brand:hover { color: rgba(255,255,255,0.9); }
@@ -30,9 +30,9 @@
         .nav-badge { background: #ef4444; color: white; font-size: 0.7rem; padding: 1px 6px; border-radius: 10px; font-weight: 700; min-width: 18px; text-align: center; }
         .main-container { max-width: 800px; margin: 0 auto; padding: 28px 20px 60px; }
         .header-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
             border-radius: 16px; padding: 24px 28px; margin-bottom: 20px; color: white;
-            box-shadow: 0 8px 30px rgba(102,126,234,0.35);
+            box-shadow: 0 8px 30px rgba(29,78,216,0.35);
         }
         .msg-card {
             background: white; border-radius: 16px; padding: 32px;
@@ -41,13 +41,13 @@
         .sender-avatar {
             width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
             font-size: 1.6rem; font-weight: 800; color: white; flex-shrink: 0;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #1d4ed8, #14245f);
         }
         .info-pill { background: #f1f5f9; border-radius: 8px; padding: 8px 14px; display: inline-flex; align-items: center; gap: 8px; font-size: 0.88rem; }
         .info-pill .lbl { color: #94a3b8; font-size: 0.82rem; }
         .info-pill .val { font-weight: 600; color: #334155; }
         .message-body {
-            background: #f8faff; border-radius: 12px; padding: 24px; border-left: 4px solid #667eea;
+            background: #f8faff; border-radius: 12px; padding: 24px; border-left: 4px solid #1d4ed8;
             line-height: 1.9; color: #334155; white-space: pre-wrap; word-break: break-word;
         }
         .badge-read { background: #d1fae5; color: #065f46; padding: 4px 12px; border-radius: 12px; font-size: 0.82rem; font-weight: 600; }
@@ -59,8 +59,8 @@
         }
         .btn-back { background: #f1f5f9; color: #475569; }
         .btn-back:hover { background: #e2e8f0; color: #334155; }
-        .btn-toggle { background: linear-gradient(135deg,#667eea,#764ba2); color: white; }
-        .btn-toggle:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.35); color: white; }
+        .btn-toggle { background: linear-gradient(135deg,#1d4ed8,#14245f); color: white; }
+        .btn-toggle:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(29,78,216,0.35); color: white; }
         .btn-delete { background: linear-gradient(135deg,#ef4444,#dc2626); color: white; }
         .btn-delete:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(239,68,68,0.35); color: white; }
         .btn-reply { background: linear-gradient(135deg,#10b981,#059669); color: white; }
@@ -75,20 +75,20 @@
             font-size: 0.92rem; line-height: 1.7; resize: vertical; min-height: 140px; outline: none;
             transition: border-color 0.2s;
         }
-        .reply-section textarea:focus { border-color: #667eea; }
+        .reply-section textarea:focus { border-color: #1d4ed8; }
         .reply-section select {
             border: 2px solid #e2e8f0; border-radius: 10px; padding: 8px 14px;
             font-size: 0.88rem; outline: none; width: 100%;
         }
-        .reply-section select:focus { border-color: #667eea; }
+        .reply-section select:focus { border-color: #1d4ed8; }
         .label-tag { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 10px; font-size: 0.78rem; font-weight: 600; color: white; margin-right: 4px; margin-bottom: 4px; }
         .label-tag .remove-label { cursor: pointer; opacity: 0.7; }
         .label-tag .remove-label:hover { opacity: 1; }
         .labels-section { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 20px; }
         .labels-section h6 { font-weight: 700; color: #334155; margin-bottom: 12px; }
         .label-option { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 10px; cursor: pointer; font-size: 0.82rem; font-weight: 600; border: 2px solid #e2e8f0; transition: all 0.2s; margin: 3px; }
-        .label-option:hover { border-color: #667eea; background: rgba(102,126,234,0.04); }
-        .label-option.active { border-color: #667eea; background: rgba(102,126,234,0.08); }
+        .label-option:hover { border-color: #1d4ed8; background: rgba(29,78,216,0.04); }
+        .label-option.active { border-color: #1d4ed8; background: rgba(29,78,216,0.08); }
         .label-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
         .toast-container { position: fixed; top: 90px; right: 20px; z-index: 9999; }
         .toast-item { padding: 14px 20px; border-radius: 12px; color: white; font-weight: 600; font-size: 0.9rem; box-shadow: 0 6px 20px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 10px; margin-bottom: 10px; animation: toastIn 0.3s ease; }
@@ -145,7 +145,7 @@
 
     <!-- Labels Section -->
     <div class="labels-section">
-        <h6><i class="fas fa-tags me-2" style="color:#667eea;"></i>分类标签</h6>
+        <h6><i class="fas fa-tags me-2" style="color:#1d4ed8;"></i>分类标签</h6>
         <div id="currentLabels" class="mb-3">
             {% for label in msg.labels.all %}
             <span class="label-tag" style="background:{{ label.color }};">
@@ -173,7 +173,7 @@
         <!-- Meta info -->
         <div class="d-flex flex-wrap gap-3 mb-4 pb-4 border-bottom">
             <div class="info-pill">
-                <i class="fas fa-user" style="color:#667eea;"></i>
+                <i class="fas fa-user" style="color:#1d4ed8;"></i>
                 <div><div class="lbl">发件人</div><div class="val">{{ msg.name }}</div></div>
             </div>
             <div class="info-pill">
@@ -191,7 +191,7 @@
         </div>
 
         <!-- Message Body -->
-        <h6 class="fw-bold mb-3" style="color:#334155;"><i class="fas fa-comment-alt me-2" style="color:#667eea;"></i>消息内容</h6>
+        <h6 class="fw-bold mb-3" style="color:#334155;"><i class="fas fa-comment-alt me-2" style="color:#1d4ed8;"></i>消息内容</h6>
         <div class="message-body">{{ msg.message }}</div>
 
         <!-- Actions -->
@@ -246,8 +246,8 @@
 
     {% if msg.session_key %}
     <!-- Quick Reply (for chatbot customer service messages) -->
-    <div class="reply-section" style="margin-top: 20px; border-left: 4px solid #667eea;">
-        <h5><i class="fas fa-headset me-2" style="color:#667eea;"></i>快速回复（聊天客服）</h5>
+    <div class="reply-section" style="margin-top: 20px; border-left: 4px solid #1d4ed8;">
+        <h5><i class="fas fa-headset me-2" style="color:#1d4ed8;"></i>快速回复（聊天客服）</h5>
         <p class="text-muted small mb-3">此消息来自聊天窗口，回复将直接显示在用户的聊天界面中。</p>
         {% if msg.admin_reply %}
         <div class="alert alert-success" style="border-radius:12px;font-size:0.9rem;">
@@ -259,7 +259,7 @@
             <label class="form-label" style="font-size:0.82rem;font-weight:600;color:#64748b;">回复内容</label>
             <textarea id="quickReplyBody" placeholder="输入回复内容..." style="width:100%;border:2px solid #e8ecf1;border-radius:14px;padding:14px 20px;font-size:1rem;min-height:100px;resize:vertical;"></textarea>
         </div>
-        <button class="btn-action btn-reply" onclick="sendQuickReply()" id="quickReplyBtn" style="background:linear-gradient(135deg,#667eea,#764ba2);">
+        <button class="btn-action btn-reply" onclick="sendQuickReply()" id="quickReplyBtn" style="background:linear-gradient(135deg,#1d4ed8,#14245f);">
             <i class="fas fa-paper-plane"></i>发送快速回复
         </button>
     </div>

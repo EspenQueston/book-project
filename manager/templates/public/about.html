@@ -1,4 +1,4 @@
-{% extends 'public/base.html' %}
+﻿{% extends 'public/base.html' %}
 {% load i18n %}
 
 {% block title %}{% trans "DUNO 360" %} - {% trans "关于我们" %}{% endblock %}
@@ -6,10 +6,12 @@
 {% block extra_css %}
 <style>
     .about-hero {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 140px 0 100px;
+        background: radial-gradient(circle at 18% 18%, rgba(96,165,250,.30), transparent 24%), radial-gradient(circle at 84% 18%, rgba(14,165,233,.16), transparent 22%), linear-gradient(135deg, #14245f 0%, #1d4ed8 100%);
+        padding: 126px 0 92px;
         position: relative;
         overflow: hidden;
+        border-radius: 0 0 28px 28px;
+        box-shadow: 0 22px 56px rgba(20,36,95,.22);
     }
     .about-hero::before {
         content: '';
@@ -94,7 +96,7 @@
     .sec { padding: 100px 0; }
     .sec-light { background: #f8f9ff; }
     .sec-label {
-        color: #667eea;
+        color: #1d4ed8;
         font-weight: 700;
         font-size: 0.8rem;
         text-transform: uppercase;
@@ -119,7 +121,7 @@
         position: relative;
         border-radius: 24px;
         overflow: hidden;
-        box-shadow: 0 25px 60px rgba(102,126,234,0.18);
+        box-shadow: 0 25px 60px rgba(29,78,216,0.18);
     }
     .story-visual-inner {
         width: 100%;
@@ -131,7 +133,7 @@
         content: '';
         position: absolute;
         inset: 0;
-        background: linear-gradient(160deg, rgba(102,126,234,0.35) 0%, rgba(118,75,162,0.45) 100%);
+        background: linear-gradient(160deg, rgba(29,78,216,0.35) 0%, rgba(20,36,95,0.45) 100%);
     }
     .story-visual-inner i { font-size: 5rem; color: rgba(255,255,255,0.7); position: relative; z-index: 1; }
     .story-year {
@@ -148,7 +150,7 @@
     .story-year h3 {
         font-size: 2rem;
         font-weight: 800;
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: linear-gradient(135deg, #1d4ed8, #14245f);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -159,25 +161,25 @@
         display: inline-flex;
         align-items: center;
         gap: 10px;
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: linear-gradient(135deg, #14245f, #1d4ed8);
         color: #fff;
         padding: 14px 34px;
-        border-radius: 14px;
+        border-radius: 50px;
         font-weight: 700;
         text-decoration: none;
         transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        box-shadow: 0 8px 25px rgba(102,126,234,0.3);
+        box-shadow: 0 8px 25px rgba(29,78,216,0.28);
     }
-    .story-btn:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 14px 35px rgba(102,126,234,0.4); color: #fff; }
+    .story-btn:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 14px 35px rgba(29,78,216,0.38); color: #fff; }
     /* Values */
     .val-card {
         background: #ffffff;
         border-radius: 24px;
         padding: 45px 30px 40px;
         text-align: center;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(102,126,234,0.04);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(29,78,216,0.04);
         transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        border: 1px solid rgba(102,126,234,0.06);
+        border: 1px solid rgba(29,78,216,0.06);
         height: 100%;
         position: relative;
         overflow: hidden;
@@ -189,28 +191,28 @@
         left: 0;
         right: 0;
         height: 4px;
-        background: linear-gradient(90deg, #667eea, #764ba2);
+        background: linear-gradient(90deg, #14245f, #1d4ed8);
         opacity: 0;
         transition: opacity 0.4s;
     }
     .val-card:hover {
         transform: translateY(-8px);
-        box-shadow: 0 12px 40px rgba(102,126,234,0.14), 0 2px 8px rgba(0,0,0,0.06);
-        border-color: rgba(102,126,234,0.18);
+        box-shadow: 0 12px 40px rgba(29,78,216,0.14), 0 2px 8px rgba(0,0,0,0.06);
+        border-color: rgba(29,78,216,0.18);
     }
     .val-card:hover::before { opacity: 1; }
     .val-card.active,
     .val-card:active {
         background: linear-gradient(145deg, #f8f9ff 0%, #f4f0ff 100%);
-        border-color: rgba(102,126,234,0.25);
-        box-shadow: 0 0 0 3px rgba(102,126,234,0.12), 0 8px 30px rgba(102,126,234,0.12);
+        border-color: rgba(29,78,216,0.25);
+        box-shadow: 0 0 0 3px rgba(29,78,216,0.12), 0 8px 30px rgba(29,78,216,0.12);
     }
     .val-card.active::before,
     .val-card:active::before { opacity: 1; }
     .val-ico {
         width: 72px;
         height: 72px;
-        background: linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.08));
+        background: linear-gradient(135deg, rgba(29,78,216,0.08), rgba(20,36,95,0.08));
         border-radius: 20px;
         display: flex;
         align-items: center;
@@ -220,17 +222,17 @@
     }
     .val-card:hover .val-ico,
     .val-card.active .val-ico {
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: linear-gradient(135deg, #14245f, #1d4ed8);
         transform: scale(1.08) rotate(3deg);
     }
-    .val-ico i { font-size: 1.6rem; color: #667eea; transition: color 0.35s; }
+    .val-ico i { font-size: 1.6rem; color: #1d4ed8; transition: color 0.35s; }
     .val-card:hover .val-ico i,
     .val-card.active .val-ico i { color: #fff; }
     .val-card h4 { font-size: 1.15rem; font-weight: 700; color: #1a1a2e; margin-bottom: 10px; }
     .val-card p { color: #6b7280; line-height: 1.7; font-size: 0.92rem; }
     /* Stats */
     .stats-band {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #14245f 0%, #1d4ed8 100%);
         padding: 70px 0;
         position: relative;
     }
@@ -249,41 +251,41 @@
         padding: 35px 20px;
         background: #ffffff;
         border-radius: 24px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(102,126,234,0.04);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(29,78,216,0.04);
         transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        border: 1px solid rgba(102,126,234,0.06);
+        border: 1px solid rgba(29,78,216,0.06);
     }
     .team-card:hover {
         transform: translateY(-8px);
-        box-shadow: 0 12px 40px rgba(102,126,234,0.14), 0 2px 8px rgba(0,0,0,0.06);
-        border-color: rgba(102,126,234,0.15);
+        box-shadow: 0 12px 40px rgba(29,78,216,0.14), 0 2px 8px rgba(0,0,0,0.06);
+        border-color: rgba(29,78,216,0.15);
     }
     .team-card.active,
     .team-card:active {
         background: linear-gradient(145deg, #f8f9ff 0%, #f4f0ff 100%);
-        border-color: rgba(102,126,234,0.2);
-        box-shadow: 0 0 0 3px rgba(102,126,234,0.1), 0 8px 30px rgba(102,126,234,0.12);
+        border-color: rgba(29,78,216,0.2);
+        box-shadow: 0 0 0 3px rgba(29,78,216,0.1), 0 8px 30px rgba(29,78,216,0.12);
     }
     .team-pic {
         width: 110px;
         height: 110px;
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: linear-gradient(135deg, #14245f, #1d4ed8);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         margin: 0 auto 20px;
-        box-shadow: 0 10px 30px rgba(102,126,234,0.25);
+        box-shadow: 0 10px 30px rgba(29,78,216,0.22);
         transition: transform 0.4s;
     }
     .team-card:hover .team-pic { transform: scale(1.08) rotate(5deg); }
     .team-pic i { font-size: 2.5rem; color: #fff; }
     .team-card h5 { font-weight: 700; color: #1a1a2e; margin-bottom: 6px; }
-    .team-card .role { color: #667eea; font-weight: 600; font-size: 0.88rem; }
+    .team-card .role { color: #1d4ed8; font-weight: 600; font-size: 0.88rem; }
     /* CTA */
     .cta-sec { background: #f8f9ff; padding: 80px 0; }
     .cta-box {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #14245f 0%, #1d4ed8 100%);
         border-radius: 28px;
         padding: 65px 50px;
         text-align: center;
@@ -308,7 +310,7 @@
         align-items: center;
         gap: 10px;
         background: #fff;
-        color: #667eea;
+        color: #1d4ed8;
         padding: 16px 42px;
         border-radius: 50px;
         font-weight: 700;
@@ -318,7 +320,7 @@
         position: relative;
         box-shadow: 0 10px 30px rgba(0,0,0,0.15);
     }
-    .cta-btn:hover { transform: translateY(-4px); box-shadow: 0 18px 40px rgba(0,0,0,0.2); color: #764ba2; }
+    .cta-btn:hover { transform: translateY(-4px); box-shadow: 0 18px 40px rgba(0,0,0,0.2); color: #14245f; }
     /* ── Mobile Optimizations ── */
     @media (max-width: 768px) {
         .about-hero { padding: 100px 0 70px; }
@@ -364,8 +366,8 @@
             padding: 40px 22px 32px;
             border-radius: 24px;
             margin: 0 4px;
-            background: linear-gradient(145deg, #667eea 0%, #764ba2 50%, #5a3f9e 100%);
-            box-shadow: 0 20px 60px rgba(102,126,234,0.25), inset 0 1px 0 rgba(255,255,255,0.1);
+            background: linear-gradient(145deg, #14245f 0%, #1d4ed8 50%, #1565c0 100%);
+            box-shadow: 0 20px 60px rgba(29,78,216,0.25), inset 0 1px 0 rgba(255,255,255,0.1);
             position: relative;
             overflow: hidden;
         }
@@ -457,9 +459,9 @@
     }
     html[data-theme="dark"] .val-card.active,
     html[data-theme="dark"] .val-card:active {
-        background: linear-gradient(145deg, rgba(102,126,234,0.08) 0%, rgba(118,75,162,0.05) 100%);
-        border-color: rgba(102,126,234,0.3);
-        box-shadow: 0 0 0 3px rgba(102,126,234,0.15), 0 8px 30px rgba(0,0,0,0.2);
+        background: linear-gradient(145deg, rgba(29,78,216,0.08) 0%, rgba(20,36,95,0.05) 100%);
+        border-color: rgba(29,78,216,0.3);
+        box-shadow: 0 0 0 3px rgba(29,78,216,0.15), 0 8px 30px rgba(0,0,0,0.2);
     }
     html[data-theme="dark"] .val-card h4 {
         color: var(--text-primary);
@@ -473,9 +475,9 @@
     }
     html[data-theme="dark"] .team-card.active,
     html[data-theme="dark"] .team-card:active {
-        background: linear-gradient(145deg, rgba(102,126,234,0.08) 0%, rgba(118,75,162,0.05) 100%);
-        border-color: rgba(102,126,234,0.25);
-        box-shadow: 0 0 0 3px rgba(102,126,234,0.12), 0 8px 30px rgba(0,0,0,0.2);
+        background: linear-gradient(145deg, rgba(29,78,216,0.08) 0%, rgba(20,36,95,0.05) 100%);
+        border-color: rgba(29,78,216,0.25);
+        box-shadow: 0 0 0 3px rgba(29,78,216,0.12), 0 8px 30px rgba(0,0,0,0.2);
     }
     html[data-theme="dark"] .team-card h5 {
         color: var(--text-primary);
@@ -606,7 +608,7 @@
         <div class="row g-4 justify-content-center">
             <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
                 <a href="{% url 'manager:public_books' %}" class="text-decoration-none">
-                <div class="team-card" style="cursor:pointer;"><div class="team-pic" style="background:linear-gradient(135deg,#667eea,#764ba2)"><i class="fas fa-book-open"></i></div><h5>{% trans "电子书商店" %}</h5><p class="role">{% trans "购买与下载电子书" %}</p></div>
+                <div class="team-card" style="cursor:pointer;"><div class="team-pic" style="background:linear-gradient(135deg,#14245f,#1d4ed8)"><i class="fas fa-book-open"></i></div><h5>{% trans "电子书商店" %}</h5><p class="role">{% trans "购买与下载电子书" %}</p></div>
                 </a>
             </div>
             <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
@@ -617,11 +619,6 @@
             <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
                 <a href="{% url 'marketplace:home' %}" class="text-decoration-none">
                 <div class="team-card" style="cursor:pointer;"><div class="team-pic" style="background:linear-gradient(135deg,#43e97b,#38f9d7)"><i class="fas fa-store"></i></div><h5>{% trans "综合市场" %}</h5><p class="role">{% trans "商品与生鲜超市" %}</p></div>
-                </a>
-            </div>
-            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
-                <a href="{% url 'manager:public_home' %}#chatbot" class="text-decoration-none">
-                <div class="team-card" style="cursor:pointer;"><div class="team-pic" style="background:linear-gradient(135deg,#4facfe,#00f2fe)"><i class="fas fa-robot"></i></div><h5>{% trans "AI智能助手" %}</h5><p class="role">{% trans "实时智能客服" %}</p></div>
                 </a>
             </div>
         </div>

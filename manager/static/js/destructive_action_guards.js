@@ -5,9 +5,48 @@
     global.__destructiveGuardsInit = true;
 
     var DESTRUCTIVE_ACTIONS = ['delete', 'clear_read', 'clear_all', 'remove'];
+    var _gConfirmCb = null;
+
+    function patchGConfirmApi() {
+        var modal = document.getElementById('gConfirmModal');
+        if (!modal) return;
+        var okBtn = document.getElementById('gConfirmOk');
+        if (!okBtn) return;
+
+        global.gConfirm = function (msg, callback, opts) {
+            opts = opts || {};
+            var i18n = global._G_I18N || {};
+            var iconEl = document.getElementById('gConfirmIcon');
+            var titleEl = document.getElementById('gConfirmTitle');
+            var textEl = document.getElementById('gConfirmText');
+            if (titleEl) titleEl.textContent = opts.title || i18n.confirmTitle || 'Confirm';
+            if (textEl) textEl.textContent = msg;
+            if (iconEl) {
+                iconEl.className = 'g-modal-icon ' + (opts.danger ? 'danger-icon' : 'confirm-icon');
+                iconEl.innerHTML = '<i class="fas ' + (opts.danger ? 'fa-exclamation-triangle' : 'fa-question') + '"></i>';
+            }
+            okBtn.className = 'g-modal-btn ' + (opts.danger ? 'g-modal-btn-danger' : 'g-modal-btn-confirm');
+            okBtn.textContent = opts.okText || i18n.confirmOk || 'OK';
+            _gConfirmCb = callback;
+            okBtn.onclick = function () {
+                var cb = _gConfirmCb;
+                global.gModalClose();
+                if (cb) cb();
+            };
+            modal.classList.add('show');
+        };
+
+        global.gModalClose = function () {
+            modal.classList.remove('show');
+            _gConfirmCb = null;
+        };
+    }
 
     function ensurePopupUi() {
-        if (document.getElementById('gConfirmModal')) return;
+        if (document.getElementById('gConfirmModal')) {
+            patchGConfirmApi();
+            return;
+        }
 
         var css = document.createElement('style');
         css.textContent = [
@@ -70,31 +109,7 @@
             };
         }
 
-        if (typeof global.gConfirm !== 'function') {
-            var _gConfirmCb = null;
-            global.gConfirm = function (msg, callback, opts) {
-                opts = opts || {};
-                var iconEl = document.getElementById('gConfirmIcon');
-                var okBtn = document.getElementById('gConfirmOk');
-                document.getElementById('gConfirmTitle').textContent = opts.title || global._G_I18N.confirmTitle;
-                document.getElementById('gConfirmText').textContent = msg;
-                iconEl.className = 'g-modal-icon ' + (opts.danger ? 'danger-icon' : 'confirm-icon');
-                iconEl.innerHTML = '<i class="fas ' + (opts.danger ? 'fa-exclamation-triangle' : 'fa-question') + '"></i>';
-                okBtn.className = 'g-modal-btn ' + (opts.danger ? 'g-modal-btn-danger' : 'g-modal-btn-confirm');
-                okBtn.textContent = opts.okText || global._G_I18N.confirmOk;
-                _gConfirmCb = callback;
-                okBtn.onclick = function () {
-                    var cb = _gConfirmCb;
-                    global.gModalClose();
-                    if (cb) cb();
-                };
-                modal.classList.add('show');
-            };
-            global.gModalClose = function () {
-                document.getElementById('gConfirmModal').classList.remove('show');
-                _gConfirmCb = null;
-            };
-        }
+        patchGConfirmApi();
     }
 
     function pathOf(url) {

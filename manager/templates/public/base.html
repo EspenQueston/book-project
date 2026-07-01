@@ -1,4 +1,4 @@
-{% load i18n static %}
+﻿{% load i18n static %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE }}">
 <head>
@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>{% block title %}DUNO 360{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml" href="{% static 'img/duno360-logo.svg' %}">
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -19,9 +20,11 @@
         /* ========== MODERN DESIGN TOKENS ========== */
         :root {
             /* Brand */
-            --brand-primary: #667eea;
-            --brand-secondary: #764ba2;
-            --accent: #e74c3c;
+            --brand-primary: #1d4ed8;
+            --brand-secondary: #14245f;
+            --brand-gradient: linear-gradient(135deg, #14245f 0%, #1d4ed8 100%);
+            --brand-gradient-soft: linear-gradient(135deg, rgba(20,36,95,0.10) 0%, rgba(29,78,216,0.12) 100%);
+            --accent: #2563eb;
             --success: #27ae60;
             --warning: #f39c12;
 
@@ -45,8 +48,8 @@
             /* Interactive */
             --input-bg: #ffffff;
             --input-border: #e2e8f0;
-            --input-focus: #667eea;
-            --button-hover: rgba(102,126,234,0.08);
+            --input-focus: #1d4ed8;
+            --button-hover: rgba(29,78,216,0.08);
 
             /* Shadows */
             --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
@@ -165,8 +168,8 @@
         .toolbar {
             position: relative;
             overflow: hidden;
-            border: 1px solid rgba(102,126,234,0.10);
-            box-shadow: 0 18px 48px rgba(102,126,234,0.08), 0 6px 18px rgba(15,23,42,0.05);
+            border: 1px solid rgba(29,78,216,0.10);
+            box-shadow: 0 18px 48px rgba(29,78,216,0.08), 0 6px 18px rgba(15,23,42,0.05);
             backdrop-filter: blur(10px);
         }
         .platform-form-card::before,
@@ -179,7 +182,7 @@
             position: absolute;
             inset: 0;
             pointer-events: none;
-            background: linear-gradient(135deg, rgba(255,255,255,0.18), transparent 38%, transparent 62%, rgba(118,75,162,0.06));
+            background: linear-gradient(135deg, rgba(255,255,255,0.18), transparent 38%, transparent 62%, rgba(20,36,95,0.06));
         }
         .platform-form-card::after,
         .content-card::after,
@@ -202,7 +205,7 @@
         }
         .form-control, .form-select, textarea, input[type="text"], input[type="email"], input[type="password"], input[type="number"], input[type="url"], input[type="tel"], input[type="search"] {
             border-radius: 14px !important;
-            border: 1.5px solid rgba(102,126,234,0.14) !important;
+            border: 1.5px solid rgba(29,78,216,0.14) !important;
             background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(248,250,252,0.92)) !important;
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.85), 0 1px 2px rgba(15,23,42,0.03);
             min-height: 46px;
@@ -210,19 +213,19 @@
         }
         textarea.form-control { min-height: 120px; }
         .form-control:hover, .form-select:hover, textarea:hover {
-            border-color: rgba(102,126,234,0.24) !important;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 6px 18px rgba(102,126,234,0.08);
+            border-color: rgba(29,78,216,0.24) !important;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 6px 18px rgba(29,78,216,0.08);
         }
         .form-control:focus, .form-select:focus, textarea:focus {
-            border-color: rgba(102,126,234,0.65) !important;
-            box-shadow: 0 0 0 4px rgba(102,126,234,0.14), 0 16px 30px rgba(102,126,234,0.10) !important;
+            border-color: rgba(29,78,216,0.65) !important;
+            box-shadow: 0 0 0 4px rgba(29,78,216,0.14), 0 16px 30px rgba(29,78,216,0.10) !important;
             transform: translateY(-1px);
             background: linear-gradient(180deg, rgba(255,255,255,1), rgba(248,250,252,0.96)) !important;
         }
         .input-group-text {
             border-radius: 14px !important;
-            border: 1.5px solid rgba(102,126,234,0.14) !important;
-            background: linear-gradient(135deg, rgba(102,126,234,0.10), rgba(118,75,162,0.08)) !important;
+            border: 1.5px solid rgba(29,78,216,0.14) !important;
+            background: linear-gradient(135deg, rgba(29,78,216,0.10), rgba(20,36,95,0.08)) !important;
             color: var(--text-secondary);
             font-weight: 700;
         }
@@ -231,11 +234,11 @@
             overflow: hidden;
         }
         .btn-primary, .btn-primary-gradient, .btn-submit, .btn-primary-modern {
-            box-shadow: 0 10px 25px rgba(102,126,234,0.22);
+            box-shadow: 0 10px 25px rgba(29,78,216,0.22);
         }
         .btn-primary:hover, .btn-primary-gradient:hover, .btn-submit:hover, .btn-primary-modern:hover {
             transform: translateY(-2px);
-            box-shadow: 0 14px 32px rgba(102,126,234,0.28);
+            box-shadow: 0 14px 32px rgba(29,78,216,0.28);
         }
         .page-header-card, .mv-page-header-card, .vp-page-head, .header-card {
             position: relative;
@@ -292,7 +295,7 @@
         html[data-theme="dark"] .form-control:focus, html[data-theme="dark"] .form-select:focus {
             background: var(--input-bg);
             color: var(--text-primary);
-            box-shadow: 0 0 0 3px rgba(102,126,234,0.15);
+            box-shadow: 0 0 0 3px rgba(29,78,216,0.15);
         }
         html[data-theme="dark"] .dropdown-menu {
             background: var(--bg-elevated);
@@ -309,7 +312,7 @@
             transition: all 0.2s ease;
         }
         .navbar .dropdown-item:hover {
-            background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1));
+            background: linear-gradient(135deg, rgba(29,78,216,0.1), rgba(20,36,95,0.1));
             transform: translateX(4px);
         }
         .navbar .dropdown-menu {
@@ -416,27 +419,25 @@
             font-size: 1.5rem;
         }
         .duno-brand {
-            font-weight: 800;
-            letter-spacing: 0.5px;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
         }
-        .duno-brand i {
-            font-size: 1.25rem;
-            color: #fff;
+        .duno-brand-logo {
+            height: 52px;
+            width: auto;
+            display: block;
+            filter: drop-shadow(0 5px 14px rgba(15,23,42,.26));
         }
-        .duno-brand-text {
-            background: linear-gradient(90deg, #ffffff, #dbeafe);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            color: transparent;
-            font-size: 1.38rem;
-            line-height: 1;
-            font-family: "Cinzel", "Georgia", "Times New Roman", serif;
-            font-weight: 800;
-            text-shadow: 0 1px 10px rgba(255, 255, 255, 0.12);
+        .navbar-brand.duno-brand {
+            min-width: 178px;
+            min-height: 58px;
+            padding: 4px 0;
+        }
+        .footer-logo-image {
+            height: 54px;
+            width: auto;
+            display: block;
+            filter: drop-shadow(0 6px 16px rgba(0,0,0,.18));
         }
         
         .hero-section {
@@ -558,19 +559,6 @@
             display: flex;
             align-items: center;
             margin-bottom: 20px;
-        }
-        
-        .footer-logo i {
-            font-size: 2.5rem;
-            color: var(--secondary-color);
-            margin-right: 15px;
-        }
-        
-        .footer-logo h4 {
-            margin: 0;
-            font-weight: 700;
-            color: #ffffff;
-            font-size: 1.5rem;
         }
         
         .footer-description {
@@ -830,7 +818,7 @@
             section { margin-bottom: 8px !important; }
             .card { padding: 8px; }
             .btn, button { padding: 8px 14px; font-size: 13px; border-radius: 20px; }
-            .btn-primary { background: #667eea; border-color: #667eea; }
+            .btn-primary { background: #1d4ed8; border-color: #1d4ed8; }
             input, select, textarea { font-size: 14px !important; }
             /* product cards dense */
             .product-card img { aspect-ratio: 3/4; object-fit: cover; }
@@ -887,6 +875,9 @@
             }
         }
         
+        @media (max-width: 768px) {
+            .footer-description { display: none !important; }
+        }
         @media (max-width: 576px) {
             .footer-logo h4 {
                 font-size: 1.3rem;
@@ -908,7 +899,7 @@
     .g-toast-success{background:linear-gradient(135deg,#10b981,#059669);}
     .g-toast-error{background:linear-gradient(135deg,#ef4444,#dc2626);}
     .g-toast-warning{background:linear-gradient(135deg,#f59e0b,#d97706);}
-    .g-toast-info{background:linear-gradient(135deg,#667eea,#764ba2);}
+    .g-toast-info{background:linear-gradient(135deg,#1d4ed8,#14245f);}
     .g-toast i{font-size:1.2rem;flex-shrink:0;}
     .g-toast-close{position:absolute;top:8px;right:10px;background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;font-size:.85rem;padding:4px;}
     .g-toast-close:hover{color:#fff;}
@@ -921,7 +912,7 @@
     .g-modal-card{background:#fff;border-radius:22px;padding:40px 36px 32px;max-width:420px;width:90%;box-shadow:0 25px 80px rgba(0,0,0,.2);animation:g-modal-pop .35s cubic-bezier(.175,.885,.32,1.275);text-align:center;}
     .g-modal-icon{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:1.6rem;color:#fff;}
     .g-modal-icon.confirm-icon{background:linear-gradient(135deg,#f59e0b,#d97706);}
-    .g-modal-icon.info-icon{background:linear-gradient(135deg,#667eea,#764ba2);}
+    .g-modal-icon.info-icon{background:linear-gradient(135deg,#1d4ed8,#14245f);}
     .g-modal-icon.danger-icon{background:linear-gradient(135deg,#ef4444,#dc2626);}
     .g-modal-icon.success-icon{background:linear-gradient(135deg,#10b981,#059669);}
     .g-modal-title{font-size:1.25rem;font-weight:700;color:#1a1a2e;margin-bottom:10px;}
@@ -931,8 +922,8 @@
     .g-modal-btn:hover{transform:translateY(-2px);}
     .g-modal-btn-cancel{background:#f3f4f6;color:#6b7280;}
     .g-modal-btn-cancel:hover{background:#e5e7eb;}
-    .g-modal-btn-confirm{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;box-shadow:0 6px 20px rgba(102,126,234,.3);}
-    .g-modal-btn-confirm:hover{box-shadow:0 10px 30px rgba(102,126,234,.4);}
+    .g-modal-btn-confirm{background:linear-gradient(135deg,#1d4ed8,#14245f);color:#fff;box-shadow:0 6px 20px rgba(29,78,216,.3);}
+    .g-modal-btn-confirm:hover{box-shadow:0 10px 30px rgba(29,78,216,.4);}
     .g-modal-btn-danger{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;box-shadow:0 6px 20px rgba(239,68,68,.3);}
     .g-modal-btn-danger:hover{box-shadow:0 10px 30px rgba(239,68,68,.4);}
     @keyframes g-modal-fade-in{from{opacity:0;}to{opacity:1;}}
@@ -950,11 +941,10 @@
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background: var(--brand-gradient); box-shadow: 0 8px 28px rgba(20,36,95,0.28);">
         <div class="container">
-            <a class="navbar-brand duno-brand" href="{% url 'manager:public_home' %}">
-                <i class="fas fa-globe"></i>
-                <span class="duno-brand-text">DUNO 360</span>
+            <a class="navbar-brand duno-brand" href="{% url 'manager:public_home' %}" aria-label="DUNO 360">
+                <img src="{% static 'img/duno360-logo.svg' %}" alt="DUNO 360" class="duno-brand-logo">
             </a>
             <a href="{% url 'manager:view_cart' %}" class="navbar-mobile-cart d-lg-none" aria-label="{% trans '购物车' %}">
                 <i class="fas fa-shopping-cart"></i>
@@ -993,7 +983,7 @@
                 <div class="mobile-menu-body">
                     <nav class="mobile-menu-nav">
                         <a href="{% url 'manager:public_home' %}" class="mobile-menu-item">
-                            <div class="mobile-menu-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);"><i class="fas fa-home"></i></div>
+                            <div class="mobile-menu-icon" style="background: linear-gradient(135deg, #1d4ed8, #14245f);"><i class="fas fa-home"></i></div>
                             <span>{% trans "首页" %}</span>
                             <i class="fas fa-chevron-right mobile-menu-arrow"></i>
                         </a>
@@ -1077,16 +1067,23 @@
 
                         {% if request.session.site_user_id %}
                         <a href="{% url 'manager:user_profile' %}" class="mobile-menu-item">
-                            <div class="mobile-menu-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);"><i class="fas fa-user"></i></div>
+                            <div class="mobile-menu-icon" style="background: linear-gradient(135deg, #1d4ed8, #14245f);"><i class="fas fa-user"></i></div>
                             <span>{% trans "个人中心" %}</span>
                             <i class="fas fa-chevron-right mobile-menu-arrow"></i>
                         </a>
                         {% else %}
-                        <a href="{% url 'manager:user_login' %}" class="mobile-menu-item">
-                            <div class="mobile-menu-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);"><i class="fas fa-sign-in-alt"></i></div>
-                            <span>{% trans "登录" %}</span>
-                            <i class="fas fa-chevron-right mobile-menu-arrow"></i>
-                        </a>
+                        <div class="mobile-menu-group">
+                            <button class="mobile-menu-item mobile-menu-submenu-toggle" data-submenu="login-submenu">
+                                <div class="mobile-menu-icon" style="background: linear-gradient(135deg, #1d4ed8, #14245f);"><i class="fas fa-sign-in-alt"></i></div>
+                                <span>{% trans "登录" %}</span>
+                                <small class="ms-auto me-2" style="opacity:.72;font-size:.7rem;">{% trans "选择身份" %}</small>
+                                <i class="fas fa-chevron-right mobile-menu-arrow"></i>
+                            </button>
+                            <div class="mobile-submenu" id="login-submenu">
+                                <a href="{% url 'manager:user_login' %}" class="mobile-submenu-item"><i class="fas fa-user text-info"></i>{% trans "普通用户登录" %}</a>
+                                <a href="{% url 'manager:vendor_login' %}" class="mobile-submenu-item"><i class="fas fa-store text-warning"></i>{% trans "卖家登录" %}</a>
+                            </div>
+                        </div>
                         {% endif %}
 
                         <a href="{% url 'manager:view_cart' %}" class="mobile-menu-item">
@@ -1111,14 +1108,14 @@
             <div class="collapse navbar-collapse d-none d-lg-flex" id="navbarNavDesktop">
                 <ul class="navbar-nav me-auto ms-lg-3">
                     <li class="nav-item">
-                        <a class="nav-link px-2 py-2" href="{% url 'manager:public_home' %}" style="font-weight: 500; font-size: 0.9rem; transition: all 0.3s ease; border-radius: 8px;">
-                            <i class="fas fa-home me-1"></i><span>{% trans "首页" %}</span>
+                        <a class="nav-link px-2 py-2 nav-desktop-item" data-nav="home" href="{% url 'manager:public_home' %}" style="font-weight: 500; font-size: 0.9rem; transition: all 0.3s ease; border-radius: 8px;">
+                            <i class="fas fa-home me-1"></i><span data-zh="首页" data-en="Home" data-fr="Accueil">首页</span>
                         </a>
                     </li>
                     <!-- Books Dropdown -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link px-2 py-2 dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-weight: 500; font-size: 0.9rem; transition: all 0.3s ease; border-radius: 8px;">
-                            <i class="fas fa-book me-1"></i><span>{% trans "图书" %}</span>
+                        <a class="nav-link px-2 py-2 dropdown-toggle nav-desktop-item" data-nav="books" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-weight: 500; font-size: 0.9rem; transition: all 0.3s ease; border-radius: 8px;">
+                            <i class="fas fa-book me-1"></i><span data-zh="图书" data-en="Books" data-fr="Livres">图书</span>
                         </a>
                         <ul class="dropdown-menu" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: none; padding: 8px; min-width: 220px;">
                             <li>
@@ -1151,29 +1148,29 @@
                         </ul>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link px-2 py-2" href="{% url 'marketplace:home' %}" style="font-weight: 500; font-size: 0.9rem; transition: all 0.3s ease; border-radius: 8px;">
-                            <i class="fas fa-store me-1"></i><span>{% trans "市场" %}</span>
+                        <a class="nav-link px-2 py-2 nav-desktop-item" data-nav="market" href="{% url 'marketplace:home' %}" style="font-weight: 500; font-size: 0.9rem; transition: all 0.3s ease; border-radius: 8px;">
+                            <i class="fas fa-store me-1"></i><span data-zh="市场" data-en="Market" data-fr="Marché">市场</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link px-2 py-2" href="{% url 'manager:track_order' %}" style="font-weight: 500; font-size: 0.9rem; transition: all 0.3s ease; border-radius: 8px;">
-                            <i class="fas fa-search-location me-1"></i><span>{% trans "跟踪订单" %}</span>
+                        <a class="nav-link px-2 py-2 nav-desktop-item" data-nav="track" href="{% url 'manager:track_order' %}" style="font-weight: 500; font-size: 0.9rem; transition: all 0.3s ease; border-radius: 8px;">
+                            <i class="fas fa-search-location me-1"></i><span data-zh="跟踪订单" data-en="Track Order" data-fr="Suivi commande">跟踪订单</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link px-3 py-2" href="{% url 'manager:publish_entry' %}" style="font-weight: 800; font-size: 0.9rem; transition: all 0.3s ease; border-radius: 999px; background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.25);">
-                            <i class="fas fa-bullhorn me-1"></i><span>{% trans "Publier" %}</span>
+                        <a class="nav-link px-3 py-2 nav-link-publish" href="{% url 'manager:publish_entry' %}" style="font-weight: 800; font-size: 0.9rem; transition: all 0.3s ease; border-radius: 999px; background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.25);">
+                            <i class="fas fa-bullhorn me-1"></i><span data-zh="发布" data-en="Publish" data-fr="Publier">发布</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link px-2 py-2" href="{% url 'manager:public_blog' %}" style="font-weight: 500; font-size: 0.9rem; transition: all 0.3s ease; border-radius: 8px;">
-                            <i class="fas fa-blog me-1"></i><span>{% trans "博客" %}</span>
+                        <a class="nav-link px-2 py-2 nav-desktop-item" data-nav="blog" href="{% url 'manager:public_blog' %}" style="font-weight: 500; font-size: 0.9rem; transition: all 0.3s ease; border-radius: 8px;">
+                            <i class="fas fa-blog me-1"></i><span data-zh="博客" data-en="Blog" data-fr="Blog">博客</span>
                         </a>
                     </li>
                     <!-- More Dropdown -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link px-2 py-2 dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-weight: 500; font-size: 0.9rem; transition: all 0.3s ease; border-radius: 8px;">
-                            <i class="fas fa-ellipsis-h me-1"></i><span>{% trans "更多" %}</span>
+                        <a class="nav-link px-2 py-2 dropdown-toggle nav-desktop-item" data-nav="more" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-weight: 500; font-size: 0.9rem; transition: all 0.3s ease; border-radius: 8px;">
+                            <i class="fas fa-ellipsis-h me-1"></i><span data-zh="更多" data-en="More" data-fr="Plus">更多</span>
                         </a>
                         <ul class="dropdown-menu" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: none; padding: 8px; min-width: 220px;">
                             <li>
@@ -1254,7 +1251,7 @@
                         </ul>
                     </div>
                     {% else %}
-                    <a href="{% url 'manager:user_login' %}" class="d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background: rgba(255,255,255,0.15); border-radius: 50%; backdrop-filter: blur(10px); transition: all 0.3s ease; text-decoration: none;" title="{% trans '登录' %}">
+                    <a href="{% url 'manager:user_login' %}" class="d-none d-md-flex align-items-center justify-content-center text-decoration-none" style="width: 38px; height: 38px; background: rgba(255,255,255,0.15); border-radius: 50%; backdrop-filter: blur(10px); transition: all 0.3s ease;" title="{% trans '登录' %}">
                         <i class="fas fa-user" style="font-size: 1rem; color: #fff;"></i>
                     </a>
                     {% endif %}
@@ -1277,10 +1274,42 @@
         </div>
     </nav>
     
+    <script>
+    (function() {
+        var path = window.location.pathname;
+        var navKey = null;
+        if (path === '/' || path === '/manager/public/' || path === '/manager/public') navKey = 'home';
+        else if (path.indexOf('/manager/public/books') === 0 || path.indexOf('/manager/public/authors') === 0 || path.indexOf('/manager/public/publishers') === 0) navKey = 'books';
+        else if (path.indexOf('/marketplace/') === 0) navKey = 'market';
+        else if (path.indexOf('/manager/track-order') === 0) navKey = 'track';
+        else if (path.indexOf('/manager/public/blog') === 0) navKey = 'blog';
+        else if (path.indexOf('/manager/public/about') === 0 || path.indexOf('/manager/public/contact') === 0 || path.indexOf('/manager/public/faq') === 0) navKey = 'more';
+        if (navKey) {
+            document.querySelectorAll('#navbarNavDesktop .nav-desktop-item[data-nav="' + navKey + '"]').forEach(function(el) {
+                el.classList.add('active');
+            });
+        }
+    })();
+    </script>
+    
     <style>
         /* Enhanced Navigation Hover Effects */
         .navbar-nav .nav-link:hover {
             background: rgba(255, 255, 255, 0.15) !important;
+            transform: translateY(-2px);
+        }
+        
+        .navbar-nav .nav-link.active:not(.nav-link-publish) {
+            background: rgba(255, 255, 255, 0.24) !important;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.38);
+            font-weight: 700 !important;
+        }
+        .navbar-nav .nav-link-publish {
+            background: rgba(255, 255, 255, 0.18) !important;
+            border: 1px solid rgba(255, 255, 255, 0.28) !important;
+        }
+        .navbar-nav .nav-link-publish:hover {
+            background: rgba(255, 255, 255, 0.28) !important;
             transform: translateY(-2px);
         }
         
@@ -1372,8 +1401,10 @@
             right: 0;
             width: 320px;
             max-width: 85vw;
-            height: 100vh;
-            background: linear-gradient(180deg, #667eea 0%, #764ba2 40%, #5a3f9e 100%);
+            height: min(78vh, 640px);
+            top: 12px;
+            border-radius: 26px 0 0 26px;
+            background: linear-gradient(180deg, #1d4ed8 0%, #14245f 40%, #5a3f9e 100%);
             z-index: 1050;
             transform: translateX(100%);
             transition: transform 0.45s cubic-bezier(0.32, 0.72, 0, 1);
@@ -1618,11 +1649,12 @@
             .mobile-menu-toggle { display: flex; }
             .navbar-mobile-cart { display: flex; }
             .duno-brand { margin-right: 0; }
-            .duno-brand i { font-size: 1.35rem; }
-            .duno-brand-text {
-                font-size: 1.85rem;
-                letter-spacing: 0.9px;
-                font-weight: 900;
+            .duno-brand-logo {
+                height: 46px;
+            }
+            .navbar-brand.duno-brand {
+                min-width: 154px;
+                min-height: 50px;
             }
         }
     </style>
@@ -1641,8 +1673,7 @@
                 <div class="col-lg-4 col-md-6">
                     <div class="footer-section">
                         <div class="footer-logo">
-                            <i class="fas fa-globe"></i>
-                            <h4>DUNO 360</h4>
+                            <img src="{% static 'img/duno360-logo.svg' %}" alt="DUNO 360" class="footer-logo-image">
                         </div>
                         <p class="footer-description">
                             <span data-zh="综合性数字平台，融合图书、在线课程、电商市场与生鲜超市，为您提供一站式的知识获取与购物体验。" data-en="A comprehensive digital platform combining books, online courses, e-commerce marketplace and fresh supermarket — your one-stop destination for knowledge and shopping." data-fr="Plateforme numérique complète combinant livres, cours en ligne, marketplace e-commerce et supermarché — votre destination unique pour le savoir et le shopping.">综合性数字平台，融合图书、在线课程、电商市场与生鲜超市，为您提供一站式的知识获取与购物体验。</span>
@@ -2156,7 +2187,20 @@ document.addEventListener('DOMContentLoaded', function() {
     })();
     </script>
 
-    <script src="/static/js/chatbot_widget.js" defer></script>
+    <!-- ===== Tawk.to Live Chat Widget ===== -->
+    {% if TAWKTO_PROPERTY_ID and TAWKTO_WIDGET_ID %}
+    <script type="text/javascript">
+    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+    (function(){
+        var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+        s1.async=true;
+        s1.src='https://embed.tawk.to/{{ TAWKTO_PROPERTY_ID }}/{{ TAWKTO_WIDGET_ID }}';
+        s1.charset='UTF-8';
+        s1.setAttribute('crossorigin','*');
+        s0.parentNode.insertBefore(s1,s0);
+    })();
+    </script>
+    {% endif %}
 
     <!-- ===== PWA Feature 6: Bottom Tab Bar (mobile only) ===== -->
     <style>

@@ -790,6 +790,7 @@ VERIFICATION_TYPE_CHOICES = [
     ('user', '用户注册'),
     ('vendor', '卖家注册'),
     ('password_reset', '密码重置'),
+    ('vendor_activation_payment', '卖家激活支付'),
 ]
 
 
@@ -807,7 +808,7 @@ class EmailVerification(models.Model):
         verbose_name='Localisation',
     )
     city = models.CharField(max_length=64, default=DEFAULT_CONGO_CITY, verbose_name='Ville')
-    verification_type = models.CharField(max_length=20, choices=VERIFICATION_TYPE_CHOICES, default='user', verbose_name='验证类型')
+    verification_type = models.CharField(max_length=25, choices=VERIFICATION_TYPE_CHOICES, default='user', verbose_name='验证类型')
     company_name = models.CharField(max_length=200, blank=True, default='', verbose_name='公司名称')
     description = models.TextField(blank=True, default='', verbose_name='描述')
     is_verified = models.BooleanField(default=False, verbose_name='已验证')
@@ -927,6 +928,8 @@ class Vendor(models.Model):
     status = models.CharField(max_length=20, choices=VENDOR_STATUS_CHOICES, default='pending', verbose_name='状态')
     is_active = models.BooleanField(default=True, verbose_name='启用')
     is_official = models.BooleanField(default=False, verbose_name='官方直营店', db_index=True)
+    is_certified = models.BooleanField(default=False, verbose_name='认证卖家', db_index=True)
+    certified_at = models.DateTimeField(null=True, blank=True, verbose_name='认证时间')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='注册时间')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='更新时间')
 
@@ -944,6 +947,49 @@ class Vendor(models.Model):
             return self.logo.url
         return None
 
+    def get_seller_badge_tier(self):
+        """official → certified → approved → standard"""
+        return self.get_certification_state()
+
+    def get_certification_score(self):
+        """Strong backend score for certified seller eligibility."""
+        score = 0
+        if self.status == 'approved':
+            score += 35
+        if self.is_active:
+            score += 20
+        if self.phone:
+            score += 10
+        if self.logo:
+            score += 10
+        if (self.description or '').strip() and len((self.description or '').strip()) >= 60:
+            score += 10
+        if self.city:
+            score += 5
+        if self.vendorbook_set.filter(is_active=True).exists():
+            score += 5
+        if getattr(self, 'products', None) and self.products.filter(is_active=True).exists():
+            score += 5
+        return min(score, 100)
+
+    def can_receive_certification(self):
+        """Strong gate: approved, active, complete profile, enough trust score, not official."""
+        return (
+            self.status == 'approved'
+            and self.is_active
+            and not self.is_official
+            and self.get_certification_score() >= 75
+        )
+
+    def get_certification_state(self):
+        if self.is_official:
+            return 'official'
+        if self.is_certified and self.can_receive_certification():
+            return 'certified'
+        if self.status == 'approved':
+            return 'approved'
+        return 'standard'
+
     def get_total_books(self):
         return self.vendorbook_set.count()
 
@@ -955,7 +1001,6 @@ class VendorBook(models.Model):
     """Books listed by a vendor"""
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, verbose_name='卖家')
     book = models.ForeignKey(Book, on_delete=models.CASCADE, verbose_name='图书')
-    vendor_price = models.DecimalField(max_digits=8, decimal_places=2, verbose_name='卖家定价')
     is_active = models.BooleanField(default=True, verbose_name='上架')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='上架时间')
 
@@ -1047,130 +1092,6 @@ class VendorNotification(models.Model):
 
     def __str__(self):
         return f'[{self.vendor.company_name}] {self.title}'
-
-
-# ==========================================
-# AI Chatbot System
-# ==========================================
-
-AI_PROVIDER_CHOICES = [
-    ('openai', 'OpenAI (ChatGPT)'),
-    ('anthropic', 'Anthropic (Claude)'),
-    ('google', 'Google (Gemini)'),
-    ('qwen', 'Alibaba (Qwen/通义千问)'),
-    ('deepseek', 'DeepSeek'),
-    ('openrouter', 'OpenRouter'),
-    ('custom', 'Custom / Local'),
-]
-
-CHAT_ROLE_CHOICES = [
-    ('user', 'User'),
-    ('assistant', 'Assistant'),
-    ('system', 'System'),
-]
-
-
-class ChatbotConfig(models.Model):
-    """Global chatbot configuration — one active config at a time."""
-    name = models.CharField(max_length=100, default='Default Config', verbose_name='配置名称')
-    is_active = models.BooleanField(default=True, verbose_name='启用')
-    provider = models.CharField(max_length=20, choices=AI_PROVIDER_CHOICES, default='openai', verbose_name='AI 提供商')
-    api_key = models.CharField(max_length=500, blank=True, default='', verbose_name='API Key')
-    model_name = models.CharField(max_length=100, blank=True, default='', verbose_name='模型名称',
-                                  help_text='e.g. gpt-4o, claude-3-5-sonnet-20241022, gemini-1.5-pro, qwen-plus')
-    api_endpoint = models.CharField(max_length=500, blank=True, default='', verbose_name='自定义 API 地址',
-                                    help_text='Leave blank to use provider default')
-    system_prompt = models.TextField(
-        default='你是DUNO 360平台的友好、专业助手。你帮助用户了解图书、作者、出版社、在线课程、市场商品和生鲜超市信息，并回答关于购物、订单等问题。请用简洁、友好的语言回答。',
-        verbose_name='系统提示词 (System Prompt)'
-    )
-    max_tokens = models.IntegerField(default=1000, verbose_name='最大 Token 数')
-    temperature = models.FloatField(default=0.7, verbose_name='温度 (0.0 - 2.0)')
-    # Widget appearance
-    widget_title = models.CharField(max_length=100, default='AI 助手', verbose_name='聊天窗口标题')
-    widget_subtitle = models.CharField(max_length=200, default='有什么可以帮助你的？', verbose_name='副标题')
-    welcome_message = models.TextField(
-        default='你好！我是 AI 助手，有什么可以帮助你的吗？',
-        verbose_name='欢迎消息'
-    )
-    # Scope: show on public pages, admin pages, or both
-    show_on_public = models.BooleanField(default=True, verbose_name='在前端显示')
-    show_on_admin = models.BooleanField(default=True, verbose_name='在管理后台显示')
-    # Rate limiting
-    max_messages_per_session = models.IntegerField(default=50, verbose_name='每会话最大消息数')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        db_table = 'chatbot_config'
-        verbose_name = '聊天机器人配置'
-        verbose_name_plural = '聊天机器人配置'
-
-    def __str__(self):
-        return f'{self.name} ({self.get_provider_display()})'
-
-    def get_masked_api_key(self):
-        """Return masked API key for display."""
-        if not self.api_key:
-            return ''
-        k = self.api_key
-        if len(k) <= 8:
-            return '*' * len(k)
-        return k[:4] + '*' * (len(k) - 8) + k[-4:]
-
-    def get_default_model(self):
-        defaults = {
-            'openai': 'gpt-4o-mini',
-            'anthropic': 'claude-3-5-haiku-20241022',
-            'google': 'gemini-1.5-flash',
-            'qwen': 'qwen-plus',
-            'deepseek': 'deepseek-chat',
-            'openrouter': 'nvidia/nemotron-3-super-120b-a12b:free',
-            'custom': '',
-        }
-        return self.model_name or defaults.get(self.provider, '')
-
-
-class ChatSession(models.Model):
-    """A single chat session (anonymous or user-linked)."""
-    session_key = models.CharField(max_length=64, db_index=True, verbose_name='Session Key')
-    user = models.ForeignKey('SiteUser', null=True, blank=True, on_delete=models.SET_NULL,
-                             related_name='chat_sessions', verbose_name='用户')
-    config = models.ForeignKey(ChatbotConfig, null=True, on_delete=models.SET_NULL,
-                               related_name='sessions', verbose_name='配置')
-    started_at = models.DateTimeField(auto_now_add=True, verbose_name='开始时间')
-    last_active = models.DateTimeField(auto_now=True, verbose_name='最近活跃')
-    message_count = models.IntegerField(default=0, verbose_name='消息数')
-    is_closed = models.BooleanField(default=False)
-    context = models.TextField(blank=True, default='', verbose_name='上下文摘要')
-
-    class Meta:
-        db_table = 'chat_session'
-        ordering = ['-last_active']
-        verbose_name = '聊天会话'
-        verbose_name_plural = '聊天会话'
-
-    def __str__(self):
-        return f'Session {self.session_key[:12]} ({self.message_count} msgs)'
-
-
-class ChatMessage(models.Model):
-    """A single message in a chat session."""
-    session = models.ForeignKey(ChatSession, on_delete=models.CASCADE,
-                                related_name='messages', verbose_name='会话')
-    role = models.CharField(max_length=10, choices=CHAT_ROLE_CHOICES, verbose_name='角色')
-    content = models.TextField(verbose_name='内容')
-    tokens_used = models.IntegerField(default=0, verbose_name='Token 用量')
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name='时间')
-
-    class Meta:
-        db_table = 'chat_message'
-        ordering = ['created_at']
-        verbose_name = '聊天消息'
-        verbose_name_plural = '聊天消息'
-
-    def __str__(self):
-        return f'[{self.role}] {self.content[:60]}'
 
 
 # ==========================================
@@ -1519,6 +1440,123 @@ class TopUpOrder(models.Model):
 
     def __str__(self):
         return f'{self.order_number} — {self.amount} ({self.get_status_display()})'
+
+
+class SellerActivationPayment(models.Model):
+    """Tracks the mandatory 100 FCFA secure payment before buyer becomes seller."""
+    STATUS_CHOICES = [
+        ('pending', '待支付'),
+        ('processing', '支付处理中'),
+        ('paid', '已支付'),
+        ('failed', '支付失败'),
+        ('cancelled', '已取消'),
+    ]
+    PROVIDER_CHOICES = [
+        ('pawapay', 'pawaPay'),
+    ]
+
+    user = models.ForeignKey(SiteUser, on_delete=models.CASCADE, related_name='seller_activation_payments', verbose_name='用户')
+    vendor = models.ForeignKey('Vendor', on_delete=models.SET_NULL, null=True, blank=True, related_name='activation_payments', verbose_name='卖家')
+    order_number = models.CharField(max_length=40, unique=True, verbose_name='激活单号')
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('100.00'), verbose_name='支付金额')
+    currency = models.CharField(max_length=10, default='XAF', verbose_name='币种')
+    provider = models.CharField(max_length=20, choices=PROVIDER_CHOICES, default='pawapay', verbose_name='支付通道')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', db_index=True, verbose_name='支付状态')
+    payer_phone = models.CharField(max_length=30, blank=True, default='', verbose_name='付款手机号')
+    payer_name = models.CharField(max_length=120, blank=True, default='', verbose_name='付款人姓名')
+    external_reference = models.CharField(max_length=120, blank=True, default='', verbose_name='外部参考号')
+    external_status = models.CharField(max_length=60, blank=True, default='', verbose_name='外部状态')
+    provider_message = models.CharField(max_length=255, blank=True, default='', verbose_name='支付反馈')
+    paid_at = models.DateTimeField(null=True, blank=True, verbose_name='支付完成时间')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='更新时间')
+
+    class Meta:
+        db_table = 'seller_activation_payment'
+        ordering = ['-created_at']
+        verbose_name = '卖家激活支付'
+        verbose_name_plural = '卖家激活支付'
+
+    def __str__(self):
+        return f'{self.order_number} — {self.user.name} — {self.get_status_display()}'
+
+    @property
+    def is_successful(self):
+        return self.status == 'paid'
+
+
+class DonationCampaign(models.Model):
+    """Donation campaign replacing wallet-first credit direction for public support missions."""
+    STATUS_CHOICES = [
+        ('draft', '草稿'),
+        ('active', '进行中'),
+        ('paused', '已暂停'),
+        ('completed', '已完成'),
+    ]
+    BENEFICIARY_CHOICES = [
+        ('orphans', '孤儿支持'),
+        ('disadvantaged', '困难群体支持'),
+        ('education', '教育支持'),
+        ('health', '医疗支持'),
+        ('community', '社区援助'),
+    ]
+
+    title = models.CharField(max_length=180, verbose_name='项目标题')
+    slug = models.SlugField(max_length=220, unique=True, verbose_name='Slug')
+    summary = models.CharField(max_length=255, blank=True, default='', verbose_name='项目摘要')
+    description = models.TextField(blank=True, default='', verbose_name='项目描述')
+    beneficiary_type = models.CharField(max_length=30, choices=BENEFICIARY_CHOICES, default='disadvantaged', verbose_name='受益对象')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft', verbose_name='状态')
+    goal_amount = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'), verbose_name='目标金额')
+    raised_amount = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'), verbose_name='已筹金额')
+    sort_priority = models.PositiveIntegerField(default=0, verbose_name='排序优先级')
+    cover_image = models.ImageField(upload_to='donation_campaigns/', blank=True, null=True, verbose_name='封面图')
+    is_featured = models.BooleanField(default=False, verbose_name='重点项目')
+    starts_at = models.DateTimeField(null=True, blank=True, verbose_name='开始时间')
+    ends_at = models.DateTimeField(null=True, blank=True, verbose_name='结束时间')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='更新时间')
+
+    class Meta:
+        db_table = 'donation_campaign'
+        ordering = ['-is_featured', '-sort_priority', '-created_at']
+        verbose_name = '公益捐赠项目'
+        verbose_name_plural = '公益捐赠项目'
+
+    def __str__(self):
+        return self.title
+
+
+class DonationContribution(models.Model):
+    STATUS_CHOICES = [
+        ('pending', '待支付'),
+        ('paid', '已支付'),
+        ('failed', '失败'),
+        ('cancelled', '已取消'),
+    ]
+
+    campaign = models.ForeignKey(DonationCampaign, on_delete=models.CASCADE, related_name='contributions', verbose_name='捐赠项目')
+    user = models.ForeignKey(SiteUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='donations', verbose_name='用户')
+    donor_name = models.CharField(max_length=120, blank=True, default='', verbose_name='捐赠人姓名')
+    donor_phone = models.CharField(max_length=30, blank=True, default='', verbose_name='捐赠人电话')
+    amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='捐赠金额')
+    currency = models.CharField(max_length=10, default='XAF', verbose_name='币种')
+    payment_provider = models.CharField(max_length=20, default='pawapay', verbose_name='支付渠道')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name='支付状态')
+    external_reference = models.CharField(max_length=120, blank=True, default='', verbose_name='外部参考号')
+    public_message = models.CharField(max_length=255, blank=True, default='', verbose_name='公开留言')
+    is_anonymous = models.BooleanField(default=False, verbose_name='匿名捐赠')
+    paid_at = models.DateTimeField(null=True, blank=True, verbose_name='支付时间')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+
+    class Meta:
+        db_table = 'donation_contribution'
+        ordering = ['-created_at']
+        verbose_name = '公益捐赠记录'
+        verbose_name_plural = '公益捐赠记录'
+
+    def __str__(self):
+        return f'{self.campaign.title} — {self.amount}'
 
 
 # ==========================================

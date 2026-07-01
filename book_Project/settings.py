@@ -117,6 +117,7 @@ TEMPLATES = [
                 'manager.context_processors.platform_branding',
                 'manager.context_processors.use_local_static',
                 'manager.context_processors.congo_locations_context',
+                'manager.context_processors.tawkto',
             ],
         },
     },
@@ -214,14 +215,16 @@ MODELTRANSLATION_LANGUAGES = ('zh-hans', 'en', 'fr')
 MODELTRANSLATION_FALLBACK_LANGUAGES = {'default': ('zh-hans', 'en', 'fr')}
 
 # translatebot — traduction automatique des .po via OpenRouter / LLM
-# Provider must be 'litellm'; model uses 'openrouter/<model>' prefix for litellm routing
-# Primary: meta-llama/llama-4-scout:free (more reliable than gemma on free tier)
-# Fallback: openrouter/google/gemma-4-31b-it:free
 OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY', '')
 TRANSLATEBOT_PROVIDER = 'litellm'
 TRANSLATEBOT_MODEL = 'openrouter/openai/gpt-oss-20b:free'
 TRANSLATEBOT_API_KEY = os.environ.get('OPENROUTER_API_KEY', '')
 TRANSLATEBOT_SOURCE_LANGUAGE = 'zh-hans'
+
+# Tawk.to Live Chat Widget
+# Get these from your Tawk.to dashboard → Administration → Property Settings
+TAWKTO_PROPERTY_ID = os.environ.get('TAWKTO_PROPERTY_ID', '')
+TAWKTO_WIDGET_ID = os.environ.get('TAWKTO_WIDGET_ID', 'default')
 
 TIME_ZONE = 'UTC'
 USE_I18N = True

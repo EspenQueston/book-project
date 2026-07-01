@@ -32,3 +32,11 @@ def congo_locations_context(request):
         'congo_departments': CONGO_DEPARTMENTS,
         'congo_departments_json': json.dumps(get_departments_for_js()),
     }
+
+
+def tawkto(request):
+    """Expose Tawk.to widget credentials to all templates."""
+    return {
+        'TAWKTO_PROPERTY_ID': getattr(settings, 'TAWKTO_PROPERTY_ID', ''),
+        'TAWKTO_WIDGET_ID': getattr(settings, 'TAWKTO_WIDGET_ID', 'default'),
+    }
