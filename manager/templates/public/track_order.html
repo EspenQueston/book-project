@@ -1,25 +1,50 @@
-{% extends 'public/base.html' %}
+﻿{% extends 'public/base.html' %}
 {% load i18n %}
 {% load currency_filters %}
+{% load order_status_tags %}
 
-{% block title %}{% trans "Track Order" %} - {% trans "DUNO 360" %}{% endblock %}
+{% block title %}订单跟踪 - DUNO 360{% endblock %}
 
 {% block content %}
 <style>
     .track-container {
         max-width: min(1240px, 96vw);
-        margin: 40px auto 60px;
+        margin: 0 auto 60px;
         padding: 0 16px;
     }
     
     .track-header {
         text-align: center;
-        margin-bottom: 40px;
-        padding: 40px 0;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        margin: 0 calc(50% - 50vw) 40px;
+        min-height: clamp(330px, 44vh, 520px);
+        padding: 92px max(24px, calc((100vw - 1180px) / 2)) 62px;
+        background:
+            radial-gradient(circle at 18% 18%, rgba(96,165,250,.36), transparent 28%),
+            radial-gradient(circle at 84% 20%, rgba(14,165,233,.22), transparent 26%),
+            radial-gradient(circle at 50% 105%, rgba(255,255,255,.18), transparent 36%),
+            linear-gradient(135deg, #14245f 0%, #1d4ed8 100%);
         color: white;
-        border-radius: 15px;
+        border-radius: 0 0 32px 32px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 28px 70px rgba(20,36,95,.25);
     }
+    .track-header::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: linear-gradient(rgba(255,255,255,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.08) 1px, transparent 1px);
+        background-size: 52px 52px;
+        mask-image: linear-gradient(to bottom, rgba(0,0,0,.82), transparent 88%);
+        pointer-events: none;
+    }
+    .track-header > * { position: relative; z-index: 1; }
+    .track-header h1 { font-size: clamp(2.1rem, 4vw, 4.2rem); font-weight: 950; letter-spacing: -.06em; text-shadow: 0 18px 48px rgba(0,0,0,.24); }
+    .track-header p { max-width: 760px; font-size: clamp(1rem, 1.6vw, 1.32rem); opacity: .92; }
     
     .track-form {
         background: white;
@@ -38,12 +63,12 @@
     }
     
     .order-input:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        border-color: #1d4ed8;
+        box-shadow: 0 0 0 4px rgba(29,78,216,0.12);
     }
     
     .track-btn {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #14245f 0%, #1d4ed8 100%);
         border: none;
         border-radius: 10px;
         padding: 15px 30px;
@@ -54,7 +79,7 @@
     
     .track-btn:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        box-shadow: 0 12px 32px rgba(29,78,216,0.34);
         color: white;
     }
     
@@ -223,24 +248,25 @@
     }
     .desk-auto-kpi {
         display: grid;
-        grid-template-columns: repeat(4, minmax(120px, 1fr));
+        grid-template-columns: repeat(5, minmax(100px, 1fr));
         gap: 10px;
         margin-bottom: 14px;
     }
     .desk-kpi-card {
-        background: linear-gradient(135deg, #f8f9ff, #f4f0ff);
-        border: 1px solid #ecebff;
-        border-radius: 12px;
-        padding: 12px 10px;
+        background: linear-gradient(135deg, #f8fbff, #eef5ff);
+        border: 1px solid rgba(29,78,216,.12);
+        border-radius: 14px;
+        padding: 14px 12px;
+        box-shadow: 0 10px 24px rgba(29,78,216,.07);
     }
-    .desk-kpi-num { font-size: 20px; font-weight: 800; color: #4c51bf; line-height: 1; }
+    .desk-kpi-num { font-size: 22px; font-weight: 900; color: #1d4ed8; line-height: 1; }
     .desk-kpi-lbl { font-size: 11px; color: #6b7280; margin-top: 4px; }
     .desk-filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
     .desk-filter-chip {
         border-radius: 999px; padding: 6px 12px; border: 1px solid #e3e7f1;
         text-decoration: none; color: #4b5563; font-size: 12px; font-weight: 700; background: #fff;
     }
-    .desk-filter-chip.active { background: linear-gradient(135deg,#667eea,#764ba2); border-color: transparent; color: #fff; }
+    .desk-filter-chip.active { background: linear-gradient(135deg,#1d4ed8,#14245f); border-color: transparent; color: #fff; }
     .desk-order-table th { font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: .3px; }
     .desk-order-table td { vertical-align: middle; }
     .desk-order-cards { display: flex; flex-direction: column; gap: 12px; }
@@ -248,12 +274,12 @@
         padding: 18px 20px;
         border-radius: 18px;
         background: linear-gradient(145deg, #fff 0%, #f8fafc 100%);
-        border: 1px solid rgba(102, 126, 234, 0.12);
+        border: 1px solid rgba(29,78,216, 0.12);
         box-shadow: 0 6px 22px rgba(15, 23, 42, 0.06);
         transition: box-shadow 0.2s, transform 0.15s;
     }
     .desk-oc:hover {
-        box-shadow: 0 12px 32px rgba(102, 126, 234, 0.14);
+        box-shadow: 0 16px 38px rgba(29,78,216, 0.16);
         transform: translateY(-2px);
     }
     .desk-oc-row1 {
@@ -275,7 +301,7 @@
         padding-top: 12px;
         border-top: 1px solid rgba(226, 232, 240, 0.9);
     }
-    .desk-oc-amt { font-weight: 800; font-size: 1.1rem; color: #667eea; white-space: nowrap; }
+    .desk-oc-amt { font-weight: 900; font-size: 1.1rem; color: #1d4ed8; white-space: nowrap; }
     .desk-oc-meta { font-size: 0.8rem; color: #64748b; font-weight: 600; }
     .desk-channel-tag {
         display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700;
@@ -289,6 +315,28 @@
     .desk-status-shipped { background: #e8f9ef; color: #047857; }
     .desk-status-delivered { background: #d1fae5; color: #065f46; }
     .desk-status-cancelled { background: #fee2e2; color: #b91c1c; }
+    .track-empty-state {
+        margin-top: 16px;
+        border: 1px dashed rgba(29,78,216,.24);
+        background: linear-gradient(135deg, rgba(248,251,255,.96), rgba(238,245,255,.9));
+        border-radius: 22px;
+        padding: 42px 24px;
+        text-align: center;
+        color: #64748b;
+    }
+    .track-empty-state i {
+        width: 72px;
+        height: 72px;
+        border-radius: 24px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, rgba(20,36,95,.09), rgba(29,78,216,.12));
+        color: #1d4ed8;
+        font-size: 1.9rem;
+        margin-bottom: 16px;
+    }
+    .track-empty-state h5 { color:#0f172a; font-weight:900; margin-bottom:8px; }
     .track-pr-wrap {
         background: linear-gradient(135deg, #fffbeb 0%, #fef9c3 100%);
         border: 1px solid rgba(251, 191, 36, 0.45);
@@ -306,7 +354,7 @@
     .track-pr-card:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(0,0,0,0.07); }
     .track-pr-thumb { width: 52px; height: 52px; border-radius: 10px; object-fit: cover; background: #f8fafc; flex-shrink: 0; border: 1px solid #e2e8f0; }
     .track-pr-name { font-weight: 700; font-size: 0.88rem; color: #1e293b; line-height: 1.3; flex: 1; min-width: 0; }
-    .track-pr-cta { font-weight: 800; font-size: 0.75rem; color: #667eea; white-space: nowrap; }
+    .track-pr-cta { font-weight: 900; font-size: 0.75rem; color: #1d4ed8; white-space: nowrap; }
     @media (max-width: 768px) {
         .track-pr-grid { grid-template-columns: 1fr; }
     }
@@ -356,8 +404,8 @@
         transition: all .15s;
     }
     .orders-filter-tab.active {
-        color: #667eea;
-        border-bottom-color: #667eea;
+        color: #1d4ed8;
+        border-bottom-color: #1d4ed8;
     }
 
     /* Search bar (mobile orders) */
@@ -378,11 +426,11 @@
         background: #F5F5F5;
         outline: none;
     }
-    .orders-mobile-search input:focus { border-color: #667eea; }
+    .orders-mobile-search input:focus { border-color: #1d4ed8; }
     .orders-mobile-search button {
         width: 34px; height: 34px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: linear-gradient(135deg, #1d4ed8, #14245f);
         border: none;
         color: #fff;
         font-size: 14px;
@@ -416,13 +464,13 @@
         font-size: 13px; font-weight: 700; color: #333;
         display: flex; align-items: center; gap: 6px;
     }
-    .order-card-vendor i { color: #667eea; }
+    .order-card-vendor i { color: #1d4ed8; }
     .order-card-status {
         font-size: 11px; font-weight: 700;
         padding: 3px 10px; border-radius: 20px;
     }
     .order-card-status.pending   { background: #fff7e0; color: #f59e0b; }
-    .order-card-status.processing{ background: #e0f0ff; color: #667eea; }
+    .order-card-status.processing{ background: #e0f0ff; color: #1d4ed8; }
     .order-card-status.shipped   { background: #e8f5e9; color: #10b981; }
     .order-card-status.delivered { background: #d1fae5; color: #059669; }
     .order-card-status.cancelled { background: #fdecea; color: #E4393C; }
@@ -463,8 +511,8 @@
         border: none; cursor: pointer; text-decoration: none;
         display: inline-flex; align-items: center; gap: 4px;
     }
-    .order-btn-primary { background: linear-gradient(135deg,#667eea,#764ba2); color: #fff; }
-    .order-btn-outline { background: #fff; color: #667eea; border: 1px solid #667eea; }
+    .order-btn-primary { background: linear-gradient(135deg,#14245f,#1d4ed8); color: #fff; }
+    .order-btn-outline { background: #fff; color: #1d4ed8; border: 1px solid #1d4ed8; }
     .order-btn-pay { background: linear-gradient(135deg,#10b981,#059669); color: #fff; }
     .order-btn-cancel { background: #fff; color: #E4393C; border: 1px solid #E4393C; }
 }
@@ -546,7 +594,7 @@ html[data-theme="dark"] .desk-auto-wrap {
     box-shadow: 0 10px 30px rgba(0,0,0,0.15);
 }
 html[data-theme="dark"] .desk-kpi-card {
-    background: linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.06));
+    background: linear-gradient(135deg, rgba(29,78,216,0.08), rgba(20,36,95,0.06));
     border-color: var(--border-subtle);
 }
 html[data-theme="dark"] .desk-kpi-num {
@@ -561,7 +609,7 @@ html[data-theme="dark"] .desk-filter-chip {
     color: var(--text-secondary);
 }
 html[data-theme="dark"] .desk-status-pending { background: rgba(245,158,11,0.15); color: #fbbf24; }
-html[data-theme="dark"] .desk-status-processing { background: rgba(102,126,234,0.15); color: #818cf8; }
+html[data-theme="dark"] .desk-status-processing { background: rgba(29,78,216,0.15); color: #818cf8; }
 html[data-theme="dark"] .desk-status-shipped { background: rgba(16,185,129,0.15); color: #34d399; }
 html[data-theme="dark"] .desk-status-delivered { background: rgba(16,185,129,0.2); color: #34d399; }
 html[data-theme="dark"] .desk-status-cancelled { background: rgba(239,68,68,0.15); color: #f87171; }
@@ -637,9 +685,9 @@ html[data-theme="dark"] .order-btn-cancel {
     <!-- Filter Tabs -->
     <div class="orders-filter-bar">
         <div class="orders-filter-tab active" data-filter="all" onclick="filterOrders('all', this)" data-zh="全部" data-en="All" data-fr="Tout">全部</div>
-        <div class="orders-filter-tab" data-filter="payment_pending" onclick="filterOrders('payment_pending', this)" data-zh="待付款" data-en="Pending" data-fr="En attente">待付款</div>
+        <div class="orders-filter-tab" data-filter="pending" onclick="filterOrders('pending', this)" data-zh="待付款" data-en="Pending" data-fr="En attente">待付款</div>
         <div class="orders-filter-tab" data-filter="processing" onclick="filterOrders('processing', this)" data-zh="处理中" data-en="Processing" data-fr="En cours">处理中</div>
-        <div class="orders-filter-tab" data-filter="shipped" onclick="filterOrders('shipped', this)" data-zh="已发货" data-en="Shipped" data-fr="Livré">已发货</div>
+        <div class="orders-filter-tab" data-filter="shipped" onclick="filterOrders('shipped', this)" data-zh="已发货" data-en="Shipped" data-fr="Expédié">已发货</div>
         <div class="orders-filter-tab" data-filter="delivered" onclick="filterOrders('delivered', this)" data-zh="已完成" data-en="Delivered" data-fr="Terminé">已完成</div>
         <div class="orders-filter-tab" data-filter="cancelled" onclick="filterOrders('cancelled', this)" data-zh="已取消" data-en="Cancelled" data-fr="Annulé">已取消</div>
     </div>
@@ -671,7 +719,7 @@ html[data-theme="dark"] .order-btn-cancel {
 
     {% if orders %}
     {% for order in orders %}
-    <div class="order-mobile-card" data-status="{{ order.status }}" data-num="{{ order.order_number|lower }}">
+    <div class="order-mobile-card" data-status="{{ order.status }}" data-bucket="{{ order.status|status_bucket }}" data-num="{{ order.order_number|lower }}">
         <!-- Card header -->
         <div class="order-mobile-card-header">
             <span class="order-card-vendor">
@@ -689,7 +737,7 @@ html[data-theme="dark"] .order-btn-cancel {
                 {% if item.book and item.book.cover_image %}
                 <img class="order-item-img" src="{{ item.book.get_cover_url }}" alt="{{ item.book.name }}">
                 {% else %}
-                <div class="order-item-img d-flex align-items-center justify-content-center" style="background:#f0eaff;"><i class="fas fa-book" style="color:#667eea;font-size:20px;"></i></div>
+                <div class="order-item-img d-flex align-items-center justify-content-center" style="background:#f0eaff;"><i class="fas fa-book" style="color:#1d4ed8;font-size:20px;"></i></div>
                 {% endif %}
                 <div class="order-item-info">
                     <div class="order-item-name">{% if item.book %}{{ item.book.name }}{% else %}{{ item.product_name|default:"商品" }}{% endif %}</div>
@@ -723,7 +771,7 @@ html[data-theme="dark"] .order-btn-cancel {
 
     {% if mkt_orders %}
     {% for morder in mkt_orders %}
-    <div class="order-mobile-card" data-status="{{ morder.status }}" data-num="{{ morder.order_number|lower }}">
+    <div class="order-mobile-card" data-status="{{ morder.status }}" data-bucket="{{ morder.status|status_bucket }}" data-num="{{ morder.order_number|lower }}">
         <div class="order-mobile-card-header">
             <span class="order-card-vendor">
                 <i class="fas fa-store"></i>
@@ -739,7 +787,7 @@ html[data-theme="dark"] .order-btn-cancel {
                 {% if item.product and item.product.image %}
                 <img class="order-item-img" src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
                 {% else %}
-                <div class="order-item-img d-flex align-items-center justify-content-center" style="background:#f3f0ff;"><i class="fas fa-store" style="color:#764ba2;font-size:20px;"></i></div>
+                <div class="order-item-img d-flex align-items-center justify-content-center" style="background:#f3f0ff;"><i class="fas fa-store" style="color:#14245f;font-size:20px;"></i></div>
                 {% endif %}
                 <div class="order-item-info">
                     <div class="order-item-name">{% if item.product %}{{ item.product.name }}{% else %}商品{% endif %}</div>
@@ -769,7 +817,7 @@ html[data-theme="dark"] .order-btn-cancel {
     <div class="orders-empty">
         <i class="fas fa-box-open"></i>
         <p style="font-size:14px;" data-zh="暂无订单记录" data-en="No orders found" data-fr="Aucune commande">暂无订单记录</p>
-        <a href="{% url 'manager:public_books' %}" class="btn" style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-radius:20px;padding:10px 24px;font-size:13px;font-weight:600;text-decoration:none;">
+        <a href="{% url 'manager:public_books' %}" class="btn" style="background:linear-gradient(135deg,#1d4ed8,#14245f);color:#fff;border-radius:20px;padding:10px 24px;font-size:13px;font-weight:600;text-decoration:none;">
             <i class="fas fa-book me-2"></i><span data-zh="去购书" data-en="Browse Books" data-fr="Parcourir les livres">去购书</span>
         </a>
     </div>
@@ -787,7 +835,7 @@ html[data-theme="dark"] .order-btn-cancel {
                 <input type="hidden" name="search_type" value="order_number">
                 <div style="display:flex;gap:8px;">
                     <input type="text" name="order_number" placeholder="输入订单号..." style="flex:1;border:1px solid #eee;border-radius:20px;padding:9px 14px;font-size:13px;background:#F5F5F5;outline:none;">
-                    <button type="submit" style="padding:9px 16px;background:linear-gradient(135deg,#667eea,#764ba2);border:none;border-radius:20px;color:#fff;font-size:13px;font-weight:600;">查询</button>
+                    <button type="submit" style="padding:9px 16px;background:linear-gradient(135deg,#1d4ed8,#14245f);border:none;border-radius:20px;color:#fff;font-size:13px;font-weight:600;">查询</button>
                 </div>
             </form>
         </div>
@@ -800,9 +848,9 @@ html[data-theme="dark"] .order-btn-cancel {
     <!-- Header -->
     <div class="track-header">
         <h1 class="mb-3">
-            <i class="fas fa-search me-3"></i>{% trans "Track Order" %}
+            <i class="fas fa-search me-3"></i><span data-zh="订单跟踪" data-en="Track Order" data-fr="Suivi de commande">订单跟踪</span>
         </h1>
-        <p class="mb-0">{% trans "Enter your order number or email to check order status and shipping" %}</p>
+        <p class="mb-0"><span data-zh="输入订单号或邮箱，查看订单状态与物流进度。" data-en="Enter your order number or email to check order status and shipping." data-fr="Saisissez votre numéro de commande ou e-mail pour consulter le statut et la livraison.">输入订单号或邮箱，查看订单状态与物流进度。</span></p>
     </div>
 
     <!-- Search Form -->
@@ -810,12 +858,12 @@ html[data-theme="dark"] .order-btn-cancel {
         <ul class="nav nav-tabs mb-4" id="searchTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="order-tab" data-bs-toggle="tab" data-bs-target="#order-search" type="button" role="tab">
-                    <i class="fas fa-hashtag"></i> {% trans "Order Number" %}
+                    <i class="fas fa-hashtag"></i> <span data-zh="订单号" data-en="Order Number" data-fr="N° de commande">订单号</span>
                 </button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="email-tab" data-bs-toggle="tab" data-bs-target="#email-search" type="button" role="tab">
-                    <i class="fas fa-envelope"></i> {% trans "Email" %}
+                    <i class="fas fa-envelope"></i> <span data-zh="邮箱" data-en="Email" data-fr="E-mail">邮箱</span>
                 </button>
             </li>
         </ul>
@@ -850,24 +898,33 @@ html[data-theme="dark"] .order-btn-cancel {
                 <form method="post">
                     {% csrf_token %}
                     <input type="hidden" name="search_type" value="email">
-                    <div class="row align-items-end">
-                        <div class="col-md-8">
+                    <div class="row align-items-end g-3">
+                        <div class="col-md-5">
                             <label for="customer_email" class="form-label">{% trans "Customer Email" %}</label>
-                            <input type="email" 
-                                   class="form-control order-input" 
-                                   id="customer_email" 
-                                   name="customer_email" 
+                            <input type="email"
+                                   class="form-control order-input"
+                                   id="customer_email"
+                                   name="customer_email"
                                    placeholder="{% trans "Enter your email address" %}"
                                    required>
                         </div>
                         <div class="col-md-4">
+                            <label for="email_order_number" class="form-label">{% trans "Security order number" %}</label>
+                            <input type="text"
+                                   class="form-control order-input"
+                                   id="email_order_number"
+                                   name="email_order_number"
+                                   placeholder="{% trans "One order number from this email" %}"
+                                   required>
+                        </div>
+                        <div class="col-md-3">
                             <button type="submit" class="btn track-btn w-100">
-                                <i class="fas fa-search me-2"></i>{% trans "Search Order" %}
+                                <i class="fas fa-shield-alt me-2"></i>{% trans "Verify & Search" %}
                             </button>
                         </div>
                     </div>
                     <small class="text-muted mt-2 d-block">
-                        <i class="fas fa-info-circle"></i> {% trans "All orders linked to this email will be shown" %}
+                        <i class="fas fa-lock me-1"></i> {% trans "For privacy, email lookup requires one matching order number as proof of ownership." %}
                     </small>
                 </form>
             </div>
@@ -903,34 +960,35 @@ html[data-theme="dark"] .order-btn-cancel {
     </div>
     {% endif %}
 
-    {% if site_user and desktop_order_rows %}
+    {% if site_user %}
     <div class="desk-auto-wrap">
         <div class="desk-auto-top">
             <div>
-                <h4 class="mb-1"><i class="fas fa-layer-group me-2"></i>{% trans "My Order Overview" %}</h4>
+                <h4 class="mb-1"><i class="fas fa-layer-group me-2"></i><span data-zh="我的订单概览" data-en="My Order Overview" data-fr="Mes commandes">我的订单概览</span></h4>
                 <div class="text-muted" style="font-size:13px;">
-                    {% trans "Aggregated view of your book and marketplace orders with real-time status tracking." %}
+                    <span data-zh="图书与市场订单汇总，实时跟踪状态。" data-en="Aggregated view of your book and marketplace orders with real-time status tracking." data-fr="Vue consolidée de vos commandes livres et marketplace avec suivi en temps réel.">图书与市场订单汇总，实时跟踪状态。</span>
                 </div>
             </div>
             <a href="{% url 'manager:user_profile' %}" class="btn btn-sm btn-outline-primary">
-                <i class="fas fa-user me-1"></i>{% trans "Back to Profile" %}
+                <i class="fas fa-user me-1"></i><span data-zh="返回个人中心" data-en="Back to Profile" data-fr="Retour au profil">返回个人中心</span>
             </a>
         </div>
 
         <div class="desk-auto-kpi">
-            <div class="desk-kpi-card"><div class="desk-kpi-num">{{ desktop_status_counts.all }}</div><div class="desk-kpi-lbl">{% trans "All Orders" %}</div></div>
-            <div class="desk-kpi-card"><div class="desk-kpi-num">{{ desktop_status_counts.pending }}</div><div class="desk-kpi-lbl">{% trans "Pending" %}</div></div>
-            <div class="desk-kpi-card"><div class="desk-kpi-num">{{ desktop_status_counts.shipped }}</div><div class="desk-kpi-lbl">{% trans "In Transit" %}</div></div>
-            <div class="desk-kpi-card"><div class="desk-kpi-num">{{ desktop_status_counts.delivered }}</div><div class="desk-kpi-lbl">{% trans "Completed" %}</div></div>
+            <div class="desk-kpi-card"><div class="desk-kpi-num">{{ desktop_status_counts.all }}</div><div class="desk-kpi-lbl" data-zh="全部" data-en="All Orders" data-fr="Toutes">全部</div></div>
+            <div class="desk-kpi-card"><div class="desk-kpi-num">{{ desktop_status_counts.pending }}</div><div class="desk-kpi-lbl" data-zh="待付款" data-en="Pending" data-fr="En attente">待付款</div></div>
+            <div class="desk-kpi-card"><div class="desk-kpi-num">{{ desktop_status_counts.processing }}</div><div class="desk-kpi-lbl" data-zh="处理中" data-en="Processing" data-fr="En cours">处理中</div></div>
+            <div class="desk-kpi-card"><div class="desk-kpi-num">{{ desktop_status_counts.shipped }}</div><div class="desk-kpi-lbl" data-zh="运输中" data-en="In Transit" data-fr="Expédié">运输中</div></div>
+            <div class="desk-kpi-card"><div class="desk-kpi-num">{{ desktop_status_counts.delivered }}</div><div class="desk-kpi-lbl" data-zh="已完成" data-en="Completed" data-fr="Terminé">已完成</div></div>
         </div>
 
         <div class="desk-filter-row">
-            <a class="desk-filter-chip {% if not status_filter %}active{% endif %}" href="{% url 'manager:track_order' %}">{% trans "All" %}</a>
-            <a class="desk-filter-chip {% if status_filter == 'pending' %}active{% endif %}" href="{% url 'manager:track_order' %}?status=pending">{% trans "Pending Payment" %}</a>
-            <a class="desk-filter-chip {% if status_filter == 'processing' %}active{% endif %}" href="{% url 'manager:track_order' %}?status=processing">{% trans "Processing" %}</a>
-            <a class="desk-filter-chip {% if status_filter == 'shipped' %}active{% endif %}" href="{% url 'manager:track_order' %}?status=shipped">{% trans "Shipped" %}</a>
-            <a class="desk-filter-chip {% if status_filter == 'delivered' %}active{% endif %}" href="{% url 'manager:track_order' %}?status=delivered">{% trans "Completed" %}</a>
-            <a class="desk-filter-chip {% if status_filter == 'cancelled' %}active{% endif %}" href="{% url 'manager:track_order' %}?status=cancelled">{% trans "Cancelled" %}</a>
+            <a class="desk-filter-chip {% if not status_filter %}active{% endif %}" href="{% url 'manager:track_order' %}"><span data-zh="全部" data-en="All" data-fr="Tout">全部</span></a>
+            <a class="desk-filter-chip {% if status_filter == 'pending' %}active{% endif %}" href="{% url 'manager:track_order' %}?status=pending"><span data-zh="待付款" data-en="Pending Payment" data-fr="En attente de paiement">待付款</span></a>
+            <a class="desk-filter-chip {% if status_filter == 'processing' %}active{% endif %}" href="{% url 'manager:track_order' %}?status=processing"><span data-zh="处理中" data-en="Processing" data-fr="En cours">处理中</span></a>
+            <a class="desk-filter-chip {% if status_filter == 'shipped' %}active{% endif %}" href="{% url 'manager:track_order' %}?status=shipped"><span data-zh="已发货" data-en="Shipped" data-fr="Expédié">已发货</span></a>
+            <a class="desk-filter-chip {% if status_filter == 'delivered' %}active{% endif %}" href="{% url 'manager:track_order' %}?status=delivered"><span data-zh="已完成" data-en="Completed" data-fr="Terminé">已完成</span></a>
+            <a class="desk-filter-chip {% if status_filter == 'cancelled' %}active{% endif %}" href="{% url 'manager:track_order' %}?status=cancelled"><span data-zh="已取消" data-en="Cancelled" data-fr="Annulé">已取消</span></a>
         </div>
 
         <div class="desk-order-cards">
@@ -949,15 +1007,21 @@ html[data-theme="dark"] .order-btn-cancel {
                     </div>
                     <div class="text-end">
                         <div class="desk-oc-amt">{{ row.total_amount|fcfa }}</div>
-                        <div class="desk-oc-meta">{{ row.item_count }} {% trans "items" %}</div>
+                        <div class="desk-oc-meta">{{ row.item_count }} <span data-zh="件" data-en="items" data-fr="articles">件</span></div>
                     </div>
                 </div>
                 <div class="desk-oc-row2">
                     <span class="desk-oc-meta"><i class="far fa-clock me-1"></i>{{ row.created_at|date:"Y-m-d H:i" }}</span>
                     <a href="{{ row.detail_url }}" class="btn btn-sm btn-primary rounded-pill px-4 fw-bold">
-                        <i class="fas fa-eye me-1"></i>{% trans "View Details" %}
+                        <i class="fas fa-eye me-1"></i><span data-zh="查看详情" data-en="View Details" data-fr="Voir détails">查看详情</span>
                     </a>
                 </div>
+            </div>
+            {% empty %}
+            <div class="track-empty-state">
+                <i class="fas fa-box-open"></i>
+                <h5 data-zh="此状态暂无订单" data-en="No orders in this status" data-fr="Aucune commande dans cet état">此状态暂无订单</h5>
+                <p class="mb-0" data-zh="你目前没有任何订单处于此状态，请选择其他状态或返回全部订单。" data-en="You currently have no orders in this status. Try another status or return to all orders." data-fr="Vous n’avez actuellement aucune commande dans cet état. Essayez un autre statut ou revenez à toutes les commandes.">你目前没有任何订单处于此状态，请选择其他状态或返回全部订单。</p>
             </div>
             {% endfor %}
         </div>
@@ -974,7 +1038,7 @@ html[data-theme="dark"] .order-btn-cancel {
         {% if orders %}
         <h5 class="mb-3"><i class="fas fa-book me-2"></i>{% trans "Book Orders" %}</h5>
         {% for order in orders %}
-        <div class="card mb-3" style="border-left: 4px solid #667eea;">
+        <div class="card mb-3" style="border-left: 4px solid #1d4ed8;">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <div>
@@ -1030,7 +1094,7 @@ html[data-theme="dark"] .order-btn-cancel {
         {% if mkt_orders %}
         <h5 class="mb-3 {% if orders %}mt-4{% endif %}"><i class="fas fa-store me-2"></i>{% trans "Market Orders" %}</h5>
         {% for morder in mkt_orders %}
-        <div class="card mb-3" style="border-left: 4px solid #764ba2;">
+        <div class="card mb-3" style="border-left: 4px solid #14245f;">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <div>
@@ -1625,17 +1689,13 @@ function getCookie(name) {
 })();
 
 function filterOrders(filter, tabEl) {
-    // Update active tab
     document.querySelectorAll('.orders-filter-tab').forEach(function(t) { t.classList.remove('active'); });
     if (tabEl) tabEl.classList.add('active');
-    // Filter cards
+    if (filter === 'payment_pending') filter = 'pending';
     document.querySelectorAll('.order-mobile-card').forEach(function(card) {
-        var status = card.getAttribute('data-status') || '';
-        if (filter === 'all' || status === filter) {
-            card.style.display = '';
-        } else {
-            card.style.display = 'none';
-        }
+        var bucket = card.getAttribute('data-bucket') || '';
+        var show = filter === 'all' || bucket === filter;
+        card.style.display = show ? '' : 'none';
     });
 }
 

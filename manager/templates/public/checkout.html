@@ -1,4 +1,4 @@
-{% extends 'public/base.html' %}
+﻿{% extends 'public/base.html' %}
 {% load i18n static %}
 {% load currency_filters %}
 
@@ -8,8 +8,8 @@
 <style>
 /* ===== Base / Desktop Styles ===== */
 :root {
-    --ck-primary: #667eea;
-    --ck-primary-end: #764ba2;
+    --ck-primary: #1d4ed8;
+    --ck-primary-end: #14245f;
     --ck-accent: #E4393C;
     --ck-green: #28a745;
     --ck-bg: #ffffff;
@@ -130,7 +130,7 @@ html[data-theme="dark"] {
 .payment-option.selected {
     opacity: 1;
     transform: scale(1);
-    box-shadow: 0 14px 40px rgba(102,126,234,0.22);
+    box-shadow: 0 14px 40px rgba(29,78,216,0.22);
 }
 .payment-option.selected .pm-check {
     color: #fff;
@@ -153,7 +153,7 @@ html[data-theme="dark"] {
     min-width: 76px !important;
     max-width: 88px;
     justify-content: center;
-    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    background: linear-gradient(135deg, #1d4ed8, #14245f) !important;
     color: #ffffff !important;
     font-weight: 800 !important;
     font-size: 0.92rem !important;
@@ -192,12 +192,12 @@ html[data-theme="dark"] {
 .payment-option:hover {
     border-color: var(--ck-primary);
     transform: translateY(-3px);
-    box-shadow: 0 12px 32px rgba(102,126,234,0.15);
+    box-shadow: 0 12px 32px rgba(29,78,216,0.15);
 }
 .payment-option.selected {
     border-color: var(--ck-primary);
-    background: linear-gradient(160deg, rgba(102,126,234,0.08), rgba(118,75,162,0.05));
-    box-shadow: 0 12px 36px rgba(102,126,234,0.2);
+    background: linear-gradient(160deg, rgba(29,78,216,0.08), rgba(20,36,95,0.05));
+    box-shadow: 0 12px 36px rgba(29,78,216,0.2);
 }
 .payment-option.selected::before { opacity: 1; }
 .payment-option[data-method="pawapay"].selected {
@@ -288,9 +288,25 @@ html[data-theme="dark"] {
     background: var(--ck-input-bg);
     color: var(--ck-text);
 }
+select.form-control,
+select.form-select {
+    cursor: pointer;
+    appearance: auto;
+    -webkit-appearance: menulist;
+    min-height: 48px;
+    padding-right: 2rem;
+    background-image: none;
+}
+select.form-control:disabled,
+select.form-select:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    background-color: var(--ck-bg-summary);
+}
+#checkoutCityText.d-none { display: none !important; }
 .form-control:focus {
     border-color: var(--ck-primary);
-    box-shadow: 0 0 0 0.2rem rgba(102,126,234,.25);
+    box-shadow: 0 0 0 0.2rem rgba(29,78,216,.25);
 }
 
 .btn-checkout {
@@ -425,8 +441,8 @@ html[data-theme="dark"] .ck-guarantee-banner {
     }
     .form-control:focus {
         background: #fff;
-        border-color: #667eea;
-        box-shadow: 0 0 0 4px rgba(102,126,234,0.12);
+        border-color: #1d4ed8;
+        box-shadow: 0 0 0 4px rgba(29,78,216,0.12);
     }
     html[data-theme="dark"] .form-control {
         background: var(--ck-input-bg);
@@ -468,9 +484,9 @@ html[data-theme="dark"] .ck-guarantee-banner {
         transition: all 0.2s ease;
     }
     .payment-option.selected {
-        border-color: #667eea;
-        background: linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.06));
-        box-shadow: 0 4px 14px rgba(102,126,234,0.15);
+        border-color: #1d4ed8;
+        background: linear-gradient(135deg, rgba(29,78,216,0.08), rgba(20,36,95,0.06));
+        box-shadow: 0 4px 14px rgba(29,78,216,0.15);
     }
     .payment-icon {
         font-size: 1.5rem;
@@ -580,14 +596,14 @@ html[data-theme="dark"] .ck-guarantee-banner {
         background: rgba(255,255,255,0.92);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
-        border-top: 1px solid rgba(102,126,234,0.12);
+        border-top: 1px solid rgba(29,78,216,0.12);
         padding: 10px 14px;
         z-index: 900;
         box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.1);
     }
     .ck-pay-btn {
         width: 100%;
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: linear-gradient(135deg, #1d4ed8, #14245f);
         color: #fff;
         border: none;
         border-radius: 14px;
@@ -679,7 +695,7 @@ html[data-theme="dark"] .ck-guarantee-banner {
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label class="form-label">{% trans "国家" %} *</label>
-                                <select name="country" id="checkoutCountry" class="form-control" required>
+                                <select name="country" id="checkoutCountry" class="form-control form-select" required>
                                     <option value="">{% trans "请选择国家" %}</option>
                                     <optgroup label="{% trans '西非 — KKiaPay' %}">
                                         <option value="Benin" data-iso="BJ" data-phone="+229" data-kkiapay="1">🇧🇯 Bénin (+229)</option>
@@ -696,7 +712,7 @@ html[data-theme="dark"] .ck-guarantee-banner {
                                         <option value="Cameroon" data-iso="CM" data-phone="+237" data-pawapay="1">🇨🇲 Cameroun (+237)</option>
                                         <option value="Central African Republic" data-iso="CF" data-phone="+236" data-pawapay="1">🇨🇫 {% trans "中非共和国" %} (+236)</option>
                                         <option value="Chad" data-iso="TD" data-phone="+235" data-pawapay="1">🇹🇩 {% trans "乍得" %} (+235)</option>
-                                        <option value="Congo" data-iso="CG" data-phone="+242" data-pawapay="1">🇨🇬 Congo (+242)</option>
+                                        <option value="Congo" data-iso="CG" data-phone="+242" data-pawapay="1" selected>🇨🇬 Congo (+242)</option>
                                         <option value="Democratic Republic of the Congo" data-iso="CD" data-phone="+243" data-pawapay="1">🇨🇩 RDC (+243)</option>
                                         <option value="Equatorial Guinea" data-iso="GQ" data-phone="+240" data-pawapay="1">🇬🇶 {% trans "赤道几内亚" %} (+240)</option>
                                         <option value="Gabon" data-iso="GA" data-phone="+241" data-pawapay="1">🇬🇦 Gabon (+241)</option>
@@ -717,10 +733,13 @@ html[data-theme="dark"] .ck-guarantee-banner {
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label class="form-label">{% trans "城市" %} *</label>
-                                <select name="city" id="checkoutCity" class="form-control" disabled
+                                <select name="city" id="checkoutCity" class="form-control form-select" disabled
                                         aria-disabled="true">
                                     <option value="">{% trans "请先选择国家" %}</option>
                                 </select>
+                                <input type="text" id="checkoutCityText" class="form-control d-none"
+                                       disabled autocomplete="address-level2"
+                                       placeholder="{% trans '请输入您的城市' %}">
                             </div>
                         </div>
                     </div>
@@ -890,6 +909,7 @@ html[data-theme="dark"] .ck-guarantee-banner {
 const CK_I18N = {
     selectCountryFirst: "{% filter escapejs %}{% trans '请先选择国家' %}{% endfilter %}",
     selectCity: "{% filter escapejs %}{% trans '请选择城市' %}{% endfilter %}",
+    enterCity: "{% filter escapejs %}{% trans '请输入您的城市' %}{% endfilter %}",
     noCitiesForCountry: "{% filter escapejs %}{% trans '该国家暂无城市列表' %}{% endfilter %}",
     selectCountryForPayment: "{% filter escapejs %}{% trans '请先选择国家以显示可用的支付方式' %}{% endfilter %}",
     noOnlinePayment: "{% filter escapejs %}{% trans '当前国家暂不支持在线支付' %}{% endfilter %}",
@@ -997,15 +1017,46 @@ function attachPaymentOptionListeners() {
 
 document.getElementById('checkoutCountry').addEventListener('change', function() {
     updatePaymentMethods(this.value);
-    document.getElementById('selectedPaymentMethod').value = '';
     updatePhonePrefix();
     updateCityOptions(this.value);
 });
+
+function setCityFieldMode(mode) {
+    const citySelect = document.getElementById('checkoutCity');
+    const cityText = document.getElementById('checkoutCityText');
+    if (!citySelect || !cityText) return;
+
+    if (mode === 'text') {
+        citySelect.classList.add('d-none');
+        citySelect.disabled = true;
+        citySelect.removeAttribute('name');
+        citySelect.removeAttribute('required');
+        citySelect.setAttribute('aria-disabled', 'true');
+
+        cityText.classList.remove('d-none');
+        cityText.disabled = false;
+        cityText.setAttribute('name', 'city');
+        cityText.setAttribute('required', 'required');
+        cityText.setAttribute('aria-disabled', 'false');
+        return;
+    }
+
+    cityText.classList.add('d-none');
+    cityText.disabled = true;
+    cityText.removeAttribute('name');
+    cityText.removeAttribute('required');
+    cityText.value = '';
+    cityText.setAttribute('aria-disabled', 'true');
+
+    citySelect.classList.remove('d-none');
+    citySelect.setAttribute('name', 'city');
+}
 
 function updateCityOptions(country) {
     const citySelect = document.getElementById('checkoutCity');
     if (!citySelect) return;
 
+    setCityFieldMode('select');
     citySelect.innerHTML = '';
     citySelect.disabled = true;
     citySelect.removeAttribute('required');
@@ -1018,7 +1069,7 @@ function updateCityOptions(country) {
 
     const cities = checkoutCitiesByCountry[country] || [];
     if (!cities.length) {
-        citySelect.innerHTML = '<option value="">' + CK_I18N.noCitiesForCountry + '</option>';
+        setCityFieldMode('text');
         return;
     }
 
@@ -1106,8 +1157,17 @@ function updatePhonePrefix() {
 (function initCheckoutLocation() {
     const countrySelect = document.getElementById('checkoutCountry');
     if (!countrySelect) return;
+
+    if (!countrySelect.value) {
+        const pawapayDefault = countrySelect.querySelector('option[data-pawapay="1"]');
+        const kkiapayDefault = countrySelect.querySelector('option[data-kkiapay="1"]');
+        if (pawapayDefault) countrySelect.value = pawapayDefault.value;
+        else if (kkiapayDefault) countrySelect.value = kkiapayDefault.value;
+    }
+
     updatePhonePrefix();
     updateCityOptions(countrySelect.value);
+    updatePaymentMethods(countrySelect.value);
 })();
 
 function showQRCodeModal(method) {
@@ -1176,7 +1236,7 @@ function closeQRModal() {
                 <strong style="color: #e74c3c;">{% trans "金额" %}：{{ total_amount|fcfa }}</strong>
             </p>
 
-            <div id="qrTimer" style="color: var(--ck-primary, #667eea); font-weight: bold; margin-bottom: 20px;">
+            <div id="qrTimer" style="color: var(--ck-primary, #1d4ed8); font-weight: bold; margin-bottom: 20px;">
                 60秒后显示确认按钮...
             </div>
 

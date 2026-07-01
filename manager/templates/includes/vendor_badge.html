@@ -1,0 +1,18 @@
+{% load i18n %}
+{# Vendor badge: official > certified > approved seller #}
+{% if vendor.is_official %}
+<span class="v-badge v-badge-official" title="{% trans '平台官方直营' %}">
+    <i class="fas fa-certificate"></i>
+    <span data-zh="官方直营" data-en="Official Store" data-fr="Boutique officielle">{% trans "官方直营" %}</span>
+</span>
+{% elif vendor.get_certification_state == 'certified' %}
+<span class="v-badge v-badge-certified" title="{% trans '平台认证卖家 — 品质与服务保障' %}">
+    <i class="fas fa-certificate"></i>
+    <span data-zh="认证卖家" data-en="Certified Seller" data-fr="Vendeur certifié">{% trans "认证卖家" %}</span>
+</span>
+{% elif vendor.status == 'approved' %}
+<span class="v-badge v-badge-approved" title="{% trans '已批准入驻卖家' %}">
+    <i class="fas fa-store"></i>
+    <span data-zh="入驻卖家" data-en="Approved Seller" data-fr="Vendeur approuvé">{% trans "入驻卖家" %}</span>
+</span>
+{% endif %}

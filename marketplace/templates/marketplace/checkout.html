@@ -1,4 +1,4 @@
-{% extends "public/base.html" %}
+﻿{% extends "public/base.html" %}
 {% load i18n static %}
 {% load currency_filters %}
 
@@ -6,7 +6,7 @@
 
 {% block extra_css %}
 <style>
-    :root { --primary-color: #667eea; --secondary-color: #764ba2; --danger-color: #ef4444; }
+    :root { --primary-color: #1d4ed8; --secondary-color: #14245f; --danger-color: #ef4444; }
     .checkout-header {
         background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
         border-radius: 16px; padding: 30px; color: #fff; margin-bottom: 24px;
@@ -18,7 +18,7 @@
     .checkout-card h5 i { color: var(--primary-color); margin-right: 10px; }
 
     .form-floating label { color: #64748b; }
-    .form-control:focus { border-color: var(--primary-color); box-shadow: 0 0 0 0.2rem rgba(102,126,234,0.15); }
+    .form-control:focus { border-color: var(--primary-color); box-shadow: 0 0 0 0.2rem rgba(29,78,216,0.15); }
 
     /* Payment methods */
     .payment-methods { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; }
@@ -38,8 +38,8 @@
     .payment-option:hover { border-color: var(--primary-color); transform: translateY(-2px); }
     .payment-option.selected {
         opacity: 1; transform: scale(1);
-        border-color: var(--primary-color); background: rgba(102,126,234,0.07);
-        box-shadow: 0 12px 36px rgba(102,126,234,0.2);
+        border-color: var(--primary-color); background: rgba(29,78,216,0.07);
+        box-shadow: 0 12px 36px rgba(29,78,216,0.2);
     }
     .payment-option.selected .pm-check {
         color: #fff; border-color: transparent;
@@ -61,7 +61,7 @@
     }
     .ck-phone-prefix {
         min-width: 76px; justify-content: center;
-        background: linear-gradient(135deg, #667eea, #764ba2) !important;
+        background: linear-gradient(135deg, #1d4ed8, #14245f) !important;
         color: #fff !important; font-weight: 800 !important; font-size: 0.92rem !important;
         border: none !important;
     }
@@ -71,7 +71,7 @@
     .payment-name { font-weight: 600; font-size: 0.85rem; color: #334155; }
     .payment-provider { font-size: 0.72rem; color: #94a3b8; margin-top: 4px; }
     .payment-instructions { font-size: 0.72rem; color: #64748b; margin-top: 4px; max-width: 130px; line-height: 1.3; }
-    .form-select:focus { border-color: var(--primary-color); box-shadow: 0 0 0 0.2rem rgba(102,126,234,0.15); }
+    .form-select:focus { border-color: var(--primary-color); box-shadow: 0 0 0 0.2rem rgba(29,78,216,0.15); }
 
     /* Order items */
     .order-item { display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
@@ -92,7 +92,7 @@
         color: #fff; font-weight: 700; font-size: 1.1rem; cursor: pointer;
         transition: all 0.3s; margin-top: 16px;
     }
-    .btn-pay:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.4); }
+    .btn-pay:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(29,78,216,0.4); }
     .btn-back { display: block; text-align: center; margin-top: 12px; color: var(--primary-color); text-decoration: none; font-weight: 600; font-size: 0.9rem; }
     @media (max-width: 768px) {
         body { background:#f5f5f5; }
@@ -132,7 +132,7 @@
             width:auto;
             z-index:8998;
             border-radius:999px;
-            box-shadow:0 10px 24px rgba(102,126,234,.35);
+            box-shadow:0 10px 24px rgba(29,78,216,.35);
         }
     }
 
@@ -152,7 +152,7 @@
         background: var(--button-hover);
     }
     html[data-theme="dark"] .payment-option.selected {
-        background: rgba(102,126,234,0.15);
+        background: rgba(29,78,216,0.15);
         border-color: var(--brand-primary);
     }
     html[data-theme="dark"] .payment-name {
@@ -293,7 +293,7 @@
                     <div class="payment-methods mt-2" id="walletPaymentContainer">
                         <div class="payment-option" data-method="wallet" role="button" tabindex="0" aria-pressed="false">
                             <span class="pm-check"><i class="fas fa-check"></i></span>
-                            <i class="fas fa-wallet payment-icon" style="color:#667eea;"></i>
+                            <i class="fas fa-wallet payment-icon" style="color:#1d4ed8;"></i>
                             <span class="payment-name">{% trans "Wallet / Store Credit" %}</span>
                             <span class="payment-provider">{% trans "Balance" %}: {{ wallet_balance|fcfa }}</span>
                         </div>
@@ -352,7 +352,7 @@
                 <i class="fas fa-mobile-alt"></i> {% trans "请使用手机扫码完成支付" %}<br>
                 <strong style="color:#e74c3c;">{% trans "金额" %}：{{ total_price|fcfa }}</strong>
             </p>
-            <div id="qrTimer" style="color:#667eea;font-weight:bold;margin-bottom:20px;">60秒后显示确认按钮...</div>
+            <div id="qrTimer" style="color:#1d4ed8;font-weight:bold;margin-bottom:20px;">60秒后显示确认按钮...</div>
             <div id="confirmButtons" style="display:none;">
                 <p style="margin-bottom:12px;color:#333;">{% trans "请确认支付状态" %}：</p>
                 <div style="display:flex;gap:10px;justify-content:center;">

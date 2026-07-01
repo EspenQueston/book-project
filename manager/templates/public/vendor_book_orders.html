@@ -1,4 +1,4 @@
-{% extends 'public/vendor_panel_base.html' %}
+﻿{% extends 'public/vendor_panel_base.html' %}
 {% load i18n %}
 {% load currency_filters %}
 
@@ -7,12 +7,12 @@
 {% block panel_extra_css %}
 <style>
     .vp-page-head {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
         color: #fff;
         padding: 20px 22px;
         border-radius: 15px;
         margin-bottom: 18px;
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.28);
+        box-shadow: 0 8px 25px rgba(29, 78, 216, 0.28);
     }
     .vp-toolbar {
         background: var(--card-bg, #fff);
@@ -20,7 +20,7 @@
         padding: 16px;
         margin-bottom: 16px;
         box-shadow: 0 4px 18px rgba(0,0,0,0.06);
-        border: 1px solid rgba(102,126,234,0.1);
+        border: 1px solid rgba(29,78,216,0.1);
     }
     .vp-table-card {
         background: var(--card-bg, #fff);
@@ -29,7 +29,7 @@
         box-shadow: 0 4px 18px rgba(0,0,0,0.06);
     }
     .vp-table-card thead th {
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: linear-gradient(135deg, #1d4ed8, #14245f);
         color: #fff;
         font-size: 0.82rem;
         padding: 12px 14px;
@@ -38,12 +38,12 @@
     .vp-table-card tbody td { padding: 12px 14px; font-size: 0.88rem; vertical-align: middle; }
     .stat-pill {
         display: inline-flex; align-items: center; gap: 6px;
-        background: rgba(102,126,234,0.1);
+        background: rgba(29,78,216,0.1);
         border-radius: 20px;
         padding: 6px 14px;
         font-size: 0.82rem;
         font-weight: 600;
-        color: #667eea;
+        color: #1d4ed8;
     }
 </style>
 {% endblock %}
@@ -87,7 +87,7 @@
         <input type="text" name="search" class="form-control form-control-sm rounded-3" placeholder="{% trans '订单号、客户…' %}" value="{{ current_search }}">
     </div>
     <div class="col-md-2 d-flex gap-2">
-        <button type="submit" class="btn btn-sm flex-grow-1 rounded-3 fw-semibold text-white border-0" style="background:linear-gradient(135deg,#667eea,#764ba2);"><i class="fas fa-filter me-1"></i>{% trans "筛选" %}</button>
+        <button type="submit" class="btn btn-sm flex-grow-1 rounded-3 fw-semibold text-white border-0" style="background:linear-gradient(135deg,#1d4ed8,#14245f);"><i class="fas fa-filter me-1"></i>{% trans "筛选" %}</button>
         <a href="{% url 'manager:vendor_book_orders' %}" class="btn btn-sm btn-outline-secondary rounded-3">{% trans "重置" %}</a>
     </div>
 </form>

@@ -1,4 +1,4 @@
-{% extends 'public/base.html' %}
+﻿{% extends 'public/base.html' %}
 {% load i18n static %}
 
 {% block title %}Paiement Mobile Money - {{ order_number }}{% endblock %}
@@ -24,7 +24,7 @@
     .pay-icon {
         width: 80px;
         height: 80px;
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: linear-gradient(135deg, #1d4ed8, #14245f);
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -35,7 +35,7 @@
     .pay-amount {
         font-size: 2.2rem;
         font-weight: 700;
-        color: #667eea;
+        color: #1d4ed8;
         margin-bottom: 8px;
     }
     .pay-order-ref {
@@ -45,7 +45,7 @@
         font-family: monospace;
     }
     .btn-pay {
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: linear-gradient(135deg, #1d4ed8, #14245f);
         color: #fff;
         border: none;
         border-radius: 12px;
@@ -151,7 +151,7 @@
             amount:        TOTAL_AMOUNT,
             key:           PUBLIC_KEY,
             sandbox:       IS_SANDBOX,
-            theme:         '#667eea',
+            theme:         '#1d4ed8',
             position:      'center',
             paymentmethod: 'momo',
             name:          CUSTOMER_NAME,

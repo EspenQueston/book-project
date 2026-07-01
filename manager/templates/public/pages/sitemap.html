@@ -1,4 +1,4 @@
-{% extends 'public/base.html' %}
+﻿{% extends 'public/base.html' %}
 {% load i18n %}
 
 {% block title %}{% trans "网站地图" %} - DUNO 360{% endblock %}
@@ -163,7 +163,7 @@
                 e.preventDefault();
                 target.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 target.style.transition = 'box-shadow .4s ease';
-                target.style.boxShadow = '0 0 0 3px rgba(102,126,234,.35), 0 22px 56px rgba(102,126,234,.16)';
+                target.style.boxShadow = '0 0 0 3px rgba(29,78,216,.35), 0 22px 56px rgba(29,78,216,.16)';
                 setTimeout(function() { target.style.boxShadow = ''; }, 1200);
             }
         });

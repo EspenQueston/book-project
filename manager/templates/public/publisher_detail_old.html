@@ -1,4 +1,4 @@
-{% extends 'public/base.html' %}
+﻿{% extends 'public/base.html' %}
 {% load i18n %}
 
 {% block title %}{% trans "出版社详情" %} - {{ publisher.publisher_name }} | {% trans "DUNO 360" %}{% endblock %}
@@ -6,7 +6,7 @@
 {% block extra_css %}
 <style>
     .header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
         color: white;
         padding: 60px 0;
         margin-bottom: 40px;
@@ -14,7 +14,7 @@
     }
     .publisher-logo {
         width: 150px; height: 150px; border-radius: 15px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
         display: flex; align-items: center; justify-content: center;
         font-size: 4rem; color: white; margin: 0 auto 20px;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
@@ -31,17 +31,17 @@
     }
     .section-title i {
         margin-right: 10px; color: var(--primary-color);
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
     .back-btn {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
         border: none; color: white; padding: 12px 25px; border-radius: 25px;
         text-decoration: none; display: inline-flex; align-items: center;
         margin-bottom: 20px; transition: all 0.3s ease;
     }
     .back-btn:hover {
-        transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        transform: translateY(-2px); box-shadow: 0 5px 15px rgba(29, 78, 216, 0.3);
         color: white; text-decoration: none;
     }
     .back-btn i { margin-right: 8px; }
@@ -52,7 +52,7 @@
     .stat-card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,0.15); }
     .stat-icon {
         width: 70px; height: 70px; margin: 0 auto 15px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
         border-radius: 15px; display: flex; align-items: center; justify-content: center;
         color: white; font-size: 2rem;
     }
@@ -71,7 +71,7 @@
     .info-value { color: #2c3e50; font-weight: 600; }
     .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
     .stats-item {
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+        background: linear-gradient(135deg, rgba(29, 78, 216, 0.08) 0%, rgba(20, 36, 95, 0.08) 100%);
         padding: 20px; border-radius: 12px; text-align: center;
         border: 2px solid transparent; transition: all 0.3s ease;
     }
@@ -82,7 +82,7 @@
     .section-header { text-align: center; }
     .section-header h3 { font-size: 2.2rem; font-weight: 700; color: #2c3e50; margin-bottom: 10px; }
     .section-header h3 i {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         background-clip: text; margin-right: 10px;
     }
@@ -103,7 +103,7 @@
     .book-title { font-size: 1.2rem; font-weight: 600; color: #2c3e50; margin-bottom: 12px; line-height: 1.4; }
     .book-description {
         color: #6c757d; font-size: 0.9rem; font-style: italic; margin-bottom: 15px; padding: 10px;
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        background: linear-gradient(135deg, rgba(29, 78, 216, 0.05) 0%, rgba(20, 36, 95, 0.05) 100%);
         border-left: 3px solid var(--primary-color); border-radius: 5px; line-height: 1.5;
     }
     .book-description i { color: var(--primary-color); margin-right: 5px; font-size: 0.8rem; }
@@ -111,25 +111,25 @@
     .meta-item { display: flex; align-items: center; margin-bottom: 8px; color: #6c757d; font-size: 0.9rem; }
     .meta-item i { width: 20px; color: var(--primary-color); margin-right: 8px; }
     .price-tag {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
         color: white; padding: 5px 15px; border-radius: 20px; font-weight: 500; display: inline-block;
     }
     .btn-primary-modern {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
         border: none; color: white; padding: 12px 30px; border-radius: 25px;
         font-weight: 600; transition: all 0.3s ease;
     }
     .btn-primary-modern:hover {
-        transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4); color: white;
+        transform: translateY(-2px); box-shadow: 0 8px 25px rgba(29, 78, 216, 0.4); color: white;
     }
     .btn-outline-primary-modern {
         background: transparent; border: 2px solid var(--primary-color); color: var(--primary-color);
         padding: 12px 30px; border-radius: 25px; font-weight: 600; transition: all 0.3s ease;
     }
     .btn-outline-primary-modern:hover {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
         border-color: var(--primary-color); color: white;
-        transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        transform: translateY(-2px); box-shadow: 0 8px 25px rgba(29, 78, 216, 0.4);
     }
     @media (max-width: 768px) {
         .header { padding: 40px 0; }

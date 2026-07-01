@@ -9,10 +9,10 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --mkt-sidebar-bg: linear-gradient(165deg, #0f172a 0%, #1e293b 45%, #312e81 100%);
-            --mkt-sidebar-border: rgba(148, 163, 184, 0.12);
-            --mkt-accent: #818cf8;
-            --mkt-accent-soft: rgba(129, 140, 248, 0.15);
+            --mkt-sidebar-bg: linear-gradient(165deg, #07142f 0%, #14245f 46%, #1d4ed8 100%);
+            --mkt-sidebar-border: rgba(147, 197, 253, 0.14);
+            --mkt-accent: #60a5fa;
+            --mkt-accent-soft: rgba(96, 165, 250, 0.16);
             --mkt-text-muted: rgba(226, 232, 240, 0.55);
             --mkt-page-bg: #f1f5f9;
             --mkt-card-radius: 16px;
@@ -57,7 +57,7 @@
         .mkt-sidebar-brand .brand-mark {
             width: 40px; height: 40px;
             border-radius: 12px;
-            background: linear-gradient(135deg, #818cf8, #c084fc);
+            background: linear-gradient(135deg, #93c5fd, #60a5fa);
             display: flex; align-items: center; justify-content: center;
             font-size: 1.1rem;
             color: #0f172a;
@@ -409,6 +409,7 @@
     })();
     </script>
     {% block extra_admin_js %}{% endblock %}
+    {% include 'includes/global_popups.html' %}
     <script src="/static/js/destructive_action_guards.js"></script>
     <script src="/static/js/admin_i18n.js" defer></script>
 </body>

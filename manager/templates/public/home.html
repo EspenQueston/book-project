@@ -1,4 +1,4 @@
-{% extends 'public/base.html' %}
+﻿{% extends 'public/base.html' %}
 {% load i18n %}
 {% load currency_filters %}
 
@@ -7,7 +7,7 @@
 {% block extra_css %}
 <style>
     :root {
-        --hero-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --hero-gradient: linear-gradient(135deg, #14245f 0%, #1d4ed8 100%);
         --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
         --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
@@ -86,7 +86,7 @@
         height: 280px;
         right: -6%;
         bottom: -14%;
-        background: rgba(118,75,162,0.55);
+        background: rgba(20,36,95,0.55);
         animation: heroAuroraDrift 16s ease-in-out infinite;
     }
 
@@ -475,9 +475,9 @@
 
     .search-btn {
         background: transparent;
-        color: #667eea;
+        color: #1d4ed8;
         border: none;
-        border-left: 1px solid rgba(102, 126, 234, 0.18);
+        border-left: 1px solid rgba(29, 78, 216, 0.18);
         padding: 0 28px;
         border-radius: 0;
         font-weight: 700;
@@ -498,11 +498,11 @@
     /* Popular Picks and New Arrivals — shared premium desktop design */
     .featured-section,
     .new-arrivals-section {
-        padding: 88px 0;
+        padding: 96px 0;
         background:
-            radial-gradient(circle at 12% 12%, rgba(102,126,234,.14), transparent 28%),
-            radial-gradient(circle at 88% 18%, rgba(118,75,162,.12), transparent 24%),
-            linear-gradient(180deg,#f8fafc 0%,#eef2ff 52%,#ffffff 100%);
+            radial-gradient(circle at 12% 12%, rgba(14,165,233,.10), transparent 28%),
+            radial-gradient(circle at 88% 18%, rgba(59,130,246,.10), transparent 24%),
+            linear-gradient(180deg,#f8fbff 0%,#eef6ff 48%,#ffffff 100%);
         position: relative;
         overflow: hidden;
     }
@@ -511,9 +511,9 @@
         content:'';
         position:absolute;
         inset:0;
-        background-image: linear-gradient(rgba(102,126,234,.055) 1px, transparent 1px), linear-gradient(90deg, rgba(102,126,234,.055) 1px, transparent 1px);
+        background-image: linear-gradient(rgba(148,163,184,.055) 1px, transparent 1px), linear-gradient(90deg, rgba(148,163,184,.055) 1px, transparent 1px);
         background-size: 44px 44px;
-        mask-image: linear-gradient(180deg, rgba(0,0,0,.7), transparent 88%);
+        mask-image: linear-gradient(180deg, rgba(0,0,0,.68), transparent 88%);
         pointer-events:none;
     }
     .featured-section .container,
@@ -528,265 +528,248 @@
     }
 
     .showcase-tab, .na-tab {
-        background: rgba(255,255,255,.82);
-        border: 1px solid rgba(102,126,234,.15);
-        color: #64748b;
+        background: rgba(255,255,255,.9);
+        border: 1px solid rgba(148,163,184,.18);
+        color: #475569;
         padding: 11px 24px;
         border-radius: 999px;
         font-weight: 800;
         font-size: .92rem;
         cursor: pointer;
         transition: all 0.28s ease;
-        box-shadow: 0 8px 22px rgba(102,126,234,.07);
+        box-shadow: 0 10px 26px rgba(15,23,42,.06);
         display:inline-flex;
         align-items:center;
         gap:8px;
+        backdrop-filter: blur(10px);
     }
 
-    .showcase-tab:hover, .na-tab:hover { color: #667eea; background: #fff; transform: translateY(-2px); border-color:rgba(102,126,234,.32); }
+    .showcase-tab:hover, .na-tab:hover { color: #0f172a; background: #fff; transform: translateY(-2px); border-color:rgba(59,130,246,.26); box-shadow:0 14px 30px rgba(15,23,42,.08); }
 
     .showcase-tab.active, .na-tab.active {
-        background: var(--hero-gradient);
+        background: linear-gradient(135deg,#0f172a,#1d4ed8);
         color: white;
         border-color: transparent;
-        box-shadow: 0 12px 28px rgba(102,126,234,0.28);
+        box-shadow: 0 16px 36px rgba(29,78,216,0.24);
     }
 
     .showcase-panel { display: none; }
     .showcase-panel.active { display: block; animation: naFadeIn .35s ease; }
 
-    .book-card {
-        background: white;
-        border-radius: 16px;
+    .book-card,
+    .product-card,
+    .course-card {
+        background: linear-gradient(180deg,#ffffff 0%,#f8fafc 100%);
+        border-radius: 24px;
         overflow: hidden;
-        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
-        transition: all 0.3s ease;
-        border: none;
+        box-shadow: 0 18px 48px rgba(15,23,42,0.08);
+        transition: transform .32s ease, box-shadow .32s ease, border-color .32s ease;
+        border: 1px solid rgba(148,163,184,.14);
         height: 100%;
         position: relative;
     }
 
-    .book-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.13);
+    .book-card::before,
+    .product-card::before,
+    .course-card::before {
+        content:'';
+        position:absolute;
+        inset:0;
+        background:linear-gradient(180deg,rgba(255,255,255,.30),transparent 52%,rgba(37,99,235,.03));
+        pointer-events:none;
+        z-index:0;
     }
 
-    .book-image {
-        height: 180px;
-        background: linear-gradient(135deg, #f0f0ff 0%, #e8e0ff 100%);
+    .book-card:hover,
+    .product-card:hover,
+    .course-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 30px 70px rgba(15,23,42,0.12);
+        border-color: rgba(59,130,246,.24);
+    }
+
+    .book-image,
+    .product-card-img,
+    .course-card-img {
+        height: 210px;
+        background: #ffffff;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 2.5rem;
-        color: #b4a0d8;
+        color: #94a3b8;
         position: relative;
         overflow: hidden;
-        padding: 12px;
+        padding: 16px;
+        border-bottom:1px solid rgba(226,232,240,.9);
     }
-    .book-image img {
+    .book-image::after,
+    .product-card-img::after,
+    .course-card-img::after {
+        content:'';
+        position:absolute;
+        inset:auto 0 0 0;
+        height:72px;
+        background:linear-gradient(180deg,rgba(255,255,255,0),rgba(248,250,252,.92));
+        pointer-events:none;
+    }
+    .book-image img,
+    .product-card-img img,
+    .course-card-img img {
         width: 100%; height: 100%;
         object-fit: contain;
-        filter: drop-shadow(0 3px 8px rgba(0,0,0,0.12));
-        transition: transform 0.3s ease;
+        filter: drop-shadow(0 8px 18px rgba(15,23,42,0.12));
+        transition: transform 0.36s ease;
+        position:relative;
+        z-index:1;
     }
-    .book-card:hover .book-image img { transform: scale(1.05); }
+    .book-card:hover .book-image img,
+    .product-card:hover .product-card-img img,
+    .course-card:hover .course-card-img img { transform: scale(1.05); }
 
-    .book-info {
-        padding: 18px;
+    .book-info,
+    .product-card-body,
+    .course-card-body {
+        padding: 20px;
+        position:relative;
+        z-index:1;
     }
 
-    .book-title {
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: var(--primary-color);
+    .book-title,
+    .product-card-body h5,
+    .course-card-body h5 {
+        font-size: 1rem;
+        font-weight: 850;
+        color: #0f172a;
         margin-bottom: 8px;
-        line-height: 1.3;
+        line-height: 1.35;
+    }
+
+    .book-publisher,
+    .product-card-footer .sales,
+    .course-card-meta,
+    .course-card-footer .enroll {
+        color: #64748b;
+        font-size: 0.82rem;
     }
 
     .book-publisher {
-        color: #64748b;
-        font-size: 0.82rem;
         margin-bottom: 12px;
         display: flex;
         align-items: center;
     }
 
-    .book-publisher i {
-        margin-right: 6px;
-        color: var(--secondary-color);
-    }
-
-    .book-stats {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 14px;
-    }
-
-    .book-price {
-        background: var(--success-gradient);
-        color: white;
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-weight: 700;
-        font-size: 0.9rem;
-    }
-
-    .book-sales {
-        background: #f1f5f9;
-        color: #475569;
-        padding: 5px 10px;
-        border-radius: 16px;
-        font-size: 0.78rem;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-    }
-
+    .book-publisher i,
+    .product-card-footer .sales i,
+    .course-card-meta i,
     .book-sales i {
-        margin-right: 4px;
-        color: #f39c12;
+        margin-right: 6px;
+        color: #f59e0b;
     }
 
-    .book-actions {
-        display: flex;
-        gap: 8px;
-    }
-
-    .btn-book-detail {
-        flex: 1;
-        background: transparent;
-        color: var(--primary-color);
-        border: 2px solid var(--primary-color);
-        padding: 8px 14px;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 0.82rem;
-        transition: all 0.3s ease;
-    }
-
-    .btn-book-detail:hover {
-        background: var(--primary-color);
-        color: white;
-        transform: translateY(-2px);
-    }
-
-    .btn-add-cart {
-        background: var(--hero-gradient);
-        color: white;
-        border: none;
-        padding: 8px 14px;
-        border-radius: 20px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        min-width: auto;
-    }
-
-    .btn-add-cart:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-        color: white;
-    }
-
-    /* Product Card */
-    .product-card {
-        background: white;
-        border-radius: 16px;
-        overflow: hidden;
-        box-shadow: 0 6px 24px rgba(0,0,0,0.08);
-        transition: all 0.3s ease;
-        height: 100%;
-    }
-    .product-card:hover { transform: translateY(-8px); box-shadow: 0 16px 40px rgba(0,0,0,0.13); }
-    .product-card-img {
-        height: 180px;
-        background: linear-gradient(135deg, #fff5f7 0%, #ffe0e6 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-        position: relative;
-        padding: 12px;
-    }
-    .product-card-img img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 3px 8px rgba(0,0,0,0.1)); transition: transform 0.3s ease; }
-    .product-card:hover .product-card-img img { transform: scale(1.05); }
-    .product-card-img i { font-size: 2.5rem; color: rgba(255,255,255,0.6); }
-    .product-card-body { padding: 16px; }
-    .product-card-body h5 { font-size: 0.95rem; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
-    .product-card-body .cat-badge {
-        display: inline-block;
-        background: #ede9fe;
-        color: #7c3aed;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 0.78rem;
-        font-weight: 600;
-        margin-bottom: 12px;
-    }
-    .product-card-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    .product-card-footer .price { font-size: 1.05rem; font-weight: 800; color: #ef4444; }
-    .product-card-footer .sales { font-size: 0.8rem; color: #94a3b8; }
-    .product-card-footer .sales i { color: #f59e0b; }
-
-    /* Course Card */
-    .course-card {
-        background: white;
-        border-radius: 16px;
-        overflow: hidden;
-        box-shadow: 0 6px 24px rgba(0,0,0,0.08);
-        transition: all 0.3s ease;
-        height: 100%;
-    }
-    .course-card:hover { transform: translateY(-8px); box-shadow: 0 16px 40px rgba(0,0,0,0.13); }
-    .course-card-img {
-        height: 180px;
-        background: linear-gradient(135deg, #f0f8ff 0%, #e0f0ff 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 12px;
-        overflow: hidden;
-        position: relative;
-    }
-    .course-card-img img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 3px 8px rgba(0,0,0,0.1)); transition: transform 0.3s ease; }
-    .course-card:hover .course-card-img img { transform: scale(1.05); }
-    .course-card-img i { font-size: 2.5rem; color: rgba(255,255,255,0.6); }
-    .course-level-badge {
-        position: absolute;
-        top: 12px;
-        left: 12px;
-        padding: 4px 14px;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 700;
-        color: white;
-        backdrop-filter: blur(8px);
-    }
-    .course-level-badge.beginner { background: rgba(16,185,129,0.85); }
-    .course-level-badge.intermediate { background: rgba(245,158,11,0.85); }
-    .course-level-badge.advanced { background: rgba(239,68,68,0.85); }
-    .course-card-body { padding: 16px; }
-    .course-card-body h5 { font-size: 0.95rem; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
-    .course-card-body .instructor { font-size: 0.82rem; color: #667eea; font-weight: 600; margin-bottom: 8px; }
-    .course-card-meta {
-        display: flex;
-        gap: 10px;
-        font-size: 0.78rem;
-        color: #94a3b8;
-        margin-bottom: 10px;
-    }
-    .course-card-meta i { margin-right: 4px; }
+    .book-stats,
+    .product-card-footer,
     .course-card-footer {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        gap: 10px;
     }
-    .course-card-footer .price { font-size: 1.2rem; font-weight: 800; color: #667eea; }
-    .course-card-footer .enroll { font-size: 0.85rem; color: #94a3b8; }
+
+    .book-stats { margin-bottom: 14px; }
+
+    .book-price,
+    .product-card-footer .price,
+    .course-card-footer .price {
+        font-size: 1.08rem;
+        font-weight: 900;
+        color: #0f172a;
+    }
+
+    .book-sales {
+        background: #f8fafc;
+        color: #475569;
+        padding: 6px 11px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        border:1px solid rgba(148,163,184,.14);
+    }
+
+    .book-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn-book-detail {
+        flex: 1;
+        background: #f8fbff;
+        color: #0f172a;
+        border: 1px solid rgba(59,130,246,.18);
+        padding: 10px 14px;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 0.84rem;
+        transition: all 0.28s ease;
+    }
+
+    .btn-book-detail:hover {
+        background: linear-gradient(135deg,#0f172a,#1d4ed8);
+        color: white;
+        transform: translateY(-2px);
+        border-color: transparent;
+    }
+
+    .btn-add-cart {
+        background: linear-gradient(135deg,#0f172a,#1d4ed8);
+        color: white;
+        border: none;
+        padding: 10px 14px;
+        border-radius: 999px;
+        font-weight: 600;
+        transition: all 0.28s ease;
+        min-width: auto;
+        box-shadow: 0 12px 24px rgba(29,78,216,.22);
+    }
+
+    .btn-add-cart:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 28px rgba(29,78,216,.28);
+        color: white;
+    }
+
+    .product-card-body .cat-badge,
+    .course-level-badge {
+        display: inline-flex;
+        align-items:center;
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 800;
+        border:1px solid rgba(59,130,246,.14);
+        background:#eef4ff;
+        color:#1d4ed8;
+        margin-bottom: 12px;
+        backdrop-filter: blur(8px);
+    }
+    .course-level-badge {
+        position: absolute;
+        top: 14px;
+        left: 14px;
+        margin-bottom:0;
+        z-index:2;
+    }
+    .course-level-badge.beginner { background: rgba(16,185,129,.12); color:#047857; border-color:rgba(16,185,129,.18); }
+    .course-level-badge.intermediate { background: rgba(245,158,11,.14); color:#b45309; border-color:rgba(245,158,11,.18); }
+    .course-level-badge.advanced { background: rgba(239,68,68,.12); color:#b91c1c; border-color:rgba(239,68,68,.18); }
+    .course-card-body .instructor { font-size: 0.82rem; color: #2563eb; font-weight: 700; margin-bottom: 10px; }
+    .course-card-meta {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
 
     /* Call to Action Section */
     .cta-section {
@@ -988,7 +971,7 @@
     }
     html[data-theme="dark"] .kk-item { color: #e2e8f0; }
     .kk-item:active { transform: scale(0.88); }
-    .kk-item:hover { transform: scale(1.06); color: #667eea; }
+    .kk-item:hover { transform: scale(1.06); color: #1d4ed8; }
     .kk-icon {
         width: 50px;
         height: 50px;
@@ -1111,24 +1094,25 @@
     .flash-scroll::-webkit-scrollbar { display: none; }
     .flash-card {
         flex-shrink: 0;
-        width: 130px;
-        background: var(--card-bg, #fff);
-        border-radius: 12px;
+        width: 138px;
+        background: linear-gradient(180deg,#ffffff,#f8fafc);
+        border-radius: 18px;
         overflow: hidden;
-        box-shadow: 0 3px 12px rgba(0,0,0,0.10);
+        box-shadow: 0 12px 30px rgba(15,23,42,0.08);
         scroll-snap-align: start;
         text-decoration: none;
         color: inherit;
-        transition: transform 0.2s;
+        transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease;
+        border:1px solid rgba(148,163,184,.12);
     }
-    .flash-card:hover { transform: translateY(-3px); }
+    .flash-card:hover { transform: translateY(-6px); box-shadow:0 20px 40px rgba(15,23,42,.12); border-color:rgba(59,130,246,.22); }
     .flash-card-img {
         width: 100%;
-        height: 110px;
+        height: 118px;
         object-fit: cover;
-        background: #f3f4f6;
+        background: #f8fafc;
     }
-    .flash-card-body { padding: 6px 8px 8px; }
+    .flash-card-body { padding: 10px 10px 12px; }
     .flash-card-name {
         font-size: 0.75rem;
         font-weight: 600;
@@ -1168,12 +1152,12 @@
             grid-template-columns: 1fr auto;
             align-items: center;
             gap: 10px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
             padding: 10px 14px;
             position: sticky;
             top: 56px;
             z-index: 850;
-            box-shadow: 0 3px 14px rgba(102,126,234,0.35);
+            box-shadow: 0 3px 14px rgba(29,78,216,0.35);
         }
         html[data-theme="dark"] .pwa-search-bar {
             background: linear-gradient(135deg, #4338ca 0%, #5b21b6 100%);
@@ -1307,16 +1291,16 @@
     .bd-carousel-slide {
         flex: 0 0 min(190px, 56vw);
         min-width: 0;
-        border-radius: 14px;
+        border-radius: 20px;
         overflow: hidden;
         text-decoration: none;
         color: inherit;
-        border: 1px solid rgba(15, 23, 42, 0.08);
+        border: 1px solid rgba(148,163,184,.14);
         background: linear-gradient(180deg, #ffffff, #f8fafc);
-        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
-        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        box-shadow: 0 14px 32px rgba(15, 23, 42, 0.08);
+        transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease;
     }
-    .bd-carousel-slide:hover { transform: translateY(-3px); box-shadow: 0 14px 28px rgba(15, 23, 42, 0.14); }
+    .bd-carousel-slide:hover { transform: translateY(-6px); box-shadow: 0 22px 44px rgba(15, 23, 42, 0.12); border-color:rgba(59,130,246,.22); }
     html[data-theme="dark"] .bd-carousel-slide {
         background: linear-gradient(180deg, #0f172a, #111827);
         border-color: #334155;
@@ -1433,13 +1417,13 @@ html[data-theme="dark"] .bd-tag-pill.bd-carousel-tag-fav { background: rgba(236,
     .feed-title-dot {
         width: 6px; height: 6px;
         border-radius: 50%;
-        background: linear-gradient(135deg,#667eea,#764ba2);
+        background: linear-gradient(135deg,#14245f,#1d4ed8);
         display: inline-block;
     }
     html[data-theme="dark"] .feed-title { color: #e2e8f0; }
     .feed-see-all {
         font-size: 0.72rem;
-        color: #667eea;
+        color: #1d4ed8;
         text-decoration: none;
         font-weight: 700;
     }
@@ -1533,7 +1517,7 @@ html[data-theme="dark"] .bd-tag-pill.bd-carousel-tag-fav { background: rgba(236,
     .feed-card-wishlist.wishlisted { color: #ef4444; }
     .feed-load-more { text-align: center; padding: 16px 0; }
     .feed-load-more button {
-        background: linear-gradient(135deg,#667eea,#764ba2);
+        background: linear-gradient(135deg,#1d4ed8,#14245f);
         color: #fff;
         border: none;
         padding: 10px 30px;
@@ -1541,28 +1525,28 @@ html[data-theme="dark"] .bd-tag-pill.bd-carousel-tag-fav { background: rgba(236,
         font-weight: 700;
         cursor: pointer;
         font-size: 0.85rem;
-        box-shadow: 0 4px 15px rgba(102,126,234,0.3);
+        box-shadow: 0 4px 15px rgba(29,78,216,0.3);
     }
     #feedLoader { text-align: center; padding: 12px; color: #9ca3af; font-size: 0.85rem; }
     {% include 'public/includes/feed_view_details_css.html' %}
     @media (min-width: 769px) { .feed-section { display: none; } }
 
 /* ===== New Arrivals / Popular Picks Cards ===== */
-.na-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
-.na-card { background: rgba(255,255,255,.9); border-radius: 22px; overflow: hidden; transition: all .3s; border: 1px solid rgba(102,126,234,.12); box-shadow:0 14px 36px rgba(102,126,234,.10); position:relative; }
-.na-card:hover { transform: translateY(-8px); box-shadow: 0 24px 54px rgba(102,126,234,.20); border-color:rgba(102,126,234,.28); }
-.na-cover { height: 220px; background: linear-gradient(135deg, #eef2ff, #f5f3ff); display: flex; align-items: center; justify-content: center; padding: 16px; overflow: hidden; position:relative; }
-.na-cover::after { content:''; position:absolute; inset:auto -20% -35% -20%; height:70%; background:radial-gradient(circle, rgba(102,126,234,.16), transparent 65%); }
+.na-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+.na-card { background: linear-gradient(180deg,rgba(255,255,255,.98),rgba(248,250,252,.98)); border-radius: 24px; overflow: hidden; transition: all .32s ease; border: 1px solid rgba(148,163,184,.14); box-shadow:0 18px 48px rgba(15,23,42,.08); position:relative; }
+.na-card:hover { transform: translateY(-8px); box-shadow: 0 28px 64px rgba(15,23,42,.12); border-color:rgba(59,130,246,.22); }
+.na-cover { height: 228px; background: #ffffff; display: flex; align-items: center; justify-content: center; padding: 18px; overflow: hidden; position:relative; border-bottom:1px solid rgba(226,232,240,.9); }
+.na-cover::after { content:''; position:absolute; inset:auto 0 0 0; height:72px; background:linear-gradient(180deg,rgba(255,255,255,0),rgba(248,250,252,.92)); pointer-events:none; }
 .na-cover img { max-width: 100%; max-height: 100%; object-fit: contain; transition: transform .4s; position:relative; z-index:1; }
-.na-card:hover .na-cover img { transform: scale(1.08) rotate(-1deg); }
-.na-body { padding: 17px; }
-.na-badge { font-size: .65rem; font-weight: 800; padding: 4px 11px; border-radius: 20px; background: linear-gradient(135deg,#667eea,#764ba2); color: #fff; display: inline-block; margin-bottom: 9px; }
-.na-title { font-size: .96rem; font-weight: 850; color: #1e293b; margin-bottom: 7px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.na-pub { font-size: .8rem; color: #94a3b8; margin-bottom: 10px; }
+.na-card:hover .na-cover img { transform: scale(1.045); }
+.na-body { padding: 20px 20px 18px; }
+.na-badge { font-size: .7rem; font-weight: 800; padding: 6px 12px; border-radius: 999px; background:#eef4ff; border:1px solid rgba(59,130,246,.12); color:#0f172a; display: inline-flex; align-items:center; margin-bottom: 10px; }
+.na-title { font-size: .98rem; font-weight: 850; color: #0f172a; margin-bottom: 7px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.na-pub { font-size: .82rem; color: #64748b; margin-bottom: 10px; }
 .na-footer { display: flex; justify-content: space-between; align-items: center; gap:10px; }
-.na-price { font-size: 1.15rem; font-weight: 900; color: #667eea; }
-.na-btn { background: linear-gradient(135deg,#667eea,#764ba2); color: #fff; border: none; border-radius: 999px; padding: 7px 15px; font-size: .8rem; font-weight: 800; cursor: pointer; text-decoration: none; transition: all .2s; white-space:nowrap; }
-.na-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(102,126,234,.32); color: #fff; }
+.na-price { font-size: 1.15rem; font-weight: 900; color: #0f172a; }
+.na-btn { background: linear-gradient(135deg,#0f172a,#1d4ed8); color: #fff; border: none; border-radius: 999px; padding: 8px 15px; font-size: .8rem; font-weight: 800; cursor: pointer; text-decoration: none; transition: all .2s; white-space:nowrap; }
+.na-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(29,78,216,.24); color: #fff; }
 .na-tab i { font-size: .85rem; }
 .na-tab-content { position: relative; }
 .na-tab-panel { display: none; animation: naFadeIn .4s ease; }
@@ -1575,9 +1559,9 @@ html[data-theme="dark"] .bd-tag-pill.bd-carousel-tag-fav { background: rgba(236,
     font-size: .65rem; font-weight: 800; padding: 4px 10px; border-radius: 20px;
     text-transform: uppercase; letter-spacing: .5px;
 }
-.na-type-badge.book { background: linear-gradient(135deg,#667eea,#764ba2); color: #fff; }
-.na-type-badge.product { background: linear-gradient(135deg,#10b981,#059669); color: #fff; }
-.na-type-badge.course { background: linear-gradient(135deg,#f59e0b,#d97706); color: #fff; }
+.na-type-badge.book { background: rgba(99,102,241,.10); color: #4338ca; border:1px solid rgba(99,102,241,.18); }
+.na-type-badge.product { background: rgba(14,165,233,.10); color: #0369a1; border:1px solid rgba(14,165,233,.18); }
+.na-type-badge.course { background: rgba(245,158,11,.12); color: #b45309; border:1px solid rgba(245,158,11,.18); }
 .na-cover { position: relative; }
 .na-discount {
     position: absolute; top: 12px; right: 12px;
@@ -1585,38 +1569,41 @@ html[data-theme="dark"] .bd-tag-pill.bd-carousel-tag-fav { background: rgba(236,
     font-size: .7rem; font-weight: 800; padding: 4px 10px; border-radius: 20px;
 }
 .na-rating { color: #f59e0b; font-size: .8rem; font-weight: 700; }
-.na-instructor { font-size: .8rem; color: #94a3b8; margin-bottom: 6px; }
+.na-instructor { font-size: .8rem; color: #64748b; margin-bottom: 6px; }
 .na-original-price { font-size: .85rem; color: #94a3b8; text-decoration: line-through; margin-right: 6px; }
 
 /* ===== Home Category Hub ===== */
-.home-category-hub { padding: 42px 0 52px; background: radial-gradient(circle at 14% 8%, rgba(102,126,234,.16), transparent 28%), radial-gradient(circle at 86% 18%, rgba(118,75,162,.12), transparent 26%), linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%); position:relative; overflow:hidden; }
-.home-category-hub::before { content:''; position:absolute; inset:0; background-image:linear-gradient(rgba(102,126,234,.055) 1px, transparent 1px), linear-gradient(90deg, rgba(102,126,234,.055) 1px, transparent 1px); background-size:42px 42px; pointer-events:none; opacity:.7; }
-.home-category-hub::after { content:''; position:absolute; width:280px; height:280px; right:-96px; top:-94px; border-radius:42px; background:linear-gradient(135deg,rgba(102,126,234,.13),rgba(118,75,162,.08)); transform:rotate(28deg); filter:blur(.2px); animation:categoryShapeFloat 10s ease-in-out infinite; pointer-events:none; }
+.home-category-hub { padding: 48px 0 58px; background: radial-gradient(circle at 12% 8%, rgba(14,165,233,.12), transparent 28%), radial-gradient(circle at 88% 18%, rgba(59,130,246,.10), transparent 26%), linear-gradient(180deg, #ffffff 0%, #f4f9ff 100%); position:relative; overflow:hidden; }
+.home-category-hub::before { content:''; position:absolute; inset:0; background-image:linear-gradient(rgba(148,163,184,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(148,163,184,.05) 1px, transparent 1px); background-size:42px 42px; pointer-events:none; opacity:.7; }
+.home-category-hub::after { content:''; position:absolute; width:280px; height:280px; right:-96px; top:-94px; border-radius:42px; background:linear-gradient(135deg,rgba(59,130,246,.10),rgba(14,165,233,.06)); transform:rotate(28deg); filter:blur(.2px); animation:categoryShapeFloat 10s ease-in-out infinite; pointer-events:none; }
 .home-category-hub .container { position:relative; z-index:1; }
 .home-category-head { display:flex; justify-content:space-between; align-items:flex-end; gap:18px; margin-bottom:24px; }
-.home-category-kicker { color:#667eea; font-weight:900; font-size:.78rem; text-transform:uppercase; letter-spacing:1.6px; margin-bottom:6px; }
-.home-category-title { font-size:2.1rem; font-weight:950; color:#1e293b; margin:0; letter-spacing:-.04em; }
+.home-category-kicker { color:#2563eb; font-weight:900; font-size:.78rem; text-transform:uppercase; letter-spacing:1.6px; margin-bottom:6px; }
+.home-category-title { font-size:2.1rem; font-weight:950; color:#0f172a; margin:0; letter-spacing:-.04em; }
 .home-category-subtitle { color:#64748b; margin:6px 0 0; }
-.home-category-grid { display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); gap:16px; }
-.home-category-card { position:relative; min-height:124px; padding:18px 16px; border-radius:24px; background:rgba(255,255,255,.88); border:1px solid rgba(102,126,234,.12); box-shadow:0 10px 30px rgba(102,126,234,.08); text-decoration:none; color:#1e293b; overflow:hidden; transition:transform .28s ease, box-shadow .28s ease, border-color .28s ease, opacity .45s ease; backdrop-filter:blur(12px); opacity:0; transform:translateY(24px) scale(.965); }
-.home-category-card::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,255,255,.35),transparent 44%,rgba(102,126,234,.055)); opacity:.8; pointer-events:none; }
-.home-category-card::after { content:''; position:absolute; right:-26px; bottom:-26px; width:92px; height:92px; border-radius:50%; background:var(--cat-glow, rgba(102,126,234,.10)); transition:transform .28s ease, opacity .28s ease; }
-.home-category-card.is-visible { opacity:1; transform:translateY(0) scale(1); transition-delay:calc(var(--cat-index, 0) * 55ms); }
-.home-category-card:hover { color:#1e293b; transform:translateY(-7px) scale(1.015); box-shadow:0 22px 50px rgba(102,126,234,.18); border-color:rgba(102,126,234,.30); }
-.home-category-card:hover::after { transform:scale(1.22); opacity:.95; }
-.home-category-icon { width:48px; height:48px; border-radius:17px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:1.18rem; background:var(--cat-bg, linear-gradient(135deg,#667eea,#764ba2)); box-shadow:0 12px 24px rgba(102,126,234,.25); margin-bottom:12px; position:relative; z-index:1; transition:transform .28s ease; }
+.home-category-grid { display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); gap:18px; }
+.home-category-card { position:relative; min-height:124px; padding:18px 16px; border-radius:24px; background:rgba(255,255,255,.94); border:1px solid rgba(148,163,184,.14); box-shadow:0 16px 40px rgba(15,23,42,.06); text-decoration:none; color:#0f172a; overflow:hidden; transition:transform .28s ease, box-shadow .28s ease, border-color .28s ease, opacity .45s ease; backdrop-filter:blur(12px); opacity:1 !important; transform:none !important; }
+.home-category-card::before { content:''; position:absolute; inset:0; background:linear-gradient(180deg,rgba(255,255,255,.36),transparent 56%,rgba(59,130,246,.03)); opacity:.9; pointer-events:none; }
+.home-category-card::after { content:''; position:absolute; right:-26px; bottom:-26px; width:92px; height:92px; border-radius:50%; background:var(--cat-glow, rgba(59,130,246,.08)); transition:transform .28s ease, opacity .28s ease; }
+.home-category-card.is-visible { opacity:1; transform:none; transition-delay:calc(var(--cat-index, 0) * 40ms); }
+.home-category-card:hover { color:#0f172a; transform:translateY(-7px) scale(1.015); box-shadow:0 24px 52px rgba(15,23,42,.10); border-color:rgba(59,130,246,.24); }
+.home-category-card:hover::after { transform:scale(1.18); opacity:.92; }
+.home-category-icon { width:48px; height:48px; border-radius:17px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:1.18rem; background:var(--cat-bg, linear-gradient(135deg,#0f172a,#2563eb)); box-shadow:0 12px 24px rgba(37,99,235,.18); margin-bottom:12px; position:relative; z-index:1; transition:transform .28s ease; }
 .home-category-card:hover .home-category-icon { transform:rotate(-4deg) scale(1.07); }
-.home-category-card h3 { font-size:.96rem; font-weight:900; line-height:1.25; margin:0; position:relative; z-index:1; }
+.home-category-card h3 { font-size:.96rem; font-weight:900; line-height:1.25; margin:0; position:relative; z-index:1; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; min-height:2.45em; word-break:break-word; hyphens:auto; }
 .home-category-card p { display:none; }
 .home-category-card { min-height:108px; }
-.home-category-card.is-publish { background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; }
-.home-category-card.is-publish h3 { color:#fff; }
-.home-category-card.is-publish .home-category-icon { background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.25); }
-.home-category-extra { display:none; }
-.home-category-card.home-category-final { display:block; }
-.home-category-hub.expanded .home-category-extra { display:block; }
+@media (min-width: 769px) {
+    .home-category-grid { grid-template-columns:repeat(5, minmax(0, 1fr)); gap:14px; }
+    .home-category-card { min-height:118px; padding:16px 14px; }
+    .home-category-card h3 { font-size: clamp(0.74rem, 0.68rem + 0.18vw, 0.92rem); line-height:1.2; min-height:2.35em; }
+    .home-category-card.is-publish h3 { font-size: clamp(0.78rem, 0.72rem + 0.2vw, 0.96rem); }
+}
+.home-category-card:nth-child(n+16) { display:none; }
+.home-category-hub.expanded .home-category-card:nth-child(n+16) { display:block; }
 @media (min-width: 769px) { .home-category-card.home-category-final { grid-column:auto; } }
-.home-category-more { border:0; border-radius:999px; padding:12px 24px; font-weight:850; color:#fff; background:linear-gradient(135deg,#667eea,#764ba2); box-shadow:0 12px 24px rgba(102,126,234,.24); display:inline-flex; align-items:center; gap:8px; }
+.home-category-more { border:0; border-radius:999px; padding:13px 30px; min-width:150px; justify-content:center; font-weight:900; color:#fff; background:linear-gradient(135deg,#14245f 0%,#1d4ed8 100%); box-shadow:0 18px 34px rgba(29,78,216,.28); display:inline-flex; align-items:center; gap:8px; transition:transform .2s ease, box-shadow .2s ease, filter .2s ease; }
+.home-category-more:hover { transform:translateY(-2px); filter:brightness(1.04); box-shadow:0 22px 42px rgba(29,78,216,.36); }
 .home-category-more i { transition:transform .25s; }
 .home-category-hub.expanded .home-category-more i { transform:rotate(180deg); }
 @keyframes categoryShapeFloat { 0%,100% { transform:rotate(28deg) translate3d(0,0,0); } 50% { transform:rotate(34deg) translate3d(-18px,20px,0); } }
@@ -1647,9 +1634,9 @@ html[data-theme="dark"] .bd-tag-pill.bd-carousel-tag-fav { background: rgba(236,
     .home-category-title { font-size:1.08rem; }
     .home-category-subtitle { font-size:.78rem; }
     .home-category-grid { grid-template-columns:repeat(4, minmax(0, 1fr)); gap:10px 7px; }
-    .home-category-card { min-height:92px; padding:10px 6px; border-radius:16px; box-shadow:0 4px 14px rgba(102,126,234,.08); text-align:center; }
-    .home-category-card.home-category-final { display:none; }
-    .home-category-hub.expanded .home-category-card.home-category-final { display:block; }
+    .home-category-card { min-height:92px; padding:10px 6px; border-radius:16px; box-shadow:0 4px 14px rgba(29,78,216,.08); text-align:center; }
+    .home-category-card:nth-child(n+13) { display:none; }
+    .home-category-hub.expanded .home-category-card:nth-child(n+13) { display:block; }
     .home-category-card::after { width:56px; height:56px; right:-22px; bottom:-22px; }
     .home-category-icon { width:42px; height:42px; border-radius:14px; margin:0 auto 7px; font-size:1rem; }
     .home-category-card h3 { font-size:.66rem; line-height:1.16; margin:0; }
@@ -1719,7 +1706,7 @@ html[data-theme="dark"] .bd-tag-pill.bd-carousel-tag-fav { background: rgba(236,
         letter-spacing: 0.2px;
     }
     html[data-theme="dark"] .mbn-item { color: #64748b; }
-    .mbn-item.active { color: #667eea; }
+    .mbn-item.active { color: #1d4ed8; }
     html[data-theme="dark"] .mbn-item.active { color: #818cf8; }
     .mbn-icon {
         font-size: 1.3rem;
@@ -1736,7 +1723,7 @@ html[data-theme="dark"] .bd-tag-pill.bd-carousel-tag-fav { background: rgba(236,
         width: 28px;
         height: 2.5px;
         border-radius: 0 0 3px 3px;
-        background: linear-gradient(135deg,#667eea,#764ba2);
+        background: linear-gradient(135deg,#1d4ed8,#14245f);
         transition: transform 0.25s cubic-bezier(.34,1.56,.64,1);
     }
     .mbn-item.active .mbn-active-bar { transform: translateX(-50%) scaleX(1); }
@@ -1767,19 +1754,19 @@ html[data-theme="dark"] .bd-tag-pill.bd-carousel-tag-fav { background: rgba(236,
         width: 52px;
         height: 52px;
         border-radius: 50%;
-        background: linear-gradient(135deg,#667eea,#764ba2);
+        background: linear-gradient(135deg,#1d4ed8,#14245f);
         display: flex;
         align-items: center;
         justify-content: center;
         color: #fff;
         font-size: 1.35rem;
-        box-shadow: 0 6px 20px rgba(102,126,234,0.5);
+        box-shadow: 0 6px 20px rgba(29,78,216,0.5);
         border: 3px solid #fff;
         transition: transform 0.2s, box-shadow 0.2s;
     }
     html[data-theme="dark"] .mbn-center .mbn-icon-wrap { border-color: #0f172a; }
-    .mbn-center:active .mbn-icon-wrap { transform: scale(0.9); box-shadow: 0 3px 10px rgba(102,126,234,0.35); }
-    .mbn-center-label { color: #667eea; }
+    .mbn-center:active .mbn-icon-wrap { transform: scale(0.9); box-shadow: 0 3px 10px rgba(29,78,216,0.35); }
+    .mbn-center-label { color: #1d4ed8; }
 }
 
 /* ========== DARK MODE OVERRIDES (all breakpoints) ========== */
@@ -1820,25 +1807,37 @@ html[data-theme="dark"] .showcase-tab:hover {
 html[data-theme="dark"] .book-card,
 html[data-theme="dark"] .product-card,
 html[data-theme="dark"] .course-card {
-    background: var(--bg-surface);
-    box-shadow: 0 6px 24px rgba(0,0,0,0.25);
+    background: linear-gradient(180deg,#111827,#0f172a);
+    border-color: rgba(96,165,250,.12);
+    box-shadow: 0 18px 38px rgba(0,0,0,0.28);
 }
 html[data-theme="dark"] .book-card:hover,
 html[data-theme="dark"] .product-card:hover,
 html[data-theme="dark"] .course-card:hover {
-    box-shadow: 0 16px 40px rgba(0,0,0,0.35);
+    box-shadow: 0 28px 56px rgba(0,0,0,0.34);
+    border-color: rgba(96,165,250,.24);
 }
 html[data-theme="dark"] .book-info h5,
 html[data-theme="dark"] .product-info h5,
-html[data-theme="dark"] .course-info h5 {
+html[data-theme="dark"] .course-info h5,
+html[data-theme="dark"] .product-card-body h5,
+html[data-theme="dark"] .course-card-body h5,
+html[data-theme="dark"] .book-title,
+html[data-theme="dark"] .book-price,
+html[data-theme="dark"] .product-card-footer .price,
+html[data-theme="dark"] .course-card-footer .price {
     color: var(--text-primary);
 }
 html[data-theme="dark"] .book-author,
 html[data-theme="dark"] .product-price-original,
-html[data-theme="dark"] .course-instructor {
+html[data-theme="dark"] .course-instructor,
+html[data-theme="dark"] .book-publisher,
+html[data-theme="dark"] .product-card-footer .sales,
+html[data-theme="dark"] .course-card-meta,
+html[data-theme="dark"] .course-card-footer .enroll,
+html[data-theme="dark"] .book-sales {
     color: var(--text-tertiary);
 }
-html[data-theme="dark"] .book-price,
 html[data-theme="dark"] .product-price {
     color: var(--brand-primary);
 }
@@ -1859,7 +1858,7 @@ html[data-theme="dark"] .search-section .search-btn {
     border-left-color: var(--border-default);
 }
 html[data-theme="dark"] .search-section .search-btn:hover {
-    background: rgba(102,126,234,.12);
+    background: rgba(29,78,216,.12);
 }
 html[data-theme="dark"] .search-tab.active {
     background: var(--bg-surface);
@@ -1900,8 +1899,9 @@ html[data-theme="dark"] .flash-sales-section {
     background: var(--bg-page);
 }
 html[data-theme="dark"] .flash-card {
-    background: var(--bg-surface);
-    box-shadow: 0 3px 12px rgba(0,0,0,0.25);
+    background: linear-gradient(180deg,#111827,#0f172a);
+    border-color: rgba(96,165,250,.12);
+    box-shadow: 0 14px 30px rgba(0,0,0,0.28);
 }
 html[data-theme="dark"] .flash-card-name {
     color: var(--text-primary);
@@ -1977,9 +1977,9 @@ html[data-theme="dark"] .latest-posts-section {
     background: var(--bg-page) !important;
 }
 html[data-theme="dark"] .latest-post-card {
-    background: var(--bg-surface) !important;
-    border-color: var(--border-subtle) !important;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
+    background: linear-gradient(180deg,#111827,#0f172a) !important;
+    border-color: rgba(96,165,250,.12) !important;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.24) !important;
 }
 html[data-theme="dark"] .latest-post-card h5 {
     color: var(--text-primary) !important;
@@ -2016,15 +2016,37 @@ html[data-theme="dark"] .na-pub {
 html[data-theme="dark"] .na-tab {
     background: var(--bg-elevated);
     color: var(--text-secondary);
+    border-color: rgba(148,163,184,.14);
 }
 html[data-theme="dark"] .na-tab:hover {
     background: var(--bg-surface);
     color: var(--text-primary);
 }
 html[data-theme="dark"] .na-tab.active {
-    background: linear-gradient(135deg,#667eea,#764ba2);
+    background: linear-gradient(135deg,#0f172a,#2563eb);
     color: #fff;
-    box-shadow: 0 4px 15px rgba(102,126,234,.25);
+    box-shadow: 0 10px 24px rgba(37,99,235,.22);
+}
+html[data-theme="dark"] .na-card {
+    background: linear-gradient(180deg,#111827,#0f172a);
+    border-color: rgba(148,163,184,.12);
+    box-shadow: 0 18px 42px rgba(0,0,0,.30);
+}
+html[data-theme="dark"] .na-cover {
+    background: #0b1220;
+    border-bottom-color: rgba(51,65,85,.85);
+}
+html[data-theme="dark"] .na-cover::after {
+    background: linear-gradient(180deg,rgba(11,18,32,0),rgba(15,23,42,.94));
+}
+html[data-theme="dark"] .na-title,
+html[data-theme="dark"] .na-price {
+    color: var(--text-primary);
+}
+html[data-theme="dark"] .na-badge {
+    background: rgba(37,99,235,.14);
+    border-color: rgba(96,165,250,.18);
+    color: #dbeafe;
 }
 html[data-theme="dark"] .na-instructor {
     color: var(--text-tertiary);
@@ -2108,27 +2130,27 @@ html[data-theme="dark"] .pwa-search-inner input {
 
 /* Categories hub & FAQ — dark mode (hero keeps light appearance) */
 html[data-theme="dark"] .home-category-hub {
-    background: radial-gradient(circle at 14% 8%, rgba(99,102,241,0.10), transparent 28%), radial-gradient(circle at 86% 18%, rgba(139,92,246,0.08), transparent 26%), linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+    background: radial-gradient(circle at 14% 8%, rgba(37,99,235,0.10), transparent 28%), radial-gradient(circle at 86% 18%, rgba(14,165,233,0.08), transparent 26%), linear-gradient(135deg, #0f172a 0%, #111827 100%);
 }
 html[data-theme="dark"] .home-category-hub::before {
-    background-image: linear-gradient(rgba(129,140,248,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(129,140,248,0.06) 1px, transparent 1px);
+    background-image: linear-gradient(rgba(96,165,250,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(96,165,250,0.06) 1px, transparent 1px);
 }
-html[data-theme="dark"] .home-category-kicker { color: #a5b4fc; }
+html[data-theme="dark"] .home-category-kicker { color: #93c5fd; }
 html[data-theme="dark"] .home-category-title { color: var(--text-primary); }
 html[data-theme="dark"] .home-category-subtitle { color: var(--text-secondary); }
 html[data-theme="dark"] .home-category-card {
-    background: rgba(30,41,59,0.88);
-    border-color: rgba(129,140,248,0.14);
+    background: rgba(17,24,39,0.9);
+    border-color: rgba(96,165,250,0.12);
     color: var(--text-primary);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.22);
+    box-shadow: 0 14px 34px rgba(0,0,0,0.24);
 }
 html[data-theme="dark"] .home-category-card::before {
-    background: linear-gradient(135deg, rgba(129,140,248,0.08), transparent 44%, rgba(99,102,241,0.04));
+    background: linear-gradient(135deg, rgba(96,165,250,0.08), transparent 44%, rgba(37,99,235,0.04));
 }
 html[data-theme="dark"] .home-category-card p { color: var(--text-secondary); }
 html[data-theme="dark"] .home-category-card:hover {
     color: var(--text-primary);
-    border-color: rgba(129,140,248,0.32);
+    border-color: rgba(96,165,250,0.26);
     box-shadow: 0 22px 50px rgba(0,0,0,0.32);
 }
 @media (max-width: 768px) {
@@ -2215,50 +2237,51 @@ html[data-theme="dark"] .home-category-card:hover {
         <div class="home-category-head">
             <div>
                 <div class="home-category-kicker">Duno360 Market</div>
-                <h2 class="home-category-title">Catégories populaires</h2>
-                <p class="home-category-subtitle">Explorez les annonces, produits et services par univers.</p>
+                <h2 class="home-category-title" data-zh="热门分类" data-en="Popular categories" data-fr="Catégories populaires">热门分类</h2>
+                <p class="home-category-subtitle" data-zh="按类别探索商品、广告与服务。" data-en="Explore listings, products and services by category." data-fr="Explorez les annonces, produits et services par univers.">按类别探索商品、广告与服务。</p>
             </div>
-            <button class="home-category-more d-none d-md-inline-flex" type="button" onclick="toggleHomeCategories(this)">Voir plus <i class="fas fa-chevron-down"></i></button>
+            <button class="home-category-more d-none d-md-inline-flex" type="button" onclick="toggleHomeCategories(this)" data-zh="查看更多" data-en="See more" data-fr="Voir plus">查看更多 <i class="fas fa-chevron-down"></i></button>
         </div>
         <div class="home-category-grid">
-            <a href="{% url 'manager:publish_entry' %}" class="home-category-card is-publish"><div class="home-category-icon"><i class="fas fa-plus"></i></div><h3>Publier une annonce</h3><p>Raccourci vendeur</p></a>
-            <a href="/marketplace/" class="home-category-card" style="--cat-bg:linear-gradient(135deg,#f97316,#ea580c);--cat-glow:rgba(249,115,22,.12)"><div class="home-category-icon"><i class="fas fa-store"></i></div><h3>Marché</h3><p>Tous les produits</p></a>
+            <a href="{% url 'manager:publish_entry' %}" class="home-category-card is-publish"><div class="home-category-icon"><i class="fas fa-plus"></i></div><h3 data-zh="发布广告" data-en="Post an ad" data-fr="Publier une annonce">发布广告</h3><p data-zh="卖家快捷入口" data-en="Seller shortcut" data-fr="Raccourci vendeur">卖家快捷入口</p></a>
+            <a href="/marketplace/" class="home-category-card" style="--cat-bg:linear-gradient(135deg,#f97316,#ea580c);--cat-glow:rgba(249,115,22,.12)"><div class="home-category-icon"><i class="fas fa-store"></i></div><h3 data-zh="市场" data-en="Market" data-fr="Marché">市场</h3><p data-zh="全部商品" data-en="All products" data-fr="Tous les produits">全部商品</p></a>
             <a href="{% url 'manager:public_books' %}" class="home-category-card" style="--cat-bg:linear-gradient(135deg,#6366f1,#4f46e5);--cat-glow:rgba(99,102,241,.14)"><div class="home-category-icon"><i class="fas fa-book-open"></i></div><h3 data-zh="书城" data-en="Books" data-fr="Livres">书城</h3></a>
             <a href="#bdCarousel" class="home-category-card" style="--cat-bg:linear-gradient(135deg,#ef4444,#dc2626);--cat-glow:rgba(239,68,68,.12)"><div class="home-category-icon"><i class="fas fa-fire"></i></div><h3 data-zh="热门" data-en="Trending" data-fr="Tendance">热门</h3></a>
-            <a href="/marketplace/products/?category=vehicules" class="home-category-card" data-subcats="Pièces & Accessoires, Voitures: Toyota / Audi / BMW, Motos & Scooters, Bus & Microbus, Camions & Remorques, Matériel lourd, Motomarines & Bateaux, Services automobiles"><div class="home-category-icon"><i class="fas fa-car"></i></div><h3>Véhicules</h3><p>Autos, motos, pièces</p></a>
-            <a href="/marketplace/products/?category=propriete" class="home-category-card" data-subcats="Nouvelles constructions, Maisons & Appartements à Louer / à Vendre, Location courte, Terrains & Parcelles, Centres et lieux d'événements, Propriété commerciale"><div class="home-category-icon"><i class="fas fa-building"></i></div><h3>Propriété</h3><p>Immobilier</p></a>
-            <a href="/marketplace/products/?category=telephones-tablettes" class="home-category-card"><div class="home-category-icon"><i class="fas fa-mobile-alt"></i></div><h3>Téléphones & Tablettes</h3><p>Mobiles et accessoires</p></a>
-            <a href="/marketplace/products/?category=electronique" class="home-category-card"><div class="home-category-icon"><i class="fas fa-tv"></i></div><h3>Électronique</h3><p>High-tech</p></a>
-            <a href="/marketplace/products/?category=maison-meubles-electromenager" class="home-category-card"><div class="home-category-icon"><i class="fas fa-couch"></i></div><h3>Maison & Meubles</h3><p>Électroménager</p></a>
-            <a href="/marketplace/products/?category=mode" class="home-category-card"><div class="home-category-icon"><i class="fas fa-tshirt"></i></div><h3>Mode</h3><p>Vêtements et style</p></a>
-            <a href="/marketplace/products/?category=sante-beaute" class="home-category-card"><div class="home-category-icon"><i class="fas fa-spa"></i></div><h3>Santé & Beauté</h3><p>Bien-être</p></a>
-            <a href="/marketplace/products/?category=services" class="home-category-card" data-subcats="Construction & Métiers, Services automobiles, Informatiques, Réparation, Nettoyage, Impression, Fabrication, Logistique, Juridique"><div class="home-category-icon"><i class="fas fa-concierge-bell"></i></div><h3>Prestations de service</h3><p>Services pro</p></a>
-            <a href="/marketplace/products/?category=reparation-construction" class="home-category-card home-category-extra" data-subcats="Équipement électrique, Matériaux de construction, Plomberie & Eau, Outils électriques/manuels, Mesure, Quincaillerie, Portes/Fenêtres"><div class="home-category-icon"><i class="fas fa-hard-hat"></i></div><h3>Réparation & Construction</h3><p>Travaux</p></a>
-            <a href="/marketplace/products/?category=equipement-outils" class="home-category-card home-category-extra" data-subcats="Équipement médical, sécurité, fabrication, magasin, restauration, salon, Papeterie"><div class="home-category-icon"><i class="fas fa-tools"></i></div><h3>Équipement & Outils</h3><p>Matériel</p></a>
-            <a href="/marketplace/products/?category=sports-arts-plein-air" class="home-category-card home-category-extra"><div class="home-category-icon"><i class="fas fa-basketball-ball"></i></div><h3>Sports, arts & plein air</h3><p>Loisirs</p></a>
-            <a href="/marketplace/products/?category=bebes-enfants" class="home-category-card home-category-extra"><div class="home-category-icon"><i class="fas fa-baby"></i></div><h3>Bébés & Enfants</h3><p>Famille</p></a>
-            <a href="/marketplace/supermarket/?category=agriculture-alimentation" class="home-category-card home-category-extra"><div class="home-category-icon"><i class="fas fa-seedling"></i></div><h3>Agriculture & Alimentation</h3><p>Produits frais</p></a>
-            <a href="/marketplace/products/?category=animaux" class="home-category-card home-category-extra"><div class="home-category-icon"><i class="fas fa-paw"></i></div><h3>Animaux</h3><p>Compagnie</p></a>
-            <a href="/marketplace/products/?category=emplois" class="home-category-card home-category-extra"><div class="home-category-icon"><i class="fas fa-briefcase"></i></div><h3>Emplois</h3><p>Opportunités</p></a>
-            <a href="/marketplace/products/?category=recherche" class="home-category-card home-category-extra"><div class="home-category-icon"><i class="fas fa-search-plus"></i></div><h3>À la recherche de...</h3><p>Demandes</p></a>
-            <a href="/marketplace/courses/" class="home-category-card home-category-final" style="--cat-bg:linear-gradient(135deg,#8b5cf6,#6366f1);--cat-glow:rgba(139,92,246,.14)"><div class="home-category-icon"><i class="fas fa-graduation-cap"></i></div><h3>Formations</h3><p>Cours et compétences</p></a>
-            <a href="/marketplace/supermarket/" class="home-category-card home-category-final" style="--cat-bg:linear-gradient(135deg,#10b981,#059669);--cat-glow:rgba(16,185,129,.14)"><div class="home-category-icon"><i class="fas fa-basket-shopping"></i></div><h3>Supermarché</h3><p>Produits du quotidien</p></a>
-            <a href="/manager/public/blog/" class="home-category-card home-category-final" style="--cat-bg:linear-gradient(135deg,#06b6d4,#2563eb);--cat-glow:rgba(6,182,212,.14)"><div class="home-category-icon"><i class="fas fa-newspaper"></i></div><h3>Actualités</h3><p>Guides et tendances</p></a>
+            <a href="/marketplace/products/?category=vehicules" class="home-category-card" data-subcats="Pièces & Accessoires, Voitures: Toyota / Audi / BMW, Motos & Scooters, Bus & Microbus, Camions & Remorques, Matériel lourd, Motomarines & Bateaux, Services automobiles"><div class="home-category-icon"><i class="fas fa-car"></i></div><h3 data-zh="车辆" data-en="Vehicles" data-fr="Véhicules">车辆</h3><p data-zh="汽车、摩托、配件" data-en="Cars, bikes, parts" data-fr="Autos, motos, pièces">汽车、摩托、配件</p></a>
+            <a href="/marketplace/products/?category=propriete" class="home-category-card" data-subcats="Nouvelles constructions, Maisons & Appartements à Louer / à Vendre, Location courte, Terrains & Parcelles, Centres et lieux d'événements, Propriété commerciale"><div class="home-category-icon"><i class="fas fa-building"></i></div><h3 data-zh="房产" data-en="Property" data-fr="Propriété">房产</h3><p data-zh="房地产" data-en="Real estate" data-fr="Immobilier">房地产</p></a>
+            <a href="/marketplace/products/?category=telephones-tablettes" class="home-category-card"><div class="home-category-icon"><i class="fas fa-mobile-alt"></i></div><h3 data-zh="手机与平板" data-en="Phones & Tablets" data-fr="Téléphones & Tablettes">手机与平板</h3><p data-zh="手机及配件" data-en="Mobiles & accessories" data-fr="Mobiles et accessoires">手机及配件</p></a>
+            <a href="/marketplace/products/?category=electronique" class="home-category-card"><div class="home-category-icon"><i class="fas fa-tv"></i></div><h3 data-zh="电子产品" data-en="Electronics" data-fr="Électronique">电子产品</h3><p data-zh="数码科技" data-en="Tech & gadgets" data-fr="High-tech">数码科技</p></a>
+            <a href="/marketplace/products/?category=maison-meubles-electromenager" class="home-category-card"><div class="home-category-icon"><i class="fas fa-couch"></i></div><h3 data-zh="家居家电" data-en="Home & Furniture" data-fr="Maison & Meubles">家居家电</h3><p data-zh="家具与电器" data-en="Furniture & appliances" data-fr="Électroménager">家具与电器</p></a>
+            <a href="/marketplace/products/?category=mode" class="home-category-card"><div class="home-category-icon"><i class="fas fa-tshirt"></i></div><h3 data-zh="时尚" data-en="Fashion" data-fr="Mode">时尚</h3><p data-zh="服装与风格" data-en="Clothing & style" data-fr="Vêtements et style">服装与风格</p></a>
+            <a href="/marketplace/products/?category=sante-beaute" class="home-category-card"><div class="home-category-icon"><i class="fas fa-spa"></i></div><h3 data-zh="健康美容" data-en="Health & Beauty" data-fr="Santé & Beauté">健康美容</h3><p data-zh="健康护理" data-en="Wellness" data-fr="Bien-être">健康护理</p></a>
+            <a href="/marketplace/products/?category=services" class="home-category-card" data-subcats="Construction & Métiers, Services automobiles, Informatiques, Réparation, Nettoyage, Impression, Fabrication, Logistique, Juridique"><div class="home-category-icon"><i class="fas fa-concierge-bell"></i></div><h3 data-zh="专业服务" data-en="Services" data-fr="Prestations de service">专业服务</h3><p data-zh="各类服务" data-en="Professional services" data-fr="Services pro">各类服务</p></a>
+            <a href="/marketplace/products/?category=reparation-construction" class="home-category-card home-category-extra" data-subcats="Équipement électrique, Matériaux de construction, Plomberie & Eau, Outils électriques/manuels, Mesure, Quincaillerie, Portes/Fenêtres"><div class="home-category-icon"><i class="fas fa-hard-hat"></i></div><h3 data-zh="维修与建筑" data-en="Repair & Construction" data-fr="Réparation & Construction">维修与建筑</h3></a>
+            <a href="/marketplace/products/?category=equipement-outils" class="home-category-card home-category-extra" data-subcats="Équipement médical, sécurité, fabrication, magasin, restauration, salon, Papeterie"><div class="home-category-icon"><i class="fas fa-tools"></i></div><h3 data-zh="设备与工具" data-en="Equipment & Tools" data-fr="Équipement & Outils">设备与工具</h3></a>
+            <a href="/marketplace/products/?category=sports-arts-plein-air" class="home-category-card home-category-extra"><div class="home-category-icon"><i class="fas fa-basketball-ball"></i></div><h3 data-zh="运动艺术与户外" data-en="Sports, Arts & Outdoors" data-fr="Sports, arts & plein air">运动艺术与户外</h3></a>
+            <a href="/marketplace/products/?category=bebes-enfants" class="home-category-card home-category-extra"><div class="home-category-icon"><i class="fas fa-baby"></i></div><h3 data-zh="母婴儿童" data-en="Babies & Kids" data-fr="Bébés & Enfants">母婴儿童</h3></a>
+            <a href="/marketplace/supermarket/?category=agriculture-alimentation" class="home-category-card home-category-extra"><div class="home-category-icon"><i class="fas fa-seedling"></i></div><h3 data-zh="农业与食品" data-en="Agriculture & Food" data-fr="Agriculture & Alimentation">农业与食品</h3></a>
+            <a href="/marketplace/products/?category=animaux" class="home-category-card home-category-extra"><div class="home-category-icon"><i class="fas fa-paw"></i></div><h3 data-zh="宠物" data-en="Pets" data-fr="Animaux">宠物</h3></a>
+            <a href="/marketplace/products/?category=emplois" class="home-category-card home-category-extra"><div class="home-category-icon"><i class="fas fa-briefcase"></i></div><h3 data-zh="招聘求职" data-en="Jobs" data-fr="Emplois">招聘求职</h3></a>
+            <a href="/marketplace/products/?category=recherche" class="home-category-card home-category-extra"><div class="home-category-icon"><i class="fas fa-search-plus"></i></div><h3 data-zh="求购信息" data-en="Looking for..." data-fr="À la recherche de...">求购信息</h3></a>
+            <a href="/marketplace/courses/" class="home-category-card home-category-final" style="--cat-bg:linear-gradient(135deg,#8b5cf6,#6366f1);--cat-glow:rgba(139,92,246,.14)"><div class="home-category-icon"><i class="fas fa-graduation-cap"></i></div><h3 data-zh="在线课程" data-en="Courses" data-fr="Formations">在线课程</h3></a>
+            <a href="/marketplace/supermarket/" class="home-category-card home-category-final" style="--cat-bg:linear-gradient(135deg,#10b981,#059669);--cat-glow:rgba(16,185,129,.14)"><div class="home-category-icon"><i class="fas fa-basket-shopping"></i></div><h3 data-zh="超市" data-en="Supermarket" data-fr="Supermarché">超市</h3></a>
+            <a href="/manager/public/blog/" class="home-category-card home-category-final" style="--cat-bg:linear-gradient(135deg,#06b6d4,#2563eb);--cat-glow:rgba(6,182,212,.14)"><div class="home-category-icon"><i class="fas fa-newspaper"></i></div><h3 data-zh="资讯" data-en="News" data-fr="Actualités">资讯</h3></a>
         </div>
-        <div class="text-center mt-3 d-md-none"><button class="home-category-more" type="button" onclick="toggleHomeCategories(this)">Voir plus <i class="fas fa-chevron-down"></i></button></div>
+        <div class="text-center mt-3 d-md-none"><button class="home-category-more" type="button" onclick="toggleHomeCategories(this)" data-zh="查看更多" data-en="See more" data-fr="Voir plus">查看更多 <i class="fas fa-chevron-down"></i></button></div>
     </div>
 </section>
 
 <!-- ===== PWA: Mobile Search Bar (sticky, mobile only) ===== -->
 <div class="pwa-search-bar" id="pwaSearchBar">
-    <div class="pwa-search-label"><i class="fas fa-compass"></i><span>Que cherchez-vous ?</span></div>
+    <div class="pwa-search-label"><i class="fas fa-compass"></i><span data-zh="您在找什么？" data-en="What are you looking for?" data-fr="Que cherchez-vous ?">您在找什么？</span></div>
     <form class="pwa-search-inner" action="/marketplace/products/" method="get" id="pwaQuickSearchForm">
         <i class="fas fa-search"></i>
-        <input type="text" name="q" id="pwaSearchInput" placeholder="Produit, marque, annonce..." autocomplete="off">
+        <input type="text" name="q" id="pwaSearchInput" placeholder="产品、品牌、广告..." autocomplete="off"
+               data-ph-zh="产品、品牌、广告..." data-ph-en="Product, brand, listing..." data-ph-fr="Produit, marque, annonce...">
         <input type="hidden" name="category" id="pwaSearchCategoryHidden" value="">
     </form>
-    <select class="pwa-search-category" id="pwaSearchCategory" aria-label="Catégorie de recherche">
-        <option value="" data-action="/marketplace/products/" data-category="" data-placeholder="Produit, marque, annonce...">Toutes</option>
+    <select class="pwa-search-category" id="pwaSearchCategory" aria-label="{% trans '搜索分类' %}">
+        <option value="" data-action="/marketplace/products/" data-category="" data-placeholder="产品、品牌、广告..." data-zh="全部" data-en="All" data-fr="Toutes">全部</option>
         {% for cat in search_categories %}
         <option value="{{ cat.slug }}" data-action="/marketplace/products/" data-category="{{ cat.slug }}" data-placeholder="Rechercher dans {{ cat.name }}...">{{ cat.name }}</option>
         {% endfor %}
@@ -2504,12 +2527,12 @@ html[data-theme="dark"] .home-category-card:hover {
 </section>
 
 <!-- Featured Content Showcase -->
-<section class="featured-section home-section-lavender">
+<section class="featured-section">
     <div class="container">
         <div class="section-header" data-aos="fade-up">
             <h2 class="section-title"><span data-zh="热门推荐" data-en="Popular Picks" data-fr="Sélections populaires">热门推荐</span></h2>
             <p class="section-subtitle">
-                <span data-zh="精选图书、热销商品与优质课程，为您推荐最受欢迎的内容" data-en="Featured books, bestselling products &amp; top courses — the most popular content for you" data-fr="Livres sélectionnés, produits populaires &amp; meilleurs cours — le contenu le plus populaire pour vous">精选图书、热销商品与优质课程，为您推荐最受欢迎的内容</span>
+                <span data-zh="精选图书、热销商品、优质课程与超市好物，为您推荐最受欢迎的内容" data-en="Featured books, bestselling products, top courses &amp; supermarket essentials — the most popular content for you" data-fr="Livres sélectionnés, produits populaires, meilleurs cours et essentiels du supermarché — le contenu le plus populaire pour vous">精选图书、热销商品、优质课程与超市好物，为您推荐最受欢迎的内容</span>
             </p>
         </div>
 
@@ -2522,6 +2545,9 @@ html[data-theme="dark"] .home-category-card:hover {
             </span>
             <span class="showcase-tab" onclick="showPanel('courses-panel', this)">
                 <i class="fas fa-graduation-cap me-1"></i><span data-zh="课程" data-en="Courses" data-fr="Cours">课程</span>
+            </span>
+            <span class="showcase-tab" onclick="showPanel('supermarket-panel', this)">
+                <i class="fas fa-basket-shopping me-1"></i><span data-zh="超市" data-en="Supermarket" data-fr="Supermarché">超市</span>
             </span>
         </div>
 
@@ -2566,7 +2592,7 @@ html[data-theme="dark"] .home-category-card:hover {
                 {% endfor %}
             </div>
             <div class="text-center mt-4">
-                <a href="{% url 'manager:public_books' %}" class="btn btn-cta" style="background:var(--hero-gradient);color:white;">
+                <a href="{% url 'manager:public_books' %}" class="btn btn-cta" style="background:linear-gradient(135deg,#0f172a,#1d4ed8);color:white;">
                     <i class="fas fa-book-open me-2"></i><span data-zh="查看更多图书" data-en="View More Books" data-fr="Voir plus de livres">查看更多图书</span>
                 </a>
             </div>
@@ -2611,7 +2637,7 @@ html[data-theme="dark"] .home-category-card:hover {
                 {% endfor %}
             </div>
             <div class="text-center mt-4">
-                <a href="/marketplace/products/" class="btn btn-cta" style="background:linear-gradient(135deg,#f093fb,#f5576c);color:white;">
+                <a href="/marketplace/products/" class="btn btn-cta" style="background:linear-gradient(135deg,#0f172a,#1d4ed8);color:white;">
                     <i class="fas fa-store me-2"></i><span data-zh="查看更多商品" data-en="View More Products" data-fr="Voir plus de produits">查看更多商品</span>
                 </a>
             </div>
@@ -2659,7 +2685,7 @@ html[data-theme="dark"] .home-category-card:hover {
                 {% endfor %}
             </div>
             <div class="text-center mt-4">
-                <a href="/marketplace/courses/" class="btn btn-cta" style="background:linear-gradient(135deg,#4facfe,#00f2fe);color:white;">
+                <a href="/marketplace/courses/" class="btn btn-cta" style="background:linear-gradient(135deg,#0f172a,#1d4ed8);color:white;">
                     <i class="fas fa-graduation-cap me-2"></i><span data-zh="查看更多课程" data-en="View More Courses" data-fr="Voir plus de cours">查看更多课程</span>
                 </a>
             </div>
@@ -2670,15 +2696,59 @@ html[data-theme="dark"] .home-category-card:hover {
             </div>
             {% endif %}
         </div>
+
+        <div id="supermarket-panel" class="showcase-panel">
+            {% if featured_supermarket %}
+            <div class="row g-3">
+                {% for item in featured_supermarket %}
+                {% if forloop.counter <= 4 %}
+                <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="{{ forloop.counter0|add:50 }}">
+                    <a href="/marketplace/supermarket/{{ item.slug }}/" class="text-decoration-none">
+                    <div class="showcase-card na-card">
+                        <div class="na-cover">
+                            <span class="na-type-badge product" data-zh="超市" data-en="Supermarket" data-fr="Supermarché">超市</span>
+                            {% if item.image %}
+                                <img src="{{ item.image.url }}" alt="{{ item.name }}" style="width:100%;height:100%;object-fit:cover;">
+                            {% else %}
+                                <i class="fas fa-basket-shopping" style="font-size:3rem;color:rgba(14,165,233,.32);"></i>
+                            {% endif %}
+                        </div>
+                        <div class="na-body">
+                            <span class="na-badge">{{ item.category.name|default:'超市' }}</span>
+                            <div class="na-title">{{ item.name|truncatechars:28 }}</div>
+                            <div class="na-pub">{{ item.description|truncatechars:90 }}</div>
+                            <div class="na-footer">
+                                <span class="na-price">{{ item.price|fcfa }}</span>
+                                <span class="na-instructor"><i class="fas fa-fire me-1"></i>{{ item.sales_count|default:0 }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    </a>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+            <div class="text-center mt-4">
+                <a href="/marketplace/supermarket/" class="btn btn-cta" style="background:linear-gradient(135deg,#0f172a,#1d4ed8);color:white;">
+                    <i class="fas fa-basket-shopping me-2"></i><span data-zh="查看更多超市商品" data-en="View More Supermarket Items" data-fr="Voir plus d'articles du supermarché">查看更多超市商品</span>
+                </a>
+            </div>
+            {% else %}
+            <div class="text-center py-5 text-muted">
+                <i class="fas fa-basket-shopping fa-3x mb-3" style="opacity:0.3;"></i>
+                <p><span data-zh="暂无超市商品" data-en="No supermarket items yet" data-fr="Aucun article de supermarché pour le moment">暂无超市商品</span></p>
+            </div>
+            {% endif %}
+        </div>
     </div>
 </section>
 
 <!-- New Arrivals Section -->
-<section class="new-arrivals-section home-section-mint">
+<section class="new-arrivals-section">
     <div class="container">
         <div class="section-header" data-aos="fade-up">
             <h2 class="section-title"><span data-zh="新书上架" data-en="New Arrivals" data-fr="Nouveautés">新书上架</span></h2>
-            <p class="section-subtitle"><span data-zh="最新入库的精选图书与商城好物，抢先发现" data-en="Fresh books & marketplace finds — discover first" data-fr="Nouveautés livres & marché — découvrez en premier">最新入库的精选图书与商城好物，抢先发现</span></p>
+            <p class="section-subtitle"><span data-zh="最新入库的图书、商品、课程与超市好物，抢先发现" data-en="Fresh books, products, courses & supermarket finds — discover first" data-fr="Nouveaux livres, produits, cours et trouvailles supermarché — découvrez en premier">最新入库的图书、商品、课程与超市好物，抢先发现</span></p>
         </div>
 
         <!-- Tabs -->
@@ -2686,7 +2756,7 @@ html[data-theme="dark"] .home-category-card:hover {
             <button class="na-tab active" data-panel="na-books"><i class="fas fa-book"></i><span data-zh="图书" data-en="Books" data-fr="Livres">图书</span></button>
             <button class="na-tab" data-panel="na-products"><i class="fas fa-shopping-bag"></i><span data-zh="商品" data-en="Products" data-fr="Produits">商品</span></button>
             <button class="na-tab" data-panel="na-courses"><i class="fas fa-graduation-cap"></i><span data-zh="课程" data-en="Courses" data-fr="Cours">课程</span></button>
-            <button class="na-tab" data-panel="na-all"><i class="fas fa-th-large"></i><span data-zh="全部" data-en="All" data-fr="Tout">全部</span></button>
+            <button class="na-tab" data-panel="na-supermarket"><i class="fas fa-basket-shopping"></i><span data-zh="超市" data-en="Supermarket" data-fr="Supermarché">超市</span></button>
         </div>
 
         <div class="na-tab-content" data-aos="fade-up" data-aos-delay="100">
@@ -2697,8 +2767,8 @@ html[data-theme="dark"] .home-category-card:hover {
                     {% for book in recent_books|slice:":4" %}
                     <div class="na-card">
                         <div class="na-cover">
-                            <span class="na-type-badge book">Book</span>
-                            {% if book.cover_image %}<img src="{{ book.cover_image.url }}" alt="{{ book.name }}">{% else %}<i class="fas fa-book" style="font-size:3rem;color:rgba(102,126,234,.3);"></i>{% endif %}
+                            <span class="na-type-badge book" data-zh="图书" data-en="Book" data-fr="Livre">图书</span>
+                            {% if book.cover_image %}<img src="{{ book.cover_image.url }}" alt="{{ book.name }}">{% else %}<i class="fas fa-book" style="font-size:3rem;color:rgba(29,78,216,.3);"></i>{% endif %}
                         </div>
                         <div class="na-body">
                             <span class="na-badge">{% if book.category %}{{ book.category.name }}{% else %}新书{% endif %}</span>
@@ -2713,7 +2783,7 @@ html[data-theme="dark"] .home-category-card:hover {
                     {% endfor %}
                 </div>
                 <div class="text-center mt-4">
-                    <a href="{% url 'manager:public_books' %}?sort=newest" class="btn btn-cta" style="background:var(--hero-gradient);color:white;padding:14px 36px;border-radius:50px;font-weight:700;">
+                    <a href="{% url 'manager:public_books' %}?sort=newest" class="btn btn-cta" style="background:linear-gradient(135deg,#0f172a,#1d4ed8);color:white;padding:14px 36px;border-radius:50px;font-weight:700;">
                         <i class="fas fa-book-open me-2"></i><span data-zh="查看全部新书" data-en="View All New Books" data-fr="Voir toutes les nouveautés">查看全部新书</span>
                     </a>
                 </div>
@@ -2729,24 +2799,24 @@ html[data-theme="dark"] .home-category-card:hover {
                     {% for product in recent_products %}
                     <div class="na-card">
                         <div class="na-cover">
-                            <span class="na-type-badge product">Product</span>
+                            <span class="na-type-badge product" data-zh="商品" data-en="Product" data-fr="Produit">商品</span>
                             {% if product.get_discount_percent %}<span class="na-discount">-{{ product.get_discount_percent }}%</span>{% endif %}
                             {% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}" style="object-fit:cover;width:100%;height:100%;">{% else %}<i class="fas fa-shopping-bag" style="font-size:3rem;color:rgba(16,185,129,.3);"></i>{% endif %}
                         </div>
                         <div class="na-body">
-                            <span class="na-badge" style="background:linear-gradient(135deg,#10b981,#059669);">{% if product.category %}{{ product.category.name }}{% else %}商品{% endif %}</span>
+                            <span class="na-badge">{% if product.category %}{{ product.category.name }}{% else %}<span data-zh="商品" data-en="Product" data-fr="Produit">商品</span>{% endif %}</span>
                             <div class="na-title">{{ product.name }}</div>
                             <div class="na-pub"><i class="fas fa-store me-1"></i>{% if product.vendor %}{{ product.vendor.company_name }}{% else %}DUNO Market{% endif %}</div>
                             <div class="na-footer">
                                 <span>{% if product.original_price %}<span class="na-original-price">{{ product.original_price|fcfa }}</span>{% endif %}<span class="na-price">{{ product.price|fcfa }}</span></span>
-                                <a href="{% url 'marketplace:product_detail' product.slug %}" class="na-btn" style="background:linear-gradient(135deg,#10b981,#059669);"><i class="fas fa-eye me-1"></i><span data-zh="查看" data-en="View" data-fr="Voir">查看</span></a>
+                                <a href="{% url 'marketplace:product_detail' product.slug %}" class="na-btn"><i class="fas fa-eye me-1"></i><span data-zh="查看" data-en="View" data-fr="Voir">查看</span></a>
                             </div>
                         </div>
                     </div>
                     {% endfor %}
                 </div>
                 <div class="text-center mt-4">
-                    <a href="{% url 'marketplace:product_list' %}" class="btn btn-cta" style="background:linear-gradient(135deg,#10b981,#059669);color:white;padding:14px 36px;border-radius:50px;font-weight:700;">
+                    <a href="{% url 'marketplace:product_list' %}" class="btn btn-cta" style="background:linear-gradient(135deg,#0f172a,#1d4ed8);color:white;padding:14px 36px;border-radius:50px;font-weight:700;">
                         <i class="fas fa-shopping-bag me-2"></i><span data-zh="查看全部商品" data-en="View All Products" data-fr="Voir tous les produits">查看全部商品</span>
                     </a>
                 </div>
@@ -2762,23 +2832,23 @@ html[data-theme="dark"] .home-category-card:hover {
                     {% for course in recent_courses %}
                     <div class="na-card">
                         <div class="na-cover">
-                            <span class="na-type-badge course">Course</span>
+                            <span class="na-type-badge course" data-zh="课程" data-en="Course" data-fr="Cours">课程</span>
                             {% if course.image %}<img src="{{ course.image.url }}" alt="{{ course.title }}" style="object-fit:cover;width:100%;height:100%;">{% else %}<i class="fas fa-graduation-cap" style="font-size:3rem;color:rgba(245,158,11,.3);"></i>{% endif %}
                         </div>
                         <div class="na-body">
-                            <span class="na-badge" style="background:linear-gradient(135deg,#f59e0b,#d97706);">{% if course.category %}{{ course.category.name }}{% else %}课程{% endif %}</span>
+                            <span class="na-badge">{% if course.category %}{{ course.category.name }}{% else %}<span data-zh="课程" data-en="Course" data-fr="Cours">课程</span>{% endif %}</span>
                             <div class="na-title">{{ course.title }}</div>
                             <div class="na-instructor"><i class="fas fa-chalkboard-teacher me-1"></i>{{ course.instructor }}</div>
                             <div class="na-footer">
-                                <span>{% if course.original_price %}<span class="na-original-price">{{ course.original_price|fcfa }}</span>{% endif %}<span class="na-price" style="color:#f59e0b;">{{ course.price|fcfa }}</span></span>
-                                <a href="{% url 'marketplace:course_detail' course.slug %}" class="na-btn" style="background:linear-gradient(135deg,#f59e0b,#d97706);"><i class="fas fa-eye me-1"></i><span data-zh="查看" data-en="View" data-fr="Voir">查看</span></a>
+                                <span>{% if course.original_price %}<span class="na-original-price">{{ course.original_price|fcfa }}</span>{% endif %}<span class="na-price">{{ course.price|fcfa }}</span></span>
+                                <a href="{% url 'marketplace:course_detail' course.slug %}" class="na-btn"><i class="fas fa-eye me-1"></i><span data-zh="查看" data-en="View" data-fr="Voir">查看</span></a>
                             </div>
                         </div>
                     </div>
                     {% endfor %}
                 </div>
                 <div class="text-center mt-4">
-                    <a href="{% url 'marketplace:course_list' %}" class="btn btn-cta" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:white;padding:14px 36px;border-radius:50px;font-weight:700;">
+                    <a href="{% url 'marketplace:course_list' %}" class="btn btn-cta" style="background:linear-gradient(135deg,#0f172a,#1d4ed8);color:white;padding:14px 36px;border-radius:50px;font-weight:700;">
                         <i class="fas fa-graduation-cap me-2"></i><span data-zh="查看全部课程" data-en="View All Courses" data-fr="Voir tous les cours">查看全部课程</span>
                     </a>
                 </div>
@@ -2787,67 +2857,35 @@ html[data-theme="dark"] .home-category-card:hover {
                 {% endif %}
             </div>
 
-            <!-- All Panel (mixed) -->
-            <div class="na-tab-panel" id="na-all">
+            <div class="na-tab-panel" id="na-supermarket">
+                {% if recent_supermarket %}
                 <div class="na-grid">
-                    {% for book in recent_books|slice:":2" %}
+                    {% for item in recent_supermarket %}
                     <div class="na-card">
                         <div class="na-cover">
-                            <span class="na-type-badge book">Book</span>
-                            {% if book.cover_image %}<img src="{{ book.cover_image.url }}" alt="{{ book.name }}">{% else %}<i class="fas fa-book" style="font-size:3rem;color:rgba(102,126,234,.3);"></i>{% endif %}
+                            <span class="na-type-badge product" data-zh="超市" data-en="Supermarket" data-fr="Supermarché">超市</span>
+                            {% if item.image %}<img src="{{ item.image.url }}" alt="{{ item.name }}" style="object-fit:cover;width:100%;height:100%;">{% else %}<i class="fas fa-basket-shopping" style="font-size:3rem;color:rgba(16,185,129,.3);"></i>{% endif %}
                         </div>
                         <div class="na-body">
-                            <span class="na-badge">{% if book.category %}{{ book.category.name }}{% else %}新书{% endif %}</span>
-                            <div class="na-title">{{ book.name }}</div>
-                            <div class="na-pub"><i class="fas fa-building me-1"></i>{{ book.publisher.publisher_name }}</div>
+                            <span class="na-badge">{% if item.category %}{{ item.category.name }}{% else %}<span data-zh="超市" data-en="Supermarket" data-fr="Supermarché">超市</span>{% endif %}</span>
+                            <div class="na-title">{{ item.name }}</div>
+                            <div class="na-pub"><i class="fas fa-store me-1"></i>{% if item.vendor %}{{ item.vendor.company_name }}{% else %}DUNO Market{% endif %}</div>
                             <div class="na-footer">
-                                <span class="na-price">{{ book.price|fcfa }}</span>
-                                <a href="{% url 'manager:public_book_detail' book.id %}" class="na-btn"><i class="fas fa-eye me-1"></i><span data-zh="查看" data-en="View" data-fr="Voir">查看</span></a>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                    {% for product in recent_products|slice:":1" %}
-                    <div class="na-card">
-                        <div class="na-cover">
-                            <span class="na-type-badge product">Product</span>
-                            {% if product.get_discount_percent %}<span class="na-discount">-{{ product.get_discount_percent }}%</span>{% endif %}
-                            {% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}" style="object-fit:cover;width:100%;height:100%;">{% else %}<i class="fas fa-shopping-bag" style="font-size:3rem;color:rgba(16,185,129,.3);"></i>{% endif %}
-                        </div>
-                        <div class="na-body">
-                            <span class="na-badge" style="background:linear-gradient(135deg,#10b981,#059669);">{% if product.category %}{{ product.category.name }}{% else %}商品{% endif %}</span>
-                            <div class="na-title">{{ product.name }}</div>
-                            <div class="na-pub"><i class="fas fa-store me-1"></i>{% if product.vendor %}{{ product.vendor.company_name }}{% else %}DUNO Market{% endif %}</div>
-                            <div class="na-footer">
-                                <span class="na-price">{{ product.price|fcfa }}</span>
-                                <a href="{% url 'marketplace:product_detail' product.slug %}" class="na-btn" style="background:linear-gradient(135deg,#10b981,#059669);"><i class="fas fa-eye me-1"></i><span data-zh="查看" data-en="View" data-fr="Voir">查看</span></a>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                    {% for course in recent_courses|slice:":1" %}
-                    <div class="na-card">
-                        <div class="na-cover">
-                            <span class="na-type-badge course">Course</span>
-                            {% if course.image %}<img src="{{ course.image.url }}" alt="{{ course.title }}" style="object-fit:cover;width:100%;height:100%;">{% else %}<i class="fas fa-graduation-cap" style="font-size:3rem;color:rgba(245,158,11,.3);"></i>{% endif %}
-                        </div>
-                        <div class="na-body">
-                            <span class="na-badge" style="background:linear-gradient(135deg,#f59e0b,#d97706);">{% if course.category %}{{ course.category.name }}{% else %}课程{% endif %}</span>
-                            <div class="na-title">{{ course.title }}</div>
-                            <div class="na-instructor"><i class="fas fa-chalkboard-teacher me-1"></i>{{ course.instructor }}</div>
-                            <div class="na-footer">
-                                <span class="na-price" style="color:#f59e0b;">{{ course.price|fcfa }}</span>
-                                <a href="{% url 'marketplace:course_detail' course.slug %}" class="na-btn" style="background:linear-gradient(135deg,#f59e0b,#d97706);"><i class="fas fa-eye me-1"></i><span data-zh="查看" data-en="View" data-fr="Voir">查看</span></a>
+                                <span class="na-price">{{ item.price|fcfa }}</span>
+                                <a href="{% url 'marketplace:supermarket_detail' item.slug %}" class="na-btn"><i class="fas fa-eye me-1"></i><span data-zh="查看" data-en="View" data-fr="Voir">查看</span></a>
                             </div>
                         </div>
                     </div>
                     {% endfor %}
                 </div>
                 <div class="text-center mt-4">
-                    <a href="{% url 'marketplace:home' %}" class="btn btn-cta" style="background:var(--hero-gradient);color:white;padding:14px 36px;border-radius:50px;font-weight:700;">
-                        <i class="fas fa-store me-2"></i><span data-zh="探索市场" data-en="Explore Marketplace" data-fr="Explorer le marché">探索市场</span>
+                    <a href="{% url 'marketplace:supermarket_list' %}" class="btn btn-cta" style="background:linear-gradient(135deg,#0f172a,#1d4ed8);color:white;padding:14px 36px;border-radius:50px;font-weight:700;">
+                        <i class="fas fa-basket-shopping me-2"></i><span data-zh="查看全部超市商品" data-en="View All Supermarket Items" data-fr="Voir tous les articles du supermarché">查看全部超市商品</span>
                     </a>
                 </div>
+                {% else %}
+                <div class="text-center py-5"><p class="text-muted">{% trans "暂无超市商品" %}</p></div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -2871,7 +2909,7 @@ html[data-theme="dark"] .home-category-card:hover {
 
 <!-- Latest Blog Posts -->
 {% if latest_blogs %}
-<section class="latest-posts-section home-section-lavender" style="padding:80px 0;background:linear-gradient(135deg,#f8fafc,#fff);">
+<section class="latest-posts-section" style="padding:88px 0;background:linear-gradient(180deg,#ffffff 0%,#f4f9ff 100%);">
     <div class="container">
         <div class="section-header" data-aos="fade-up">
             <h2 class="section-title"><span data-zh="最新动态" data-en="Latest Posts" data-fr="Derniers articles">最新动态</span></h2>
@@ -2881,17 +2919,17 @@ html[data-theme="dark"] .home-category-card:hover {
             {% for blog in latest_blogs %}
             <div class="col-lg-4">
                 <a href="{% url 'manager:public_blog_detail' blog.slug %}" style="text-decoration:none;color:inherit;">
-                <div class="latest-post-card" style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(102,126,234,.08);transition:all .3s;border:1px solid rgba(102,126,234,.06);height:100%;">
-                    <div style="height:200px;overflow:hidden;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;position:relative;">
-                        {% if blog.image %}<img src="{{ blog.image.url }}" alt="{{ blog.title }}" style="width:100%;height:100%;object-fit:cover;">{% else %}<i class="fas fa-newspaper" style="font-size:3rem;color:rgba(255,255,255,.4);"></i>{% endif %}
-                        {% if blog.category %}<span style="position:absolute;top:12px;left:12px;background:rgba(255,255,255,.9);color:#667eea;font-size:.7rem;font-weight:700;padding:4px 12px;border-radius:20px;">{{ blog.category.name }}</span>{% endif %}
+                <div class="latest-post-card" style="background:linear-gradient(180deg,#ffffff,#f8fafc);border-radius:24px;overflow:hidden;box-shadow:0 18px 44px rgba(15,23,42,.08);transition:all .32s ease;border:1px solid rgba(148,163,184,.12);height:100%;">
+                    <div style="height:214px;overflow:hidden;background:linear-gradient(135deg,#0f172a,#2563eb);display:flex;align-items:center;justify-content:center;position:relative;">
+                        {% if blog.image %}<img src="{{ blog.image.url }}" alt="{{ blog.title }}" style="width:100%;height:100%;object-fit:cover;transition:transform .38s ease;">{% else %}<i class="fas fa-newspaper" style="font-size:3rem;color:rgba(255,255,255,.45);"></i>{% endif %}
+                        {% if blog.category %}<span style="position:absolute;top:14px;left:14px;background:rgba(255,255,255,.92);color:#1d4ed8;font-size:.72rem;font-weight:800;padding:6px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.8);">{{ blog.category.name }}</span>{% endif %}
                     </div>
-                    <div style="padding:20px;">
-                        <h5 style="font-weight:700;font-size:1.05rem;color:#1e293b;margin-bottom:8px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ blog.title }}</h5>
-                        <p style="font-size:.85rem;color:#94a3b8;margin-bottom:12px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">{{ blog.content|striptags|truncatechars:120 }}</p>
-                        <div style="display:flex;justify-content:space-between;align-items:center;">
-                            <span style="font-size:.75rem;color:#94a3b8;"><i class="fas fa-calendar me-1"></i>{{ blog.created_at|date:"Y-m-d" }}</span>
-                            <span style="font-size:.8rem;color:#667eea;font-weight:600;" data-zh="阅读更多 →" data-en="Read more →" data-fr="Lire plus →">阅读更多 →</span>
+                    <div style="padding:22px;">
+                        <h5 style="font-weight:800;font-size:1.06rem;color:#0f172a;margin-bottom:10px;line-height:1.42;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ blog.title }}</h5>
+                        <p style="font-size:.88rem;color:#64748b;margin-bottom:14px;line-height:1.65;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">{{ blog.content|striptags|truncatechars:120 }}</p>
+                        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+                            <span style="font-size:.76rem;color:#94a3b8;"><i class="fas fa-calendar me-1"></i>{{ blog.created_at|date:"Y-m-d" }}</span>
+                            <span style="font-size:.82rem;color:#1d4ed8;font-weight:700;" data-zh="阅读更多 →" data-en="Read more →" data-fr="Lire plus →">阅读更多 →</span>
                         </div>
                     </div>
                 </div>
@@ -2900,7 +2938,7 @@ html[data-theme="dark"] .home-category-card:hover {
             {% endfor %}
         </div>
         <div class="text-center mt-4" data-aos="fade-up">
-            <a href="{% url 'manager:public_blog' %}" class="btn btn-cta" style="background:#fff;color:#667eea;font-weight:700;padding:14px 36px;border-radius:50px;box-shadow:0 4px 15px rgba(102,126,234,.15);border:2px solid rgba(102,126,234,.2);">
+            <a href="{% url 'manager:public_blog' %}" class="btn btn-cta" style="background:linear-gradient(135deg,#0f172a,#1d4ed8);color:#fff;font-weight:700;padding:14px 36px;border-radius:999px;box-shadow:0 14px 28px rgba(29,78,216,.22);border:0;">
                 <i class="fas fa-newspaper me-2"></i><span data-zh="查看全部文章" data-en="View All Posts" data-fr="Voir tous les articles">查看全部文章</span>
             </a>
         </div>
@@ -2971,7 +3009,7 @@ html[data-theme="dark"] .home-category-card:hover {
                         <span data-zh="浏览图书、发现课程、探索市场、选购生鲜 — 一站式满足您的一切需求" data-en="Browse books, discover courses, explore the marketplace, shop fresh — all in one place" data-fr="Parcourez les livres, découvrez les cours, explorez le marché, achetez frais — tout en un seul endroit">浏览图书、发现课程、探索市场、选购生鲜 — 一站式满足您的一切需求</span>
                     </p>
                     <div class="d-flex flex-wrap justify-content-center gap-3">
-                        <a href="{% url 'manager:public_books' %}" class="btn btn-cta" style="background:white;color:#667eea;font-weight:700;padding:16px 36px;border-radius:50px;font-size:1.05rem;box-shadow:0 8px 25px rgba(0,0,0,0.15);transition:all 0.3s ease;">
+                        <a href="{% url 'manager:public_books' %}" class="btn btn-cta" style="background:white;color:#1d4ed8;font-weight:700;padding:16px 36px;border-radius:50px;font-size:1.05rem;box-shadow:0 8px 25px rgba(0,0,0,0.15);transition:all 0.3s ease;">
                             <i class="fas fa-book-open me-2"></i><span data-zh="浏览图书" data-en="Browse Books" data-fr="Parcourir les livres">浏览图书</span>
                         </a>
                         <a href="/marketplace/" class="btn btn-cta" style="background:transparent;color:white;font-weight:700;padding:16px 36px;border-radius:50px;font-size:1.05rem;border:2px solid rgba(255,255,255,0.7);transition:all 0.3s ease;">
@@ -2995,8 +3033,12 @@ function toggleHomeCategories(btn) {
     if (!hub) return;
     hub.classList.toggle('expanded');
     var expanded = hub.classList.contains('expanded');
+    var lang = document.documentElement.lang || 'zh-Hans';
+    var label = expanded
+        ? (lang.indexOf('fr') === 0 ? 'Voir moins' : (lang.indexOf('en') === 0 ? 'See less' : '收起'))
+        : (lang.indexOf('fr') === 0 ? 'Voir plus' : (lang.indexOf('en') === 0 ? 'See more' : '查看更多'));
     document.querySelectorAll('.home-category-more').forEach(function(button) {
-        button.innerHTML = (expanded ? 'Voir moins' : 'Voir plus') + ' <i class="fas fa-chevron-down"></i>';
+        button.innerHTML = label + ' <i class="fas fa-chevron-down"></i>';
     });
 }
 

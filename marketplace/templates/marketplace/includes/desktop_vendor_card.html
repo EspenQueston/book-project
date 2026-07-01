@@ -1,7 +1,7 @@
 {% load i18n %}
 {% include 'marketplace/includes/seller_card_theme.html' %}
 {% if seller_vendor %}
-<div class="desk-seller-card{% if seller_vendor.is_official %} desk-seller-card--official{% endif %}{% if seller_card_variant == 'sidebar' %} desk-seller-card--sidebar{% endif %}">
+<div class="desk-seller-card{% if seller_vendor.is_official %} desk-seller-card--official{% elif seller_vendor.is_certified %} desk-seller-card--certified{% endif %}{% if seller_card_variant == 'sidebar' %} desk-seller-card--sidebar{% endif %}">
     <div class="desk-seller-card-inner">
         <div class="d-flex align-items-center gap-3 w-100{% if seller_card_variant == 'sidebar' %} mb-1{% endif %}">
             <div class="desk-seller-avatar">
@@ -18,9 +18,11 @@
                 <a href="{% url 'manager:public_vendor_shop' seller_vendor.id %}" class="desk-seller-name">{{ seller_vendor.company_name }}</a>
                 <div class="desk-seller-meta">
                     {% if seller_vendor.is_official %}
-                    <span class="desk-seller-badge-official"><i class="fas fa-badge-check"></i>{% trans "官方认证" %}</span>
-                    {% else %}
-                    <span class="verified"><i class="fas fa-shield-alt"></i> {% trans "认证商家" %}</span>
+                    <span class="desk-seller-badge-official"><i class="fas fa-certificate"></i>{% trans "官方直营" %}</span>
+                    {% elif seller_vendor.is_certified %}
+                    <span class="desk-seller-badge-certified"><i class="fas fa-badge-check"></i>{% trans "认证卖家" %}</span>
+                    {% elif seller_vendor.status == 'approved' %}
+                    <span class="desk-seller-badge-approved"><i class="fas fa-store"></i>{% trans "入驻卖家" %}</span>
                     {% endif %}
                     {% if vendor_follower_count %}
                     <span><i class="fas fa-users"></i> {{ vendor_follower_count }} {% trans "粉丝" %}</span>

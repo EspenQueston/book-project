@@ -1,4 +1,4 @@
-{% extends "marketplace/vendor/base.html" %}
+﻿{% extends "marketplace/vendor/base.html" %}
 {% load currency_filters i18n %}
 
 {% block title %}{% trans "卖家仪表板" %} - {{ vendor.company_name }}{% endblock %}
@@ -17,7 +17,7 @@
     .order-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.88rem; }
     .order-row:last-child { border-bottom: none; }
     .quick-action { background: #fff; border-radius: 15px; padding: 22px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); text-align: center; transition: all 0.3s; text-decoration: none; color: inherit; display: block; }
-    .quick-action:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(102,126,234,0.15); color: inherit; }
+    .quick-action:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(29,78,216,0.15); color: inherit; }
     .quick-action i { font-size: 1.8rem; margin-bottom: 8px; }
 </style>
 {% endblock %}
@@ -38,7 +38,7 @@
     <div class="col-6 col-lg-3">
         <div class="stat-card">
             <div class="d-flex align-items-center">
-                <div class="stat-icon me-3" style="background:linear-gradient(135deg,#667eea,#764ba2);"><i class="fas fa-shopping-bag"></i></div>
+                <div class="stat-icon me-3" style="background:linear-gradient(135deg,#1d4ed8,#14245f);"><i class="fas fa-shopping-bag"></i></div>
                 <div>
                     <div class="stat-value">{{ product_count }}</div>
                     <div class="stat-label">{% trans "商品" %}</div>
@@ -85,7 +85,7 @@
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-3">
         <a href="{% url 'marketplace:vendor_product_add' %}" class="quick-action">
-            <i class="fas fa-plus-circle d-block" style="color:#667eea;"></i>
+            <i class="fas fa-plus-circle d-block" style="color:#1d4ed8;"></i>
             <h6 class="fw-bold mb-0" style="font-size:0.88rem;">{% trans "添加商品" %}</h6>
         </a>
     </div>
@@ -125,8 +125,8 @@
         <div class="chart-card">
             <h6><i class="fas fa-balance-scale me-2" style="color:var(--primary-color);"></i>{% trans "收入构成" %}</h6>
             <div class="d-flex gap-3">
-                <div class="flex-fill text-center p-3" style="background:rgba(102,126,234,0.06);border-radius:12px;">
-                    <div style="font-size:1.3rem;font-weight:800;color:#667eea;">{{ product_revenue|fcfa }}</div>
+                <div class="flex-fill text-center p-3" style="background:rgba(29,78,216,0.06);border-radius:12px;">
+                    <div style="font-size:1.3rem;font-weight:800;color:#1d4ed8;">{{ product_revenue|fcfa }}</div>
                     <small class="text-muted">{% trans "商品收入" %}</small>
                 </div>
                 <div class="flex-fill text-center p-3" style="background:rgba(240,147,251,0.06);border-radius:12px;">
@@ -153,8 +153,8 @@
         </div>
     </div>
     <div class="col-md-3">
-        <div class="stat-card text-center" style="background:linear-gradient(135deg,rgba(102,126,234,0.06),rgba(118,75,162,0.03));">
-            <div style="font-size:1.6rem;font-weight:800;color:#667eea;">{{ active_courses }}</div>
+        <div class="stat-card text-center" style="background:linear-gradient(135deg,rgba(29,78,216,0.06),rgba(20,36,95,0.03));">
+            <div style="font-size:1.6rem;font-weight:800;color:#1d4ed8;">{{ active_courses }}</div>
             <small class="text-muted">{% trans "发布课程" %}</small>
         </div>
     </div>
@@ -190,11 +190,11 @@
     </div>
     <div class="col-lg-6">
         <div class="chart-card">
-            <h6><i class="fas fa-receipt me-2" style="color:#667eea;"></i>{% trans "最近订单" %}</h6>
+            <h6><i class="fas fa-receipt me-2" style="color:#1d4ed8;"></i>{% trans "最近订单" %}</h6>
             {% if recent_orders %}
             {% for order in recent_orders %}
             <div class="order-row">
-                <span class="badge" style="background:rgba(102,126,234,0.1);color:#667eea;font-size:0.72rem;">{{ order.order_number|truncatechars:12 }}</span>
+                <span class="badge" style="background:rgba(29,78,216,0.1);color:#1d4ed8;font-size:0.72rem;">{{ order.order_number|truncatechars:12 }}</span>
                 <div class="flex-grow-1">
                     <div class="fw-bold" style="font-size:0.85rem;">{% if order.user_name %}{{ order.user_name }}{% else %}{% trans "匿名" %}{% endif %}</div>
                     <small class="text-muted">{{ order.created_at|date:"m/d H:i" }}</small>
@@ -224,13 +224,13 @@ new Chart(revCtx, {
             {
                 label: '{% trans "商品收入" %}',
                 data: {{ daily_product_data|safe }},
-                borderColor: '#667eea',
-                backgroundColor: 'rgba(102,126,234,0.1)',
+                borderColor: '#1d4ed8',
+                backgroundColor: 'rgba(29,78,216,0.1)',
                 fill: true,
                 tension: 0.4,
                 borderWidth: 2,
                 pointRadius: 4,
-                pointBackgroundColor: '#667eea',
+                pointBackgroundColor: '#1d4ed8',
             },
             {
                 label: '{% trans "课程收入" %}',
@@ -267,7 +267,7 @@ if (catLabels.length > 0) {
             labels: catLabels,
             datasets: [{
                 data: catCounts,
-                backgroundColor: ['#667eea','#f093fb','#10b981','#f59e0b','#ef4444','#06b6d4'],
+                backgroundColor: ['#1d4ed8','#f093fb','#10b981','#f59e0b','#ef4444','#06b6d4'],
                 borderWidth: 0,
             }]
         },

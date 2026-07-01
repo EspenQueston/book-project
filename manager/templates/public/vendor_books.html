@@ -1,4 +1,4 @@
-{% extends 'public/vendor_panel_base.html' %}
+﻿{% extends 'public/vendor_panel_base.html' %}
 {% load i18n %}
 {% load currency_filters %}
 
@@ -7,12 +7,12 @@
 {% block panel_extra_css %}
 <style>
     .page-header-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
         color: #fff;
         padding: 20px 22px;
         border-radius: 15px;
         margin-bottom: 20px;
-        box-shadow: 0 8px 28px rgba(102, 126, 234, 0.32);
+        box-shadow: 0 8px 28px rgba(29, 78, 216, 0.32);
     }
     .badge-active { background: rgba(16,185,129,0.12); color: #10b981; font-weight: 600; }
     .badge-inactive { background: rgba(239,68,68,0.12); color: #ef4444; font-weight: 600; }
@@ -28,7 +28,7 @@
     .book-thumb-placeholder {
         width: 48px !important; height: 60px !important;
         min-width: 48px; border-radius: 8px;
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: linear-gradient(135deg, #1d4ed8, #14245f);
         display: flex; align-items: center; justify-content: center;
         flex-shrink: 0; color: rgba(255,255,255,0.8); font-size: 1.1rem;
     }
@@ -119,6 +119,7 @@
                     </td>
                     <td>
                         <div class="action-btns">
+                            <a href="{% url 'manager:public_book_detail' vb.book.id %}" class="btn btn-sm btn-outline-info rounded-pill" target="_blank" rel="noopener" title="{% trans 'Voir sur le site' %}"><i class="fas fa-external-link-alt"></i></a>
                             <a href="{% url 'manager:vendor_edit_book' %}?id={{ vb.id }}" class="btn btn-sm btn-outline-primary rounded-pill" title="{% trans 'Edit' %}"><i class="fas fa-edit"></i></a>
                             <button type="button" class="btn btn-sm btn-outline-danger rounded-pill" onclick="vpDeleteBook({{ vb.id }})" title="{% trans 'Delete' %}"><i class="fas fa-trash"></i></button>
                         </div>

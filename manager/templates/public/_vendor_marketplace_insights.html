@@ -1,17 +1,17 @@
-{% load i18n %}
+﻿{% load i18n %}
 {% load currency_filters %}
 {# Marketplace analytics merged from former product-center dashboard (uses vm_* context keys). #}
 <div class="vm-insights-block mt-2">
     <div class="row g-4 mb-3">
         <div class="col-lg-8">
             <div class="dash-card vm-chart-card">
-                <h5><i class="fas fa-chart-area me-2" style="color:#667eea;"></i>{% trans "近7天市场订单收入" %}</h5>
+                <h5><i class="fas fa-chart-area me-2" style="color:#1d4ed8;"></i>{% trans "近7天市场订单收入" %}</h5>
                 <div class="vm-chart-wrap"><canvas id="vendorInsightRevenueChart" aria-hidden="true"></canvas></div>
             </div>
         </div>
         <div class="col-lg-4">
             <div class="dash-card vm-chart-card">
-                <h5><i class="fas fa-chart-pie me-2" style="color:#667eea;"></i>{% trans "商品分类分布" %}</h5>
+                <h5><i class="fas fa-chart-pie me-2" style="color:#1d4ed8;"></i>{% trans "商品分类分布" %}</h5>
                 <div class="vm-chart-wrap vm-chart-wrap-sm"><canvas id="vendorInsightCategoryChart" aria-hidden="true"></canvas></div>
             </div>
         </div>
@@ -88,11 +88,11 @@
         </div>
         <div class="col-lg-6">
             <div class="dash-card">
-                <h5><i class="fas fa-receipt me-2" style="color:#667eea;"></i>{% trans "最近市场订单" %}</h5>
+                <h5><i class="fas fa-receipt me-2" style="color:#1d4ed8;"></i>{% trans "最近市场订单" %}</h5>
                 {% if vm_recent_orders %}
                 {% for order in vm_recent_orders %}
                 <div class="vm-order-row">
-                    <span class="badge font-monospace" style="background:rgba(102,126,234,0.12);color:#667eea;font-size:0.72rem;">{{ order.order_number|truncatechars:14 }}</span>
+                    <span class="badge font-monospace" style="background:rgba(29,78,216,0.12);color:#1d4ed8;font-size:0.72rem;">{{ order.order_number|truncatechars:14 }}</span>
                     <div class="flex-grow-1" style="min-width:0;">
                         <div class="fw-bold small">{% if order.user_name %}{{ order.user_name }}{% else %}{% trans "匿名" %}{% endif %}</div>
                         <small class="text-muted">{{ order.created_at|date:"m/d H:i" }}</small>

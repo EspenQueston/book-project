@@ -1,4 +1,4 @@
-{% load currency_filters %}
+﻿{% load currency_filters %}
 <!DOCTYPE html>
 <html lang="zh-Hans">
 <head>
@@ -10,8 +10,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --primary-color: #667eea;
-            --secondary-color: #764ba2;
+            --primary-color: #1d4ed8;
+            --secondary-color: #14245f;
             --success-color: #10b981;
             --warning-color: #f59e0b;
             --danger-color: #ef4444;
@@ -491,8 +491,8 @@
                 datasets: [{
                     label: '销售额 (FCFA)',
                     data: {{ daily_sales_json|safe|default:"[]" }}.map(item => item.revenue) || [0, 0, 0, 0, 0, 0, 0],
-                    borderColor: '#667eea',
-                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    borderColor: '#1d4ed8',
+                    backgroundColor: 'rgba(29, 78, 216, 0.1)',
                     borderWidth: 3,
                     fill: true,
                     tension: 0.4
@@ -528,8 +528,8 @@
                 datasets: [{
                     data: {{ publisher_stats_json|safe|default:"[]" }}.map(item => item.books) || [1],
                     backgroundColor: [
-                        '#667eea',
-                        '#764ba2',
+                        '#1d4ed8',
+                        '#14245f',
                         '#10b981',
                         '#f59e0b',
                         '#ef4444',

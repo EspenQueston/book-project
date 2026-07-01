@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 180" role="img" aria-labelledby="title desc">
+  <title id="title">DUNO 360 logo</title>
+  <desc id="desc">DUNO 360 wordmark with circular commerce arrows and cart icon</desc>
+  <defs>
+    <linearGradient id="blueGrad" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#0b5fa5"/>
+      <stop offset="100%" stop-color="#0a4f8f"/>
+    </linearGradient>
+    <linearGradient id="tealGrad" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#10b7c4"/>
+      <stop offset="100%" stop-color="#1098b3"/>
+    </linearGradient>
+    <linearGradient id="yellowGrad" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#ffd54a"/>
+      <stop offset="100%" stop-color="#f5b700"/>
+    </linearGradient>
+    <marker id="arrowBlue" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#0a4f8f"/>
+    </marker>
+    <marker id="arrowTeal" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1098b3"/>
+    </marker>
+    <marker id="arrowYellow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#f5b700"/>
+    </marker>
+  </defs>
+
+  <g font-family="Segoe UI, Arial, sans-serif" fill="url(#blueGrad)">
+    <text x="18" y="100" font-size="76" font-weight="800" letter-spacing="1">DUNO</text>
+    <text x="140" y="155" font-size="72" font-weight="800">360</text>
+  </g>
+
+  <path d="M210 88 L250 48 L275 73 L307 42" fill="none" stroke="#0a4f8f" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrowBlue)"/>
+
+  <path d="M305 64 A74 74 0 0 1 430 66" fill="none" stroke="url(#tealGrad)" stroke-width="16" stroke-linecap="round" marker-end="url(#arrowTeal)"/>
+  <path d="M430 72 A74 74 0 0 1 426 136" fill="none" stroke="url(#yellowGrad)" stroke-width="16" stroke-linecap="round" marker-end="url(#arrowYellow)"/>
+  <path d="M405 145 A74 74 0 0 1 302 127" fill="none" stroke="url(#tealGrad)" stroke-width="16" stroke-linecap="round" marker-end="url(#arrowTeal)"/>
+
+  <circle cx="360" cy="98" r="42" fill="none" stroke="#0a4f8f" stroke-width="8"/>
+  <path d="M332 82 H388 L381 110 H340 Z" fill="none" stroke="#0a4f8f" stroke-width="7" stroke-linejoin="round"/>
+  <circle cx="347" cy="121" r="6" fill="#0a4f8f"/>
+  <circle cx="374" cy="121" r="6" fill="#0a4f8f"/>
+  <path d="M350 82 C352 68 358 60 367 56" fill="none" stroke="#0a4f8f" stroke-width="7" stroke-linecap="round"/>
+  <path d="M360 56 V82 M344 60 L344 82 M376 60 L376 82" fill="none" stroke="#0a4f8f" stroke-width="6" stroke-linecap="round"/>
+</svg>

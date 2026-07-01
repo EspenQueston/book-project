@@ -3,146 +3,432 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>图书分类管理 - DUNO 360</title>
+    <title data-zh="图书分类管理 - DUNO 360" data-en="Book Categories - DUNO 360" data-fr="Catégories livres - DUNO 360">图书分类管理 - DUNO 360</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { --primary-color:#667eea; --secondary-color:#764ba2; --danger-color:#ef4444; }
-        body { background:linear-gradient(135deg,#f5f7fa 0%,#c3cfe2 100%); font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; min-height:100vh; }
-        .main-container { padding:20px 0; }
-        .header-card { background:linear-gradient(135deg,var(--primary-color),var(--secondary-color)); color:#fff; border-radius:15px; padding:25px 30px; margin-bottom:20px; box-shadow:0 8px 25px rgba(0,0,0,.15); display:flex; justify-content:space-between; align-items:center; gap:20px; }
-        .content-card { background:#fff; border-radius:15px; padding:30px; box-shadow:0 8px 25px rgba(0,0,0,.1); margin-bottom:20px; }
-        .form-control { border:2px solid #e8ecf1; border-radius:12px; padding:12px 16px; }
-        .form-control:focus { border-color:var(--primary-color); box-shadow:0 0 0 4px rgba(102,126,234,.1); }
-        .category-card { display:flex; align-items:center; justify-content:space-between; background:#f8f9ff; border-radius:12px; padding:18px 20px; margin-bottom:12px; border:1px solid rgba(102,126,234,.1); }
-        .category-info { display:flex; align-items:center; gap:15px; }
-        .category-icon { width:45px; height:45px; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#fff; }
-        .category-meta h6 { margin:0; font-weight:700; color:#1a1a2e; }
-        .category-meta small { color:#6c757d; }
-        .badge-count { background:rgba(102,126,234,.1); color:var(--primary-color); padding:4px 12px; border-radius:20px; font-size:.85rem; font-weight:600; }
-        .btn-icon { background:none; border:none; cursor:pointer; padding:6px 10px; border-radius:8px; }
-        .btn-toggle { color:#667eea; }
-        .btn-delete { color:var(--danger-color); }
-        .btn-icon:hover { background:#eef2ff; }
-        .btn-delete:hover { background:#fee2e2; }
+        :root {
+            --primary-color: #1d4ed8;
+            --secondary-color: #14245f;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+
+        /* ── Offset for sidebar ── */
+        .admin-main-offset {
+            margin-left: 268px;
+            min-height: 100vh;
+        }
+
+        @media (max-width: 991px) {
+            .admin-main-offset { margin-left: 0; }
+        }
+
+        .main-container { padding: 24px 0; }
+
+        /* ── Header Card ── */
+        .header-card {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: #fff;
+            border-radius: 16px;
+            padding: 24px 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 30px rgba(29, 78, 216, 0.22);
+        }
+
+        .header-card h2 { font-size: 1.5rem; font-weight: 800; margin: 0; }
+        .header-card small { opacity: 0.85; font-size: 0.9rem; }
+
+        .breadcrumb-modern { background: none; padding: 0; margin-bottom: 12px; }
+        .breadcrumb-modern .breadcrumb-item a { color: rgba(255,255,255,.85); text-decoration: none; }
+        .breadcrumb-modern .breadcrumb-item a:hover { color: #fff; }
+        .breadcrumb-modern .breadcrumb-item.active { color: rgba(255,255,255,.7); }
+        .breadcrumb-modern .breadcrumb-item + .breadcrumb-item::before { color: rgba(255,255,255,.5); }
+
+        /* ── Content Cards ── */
+        .content-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 4px 20px rgba(0,0,0,.08);
+            margin-bottom: 24px;
+            border: none;
+        }
+
+        .content-card h5 { font-size: 1rem; font-weight: 700; color: #1a1a2e; }
+
+        /* ── Form ── */
+        .form-label { font-weight: 600; font-size: .875rem; color: #374151; margin-bottom: 6px; }
+        .form-control {
+            border: 2px solid #e8ecf1;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: .9rem;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(29, 78, 216, .1);
+        }
+        .form-control-color { padding: 6px; height: 44px; }
+
+        .btn-submit {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 24px;
+            font-weight: 700;
+            font-size: .95rem;
+            width: 100%;
+            transition: opacity .2s, transform .2s;
+            margin-top: 16px;
+        }
+        .btn-submit:hover { opacity: .92; transform: translateY(-1px); color: #fff; }
+
+        /* ── Category Cards ── */
+        .category-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f8f9ff;
+            border-radius: 12px;
+            padding: 16px 18px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(29, 78, 216, .08);
+            transition: box-shadow .2s;
+        }
+        .category-card:hover { box-shadow: 0 4px 16px rgba(29, 78, 216, .12); }
+
+        .category-info { display: flex; align-items: center; gap: 14px; }
+        .category-icon {
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        .category-meta h6 { margin: 0; font-weight: 700; color: #1a1a2e; font-size: .95rem; }
+        .category-meta small { color: #6c757d; font-size: .8rem; }
+
+        .badge-count {
+            background: rgba(29, 78, 216, .1);
+            color: var(--primary-color);
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: .8rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .btn-icon {
+            background: none; border: none; cursor: pointer;
+            padding: 7px 10px; border-radius: 8px;
+            transition: background .18s;
+        }
+        .btn-toggle { color: var(--primary-color); }
+        .btn-delete { color: var(--danger-color); }
+        .btn-icon:hover.btn-toggle { background: #eef2ff; }
+        .btn-icon:hover.btn-delete { background: #fee2e2; }
+
+        /* ── Empty State ── */
+        .empty-state { text-align: center; padding: 48px 20px; color: #94a3b8; }
+        .empty-state i { font-size: 3.5rem; color: #e2e8f0; margin-bottom: 16px; display: block; }
+
+        /* ── Toolbar ── */
+        .toolbar {
+            background: #fff;
+            border-radius: 12px;
+            padding: 18px 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.06);
+            border: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* ── Modal ── */
+        .g-modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,.5); backdrop-filter: blur(4px);
+            z-index: 10000; justify-content: center; align-items: center;
+        }
+        .g-modal-card {
+            background: #fff; border-radius: 20px; padding: 36px 32px;
+            max-width: 400px; width: 90%; text-align: center;
+            box-shadow: 0 25px 60px rgba(0,0,0,.25);
+            animation: gModalIn .3s ease;
+        }
+        @keyframes gModalIn { from { opacity:0; transform:scale(.85) } to { opacity:1; transform:scale(1) } }
+        .g-modal-icon { width:60px; height:60px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 18px; font-size:26px; }
+        .g-modal-icon.warning { background:#fee2e2; color:#ef4444; }
+        .g-modal-title { font-size:1.15rem; font-weight:700; margin-bottom:8px; color:#1e293b; }
+        .g-modal-message { color:#64748b; margin-bottom:22px; line-height:1.6; font-size:.9rem; }
+        .g-modal-actions { display:flex; gap:10px; justify-content:center; }
+        .g-modal-btn { padding:10px 26px; border-radius:10px; border:none; font-weight:600; cursor:pointer; transition:all .2s; font-size:.9rem; }
+        .g-modal-btn.cancel { background:#f1f5f9; color:#64748b; }
+        .g-modal-btn.danger { background:linear-gradient(135deg,#ef4444,#dc2626); color:#fff; }
+        .g-modal-btn.danger:hover { opacity:.9; transform:translateY(-1px); }
     </style>
 </head>
 <body>
-    <div class="container main-container">
-        <div class="header-card">
-            <div>
-                <h2 class="mb-1"><i class="fas fa-layer-group me-2"></i>图书分类管理</h2>
-                <small style="opacity:.9;">管理 books 页面移动端和桌面端共用的分类</small>
-            </div>
-            <div class="d-flex gap-2">
-                <a href="/manager/book_list/" class="btn btn-outline-light btn-sm"><i class="fas fa-arrow-left me-1"></i>返回图书管理</a>
-                <a href="/manager/add_book/" class="btn btn-light btn-sm"><i class="fas fa-plus me-1"></i>添加图书</a>
-            </div>
-        </div>
+    {% include "admin/_admin_sidebar.html" %}
 
-        {% if messages %}
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" style="border-radius:12px;">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        {% endfor %}
-        {% endif %}
+    <div class="admin-main-offset">
+        <div class="main-container">
+            <div class="container-fluid">
 
-        <div class="row g-4">
-            <div class="col-lg-5">
-                <div class="content-card">
-                    <h5 class="mb-4 fw-bold"><i class="fas fa-plus-circle me-2" style="color:var(--primary-color);"></i>添加分类</h5>
-                    <form method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="add">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">分类名称</label>
-                            <input type="text" name="name" class="form-control" placeholder="例如：小说 / Science / Business" required>
+                <!-- Header -->
+                <div class="header-card">
+                    <div class="d-flex justify-content-between align-items-start gap-3">
+                        <div>
+                            <nav class="breadcrumb-modern">
+                                <ol class="breadcrumb mb-0">
+                                    <li class="breadcrumb-item">
+                                        <a href="/manager/dashboard/"><i class="fas fa-home me-1"></i><span data-zh="仪表板" data-en="Dashboard" data-fr="Tableau de bord">仪表板</span></a>
+                                    </li>
+                                    <li class="breadcrumb-item">
+                                        <a href="/manager/book_list/" data-zh="图书管理" data-en="Books" data-fr="Livres">图书管理</a>
+                                    </li>
+                                    <li class="breadcrumb-item active" data-zh="图书分类" data-en="Categories" data-fr="Catégories">图书分类</li>
+                                </ol>
+                            </nav>
+                            <h2><i class="fas fa-layer-group me-2"></i><span data-zh="图书分类管理" data-en="Book Categories" data-fr="Catégories de livres">图书分类管理</span></h2>
+                            <p class="mb-0 mt-1 opacity-80" style="font-size:.9rem;" data-zh="管理图书页面移动端和桌面端共用的分类" data-en="Manage categories shared between mobile and desktop book pages" data-fr="Gérer les catégories partagées entre mobile et bureau">管理图书页面移动端和桌面端共用的分类</p>
                         </div>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">英文名称</label>
-                                <input type="text" name="name_en" class="form-control" placeholder="Optional">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">法文名称</label>
-                                <input type="text" name="name_fr" class="form-control" placeholder="Optionnel">
-                            </div>
+                        <div class="text-end d-none d-md-block">
+                            <p class="mb-0"><span data-zh="欢迎回来，" data-en="Welcome, " data-fr="Bienvenue, ">欢迎回来，</span><strong>{{ name }}</strong> <span data-zh="管理员" data-en="Admin" data-fr="Admin">管理员</span></p>
                         </div>
-                        <div class="mb-3 mt-3">
-                            <label class="form-label fw-bold">Slug</label>
-                            <input type="text" name="slug" class="form-control" placeholder="roman, science, business...">
-                            <small class="text-muted">留空会自动生成。</small>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">描述</label>
-                            <input type="text" name="description" class="form-control" placeholder="简短描述（可选）">
-                        </div>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">图标</label>
-                                <input type="text" name="icon" class="form-control" value="fas fa-book">
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label fw-bold">颜色</label>
-                                <input type="color" name="color" class="form-control form-control-color w-100" value="#667eea">
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label fw-bold">排序</label>
-                                <input type="number" name="display_order" class="form-control" value="0">
-                            </div>
-                        </div>
-                        <button type="submit" class="btn w-100 mt-4" style="background:linear-gradient(135deg,var(--primary-color),var(--secondary-color)); color:#fff; border-radius:12px; padding:12px; font-weight:600;">
-                            <i class="fas fa-plus me-1"></i>创建分类
-                        </button>
-                    </form>
+                    </div>
                 </div>
-            </div>
 
-            <div class="col-lg-7">
-                <div class="content-card">
-                    <h5 class="mb-4 fw-bold"><i class="fas fa-list me-2" style="color:var(--primary-color);"></i>现有分类 ({{ categories|length }})</h5>
-                    {% if categories %}
-                    {% for cat in categories %}
-                    <div class="category-card">
-                        <div class="category-info">
-                            <div class="category-icon" style="background:{{ cat.color|default:'#667eea' }};">
-                                <i class="{{ cat.icon|default:'fas fa-book' }}"></i>
-                            </div>
-                            <div class="category-meta">
-                                <h6>{{ cat.name }} <small class="ms-1 text-muted">/{{ cat.slug }}</small></h6>
-                                <small>{% if cat.description %}{{ cat.description|truncatechars:50 }}{% else %}暂无描述{% endif %}</small>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="badge-count">{{ cat.book_count }} 本</span>
-                            <span class="badge {% if cat.is_active %}bg-success{% else %}bg-secondary{% endif %}">{% if cat.is_active %}启用{% else %}隐藏{% endif %}</span>
-                            <form method="post" class="d-inline">
+                <!-- Toolbar -->
+                <div class="toolbar">
+                    <h5 class="mb-0 text-muted">
+                        <i class="fas fa-layer-group me-1"></i>
+                        <span data-zh="图书分类" data-en="Book Categories" data-fr="Catégories">图书分类</span>
+                        <span class="badge bg-primary ms-2">{{ categories|length }}</span>
+                    </h5>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="/manager/book_list/" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-arrow-left me-1"></i><span data-zh="返回图书管理" data-en="Back to Books" data-fr="Retour aux livres">返回图书管理</span>
+                        </a>
+                        <a href="/manager/add_book/" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-plus me-1"></i><span data-zh="添加图书" data-en="Add Book" data-fr="Ajouter un livre">添加图书</span>
+                        </a>
+                        <a href="/manager/dashboard/" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-chart-line me-1"></i><span data-zh="仪表盘" data-en="Dashboard" data-fr="Tableau de bord">仪表盘</span>
+                        </a>
+                    </div>
+                </div>
+
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" style="border-radius:12px; margin-bottom:16px;">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+                {% endif %}
+
+                <!-- Main Grid -->
+                <div class="row g-4">
+
+                    <!-- Left: Add form -->
+                    <div class="col-lg-5">
+                        <div class="content-card">
+                            <h5 class="mb-4">
+                                <i class="fas fa-plus-circle me-2" style="color:var(--primary-color);"></i>
+                                <span data-zh="添加分类" data-en="Add Category" data-fr="Ajouter une catégorie">添加分类</span>
+                            </h5>
+                            <form method="post">
                                 {% csrf_token %}
-                                <input type="hidden" name="action" value="toggle">
-                                <input type="hidden" name="category_id" value="{{ cat.id }}">
-                                <button type="submit" class="btn-icon btn-toggle" title="启用/隐藏"><i class="fas fa-eye"></i></button>
-                            </form>
-                            <form method="post" class="d-inline" data-confirm-message="确定删除分类「{{ cat.name }}」吗？关联图书将变为无分类。">
-                                {% csrf_token %}
-                                <input type="hidden" name="action" value="delete">
-                                <input type="hidden" name="category_id" value="{{ cat.id }}">
-                                <button type="submit" class="btn-icon btn-delete" title="删除"><i class="fas fa-trash"></i></button>
+                                <input type="hidden" name="action" value="add">
+
+                                <div class="mb-3">
+                                    <label class="form-label" data-zh="分类名称" data-en="Category Name" data-fr="Nom de la catégorie">分类名称</label>
+                                    <input type="text" name="name" class="form-control" placeholder="例如：小说 / Science / Business" required>
+                                </div>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label" data-zh="英文名称" data-en="English Name" data-fr="Nom en anglais">英文名称</label>
+                                        <input type="text" name="name_en" class="form-control" placeholder="Optional">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label" data-zh="法文名称" data-en="French Name" data-fr="Nom en français">法文名称</label>
+                                        <input type="text" name="name_fr" class="form-control" placeholder="Optionnel">
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Slug</label>
+                                    <input type="text" name="slug" class="form-control" placeholder="roman, science, business...">
+                                    <small class="text-muted" data-zh="留空会自动生成。" data-en="Leave empty to auto-generate." data-fr="Laisser vide pour générer automatiquement.">留空会自动生成。</small>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label" data-zh="描述" data-en="Description" data-fr="Description">描述</label>
+                                    <input type="text" name="description" class="form-control" placeholder="简短描述（可选）">
+                                </div>
+
+                                <div class="row g-3 mb-1">
+                                    <div class="col-md-6">
+                                        <label class="form-label" data-zh="图标" data-en="Icon (Font Awesome)" data-fr="Icône (Font Awesome)">图标</label>
+                                        <input type="text" name="icon" class="form-control" value="fas fa-book" placeholder="fas fa-book">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label" data-zh="颜色" data-en="Color" data-fr="Couleur">颜色</label>
+                                        <input type="color" name="color" class="form-control form-control-color w-100" value="#1d4ed8">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label" data-zh="排序" data-en="Order" data-fr="Ordre">排序</label>
+                                        <input type="number" name="display_order" class="form-control" value="0" min="0">
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-submit">
+                                    <i class="fas fa-plus me-1"></i><span data-zh="创建分类" data-en="Create Category" data-fr="Créer la catégorie">创建分类</span>
+                                </button>
                             </form>
                         </div>
                     </div>
-                    {% endfor %}
-                    {% else %}
-                    <div class="text-center py-4 text-muted">
-                        <i class="fas fa-folder-open d-block" style="font-size:3rem;color:#ddd;margin-bottom:15px;"></i>
-                        <p>暂无图书分类，请先添加。</p>
+
+                    <!-- Right: existing categories -->
+                    <div class="col-lg-7">
+                        <div class="content-card">
+                            <h5 class="mb-4">
+                                <i class="fas fa-list me-2" style="color:var(--primary-color);"></i>
+                                <span data-zh="现有分类" data-en="Existing Categories" data-fr="Catégories existantes">现有分类</span>
+                                <span class="badge bg-secondary ms-1">{{ categories|length }}</span>
+                            </h5>
+
+                            {% if categories %}
+                            {% for cat in categories %}
+                            <div class="category-card">
+                                <div class="category-info">
+                                    <div class="category-icon" style="background:{{ cat.color|default:'#1d4ed8' }};">
+                                        <i class="{{ cat.icon|default:'fas fa-book' }}"></i>
+                                    </div>
+                                    <div class="category-meta">
+                                        <h6>{{ cat.name }} <small class="ms-1 text-muted">/{{ cat.slug }}</small></h6>
+                                        <small>
+                                            {% if cat.description %}
+                                                {{ cat.description|truncatechars:55 }}
+                                            {% else %}
+                                                <span data-zh="暂无描述" data-en="No description" data-fr="Sans description">暂无描述</span>
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                                    <span class="badge-count">{{ cat.book_count }} <span data-zh="本" data-en="books" data-fr="livres">本</span></span>
+                                    <span class="badge {% if cat.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                                        {% if cat.is_active %}
+                                            <span data-zh="启用" data-en="Active" data-fr="Actif">启用</span>
+                                        {% else %}
+                                            <span data-zh="隐藏" data-en="Hidden" data-fr="Masqué">隐藏</span>
+                                        {% endif %}
+                                    </span>
+
+                                    <!-- Toggle -->
+                                    <form method="post" class="d-inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="toggle">
+                                        <input type="hidden" name="category_id" value="{{ cat.id }}">
+                                        <button type="submit" class="btn-icon btn-toggle" title="启用/隐藏">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </form>
+
+                                    <!-- Delete -->
+                                    <button type="button" class="btn-icon btn-delete"
+                                        data-cat-id="{{ cat.id }}"
+                                        data-cat-name="{{ cat.name }}"
+                                        title="删除"
+                                        onclick="confirmDelete(this)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                    <form id="delete-form-{{ cat.id }}" method="post" class="d-none">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="delete">
+                                        <input type="hidden" name="category_id" value="{{ cat.id }}">
+                                    </form>
+                                </div>
+                            </div>
+                            {% endfor %}
+
+                            {% else %}
+                            <div class="empty-state">
+                                <i class="fas fa-folder-open"></i>
+                                <p class="fw-semibold mb-1" data-zh="暂无图书分类" data-en="No book categories yet" data-fr="Aucune catégorie">暂无图书分类</p>
+                                <p class="text-muted small mb-0" data-zh="请在左侧添加第一个分类" data-en="Add your first category on the left" data-fr="Ajoutez votre première catégorie à gauche">请在左侧添加第一个分类</p>
+                            </div>
+                            {% endif %}
+                        </div>
                     </div>
-                    {% endif %}
-                </div>
+
+                </div><!-- /row -->
+            </div>
+        </div>
+    </div><!-- /admin-main-offset -->
+
+    <!-- Delete Confirm Modal -->
+    <div class="g-modal-overlay" id="deleteModal">
+        <div class="g-modal-card">
+            <div class="g-modal-icon warning"><i class="fas fa-trash"></i></div>
+            <div class="g-modal-title" id="deleteModalTitle" data-zh="删除分类" data-en="Delete Category" data-fr="Supprimer la catégorie">删除分类</div>
+            <div class="g-modal-message" id="deleteModalMsg"></div>
+            <div class="g-modal-actions">
+                <button class="g-modal-btn cancel" onclick="closeDeleteModal()" data-zh="取消" data-en="Cancel" data-fr="Annuler">取消</button>
+                <button class="g-modal-btn danger" id="deleteModalConfirm" data-zh="确认删除" data-en="Confirm Delete" data-fr="Supprimer">确认删除</button>
             </div>
         </div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Delete confirm modal
+        function confirmDelete(btn) {
+            var catId = btn.dataset.catId;
+            var catName = btn.dataset.catName;
+            var modal = document.getElementById('deleteModal');
+            var msg = document.getElementById('deleteModalMsg');
+            var confirmBtn = document.getElementById('deleteModalConfirm');
+
+            var lang = localStorage.getItem('adminLang') || 'zh';
+            var texts = {
+                zh: '确定删除分类「' + catName + '」吗？\n关联图书将变为无分类。',
+                en: 'Delete category "' + catName + '"?\nAssociated books will become uncategorized.',
+                fr: 'Supprimer la catégorie "' + catName + '" ?\nLes livres associés seront déclassés.'
+            };
+            msg.innerText = texts[lang] || texts.zh;
+            modal.style.display = 'flex';
+            confirmBtn.onclick = function () {
+                document.getElementById('delete-form-' + catId).submit();
+            };
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+        }
+
+        // Close on overlay click
+        document.getElementById('deleteModal').addEventListener('click', function(e) {
+            if (e.target === this) closeDeleteModal();
+        });
+    </script>
+    <script src="/static/js/admin_i18n.js" defer></script>
 </body>
 </html>

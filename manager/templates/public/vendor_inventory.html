@@ -1,18 +1,18 @@
-{% extends 'public/vendor_panel_base.html' %}
+﻿{% extends 'public/vendor_panel_base.html' %}
 {% load i18n %}
 {% load currency_filters %}
 
-{% block panel_title %}{% trans "Inventory" %} · {{ vendor.company_name }}{% endblock %}
+{% block panel_title %}{% trans "Inventory Management" %} · {{ vendor.company_name }}{% endblock %}
 
 {% block panel_extra_css %}
 <style>
     .vp-page-head {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
         color: #fff;
         padding: 20px 22px;
         border-radius: 15px;
         margin-bottom: 20px;
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.28);
+        box-shadow: 0 8px 25px rgba(29, 78, 216, 0.28);
     }
     .vp-card {
         background: var(--card-bg, #fff);
@@ -71,7 +71,7 @@
         border: none; cursor: pointer; transition: all 0.15s;
     }
     .inv-btn:hover { transform: scale(1.05); }
-    .inv-btn-add { background: linear-gradient(135deg,#667eea,#764ba2); color: #fff; }
+    .inv-btn-add { background: linear-gradient(135deg,#1d4ed8,#14245f); color: #fff; }
     .inv-btn-set { background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; }
     .inv-btn-set:hover { background: #e5e7eb; }
     .inv-empty {
@@ -89,16 +89,16 @@
     .inv-tab {
         padding: 10px 20px; border-radius: 12px;
         font-size: 0.88rem; font-weight: 700;
-        border: 2px solid rgba(102,126,234,0.15);
+        border: 2px solid rgba(29,78,216,0.15);
         background: var(--card-bg, #fff);
         color: var(--text-color, #374151);
         cursor: pointer; transition: all 0.2s;
     }
-    .inv-tab:hover { border-color: rgba(102,126,234,0.4); }
+    .inv-tab:hover { border-color: rgba(29,78,216,0.4); }
     .inv-tab.active {
-        background: linear-gradient(135deg,#667eea,#764ba2);
+        background: linear-gradient(135deg,#1d4ed8,#14245f);
         color: #fff; border-color: transparent;
-        box-shadow: 0 4px 14px rgba(102,126,234,0.35);
+        box-shadow: 0 4px 14px rgba(29,78,216,0.35);
     }
     .inv-tab i { margin-right: 6px; }
     .inv-panel { display: none; }
@@ -131,7 +131,7 @@
     html[data-theme="dark"] .inv-tab {
         background: #1e293b;
         color: #cbd5e1;
-        border-color: rgba(102,126,234,0.2);
+        border-color: rgba(29,78,216,0.2);
     }
     html[data-theme="dark"] .inv-input {
         background: #0f172a;
@@ -167,7 +167,7 @@
 {% block vendor_panel_content %}
 <div class="vp-page-head d-flex flex-wrap justify-content-between align-items-center gap-3">
     <div>
-        <h4 class="mb-1 fw-bold"><i class="fas fa-boxes me-2"></i>{% trans "Inventory" %}</h4>
+        <h4 class="mb-1 fw-bold"><i class="fas fa-boxes me-2"></i>{% trans "Inventory Management" %}</h4>
         <small class="opacity-90">{% trans "Manage stock levels for all your items in one place" %}</small>
     </div>
     <div class="d-flex flex-wrap gap-2 align-items-center">

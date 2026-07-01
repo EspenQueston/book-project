@@ -4,33 +4,67 @@
 
 {% block title %}{% trans "超市商品" %} · {{ vendor.company_name }}{% endblock %}
 
+{% block extra_vendor_css %}
+<style>
+    .vendor-unified-shell { display:flex; flex-direction:column; gap:20px; }
+    .vendor-hero { background:linear-gradient(135deg,#0f172a,#1d4ed8 55%,#38bdf8); border-radius:28px; color:#fff; padding:26px; box-shadow:0 18px 45px rgba(15,23,42,.22); }
+    .vendor-hero-actions .btn { border-radius:999px; padding:12px 20px; font-weight:700; }
+    .vendor-stat-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; }
+    .vendor-stat-card { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.16); border-radius:20px; padding:16px; backdrop-filter:blur(12px); }
+    .vendor-stat-label { font-size:.78rem; opacity:.86; }
+    .vendor-stat-value { font-size:1.4rem; font-weight:800; }
+    .vendor-panel-card { background:#fff; border:1px solid #e2e8f0; border-radius:24px; box-shadow:0 10px 30px rgba(15,23,42,.06); }
+    .vendor-toolbar { padding:18px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+    .vendor-search { display:flex; gap:10px; flex:1; min-width:260px; }
+    .vendor-search .form-control { border-radius:16px; min-height:48px; }
+    .vendor-table thead th { font-size:.76rem; letter-spacing:.06em; text-transform:uppercase; color:#64748b; border-bottom:none; }
+    .vendor-table tbody td { padding:18px 16px; vertical-align:middle; }
+    .vendor-row-title { font-weight:800; color:#0f172a; }
+    .vendor-row-meta { color:#64748b; font-size:.82rem; }
+    .vendor-thumb { width:56px; height:56px; border-radius:16px; object-fit:cover; box-shadow:0 8px 18px rgba(15,23,42,.12); }
+    .vendor-thumb-placeholder { width:56px; height:56px; border-radius:16px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#22c55e,#06b6d4); color:#fff; }
+    .vendor-status-pill { border-radius:999px; padding:7px 12px; font-weight:700; font-size:.78rem; }
+    .vendor-actions { display:flex; gap:8px; flex-wrap:wrap; }
+    .vendor-actions .btn { border-radius:999px; }
+    @media (max-width: 991px) { .vendor-stat-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media (max-width: 767px) { .vendor-stat-grid { grid-template-columns:1fr; } }
+</style>
+{% endblock %}
+
 {% block vendor_content %}
-<div class="page-header-card">
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
-        <div>
-            <h4 class="mb-1 fw-bold"><i class="fas fa-apple-alt me-2"></i>{% trans "超市商品" %}</h4>
-            <small style="opacity:.9;">{% trans "管理生鲜与日用品上架、库存与规格" %}</small>
+<div class="vendor-unified-shell">
+    <section class="vendor-hero">
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+            <div>
+                <div class="text-uppercase small fw-bold opacity-75 mb-2">{% trans "超市管理中心" %}</div>
+                <h3 class="mb-2 fw-bold"><i class="fas fa-apple-alt me-2"></i>{% trans "超市商品" %}</h3>
+                <p class="mb-0 opacity-75">{% trans "统一管理商品、库存、价格、状态与展示质量。" %}</p>
+            </div>
+            <div class="vendor-hero-actions d-flex gap-2 flex-wrap">
+                <a href="{% url 'marketplace:vendor_supermarket_add' %}" class="btn btn-light text-dark"><i class="fas fa-plus me-2"></i>{% trans "新增商品" %}</a>
+            </div>
         </div>
-        <a href="{% url 'marketplace:vendor_supermarket_add' %}" class="btn btn-light rounded-pill px-4 fw-semibold">
-            <i class="fas fa-plus me-2"></i>{% trans "添加超市商品" %}
-        </a>
-    </div>
-</div>
+        <div class="vendor-stat-grid">
+            <div class="vendor-stat-card"><div class="vendor-stat-label">{% trans "全部商品" %}</div><div class="vendor-stat-value">{{ total_items }}</div></div>
+            <div class="vendor-stat-card"><div class="vendor-stat-label">{% trans "已上架" %}</div><div class="vendor-stat-value">{{ active_items }}</div></div>
+            <div class="vendor-stat-card"><div class="vendor-stat-label">{% trans "搜索状态" %}</div><div class="vendor-stat-value">{% if search_query %}1{% else %}0{% endif %}</div></div>
+            <div class="vendor-stat-card"><div class="vendor-stat-label">{% trans "管理模式" %}</div><div class="vendor-stat-value">PRO</div></div>
+        </div>
+    </section>
 
-<div class="mv-toolbar d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-    <form method="get" class="d-flex gap-2 flex-grow-1" style="min-width:220px;">
-        <input type="text" name="q" class="form-control rounded-3" placeholder="{% trans '搜索名称或品牌…' %}" value="{{ search_query|default:'' }}">
-        <button type="submit" class="btn btn-primary-gradient rounded-3 px-3"><i class="fas fa-search"></i></button>
-    </form>
-    <div class="d-flex gap-3 small fw-semibold text-secondary">
-        <span>{% trans "全部" %} <strong class="text-dark">{{ total_items }}</strong></span>
-        <span>{% trans "上架" %} <strong class="text-success">{{ active_items }}</strong></span>
+<section class="vendor-panel-card overflow-hidden">
+    <div class="vendor-toolbar">
+        <form method="get" class="vendor-search">
+            <input type="text" name="q" class="form-control" placeholder="{% trans '搜索名称、品牌或产地…' %}" value="{{ search_query|default:'' }}">
+            <button type="submit" class="btn btn-primary-gradient rounded-pill px-4"><i class="fas fa-search me-2"></i>{% trans "搜索" %}</button>
+        </form>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <span class="badge rounded-pill text-bg-light px-3 py-2">{% trans "现代化库存视图" %}</span>
+            <span class="badge rounded-pill text-bg-success px-3 py-2">{% trans "实时状态" %}</span>
+        </div>
     </div>
-</div>
-
-<div class="content-card overflow-hidden">
     <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
+        <table class="table table-hover align-middle mb-0 vendor-table">
             <thead class="table-light">
                 <tr>
                     <th class="ps-4">{% trans "商品" %}</th>
@@ -46,10 +80,10 @@
                 <tr>
                     <td class="ps-4">
                         <div class="d-flex align-items-center gap-3">
-                            <img src="{{ item.get_image_url }}" alt="" width="48" height="48" class="rounded-3 object-fit-cover shadow-sm">
+                            <img src="{{ item.get_image_url }}" alt="" class="vendor-thumb">
                             <div class="min-w-0">
-                                <div class="fw-bold text-truncate">{{ item.name }}</div>
-                                <small class="text-muted">{{ item.brand|default:"" }} {% if item.origin %}· {{ item.origin }}{% endif %}</small>
+                                <div class="vendor-row-title text-truncate">{{ item.name }}</div>
+                                <div class="vendor-row-meta">{{ item.brand|default:"" }} {% if item.origin %}· {{ item.origin }}{% endif %}</div>
                             </div>
                         </div>
                     </td>
@@ -57,15 +91,16 @@
                     <td>{{ item.stock }}</td>
                     <td>{{ item.sales_count }}</td>
                     <td>
-                        {% if item.is_active %}<span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle">{% trans "上架" %}</span>
-                        {% else %}<span class="badge rounded-pill bg-secondary-subtle text-secondary border">{% trans "下架" %}</span>{% endif %}
+                        {% if item.is_active %}<span class="vendor-status-pill bg-success-subtle text-success">{% trans "上架" %}</span>
+                        {% else %}<span class="vendor-status-pill bg-secondary-subtle text-secondary">{% trans "下架" %}</span>{% endif %}
                     </td>
                     <td class="pe-4">
-                        <div class="d-flex flex-wrap gap-1">
-                            <a href="{% url 'marketplace:vendor_supermarket_edit' item.pk %}" class="btn btn-sm btn-outline-primary rounded-pill">{% trans "编辑" %}</a>
-                            <form method="post" action="{% url 'marketplace:vendor_supermarket_delete' item.pk %}" class="d-inline" data-confirm-message="{% trans 'Are you sure you want to delete this item?' %}">
+                        <div class="vendor-actions">
+                            <a href="{% url 'marketplace:supermarket_detail' item.slug %}" class="btn btn-sm btn-outline-info" target="_blank" rel="noopener" title="{% trans '查看前台' %}"><i class="fas fa-external-link-alt"></i></a>
+                            <a href="{% url 'marketplace:vendor_supermarket_edit' item.pk %}" class="btn btn-sm btn-outline-primary">{% trans "编辑" %}</a>
+                            <form method="post" action="{% url 'marketplace:vendor_supermarket_delete' item.pk %}" class="d-inline" data-confirm-message="{% trans '确定删除此商品吗？' %}">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill">{% trans "删除" %}</button>
+                                <button type="submit" class="btn btn-sm btn-outline-danger">{% trans "删除" %}</button>
                             </form>
                         </div>
                     </td>
@@ -76,6 +111,7 @@
             </tbody>
         </table>
     </div>
+</section>
 </div>
 
 {% if items.paginator.num_pages > 1 %}

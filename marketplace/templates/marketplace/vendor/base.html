@@ -1,4 +1,4 @@
-{% extends "public/vendor_panel_base.html" %}
+﻿{% extends "public/vendor_panel_base.html" %}
 {% load i18n %}
 
 {% block panel_title %}{% block title %}{% trans "卖家中心" %}{% endblock %}{% endblock %}
@@ -6,18 +6,18 @@
 {% block panel_extra_css %}
 <style>
     :root {
-        --primary-color: #4f46e5;
-        --secondary-color: #7c3aed;
-        --vp-primary: #4f46e5;
-        --vp-secondary: #7c3aed;
-        --vp-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        --primary-color: #1d4ed8;
+        --secondary-color: #14245f;
+        --vp-primary: #1d4ed8;
+        --vp-secondary: #14245f;
+        --vp-gradient: linear-gradient(135deg, #14245f 0%, #1d4ed8 100%);
         --mv-toolbar-bg: #ffffff;
     }
     body.vp-sidebar-collapsed .vp-sidebar-toggle {
-        background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+        background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
     }
     .vp-sidebar-toggle {
-        box-shadow: 0 6px 20px rgba(79, 70, 229, 0.35);
+        box-shadow: 0 6px 20px rgba(29, 78, 216, 0.35);
     }
     .vp-sidebar-toggle:hover {
         box-shadow: 0 10px 28px rgba(79, 70, 229, 0.45);
@@ -31,7 +31,7 @@
         padding: 15px 20px;
         margin-bottom: 20px;
         box-shadow: 0 4px 15px rgba(0,0,0,0.06);
-        border: 1px solid rgba(102,126,234,0.08);
+        border: 1px solid rgba(29,78,216,0.08);
     }
     html[data-theme="dark"] .mv-toolbar {
         border-color: #334155;
@@ -55,13 +55,36 @@
         padding: 8px 20px;
     }
     .btn-primary-gradient:hover { color: #fff; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3); }
+    .vendor-search .btn-primary-gradient {
+        min-height: 48px;
+        padding: 0 28px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border-radius: 18px !important;
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 60%, #a855f7 100%);
+        box-shadow: 0 12px 26px rgba(79,70,229,.28);
+        letter-spacing: .01em;
+        transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+        white-space: nowrap;
+    }
+    .vendor-search .btn-primary-gradient:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.03);
+        box-shadow: 0 16px 34px rgba(79,70,229,.38);
+    }
+    .vendor-search .btn-primary-gradient:active {
+        transform: translateY(0);
+        box-shadow: 0 8px 18px rgba(79,70,229,.26);
+    }
     .mv-page-header-card, .page-header-card {
         background: linear-gradient(125deg, #312e81 0%, #4f46e5 50%, #7c3aed 100%);
         border-radius: 15px;
         padding: 20px 22px;
         color: #fff;
         margin-bottom: 20px;
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.28);
+        box-shadow: 0 8px 25px rgba(29, 78, 216, 0.28);
     }
     .mv-page-header-card h4, .page-header-card h4 { font-weight: 700; margin-bottom: 0; }
     .table th {

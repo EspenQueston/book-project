@@ -1,4 +1,4 @@
-{% extends "marketplace/vendor/base.html" %}
+﻿{% extends "marketplace/vendor/base.html" %}
 {% load i18n %}
 {% load currency_filters %}
 
@@ -35,8 +35,8 @@
     .vmo-status-box {
         border-radius: 14px;
         padding: 14px 16px;
-        background: linear-gradient(145deg, rgba(102,126,234,0.08), rgba(118,75,162,0.04));
-        border: 1px solid rgba(102,126,234,0.12);
+        background: linear-gradient(145deg, rgba(29,78,216,0.08), rgba(20,36,95,0.04));
+        border: 1px solid rgba(29,78,216,0.12);
     }
     .vmo-status-box .lbl { font-size: 0.72rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
     .vmo-status-box .val { margin-top: 6px; font-weight: 700; font-size: 0.95rem; }
@@ -93,7 +93,7 @@
     <div class="row g-3 mb-3">
         <div class="col-md-6">
             <div class="content-card vmo-card h-100">
-                <h6 style="color:#667eea;"><i class="fas fa-sliders-h me-2"></i>{% trans "状态" %}</h6>
+                <h6 style="color:#1d4ed8;"><i class="fas fa-sliders-h me-2"></i>{% trans "状态" %}</h6>
                 <div class="vmo-status-grid">
                     <div class="vmo-status-box">
                         <div class="lbl">{% trans "订单状态" %}</div>
@@ -132,13 +132,13 @@
                     </div>
                 </div>
                 {% else %}
-                <p class="text-muted small mb-0"><i class="fas fa-lock me-1"></i>{% trans "订单未支付完成或已关闭，无法修改状态。" %}</p>
+                <p class="text-muted small mb-0"><i class="fas fa-lock me-1"></i>{% trans "订单已取消或已退款，无法修改状态。" %}</p>
                 {% endif %}
             </div>
         </div>
         <div class="col-md-6">
             <div class="content-card vmo-card h-100">
-                <h6 style="color:#667eea;"><i class="fas fa-user me-2"></i>{% trans "客户" %}</h6>
+                <h6 style="color:#1d4ed8;"><i class="fas fa-user me-2"></i>{% trans "客户" %}</h6>
                 <p class="fw-semibold mb-1">{{ order.user_name|default:"—" }}</p>
                 <p class="small text-muted mb-1">{{ order.user_email }}</p>
                 <p class="small mb-0">{{ order.customer_phone|default:"" }}</p>
@@ -150,51 +150,17 @@
         </div>
     </div>
 
-    <div class="row g-3">
-        <div class="col-lg-5">
-            {% if can_edit_customer %}
-            <div class="content-card vmo-card">
-                <h6 style="color:#667eea;"><i class="fas fa-edit me-2"></i>{% trans "编辑客户与收货信息" %}</h6>
-                <p class="small text-muted mb-3">{% trans "更正联系方式或收货地址（订单未取消 / 未退款时可编辑）。" %}</p>
-                <div class="mb-2">
-                    <label class="form-label small">{% trans "客户姓名" %}</label>
-                    <input type="text" id="mktCustName" class="form-control form-control-sm rounded-3" value="{{ order.user_name }}">
-                </div>
-                <div class="mb-2">
-                    <label class="form-label small">{% trans "邮箱" %}</label>
-                    <input type="email" id="mktCustEmail" class="form-control form-control-sm rounded-3" value="{{ order.user_email }}">
-                </div>
-                <div class="mb-2">
-                    <label class="form-label small">{% trans "电话 / 微信" %}</label>
-                    <input type="text" id="mktCustPhone" class="form-control form-control-sm rounded-3" value="{{ order.customer_phone }}">
-                </div>
-                <div class="mb-2">
-                    <label class="form-label small">{% trans "国家 / 地区" %}</label>
-                    <input type="text" id="mktCustCountry" class="form-control form-control-sm rounded-3" value="{{ order.country }}">
-                </div>
-                <div class="mb-2">
-                    <label class="form-label small">{% trans "收货地址" %}</label>
-                    <textarea id="mktCustAddr" class="form-control form-control-sm rounded-3" rows="3">{{ order.shipping_address }}</textarea>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label small">{% trans "客户备注" %}</label>
-                    <textarea id="mktCustNotes" class="form-control form-control-sm rounded-3" rows="2">{{ order.customer_notes }}</textarea>
-                </div>
-                <button type="button" class="btn btn-primary-gradient rounded-pill" onclick="mktSaveCustomer()">{% trans "保存联系信息" %}</button>
-            </div>
-            {% endif %}
-            {% if order.admin_notes %}
-            <div class="content-card vmo-card">
-                <h6 class="small" style="color:#667eea;">{% trans "备注记录" %}</h6>
-                <pre class="small text-muted mb-0" style="white-space:pre-wrap;">{{ order.admin_notes }}</pre>
-            </div>
-            {% endif %}
-        </div>
+    {% if order.admin_notes %}
+    <div class="content-card vmo-card">
+        <h6 class="small" style="color:#1d4ed8;">{% trans "备注记录" %}</h6>
+        <pre class="small text-muted mb-0" style="white-space:pre-wrap;">{{ order.admin_notes }}</pre>
     </div>
+    {% endif %}
 
     <div class="content-card vmo-card p-0 overflow-hidden">
-        <div class="px-4 py-3 border-bottom fw-bold d-flex align-items-center gap-2" style="color:#667eea;">
-            <i class="fas fa-box"></i> {% trans "您的商品明细" %}
+        <div class="px-4 py-3 border-bottom fw-bold d-flex align-items-center gap-2 justify-content-between" style="color:#1d4ed8;">
+            <span><i class="fas fa-box me-2"></i>{% trans "商品明细" %}</span>
+            <span class="small text-muted">{{ vendor_items|length }} {% trans "项" %}</span>
         </div>
         <div class="p-3">
             {% for it in vendor_items %}
@@ -224,25 +190,6 @@
 function getCookie(n) {
     var m = document.cookie.match('(^|;)\\s*' + n + '=([^;]*)');
     return m ? decodeURIComponent(m[2]) : '';
-}
-function mktSaveCustomer() {
-    var fd = new URLSearchParams();
-    fd.append('order_id', '{{ order.id }}');
-    fd.append('user_name', document.getElementById('mktCustName').value.trim());
-    fd.append('user_email', document.getElementById('mktCustEmail').value.trim());
-    fd.append('customer_phone', document.getElementById('mktCustPhone').value.trim());
-    fd.append('country', document.getElementById('mktCustCountry').value.trim());
-    fd.append('shipping_address', document.getElementById('mktCustAddr').value.trim());
-    fd.append('customer_notes', document.getElementById('mktCustNotes').value.trim());
-    fd.append('csrfmiddlewaretoken', getCookie('csrftoken'));
-    fetch('{% url "marketplace:vendor_marketplace_order_update_customer" order.pk %}', {
-        method: 'POST',
-        headers: {'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/x-www-form-urlencoded'},
-        body: fd.toString()
-    }).then(function(r){ return r.json(); }).then(function(d){
-        if (d.success) location.reload();
-        else alert(d.message || 'Error');
-    });
 }
 function vmoHubSave() {
     var fd = new URLSearchParams();

@@ -1,4 +1,4 @@
-{% extends 'public/base.html' %}
+﻿{% extends 'public/base.html' %}
 {% load i18n %}
 {% load currency_filters %}
 
@@ -7,10 +7,12 @@
 {% block extra_css %}
 <style>
     .author-hero {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 100px 0 80px;
+        background: radial-gradient(circle at 18% 18%, rgba(96,165,250,.30), transparent 24%), radial-gradient(circle at 84% 18%, rgba(14,165,233,.16), transparent 22%), linear-gradient(135deg, #14245f 0%, #1d4ed8 100%);
+        padding: 106px 0 84px;
         position: relative;
         overflow: hidden;
+        border-radius: 0 0 28px 28px;
+        box-shadow: 0 22px 56px rgba(20,36,95,.22);
     }
     .author-hero::before {
         content: ''; position: absolute; top: -60%; right: -15%;
@@ -40,9 +42,9 @@
         border: 2px solid #e8ecf1; border-radius: 14px; padding: 14px 20px;
         font-size: 1rem; transition: all 0.3s;
     }
-    .search-card input:focus { border-color: #667eea; box-shadow: 0 0 0 4px rgba(102,126,234,0.1); }
+    .search-card input:focus { border-color: #1d4ed8; box-shadow: 0 0 0 4px rgba(29,78,216,0.12); }
     .search-card .btn-search {
-        background: linear-gradient(135deg, #667eea, #764ba2); color: white;
+        background: linear-gradient(135deg, #14245f, #1d4ed8); color: white;
         border: none; border-radius: 14px; padding: 14px 28px; font-weight: 700;
     }
 
@@ -53,16 +55,16 @@
     }
     .author-card:hover {
         transform: translateY(-8px);
-        box-shadow: 0 20px 50px rgba(102,126,234,0.18);
+        box-shadow: 0 20px 50px rgba(29,78,216,0.18);
     }
     .author-card-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
         padding: 32px 24px 40px; text-align: center; position: relative;
     }
     .author-card-header::after {
         content: ''; position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%);
         width: 0; height: 0; border-left: 30px solid transparent; border-right: 30px solid transparent;
-        border-top: 20px solid #764ba2;
+        border-top: 20px solid #14245f;
     }
     .author-avatar {
         width: 80px; height: 80px; border-radius: 50%;
@@ -77,9 +79,9 @@
     .author-stat-row { display: flex; gap: 12px; margin-bottom: 16px; }
     .author-stat-item {
         flex: 1; background: #f8f9ff; border-radius: 12px; padding: 12px;
-        text-align: center; border: 1px solid rgba(102,126,234,0.08);
+        text-align: center; border: 1px solid rgba(29,78,216,0.08);
     }
-    .author-stat-item .stat-val { font-size: 1.2rem; font-weight: 800; color: #667eea; }
+    .author-stat-item .stat-val { font-size: 1.2rem; font-weight: 800; color: #1d4ed8; }
     .author-stat-item .stat-lbl { font-size: 0.72rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
 
     .featured-book {
@@ -92,15 +94,15 @@
     }
     .featured-book-info { flex: 1; min-width: 0; }
     .featured-book-info .book-title { font-size: 0.85rem; font-weight: 600; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .featured-book-info .book-price { font-size: 0.78rem; color: #667eea; font-weight: 700; }
+    .featured-book-info .book-price { font-size: 0.78rem; color: #1d4ed8; font-weight: 700; }
 
     .btn-author-detail {
         display: block; text-align: center; padding: 12px;
-        background: linear-gradient(135deg, #667eea, #764ba2); color: white;
+        background: linear-gradient(135deg, #14245f, #1d4ed8); color: white;
         border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 0.9rem;
         transition: all 0.3s;
     }
-    .btn-author-detail:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102,126,234,0.35); color: white; }
+    .btn-author-detail:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(29,78,216,0.28); color: white; }
 
     .empty-state-card {
         background: white; border-radius: 20px; padding: 60px 40px;

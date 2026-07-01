@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-hans">
 <head>
     <meta charset="UTF-8">
@@ -8,8 +8,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #667eea;
-            --secondary-color: #764ba2;
+            --primary-color: #1d4ed8;
+            --secondary-color: #14245f;
             --success-color: #10b981;
             --warning-color: #f59e0b;
             --danger-color: #ef4444;
@@ -33,13 +33,13 @@
             border: 2px solid #e5e7eb; border-radius: 10px; padding: 12px 16px;
             transition: all 0.3s ease; font-size: 1rem;
         }
-        .form-control:focus { border-color: var(--primary-color); box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25); }
+        .form-control:focus { border-color: var(--primary-color); box-shadow: 0 0 0 0.2rem rgba(29, 78, 216, 0.25); }
         .btn-primary-modern {
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             color: white; border-radius: 10px; padding: 12px 30px; font-weight: 600;
             transition: all 0.3s ease; border: none;
         }
-        .btn-primary-modern:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3); color: white; }
+        .btn-primary-modern:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(29, 78, 216, 0.3); color: white; }
         .btn-secondary-modern {
             background: #6b7280; color: white; border-radius: 10px; padding: 12px 30px;
             font-weight: 600; transition: all 0.3s ease; border: none;
@@ -61,8 +61,8 @@
         .breadcrumb-modern .breadcrumb-item a { color: white; text-decoration: none; }
         .breadcrumb-modern .breadcrumb-item.active { color: rgba(255,255,255,0.8); }
         .info-card {
-            background: linear-gradient(135deg, rgba(102,126,234,0.06), rgba(118,75,162,0.06));
-            border-radius: 12px; padding: 20px; border: 1px solid rgba(102,126,234,0.1); margin-bottom: 20px;
+            background: linear-gradient(135deg, rgba(29,78,216,0.06), rgba(20,36,95,0.06));
+            border-radius: 12px; padding: 20px; border: 1px solid rgba(29,78,216,0.1); margin-bottom: 20px;
         }
         .info-card .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
         .info-card .info-row:last-child { border-bottom: none; }
@@ -80,7 +80,7 @@
         .book-checkbox-item:hover { border-color: var(--primary-color); background: #f0f0ff; }
         .book-checkbox-item.selected {
             border-color: var(--primary-color);
-            background: linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.08));
+            background: linear-gradient(135deg, rgba(29,78,216,0.08), rgba(20,36,95,0.08));
         }
         .book-checkbox-item input[type="checkbox"] {
             width: 18px; height: 18px; margin-right: 10px;
@@ -110,7 +110,7 @@
         .g-modal-message{color:#64748b;margin-bottom:25px;line-height:1.6}
         .g-modal-actions{display:flex;gap:12px;justify-content:center}
         .g-modal-btn{padding:10px 28px;border-radius:12px;border:none;font-weight:600;cursor:pointer;transition:all .2s;font-size:.95rem}
-        .g-modal-btn.cancel{background:#f1f5f9;color:#64748b}.g-modal-btn.primary{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff}
+        .g-modal-btn.cancel{background:#f1f5f9;color:#64748b}.g-modal-btn.primary{background:linear-gradient(135deg,#1d4ed8,#14245f);color:#fff}
     </style>
 </head>
 <body>

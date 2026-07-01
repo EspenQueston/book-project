@@ -1,4 +1,4 @@
-{% extends 'public/vendor_panel_base.html' %}
+﻿{% extends 'public/vendor_panel_base.html' %}
 {% load i18n %}
 
 {% block panel_title %}{% trans "Notifications" %} · {{ vendor.company_name }}{% endblock %}
@@ -6,12 +6,12 @@
 {% block panel_extra_css %}
 <style>
     .vn-head {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
         color: #fff;
         padding: 22px 24px;
         border-radius: 18px;
         margin-bottom: 20px;
-        box-shadow: 0 12px 32px rgba(102, 126, 234, 0.28);
+        box-shadow: 0 12px 32px rgba(29, 78, 216, 0.28);
     }
     .vn-card {
         background: var(--card-bg, #fff);
@@ -38,7 +38,7 @@
         border-bottom: 1px solid rgba(15, 23, 42, 0.05);
         transition: background 0.15s ease;
     }
-    .vn-item:hover { background: rgba(102, 126, 234, 0.04); }
+    .vn-item:hover { background: rgba(29, 78, 216, 0.04); }
     .vn-item.unread { background: rgba(16, 185, 129, 0.06); }
     .vn-item:last-child { border-bottom: none; }
     .vn-icon {
@@ -49,7 +49,7 @@
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
-        background: rgba(102, 126, 234, 0.1);
+        background: rgba(29, 78, 216, 0.1);
         font-size: 1rem;
     }
     .vn-title { font-weight: 700; font-size: 0.92rem; color: #1e293b; }

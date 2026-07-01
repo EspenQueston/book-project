@@ -1,18 +1,18 @@
-{% extends "marketplace/vendor/base.html" %}
-{% block title %}{% if product %}Modifier le produit{% else %}{% if public_publish_mode %}Publier une annonce{% else %}Ajouter un produit{% endif %}{% endif %} - {{ vendor.company_name }}{% endblock %}
+﻿{% extends "marketplace/vendor/base.html" %}
+{% load i18n %}
+{% block title %}{% if product %}{% trans "编辑商品" %}{% else %}{% if public_publish_mode %}{% trans "发布广告" %}{% else %}{% trans "新增商品" %}{% endif %}{% endif %} - {{ vendor.company_name }}{% endblock %}
 {% block nav_products %}active{% endblock %}
 
 {% block extra_vendor_css %}
-<style>
-    .vendor-form-shell { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(320px,.85fr); gap:24px; }
-    .vendor-form-card { background:#fff; border-radius:18px; padding:24px; box-shadow:0 8px 24px rgba(15,23,42,.06); border:1px solid rgba(102,126,234,.08); }
+    .vendor-form-shell { display:grid; grid-template-columns:minmax(0,1.35fr) minmax(340px,.82fr); gap:24px; }
+    .vendor-form-card { background:#fff; border-radius:24px; padding:26px; box-shadow:0 16px 44px rgba(15,23,42,.08); border:1px solid rgba(29,78,216,.12); }
     .vendor-form-title { font-size:1.05rem; font-weight:800; color:#1e293b; margin-bottom:18px; display:flex; align-items:center; gap:10px; }
-    .vendor-form-title i { color:#667eea; }
+    .vendor-form-title i { color:#1d4ed8; }
     .vendor-form-card .form-label { font-weight:700; color:#334155; font-size:.88rem; }
     .vendor-form-card .form-control, .vendor-form-card .form-select, .vendor-form-card .input-group-text { border-radius:12px; min-height:46px; }
     .vendor-form-card textarea.form-control { min-height:130px; }
     .vendor-form-card .form-control, .vendor-form-card .form-select { border:1.5px solid #dbe3f3; box-shadow:none; }
-    .vendor-form-card .form-control:focus, .vendor-form-card .form-select:focus { border-color:#667eea; box-shadow:0 0 0 3px rgba(102,126,234,.12); }
+    .vendor-form-card .form-control:focus, .vendor-form-card .form-select:focus { border-color:#1d4ed8; box-shadow:0 0 0 3px rgba(29,78,216,.12); }
     .vendor-side-stack { display:flex; flex-direction:column; gap:24px; }
     .attr-row { background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:12px; }
     .quick-preset { border-radius:999px; }
@@ -22,6 +22,9 @@
     .helper-text { font-size:.78rem; color:#64748b; }
     .form-actions { display:flex; gap:12px; flex-wrap:wrap; }
     .form-actions .btn { border-radius:999px; padding:12px 24px; font-weight:700; }
+    .vendor-form-hero { background:linear-gradient(135deg,#0f172a,#2563eb 55%,#22c55e); color:#fff; border-radius:26px; padding:26px; margin-bottom:24px; box-shadow:0 18px 45px rgba(15,23,42,.22); }
+    .vendor-form-hero h4 { font-weight:900; margin-bottom:8px; }
+    .vendor-form-hero p { opacity:.82; margin:0; }
     .switch-card { background:linear-gradient(135deg,#f8fafc,#eef2ff); border:1px solid #dbe3f3; border-radius:16px; padding:16px; }
     .chips-wrap { display:flex; flex-wrap:wrap; gap:10px; }
     .chip-option { display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border-radius:999px; border:1px solid #dbe3f3; background:#fff; font-size:.82rem; font-weight:700; }
@@ -37,17 +40,16 @@
         .form-actions .btn { width:100%; justify-content:center; }
         .page-header-card .d-flex { flex-direction:column; align-items:flex-start !important; gap:12px; }
     }
-</style>
 {% endblock %}
 
 {% block vendor_content %}
-<div class="page-header-card">
-    <div class="d-flex justify-content-between align-items-center gap-3">
+<div class="vendor-form-hero">
+    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
         <div>
-            <h4><i class="fas fa-{% if product %}edit{% else %}plus-circle{% endif %} me-2"></i>{% if product %}Modifier le produit{% else %}{% if public_publish_mode %}Publier une annonce{% else %}Ajouter un produit{% endif %}{% endif %}</h4>
-            <p class="mb-0 opacity-75" style="font-size:.92rem;">{% if product %}Mettez à jour les informations de « {{ product.name }} »{% else %}Utilisez la même structure professionnelle que le formulaire admin marketplace{% endif %}</p>
+            <div class="text-uppercase small fw-bold opacity-75 mb-2"><span data-zh="商品发布工作台" data-en="Product publishing workspace" data-fr="Espace de publication produit">商品发布工作台</span></div>
+            <h4><i class="fas fa-{% if product %}edit{% else %}plus-circle{% endif %} me-2"></i>{% if product %}<span data-zh="编辑商品" data-en="Edit product" data-fr="Modifier le produit">编辑商品</span>{% else %}{% if public_publish_mode %}<span data-zh="发布广告" data-en="Publish listing" data-fr="Publier une annonce">发布广告</span>{% else %}<span data-zh="新增商品" data-en="Add product" data-fr="Ajouter un produit">新增商品</span>{% endif %}{% endif %}</h4>
         </div>
-        <a href="{% url 'marketplace:vendor_products' %}" class="btn btn-light rounded-pill px-4"><i class="fas fa-arrow-left me-2"></i>Retour à la liste</a>
+        <a href="{% url 'marketplace:vendor_products' %}" class="btn btn-light rounded-pill px-4 fw-semibold"><i class="fas fa-arrow-left me-2"></i><span data-zh="返回商品列表" data-en="Back to product list" data-fr="Retour à la liste des produits">返回商品列表</span></a>
     </div>
 </div>
 
@@ -58,45 +60,52 @@
             <div class="vendor-form-title"><i class="fas fa-box-open"></i><span>Informations principales</span></div>
             <div class="mb-3">
                 <label class="form-label fw-bold">Nom du produit <span class="text-danger">*</span></label>
-                <input type="text" name="name" class="form-control" value="{{ product.name|default:'' }}" required>
+                <input type="text" name="name" class="form-control {% if form_state.errors.name %}is-invalid{% endif %}" value="{% if form_state.values.name is not None %}{{ form_state.values.name }}{% elif product %}{{ product.name|default:'' }}{% endif %}" required>
+                {% if form_state.errors.name %}<div class="invalid-feedback d-block">{{ form_state.errors.name }}</div>{% endif %}
             </div>
             <div class="mb-3">
                 <label class="form-label fw-bold">Nom anglais</label>
-                <input type="text" name="name_en" class="form-control" value="{{ product.name_en|default:'' }}">
+                <input type="text" name="name_en" class="form-control" value="{% if form_state.values.name_en is not None %}{{ form_state.values.name_en }}{% elif product %}{{ product.name_en|default:'' }}{% endif %}">
             </div>
             <div class="mb-3">
-                <label class="form-label fw-bold">Description</label>
-                <textarea name="description" class="form-control" rows="5">{{ product.description|default:'' }}</textarea>
+                <label class="form-label fw-bold">Description <span class="text-danger">*</span></label>
+                <textarea name="description" class="form-control {% if form_state.errors.description %}is-invalid{% endif %}" rows="5" required minlength="12">{% if form_state.values.description is not None %}{{ form_state.values.description }}{% elif product %}{{ product.description|default:'' }}{% endif %}</textarea>
+                {% if form_state.errors.description %}<div class="invalid-feedback d-block">{{ form_state.errors.description }}</div>{% endif %}
                 <div class="helper-text mt-2">Ajoutez une description claire, utile et rassurante pour améliorer la conversion.</div>
             </div>
             <div class="row g-3">
                 <div class="col-md-3">
                     <label class="form-label fw-bold">Prix <span class="text-danger">*</span></label>
-                    <div class="input-group"><span class="input-group-text">FCFA</span><input type="number" name="price" class="form-control" step="0.01" value="{{ product.price|default:'' }}" required></div>
+                    <div class="input-group"><span class="input-group-text">FCFA</span><input type="number" name="price" class="form-control {% if form_state.errors.price %}is-invalid{% endif %}" step="0.01" value="{% if form_state.values.price is not None %}{{ form_state.values.price }}{% elif product %}{{ product.price|default:'' }}{% endif %}" required></div>
+                    {% if form_state.errors.price %}<div class="invalid-feedback d-block">{{ form_state.errors.price }}</div>{% endif %}
                 </div>
                 <div class="col-md-3">
                     <label class="form-label fw-bold">Prix original</label>
-                    <div class="input-group"><span class="input-group-text">FCFA</span><input type="number" name="original_price" class="form-control" step="0.01" value="{{ product.original_price|default:'' }}"></div>
+                    <div class="input-group"><span class="input-group-text">FCFA</span><input type="number" name="original_price" class="form-control" step="0.01" value="{% if form_state.values.original_price is not None %}{{ form_state.values.original_price }}{% elif product %}{{ product.original_price|default:'' }}{% endif %}"></div>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label fw-bold">Stock <span class="text-danger">*</span></label>
-                    <input type="number" name="stock" class="form-control" value="{{ product.stock|default:'0' }}" required>
+                    <input type="number" name="stock" class="form-control {% if form_state.errors.stock %}is-invalid{% endif %}" value="{% if form_state.values.stock is not None %}{{ form_state.values.stock }}{% elif product %}{{ product.stock|default:'0' }}{% else %}0{% endif %}" required>
+                    {% if form_state.errors.stock %}<div class="invalid-feedback d-block">{{ form_state.errors.stock }}</div>{% endif %}
                 </div>
                 <div class="col-md-3">
                     <label class="form-label fw-bold">Vente min.</label>
-                    <input type="number" name="min_order_quantity" class="form-control" min="1" value="{{ product.min_order_quantity|default:'1' }}">
+                    <input type="number" name="min_order_quantity" class="form-control {% if form_state.errors.min_order_quantity %}is-invalid{% endif %}" min="1" value="{% if form_state.values.min_order_quantity is not None %}{{ form_state.values.min_order_quantity }}{% elif product %}{{ product.min_order_quantity|default:'1' }}{% else %}1{% endif %}">
+                    {% if form_state.errors.min_order_quantity %}<div class="invalid-feedback d-block">{{ form_state.errors.min_order_quantity }}</div>{% endif %}
                     <div class="helper-text mt-1">Nombre minimum de pièces par commande.</div>
                 </div>
             </div>
             <div class="row g-3 mt-1">
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Vente max.</label>
-                    <input type="number" name="max_order_quantity" class="form-control" min="1" value="{{ product.max_order_quantity|default:'' }}">
+                    <input type="number" name="max_order_quantity" class="form-control {% if form_state.errors.max_order_quantity %}is-invalid{% endif %}" min="1" value="{% if form_state.values.max_order_quantity is not None %}{{ form_state.values.max_order_quantity }}{% elif product %}{{ product.max_order_quantity|default:'' }}{% endif %}">
+                    {% if form_state.errors.max_order_quantity %}<div class="invalid-feedback d-block">{{ form_state.errors.max_order_quantity }}</div>{% endif %}
                     <div class="helper-text mt-1">Optionnel. Laissez vide pour aucune limite.</div>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Incrément</label>
-                    <input type="number" name="quantity_step" class="form-control" min="1" value="{{ product.quantity_step|default:'1' }}">
+                    <input type="number" name="quantity_step" class="form-control {% if form_state.errors.quantity_step %}is-invalid{% endif %}" min="1" value="{% if form_state.values.quantity_step is not None %}{{ form_state.values.quantity_step }}{% elif product %}{{ product.quantity_step|default:'1' }}{% else %}1{% endif %}">
+                    {% if form_state.errors.quantity_step %}<div class="invalid-feedback d-block">{{ form_state.errors.quantity_step }}</div>{% endif %}
                     <div class="helper-text mt-1">Ex: 12 pour vendre par carton de 12.</div>
                 </div>
             </div>
@@ -104,11 +113,12 @@
             <div class="row g-3 mt-1">
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Téléphone vendeur <span class="text-danger">*</span></label>
-                    <input type="text" name="seller_phone" class="form-control" required value="{{ seller_phone|default:vendor.phone|default:'' }}">
+                    <input type="text" name="seller_phone" class="form-control {% if form_state.errors.seller_phone %}is-invalid{% endif %}" required value="{% if form_state.values.seller_phone is not None %}{{ form_state.values.seller_phone }}{% elif seller_phone %}{{ seller_phone }}{% elif vendor %}{{ vendor.phone|default:'' }}{% endif %}">
+                    {% if form_state.errors.seller_phone %}<div class="invalid-feedback d-block">{{ form_state.errors.seller_phone }}</div>{% endif %}
                 </div>
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Nom vendeur</label>
-                    <input type="text" name="seller_name" class="form-control" value="{{ seller_name|default:vendor.contact_name|default:vendor.company_name }}">
+                    <input type="text" name="seller_name" class="form-control" value="{% if form_state.values.seller_name is not None %}{{ form_state.values.seller_name }}{% elif seller_name %}{{ seller_name }}{% elif vendor %}{{ vendor.contact_name|default:vendor.company_name }}{% endif %}">
                 </div>
             </div>
 
@@ -151,37 +161,38 @@
                 <div class="vendor-form-title"><i class="fas fa-sliders-h"></i><span>Réglages produit</span></div>
                 <div class="mb-3">
                     <label class="form-label fw-bold">Catégorie</label>
-                    <select name="category" class="form-select">
+                    <select name="category" class="form-select {% if form_state.errors.category %}is-invalid{% endif %}" required>
                         <option value="">-- Choisir une catégorie --</option>
                         {% for cat in categories %}
-                        <option value="{{ cat.id }}" {% if product.category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+                        <option value="{{ cat.id }}" {% if form_state.values.category == cat.id|stringformat:'s' or product and product.category_id == cat.id and not form_state.values.category %}selected{% endif %}>{{ cat.name }}</option>
                         {% endfor %}
                     </select>
+                    {% if form_state.errors.category %}<div class="invalid-feedback d-block">{{ form_state.errors.category }}</div>{% endif %}
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-bold">Marque</label>
-                    <input type="text" name="brand" class="form-control" value="{{ product.brand|default:'' }}">
+                    <input type="text" name="brand" class="form-control" value="{% if form_state.values.brand is not None %}{{ form_state.values.brand }}{% elif product %}{{ product.brand|default:'' }}{% endif %}">
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-bold">État</label>
                     <select name="condition" class="form-select">
-                        <option value="new" {% if product.condition == 'new' %}selected{% endif %}>Neuf</option>
-                        <option value="like_new" {% if product.condition == 'like_new' %}selected{% endif %}>Comme neuf</option>
-                        <option value="used" {% if product.condition == 'used' %}selected{% endif %}>Occasion</option>
-                        <option value="refurbished" {% if product.condition == 'refurbished' %}selected{% endif %}>Reconditionné</option>
+                        <option value="new" {% if form_state.values.condition == 'new' or product and product.condition == 'new' and not form_state.values.condition or not product and not form_state.values.condition %}selected{% endif %}>Neuf</option>
+                        <option value="like_new" {% if form_state.values.condition == 'like_new' or product and product.condition == 'like_new' and not form_state.values.condition %}selected{% endif %}>Comme neuf</option>
+                        <option value="used" {% if form_state.values.condition == 'used' or product and product.condition == 'used' and not form_state.values.condition %}selected{% endif %}>Occasion</option>
+                        <option value="refurbished" {% if form_state.values.condition == 'refurbished' or product and product.condition == 'refurbished' and not form_state.values.condition %}selected{% endif %}>Reconditionné</option>
                     </select>
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-bold">Poids (kg)</label>
-                    <input type="number" name="weight" class="form-control" step="0.01" value="{{ product.weight|default:'' }}">
+                    <input type="number" name="weight" class="form-control" step="0.01" value="{% if form_state.values.weight is not None %}{{ form_state.values.weight }}{% elif product %}{{ product.weight|default:'' }}{% endif %}">
                 </div>
                 <div class="switch-card">
                     <div class="form-check form-switch mb-2">
-                        <input type="checkbox" name="is_active" class="form-check-input" id="isActive" {% if product.is_active or not product %}checked{% endif %}>
+                        <input type="checkbox" name="is_active" class="form-check-input" id="isActive" {% if form_state.values.is_active or product.is_active and not form_state.values or not product and not form_state.values %}checked{% endif %}>
                         <label class="form-check-label fw-bold" for="isActive">Publier</label>
                     </div>
                     <div class="form-check form-switch mb-0">
-                        <input type="checkbox" name="delivery_available" class="form-check-input" id="deliveryAvailable" {% if product %}checked{% endif %}>
+                        <input type="checkbox" name="delivery_available" class="form-check-input" id="deliveryAvailable" {% if form_state.values.delivery_available or product and not form_state.values %}checked{% endif %}>
                         <label class="form-check-label fw-bold" for="deliveryAvailable">Livraison disponible</label>
                     </div>
                 </div>
@@ -208,7 +219,8 @@
                         <input type="file" name="image_3" class="form-control mt-2" accept="image/*">
                     </div>
                 </div>
-                <div class="helper-text mt-3">Sur mobile, les zones d’upload restent simples et lisibles pour une meilleure expérience utilisateur.</div>
+                {% if form_state.errors.image %}<div class="invalid-feedback d-block mb-2">{{ form_state.errors.image }}</div>{% endif %}
+                <div class="helper-text mt-3">{% if public_publish_mode %}Au moins 2 photos sont requises pour publier une annonce.{% else %}Au moins 1 photo est requise (2 ou plus recommandées).{% endif %}</div>
             </div>
 
             <div class="vendor-form-card">

@@ -1,11 +1,11 @@
-{% load i18n %}
+﻿{% load i18n %}
 <style>
 /* Shared seller / publisher card theme */
 .desk-seller-card {
     position: relative;
     overflow: hidden;
     background: linear-gradient(145deg, rgba(255,255,255,0.98) 0%, rgba(248,250,255,0.96) 100%);
-    border: 1px solid rgba(102,126,234,0.16);
+    border: 1px solid rgba(29,78,216,0.16);
     border-radius: 22px;
     padding: 20px 20px 18px;
     margin-bottom: 0;
@@ -18,13 +18,13 @@
     inset: 0 auto auto 0;
     width: 100%;
     height: 3px;
-    background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
+    background: linear-gradient(90deg, #1d4ed8, #14245f, #1d4ed8);
     opacity: 0.85;
 }
 .desk-seller-card:hover {
-    box-shadow: 0 20px 48px rgba(102,126,234,0.16);
+    box-shadow: 0 20px 48px rgba(29,78,216,0.16);
     transform: translateY(-2px);
-    border-color: rgba(102,126,234,0.28);
+    border-color: rgba(29,78,216,0.28);
 }
 .desk-seller-card--publisher::before {
     background: linear-gradient(90deg, #10b981, #059669, #34d399);
@@ -34,17 +34,17 @@
 .desk-seller-card--official {
     border: none;
     background:
-        radial-gradient(ellipse 120% 80% at 0% 0%, rgba(102,126,234,0.09) 0%, transparent 55%),
-        radial-gradient(ellipse 90% 70% at 100% 100%, rgba(118,75,162,0.07) 0%, transparent 50%),
+        radial-gradient(ellipse 120% 80% at 0% 0%, rgba(29,78,216,0.09) 0%, transparent 55%),
+        radial-gradient(ellipse 90% 70% at 100% 100%, rgba(20,36,95,0.07) 0%, transparent 50%),
         linear-gradient(155deg, #ffffff 0%, #f8faff 45%, #f5f3ff 100%);
     box-shadow:
-        0 16px 44px rgba(102, 126, 234, 0.14),
-        0 0 0 1px rgba(102, 126, 234, 0.14);
+        0 16px 44px rgba(29, 78, 216, 0.14),
+        0 0 0 1px rgba(29, 78, 216, 0.14);
 }
 .desk-seller-card--official::before {
     height: 4px;
     opacity: 1;
-    background: linear-gradient(90deg, #667eea 0%, #764ba2 40%, #a78bfa 70%, #667eea 100%);
+    background: linear-gradient(90deg, #1d4ed8 0%, #14245f 40%, #a78bfa 70%, #1d4ed8 100%);
     background-size: 220% 100%;
     animation: dunoOfficialBar 5s ease-in-out infinite;
 }
@@ -54,7 +54,7 @@
     inset: 0;
     border-radius: 22px;
     padding: 1.5px;
-    background: linear-gradient(135deg, rgba(102,126,234,0.55), rgba(118,75,162,0.35), rgba(167,139,250,0.45), rgba(102,126,234,0.4));
+    background: linear-gradient(135deg, rgba(29,78,216,0.55), rgba(20,36,95,0.35), rgba(167,139,250,0.45), rgba(29,78,216,0.4));
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
@@ -64,26 +64,26 @@
 }
 .desk-seller-card--official:hover {
     box-shadow:
-        0 22px 52px rgba(102, 126, 234, 0.2),
-        0 0 0 1px rgba(102, 126, 234, 0.22);
+        0 22px 52px rgba(29, 78, 216, 0.2),
+        0 0 0 1px rgba(29, 78, 216, 0.22);
 }
 .desk-seller-card--official:hover::after {
     opacity: 1;
 }
 .desk-seller-card--official .desk-seller-kicker {
-    background: linear-gradient(90deg, #667eea, #764ba2);
+    background: linear-gradient(90deg, #1d4ed8, #14245f);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
 .desk-seller-card--official .desk-seller-avatar {
     box-shadow:
-        0 10px 26px rgba(102,126,234,0.38),
+        0 10px 26px rgba(29,78,216,0.38),
         0 0 0 3px #fff,
-        0 0 0 5px rgba(102,126,234,0.22);
+        0 0 0 5px rgba(29,78,216,0.22);
 }
 .desk-seller-card--official .desk-seller-name:hover {
-    color: #764ba2;
+    color: #14245f;
 }
 
 @keyframes dunoOfficialBar {
@@ -103,7 +103,7 @@
     width: 68px;
     height: 68px;
     border-radius: 18px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #1d4ed8, #14245f);
     color: #fff;
     display: flex;
     align-items: center;
@@ -112,7 +112,7 @@
     font-weight: 800;
     overflow: hidden;
     flex-shrink: 0;
-    box-shadow: 0 8px 22px rgba(102,126,234,0.28);
+    box-shadow: 0 8px 22px rgba(29,78,216,0.28);
 }
 .desk-seller-card--publisher .desk-seller-avatar {
     background: linear-gradient(135deg, #10b981, #059669);
@@ -125,7 +125,7 @@
     font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: #667eea;
+    color: #1d4ed8;
     margin-bottom: 5px;
 }
 .desk-seller-card--publisher .desk-seller-kicker { color: #059669; }
@@ -138,7 +138,7 @@
     transition: color 0.2s;
     display: inline-block;
 }
-.desk-seller-name:hover { color: #667eea; }
+.desk-seller-name:hover { color: #1d4ed8; }
 .desk-seller-card--publisher .desk-seller-name:hover { color: #059669; }
 .desk-seller-meta {
     display: flex;
@@ -173,15 +173,15 @@
     font-weight: 700;
     letter-spacing: 0.01em;
     color: #5b21b6 !important;
-    background: rgba(102,126,234,0.1) !important;
-    border: 1px solid rgba(102,126,234,0.22) !important;
+    background: rgba(29,78,216,0.1) !important;
+    border: 1px solid rgba(29,78,216,0.22) !important;
     box-shadow: none;
     max-width: none;
     white-space: nowrap;
 }
 .desk-seller-badge-official i {
     font-size: 0.74rem;
-    color: #667eea;
+    color: #1d4ed8;
     opacity: 1;
 }
 .desk-seller-actions {
@@ -211,9 +211,9 @@
 }
 .vendor-follow-btn,
 .publisher-follow-btn {
-    border: 2px solid #667eea;
+    border: 2px solid #1d4ed8;
     background: #fff;
-    color: #667eea;
+    color: #1d4ed8;
 }
 .desk-seller-card--publisher .publisher-follow-btn {
     border-color: #10b981;
@@ -221,7 +221,7 @@
 }
 .vendor-follow-btn:hover,
 .publisher-follow-btn:hover {
-    background: rgba(102,126,234,0.08);
+    background: rgba(29,78,216,0.08);
     transform: translateY(-1px);
 }
 .desk-seller-card--publisher .publisher-follow-btn:hover {
@@ -229,10 +229,10 @@
 }
 .vendor-follow-btn.is-following,
 .publisher-follow-btn.is-following {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #1d4ed8, #14245f);
     border-color: transparent;
     color: #fff;
-    box-shadow: 0 6px 18px rgba(102,126,234,0.35);
+    box-shadow: 0 6px 18px rgba(29,78,216,0.35);
 }
 .desk-seller-card--publisher .publisher-follow-btn.is-following {
     background: linear-gradient(135deg, #10b981, #059669);
@@ -244,19 +244,19 @@
     color: #334155;
 }
 .desk-seller-link:hover {
-    border-color: #667eea;
-    color: #667eea;
-    background: rgba(102,126,234,0.04);
+    border-color: #1d4ed8;
+    color: #1d4ed8;
+    background: rgba(29,78,216,0.04);
     transform: translateY(-1px);
 }
 .desk-seller-link.primary {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #1d4ed8, #14245f);
     border-color: transparent;
     color: #fff;
 }
 .desk-seller-link.primary:hover {
     color: #fff;
-    box-shadow: 0 6px 18px rgba(102,126,234,0.35);
+    box-shadow: 0 6px 18px rgba(29,78,216,0.35);
 }
 .desk-seller-card--publisher .desk-seller-link.primary {
     background: linear-gradient(135deg, #10b981, #059669);
@@ -293,7 +293,7 @@
     position: relative;
     overflow: hidden;
     background: linear-gradient(155deg, #fff 0%, #f8faff 100%) !important;
-    box-shadow: inset 0 0 0 1px rgba(102,126,234,0.14);
+    box-shadow: inset 0 0 0 1px rgba(29,78,216,0.14);
 }
 .bmp-seller-section--official::before,
 .pmp-seller-section--official::before {
@@ -303,12 +303,12 @@
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(90deg, #667eea, #764ba2, #a78bfa);
+    background: linear-gradient(90deg, #1d4ed8, #14245f, #a78bfa);
 }
 .bmp-seller-section--official .bmp-seller-logo,
 .pmp-seller-section--official .pmp-seller-logo {
-    background: linear-gradient(135deg, #667eea, #764ba2) !important;
-    box-shadow: 0 4px 14px rgba(102,126,234,0.3);
+    background: linear-gradient(135deg, #1d4ed8, #14245f) !important;
+    box-shadow: 0 4px 14px rgba(29,78,216,0.3);
 }
 .bmp-seller-badge-official,
 .pmp-seller-badge-official {
@@ -320,18 +320,18 @@
     font-size: 0.72rem;
     font-weight: 700;
     color: #5b21b6;
-    background: rgba(102,126,234,0.1);
-    border: 1px solid rgba(102,126,234,0.22);
+    background: rgba(29,78,216,0.1);
+    border: 1px solid rgba(29,78,216,0.22);
     box-shadow: none;
 }
 .bmp-seller-badge-official i,
 .pmp-seller-badge-official i {
-    color: #667eea;
+    color: #1d4ed8;
     font-size: 0.74rem;
 }
 html[data-theme="dark"] .desk-seller-meta .desk-seller-badge-official {
     color: #c4b5fd !important;
-    background: rgba(102,126,234,0.18) !important;
+    background: rgba(29,78,216,0.18) !important;
     border-color: rgba(129,140,248,0.35) !important;
 }
 html[data-theme="dark"] .desk-seller-badge-official i {
@@ -340,7 +340,7 @@ html[data-theme="dark"] .desk-seller-badge-official i {
 html[data-theme="dark"] .bmp-seller-badge-official,
 html[data-theme="dark"] .pmp-seller-badge-official {
     color: #c4b5fd;
-    background: rgba(102,126,234,0.18);
+    background: rgba(29,78,216,0.18);
     border-color: rgba(129,140,248,0.35);
 }
 .bmp-seller-meta .verified {
@@ -363,12 +363,12 @@ html[data-theme="dark"] .desk-seller-card {
 }
 html[data-theme="dark"] .desk-seller-card--official {
     background:
-        radial-gradient(ellipse 100% 80% at 0% 0%, rgba(102,126,234,0.14) 0%, transparent 55%),
+        radial-gradient(ellipse 100% 80% at 0% 0%, rgba(29,78,216,0.14) 0%, transparent 55%),
         linear-gradient(155deg, #1e293b 0%, #0f172a 100%);
     box-shadow: 0 16px 44px rgba(0,0,0,0.35), 0 0 0 1px rgba(129,140,248,0.25);
 }
 html[data-theme="dark"] .desk-seller-card--official::after {
-    background: linear-gradient(135deg, rgba(102,126,234,0.5), rgba(167,139,250,0.35));
+    background: linear-gradient(135deg, rgba(29,78,216,0.5), rgba(167,139,250,0.35));
 }
 html[data-theme="dark"] .desk-seller-name { color: #f1f5f9; }
 html[data-theme="dark"] .desk-seller-meta span:not(.desk-seller-badge-official) { background: rgba(15,23,42,0.6); border-color: #334155; color: #cbd5e1; }
@@ -383,5 +383,52 @@ html[data-theme="dark"] .pmp-seller-section--official {
 
 @media (prefers-reduced-motion: reduce) {
     .desk-seller-card--official::before { animation: none; }
+    .desk-seller-badge-certified { animation: none; }
 }
+
+.desk-seller-meta .desk-seller-badge-certified {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 11px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #fff !important;
+    background: linear-gradient(135deg, #0ea5e9, #6366f1) !important;
+    border: none !important;
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+    animation: certBadgePulse 2.8s ease-in-out infinite;
+}
+.desk-seller-meta .desk-seller-badge-approved {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #047857 !important;
+    background: rgba(16, 185, 129, 0.12) !important;
+    border: 1px solid rgba(16, 185, 129, 0.28) !important;
+}
+.desk-seller-card--certified::before {
+    background: linear-gradient(90deg, #0ea5e9, #6366f1, #0ea5e9);
+}
+@keyframes certBadgePulse {
+    0%, 100% { box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35); }
+    50% { box-shadow: 0 6px 22px rgba(14, 165, 233, 0.5); }
+}
+.v-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+.v-badge-official { background: linear-gradient(135deg, #f59e0b, #ea580c); color: #fff; }
+.v-badge-certified { background: linear-gradient(135deg, #0284c7, #4f46e5); color: #fff; box-shadow: 0 4px 14px rgba(79,70,229,0.3); }
+.v-badge-approved { background: rgba(16,185,129,0.14); color: #047857; border: 1px solid rgba(16,185,129,0.3); }
 </style>

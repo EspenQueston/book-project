@@ -6,20 +6,28 @@
 
 {% block extra_css %}
 <style>
-    .search-page { padding: 30px 0 100px; min-height: 80vh; }
+    .search-page { padding: 0 0 100px; min-height: 80vh; }
+    .search-hero {
+        background: radial-gradient(circle at 18% 18%, rgba(96,165,250,.30), transparent 24%), radial-gradient(circle at 84% 18%, rgba(14,165,233,.16), transparent 22%), linear-gradient(135deg, #14245f 0%, #1d4ed8 100%);
+        border-radius: 0 0 28px 28px;
+        box-shadow: 0 22px 56px rgba(20,36,95,.22);
+        padding: 84px 0 56px;
+        margin-bottom: 28px;
+        color: #fff;
+    }
     .search-header { text-align: center; margin-bottom: 30px; }
-    .search-header h2 { font-size: 1.5rem; color: #1a1a2e; font-weight: 700; }
+    .search-header h2 { font-size: 1.8rem; color: #fff; font-weight: 800; }
     html[data-theme="dark"] .search-header h2 { color: var(--text-primary); }
     .search-form-top {
         max-width: 600px; margin: 0 auto 30px;
         display: flex; gap: 8px;
     }
     .search-form-top input {
-        flex: 1; border: 2px solid #667eea; border-radius: 25px;
+        flex: 1; border: 2px solid rgba(29,78,216,.22); border-radius: 25px;
         padding: 10px 20px; font-size: 1rem; outline: none;
     }
     .search-form-top button {
-        background: linear-gradient(135deg,#667eea,#764ba2);
+        background: linear-gradient(135deg,#14245f,#1d4ed8);
         color: #fff; border: none; border-radius: 25px;
         padding: 10px 25px; font-weight: 600; cursor: pointer;
     }
@@ -28,13 +36,13 @@
         margin-bottom: 20px; flex-wrap: wrap;
     }
     .search-tab-btn {
-        border: 2px solid #667eea; background: transparent;
-        color: #667eea; border-radius: 20px; padding: 6px 16px;
+        border: 2px solid #1d4ed8; background: transparent;
+        color: #1d4ed8; border-radius: 20px; padding: 6px 16px;
         font-size: 0.85rem; cursor: pointer; font-weight: 600;
         transition: all 0.2s;
     }
     .search-tab-btn.active, .search-tab-btn:hover {
-        background: linear-gradient(135deg,#667eea,#764ba2);
+        background: linear-gradient(135deg,#14245f,#1d4ed8);
         color: #fff; border-color: transparent;
     }
     .search-results-grid {
@@ -70,7 +78,7 @@
         overflow: hidden;
     }
     html[data-theme="dark"] .sr-card-name { color: var(--text-primary); }
-    .sr-card-price { font-size: 0.9rem; font-weight: 800; color: #667eea; margin-top: 4px; }
+    .sr-card-price { font-size: 0.9rem; font-weight: 800; color: #1d4ed8; margin-top: 4px; }
     .search-empty {
         text-align: center; padding: 60px 20px; color: #6b7280;
     }
@@ -85,7 +93,7 @@
     }
     html[data-theme="dark"] .suggestions-title { color: var(--text-primary); }
     #searchLoader { text-align: center; padding: 40px; display: none; }
-    .spinner { display: inline-block; width: 32px; height: 32px; border: 3px solid #e5e7eb; border-top-color: #667eea; border-radius: 50%; animation: spin 0.7s linear infinite; }
+    .spinner { display: inline-block; width: 32px; height: 32px; border: 3px solid #e5e7eb; border-top-color: #1d4ed8; border-radius: 50%; animation: spin 0.7s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     @media (max-width: 768px) {
@@ -99,21 +107,25 @@
 
 {% block content %}
 <div class="search-page">
-    <div class="container">
-        <div class="search-header">
-            <h2><i class="fas fa-search me-2"></i><span data-zh="搜索结果" data-en="Search Results" data-fr="Résultats">搜索结果</span></h2>
-        </div>
-        <form class="search-form-top" id="pageSearchForm" method="get" action="{% url 'manager:public_search' %}">
+    <section class="search-hero">
+        <div class="container">
+            <div class="search-header">
+                <h2><i class="fas fa-search me-2"></i><span data-zh="搜索结果" data-en="Search Results" data-fr="Résultats">搜索结果</span></h2>
+            </div>
+            <form class="search-form-top" id="pageSearchForm" method="get" action="{% url 'manager:public_search' %}">
             <input type="text" name="q" id="pageSearchInput" value="{{ query }}" placeholder="{% trans '搜索图书、商品、课程...' %}" autocomplete="off">
             <button type="submit"><i class="fas fa-search me-1"></i><span data-zh="搜索" data-en="Search" data-fr="Chercher">搜索</span></button>
         </form>
-        <div class="search-tabs" id="searchFilterTabs">
-            <button type="button" class="search-tab-btn active" data-filter="all"><span data-zh="全部" data-en="All" data-fr="Tout">全部</span></button>
-            <button type="button" class="search-tab-btn" data-filter="book"><i class="fas fa-book me-1"></i><span data-zh="图书" data-en="Books" data-fr="Livres">图书</span></button>
-            <button type="button" class="search-tab-btn" data-filter="product"><i class="fas fa-shopping-bag me-1"></i><span data-zh="商品" data-en="Products" data-fr="Produits">商品</span></button>
-            <button type="button" class="search-tab-btn" data-filter="course"><i class="fas fa-graduation-cap me-1"></i><span data-zh="课程" data-en="Courses" data-fr="Cours">课程</span></button>
-            <button type="button" class="search-tab-btn" data-filter="supermarket"><i class="fas fa-store me-1"></i><span data-zh="超市" data-en="Supermarket" data-fr="Supermarché">超市</span></button>
+            <div class="search-tabs" id="searchFilterTabs">
+                <button type="button" class="search-tab-btn active" data-filter="all"><span data-zh="全部" data-en="All" data-fr="Tout">全部</span></button>
+                <button type="button" class="search-tab-btn" data-filter="book"><i class="fas fa-book me-1"></i><span data-zh="图书" data-en="Books" data-fr="Livres">图书</span></button>
+                <button type="button" class="search-tab-btn" data-filter="product"><i class="fas fa-shopping-bag me-1"></i><span data-zh="商品" data-en="Products" data-fr="Produits">商品</span></button>
+                <button type="button" class="search-tab-btn" data-filter="course"><i class="fas fa-graduation-cap me-1"></i><span data-zh="课程" data-en="Courses" data-fr="Cours">课程</span></button>
+                <button type="button" class="search-tab-btn" data-filter="supermarket"><i class="fas fa-store me-1"></i><span data-zh="超市" data-en="Supermarket" data-fr="Supermarché">超市</span></button>
+            </div>
         </div>
+    </section>
+    <div class="container">
         <div id="searchLoader"><div class="spinner"></div></div>
         <div id="searchResultsContainer"></div>
     </div>

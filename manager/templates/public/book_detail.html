@@ -6,10 +6,10 @@
 
 {% block extra_css %}
 <style>
-:root { --primary-color: #667eea; --secondary-color: #764ba2; --success-color: #10b981; --warning-color: #f59e0b; --danger-color: #ef4444; }
+:root { --primary-color: #1d4ed8; --secondary-color: #14245f; --success-color: #10b981; --warning-color: #f59e0b; --danger-color: #ef4444; }
 .detail-hero {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 40px 0 60px; color: white; position: relative; overflow: hidden;
+    background: radial-gradient(circle at 18% 18%, rgba(96,165,250,.30), transparent 24%), radial-gradient(circle at 84% 18%, rgba(14,165,233,.16), transparent 22%), linear-gradient(135deg, #14245f 0%, #1d4ed8 100%);
+    padding: 56px 0 68px; color: white; position: relative; overflow: hidden; border-radius: 0 0 28px 28px; box-shadow: 0 22px 56px rgba(20,36,95,.22);
 }
 .detail-hero::before {
     content: ''; position: absolute; top: -50%; right: -10%; width: 400px; height: 400px;
@@ -30,15 +30,15 @@
 .main-content { background: #f8f9ff; padding: 30px 0 60px; }
 .content-card {
     background: white; border-radius: 16px; padding: 28px;
-    box-shadow: 0 4px 20px rgba(102,126,234,0.08); border: 1px solid rgba(102,126,234,0.08); margin-bottom: 20px;
+    box-shadow: 0 4px 20px rgba(29,78,216,0.08); border: 1px solid rgba(29,78,216,0.08); margin-bottom: 20px;
 }
-.section-heading { font-size: 1rem; font-weight: 700; color: #667eea; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-.section-heading::after { content: ''; flex: 1; height: 1px; background: linear-gradient(to right, rgba(102,126,234,0.2), transparent); }
+.section-heading { font-size: 1rem; font-weight: 700; color: #1d4ed8; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.section-heading::after { content: ''; flex: 1; height: 1px; background: linear-gradient(to right, rgba(29,78,216,0.2), transparent); }
 .info-row { display: flex; padding: 10px 0; border-bottom: 1px solid #f3f4f6; }
 .info-row:last-child { border-bottom: none; }
 .info-row .lbl { width: 120px; color: #9ca3af; font-size: 0.88rem; flex-shrink: 0; display: flex; align-items: center; gap: 6px; }
 .info-row .val { font-weight: 600; color: #1e293b; font-size: 0.93rem; }
-.price-tag { font-size: 2.4rem; font-weight: 800; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.price-tag { font-size: 2.4rem; font-weight: 800; background: linear-gradient(135deg, #1d4ed8, #14245f); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 .detail-hero .price-tag { background: rgba(255,255,255,0.15); -webkit-background-clip: unset; -webkit-text-fill-color: #fff; background-clip: unset; color: #fff; padding: 8px 24px; border-radius: 16px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.25); display: inline-block; }
 .stock-pill {
     padding: 5px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;
@@ -47,37 +47,39 @@
 .stock-low { background: #fef3c7; color: #92400e; }
 .stock-out { background: #fee2e2; color: #991b1b; }
 .qty-control { display: flex; align-items: center; gap: 0; background: #f8f9fa; border-radius: 10px; overflow: hidden; border: 2px solid #e5e7eb; width: fit-content; }
-.qty-btn { width: 42px; height: 42px; background: none; border: none; font-size: 1rem; cursor: pointer; color: #667eea; font-weight: 700; transition: background 0.2s; display: flex; align-items: center; justify-content: center; }
+.qty-btn { width: 42px; height: 42px; background: none; border: none; font-size: 1rem; cursor: pointer; color: #1d4ed8; font-weight: 700; transition: background 0.2s; display: flex; align-items: center; justify-content: center; }
 .qty-btn:hover { background: #e0e7ff; }
 .qty-input { width: 60px; text-align: center; border: none; background: none; font-size: 1.1rem; font-weight: 700; color: #1e293b; outline: none; }
 .btn-buy {
     background: linear-gradient(135deg, #10b981, #059669); color: white; border: none;
-    border-radius: 12px; padding: 14px 30px; font-weight: 700; font-size: 1rem;
+    border-radius: 50px; padding: 14px 30px; font-weight: 700; font-size: 1rem;
     cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 8px;
+    box-shadow: 0 8px 24px rgba(16,185,129,0.3);
 }
-.btn-buy:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(16,185,129,0.4); color: white; }
+.btn-buy:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(16,185,129,0.45); color: white; }
 .btn-cart {
-    background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none;
-    border-radius: 12px; padding: 14px 30px; font-weight: 700; font-size: 1rem;
+    background: linear-gradient(135deg, #1d4ed8, #14245f); color: white; border: none;
+    border-radius: 50px; padding: 14px 30px; font-weight: 700; font-size: 1rem;
     cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 8px;
+    box-shadow: 0 8px 24px rgba(29,78,216,0.28);
 }
-.btn-cart:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.4); color: white; }
+.btn-cart:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(29,78,216,0.42); color: white; }
 .author-chip {
-    background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 7px 18px;
+    background: linear-gradient(135deg, #1d4ed8, #14245f); color: white; padding: 7px 18px;
     border-radius: 20px; font-size: 0.88rem; font-weight: 600; text-decoration: none;
     display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;
 }
-.author-chip:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102,126,234,0.4); color: white; }
+.author-chip:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(29,78,216,0.4); color: white; }
 .price-summary {
-    background: linear-gradient(135deg, rgba(102,126,234,0.06), rgba(118,75,162,0.06));
-    border-radius: 12px; padding: 16px; border: 1px dashed rgba(102,126,234,0.3);
+    background: linear-gradient(135deg, rgba(29,78,216,0.06), rgba(20,36,95,0.06));
+    border-radius: 12px; padding: 16px; border: 1px dashed rgba(29,78,216,0.3);
 }
 .related-card {
     background: white; border-radius: 14px; overflow: hidden;
     box-shadow: 0 4px 15px rgba(0,0,0,0.07); transition: all 0.3s ease;
-    border: 1px solid rgba(102,126,234,0.08);
+    border: 1px solid rgba(29,78,216,0.08);
 }
-.related-card:hover { transform: translateY(-6px); box-shadow: 0 15px 40px rgba(102,126,234,0.15); }
+.related-card:hover { transform: translateY(-6px); box-shadow: 0 15px 40px rgba(29,78,216,0.15); }
 .related-cover { height: 180px; overflow: hidden; background: linear-gradient(135deg, #f0f0ff, #e8e0ff); display: flex; align-items: center; justify-content: center; padding: 12px; }
 .related-cover img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 3px 8px rgba(0,0,0,0.12)); transition: transform 0.3s; }
 .related-card:hover .related-cover img { transform: scale(1.06); }
@@ -112,7 +114,7 @@
     .book-desk-social-wrap {
         margin-top: 4px;
         background: linear-gradient(160deg, rgba(255,255,255,0.98) 0%, rgba(248,250,255,0.95) 100%);
-        border: 1px solid rgba(102,126,234,0.12);
+        border: 1px solid rgba(29,78,216,0.12);
         position: relative;
         overflow: hidden;
     }
@@ -122,14 +124,14 @@
         inset: 0 auto auto 0;
         width: 100%;
         height: 3px;
-        background: linear-gradient(90deg, #667eea, #764ba2, #10b981);
+        background: linear-gradient(90deg, #1d4ed8, #14245f, #10b981);
         opacity: 0.9;
     }
     .book-desk-social-wrap .desk-book-social-zone { gap: 22px; padding-top: 4px; }
     .book-desk-social-wrap .desk-seller-card { margin-bottom: 0; }
     .book-desk-social-wrap .lr-card {
         border-radius: 18px;
-        border: 1px solid rgba(102,126,234,0.1);
+        border: 1px solid rgba(29,78,216,0.1);
         box-shadow: 0 8px 28px rgba(15,23,42,0.06);
     }
 }
@@ -161,10 +163,10 @@
 }
 .bmp-seller-btns .bmp-seller-btn:nth-child(2),
 .bmp-seller-actions-row .bmp-seller-btn:nth-child(2) {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #1d4ed8, #14245f);
     color: #fff;
     border-color: transparent;
-    box-shadow: 0 4px 14px rgba(102,126,234,0.32);
+    box-shadow: 0 4px 14px rgba(29,78,216,0.32);
 }
 .bmp-seller-section--publisher .bmp-seller-btns .bmp-seller-btn:nth-child(2),
 .bmp-seller-section--publisher .bmp-seller-actions-row .bmp-seller-btn:nth-child(2) {
@@ -335,7 +337,7 @@
 }
 .bmp-seller-logo {
     width: 44px; height: 44px; border-radius: 10px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #1d4ed8, #14245f);
     display: flex; align-items: center; justify-content: center;
     color: #fff; font-size: 18px; flex-shrink: 0;
 }
@@ -362,8 +364,8 @@
     font-size: 0.72rem;
     font-weight: 700;
     text-align: center;
-    border: 1.5px solid #667eea;
-    color: #667eea;
+    border: 1.5px solid #1d4ed8;
+    color: #1d4ed8;
     cursor: pointer;
     text-decoration: none;
     background: #fff;
@@ -379,20 +381,20 @@
 }
 .bmp-seller-btn:active { transform: scale(0.97); }
 .bmp-seller-btns .bmp-seller-btn:nth-child(2) {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #1d4ed8, #14245f);
     color: #fff;
     border-color: transparent;
-    box-shadow: 0 4px 14px rgba(102,126,234,0.32);
+    box-shadow: 0 4px 14px rgba(29,78,216,0.32);
 }
 .bmp-seller-btn.follow {
     background: #fff;
-    color: #667eea;
-    border: 1.5px solid #667eea;
+    color: #1d4ed8;
+    border: 1.5px solid #1d4ed8;
     min-height: 40px;
     font-size: 0.72rem;
 }
 .bmp-seller-btn.follow.is-following {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #1d4ed8, #14245f);
     color: #fff;
     border-color: transparent;
 }
@@ -431,7 +433,7 @@
 }
 .bmp-cert-icon {
     width: 38px; height: 38px; border-radius: 50%;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #1d4ed8, #14245f);
     display: flex; align-items: center; justify-content: center;
     color: #fff; font-size: 15px;
 }
@@ -492,7 +494,7 @@
 /* Mobile 2-column feed (related books at end of mobile page) */
 .bmp-feed-section { background:#fff; padding:14px 12px 8px; margin-bottom:6px; }
 .bmp-feed-title { font-size:14px; font-weight:800; color:#1e293b; margin-bottom:12px; display:flex; align-items:center; gap:6px; }
-.bmp-feed-title i { color:#667eea; }
+.bmp-feed-title i { color:#1d4ed8; }
 .bmp-feed-grid { display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; }
 .bmp-feed-card { background:#fff; border-radius:14px; overflow:hidden; box-shadow:0 4px 12px rgba(15,23,42,0.07); border:1px solid rgba(99,102,241,0.08); text-decoration:none; color:inherit; display:block; }
 .bmp-feed-card:active { transform:scale(0.98); }
@@ -508,7 +510,7 @@
 @media (max-width: 768px) {
     .book-mobile-page {
         background:
-            radial-gradient(circle at top right, rgba(102,126,234,0.12), transparent 35%),
+            radial-gradient(circle at top right, rgba(29,78,216,0.12), transparent 35%),
             #f4f7ff;
     }
     .book-mobile-page > div:not(.bmp-bottom-bar):not(.bmp-gallery) {
@@ -519,7 +521,7 @@
     }
     .bmp-bottom-bar {
         box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.12);
-        border-top: 1px solid rgba(102,126,234,0.12);
+        border-top: 1px solid rgba(29,78,216,0.12);
     }
     .bmp-title { font-size: 16px; letter-spacing: 0.1px; }
 }
@@ -559,8 +561,8 @@ html[data-theme="dark"] .qty-input {
     color: var(--text-primary);
 }
 html[data-theme="dark"] .price-summary {
-    background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.08));
-    border-color: rgba(102,126,234,0.2);
+    background: linear-gradient(135deg, rgba(29,78,216,0.1), rgba(20,36,95,0.08));
+    border-color: rgba(29,78,216,0.2);
 }
 html[data-theme="dark"] .related-card {
     background: var(--bg-surface);
@@ -782,9 +784,11 @@ html[data-theme="dark"] .bmp-feed-meta {
                 <a class="bmp-seller-name" style="text-decoration:none;color:#333;" href="{% url 'manager:public_vendor_shop' book_vendor.id %}">{{ book_vendor.company_name }}</a>
                 <div class="bmp-seller-meta">
                     {% if book_vendor.is_official %}
-                    <span class="bmp-seller-badge-official"><i class="fas fa-badge-check"></i>{% trans "官方认证" %}</span>
-                    {% else %}
-                    <span class="verified"><i class="fas fa-shield-alt"></i> {% trans "认证商家" %}</span>
+                    <span class="bmp-seller-badge-official"><i class="fas fa-certificate"></i>{% trans "官方直营" %}</span>
+                    {% elif book_vendor.is_certified %}
+                    <span class="bmp-seller-badge-certified"><i class="fas fa-badge-check"></i>{% trans "认证卖家" %}</span>
+                    {% elif book_vendor.status == 'approved' %}
+                    <span class="verified"><i class="fas fa-store"></i> {% trans "入驻卖家" %}</span>
                     {% endif %}
                 </div>
             </div>
@@ -843,7 +847,7 @@ html[data-theme="dark"] .bmp-feed-meta {
             <div class="bmp-qa-q">{% trans "内容与描述相符吗？" %}</div>
             <div class="bmp-qa-a">{% trans "正版保证，品质优秀，强烈推荐！" %}</div>
         </div>
-        <a href="{% url 'manager:public_contact' %}" style="color:#667eea;font-size:12px;font-weight:600;text-decoration:none;">{% trans "查看更多" %}</a>
+        <a href="{% url 'manager:public_contact' %}" style="color:#1d4ed8;font-size:12px;font-weight:600;text-decoration:none;">{% trans "查看更多" %}</a>
     </div>
 
     <!-- J. Certifications Grid -->
@@ -851,7 +855,7 @@ html[data-theme="dark"] .bmp-feed-meta {
         <div class="bmp-certs-title">{% trans "服务保障" %}</div>
         <div class="bmp-certs-grid">
             <div class="bmp-cert-item">
-                <div class="bmp-cert-icon" style="background:linear-gradient(135deg,#667eea,#764ba2);"><i class="fas fa-undo"></i></div>
+                <div class="bmp-cert-icon" style="background:linear-gradient(135deg,#1d4ed8,#14245f);"><i class="fas fa-undo"></i></div>
                 <span class="bmp-cert-label">{% trans "十五天退换" %}</span>
             </div>
             <div class="bmp-cert-item">
@@ -1002,18 +1006,18 @@ html[data-theme="dark"] .bmp-feed-meta {
                 <!-- Description -->
                 {% if book.description %}
                 <div class="content-card">
-                    <div class="section-heading"><i class="fas fa-align-left" style="color:#667eea;"></i>{% trans "图书简介" %}</div>
+                    <div class="section-heading"><i class="fas fa-align-left" style="color:#1d4ed8;"></i>{% trans "图书简介" %}</div>
                     <p style="color:#475569; line-height:1.9; font-size:0.97rem;">{{ book.description }}</p>
                 </div>
                 {% endif %}
 
                 <!-- Details -->
                 <div class="content-card">
-                    <div class="section-heading"><i class="fas fa-info-circle" style="color:#667eea;"></i>{% trans "图书信息" %}</div>
+                    <div class="section-heading"><i class="fas fa-info-circle" style="color:#1d4ed8;"></i>{% trans "图书信息" %}</div>
                     <div class="info-row">
                         <span class="lbl"><i class="fas fa-building text-primary"></i>{% trans "出版社" %}</span>
                         <span class="val">
-                            <a href="{% url 'manager:public_publisher_detail' book.publisher.id %}" style="color:#667eea;text-decoration:none;">{{ book.publisher.publisher_name }}</a>
+                            <a href="{% url 'manager:public_publisher_detail' book.publisher.id %}" style="color:#1d4ed8;text-decoration:none;">{{ book.publisher.publisher_name }}</a>
                         </span>
                     </div>
                     <div class="info-row">
@@ -1057,7 +1061,7 @@ html[data-theme="dark"] .bmp-feed-meta {
             <!-- Right Column: Purchase only -->
             <div class="col-lg-4">
                 <div class="content-card sticky-top" style="top: 90px;">
-                    <div class="section-heading"><i class="fas fa-shopping-cart" style="color:#667eea;"></i>{% trans "购买" %}</div>
+                    <div class="section-heading"><i class="fas fa-shopping-cart" style="color:#1d4ed8;"></i>{% trans "购买" %}</div>
                     {% if book.inventory > 0 %}
                         <!-- Price -->
                         <div class="text-center mb-4">
@@ -1088,10 +1092,10 @@ html[data-theme="dark"] .bmp-feed-meta {
                                 <span class="text-muted small">{% trans "数量" %}</span>
                                 <span class="fw-600 small" id="display-quantity">1</span>
                             </div>
-                            <hr style="border-top:1px dashed rgba(102,126,234,0.3); margin:10px 0;">
+                            <hr style="border-top:1px dashed rgba(29,78,216,0.3); margin:10px 0;">
                             <div class="d-flex justify-content-between align-items-center">
                                 <span class="fw-bold">{% trans "总计" %}</span>
-                                <span id="total-price" style="font-size:1.5rem;font-weight:800;color:#667eea;">{{ book.price|fcfa }}</span>
+                                <span id="total-price" style="font-size:1.5rem;font-weight:800;color:#1d4ed8;">{{ book.price|fcfa }}</span>
                             </div>
                         </div>
 
@@ -1124,7 +1128,7 @@ html[data-theme="dark"] .bmp-feed-meta {
                             <i class="fas fa-comment-dots"></i>{% trans "联系卖家" %}
                         </a>
                         {% if book_vendor %}
-                        <a href="{% url 'manager:public_vendor_shop' book_vendor.id %}" class="btn btn-sm w-100" style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:10px;font-weight:700;padding:11px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                        <a href="{% url 'manager:public_vendor_shop' book_vendor.id %}" class="btn btn-sm w-100" style="background:linear-gradient(135deg,#1d4ed8,#14245f);color:#fff;border:none;border-radius:10px;font-weight:700;padding:11px;display:flex;align-items:center;justify-content:center;gap:8px;">
                             <i class="fas fa-store"></i>{% trans "访问店铺" %}
                         </a>
                         {% endif %}
@@ -1152,7 +1156,7 @@ html[data-theme="dark"] .bmp-feed-meta {
         {% if related_books %}
         <div class="mt-5">
             <h5 class="fw-bold mb-4" style="color:#1e293b;">
-                <i class="fas fa-book-open me-2" style="color:#667eea;"></i>{% trans "相关推荐" %}
+                <i class="fas fa-book-open me-2" style="color:#1d4ed8;"></i>{% trans "相关推荐" %}
                 <span class="text-muted fw-normal" style="font-size:0.85rem;margin-left:8px;">{% trans "来自同一出版社" %}</span>
             </h5>
             <div class="row g-4">
@@ -1164,10 +1168,10 @@ html[data-theme="dark"] .bmp-feed-meta {
                         </div>
                         <div class="p-3">
                             <h6 class="fw-bold mb-1 small" style="color:#1e293b;min-height:40px;">{{ r.name|truncatechars:35 }}</h6>
-                            <p class="text-muted small mb-2"><i class="fas fa-building me-1" style="color:#667eea;"></i>{{ r.publisher.publisher_name|truncatechars:20 }}</p>
+                            <p class="text-muted small mb-2"><i class="fas fa-building me-1" style="color:#1d4ed8;"></i>{{ r.publisher.publisher_name|truncatechars:20 }}</p>
                             <div class="d-flex justify-content-between align-items-center">
-                                <span class="fw-bold" style="color:#667eea;">{{ r.price|fcfa }}</span>
-                                <a href="{% url 'manager:public_book_detail' r.id %}" class="btn btn-sm" style="background:linear-gradient(135deg,#667eea,#764ba2);color:white;border-radius:8px;font-size:0.8rem;">
+                                <span class="fw-bold" style="color:#1d4ed8;">{{ r.price|fcfa }}</span>
+                                <a href="{% url 'manager:public_book_detail' r.id %}" class="btn btn-sm" style="background:linear-gradient(135deg,#1d4ed8,#14245f);color:white;border-radius:8px;font-size:0.8rem;">
                                     {% trans "查看" %}
                                 </a>
                             </div>

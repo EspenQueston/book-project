@@ -1,4 +1,4 @@
-{% extends 'public/vendor_panel_base.html' %}
+﻿{% extends 'public/vendor_panel_base.html' %}
 {% load i18n %}
 {% load currency_filters %}
 
@@ -7,12 +7,12 @@
 {% block panel_extra_css %}
 <style>
     .vp-page-welcome {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
         color: #fff;
         padding: 20px;
         border-radius: 15px;
         margin-bottom: 22px;
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        box-shadow: 0 8px 25px rgba(29, 78, 216, 0.3);
     }
     .vp-page-welcome h2 { font-size: 1.35rem; font-weight: 700; margin: 0 0 6px 0; }
     .vp-page-welcome p { margin: 0; opacity: 0.88; font-size: 0.9rem; }
@@ -28,20 +28,20 @@
         background: var(--input-bg, #fff); color: var(--dark-text, #333);
     }
     .add-card .form-control:focus, .add-card .form-select:focus {
-        border-color: #667eea; box-shadow: 0 0 0 4px rgba(102,126,234,0.1);
+        border-color: #1d4ed8; box-shadow: 0 0 0 4px rgba(29,78,216,0.1);
     }
     .btn-submit {
-        background: linear-gradient(135deg, #667eea, #764ba2); color: #fff;
+        background: linear-gradient(135deg, #1d4ed8, #14245f); color: #fff;
         border: none; border-radius: 14px; padding: 14px 32px; font-weight: 700;
         font-size: 1rem; transition: all 0.3s;
     }
-    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.35); }
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(29,78,216,0.35); }
     .inline-add-btn {
-        background: linear-gradient(135deg, #667eea, #764ba2); color: #fff;
+        background: linear-gradient(135deg, #1d4ed8, #14245f); color: #fff;
         border: none; border-radius: 8px; padding: 5px 10px; font-size: 0.8rem;
         font-weight: 600; cursor: pointer; transition: all 0.3s;
     }
-    .inline-add-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(102,126,234,0.3); }
+    .inline-add-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(29,78,216,0.3); }
     .v-modal-overlay {
         position: fixed; top: 0; left: 0; right: 0; bottom: 0;
         background: rgba(0,0,0,0.5); z-index: 9999; display: none;
@@ -78,11 +78,7 @@
                             <label class="form-label fw-bold">{% trans "售价 (FCFA)" %} <span class="text-danger">*</span></label>
                             <input type="number" name="price" class="form-control" step="0.01" min="0" value="{{ book.price }}" required>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold">{% trans "卖家定价 (FCFA)" %}</label>
-                            <input type="number" name="vendor_price" class="form-control" step="0.01" min="0" value="{{ vb.vendor_price }}">
-                        </div>
-                        <div class="col-md-4">
+                        <div class="col-md-8">
                             <label class="form-label fw-bold">{% trans "库存" %}</label>
                             <input type="number" name="inventory" class="form-control" min="0" value="{{ book.inventory }}">
                         </div>
@@ -115,8 +111,8 @@
                             <small class="text-muted">{% trans "按住 Ctrl/Cmd 可多选" %}</small>
                         </div>
                         <div class="col-12">
-                            <label class="form-label fw-bold">{% trans "图书描述" %}</label>
-                            <textarea name="description" class="form-control" rows="4">{{ book.description|default:"" }}</textarea>
+                            <label class="form-label fw-bold">{% trans "图书描述" %} <span class="text-danger">*</span></label>
+                            <textarea name="description" class="form-control" rows="4" required minlength="12">{{ book.description|default:"" }}</textarea>
                         </div>
                         <div class="col-12">
                             <label class="form-label fw-bold">{% trans "封面图片" %}</label>
@@ -131,7 +127,7 @@
 
                         <!-- Ebook Download Section -->
                         <div class="col-12 mt-2">
-                            <h6 class="fw-bold mb-3" style="color:#667eea;"><i class="fas fa-download me-2"></i>{% trans "电子书下载" %}</h6>
+                            <h6 class="fw-bold mb-3" style="color:#1d4ed8;"><i class="fas fa-download me-2"></i>{% trans "电子书下载" %}</h6>
                             <div class="alert alert-info py-2 px-3" style="border-radius:12px;font-size:0.9rem;">
                                 <i class="fas fa-info-circle me-1"></i> {% trans "您可以上传电子书文件或提供外部下载链接" %}
                             </div>
@@ -184,9 +180,16 @@ function submitEdit(e) {
     }).then(r => r.json()).then(d => {
         if (d.success) {
             gToast(d.message, 'success');
-            setTimeout(() => { window.location.href = '{% url "manager:vendor_dashboard" %}'; }, 800);
+            setTimeout(() => { window.location.href = d.redirect_url || '{% url "manager:vendor_books" %}'; }, 800);
         } else {
             gToast(d.message, 'error');
+            if (d.field) {
+                var field = form.querySelector('[name="' + d.field + '"]');
+                if (field) {
+                    field.focus();
+                    field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-save me-2"></i>{% trans "保存修改" %}';
         }
@@ -245,7 +248,7 @@ function vCreatePublisher() {
 <!-- Vendor inline modals -->
 <div class="v-modal-overlay" id="vauthorModal">
     <div class="v-modal">
-        <h5 class="fw-bold mb-3"><i class="fas fa-user-plus me-2" style="color:#667eea"></i>{% trans "新建作者" %}</h5>
+        <h5 class="fw-bold mb-3"><i class="fas fa-user-plus me-2" style="color:#1d4ed8"></i>{% trans "新建作者" %}</h5>
         <div class="mb-3">
             <label class="form-label fw-bold">{% trans "作者名称" %} <span class="text-danger">*</span></label>
             <input type="text" id="vNewAuthorName" class="form-control" style="border-radius:14px;padding:14px 20px;">
@@ -258,7 +261,7 @@ function vCreatePublisher() {
 </div>
 <div class="v-modal-overlay" id="vpublisherModal">
     <div class="v-modal">
-        <h5 class="fw-bold mb-3"><i class="fas fa-building me-2" style="color:#667eea"></i>{% trans "新建出版社" %}</h5>
+        <h5 class="fw-bold mb-3"><i class="fas fa-building me-2" style="color:#1d4ed8"></i>{% trans "新建出版社" %}</h5>
         <div class="mb-3">
             <label class="form-label fw-bold">{% trans "出版社名称" %} <span class="text-danger">*</span></label>
             <input type="text" id="vNewPubName" class="form-control" style="border-radius:14px;padding:14px 20px;">

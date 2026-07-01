@@ -1,13 +1,27 @@
 {% extends "marketplace/vendor/base.html" %}
 {% load i18n %}
 
-{% block title %}{% if item %}Modifier l'article supermarché{% else %}Ajouter un article supermarché{% endif %} · {{ vendor.company_name }}{% endblock %}
+{% block title %}{% if item|default:None %}Modifier l'article supermarché{% else %}Ajouter un article supermarché{% endif %} · {{ vendor.company_name }}{% endblock %}
+
+{% block extra_vendor_css %}
+<style>
+    .sm-form-hero { background:linear-gradient(135deg,#064e3b,#16a34a 58%,#84cc16); color:#fff; border-radius:26px; padding:26px; margin-bottom:24px; box-shadow:0 18px 45px rgba(15,23,42,.20); }
+    .sm-form-hero h4 { font-weight:900; margin-bottom:8px; }
+    .sm-form-hero p { opacity:.84; margin:0; }
+    .content-card { border-radius:24px !important; box-shadow:0 16px 44px rgba(15,23,42,.08) !important; border:1px solid rgba(22,163,74,.12); }
+    .content-card .form-control, .content-card .form-select { min-height:48px; border-radius:16px !important; border:1.5px solid #dbe3f3; box-shadow:none; }
+    .content-card .form-control:focus, .content-card .form-select:focus { border-color:#16a34a; box-shadow:0 0 0 4px rgba(22,163,74,.10); }
+</style>
+{% endblock %}
 
 {% block vendor_content %}
-<div class="page-header-card">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <h4 class="mb-0 fw-bold"><i class="fas fa-leaf me-2"></i>{% if item %}Modifier l'article supermarché{% else %}Ajouter un article supermarché{% endif %}</h4>
-        <a href="{% url 'marketplace:vendor_supermarket' %}" class="btn btn-light rounded-pill px-3 fw-semibold"><i class="fas fa-arrow-left me-2"></i>Retour</a>
+<div class="sm-form-hero">
+    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+        <div>
+            <div class="text-uppercase small fw-bold opacity-75 mb-2"><span data-zh="超市商品工作台" data-en="Supermarket workspace" data-fr="Espace supermarché">超市商品工作台</span></div>
+            <h4><i class="fas fa-leaf me-2"></i>{% if item %}<span data-zh="编辑超市商品" data-en="Edit supermarket item" data-fr="Modifier l'article supermarché">编辑超市商品</span>{% else %}<span data-zh="新增超市商品" data-en="Add supermarket item" data-fr="Ajouter un article supermarché">新增超市商品</span>{% endif %}</h4>
+        </div>
+        <a href="{% url 'marketplace:vendor_supermarket' %}" class="btn btn-light rounded-pill px-4 fw-semibold"><i class="fas fa-arrow-left me-2"></i><span data-zh="返回超市列表" data-en="Back to supermarket list" data-fr="Retour à la liste supermarché">返回超市列表</span></a>
     </div>
 </div>
 
@@ -18,58 +32,65 @@
             <div class="col-lg-8">
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Nom <span class="text-danger">*</span></label>
-                    <input type="text" name="name" class="form-control rounded-3" value="{{ item.name|default:'' }}" required>
+                    <input type="text" name="name" class="form-control rounded-3 {% if form_state.errors.name %}is-invalid{% endif %}" value="{% if form_state.values.name %}{{ form_state.values.name }}{% elif item %}{{ item.name }}{% endif %}" required>
+                    {% if form_state.errors.name %}<div class="invalid-feedback d-block">{{ form_state.errors.name }}</div>{% endif %}
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-semibold">English name</label>
-                    <input type="text" name="name_en" class="form-control rounded-3" value="{{ item.name_en|default:'' }}">
+                    <input type="text" name="name_en" class="form-control rounded-3" value="{% if form_state.values.name_en %}{{ form_state.values.name_en }}{% elif item %}{{ item.name_en }}{% endif %}">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">Description</label>
-                    <textarea name="description" class="form-control rounded-3" rows="4">{{ item.description|default:'' }}</textarea>
+                    <label class="form-label fw-semibold">Description <span class="text-danger">*</span></label>
+                    <textarea name="description" class="form-control rounded-3 {% if form_state.errors.description %}is-invalid{% endif %}" rows="4" required minlength="12">{% if form_state.values.description %}{{ form_state.values.description }}{% elif item %}{{ item.description }}{% endif %}</textarea>
+                    {% if form_state.errors.description %}<div class="invalid-feedback d-block">{{ form_state.errors.description }}</div>{% endif %}
                 </div>
                 <div class="row g-3">
                     <div class="col-md-3">
                         <label class="form-label fw-semibold">Prix *</label>
-                        <input type="number" step="0.01" name="price" class="form-control rounded-3" value="{{ item.price|default:'' }}" required>
+                        <input type="number" step="0.01" name="price" class="form-control rounded-3 {% if form_state.errors.price %}is-invalid{% endif %}" value="{% if form_state.values.price %}{{ form_state.values.price }}{% elif item %}{{ item.price }}{% endif %}" required>
+                        {% if form_state.errors.price %}<div class="invalid-feedback d-block">{{ form_state.errors.price }}</div>{% endif %}
                     </div>
                     <div class="col-md-3">
                         <label class="form-label fw-semibold">Prix original</label>
-                        <input type="number" step="0.01" name="original_price" class="form-control rounded-3" value="{{ item.original_price|default:'' }}">
+                        <input type="number" step="0.01" name="original_price" class="form-control rounded-3" value="{% if form_state.values.original_price %}{{ form_state.values.original_price }}{% elif item %}{{ item.original_price }}{% endif %}">
                     </div>
                     <div class="col-md-3">
                         <label class="form-label fw-semibold">Stock</label>
-                        <input type="number" name="stock" class="form-control rounded-3" value="{{ item.stock|default:'0' }}">
+                        <input type="number" name="stock" class="form-control rounded-3 {% if form_state.errors.stock %}is-invalid{% endif %}" value="{% if form_state.values.stock %}{{ form_state.values.stock }}{% elif item %}{{ item.stock }}{% else %}0{% endif %}">
+                        {% if form_state.errors.stock %}<div class="invalid-feedback d-block">{{ form_state.errors.stock }}</div>{% endif %}
                     </div>
                     <div class="col-md-3">
                         <label class="form-label fw-semibold">Unité</label>
                         <select name="unit" class="form-select rounded-3">
-                            <option value="piece" {% if item and item.unit == 'piece' %}selected{% elif not item %}selected{% endif %}>Pièce</option>
-                            <option value="kg" {% if item and item.unit == 'kg' %}selected{% endif %}>Kilogramme</option>
-                            <option value="g" {% if item and item.unit == 'g' %}selected{% endif %}>Gramme</option>
-                            <option value="liter" {% if item and item.unit == 'liter' %}selected{% endif %}>Litre</option>
-                            <option value="ml" {% if item and item.unit == 'ml' %}selected{% endif %}>Millilitre</option>
-                            <option value="pack" {% if item and item.unit == 'pack' %}selected{% endif %}>Pack</option>
-                            <option value="box" {% if item and item.unit == 'box' %}selected{% endif %}>Boîte</option>
-                            <option value="bottle" {% if item and item.unit == 'bottle' %}selected{% endif %}>Bouteille</option>
-                            <option value="bag" {% if item and item.unit == 'bag' %}selected{% endif %}>Sac</option>
+                            <option value="piece" {% if form_state.values.unit == 'piece' or item and item.unit == 'piece' and not form_state.values.unit or not item and not form_state.values.unit %}selected{% endif %}>Pièce</option>
+                            <option value="kg" {% if form_state.values.unit == 'kg' or item and item.unit == 'kg' and not form_state.values.unit %}selected{% endif %}>Kilogramme</option>
+                            <option value="g" {% if form_state.values.unit == 'g' or item and item.unit == 'g' and not form_state.values.unit %}selected{% endif %}>Gramme</option>
+                            <option value="liter" {% if form_state.values.unit == 'liter' or item and item.unit == 'liter' and not form_state.values.unit %}selected{% endif %}>Litre</option>
+                            <option value="ml" {% if form_state.values.unit == 'ml' or item and item.unit == 'ml' and not form_state.values.unit %}selected{% endif %}>Millilitre</option>
+                            <option value="pack" {% if form_state.values.unit == 'pack' or item and item.unit == 'pack' and not form_state.values.unit %}selected{% endif %}>Pack</option>
+                            <option value="box" {% if form_state.values.unit == 'box' or item and item.unit == 'box' and not form_state.values.unit %}selected{% endif %}>Boîte</option>
+                            <option value="bottle" {% if form_state.values.unit == 'bottle' or item and item.unit == 'bottle' and not form_state.values.unit %}selected{% endif %}>Bouteille</option>
+                            <option value="bag" {% if form_state.values.unit == 'bag' or item and item.unit == 'bag' and not form_state.values.unit %}selected{% endif %}>Sac</option>
                         </select>
                     </div>
                 </div>
                 <div class="row g-3 mt-1">
                     <div class="col-md-4">
                         <label class="form-label fw-semibold">Vente minimum</label>
-                        <input type="number" name="min_order_quantity" class="form-control rounded-3" min="1" value="{{ item.min_order_quantity|default:'1' }}">
+                        <input type="number" name="min_order_quantity" class="form-control rounded-3 {% if form_state.errors.min_order_quantity %}is-invalid{% endif %}" min="1" value="{% if form_state.values.min_order_quantity %}{{ form_state.values.min_order_quantity }}{% elif item %}{{ item.min_order_quantity }}{% else %}1{% endif %}">
+                        {% if form_state.errors.min_order_quantity %}<div class="invalid-feedback d-block">{{ form_state.errors.min_order_quantity }}</div>{% endif %}
                         <small class="text-muted">Nombre minimum de pièces par commande.</small>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-semibold">Vente maximum</label>
-                        <input type="number" name="max_order_quantity" class="form-control rounded-3" min="1" value="{{ item.max_order_quantity|default:'' }}">
+                        <input type="number" name="max_order_quantity" class="form-control rounded-3 {% if form_state.errors.max_order_quantity %}is-invalid{% endif %}" min="1" value="{% if form_state.values.max_order_quantity %}{{ form_state.values.max_order_quantity }}{% elif item %}{{ item.max_order_quantity }}{% endif %}">
+                        {% if form_state.errors.max_order_quantity %}<div class="invalid-feedback d-block">{{ form_state.errors.max_order_quantity }}</div>{% endif %}
                         <small class="text-muted">Optionnel.</small>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-semibold">Incrément</label>
-                        <input type="number" name="quantity_step" class="form-control rounded-3" min="1" value="{{ item.quantity_step|default:'1' }}">
+                        <input type="number" name="quantity_step" class="form-control rounded-3 {% if form_state.errors.quantity_step %}is-invalid{% endif %}" min="1" value="{% if form_state.values.quantity_step %}{{ form_state.values.quantity_step }}{% elif item %}{{ item.quantity_step }}{% else %}1{% endif %}">
+                        {% if form_state.errors.quantity_step %}<div class="invalid-feedback d-block">{{ form_state.errors.quantity_step }}</div>{% endif %}
                         <small class="text-muted">Ex: 12, 24, 36...</small>
                     </div>
                 </div>
@@ -77,25 +98,27 @@
             </div>
             <div class="col-lg-4">
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">Catégorie</label>
-                    <select name="category" class="form-select rounded-3">
+                    <label class="form-label fw-semibold">Catégorie <span class="text-danger">*</span></label>
+                    <select name="category" class="form-select rounded-3 {% if form_state.errors.category %}is-invalid{% endif %}" required>
                         <option value="">—</option>
                         {% for cat in categories %}
-                        <option value="{{ cat.id }}" {% if item.category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+                        <option value="{{ cat.id }}" {% if form_state.values.category == cat.id|stringformat:'s' or item and item.category_id == cat.id and not form_state.values.category %}selected{% endif %}>{{ cat.name }}</option>
                         {% endfor %}
                     </select>
+                    {% if form_state.errors.category %}<div class="invalid-feedback d-block">{{ form_state.errors.category }}</div>{% endif %}
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Marque</label>
-                    <input type="text" name="brand" class="form-control rounded-3" value="{{ item.brand|default:'' }}">
+                    <input type="text" name="brand" class="form-control rounded-3" value="{% if form_state.values.brand %}{{ form_state.values.brand }}{% elif item %}{{ item.brand }}{% endif %}">
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Origine</label>
-                    <input type="text" name="origin" class="form-control rounded-3" value="{{ item.origin|default:'' }}">
+                    <input type="text" name="origin" class="form-control rounded-3" value="{% if form_state.values.origin %}{{ form_state.values.origin }}{% elif item %}{{ item.origin }}{% endif %}">
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Image principale</label>
-                    <input type="file" name="image" class="form-control rounded-3" accept="image/*">
+                    <input type="file" name="image" class="form-control rounded-3 {% if form_state.errors.image %}is-invalid{% endif %}" accept="image/*">
+                    {% if form_state.errors.image %}<div class="invalid-feedback d-block">{{ form_state.errors.image }}</div>{% endif %}
                     {% if item and item.image %}<small class="text-muted d-block mt-1">{{ item.image.name }}</small>{% endif %}
                 </div>
                 <div class="mb-3">
@@ -109,11 +132,11 @@
                     {% if item and item.image_3 %}<small class="text-muted d-block mt-1">{{ item.image_3.name }}</small>{% endif %}
                 </div>
                 <div class="form-check form-switch mb-2">
-                    <input class="form-check-input" type="checkbox" name="is_active" id="smActive" {% if item.is_active or not item %}checked{% endif %}>
+                    <input class="form-check-input" type="checkbox" name="is_active" id="smActive" {% if form_state.values.is_active or item.is_active and not form_state.values or not item and not form_state.values %}checked{% endif %}>
                     <label class="form-check-label" for="smActive">Publier</label>
                 </div>
                 <div class="form-check form-switch mb-3">
-                    <input class="form-check-input" type="checkbox" name="is_organic" id="smOrg" {% if item.is_organic %}checked{% endif %}>
+                    <input class="form-check-input" type="checkbox" name="is_organic" id="smOrg" {% if form_state.values.is_organic or item.is_organic and not form_state.values %}checked{% endif %}>
                     <label class="form-check-label" for="smOrg">Produit bio</label>
                 </div>
             </div>

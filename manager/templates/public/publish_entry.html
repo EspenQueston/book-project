@@ -1,6 +1,6 @@
-{% extends 'public/base.html' %}
+﻿{% extends 'public/base.html' %}
 
-{% block title %}Publier sur Duno360{% endblock %}
+{% block title %}发布到 Duno360{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -13,8 +13,8 @@
         display: inline-block;
         padding: 8px 16px;
         border-radius: 999px;
-        background: rgba(102,126,234,.12);
-        color: #667eea;
+        background: rgba(29,78,216,.12);
+        color: #1d4ed8;
         font-weight: 800;
     }
     .publish-title {
@@ -25,15 +25,15 @@
     }
     .publish-lead {
         color: #64748b;
-        max-width: 620px;
+        max-width: 720px;
         margin: 12px auto 0;
     }
     .publish-card {
         background: #fff;
         border-radius: 24px;
         padding: 28px;
-        box-shadow: 0 18px 50px rgba(102,126,234,.12);
-        border: 1px solid rgba(102,126,234,.10);
+        box-shadow: 0 18px 50px rgba(29,78,216,.12);
+        border: 1px solid rgba(29,78,216,.10);
         text-align: center;
     }
     .publish-icon {
@@ -41,13 +41,13 @@
         height: 88px;
         border-radius: 24px;
         margin: 0 auto 18px;
-        background: linear-gradient(135deg,#667eea,#764ba2);
+        background: linear-gradient(135deg,#1d4ed8,#14245f);
         display: flex;
         align-items: center;
         justify-content: center;
         color: #fff;
         font-size: 2rem;
-        box-shadow: 0 14px 30px rgba(102,126,234,.28);
+        box-shadow: 0 14px 30px rgba(29,78,216,.28);
     }
     .publish-card h2 {
         font-size: 1.5rem;
@@ -62,10 +62,10 @@
         border: none;
         border-radius: 999px;
         padding: 14px 28px;
-        background: linear-gradient(135deg,#667eea,#764ba2);
+        background: linear-gradient(135deg,#1d4ed8,#14245f);
         color: #fff;
         font-weight: 800;
-        box-shadow: 0 12px 28px rgba(102,126,234,.26);
+        box-shadow: 0 12px 28px rgba(29,78,216,.26);
     }
     .publish-btn-secondary {
         border-radius: 999px;
@@ -79,11 +79,11 @@
         width: 72px;
         height: 72px;
         border-radius: 20px;
-        background: rgba(102,126,234,.12);
+        background: rgba(29,78,216,.12);
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #667eea;
+        color: #1d4ed8;
         font-size: 1.8rem;
         margin: 0 auto 16px;
     }
@@ -95,7 +95,7 @@
         color: #64748b;
     }
     .publish-type-card {
-        border: 1px solid rgba(102,126,234,.14);
+        border: 1px solid rgba(29,78,216,.14);
         background: #fff;
         border-radius: 22px;
         padding: 22px 18px;
@@ -109,12 +109,23 @@
     }
     .publish-type-card:hover {
         transform: translateY(-4px);
-        border-color: rgba(102,126,234,.35);
-        box-shadow: 0 18px 40px rgba(102,126,234,.14);
+        border-color: rgba(29,78,216,.35);
+        box-shadow: 0 18px 40px rgba(29,78,216,.14);
     }
-    .publish-type-card i { font-size: 1.6rem; color: #667eea; }
+    .publish-type-card i { font-size: 1.6rem; color: #1d4ed8; }
     .publish-type-card strong { font-size: 1.02rem; }
     .publish-type-card span { font-size: .9rem; color: #64748b; }
+    .fee-box {
+        margin: 22px auto 0;
+        max-width: 520px;
+        background: linear-gradient(135deg,#eff6ff,#eef2ff);
+        border: 1px solid rgba(29,78,216,.12);
+        border-radius: 20px;
+        padding: 18px;
+        text-align: left;
+    }
+    .fee-value { font-size: 1.9rem; font-weight: 900; color: #312e81; }
+    .fee-meta { color:#64748b; font-size:.92rem; }
 
     html[data-theme="dark"] .publish-page {
         background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
@@ -127,11 +138,13 @@
     html[data-theme="dark"] .publish-lead,
     html[data-theme="dark"] .publish-card p,
     html[data-theme="dark"] .publish-modal-text,
-    html[data-theme="dark"] .publish-type-card span {
+    html[data-theme="dark"] .publish-type-card span,
+    html[data-theme="dark"] .fee-meta {
         color: var(--text-secondary);
     }
     html[data-theme="dark"] .publish-card,
-    html[data-theme="dark"] .publish-type-card {
+    html[data-theme="dark"] .publish-type-card,
+    html[data-theme="dark"] .fee-box {
         background: var(--bg-surface);
         border-color: var(--border-default);
         box-shadow: 0 18px 50px rgba(0,0,0,.28);
@@ -162,22 +175,41 @@
 {% block content %}
 <section class="publish-page">
     <div class="container">
-        <div class="mx-auto" style="max-width:760px;">
+        <div class="mx-auto" style="max-width:820px;">
             <div class="text-center mb-4">
-                <span class="publish-badge">Publier sur Duno360</span>
-                <h1 class="publish-title">Diffusez vos livres, produits, cours et articles de supermarché</h1>
-                <p class="publish-lead">Activez votre espace vendeur, puis choisissez ce que vous souhaitez publier. Votre compte gardera aussi votre statut d'utilisateur ordinaire.</p>
+                <span class="publish-badge"><span data-zh="卖家发布入口" data-en="Seller publishing entry" data-fr="Entrée de publication vendeur">卖家发布入口</span></span>
+                <h1 class="publish-title"><span data-zh="发布图书、商品、课程与超市商品" data-en="Publish books, products, courses and supermarket items" data-fr="Publier des livres, produits, cours et articles de supermarché">发布图书、商品、课程与超市商品</span></h1>
+                <p class="publish-lead"><span data-zh="先完成 100 FCFA 的卖家激活安全支付，再选择要发布的内容类型。您的普通用户身份会继续保留。" data-en="Complete the 100 FCFA secure seller activation payment first, then choose what to publish. Your regular user account remains active." data-fr="Effectuez d'abord le paiement sécurisé d’activation vendeur de 100 FCFA, puis choisissez ce que vous souhaitez publier. Votre compte utilisateur normal reste actif.">先完成 100 FCFA 的卖家激活安全支付，再选择要发布的内容类型。您的普通用户身份会继续保留。</span></p>
             </div>
 
             <div class="publish-card">
                 <div class="publish-icon">
                     <i class="fas fa-store"></i>
                 </div>
-                <h2>Prêt à publier sur la plateforme ?</h2>
-                <p>En cliquant sur publier, vous activez aussi votre accès au panel vendeur.</p>
+                <h2><span data-zh="准备开通卖家身份？" data-en="Ready to activate seller access?" data-fr="Prêt à activer l’accès vendeur ?">准备开通卖家身份？</span></h2>
+                <p><span data-zh="完成支付后，您将获得卖家后台，并可发布图书、普通商品、课程和超市商品。" data-en="After payment, you will get seller panel access and be able to publish books, standard products, courses and supermarket items." data-fr="Après paiement, vous aurez accès au panneau vendeur et pourrez publier des livres, produits, cours et articles de supermarché.">完成支付后，您将获得卖家后台，并可发布图书、普通商品、课程和超市商品。</span></p>
+
+                <div class="fee-box">
+                    <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+                        <div>
+                            <div class="fee-meta"><span data-zh="卖家激活费用" data-en="Seller activation fee" data-fr="Frais d’activation vendeur">卖家激活费用</span></div>
+                            <div class="fee-value">{{ seller_activation_fee|default:'100.00' }} FCFA</div>
+                        </div>
+                        <div class="fee-meta text-end">
+                            <div>pawaPay</div>
+                            <div><span data-zh="数据库已跟踪" data-en="Tracked in database" data-fr="Suivi en base de données">数据库已跟踪</span></div>
+                        </div>
+                    </div>
+                    {% if pending_activation_payment %}
+                    <div class="mt-3 small" style="color:#92400e;">
+                        <span data-zh="存在待处理支付：" data-en="Pending activation payment:" data-fr="Paiement d’activation en attente :">存在待处理支付：</span>{{ pending_activation_payment.order_number }} · {{ pending_activation_payment.get_status_display }}
+                    </div>
+                    {% endif %}
+                </div>
+
                 <div class="d-flex justify-content-center gap-3 flex-wrap mt-4">
-                    <button type="button" id="launchPublishFlow" class="btn publish-btn-primary">Publier maintenant</button>
-                    <a href="/manager/public/" class="btn publish-btn-secondary">Plus tard</a>
+                    <button type="button" id="launchPublishFlow" class="btn publish-btn-primary"><span data-zh="立即开通并发布" data-en="Activate and publish now" data-fr="Activer et publier maintenant">立即开通并发布</span></button>
+                    <a href="/manager/public/" class="btn publish-btn-secondary"><span data-zh="稍后再说" data-en="Maybe later" data-fr="Plus tard">稍后再说</span></a>
                 </div>
             </div>
         </div>
@@ -188,12 +220,12 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content" style="border:none;border-radius:24px;overflow:hidden;">
       <div class="modal-body p-4 text-center">
-        <div class="publish-modal-icon"><i class="fas fa-bullhorn"></i></div>
-        <h3 class="publish-modal-title">Voulez-vous publier sur la plateforme ?</h3>
-        <p class="publish-modal-text">Vous garderez votre compte actuel et vous aurez aussi accès au vendor panel.</p>
+        <div class="publish-modal-icon"><i class="fas fa-credit-card"></i></div>
+        <h3 class="publish-modal-title"><span data-zh="确认开通卖家身份？" data-en="Confirm seller activation?" data-fr="Confirmer l’activation vendeur ?">确认开通卖家身份？</span></h3>
+        <p class="publish-modal-text"><span data-zh="系统将创建一笔 100 FCFA 的 pawaPay 卖家激活支付，并在支付成功后自动为您开通卖家身份。" data-en="The system will create a 100 FCFA pawaPay seller activation payment and enable seller access automatically after successful payment." data-fr="Le système va créer un paiement d’activation vendeur pawaPay de 100 FCFA et activer automatiquement votre accès vendeur après paiement réussi.">系统将创建一笔 100 FCFA 的 pawaPay 卖家激活支付，并在支付成功后自动为您开通卖家身份。</span></p>
         <div class="d-flex justify-content-center gap-2 mt-4">
-          <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal" style="border-radius:999px;font-weight:800;">Non</button>
-          <button type="button" class="btn px-4 publish-btn-primary" id="confirmPublishYes">Oui</button>
+          <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal" style="border-radius:999px;font-weight:800;"><span data-zh="取消" data-en="Cancel" data-fr="Annuler">取消</span></button>
+          <button type="button" class="btn px-4 publish-btn-primary" id="confirmPublishYes"><span data-zh="确认并创建支付" data-en="Confirm and create payment" data-fr="Confirmer et créer le paiement">确认并创建支付</span></button>
         </div>
       </div>
     </div>
@@ -204,10 +236,12 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content" style="border:none;border-radius:24px;overflow:hidden;">
       <div class="modal-body p-4 text-center">
-        <div style="font-size:3rem;">🎉🥳✨</div>
-        <h3 class="publish-modal-title" style="margin-top:8px;">Félicitations !</h3>
-        <p class="publish-modal-text">Vous êtes désormais capable de publier sur la plateforme et d'accéder au panel vendeur.</p>
-        <button type="button" class="btn mt-3 publish-btn-primary" id="continueToChoice">Continuer</button>
+        <div style="font-size:3rem;">🎉</div>
+        <h3 class="publish-modal-title" style="margin-top:8px;"><span data-zh="支付已创建" data-en="Payment created" data-fr="Paiement créé">支付已创建</span></h3>
+        <p class="publish-modal-text"><span data-zh="请完成 100 FCFA 的卖家激活支付。支付成功后即可继续选择发布类型。" data-en="Please complete the 100 FCFA seller activation payment. After success, you can continue to choose what to publish." data-fr="Veuillez finaliser le paiement d’activation vendeur de 100 FCFA. Après succès, vous pourrez choisir quoi publier.">请完成 100 FCFA 的卖家激活支付。支付成功后即可继续选择发布类型。</span></p>
+        <div class="d-flex justify-content-center gap-2 flex-wrap mt-3">
+            <button type="button" class="btn publish-btn-primary" id="confirmPaymentDone"><span data-zh="我已完成支付" data-en="I completed the payment" data-fr="J’ai effectué le paiement">我已完成支付</span></button>
+        </div>
       </div>
     </div>
   </div>
@@ -219,18 +253,18 @@
       <div class="modal-body p-4 p-md-5">
         <div class="text-center mb-4">
           <div class="publish-modal-icon" style="width:76px;height:76px;border-radius:22px;font-size:2rem;"><i class="fas fa-box-open"></i></div>
-          <h3 class="publish-modal-title">Que voulez-vous publier ?</h3>
-          <p class="publish-modal-text">Choisissez le type d'article disponible sur la plateforme.</p>
+          <h3 class="publish-modal-title"><span data-zh="选择发布类型" data-en="Choose what to publish" data-fr="Choisissez quoi publier">选择发布类型</span></h3>
+          <p class="publish-modal-text"><span data-zh="选择您要上架的内容类型。" data-en="Choose the content type you want to list." data-fr="Choisissez le type de contenu que vous souhaitez publier.">选择您要上架的内容类型。</span></p>
           <div class="d-flex justify-content-center gap-2 mt-3 flex-wrap">
-            <button type="button" class="btn btn-light" id="publishTypeBack" style="border-radius:999px;padding:10px 20px;font-weight:800;border:1px solid #e2e8f0;">Retour</button>
-            <a href="/manager/public/" class="btn btn-light" style="border-radius:999px;padding:10px 20px;font-weight:800;border:1px solid #e2e8f0;">Annuler</a>
+            <button type="button" class="btn btn-light" id="publishTypeBack" style="border-radius:999px;padding:10px 20px;font-weight:800;border:1px solid #e2e8f0;"><span data-zh="返回" data-en="Back" data-fr="Retour">返回</span></button>
+            <a href="/manager/public/" class="btn btn-light" style="border-radius:999px;padding:10px 20px;font-weight:800;border:1px solid #e2e8f0;"><span data-zh="取消" data-en="Cancel" data-fr="Annuler">取消</span></a>
           </div>
         </div>
         <div class="row g-3">
-          <div class="col-md-6"><button class="publish-type-card w-100" data-type="product"><i class="fas fa-shopping-bag"></i><strong>Produit ordinaire</strong><span>Boutique · commission 10%</span></button></div>
-          <div class="col-md-6"><button class="publish-type-card w-100" data-type="supermarket"><i class="fas fa-apple-alt"></i><strong>Produit consommable</strong><span>Supermarché · commission 12%</span></button></div>
-          <div class="col-md-6"><button class="publish-type-card w-100" data-type="course"><i class="fas fa-graduation-cap"></i><strong>Cours en ligne</strong><span>Formation · commission 10%</span></button></div>
-          <div class="col-md-6"><button class="publish-type-card w-100" data-type="book"><i class="fas fa-book"></i><strong>Livre</strong><span>Livre · commission 9%</span></button></div>
+          <div class="col-md-6"><button class="publish-type-card w-100" data-type="product"><i class="fas fa-shopping-bag"></i><strong><span data-zh="普通商品" data-en="Standard product" data-fr="Produit standard">普通商品</span></strong><span data-zh="商城 · 佣金 10%" data-en="Marketplace · 10% commission" data-fr="Marketplace · commission 10%">商城 · 佣金 10%</span></button></div>
+          <div class="col-md-6"><button class="publish-type-card w-100" data-type="supermarket"><i class="fas fa-apple-alt"></i><strong><span data-zh="超市商品" data-en="Supermarket item" data-fr="Article de supermarché">超市商品</span></strong><span data-zh="超市 · 佣金 12%" data-en="Supermarket · 12% commission" data-fr="Supermarché · commission 12%">超市 · 佣金 12%</span></button></div>
+          <div class="col-md-6"><button class="publish-type-card w-100" data-type="course"><i class="fas fa-graduation-cap"></i><strong><span data-zh="在线课程" data-en="Online course" data-fr="Cours en ligne">在线课程</span></strong><span data-zh="课程 · 佣金 10%" data-en="Courses · 10% commission" data-fr="Cours · commission 10%">课程 · 佣金 10%</span></button></div>
+          <div class="col-md-6"><button class="publish-type-card w-100" data-type="book"><i class="fas fa-book"></i><strong><span data-zh="图书" data-en="Book" data-fr="Livre">图书</span></strong><span data-zh="图书 · 佣金 9%" data-en="Books · 9% commission" data-fr="Livres · commission 9%">图书 · 佣金 9%</span></button></div>
         </div>
       </div>
     </div>
@@ -264,9 +298,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }).catch(err => alert(err.message || 'Une erreur est survenue.'));
   });
 
-  document.getElementById('continueToChoice').addEventListener('click', function() {
-    congratsModal.hide();
-    typeModal.show();
+  document.getElementById('confirmPaymentDone').addEventListener('click', function() {
+    fetch('{% url "manager:publish_entry" %}', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrftoken },
+      body: new URLSearchParams({ action: 'confirm_vendor_activation_payment' })
+    }).then(r => r.json()).then(data => {
+      if (!data.success) throw new Error(data.message || 'Erreur');
+      congratsModal.hide();
+      typeModal.show();
+    }).catch(err => alert(err.message || 'Une erreur est survenue.'));
   });
 
   var publishTypeBack = document.getElementById('publishTypeBack');

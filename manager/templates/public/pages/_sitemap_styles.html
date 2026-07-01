@@ -1,6 +1,6 @@
-<style>
+﻿<style>
 :root {
-    --duno-hero-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --duno-hero-gradient: linear-gradient(135deg, #14245f 0%, #1d4ed8 100%);
 }
 
 /* ── Hero (platform theme) ── */
@@ -48,7 +48,7 @@
 }
 .duno-sitemap-ambient .hero-aurora-a {
     width: 260px; height: 260px; right: -4%; bottom: -12%;
-    background: rgba(118,75,162,.55);
+    background: rgba(14,165,233,.46);
     animation: dunoSitemapDrift 16s ease-in-out infinite;
 }
 .duno-sitemap-ambient .hero-aurora-b {
@@ -110,7 +110,7 @@
 }
 .duno-sitemap-jump a:hover,
 .duno-sitemap-jump a.active {
-    background: rgba(255,255,255,.95); border-color: #fff; color: #667eea;
+    background: rgba(255,255,255,.95); border-color: #fff; color: #1d4ed8;
     box-shadow: 0 8px 28px rgba(15,23,42,.18);
 }
 .duno-sitemap-wave {
@@ -123,21 +123,21 @@
     display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
     gap: 16px; margin: 36px 0 28px;
     padding: 18px 22px; border-radius: 20px;
-    background: #fff; border: 1px solid rgba(102,126,234,.12);
-    box-shadow: 0 12px 40px rgba(102,126,234,.08);
+    background: #fff; border: 1px solid rgba(29,78,216,.12);
+    box-shadow: 0 12px 40px rgba(29,78,216,.08);
 }
 .duno-sitemap-search-wrap {
     flex: 1; min-width: 220px; max-width: 420px;
     display: flex; align-items: center; gap: 10px;
     background: #f8faff; border-radius: 999px;
-    padding: 0 18px; border: 1px solid rgba(102,126,234,.12);
+    padding: 0 18px; border: 1px solid rgba(29,78,216,.12);
     transition: border-color .2s, box-shadow .2s;
 }
 .duno-sitemap-search-wrap:focus-within {
-    border-color: rgba(102,126,234,.45);
-    box-shadow: 0 0 0 4px rgba(102,126,234,.1);
+    border-color: rgba(29,78,216,.45);
+    box-shadow: 0 0 0 4px rgba(29,78,216,.1);
 }
-.duno-sitemap-search-wrap i { color: #667eea; font-size: .9rem; }
+.duno-sitemap-search-wrap i { color: #1d4ed8; font-size: .9rem; }
 .duno-sitemap-search-wrap input {
     flex: 1; border: none !important; background: transparent !important;
     padding: 12px 0 !important; font-size: .95rem; color: #334155;
@@ -149,7 +149,7 @@
 .duno-sitemap-filter-hint {
     font-size: .85rem; color: #64748b; font-weight: 600;
 }
-.duno-sitemap-filter-hint span { color: #667eea; font-weight: 800; }
+.duno-sitemap-filter-hint span { color: #1d4ed8; font-weight: 800; }
 
 /* ── Grid & cards ── */
 .duno-sitemap-body { padding-bottom: 80px; }
@@ -160,20 +160,20 @@
 }
 .duno-sitemap-card {
     background: #fff; border-radius: 22px; overflow: hidden;
-    border: 1px solid rgba(102,126,234,.1);
+    border: 1px solid rgba(29,78,216,.1);
     box-shadow: 0 14px 44px rgba(15,23,42,.06);
     transition: transform .28s ease, box-shadow .28s ease, opacity .28s ease;
     scroll-margin-top: 100px;
 }
 .duno-sitemap-card:hover {
     transform: translateY(-6px);
-    box-shadow: 0 22px 56px rgba(102,126,234,.16);
+    box-shadow: 0 22px 56px rgba(29,78,216,.16);
 }
 .duno-sitemap-card.is-hidden { display: none; }
 .duno-sitemap-card-head {
     padding: 20px 22px;
-    background: linear-gradient(135deg, rgba(102,126,234,.1), rgba(118,75,162,.08));
-    border-bottom: 1px solid rgba(102,126,234,.1);
+    background: linear-gradient(135deg, rgba(29,78,216,.1), rgba(20,36,95,.08));
+    border-bottom: 1px solid rgba(29,78,216,.1);
     display: flex; align-items: center; justify-content: space-between; gap: 12px;
 }
 .duno-sitemap-card-head h2 {
@@ -184,11 +184,11 @@
     width: 42px; height: 42px; border-radius: 13px; flex-shrink: 0;
     display: inline-flex; align-items: center; justify-content: center;
     background: var(--duno-hero-gradient); color: #fff; font-size: 1rem;
-    box-shadow: 0 8px 22px rgba(102,126,234,.28);
+    box-shadow: 0 8px 22px rgba(29,78,216,.28);
 }
 .duno-sitemap-card-count {
     font-size: .72rem; font-weight: 800; padding: 5px 12px;
-    border-radius: 999px; background: rgba(102,126,234,.12); color: #667eea;
+    border-radius: 999px; background: rgba(29,78,216,.12); color: #1d4ed8;
     white-space: nowrap;
 }
 .duno-sitemap-card ul { list-style: none; padding: 12px 14px 16px; margin: 0; }
@@ -203,11 +203,11 @@
 .duno-sitemap-card a .link-arrow {
     width: 28px; height: 28px; border-radius: 8px;
     display: inline-flex; align-items: center; justify-content: center;
-    background: rgba(102,126,234,.08); color: #667eea;
+    background: rgba(29,78,216,.08); color: #1d4ed8;
     font-size: .65rem; transition: all .22s ease; flex-shrink: 0;
 }
 .duno-sitemap-card a:hover {
-    background: linear-gradient(135deg, rgba(102,126,234,.08), rgba(118,75,162,.06));
+    background: linear-gradient(135deg, rgba(29,78,216,.08), rgba(20,36,95,.06));
     color: #4338ca; padding-left: 18px;
 }
 .duno-sitemap-card a:hover .link-arrow {
@@ -215,17 +215,17 @@
     transform: translateX(3px);
 }
 .duno-sitemap-card a i.link-dot {
-    font-size: .45rem; color: #667eea; opacity: .7;
+    font-size: .45rem; color: #1d4ed8; opacity: .7;
 }
 
 /* ── Empty state ── */
 .duno-sitemap-empty {
     display: none; text-align: center; padding: 60px 24px;
     border-radius: 22px; background: #fff;
-    border: 1px dashed rgba(102,126,234,.25);
+    border: 1px dashed rgba(29,78,216,.25);
 }
 .duno-sitemap-empty.is-visible { display: block; }
-.duno-sitemap-empty i { font-size: 2.5rem; color: #667eea; opacity: .5; margin-bottom: 16px; }
+.duno-sitemap-empty i { font-size: 2.5rem; color: #1d4ed8; opacity: .5; margin-bottom: 16px; }
 .duno-sitemap-empty h3 { font-size: 1.15rem; font-weight: 800; color: #1e293b; }
 .duno-sitemap-empty p { color: #64748b; margin: 8px 0 0; }
 
@@ -234,7 +234,7 @@
     margin-top: 32px; border-radius: 22px; padding: 28px 32px;
     background: var(--duno-hero-gradient); color: #fff;
     display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;
-    box-shadow: 0 20px 50px rgba(102,126,234,.28);
+    box-shadow: 0 20px 50px rgba(29,78,216,.28);
 }
 .duno-sitemap-cta h3 { font-size: 1.15rem; font-weight: 800; margin: 0 0 4px; }
 .duno-sitemap-cta p { margin: 0; opacity: .9; font-size: .9rem; }
@@ -247,7 +247,7 @@ html[data-theme="dark"] .duno-sitemap-card,
 html[data-theme="dark"] .duno-sitemap-empty {
     background: var(--bg-surface); border-color: var(--border-default);
 }
-html[data-theme="dark"] .duno-sitemap-card-head { background: rgba(102,126,234,.12); }
+html[data-theme="dark"] .duno-sitemap-card-head { background: rgba(29,78,216,.12); }
 html[data-theme="dark"] .duno-sitemap-card-head h2 { color: var(--text-primary); }
 html[data-theme="dark"] .duno-sitemap-card a { color: var(--text-secondary); }
 html[data-theme="dark"] .duno-sitemap-search-wrap { background: var(--bg-page); }

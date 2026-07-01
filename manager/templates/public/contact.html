@@ -1,4 +1,4 @@
-{% extends 'public/base.html' %}
+﻿{% extends 'public/base.html' %}
 {% load i18n %}
 
 {% block title %}{% trans "DUNO 360" %} - {% trans "联系我们" %}{% endblock %}
@@ -6,10 +6,12 @@
 {% block extra_css %}
 <style>
     .ct-hero {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 140px 0 100px;
+        background: radial-gradient(circle at 18% 18%, rgba(96,165,250,.30), transparent 24%), radial-gradient(circle at 84% 18%, rgba(14,165,233,.16), transparent 22%), linear-gradient(135deg, #14245f 0%, #1d4ed8 100%);
+        padding: 118px 0 92px;
         position: relative;
         overflow: hidden;
+        border-radius: 0 0 32px 32px;
+        box-shadow: 0 26px 70px rgba(20,36,95,.22);
     }
     .ct-hero::before {
         content: '';
@@ -80,7 +82,7 @@
     }
     .sec { padding: 100px 0; }
     .sec-alt { background: #f8f9ff; }
-    .sec-label { color: #667eea; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 12px; }
+    .sec-label { color: #1d4ed8; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 12px; }
     .sec-heading { font-size: 2.3rem; font-weight: 800; color: #1a1a2e; margin-bottom: 18px; }
     /* Info cards */
     .info-card {
@@ -88,9 +90,9 @@
         border-radius: 24px;
         padding: 38px 25px;
         text-align: center;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(102,126,234,0.04);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(29,78,216,0.04);
         transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        border: 1px solid rgba(102,126,234,0.06);
+        border: 1px solid rgba(29,78,216,0.06);
         height: 100%;
         position: relative;
         overflow: hidden;
@@ -102,21 +104,21 @@
         left: 0;
         right: 0;
         height: 4px;
-        background: linear-gradient(90deg, #667eea, #764ba2);
+        background: linear-gradient(90deg, #1d4ed8, #14245f);
         opacity: 0;
         transition: opacity 0.4s;
     }
     .info-card:hover {
         transform: translateY(-8px);
-        box-shadow: 0 12px 40px rgba(102,126,234,0.14), 0 2px 8px rgba(0,0,0,0.06);
-        border-color: rgba(102,126,234,0.18);
+        box-shadow: 0 12px 40px rgba(29,78,216,0.14), 0 2px 8px rgba(0,0,0,0.06);
+        border-color: rgba(29,78,216,0.18);
     }
     .info-card:hover::before { opacity: 1; }
     .info-card.active,
     .info-card:active {
         background: linear-gradient(145deg, #f8f9ff 0%, #f4f0ff 100%);
-        border-color: rgba(102,126,234,0.25);
-        box-shadow: 0 0 0 3px rgba(102,126,234,0.12), 0 8px 30px rgba(102,126,234,0.12);
+        border-color: rgba(29,78,216,0.25);
+        box-shadow: 0 0 0 3px rgba(29,78,216,0.12), 0 8px 30px rgba(29,78,216,0.12);
     }
     .info-card.active::before,
     .info-card:active::before { opacity: 1; }
@@ -135,26 +137,26 @@
     .info-ico i { font-size: 1.5rem; color: #fff; }
     .info-card h5 { font-weight: 700; color: #1a1a2e; margin-bottom: 10px; font-size: 1.05rem; }
     .info-card p { color: #6b7280; font-size: 0.92rem; line-height: 1.6; margin: 0; }
-    .info-card a { color: #667eea; text-decoration: none; font-weight: 600; transition: color 0.3s; }
-    .info-card a:hover { color: #764ba2; }
+    .info-card a { color: #1d4ed8; text-decoration: none; font-weight: 600; transition: color 0.3s; }
+    .info-card a:hover { color: #14245f; }
     /* Form */
     .form-card {
         background: #ffffff;
         border-radius: 28px;
         padding: 50px 40px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(102,126,234,0.06);
-        border: 1px solid rgba(102,126,234,0.06);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(29,78,216,0.06);
+        border: 1px solid rgba(29,78,216,0.06);
         transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
     .form-card:hover {
-        box-shadow: 0 8px 32px rgba(102,126,234,0.12), 0 2px 8px rgba(0,0,0,0.06);
-        border-color: rgba(102,126,234,0.12);
+        box-shadow: 0 8px 32px rgba(29,78,216,0.12), 0 2px 8px rgba(0,0,0,0.06);
+        border-color: rgba(29,78,216,0.12);
     }
     .form-card.active,
     .form-card:active {
         background: linear-gradient(145deg, #f8f9ff 0%, #f4f0ff 100%);
-        border-color: rgba(102,126,234,0.2);
-        box-shadow: 0 0 0 3px rgba(102,126,234,0.1), 0 8px 30px rgba(102,126,234,0.12);
+        border-color: rgba(29,78,216,0.2);
+        box-shadow: 0 0 0 3px rgba(29,78,216,0.1), 0 8px 30px rgba(29,78,216,0.12);
     }
     .form-card .form-floating { margin-bottom: 18px; }
     .form-card .form-control {
@@ -165,14 +167,14 @@
         transition: all 0.3s;
         background: #fafbff;
     }
-    .form-card .form-control:focus { border-color: #667eea; box-shadow: 0 0 0 4px rgba(102,126,234,0.08); background: #fff; }
+    .form-card .form-control:focus { border-color: #1d4ed8; box-shadow: 0 0 0 4px rgba(29,78,216,0.08); background: #fff; }
     .form-card label { color: #6b7280; padding: 16px 20px; }
     .form-card textarea.form-control { min-height: 140px; }
     .btn-send {
         display: inline-flex;
         align-items: center;
         gap: 10px;
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: linear-gradient(135deg, #1d4ed8, #14245f);
         color: #fff;
         padding: 16px 45px;
         border-radius: 50px;
@@ -181,9 +183,9 @@
         font-size: 1.05rem;
         cursor: pointer;
         transition: all 0.4s;
-        box-shadow: 0 8px 25px rgba(102,126,234,0.3);
+        box-shadow: 0 8px 25px rgba(29,78,216,0.3);
     }
-    .btn-send:hover { transform: translateY(-3px); box-shadow: 0 14px 35px rgba(102,126,234,0.4); }
+    .btn-send:hover { transform: translateY(-3px); box-shadow: 0 14px 35px rgba(29,78,216,0.4); }
     .alert-ok {
         background: linear-gradient(135deg, #d4edda, #c3e6cb);
         border: none;
@@ -201,22 +203,22 @@
         background: #ffffff;
         border-radius: 18px;
         padding: 20px 22px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 2px 8px rgba(102,126,234,0.04);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 2px 8px rgba(29,78,216,0.04);
         transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         text-decoration: none;
         margin-bottom: 14px;
-        border: 1px solid rgba(102,126,234,0.06);
+        border: 1px solid rgba(29,78,216,0.06);
     }
     .soc-card:hover {
         transform: translateX(6px);
-        box-shadow: 0 8px 24px rgba(102,126,234,0.12), 0 2px 6px rgba(0,0,0,0.04);
-        border-color: rgba(102,126,234,0.15);
+        box-shadow: 0 8px 24px rgba(29,78,216,0.12), 0 2px 6px rgba(0,0,0,0.04);
+        border-color: rgba(29,78,216,0.15);
     }
     .soc-card.active,
     .soc-card:active {
         background: linear-gradient(145deg, #f8f9ff 0%, #f4f0ff 100%);
-        border-color: rgba(102,126,234,0.2);
-        box-shadow: 0 0 0 3px rgba(102,126,234,0.08), 0 6px 20px rgba(102,126,234,0.1);
+        border-color: rgba(29,78,216,0.2);
+        box-shadow: 0 0 0 3px rgba(29,78,216,0.08), 0 6px 20px rgba(29,78,216,0.1);
     }
     .soc-ico {
         width: 52px;
@@ -231,7 +233,7 @@
     .soc-card h6 { font-weight: 700; color: #1a1a2e; margin-bottom: 2px; font-size: 0.95rem; }
     .soc-card p { color: #6b7280; font-size: 0.88rem; margin: 0; }
     .map-box {
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: linear-gradient(135deg, #1d4ed8, #14245f);
         border-radius: 22px;
         height: 200px;
         display: flex;
@@ -295,9 +297,9 @@
     }
     html[data-theme="dark"] .info-card.active,
     html[data-theme="dark"] .info-card:active {
-        background: linear-gradient(145deg, rgba(102,126,234,0.08) 0%, rgba(118,75,162,0.05) 100%);
-        border-color: rgba(102,126,234,0.3);
-        box-shadow: 0 0 0 3px rgba(102,126,234,0.15), 0 8px 30px rgba(0,0,0,0.2);
+        background: linear-gradient(145deg, rgba(29,78,216,0.08) 0%, rgba(20,36,95,0.05) 100%);
+        border-color: rgba(29,78,216,0.3);
+        box-shadow: 0 0 0 3px rgba(29,78,216,0.15), 0 8px 30px rgba(0,0,0,0.2);
     }
     html[data-theme="dark"] .info-card h5 {
         color: var(--text-primary);
@@ -311,9 +313,9 @@
     }
     html[data-theme="dark"] .form-card.active,
     html[data-theme="dark"] .form-card:active {
-        background: linear-gradient(145deg, rgba(102,126,234,0.08) 0%, rgba(118,75,162,0.05) 100%);
-        border-color: rgba(102,126,234,0.25);
-        box-shadow: 0 0 0 3px rgba(102,126,234,0.12), 0 8px 30px rgba(0,0,0,0.2);
+        background: linear-gradient(145deg, rgba(29,78,216,0.08) 0%, rgba(20,36,95,0.05) 100%);
+        border-color: rgba(29,78,216,0.25);
+        box-shadow: 0 0 0 3px rgba(29,78,216,0.12), 0 8px 30px rgba(0,0,0,0.2);
     }
     html[data-theme="dark"] .form-card .form-control {
         background: var(--input-bg);
@@ -329,9 +331,9 @@
     }
     html[data-theme="dark"] .soc-card.active,
     html[data-theme="dark"] .soc-card:active {
-        background: linear-gradient(145deg, rgba(102,126,234,0.08) 0%, rgba(118,75,162,0.05) 100%);
-        border-color: rgba(102,126,234,0.25);
-        box-shadow: 0 0 0 3px rgba(102,126,234,0.12), 0 6px 20px rgba(0,0,0,0.15);
+        background: linear-gradient(145deg, rgba(29,78,216,0.08) 0%, rgba(20,36,95,0.05) 100%);
+        border-color: rgba(29,78,216,0.25);
+        box-shadow: 0 0 0 3px rgba(29,78,216,0.12), 0 6px 20px rgba(0,0,0,0.15);
     }
     html[data-theme="dark"] .soc-card h6 {
         color: var(--text-primary);
@@ -354,7 +356,6 @@
     }
 </style>
 {% include 'includes/home_faq_styles.html' %}
-{% include 'includes/hero_wave_divider_styles.html' %}
 {% endblock %}
 
 {% block content %}
@@ -376,7 +377,6 @@
             </div>
         </div>
     </div>
-    {% include 'includes/hero_wave_divider.html' with hero_divider_fill='#ffffff' %}
 </section>
 
 <section class="sec">
@@ -384,7 +384,7 @@
         <div class="row g-4">
             <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
                 <div class="info-card">
-                    <div class="info-ico" style="background:linear-gradient(135deg,#667eea,#764ba2)"><i class="fas fa-map-marker-alt"></i></div>
+                    <div class="info-ico" style="background:linear-gradient(135deg,#1d4ed8,#14245f)"><i class="fas fa-map-marker-alt"></i></div>
                     <h5>{% trans "地址" %}</h5>
                     <p>{% trans "北京市海淀区中关村科技园区" %}</p>
                 </div>
@@ -463,7 +463,7 @@
                     <div><h6>WhatsApp</h6><p>{{ PLATFORM_PHONE_DISPLAY }}</p></div>
                 </a>
                 <a href="mailto:{{ PLATFORM_CONTACT_EMAIL }}" class="soc-card">
-                    <div class="soc-ico" style="background:linear-gradient(135deg,#667eea,#764ba2)"><i class="fas fa-envelope"></i></div>
+                    <div class="soc-ico" style="background:linear-gradient(135deg,#1d4ed8,#14245f)"><i class="fas fa-envelope"></i></div>
                     <div><h6>{% trans "邮箱" %}</h6><p>{{ PLATFORM_CONTACT_EMAIL }}</p></div>
                 </a>
                 <div class="map-box">

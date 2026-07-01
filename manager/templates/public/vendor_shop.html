@@ -1,4 +1,4 @@
-{% extends 'public/base.html' %}
+﻿{% extends 'public/base.html' %}
 {% load i18n %}
 {% load currency_filters %}
 
@@ -8,7 +8,7 @@
 <style>
 /* ===== Shop Header ===== */
 .vs-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
     padding: 60px 0 0; position: relative; overflow: hidden;
 }
 .vs-header::before {
@@ -43,7 +43,9 @@
 }
 .vs-follow-btn:hover { background: rgba(255,255,255,0.15); transform: translateY(-2px); }
 .vs-follow-btn.following { background: rgba(255,255,255,0.2); }
-.vs-meta-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.vs-meta-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; align-items: center; }
+.vs-meta-pills .v-badge { box-shadow: 0 4px 14px rgba(0,0,0,0.15); }
+.vs-meta-pills .v-badge-approved { background: rgba(255,255,255,0.2); color: #fff; border-color: rgba(255,255,255,0.35); }
 .vs-meta-pill {
     background: rgba(255,255,255,0.12); backdrop-filter: blur(8px);
     padding: 5px 14px; border-radius: 20px; font-size: 0.8rem; color: #fff;
@@ -53,7 +55,7 @@
 
 /* ===== Tabs ===== */
 .vs-tabs {
-    background: linear-gradient(135deg, rgba(102,126,234,0.95), rgba(118,75,162,0.95));
+    background: linear-gradient(135deg, rgba(29,78,216,0.95), rgba(20,36,95,0.95));
     backdrop-filter: blur(10px);
     padding: 0;
     position: sticky; top: 0; z-index: 100;
@@ -89,7 +91,7 @@
     border: 1px solid var(--card-border, rgba(0,0,0,0.04));
     display: flex; flex-direction: column;
 }
-.vs-card:hover { transform: translateY(-6px); box-shadow: 0 12px 35px rgba(102,126,234,0.15); }
+.vs-card:hover { transform: translateY(-6px); box-shadow: 0 12px 35px rgba(29,78,216,0.15); }
 .vs-card-img {
     width: 100%; height: 200px; object-fit: cover;
     background: linear-gradient(135deg, #f0f0ff, #e8e0ff);
@@ -114,10 +116,10 @@
 .vs-card-btn {
     display: inline-block; padding: 6px 14px; border-radius: 8px; font-size: 0.78rem;
     font-weight: 700; text-decoration: none; color: #fff;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #1d4ed8, #14245f);
     transition: all 0.3s;
 }
-.vs-card-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(102,126,234,0.35); color: #fff; }
+.vs-card-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(29,78,216,0.35); color: #fff; }
 
 /* ===== Shop Info Sidebar ===== */
 .vs-info-card {
@@ -175,11 +177,42 @@ html[data-theme="dark"] .vs-empty { color: var(--text-tertiary); }
 
 /* ===== Mobile ===== */
 @media (max-width: 768px) {
-    .vs-header { padding: 40px 0 0; }
-    .vs-logo { width: 60px; height: 60px; font-size: 1.5rem; border-radius: 14px; }
-    .vs-name { font-size: 1.2rem; }
-    .vs-stat-row { gap: 16px; }
-    .vs-stat-val { font-size: 1rem; }
+    .vs-header { padding: 28px 0 0; }
+    .vs-header .row.align-items-center { flex-direction: column; align-items: stretch !important; }
+    .vs-header .col-lg-7,
+    .vs-header .col-lg-5 { width: 100%; max-width: 100%; }
+    .vs-header .d-flex.align-items-center.gap-3 { gap: 12px !important; }
+    .vs-desc { display: none !important; }
+    .vs-logo { width: 56px; height: 56px; font-size: 1.35rem; border-radius: 14px; }
+    .vs-name { font-size: 1.15rem; line-height: 1.25; }
+    .vs-meta-pills { margin-top: 8px; gap: 6px; }
+    .vs-meta-pill { font-size: 0.72rem; padding: 4px 10px; }
+    .vs-header .col-lg-5 > .d-flex {
+        flex-direction: row !important;
+        flex-wrap: wrap;
+        justify-content: space-between !important;
+        align-items: center !important;
+        gap: 12px !important;
+        margin-top: 14px;
+        padding-bottom: 16px;
+    }
+    .vs-stat-row { gap: 12px; flex: 1; justify-content: flex-start; margin-top: 0 !important; }
+    .vs-stat-val { font-size: 0.95rem; }
+    .vs-stat-lbl { font-size: 0.68rem; }
+    .vs-header .vs-contact-btn {
+        width: auto !important;
+        padding: 9px 14px !important;
+        font-size: 0.78rem !important;
+        border-radius: 20px;
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+    .vs-follow-btn {
+        padding: 9px 16px !important;
+        font-size: 0.78rem !important;
+        border-radius: 20px;
+        flex: 0 0 auto;
+    }
     .vs-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
     .vs-card-img { height: 150px; }
     .vs-card-body { padding: 10px; }
@@ -213,9 +246,7 @@ html[data-theme="dark"] .vs-empty { color: var(--text-tertiary); }
                         <p class="vs-desc mb-0">{{ vendor.description|default:"" }}</p>
                         {% endif %}
                         <div class="vs-meta-pills">
-                            <span class="vs-meta-pill"><i class="fas fa-check-circle"></i>
-                                {% if vendor.is_official %}{% trans "Duno360官方店" %}{% else %}{% trans "认证商家" %}{% endif %}
-                            </span>
+                            {% include 'includes/vendor_badge.html' with vendor=vendor %}
                             <span class="vs-meta-pill"><i class="fas fa-calendar-alt"></i>
                                 {% trans "入驻" %} {{ vendor.created_at|date:"Y" }}
                             </span>

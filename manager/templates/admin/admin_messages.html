@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -14,10 +14,10 @@
         }
         /* ===== Navbar ===== */
         .top-navbar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
             position: fixed; top: 0; left: 0; right: 0; z-index: 1030;
             height: 76px; display: flex; align-items: center; padding: 0 24px;
-            box-shadow: 0 4px 20px rgba(102,126,234,0.4);
+            box-shadow: 0 4px 20px rgba(29,78,216,0.4);
         }
         .nav-brand { color: white; font-size: 1.3rem; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 10px; }
         .nav-brand:hover { color: rgba(255,255,255,0.9); }
@@ -33,9 +33,9 @@
         /* ===== Layout ===== */
         .main-container { max-width: 1200px; margin: 0 auto; padding: 28px 20px 60px; }
         .header-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
             border-radius: 16px; padding: 28px 32px; margin-bottom: 24px; color: white;
-            box-shadow: 0 8px 30px rgba(102,126,234,0.35); position: relative; overflow: hidden;
+            box-shadow: 0 8px 30px rgba(29,78,216,0.35); position: relative; overflow: hidden;
         }
         .header-card::before { content:''; position:absolute; top:-40px; right:-40px; width:200px; height:200px; background:rgba(255,255,255,0.06); border-radius:50%; }
         .header-card::after { content:''; position:absolute; bottom:-30px; left:-20px; width:150px; height:150px; background:rgba(255,255,255,0.04); border-radius:50%; }
@@ -51,15 +51,15 @@
             padding: 7px 18px; border-radius: 8px; font-size: 0.88rem; font-weight: 600;
             text-decoration: none; color: #64748b; transition: all 0.2s; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 6px;
         }
-        .filter-tab.active, .filter-tab:hover { background: white; color: #667eea; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .filter-tab.active, .filter-tab:hover { background: white; color: #1d4ed8; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         .filter-tab .badge { background: #ef4444; color: white; font-size: 0.7rem; padding: 1px 6px; border-radius: 10px; min-width: 18px; text-align: center; }
         .search-bar { display: flex; gap: 8px; flex: 1; min-width: 220px; }
         .search-bar input {
             flex: 1; border: 2px solid #e2e8f0; border-radius: 10px; padding: 9px 14px; font-size: 0.9rem;
             outline: none; transition: border-color 0.2s;
         }
-        .search-bar input:focus { border-color: #667eea; }
-        .search-bar button { background: linear-gradient(135deg,#667eea,#764ba2); color: white; border: none; border-radius: 10px; padding: 9px 18px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 0.88rem; }
+        .search-bar input:focus { border-color: #1d4ed8; }
+        .search-bar button { background: linear-gradient(135deg,#1d4ed8,#14245f); color: white; border: none; border-radius: 10px; padding: 9px 18px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 0.88rem; }
         .btn-bulk { background: #f1f5f9; border: none; border-radius: 8px; padding: 8px 14px; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; color: #64748b; transition: all 0.2s; }
         .btn-bulk:hover { background: #e2e8f0; }
         .btn-bulk.danger:hover { background: #fee2e2; color: #dc2626; }
@@ -71,14 +71,14 @@
             border-bottom: 1px solid #f3f4f6; transition: background 0.15s; cursor: pointer; position: relative;
         }
         .msg-row:last-child { border-bottom: none; }
-        .msg-row:hover { background: rgba(102,126,234,0.03); }
-        .msg-row.unread { background: rgba(102,126,234,0.04); }
-        .msg-row.unread::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:linear-gradient(135deg,#667eea,#764ba2); border-radius:2px 0 0 2px; }
-        .msg-checkbox { width: 18px; height: 18px; accent-color: #667eea; cursor: pointer; flex-shrink: 0; margin-top: 4px; }
+        .msg-row:hover { background: rgba(29,78,216,0.03); }
+        .msg-row.unread { background: rgba(29,78,216,0.04); }
+        .msg-row.unread::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:linear-gradient(135deg,#1d4ed8,#14245f); border-radius:2px 0 0 2px; }
+        .msg-checkbox { width: 18px; height: 18px; accent-color: #1d4ed8; cursor: pointer; flex-shrink: 0; margin-top: 4px; }
         .msg-avatar {
             width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
             font-size: 1rem; font-weight: 700; color: white; flex-shrink: 0;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #1d4ed8, #14245f);
         }
         .msg-content { flex: 1; min-width: 0; }
         .msg-header { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; flex-wrap: wrap; }
@@ -114,7 +114,7 @@
 
         /* ===== Empty State ===== */
         .empty-state { text-align: center; padding: 64px 20px; }
-        .empty-icon { width: 80px; height: 80px; background: linear-gradient(135deg,rgba(102,126,234,0.1),rgba(118,75,162,0.1)); border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; }
+        .empty-icon { width: 80px; height: 80px; background: linear-gradient(135deg,rgba(29,78,216,0.1),rgba(20,36,95,0.1)); border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; }
 
         /* ===== Toast ===== */
         .toast-container { position: fixed; top: 90px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
@@ -207,7 +207,7 @@
             <button class="btn-bulk" onclick="bulkAction('mark_unread')"><i class="fas fa-circle"></i>标为未读</button>
             <button class="btn-bulk danger" onclick="bulkAction('delete')"><i class="fas fa-trash"></i>批量删除</button>
         </div>
-        <button class="btn-bulk ms-auto" id="selectAllBtn" onclick="toggleSelectMode()" style="background:linear-gradient(135deg,#667eea,#764ba2);color:white;">
+        <button class="btn-bulk ms-auto" id="selectAllBtn" onclick="toggleSelectMode()" style="background:linear-gradient(135deg,#1d4ed8,#14245f);color:white;">
             <i class="fas fa-check-square"></i>选择
         </button>
     </div>
@@ -243,12 +243,12 @@
             {% endfor %}
         {% else %}
         <div class="empty-state">
-            <div class="empty-icon"><i class="fas fa-inbox" style="font-size:2rem;color:#667eea;"></i></div>
+            <div class="empty-icon"><i class="fas fa-inbox" style="font-size:2rem;color:#1d4ed8;"></i></div>
             <h5 class="fw-bold mb-2" style="color:#334155;">
                 {% if search_query %}没有找到相关消息{% elif filter_type == 'unread' %}暂无未读消息{% else %}暂无消息{% endif %}
             </h5>
             <p class="text-muted small">
-                {% if search_query %}尝试使用其他关键词搜索{% elif filter_type != 'all' %}<a href="?filter=all" style="color:#667eea;">查看所有消息</a>{% else %}用户从联系我们页面发送的消息将显示在这里{% endif %}
+                {% if search_query %}尝试使用其他关键词搜索{% elif filter_type != 'all' %}<a href="?filter=all" style="color:#1d4ed8;">查看所有消息</a>{% else %}用户从联系我们页面发送的消息将显示在这里{% endif %}
             </p>
         </div>
         {% endif %}

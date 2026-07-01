@@ -1,4 +1,4 @@
-{% extends 'public/base.html' %}
+﻿{% extends 'public/base.html' %}
 {% load i18n %}
 {% load currency_filters %}
 
@@ -6,29 +6,31 @@
 
 {% block extra_css %}
 <style>
-:root { --primary-color: #667eea; --secondary-color: #764ba2; }
+:root { --primary-color: #1d4ed8; --secondary-color: #14245f; }
 .publisher-hero {
     background:
         linear-gradient(180deg, transparent 72%, #f8f9ff 100%),
-        linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 50px 0 58px; color: white; position: relative; overflow: hidden;
+        radial-gradient(circle at 18% 18%, rgba(96,165,250,.30), transparent 24%),
+        radial-gradient(circle at 84% 18%, rgba(14,165,233,.16), transparent 22%),
+        linear-gradient(135deg, #14245f 0%, #1d4ed8 100%);
+    padding: 64px 0 66px; color: white; position: relative; overflow: hidden; border-radius: 0 0 28px 28px; box-shadow: 0 22px 56px rgba(20,36,95,.22);
 }
 .publisher-hero::before { content:''; position:absolute; top:-80px; right:-80px; width:400px; height:400px; background:rgba(255,255,255,0.06); border-radius:50%; }
 .publisher-hero::after { content:''; position:absolute; bottom:-60px; left:-50px; width:300px; height:300px; background:rgba(255,255,255,0.04); border-radius:50%; }
 .pub-logo { width:110px; height:110px; background:rgba(255,255,255,0.2); border-radius:22px; display:flex; align-items:center; justify-content:center; border:3px solid rgba(255,255,255,0.35); backdrop-filter:blur(10px); box-shadow:0 8px 30px rgba(0,0,0,0.2); flex-shrink:0; }
-.stat-card { background:white; border-radius:14px; padding:22px 18px; text-align:center; box-shadow:0 4px 20px rgba(102,126,234,0.1); border:1px solid rgba(102,126,234,0.1); transition:all 0.3s; }
-.stat-card:hover { transform:translateY(-5px); box-shadow:0 12px 35px rgba(102,126,234,0.2); }
+.stat-card { background:white; border-radius:14px; padding:22px 18px; text-align:center; box-shadow:0 4px 20px rgba(29,78,216,0.1); border:1px solid rgba(29,78,216,0.1); transition:all 0.3s; }
+.stat-card:hover { transform:translateY(-5px); box-shadow:0 12px 35px rgba(29,78,216,0.2); }
 .stat-icon { width:52px; height:52px; border-radius:13px; display:flex; align-items:center; justify-content:center; margin:0 auto 13px; }
 .stat-value { font-size:1.7rem; font-weight:800; color:#1e293b; line-height:1; margin-bottom:5px; }
 .stat-label { font-size:0.82rem; color:#9ca3af; font-weight:500; }
-.section-card { background:white; border-radius:16px; padding:28px; box-shadow:0 4px 20px rgba(102,126,234,0.08); border:1px solid rgba(102,126,234,0.08); margin-bottom:20px; }
-.section-heading { font-size:1rem; font-weight:700; color:#667eea; margin-bottom:18px; padding-bottom:12px; border-bottom:2px solid rgba(102,126,234,0.12); display:flex; align-items:center; gap:8px; }
+.section-card { background:white; border-radius:16px; padding:28px; box-shadow:0 4px 20px rgba(29,78,216,0.08); border:1px solid rgba(29,78,216,0.08); margin-bottom:20px; }
+.section-heading { font-size:1rem; font-weight:700; color:#1d4ed8; margin-bottom:18px; padding-bottom:12px; border-bottom:2px solid rgba(29,78,216,0.12); display:flex; align-items:center; gap:8px; }
 .info-row { display:flex; padding:11px 0; border-bottom:1px solid #f3f4f6; align-items:flex-start; }
 .info-row:last-child { border-bottom:none; }
 .info-lbl { width:100px; font-size:0.85rem; color:#9ca3af; display:flex; align-items:center; gap:6px; flex-shrink:0; }
 .info-val { font-weight:600; color:#1e293b; font-size:0.93rem; }
-.book-card { background:white; border-radius:14px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.07); transition:all 0.3s; border:1px solid rgba(102,126,234,0.08); }
-.book-card:hover { transform:translateY(-6px); box-shadow:0 15px 40px rgba(102,126,234,0.18); }
+.book-card { background:white; border-radius:14px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.07); transition:all 0.3s; border:1px solid rgba(29,78,216,0.08); }
+.book-card:hover { transform:translateY(-6px); box-shadow:0 15px 40px rgba(29,78,216,0.18); }
 .book-cover { height:200px; overflow:hidden; background:linear-gradient(135deg,#f0f0ff,#e8e0ff); display:flex; align-items:center; justify-content:center; }
 .book-cover img { width:100%; height:100%; object-fit:cover; transition:transform 0.3s; }
 .book-card:hover .book-cover img { transform:scale(1.07); }
@@ -36,8 +38,8 @@
 .badge-stock-ok { background:#d1fae5; color:#065f46; }
 .badge-stock-low { background:#fef3c7; color:#92400e; }
 .badge-stock-out { background:#fee2e2; color:#991b1b; }
-.btn-primary-grad { background:linear-gradient(135deg,#667eea,#764ba2); color:white; border:none; border-radius:8px; padding:7px 16px; font-size:0.85rem; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:all 0.2s; }
-.btn-primary-grad:hover { transform:translateY(-2px); box-shadow:0 5px 15px rgba(102,126,234,0.35); color:white; }
+.btn-primary-grad { background:linear-gradient(135deg,#14245f,#1d4ed8); color:white; border:none; border-radius:50px; padding:9px 22px; font-size:0.85rem; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:all 0.2s; box-shadow:0 8px 20px rgba(29,78,216,.22); }
+.btn-primary-grad:hover { transform:translateY(-2px); box-shadow:0 12px 28px rgba(29,78,216,.32); color:white; }
 .pub-follow-btn {
     display:inline-flex; align-items:center; gap:8px; padding:10px 22px;
     border-radius:999px; border:2px solid rgba(255,255,255,0.85);
@@ -214,8 +216,8 @@ html[data-theme="dark"] .publisher-detail-wrap {
         <div class="row g-3 pb-4">
             <div class="col-6 col-md-3">
                 <div class="stat-card">
-                    <div class="stat-icon" style="background:linear-gradient(135deg,rgba(102,126,234,0.15),rgba(118,75,162,0.15));">
-                        <i class="fas fa-book-open" style="color:#667eea;font-size:1.3rem;"></i>
+                    <div class="stat-icon" style="background:linear-gradient(135deg,rgba(29,78,216,0.15),rgba(20,36,95,0.12));">
+                        <i class="fas fa-book-open" style="color:#1d4ed8;font-size:1.3rem;"></i>
                     </div>
                     <div class="stat-value">{{ books|length }}</div>
                     <div class="stat-label">{% trans "出版图书" %}</div>
@@ -280,8 +282,8 @@ html[data-theme="dark"] .publisher-detail-wrap {
                     <div class="section-heading"><i class="fas fa-chart-bar"></i>{% trans "经营数据" %}</div>
                     <div class="row g-3 text-center">
                         <div class="col-6">
-                            <div class="pub-biz-stat" style="background:rgba(102,126,234,0.06);">
-                                <div class="pub-biz-stat-num" style="color:#667eea;">{{ books|length }}</div>
+                            <div class="pub-biz-stat" style="background:rgba(29,78,216,0.06);">
+                                <div class="pub-biz-stat-num" style="color:#1d4ed8;">{{ books|length }}</div>
                                 <div class="pub-biz-stat-label">{% trans "图书总数" %}</div>
                             </div>
                         </div>
@@ -312,7 +314,7 @@ html[data-theme="dark"] .publisher-detail-wrap {
         <div class="section-card">
             <div class="section-heading">
                 <i class="fas fa-book"></i>{% trans "出版图书" %}
-                <span class="ms-auto px-3 py-0 rounded-pill text-white small fw-bold" style="background:linear-gradient(135deg,#667eea,#764ba2);">{{ books|length }}</span>
+                <span class="ms-auto px-3 py-0 rounded-pill text-white small fw-bold" style="background:linear-gradient(135deg,#14245f,#1d4ed8);">{{ books|length }}</span>
             </div>
             {% if books %}
             <div class="row g-4">
@@ -332,7 +334,7 @@ html[data-theme="dark"] .publisher-detail-wrap {
                             </h6>
                             <p class="small text-muted mb-2" style="min-height:40px;line-height:1.6;">{{ book.get_short_description }}</p>
                             <div class="d-flex align-items-center justify-content-between mb-3">
-                                <span class="fw-bold" style="font-size:1.2rem;color:#667eea;">{{ book.price|fcfa }}</span>
+                                <span class="fw-bold" style="font-size:1.2rem;color:#1d4ed8;">{{ book.price|fcfa }}</span>
                                 {% if book.inventory > 10 %}<span class="book-badge badge-stock-ok"><i class="fas fa-check-circle"></i>{% trans "有货" %}</span>
                                 {% elif book.inventory > 0 %}<span class="book-badge badge-stock-low"><i class="fas fa-exclamation-triangle"></i>{{ book.inventory }}{% trans "本" %}</span>
                                 {% else %}<span class="book-badge badge-stock-out"><i class="fas fa-times-circle"></i>{% trans "缺货" %}</span>{% endif %}
@@ -358,8 +360,8 @@ html[data-theme="dark"] .publisher-detail-wrap {
             </div>
             {% else %}
             <div class="text-center py-5">
-                <div style="width:80px;height:80px;background:rgba(102,126,234,0.1);border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;">
-                    <i class="fas fa-book-open" style="font-size:2rem;color:#667eea;"></i>
+                <div style="width:80px;height:80px;background:rgba(29,78,216,0.1);border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;">
+                    <i class="fas fa-book-open" style="font-size:2rem;color:#1d4ed8;"></i>
                 </div>
                 <p class="text-muted">{% trans "该出版社暂无图书" %}</p>
                 <a href="{% url 'manager:public_books' %}" class="btn-primary-grad" style="display:inline-flex;">{% trans "浏览所有图书" %}</a>

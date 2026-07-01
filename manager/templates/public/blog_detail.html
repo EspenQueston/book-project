@@ -1,4 +1,4 @@
-{% extends 'public/base.html' %}
+﻿{% extends 'public/base.html' %}
 {% load i18n %}
 {% load markdown_extras %}
 
@@ -8,10 +8,12 @@
 <style>
     /* Hero */
     .post-hero {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 120px 0 60px 0;
+        background: radial-gradient(circle at 18% 18%, rgba(96,165,250,.30), transparent 24%), radial-gradient(circle at 84% 18%, rgba(14,165,233,.16), transparent 22%), linear-gradient(135deg, #14245f 0%, #1d4ed8 100%);
+        padding: 112px 0 64px 0;
         position: relative;
         overflow: hidden;
+        border-radius: 0 0 28px 28px;
+        box-shadow: 0 22px 56px rgba(20,36,95,.22);
     }
 
     .post-hero::before {
@@ -121,7 +123,7 @@
     .article-content h3 { font-size: 1.3rem; }
 
     .article-content blockquote {
-        border-left: 4px solid #667eea;
+        border-left: 4px solid #1d4ed8;
         padding: 20px 25px;
         background: #f8f9ff;
         border-radius: 0 12px 12px 0;
@@ -137,11 +139,11 @@
     }
 
     .article-content code {
-        background: #f0f0f5;
+        background: #eff6ff;
         padding: 2px 8px;
         border-radius: 6px;
         font-size: 0.9rem;
-        color: #667eea;
+        color: #1d4ed8;
     }
 
     .article-content pre {
@@ -177,7 +179,7 @@
         border: 1px solid #e8ecf1;
     }
     .article-content th {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #14245f 0%, #1d4ed8 100%);
         color: white;
         font-weight: 600;
     }
@@ -196,13 +198,13 @@
         border-radius: 15px;
         padding: 25px;
         margin-top: 40px;
-        border: 1px solid rgba(102, 126, 234, 0.1);
+        border: 1px solid rgba(29, 78, 216, 0.1);
     }
 
     .author-avatar {
         width: 65px;
         height: 65px;
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: linear-gradient(135deg, #14245f, #1d4ed8);
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -275,12 +277,12 @@
 
     .related-card:hover {
         transform: translateY(-8px);
-        box-shadow: 0 15px 40px rgba(102, 126, 234, 0.12);
+        box-shadow: 0 15px 40px rgba(29, 78, 216, 0.12);
     }
 
     .related-cover {
         height: 160px;
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: linear-gradient(135deg, #14245f, #1d4ed8);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -334,7 +336,7 @@
         color: #1a1a2e;
         margin-bottom: 20px;
         padding-bottom: 12px;
-        border-bottom: 3px solid #667eea;
+        border-bottom: 3px solid #1d4ed8;
         font-size: 1.1rem;
     }
 
@@ -366,7 +368,7 @@
         border-radius: 8px;
         overflow: hidden;
         flex-shrink: 0;
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: linear-gradient(135deg, #14245f, #1d4ed8);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -384,13 +386,13 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        color: #667eea;
+        color: #1d4ed8;
         text-decoration: none;
         font-weight: 600;
-        transition: gap 0.3s;
+        transition: gap 0.3s, color 0.2s;
     }
 
-    .back-to-blog:hover { gap: 12px; color: #764ba2; }
+    .back-to-blog:hover { gap: 12px; color: #14245f; }
 
     @media (max-width: 768px) {
         .post-hero h1 { font-size: 1.8rem; }
@@ -549,7 +551,7 @@
                             <a href="https://wa.me/?text={{ post.title }} {{ request.build_absolute_uri }}" target="_blank" rel="noopener noreferrer" class="share-btn" style="background: #25d366;" title="WhatsApp">
                                 <i class="fab fa-whatsapp"></i>
                             </a>
-                            <a href="mailto:?subject={{ post.title }}&body={{ request.build_absolute_uri }}" class="share-btn" style="background: linear-gradient(135deg, #667eea, #764ba2);" title="Email">
+                            <a href="mailto:?subject={{ post.title }}&body={{ request.build_absolute_uri }}" class="share-btn" style="background: linear-gradient(135deg, #14245f, #1d4ed8);" title="Email">
                                 <i class="fas fa-envelope"></i>
                             </a>
                         </div>
@@ -594,7 +596,7 @@
                         <p style="color: #6c757d; font-size: 0.92rem; line-height: 1.7;">
                             {% trans "探索我们的图书目录，找到您的下一本好书。" %}
                         </p>
-                        <a href="{% url 'manager:public_books' %}" class="btn w-100" style="background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border-radius: 12px; font-weight: 600;">
+                        <a href="{% url 'manager:public_books' %}" class="btn w-100" style="background: linear-gradient(135deg, #14245f, #1d4ed8); color: #fff; border-radius: 50px; font-weight: 700; box-shadow: 0 8px 20px rgba(29,78,216,.22);">
                             <i class="fas fa-book-open me-1"></i>{% trans "图书目录" %}
                         </a>
                     </div>

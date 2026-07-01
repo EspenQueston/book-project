@@ -1,11 +1,10 @@
 {% extends "marketplace/vendor/base.html" %}
-{% block title %}{% if course %}Modifier le cours{% else %}Ajouter un cours{% endif %} - {{ vendor.company_name }}{% endblock %}
+{% block title %}{% if course|default:None %}Modifier le cours{% else %}Ajouter un cours{% endif %} - {{ vendor.company_name }}{% endblock %}
 {% block nav_courses %}active{% endblock %}
 
 {% block extra_vendor_css %}
-<style>
-    .vendor-form-shell { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(320px,.85fr); gap:24px; }
-    .vendor-form-card { background:#fff; border-radius:18px; padding:24px; box-shadow:0 8px 24px rgba(15,23,42,.06); border:1px solid rgba(245,158,11,.12); }
+    .vendor-form-shell { display:grid; grid-template-columns:minmax(0,1.35fr) minmax(340px,.82fr); gap:24px; }
+    .vendor-form-card { background:#fff; border-radius:24px; padding:26px; box-shadow:0 16px 44px rgba(15,23,42,.08); border:1px solid rgba(245,158,11,.14); }
     .vendor-form-title { font-size:1.05rem; font-weight:800; color:#1e293b; margin-bottom:18px; display:flex; align-items:center; gap:10px; }
     .vendor-form-title i { color:#f59e0b; }
     .vendor-form-card .form-label { font-weight:700; color:#334155; font-size:.88rem; }
@@ -20,6 +19,9 @@
     .mini-note { font-size:.8rem; color:#64748b; }
     .form-actions { display:flex; gap:12px; flex-wrap:wrap; }
     .form-actions .btn { border-radius:999px; padding:12px 24px; font-weight:700; }
+    .vendor-form-hero { background:linear-gradient(135deg,#111827,#7c3aed 55%,#38bdf8); color:#fff; border-radius:26px; padding:26px; margin-bottom:24px; box-shadow:0 18px 45px rgba(15,23,42,.20); }
+    .vendor-form-hero h4 { font-weight:900; margin-bottom:8px; }
+    .vendor-form-hero p { opacity:.84; margin:0; }
     .detail-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
     @media (max-width: 991.98px) {
         .vendor-form-shell { grid-template-columns:1fr; }
@@ -32,17 +34,16 @@
         .form-actions .btn { width:100%; justify-content:center; }
         .page-header-card .d-flex { flex-direction:column; align-items:flex-start !important; gap:12px; }
     }
-</style>
 {% endblock %}
 
 {% block vendor_content %}
-<div class="page-header-card">
-    <div class="d-flex justify-content-between align-items-center gap-3">
+<div class="vendor-form-hero">
+    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
         <div>
-            <h4><i class="fas fa-{% if course %}edit{% else %}plus-circle{% endif %} me-2"></i>{% if course %}Modifier le cours{% else %}Ajouter un cours{% endif %}</h4>
-            <p class="mb-0 opacity-75" style="font-size:.92rem;">Interface alignée sur l’admin marketplace, optimisée pour desktop et mobile.</p>
+            <div class="text-uppercase small fw-bold opacity-75 mb-2"><span data-zh="课程发布工作台" data-en="Course publishing workspace" data-fr="Espace de publication de cours">课程发布工作台</span></div>
+            <h4><i class="fas fa-{% if course %}edit{% else %}plus-circle{% endif %} me-2"></i>{% if course %}<span data-zh="编辑课程" data-en="Edit course" data-fr="Modifier le cours">编辑课程</span>{% else %}<span data-zh="新增课程" data-en="Add course" data-fr="Ajouter un cours">新增课程</span>{% endif %}</h4>
         </div>
-        <a href="{% url 'marketplace:vendor_courses' %}" class="btn btn-light rounded-pill px-4"><i class="fas fa-arrow-left me-2"></i>Retour à la liste</a>
+        <a href="{% url 'marketplace:vendor_courses' %}" class="btn btn-light rounded-pill px-4 fw-semibold"><i class="fas fa-arrow-left me-2"></i><span data-zh="返回课程列表" data-en="Back to course list" data-fr="Retour à la liste des cours">返回课程列表</span></a>
     </div>
 </div>
 
@@ -53,28 +54,32 @@
             <div class="vendor-form-title"><i class="fas fa-graduation-cap"></i><span>Informations du cours</span></div>
             <div class="mb-3">
                 <label class="form-label fw-bold">Titre du cours <span class="text-danger">*</span></label>
-                <input type="text" name="title" class="form-control" value="{{ course.title|default:'' }}" required>
+                <input type="text" name="title" class="form-control {% if form_state.errors.title %}is-invalid{% endif %}" value="{% if form_state.values.title is not None %}{{ form_state.values.title }}{% elif course %}{{ course.title|default:'' }}{% endif %}" required>
+                {% if form_state.errors.title %}<div class="invalid-feedback d-block">{{ form_state.errors.title }}</div>{% endif %}
             </div>
             <div class="mb-3">
                 <label class="form-label fw-bold">Titre anglais</label>
-                <input type="text" name="title_en" class="form-control" value="{{ course.title_en|default:'' }}">
+                <input type="text" name="title_en" class="form-control" value="{% if form_state.values.title_en is not None %}{{ form_state.values.title_en }}{% elif course %}{{ course.title_en|default:'' }}{% endif %}">
             </div>
             <div class="mb-3">
-                <label class="form-label fw-bold">Description</label>
-                <textarea name="description" class="form-control" rows="5">{{ course.description|default:'' }}</textarea>
+                <label class="form-label fw-bold">Description <span class="text-danger">*</span></label>
+                <textarea name="description" class="form-control {% if form_state.errors.description %}is-invalid{% endif %}" rows="5" required minlength="12">{% if form_state.values.description is not None %}{{ form_state.values.description }}{% elif course %}{{ course.description|default:'' }}{% endif %}</textarea>
+                {% if form_state.errors.description %}<div class="invalid-feedback d-block">{{ form_state.errors.description }}</div>{% endif %}
             </div>
             <div class="row g-3">
                 <div class="col-md-4">
                     <label class="form-label fw-bold">Prix <span class="text-danger">*</span></label>
-                    <input type="number" name="price" class="form-control" step="0.01" value="{{ course.price|default:'' }}" required>
+                    <input type="number" name="price" class="form-control {% if form_state.errors.price %}is-invalid{% endif %}" step="0.01" value="{% if form_state.values.price is not None %}{{ form_state.values.price }}{% elif course %}{{ course.price|default:'' }}{% endif %}" required>
+                    {% if form_state.errors.price %}<div class="invalid-feedback d-block">{{ form_state.errors.price }}</div>{% endif %}
                 </div>
                 <div class="col-md-4">
                     <label class="form-label fw-bold">Prix original</label>
-                    <input type="number" name="original_price" class="form-control" step="0.01" value="{{ course.original_price|default:'' }}">
+                    <input type="number" name="original_price" class="form-control" step="0.01" value="{% if form_state.values.original_price is not None %}{{ form_state.values.original_price }}{% elif course %}{{ course.original_price|default:'' }}{% endif %}">
                 </div>
                 <div class="col-md-4">
                     <label class="form-label fw-bold">Instructeur <span class="text-danger">*</span></label>
-                    <input type="text" name="instructor" class="form-control" value="{{ course.instructor|default:'' }}" required>
+                    <input type="text" name="instructor" class="form-control {% if form_state.errors.instructor %}is-invalid{% endif %}" value="{% if form_state.values.instructor is not None %}{{ form_state.values.instructor }}{% elif course %}{{ course.instructor|default:'' }}{% endif %}" required>
+                    {% if form_state.errors.instructor %}<div class="invalid-feedback d-block">{{ form_state.errors.instructor }}</div>{% endif %}
                 </div>
             </div>
         </div>
@@ -83,40 +88,42 @@
             <div class="vendor-form-card">
                 <div class="vendor-form-title"><i class="fas fa-sliders-h"></i><span>Réglages du cours</span></div>
                 <div class="mb-3">
-                    <label class="form-label fw-bold">Catégorie</label>
-                    <select name="category" class="form-select">
+                    <label class="form-label fw-bold">Catégorie <span class="text-danger">*</span></label>
+                    <select name="category" class="form-select {% if form_state.errors.category %}is-invalid{% endif %}" required>
                         <option value="">-- Choisir une catégorie --</option>
                         {% for cat in categories %}
-                        <option value="{{ cat.id }}" {% if course.category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+                        <option value="{{ cat.id }}" {% if form_state.values.category == cat.id|stringformat:'s' or course and course.category_id == cat.id and not form_state.values.category %}selected{% endif %}>{{ cat.name }}</option>
                         {% endfor %}
                     </select>
+                    {% if form_state.errors.category %}<div class="invalid-feedback d-block">{{ form_state.errors.category }}</div>{% endif %}
                 </div>
                 <div class="detail-grid">
                     <div>
                         <label class="form-label fw-bold">Durée (heures)</label>
-                        <input type="number" name="duration_hours" class="form-control" step="0.1" value="{{ course.duration_hours|default:'0' }}">
+                        <input type="number" name="duration_hours" class="form-control" step="0.1" value="{% if form_state.values.duration_hours is not None %}{{ form_state.values.duration_hours }}{% elif course %}{{ course.duration_hours|default:'0' }}{% else %}0{% endif %}">
                     </div>
                     <div>
                         <label class="form-label fw-bold">Nombre de leçons</label>
-                        <input type="number" name="lessons_count" class="form-control" value="{{ course.lessons_count|default:'0' }}">
+                        <input type="number" name="lessons_count" class="form-control" value="{% if form_state.values.lessons_count is not None %}{{ form_state.values.lessons_count }}{% elif course %}{{ course.lessons_count|default:'0' }}{% else %}0{% endif %}">
                     </div>
                 </div>
                 <div class="mb-3 mt-3">
                     <label class="form-label fw-bold">Niveau</label>
                     <select name="level" class="form-select">
-                        <option value="all" {% if course.level == 'all' %}selected{% endif %}>Tous niveaux</option>
-                        <option value="beginner" {% if course.level == 'beginner' %}selected{% endif %}>Débutant</option>
-                        <option value="intermediate" {% if course.level == 'intermediate' %}selected{% endif %}>Intermédiaire</option>
-                        <option value="advanced" {% if course.level == 'advanced' %}selected{% endif %}>Avancé</option>
+                        <option value="all" {% if form_state.values.level == 'all' or course and course.level == 'all' and not form_state.values.level or not course and not form_state.values.level %}selected{% endif %}>Tous niveaux</option>
+                        <option value="beginner" {% if form_state.values.level == 'beginner' or course and course.level == 'beginner' and not form_state.values.level %}selected{% endif %}>Débutant</option>
+                        <option value="intermediate" {% if form_state.values.level == 'intermediate' or course and course.level == 'intermediate' and not form_state.values.level %}selected{% endif %}>Intermédiaire</option>
+                        <option value="advanced" {% if form_state.values.level == 'advanced' or course and course.level == 'advanced' and not form_state.values.level %}selected{% endif %}>Avancé</option>
                     </select>
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-bold">Langue</label>
-                    <input type="text" name="language" class="form-control" value="{{ course.language|default:'Français' }}">
+                    <input type="text" name="language" class="form-control" value="{% if form_state.values.language is not None %}{{ form_state.values.language }}{% elif course %}{{ course.language|default:'Français' }}{% else %}Français{% endif %}">
                 </div>
                 <div class="mb-0">
                     <label class="form-label fw-bold">Lien de prévisualisation</label>
-                    <input type="url" name="preview_url" class="form-control" value="{{ course.preview_url|default:'' }}">
+                    <input type="url" name="preview_url" class="form-control {% if form_state.errors.preview_url %}is-invalid{% endif %}" value="{% if form_state.values.preview_url is not None %}{{ form_state.values.preview_url }}{% elif course %}{{ course.preview_url|default:'' }}{% endif %}">
+                    {% if form_state.errors.preview_url %}<div class="invalid-feedback d-block">{{ form_state.errors.preview_url }}</div>{% endif %}
                 </div>
             </div>
 
@@ -125,7 +132,8 @@
                 <div class="preview-box">
                     {% if course and course.image %}<img src="{{ course.image.url }}" class="preview-thumb" alt="Cover">{% else %}<div class="preview-thumb d-flex align-items-center justify-content-center"><i class="fas fa-image text-muted"></i></div>{% endif %}
                     <label class="form-label small fw-bold">Image du cours</label>
-                    <input type="file" name="image" class="form-control mt-2" accept="image/*">
+                    <input type="file" name="image" class="form-control mt-2 {% if form_state.errors.image %}is-invalid{% endif %}" accept="image/*">
+                    {% if form_state.errors.image %}<div class="invalid-feedback d-block">{{ form_state.errors.image }}</div>{% endif %}
                     <div class="mini-note mt-2">Recommandé : format 16:9 pour un meilleur rendu desktop/mobile.</div>
                 </div>
             </div>
@@ -134,7 +142,7 @@
                 <div class="vendor-form-title"><i class="fas fa-check-circle"></i><span>Publication</span></div>
                 <div class="switch-card mb-3">
                     <div class="form-check form-switch">
-                        <input type="checkbox" name="is_active" class="form-check-input" id="isActive" {% if course.is_active or not course %}checked{% endif %}>
+                        <input type="checkbox" name="is_active" class="form-check-input" id="isActive" {% if form_state.values.is_active or course.is_active and not form_state.values or not course and not form_state.values %}checked{% endif %}>
                         <label class="form-check-label fw-bold" for="isActive">Publier le cours</label>
                     </div>
                 </div>

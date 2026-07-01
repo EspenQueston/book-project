@@ -9,8 +9,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #667eea;
-            --secondary-color: #764ba2;
+            --primary-color: #1d4ed8;
+            --secondary-color: #14245f;
             --success-color: #10b981;
             --warning-color: #f59e0b;
             --danger-color: #ef4444;
@@ -62,7 +62,7 @@
         .btn-primary-modern {
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); color: white;
         }
-        .btn-primary-modern:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.3); color: white; }
+        .btn-primary-modern:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(29,78,216,0.3); color: white; }
         .breadcrumb-modern { background: none; padding: 0; margin-bottom: 20px; }
         .breadcrumb-modern .breadcrumb-item a { color: white; text-decoration: none; }
         .breadcrumb-modern .breadcrumb-item.active { color: rgba(255,255,255,0.8); }
@@ -84,7 +84,7 @@
         .g-modal-actions{display:flex;gap:12px;justify-content:center}
         .g-modal-btn{padding:10px 28px;border-radius:12px;border:none;font-weight:600;cursor:pointer;transition:all .2s;font-size:.95rem}
         .g-modal-btn.cancel{background:#f1f5f9;color:#64748b}.g-modal-btn.cancel:hover{background:#e2e8f0}
-        .g-modal-btn.primary{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff}.g-modal-btn.primary:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(102,126,234,.4)}
+        .g-modal-btn.primary{background:linear-gradient(135deg,#1d4ed8,#14245f);color:#fff}.g-modal-btn.primary:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(29,78,216,.4)}
         .g-modal-btn.danger{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff}.g-modal-btn.danger:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(239,68,68,.4)}
         .g-toast-container{position:fixed;top:90px;right:20px;z-index:10001;display:flex;flex-direction:column;gap:10px}
         .g-toast{padding:14px 24px;border-radius:12px;color:#fff;font-weight:500;box-shadow:0 8px 25px rgba(0,0,0,.15);animation:gToastIn .3s ease;display:flex;align-items:center;gap:10px}
@@ -335,7 +335,7 @@
 
     // Confirm Modal
     var _gModalCb = null;
-    function gConfirm(title, message, type, btnClass, callback) {
+    function gAdminTableConfirm(title, message, type, btnClass, callback) {
         document.getElementById('gModalTitle').textContent = title;
         document.getElementById('gModalMessage').textContent = message;
         var icon = document.getElementById('gModalIcon');
@@ -346,14 +346,23 @@
         btn.className = 'g-modal-btn ' + (btnClass||'primary');
         btn.textContent = '确定';
         _gModalCb = callback;
-        document.getElementById('gModalOverlay').style.display = 'flex';
+        var overlay = document.getElementById('gModalOverlay');
+        overlay.style.display = 'flex';
+        overlay.style.opacity = '1';
+        overlay.style.visibility = 'visible';
     }
-    function closeGModal() { document.getElementById('gModalOverlay').style.display = 'none'; _gModalCb = null; }
+    function closeGModal() {
+        var overlay = document.getElementById('gModalOverlay');
+        overlay.style.display = 'none';
+        overlay.style.opacity = '';
+        overlay.style.visibility = '';
+        _gModalCb = null;
+    }
     function gModalCallback() { if (_gModalCb) _gModalCb(); closeGModal(); }
 
     // Toggle user
     function toggleUser(id, name) {
-        gConfirm('切换状态', '确定要切换用户 "' + name + '" 的状态吗？', 'confirm', 'primary', function() {
+        gAdminTableConfirm('切换状态', '确定要切换用户 "' + name + '" 的状态吗？', 'confirm', 'primary', function() {
             fetch('/manager/admin/users/toggle/', {
                 method: 'POST',
                 headers: {'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/x-www-form-urlencoded'},
@@ -367,7 +376,7 @@
 
     // Delete user
     function deleteUser(id, name) {
-        gConfirm('删除用户', '确定要删除用户 "' + name + '" 吗？此操作不可撤销。', 'warning', 'danger', function() {
+        gAdminTableConfirm('删除用户', '确定要删除用户 "' + name + '" 吗？此操作不可撤销。', 'warning', 'danger', function() {
             fetch('/manager/admin/users/delete/', {
                 method: 'POST',
                 headers: {'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/x-www-form-urlencoded'},
@@ -377,7 +386,10 @@
                     gToast('用户已删除', 'success');
                     var row = document.getElementById('row-' + id);
                     if (row) row.remove();
-                } else { gToast(d.error || '删除失败', 'error'); }
+                } else { gToast(d.message || d.error || '删除失败', 'error'); }
+            }).catch(function(err) {
+                gToast('请求失败，请检查网络连接', 'error');
+                console.error('deleteUser error:', err);
             });
         });
     }
@@ -438,6 +450,7 @@
         });
     }
     </script>
+<script src="/static/js/destructive_action_guards.js"></script>
 <script src="/static/js/admin_i18n.js" defer></script>
     </div><!-- /admin-main-offset -->
 </body>

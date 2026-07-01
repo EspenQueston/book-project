@@ -1,4 +1,4 @@
-{% extends 'public/base.html' %}
+﻿{% extends 'public/base.html' %}
 {% load i18n %}
 
 {% block title %}{% trans "Verify account" %} - {% trans "Seller registration" %}{% endblock %}
@@ -7,7 +7,7 @@
 {% include 'includes/signup_register_styles.html' %}
 <style>
     .auth-hero {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
         padding: 80px 0 60px;
         position: relative; overflow: hidden;
     }
@@ -44,24 +44,24 @@
     .verify-pending-banner {
         display: none; gap: 12px; align-items: center;
         padding: 14px 16px; border-radius: 14px; margin-bottom: 20px;
-        background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.25);
+        background: rgba(29, 78, 216, 0.1); border: 1px solid rgba(29, 78, 216, 0.25);
         color: var(--dark-text, #334155);
     }
-    .verify-pending-banner i { color: #667eea; }
+    .verify-pending-banner i { color: #1d4ed8; }
     .btn-auth {
-        background: linear-gradient(135deg, #667eea, #764ba2); color: #fff;
+        background: linear-gradient(135deg, #1d4ed8, #14245f); color: #fff;
         border: none; border-radius: 14px; padding: 14px; font-weight: 700;
         font-size: 1rem; width: 100%; transition: all 0.3s;
     }
     .btn-auth:disabled { opacity: 0.6; }
     .email-icon-box {
         width: 80px; height: 80px; border-radius: 50%;
-        background: linear-gradient(135deg, rgba(102,126,234,0.12), rgba(118,75,162,0.12));
+        background: linear-gradient(135deg, rgba(29,78,216,0.12), rgba(20,36,95,0.12));
         display: flex; align-items: center; justify-content: center;
         margin: 0 auto 20px;
     }
-    .email-icon-box i { font-size: 2rem; color: #667eea; }
-    .resend-link { color: #667eea; font-weight: 600; cursor: pointer; text-decoration: none; }
+    .email-icon-box i { font-size: 2rem; color: #1d4ed8; }
+    .resend-link { color: #1d4ed8; font-weight: 600; cursor: pointer; text-decoration: none; }
     html[data-theme="dark"] .auth-card { background: var(--bg-surface); box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
     html[data-theme="dark"] .pin-input { background: var(--input-bg); border-color: var(--input-border); color: var(--text-primary); }
     html[data-theme="dark"] .verify-fallback-banner { background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.3); color: var(--text-primary); }
@@ -111,7 +111,7 @@
                     </div>
                     <h5 class="fw-bold mb-2">{% trans "Email code" %}</h5>
                     <p class="text-muted mb-0 small">{% trans "Sent to" %}</p>
-                    <p class="fw-bold" style="color:#667eea;">{{ email }}</p>
+                    <p class="fw-bold" style="color:#1d4ed8;">{{ email }}</p>
                 </div>
 
                 <form id="verifyForm" onsubmit="return submitVerify(event)">
@@ -137,7 +137,7 @@
                 </form>
 
                 <div class="text-center mt-4 pt-3" style="border-top:1px solid var(--input-border, #e8ecf1);">
-                    <a href="{% url 'manager:vendor_register' %}" style="color:#667eea;font-weight:600;font-size:0.9rem;">
+                    <a href="{% url 'manager:vendor_register' %}" style="color:#1d4ed8;font-weight:600;font-size:0.9rem;">
                         <i class="fas fa-arrow-left me-1"></i>{% trans "Back to registration" %}
                     </a>
                 </div>

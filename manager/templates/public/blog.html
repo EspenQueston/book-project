@@ -1,4 +1,4 @@
-{% extends 'public/base.html' %}
+﻿{% extends 'public/base.html' %}
 {% load i18n %}
 
 {% block title %}{% trans "DUNO 360" %} - {% trans "博客" %}{% endblock %}
@@ -7,10 +7,12 @@
 <style>
     /* Hero */
     .blog-hero {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 120px 0 80px 0;
+        background: radial-gradient(circle at 18% 18%, rgba(96,165,250,.30), transparent 24%), radial-gradient(circle at 84% 18%, rgba(14,165,233,.16), transparent 22%), linear-gradient(135deg, #14245f 0%, #1d4ed8 100%);
+        padding: 118px 0 86px 0;
         position: relative;
         overflow: hidden;
+        border-radius: 0 0 28px 28px;
+        box-shadow: 0 22px 56px rgba(20,36,95,.22);
     }
 
     .blog-hero::before {
@@ -81,7 +83,7 @@
     }
 
     .blog-search-field i {
-        color: #667eea;
+        color: #1d4ed8;
         font-size: .95rem;
         flex-shrink: 0;
     }
@@ -112,7 +114,7 @@
         background: #fff;
         border: none;
         border-left: 1px solid #e2e8f0;
-        color: #667eea;
+        color: #1d4ed8;
         padding: 10px 22px;
         font-weight: 700;
         border-radius: 0 !important;
@@ -129,8 +131,8 @@
         border-radius: 18px;
         padding: 16px 20px;
         margin-bottom: 22px;
-        background: linear-gradient(135deg, rgba(102,126,234,.08), rgba(118,75,162,.06));
-        border: 1px solid rgba(102,126,234,.14);
+        background: linear-gradient(135deg, rgba(29,78,216,.08), rgba(20,36,95,.06));
+        border: 1px solid rgba(29,78,216,.14);
         display: flex;
         flex-wrap: wrap;
         align-items: center;
@@ -146,7 +148,7 @@
     }
 
     .blog-clear-search {
-        color: #667eea;
+        color: #1d4ed8;
         font-weight: 700;
         text-decoration: none;
         font-size: .88rem;
@@ -161,7 +163,7 @@
     }
 
     .section-subtitle {
-        color: #667eea;
+        color: #1d4ed8;
         font-weight: 600;
         font-size: 0.95rem;
         text-transform: uppercase;
@@ -187,12 +189,12 @@
 
     .featured-card:hover {
         transform: translateY(-10px);
-        box-shadow: 0 25px 60px rgba(102, 126, 234, 0.15);
+        box-shadow: 0 25px 60px rgba(29, 78, 216, 0.15);
     }
 
     .featured-cover {
         height: 220px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -216,7 +218,7 @@
         top: 15px;
         right: 15px;
         background: rgba(255,255,255,0.9);
-        color: #667eea;
+        color: #1d4ed8;
         padding: 5px 15px;
         border-radius: 50px;
         font-size: 0.8rem;
@@ -232,8 +234,8 @@
         display: inline-flex;
         align-items: center;
         gap: 5px;
-        background: rgba(102, 126, 234, 0.1);
-        color: #667eea;
+        background: rgba(29, 78, 216, 0.1);
+        color: #1d4ed8;
         padding: 4px 12px;
         border-radius: 50px;
         font-size: 0.8rem;
@@ -289,12 +291,12 @@
 
     .blog-card:hover {
         transform: translateY(-8px);
-        box-shadow: 0 20px 50px rgba(102, 126, 234, 0.12);
+        box-shadow: 0 20px 50px rgba(29, 78, 216, 0.12);
     }
 
     .blog-cover {
         height: 200px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -329,8 +331,8 @@
         display: inline-flex;
         align-items: center;
         gap: 5px;
-        background: rgba(102, 126, 234, 0.1);
-        color: #667eea;
+        background: rgba(29, 78, 216, 0.1);
+        color: #1d4ed8;
         padding: 4px 12px;
         border-radius: 50px;
         font-size: 0.78rem;
@@ -359,7 +361,7 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        color: #667eea;
+        color: #1d4ed8;
         font-weight: 600;
         font-size: 0.9rem;
         text-decoration: none;
@@ -382,7 +384,7 @@
         color: #1a1a2e;
         margin-bottom: 20px;
         padding-bottom: 12px;
-        border-bottom: 3px solid #667eea;
+        border-bottom: 3px solid #1d4ed8;
         font-size: 1.1rem;
     }
 
@@ -408,8 +410,8 @@
 
     .category-list a:hover,
     .category-list a.active {
-        background: rgba(102, 126, 234, 0.1);
-        color: #667eea;
+        background: rgba(29, 78, 216, 0.1);
+        color: #1d4ed8;
     }
 
     .category-count {
@@ -423,7 +425,7 @@
 
     .category-list a:hover .category-count,
     .category-list a.active .category-count {
-        background: #667eea;
+        background: #1d4ed8;
         color: #fff;
     }
 
@@ -578,7 +580,7 @@
     }
     html[data-theme="dark"] .category-list a:hover,
     html[data-theme="dark"] .category-list a.active {
-        background: rgba(102,126,234,0.15);
+        background: rgba(29,78,216,0.15);
         color: var(--brand-primary);
     }
     html[data-theme="dark"] .category-count {
@@ -724,7 +726,7 @@
                     {% if search_query %}
                     <h4>{% trans "Aucun article trouvé" %}</h4>
                     <p class="text-muted">{% trans "Essayez d'autres mots-clés ou parcourez toutes les catégories." %}</p>
-                    <a href="{% url 'manager:public_blog' %}" class="btn btn-sm mt-2" style="background: linear-gradient(135deg, #667eea, #764ba2); color:#fff; border-radius:999px; padding:8px 18px; font-weight:700;">
+                    <a href="{% url 'manager:public_blog' %}" class="btn btn-sm mt-2" style="background: linear-gradient(135deg, #1d4ed8, #14245f); color:#fff; border-radius:999px; padding:8px 18px; font-weight:700;">
                         {% trans "Voir tous les articles" %}
                     </a>
                     {% else %}

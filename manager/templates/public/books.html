@@ -10,7 +10,7 @@
         position: relative;
         width: 100%;
         height: 280px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -95,7 +95,7 @@
             position: sticky;
             top: 56px;
             z-index: 800;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
             padding: 10px 12px;
         }
         .books-search-bar {
@@ -116,7 +116,7 @@
             min-width: 0;
             margin: 0;
         }
-        .books-search-field i { color: #667eea; font-size: 14px; flex-shrink: 0; }
+        .books-search-field i { color: #1d4ed8; font-size: 14px; flex-shrink: 0; }
         .books-search-field input {
             flex: 1;
             border: none;
@@ -129,7 +129,7 @@
         }
         .books-search-btn {
             background: #fff;
-            color: #667eea;
+            color: #1d4ed8;
             border: none;
             border-left: 1px solid #e2e8f0;
             border-radius: 0;
@@ -148,7 +148,7 @@
             overflow: hidden;
             background: #fff;
             box-shadow: 0 14px 40px rgba(15, 23, 42, 0.16);
-            border: 1px solid rgba(102, 126, 234, 0.15);
+            border: 1px solid rgba(29, 78, 216, 0.15);
             display: none;
             max-height: 58vh;
             overflow-y: auto;
@@ -276,11 +276,11 @@
         html[data-theme="dark"] .bmf-card { background: #1e293b; }
         .bmf-cover {
             width: 100%; aspect-ratio: 2/3; object-fit: cover;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #1d4ed8, #14245f);
         }
         .bmf-cover-placeholder {
             width: 100%; aspect-ratio: 2/3;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #1d4ed8, #14245f);
             display: flex; align-items: center; justify-content: center;
             color: rgba(255,255,255,.6); font-size: 2rem;
         }
@@ -395,7 +395,6 @@
         box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
 </style>
-{% include 'includes/hero_wave_divider_styles.html' %}
 {% endblock %}
 
 {% block content %}
@@ -433,7 +432,7 @@
 <div class="books-king-kong" style="display:none;">
     {% for cat in categories|slice:":10" %}
     <a href="{% url 'manager:public_books' %}?category={{ cat.slug }}" class="bkk-item">
-        <div class="bkk-icon" style="background:{{ cat.color|default:'#667eea' }}"><i class="{{ cat.icon|default:'fas fa-book' }}"></i></div>
+        <div class="bkk-icon" style="background:{{ cat.color|default:'#1d4ed8' }}"><i class="{{ cat.icon|default:'fas fa-book' }}"></i></div>
         <span data-zh="{{ cat.name }}" data-en="{{ cat.name_en|default:cat.name }}" data-fr="{{ cat.name_fr|default:cat.name }}">{{ cat.name }}</span>
     </a>
     {% endfor %}
@@ -472,16 +471,15 @@
 <template id="feedViewDetailsBtnTpl">{% include 'public/includes/feed_view_details_btn.html' %}</template>
 
 <!-- ===== DESKTOP: Page Header ===== -->
-<section class="books-desktop-hero hero-section text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 0; margin-bottom: 30px;">
-    <div class="container">
+<section class="books-desktop-hero hero-section text-white" style="background: radial-gradient(circle at 18% 18%, rgba(96,165,250,.32), transparent 24%), radial-gradient(circle at 84% 18%, rgba(14,165,233,.18), transparent 24%), linear-gradient(135deg, #14245f 0%, #1d4ed8 100%); padding: 72px 0 68px; margin-bottom: 30px; border-radius: 0 0 28px 28px; box-shadow: 0 24px 56px rgba(20,36,95,.22); position:relative; overflow:hidden;">
+    <div class="container position-relative" style="z-index:1;">
         <div class="row">
             <div class="col-12 text-center">
                 <h1 class="display-5 fw-bold mb-3">{% trans "图书目录" %}</h1>
-                <p class="lead">{% trans "浏览我们丰富的图书收藏" %}</p>
+                <p class="lead mb-0">{% trans "浏览我们丰富的图书收藏" %}</p>
             </div>
         </div>
     </div>
-    {% include 'includes/hero_wave_divider.html' with hero_divider_fill='#f8f9fa' %}
 </section>
 
 <!-- Search and Filter Section -->
@@ -505,7 +503,7 @@
                         <option value="price_high" {% if sort_by == 'price_high' %}selected{% endif %}>{% trans "价格从高到低" %}</option>
                         <option value="popular" {% if sort_by == 'popular' %}selected{% endif %}>{% trans "按销量排序" %}</option>
                     </select>
-                    <button type="submit" class="btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <button type="submit" class="btn" style="background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%); color: white; border-radius: 50px; font-weight: 700; box-shadow: 0 6px 18px rgba(29,78,216,.22); padding: 10px 24px;">
                         <i class="fas fa-search"></i> {% trans "搜索" %}
                     </button>
                 </form>
@@ -555,7 +553,7 @@
                         <h5 class="card-title fw-bold mb-2" style="font-size: 1.05rem; line-height: 1.4; min-height: 42px;">{{ book.name }}</h5>
                         
                         <p class="text-muted mb-2" style="font-size: 0.88rem;">
-                            <i class="fas fa-building" style="color: #667eea;"></i> {{ book.publisher.publisher_name }}
+                            <i class="fas fa-building" style="color: #1d4ed8;"></i> {{ book.publisher.publisher_name }}
                         </p>
                         
                         <div class="d-flex gap-2 mb-3">
@@ -568,20 +566,20 @@
                                 {% if book.inventory > 0 %}
                                     <form method="post" action="{% url 'manager:buy_now' book.id %}" class="flex-fill">
                                         {% csrf_token %}
-                                        <button type="submit" class="btn btn-success btn-sm w-100" style="border-radius: 8px;">
+                                        <button type="submit" class="btn btn-success btn-sm w-100" style="border-radius: 50px; font-weight: 700; box-shadow: 0 4px 14px rgba(16,185,129,.25);">
                                             <i class="fas fa-bolt me-1"></i> {% trans "立即购买" %}
                                         </button>
                                     </form>
-                                    <button onclick="addToCartQuick({{ book.id }})" class="btn btn-primary btn-sm" style="border-radius: 8px;" title="{% trans '加入购物车' %}">
+                                    <button onclick="addToCartQuick({{ book.id }})" class="btn btn-primary btn-sm" style="border-radius: 50px; font-weight: 700; box-shadow: 0 4px 14px rgba(29,78,216,.22);" title="{% trans '加入购物车' %}">
                                         <i class="fas fa-cart-plus"></i>
                                     </button>
                                 {% else %}
-                                    <button class="btn btn-secondary btn-sm w-100" disabled style="border-radius: 8px;">
+                                    <button class="btn btn-secondary btn-sm w-100" disabled style="border-radius: 50px;">
                                         <i class="fas fa-times"></i> {% trans "缺货" %}
                                     </button>
                                 {% endif %}
                             </div>
-                            <a href="{% url 'manager:public_book_detail' book.id %}" class="btn btn-sm w-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px;">
+                            <a href="{% url 'manager:public_book_detail' book.id %}" class="btn btn-sm w-100" style="background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%); color: white; border-radius: 50px; font-weight: 700; box-shadow: 0 4px 14px rgba(29,78,216,.22);">
                                 <i class="fas fa-info-circle"></i> {% trans "查看详情" %}
                             </a>
                         </div>
@@ -606,7 +604,7 @@
             </div>
             <h4 class="text-muted mb-3">{% trans "未找到相关图书" %}</h4>
             <p class="text-muted mb-4">{% trans "请尝试其他搜索关键词或浏览所有图书" %}</p>
-            <a href="{% url 'manager:public_books' %}" class="btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+            <a href="{% url 'manager:public_books' %}" class="btn" style="background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%); color: white; border-radius: 50px; font-weight: 700; box-shadow: 0 8px 22px rgba(29,78,216,.25); padding: 12px 32px;">
                 <i class="fas fa-book"></i> {% trans "浏览所有图书" %}
             </a>
         </div>
@@ -615,7 +613,7 @@
 </section>
 
 <!-- Quick Links -->
-<section class="py-5 text-white books-desktop-quicklinks" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)">
+<section class="py-5 text-white books-desktop-quicklinks" style="background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%)">
     <div class="container">
         <div class="row text-center">
             <div class="col-md-4 mb-3" data-aos="fade-up" data-aos-delay="100">
@@ -866,11 +864,11 @@ document.addEventListener('DOMContentLoaded', function() {
             + invBadge + '</div></a>'
             + '<div class="card-body d-flex flex-column" style="padding:18px;">'
             + '<h5 class="card-title fw-bold mb-2" style="font-size:1.05rem;line-height:1.4;min-height:42px;">' + escHtml(book.name) + '</h5>'
-            + '<p class="text-muted mb-2" style="font-size:0.88rem;"><i class="fas fa-building" style="color:#667eea;"></i> ' + escHtml(book.publisher_name) + '</p>'
+            + '<p class="text-muted mb-2" style="font-size:0.88rem;"><i class="fas fa-building" style="color:#1d4ed8;"></i> ' + escHtml(book.publisher_name) + '</p>'
             + '<div class="d-flex gap-2 mb-3"><span class="badge bg-light text-success" style="font-size:0.8rem;"><i class="fas fa-boxes me-1"></i>库存 ' + book.inventory + '</span>'
             + '<span class="badge bg-light text-warning" style="font-size:0.8rem;"><i class="fas fa-fire me-1"></i>销量 ' + book.sale_num + '</span></div>'
             + '<div class="mt-auto"><div class="d-flex gap-2 mb-2">' + buyBtns + '</div>'
-            + '<a href="' + book.url + '" class="btn btn-sm w-100" style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border-radius:8px;"><i class="fas fa-info-circle"></i> 查看详情</a>'
+            + '<a href="' + book.url + '" class="btn btn-sm w-100" style="background:linear-gradient(135deg,#1d4ed8 0%,#14245f 100%);color:white;border-radius:8px;"><i class="fas fa-info-circle"></i> 查看详情</a>'
             + '</div></div></div></div>';
     }
 

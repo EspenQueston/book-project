@@ -2,147 +2,123 @@
 {% load i18n %}
 {% load currency_filters %}
 
-{% block title %}{% trans "我的商品" %} - {{ vendor.company_name }}{% endblock %}
+{% block title %}{% trans "商品列表" %} · {{ vendor.company_name }}{% endblock %}
 {% block nav_products %}active{% endblock %}
 
 {% block extra_vendor_css %}
-    .badge-active { background: rgba(16,185,129,0.12); color: #10b981; font-weight: 600; }
-    .badge-inactive { background: rgba(239,68,68,0.12); color: #ef4444; font-weight: 600; }
-    .stock-low { color: #ef4444; font-weight: 600; }
-    .stock-ok { color: #10b981; }
-    /* Product thumbnail — bulletproof sizing */
-    .prod-thumb {
-        width: 48px !important;
-        height: 48px !important;
-        min-width: 48px !important;
-        max-width: 48px !important;
-        min-height: 48px !important;
-        max-height: 48px !important;
-        object-fit: cover;
-        border-radius: 10px;
-        flex-shrink: 0;
-        display: block;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-    .prod-thumb-placeholder {
-        width: 48px !important;
-        height: 48px !important;
-        min-width: 48px;
-        border-radius: 10px;
-        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        color: rgba(255,255,255,0.8);
-        font-size: 1.1rem;
-    }
-    .product-name { font-weight: 700; font-size: 0.92rem; color: #1e293b; max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .product-sku { font-size: 0.78rem; color: #94a3b8; }
-    /* Metrics pills */
-    .metric-pill { display: inline-flex; align-items: center; gap: 6px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; padding: 5px 14px; font-size: 0.82rem; color: #64748b; font-weight: 500; }
-    .metric-pill strong { color: #1e293b; font-weight: 700; }
-    .metric-pill i { font-size: 0.75rem; }
-    .metric-pill.active i { color: #10b981; }
-    .metric-pill.sales i { color: #f59e0b; }
-    .metric-pill.stock i { color: #06b6d4; }
-    /* Table refinements */
-    .table td { font-size: 0.9rem; padding: 12px 15px !important; }
-    .table th { padding: 14px 15px !important; }
-    .action-btns { display: flex; gap: 6px; align-items: center; }
+<style>
+    .vendor-unified-shell { display:flex; flex-direction:column; gap:20px; }
+    .vendor-hero { background:linear-gradient(135deg,#111827,#2563eb 55%,#22c55e); border-radius:28px; color:#fff; padding:26px; box-shadow:0 18px 45px rgba(15,23,42,.22); }
+    .vendor-hero-actions .btn { border-radius:999px; padding:12px 20px; font-weight:700; }
+    .vendor-stat-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; }
+    .vendor-stat-card { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.16); border-radius:20px; padding:16px; backdrop-filter:blur(12px); }
+    .vendor-stat-label { font-size:.78rem; opacity:.86; }
+    .vendor-stat-value { font-size:1.4rem; font-weight:800; }
+    .vendor-panel-card { background:#fff; border:1px solid #e2e8f0; border-radius:24px; box-shadow:0 10px 30px rgba(15,23,42,.06); }
+    .vendor-toolbar { padding:18px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+    .vendor-search { display:flex; gap:10px; flex:1; min-width:260px; }
+    .vendor-search .form-control { border-radius:16px; min-height:48px; }
+    .vendor-table thead th { font-size:.76rem; letter-spacing:.06em; text-transform:uppercase; color:#64748b; border-bottom:none; }
+    .vendor-table tbody td { padding:18px 16px; vertical-align:middle; }
+    .vendor-row-title { font-weight:800; color:#0f172a; }
+    .vendor-row-meta { color:#64748b; font-size:.82rem; }
+    .vendor-thumb { width:56px; height:56px; border-radius:16px; object-fit:cover; box-shadow:0 8px 18px rgba(15,23,42,.12); }
+    .vendor-thumb-placeholder { width:56px; height:56px; border-radius:16px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#2563eb,#22c55e); color:#fff; }
+    .vendor-status-pill { border-radius:999px; padding:7px 12px; font-weight:700; font-size:.78rem; }
+    .vendor-actions { display:flex; gap:8px; flex-wrap:wrap; }
+    .vendor-actions .btn { border-radius:999px; }
+    @media (max-width: 991px) { .vendor-stat-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media (max-width: 767px) { .vendor-stat-grid { grid-template-columns:1fr; } }
+</style>
 {% endblock %}
 
 {% block vendor_content %}
-<div class="page-header-card">
-    <div class="d-flex justify-content-between align-items-center">
-        <div>
-            <h4 class="mb-1"><i class="fas fa-shopping-bag me-2"></i>{% trans "我的商品" %}</h4>
-            <small style="opacity:0.85;">{% trans "管理您的所有商品" %}</small>
+<div class="vendor-unified-shell">
+    <section class="vendor-hero">
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+            <div>
+                <div class="text-uppercase small fw-bold opacity-75 mb-2">{% trans "商品管理中心" %}</div>
+                <h3 class="mb-2 fw-bold"><i class="fas fa-shopping-bag me-2"></i>{% trans "商品列表" %}</h3>
+                <p class="mb-0 opacity-75">{% trans "以更专业、更清晰的方式管理商品、库存、销量与展示状态。" %}</p>
+            </div>
+            <div class="vendor-hero-actions d-flex gap-2 flex-wrap">
+                <a href="{% url 'marketplace:vendor_product_add' %}" class="btn btn-light text-dark"><i class="fas fa-plus me-2"></i>{% trans "新增商品" %}</a>
+            </div>
         </div>
-        <a href="{% url 'marketplace:vendor_product_add' %}" class="btn btn-light rounded-pill px-4"><i class="fas fa-plus me-2"></i>{% trans "添加商品" %}</a>
-    </div>
-</div>
+        <div class="vendor-stat-grid">
+            <div class="vendor-stat-card"><div class="vendor-stat-label">{% trans "全部商品" %}</div><div class="vendor-stat-value">{{ total_products }}</div></div>
+            <div class="vendor-stat-card"><div class="vendor-stat-label">{% trans "已上架" %}</div><div class="vendor-stat-value">{{ active_products }}</div></div>
+            <div class="vendor-stat-card"><div class="vendor-stat-label">{% trans "总销量" %}</div><div class="vendor-stat-value">{{ total_sales }}</div></div>
+            <div class="vendor-stat-card"><div class="vendor-stat-label">{% trans "总库存" %}</div><div class="vendor-stat-value">{{ total_stock }}</div></div>
+        </div>
+    </section>
 
-<div class="toolbar d-flex justify-content-between align-items-center flex-wrap gap-2">
-    <form method="get" class="d-flex gap-2">
-        <input type="text" name="q" class="form-control" placeholder="{% trans '搜索商品名称或SKU...' %}" value="{{ search_query|default:'' }}" style="max-width:280px; border-radius:10px;">
-        <button type="submit" class="btn btn-primary-gradient"><i class="fas fa-search"></i></button>
-    </form>
-    <div class="d-flex align-items-center gap-3 flex-wrap">
-        <span class="metric-pill"><i class="fas fa-box"></i> {% trans "全部" %} <strong>{{ total_products }}</strong></span>
-        <span class="metric-pill active"><i class="fas fa-check-circle"></i> {% trans "上架" %} <strong>{{ active_products }}</strong></span>
-        <span class="metric-pill sales"><i class="fas fa-chart-line"></i> {% trans "销量" %} <strong>{{ total_sales }}</strong></span>
-        <span class="metric-pill stock"><i class="fas fa-warehouse"></i> {% trans "库存" %} <strong>{{ total_stock }}</strong></span>
-    </div>
-</div>
-
-<div class="content-card">
-    <div class="table-responsive">
-        <table class="table table-hover mb-0" style="table-layout:fixed;">
-            <thead>
-                <tr>
-                    <th class="ps-4" style="width:35%;">{% trans "商品" %}</th>
-                    <th style="width:12%;">{% trans "分类" %}</th>
-                    <th style="width:10%;">{% trans "价格" %}</th>
-                    <th style="width:8%;">{% trans "库存" %}</th>
-                    <th style="width:8%;">{% trans "销量" %}</th>
-                    <th style="width:10%;">{% trans "状态" %}</th>
-                    <th style="width:17%;">{% trans "操作" %}</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for product in products %}
-                <tr id="row-{{ product.pk }}">
-                    <td class="ps-4">
-                        <div class="d-flex align-items-center gap-3">
-                            {% if product.image %}
-                            <img src="{{ product.get_image_url }}" class="prod-thumb" alt="{{ product.name }}">
-                            {% else %}
-                            <div class="prod-thumb-placeholder"><i class="fas fa-box"></i></div>
-                            {% endif %}
-                            <div style="min-width:0; flex:1;">
-                                <div class="product-name">{{ product.name }}</div>
-                                <div class="product-sku">SKU: {{ product.sku|default:"-" }}</div>
+    <section class="vendor-panel-card overflow-hidden">
+        <div class="vendor-toolbar">
+            <form method="get" class="vendor-search">
+                <input type="text" name="q" class="form-control" placeholder="{% trans '搜索商品名称、SKU 或分类…' %}" value="{{ search_query|default:'' }}">
+                <button type="submit" class="btn btn-primary-gradient rounded-pill px-4"><i class="fas fa-search me-2"></i>{% trans "搜索" %}</button>
+            </form>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="badge rounded-pill text-bg-light px-3 py-2">{% trans "智能管理" %}</span>
+                <span class="badge rounded-pill text-bg-success px-3 py-2">{% trans "实时状态" %}</span>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 vendor-table">
+                <thead>
+                    <tr>
+                        <th class="ps-4">{% trans "商品" %}</th>
+                        <th>{% trans "分类" %}</th>
+                        <th>{% trans "价格" %}</th>
+                        <th>{% trans "库存" %}</th>
+                        <th>{% trans "销量" %}</th>
+                        <th>{% trans "状态" %}</th>
+                        <th class="pe-4">{% trans "操作" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr id="row-{{ product.pk }}">
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center gap-3">
+                                {% if product.image %}
+                                <img src="{{ product.get_image_url }}" class="vendor-thumb" alt="{{ product.name }}">
+                                {% else %}
+                                <div class="vendor-thumb-placeholder"><i class="fas fa-box"></i></div>
+                                {% endif %}
+                                <div style="min-width:0; flex:1;">
+                                    <div class="vendor-row-title text-truncate">{{ product.name }}</div>
+                                    <div class="vendor-row-meta">SKU: {{ product.sku|default:"-" }}</div>
+                                </div>
                             </div>
-                        </div>
-                    </td>
-                    <td><span class="badge bg-light text-dark" style="font-size:0.8rem;">{{ product.category.name|default:"-" }}</span></td>
-                    <td><span class="fw-bold text-danger">{{ product.price|fcfa }}</span></td>
-                    <td>
-                        <span class="{% if product.stock < 5 %}stock-low{% else %}stock-ok{% endif %}">{{ product.stock }}</span>
-                    </td>
-                    <td>{{ product.sales_count }}</td>
-                    <td>
-                        <button onclick="toggleProduct({{ product.pk }}, this)" title="{% trans '切换状态' %}" style="border:none;background:none;cursor:pointer;">
-                            {% if product.is_active %}
-                            <span class="badge badge-active"><i class="fas fa-check-circle me-1"></i>{% trans "上架" %}</span>
-                            {% else %}
-                            <span class="badge badge-inactive"><i class="fas fa-times-circle me-1"></i>{% trans "下架" %}</span>
-                            {% endif %}
-                        </button>
-                    </td>
-                    <td>
-                        <div class="action-btns">
-                            <a href="{% url 'marketplace:vendor_product_edit' product.pk %}" class="btn btn-sm btn-outline-primary rounded-pill" title="{% trans '编辑' %}"><i class="fas fa-edit"></i></a>
-                            <form method="post" action="{% url 'marketplace:vendor_product_delete' product.pk %}" style="display:inline;" data-confirm-message="{% trans 'Are you sure you want to delete this product?' %}">
-                                {% csrf_token %}
-                                <button class="btn btn-sm btn-outline-danger rounded-pill" title="{% trans '删除' %}"><i class="fas fa-trash"></i></button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="7" class="text-center py-5">
-                        <i class="fas fa-box-open d-block mb-3" style="font-size:2.5rem; opacity:0.2;"></i>
-                        <p class="text-muted mb-2">{% trans "暂无商品" %}</p>
-                        <a href="{% url 'marketplace:vendor_product_add' %}" class="btn btn-sm btn-primary-gradient px-4">{% trans "添加第一个商品" %}</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+                        </td>
+                        <td>{{ product.category.name|default:"-" }}</td>
+                        <td class="fw-bold text-danger">{{ product.price|fcfa }}</td>
+                        <td>{{ product.stock }}</td>
+                        <td>{{ product.sales_count }}</td>
+                        <td>
+                            {% if product.is_active %}<span class="vendor-status-pill bg-success-subtle text-success">{% trans "上架" %}</span>
+                            {% else %}<span class="vendor-status-pill bg-secondary-subtle text-secondary">{% trans "下架" %}</span>{% endif %}
+                        </td>
+                        <td class="pe-4">
+                            <div class="vendor-actions">
+                                <a href="{% url 'marketplace:product_detail' product.slug %}" class="btn btn-sm btn-outline-info" target="_blank" rel="noopener" title="{% trans '查看前台' %}"><i class="fas fa-external-link-alt"></i></a>
+                                <a href="{% url 'marketplace:vendor_product_edit' product.pk %}" class="btn btn-sm btn-outline-primary">{% trans "编辑" %}</a>
+                                <form method="post" action="{% url 'marketplace:vendor_product_delete' product.pk %}" class="d-inline" data-confirm-message="{% trans '确定删除此商品吗？' %}">
+                                    {% csrf_token %}
+                                    <button class="btn btn-sm btn-outline-danger" title="{% trans '删除' %}">{% trans "删除" %}</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="7" class="text-center py-5 text-muted">{% trans "暂无商品" %}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
 </div>
 
 {% if products.has_other_pages %}
@@ -156,28 +132,4 @@
     </ul>
 </nav>
 {% endif %}
-{% endblock %}
-
-{% block extra_vendor_js %}
-<script>
-function toggleProduct(pk, btn) {
-    fetch(`/marketplace/vendor/products/${pk}/toggle/`, {
-        method: 'POST',
-        headers: {'X-CSRFToken': '{{ csrf_token }}', 'X-Requested-With': 'XMLHttpRequest'}
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.status === 'ok') {
-            const badge = btn.querySelector('.badge');
-            if (data.is_active) {
-                badge.className = 'badge badge-active';
-                badge.innerHTML = '<i class="fas fa-check-circle me-1"></i>{% trans "上架" %}';
-            } else {
-                badge.className = 'badge badge-inactive';
-                badge.innerHTML = '<i class="fas fa-times-circle me-1"></i>{% trans "下架" %}';
-            }
-        }
-    });
-}
-</script>
 {% endblock %}

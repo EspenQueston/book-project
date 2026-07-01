@@ -1,4 +1,4 @@
-{% extends 'public/base.html' %}
+﻿{% extends 'public/base.html' %}
 {% load i18n %}
 {% load currency_filters %}
 
@@ -7,9 +7,11 @@
 {% block extra_css %}
 <style>
     .profile-hero {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 80px 0 60px;
+        background: radial-gradient(circle at 18% 18%, rgba(96,165,250,.30), transparent 24%), radial-gradient(circle at 84% 18%, rgba(14,165,233,.16), transparent 22%), linear-gradient(135deg, #14245f 0%, #1d4ed8 100%);
+        padding: 92px 0 68px;
         position: relative; overflow: hidden;
+        border-radius: 0 0 28px 28px;
+        box-shadow: 0 22px 56px rgba(20,36,95,.22);
     }
     .profile-hero::before {
         content: ''; position: absolute; top: -50%; right: -10%;
@@ -36,13 +38,13 @@
         border: 2px solid var(--input-border, #e8ecf1); border-radius: 12px;
         padding: 12px 16px; background: var(--input-bg, #fff); color: var(--dark-text, #333);
     }
-    .profile-card .form-control:focus { border-color: #667eea; box-shadow: 0 0 0 4px rgba(102,126,234,0.1); }
+    .profile-card .form-control:focus { border-color: #1d4ed8; box-shadow: 0 0 0 4px rgba(29,78,216,0.12); }
     .btn-profile {
-        background: linear-gradient(135deg, #667eea, #764ba2); color: #fff;
+        background: linear-gradient(135deg, #14245f, #1d4ed8); color: #fff;
         border: none; border-radius: 12px; padding: 12px 28px; font-weight: 700;
         transition: all 0.3s;
     }
-    .btn-profile:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102,126,234,0.35); }
+    .btn-profile:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(29,78,216,0.28); }
     .order-card {
         border-radius: 16px; margin-bottom: 20px;
         background: var(--card-bg, #fff);
@@ -50,7 +52,7 @@
         overflow: hidden; transition: all 0.3s;
         box-shadow: 0 2px 12px rgba(0,0,0,0.04);
     }
-    .order-card:hover { box-shadow: 0 6px 24px rgba(102,126,234,0.12); }
+    .order-card:hover { box-shadow: 0 6px 24px rgba(29,78,216,0.12); }
     .order-card-header {
         display: flex; align-items: center; justify-content: space-between;
         padding: 16px 20px; cursor: pointer;
@@ -94,7 +96,7 @@
         cursor: pointer; transition: all 0.3s; color: var(--dark-text, #333);
     }
     .tab-btn.active {
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: linear-gradient(135deg, #1d4ed8, #14245f);
         color: #fff; border-color: transparent;
     }
     .follow-chip {
@@ -104,11 +106,11 @@
         border: 1px solid var(--card-border, rgba(0,0,0,0.06));
         margin-bottom: 12px; transition: box-shadow 0.2s;
     }
-    .follow-chip:hover { box-shadow: 0 4px 18px rgba(102,126,234,0.12); }
+    .follow-chip:hover { box-shadow: 0 4px 18px rgba(29,78,216,0.12); }
     .follow-chip-avatar {
         width: 48px; height: 48px; border-radius: 12px;
         object-fit: cover; flex-shrink: 0;
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: linear-gradient(135deg, #1d4ed8, #14245f);
         display: flex; align-items: center; justify-content: center;
         color: #fff; font-weight: 800; font-size: 1.1rem;
     }
@@ -117,7 +119,7 @@
     .status-badge[style*="success"] { background: rgba(16,185,129,0.12)!important; color: #059669!important; }
     .status-badge[style*="danger"]  { background: rgba(239,68,68,0.12)!important; color: #dc2626!important; }
     .status-badge[style*="info"]    { background: rgba(6,182,212,0.12)!important; color: #0891b2!important; }
-    .status-badge[style*="primary"] { background: rgba(102,126,234,0.12)!important; color: #667eea!important; }
+    .status-badge[style*="primary"] { background: rgba(29,78,216,0.12)!important; color: #1d4ed8!important; }
 
     .profile-body-inner { max-width: 1240px; margin-left: auto; margin-right: auto; }
     .upro-pending {
@@ -137,7 +139,7 @@
     .upro-pending-row:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,0.06); }
     .upro-pending-thumb { width: 48px; height: 48px; border-radius: 10px; object-fit: cover; flex-shrink: 0; border: 1px solid #e2e8f0; }
     .upro-pending-name { flex: 1; min-width: 0; font-weight: 700; font-size: 0.88rem; }
-    .upro-pending-go { font-weight: 800; font-size: 0.78rem; color: #667eea; white-space: nowrap; }
+    .upro-pending-go { font-weight: 800; font-size: 0.78rem; color: #1d4ed8; white-space: nowrap; }
     .order-card-v2 .order-card-header { border-radius: 16px 16px 0 0; }
 
     /* ========== DARK MODE ========== */
@@ -260,7 +262,7 @@
     <!-- Profile Tab -->
     <div id="tab-profile" class="tab-content" data-aos="fade-up">
         <div class="profile-card">
-            <h5><i class="fas fa-user-edit me-2" style="color:#667eea;"></i>{% trans "编辑资料" %}</h5>
+            <h5><i class="fas fa-user-edit me-2" style="color:#1d4ed8;"></i>{% trans "编辑资料" %}</h5>
             <form id="profileForm" onsubmit="return updateProfile(event)" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="row g-3">
@@ -290,7 +292,7 @@
     <!-- Followed shops & publishers (desktop tab — button sits left of Favorites) -->
     <div id="tab-follows" class="tab-content" style="display:none;" data-aos="fade-up">
         <div class="profile-card">
-            <h5><i class="fas fa-store me-2" style="color:#667eea;"></i>{% trans "关注的卖家" %}</h5>
+            <h5><i class="fas fa-store me-2" style="color:#1d4ed8;"></i>{% trans "关注的卖家" %}</h5>
             {% if followed_vendors %}
             {% for fv in followed_vendors %}
             <div class="follow-chip" id="follow-vendor-{{ fv.vendor.id }}">
@@ -312,7 +314,7 @@
             {% endif %}
         </div>
         <div class="profile-card">
-            <h5><i class="fas fa-building me-2" style="color:#764ba2;"></i>{% trans "关注的出版社" %}</h5>
+            <h5><i class="fas fa-building me-2" style="color:#14245f;"></i>{% trans "关注的出版社" %}</h5>
             {% if followed_publishers %}
             {% for fp in followed_publishers %}
             <div class="follow-chip" id="follow-publisher-{{ fp.publisher.id }}">
@@ -357,7 +359,7 @@
             <!-- Order Header -->
             <div class="order-card-header" onclick="toggleOrderItems('order-items-{{ od.order_number }}', this)">
                 <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;">
-                    <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,{% if od.type == 'book' %}#667eea,#764ba2{% else %}#10b981,#06b6d4{% endif %});display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.9rem;flex-shrink:0;">
+                    <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,{% if od.type == 'book' %}#1d4ed8,#14245f{% else %}#10b981,#06b6d4{% endif %});display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.9rem;flex-shrink:0;">
                         <i class="fas {% if od.type == 'book' %}fa-receipt{% else %}fa-store{% endif %}"></i>
                     </div>
                     <div style="min-width:0;">
@@ -372,10 +374,10 @@
                 </div>
                 <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end;">
                     <div style="text-align:right;">
-                        <div class="fw-bold" style="color:#667eea;font-size:1.05rem;">{{ od.total_amount|fcfa }}</div>
+                        <div class="fw-bold" style="color:#1d4ed8;font-size:1.05rem;">{{ od.total_amount|fcfa }}</div>
                         <small style="color:var(--muted-text,#94a3b8);">{{ od.items|length }} {% trans "件商品" %}</small>
                     </div>
-                    <span class="status-badge" style="padding:6px 14px;border-radius:999px;background:rgba(102,126,234,0.12);color:#4f46e5;font-weight:700;">
+                    <span class="status-badge" style="padding:6px 14px;border-radius:999px;background:rgba(29,78,216,0.12);color:#4f46e5;font-weight:700;">
                         {{ od.status_display }}
                     </span>
                     <i class="fas fa-chevron-down" style="color:#94a3b8;transition:transform 0.3s;font-size:0.85rem;"></i>
@@ -394,10 +396,10 @@
                         </div>
                         <div style="font-size:0.8rem;color:var(--muted-text,#64748b);">
                             {{ item.unit_price|fcfa }} × {{ item.quantity }}
-                            <span style="color:#667eea;font-weight:700;margin-left:8px;">= {{ item.total_price|fcfa }}</span>
+                            <span style="color:#1d4ed8;font-weight:700;margin-left:8px;">= {{ item.total_price|fcfa }}</span>
                         </div>
                     </div>
-                    <a href="{% url 'manager:public_book_detail' item.book.id %}" class="btn btn-sm" style="background:rgba(102,126,234,0.1);color:#667eea;border:none;border-radius:8px;padding:6px 12px;font-size:0.78rem;font-weight:600;white-space:nowrap;text-decoration:none;">
+                    <a href="{% url 'manager:public_book_detail' item.book.id %}" class="btn btn-sm" style="background:rgba(29,78,216,0.1);color:#1d4ed8;border:none;border-radius:8px;padding:6px 12px;font-size:0.78rem;font-weight:600;white-space:nowrap;text-decoration:none;">
                         <i class="fas fa-book-open me-1"></i>{% trans "查看" %}
                     </a>
                     {% else %}
@@ -416,7 +418,7 @@
                         </div>
                         <div style="font-size:0.8rem;color:var(--muted-text,#64748b);">
                             {{ item.unit_price|fcfa }} × {{ item.quantity }}
-                            <span style="color:#667eea;font-weight:700;margin-left:8px;">= {{ item.total_price|fcfa }}</span>
+                            <span style="color:#1d4ed8;font-weight:700;margin-left:8px;">= {{ item.total_price|fcfa }}</span>
                         </div>
                     </div>
                     {% endif %}
@@ -434,7 +436,7 @@
                     <i class="fas fa-clock me-1"></i>{{ od.created_at|date:"Y-m-d H:i" }}
                 </div>
                 {% if od.type == 'book' %}
-                <a href="{% url 'manager:order_confirmation' od.order_number %}" style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-radius:12px;font-size:0.88rem;font-weight:700;text-decoration:none;transition:all 0.25s;box-shadow:0 8px 22px rgba(102,126,234,0.35);">
+                <a href="{% url 'manager:order_confirmation' od.order_number %}" style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:linear-gradient(135deg,#1d4ed8,#14245f);color:#fff;border-radius:12px;font-size:0.88rem;font-weight:700;text-decoration:none;transition:all 0.25s;box-shadow:0 8px 22px rgba(29,78,216,0.35);">
                     <i class="fas fa-eye"></i>{% trans "查看订单详情" %}
                 </a>
                 {% else %}
@@ -450,7 +452,7 @@
             <i class="fas fa-shopping-bag fa-3x mb-3" style="color:#cbd5e1;"></i>
             <h6 style="color:var(--muted-text,#94a3b8);margin-bottom:16px;">{% trans "暂无订单" %}</h6>
             <div class="d-flex gap-2 justify-content-center flex-wrap">
-                <a href="{% url 'manager:public_books' %}" class="btn btn-sm" style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-radius:10px;padding:8px 20px;font-weight:600;text-decoration:none;">
+                <a href="{% url 'manager:public_books' %}" class="btn btn-sm" style="background:linear-gradient(135deg,#1d4ed8,#14245f);color:#fff;border-radius:10px;padding:8px 20px;font-weight:600;text-decoration:none;">
                     <i class="fas fa-book me-1"></i>{% trans "浏览图书" %}
                 </a>
                 <a href="{% url 'marketplace:home' %}" class="btn btn-sm" style="background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff;border-radius:10px;padding:8px 20px;font-weight:600;text-decoration:none;">
@@ -490,9 +492,9 @@
                             {% if wish.item_type == 'book' %}{% trans "图书" %}{% elif wish.item_type == 'course' %}{% trans "课程" %}{% elif wish.item_type == 'supermarket' %}{% trans "超市" %}{% else %}{% trans "商品" %}{% endif %}
                         </span>
                     </div>
-                    <div style="color:#667eea; font-weight:700; font-size:0.85rem;">{{ wish.price|fcfa }}</div>
+                    <div style="color:#1d4ed8; font-weight:700; font-size:0.85rem;">{{ wish.price|fcfa }}</div>
                 </div>
-                <a href="{{ wish.detail_url }}" class="btn btn-sm" style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-radius:10px;padding:6px 14px;">
+                <a href="{{ wish.detail_url }}" class="btn btn-sm" style="background:linear-gradient(135deg,#1d4ed8,#14245f);color:#fff;border-radius:10px;padding:6px 14px;">
                     {% trans "查看" %}
                 </a>
             </div>
@@ -517,7 +519,7 @@
                     {% if cp.course.image %}
                     <img src="{{ cp.course.image.url }}" alt="{{ cp.course.name }}" style="width:60px;height:60px;border-radius:10px;object-fit:cover;">
                     {% else %}
-                    <div style="width:60px;height:60px;border-radius:10px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.5rem;">
+                    <div style="width:60px;height:60px;border-radius:10px;background:linear-gradient(135deg,#1d4ed8,#14245f);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.5rem;">
                         <i class="fas fa-graduation-cap"></i>
                     </div>
                     {% endif %}
@@ -530,17 +532,17 @@
                         </small>
                     </div>
                     <div style="text-align:right;">
-                        <div class="fw-bold" style="font-size:1.1rem;color:{% if cp.progress_pct == 100 %}#10b981{% elif cp.progress_pct > 50 %}#667eea{% else %}#f59e0b{% endif %};">
+                        <div class="fw-bold" style="font-size:1.1rem;color:{% if cp.progress_pct == 100 %}#10b981{% elif cp.progress_pct > 50 %}#1d4ed8{% else %}#f59e0b{% endif %};">
                             {{ cp.progress_pct }}%
                         </div>
-                        <a href="{{ cp.detail_url }}" class="btn btn-sm" style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-radius:8px;padding:4px 12px;font-size:0.75rem;text-decoration:none;">
+                        <a href="{{ cp.detail_url }}" class="btn btn-sm" style="background:linear-gradient(135deg,#1d4ed8,#14245f);color:#fff;border-radius:8px;padding:4px 12px;font-size:0.75rem;text-decoration:none;">
                             {% if cp.progress_pct == 100 %}{% trans "复习" %}{% else %}{% trans "继续学习" %}{% endif %}
                         </a>
                     </div>
                 </div>
                 <!-- Progress bar -->
                 <div style="background:#e9ecef;border-radius:10px;height:8px;overflow:hidden;">
-                    <div style="height:100%;border-radius:10px;width:{{ cp.progress_pct }}%;background:linear-gradient(90deg,{% if cp.progress_pct == 100 %}#10b981,#06d6a0{% elif cp.progress_pct > 50 %}#667eea,#764ba2{% else %}#f59e0b,#fbbf24{% endif %});transition:width 0.5s;"></div>
+                    <div style="height:100%;border-radius:10px;width:{{ cp.progress_pct }}%;background:linear-gradient(90deg,{% if cp.progress_pct == 100 %}#10b981,#06d6a0{% elif cp.progress_pct > 50 %}#1d4ed8,#14245f{% else %}#f59e0b,#fbbf24{% endif %});transition:width 0.5s;"></div>
                 </div>
             </div>
             {% endfor %}
@@ -548,7 +550,7 @@
             <div class="text-center py-4">
                 <i class="fas fa-graduation-cap fa-3x mb-3" style="color:#cbd5e1;"></i>
                 <p style="color:var(--muted-text, #94a3b8);">{% trans "暂无课程" %}</p>
-                <a href="{% url 'marketplace:home' %}" class="btn btn-sm" style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-radius:10px;padding:8px 20px;font-weight:600;text-decoration:none;">
+                <a href="{% url 'marketplace:home' %}" class="btn btn-sm" style="background:linear-gradient(135deg,#1d4ed8,#14245f);color:#fff;border-radius:10px;padding:8px 20px;font-weight:600;text-decoration:none;">
                     <i class="fas fa-search me-1"></i>{% trans "浏览课程" %}
                 </a>
             </div>
@@ -561,7 +563,7 @@
 
         {% if loyalty %}
         <!-- Tier card -->
-        <div class="profile-card mb-3" style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;">
+        <div class="profile-card mb-3" style="background:linear-gradient(135deg,#1d4ed8 0%,#14245f 100%);color:#fff;border:none;">
             <div class="d-flex align-items-center justify-content-between mb-3">
                 <div>
                     <div style="font-size:2rem;font-weight:700;">{{ loyalty.points_balance }}</div>
@@ -606,16 +608,16 @@
 
         <!-- Spin Wheel -->
         <div class="profile-card mb-3" style="text-align:center;">
-            <h5 style="color:#667eea;" class="mb-3"><i class="fas fa-dharmachakra me-2"></i><span data-zh="每日转盘" data-en="Daily Spin" data-fr="Roue quotidienne">每日转盘</span></h5>
+            <h5 style="color:#1d4ed8;" class="mb-3"><i class="fas fa-dharmachakra me-2"></i><span data-zh="每日转盘" data-en="Daily Spin" data-fr="Roue quotidienne">每日转盘</span></h5>
             <div id="spinWheelWrap" style="position:relative;display:inline-block;margin-bottom:14px;">
-                <canvas id="spinCanvas" width="240" height="240" style="border-radius:50%;box-shadow:0 8px 25px rgba(102,126,234,.4);cursor:pointer;"></canvas>
+                <canvas id="spinCanvas" width="240" height="240" style="border-radius:50%;box-shadow:0 8px 25px rgba(29,78,216,.4);cursor:pointer;"></canvas>
                 <div id="spinArrow" style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:1.6rem;line-height:1;text-shadow:0 2px 6px #0003;">▼</div>
             </div>
             <div>
                 {% if loyalty.last_spin_today %}
                 <p style="color:#94a3b8;font-size:.9rem;" id="spinStatus"><i class="fas fa-check-circle" style="color:#10b981;"></i> <span data-zh="今天已经转过了，明天再来！" data-en="Already spun today! Come back tomorrow." data-fr="Déjà tourné aujourd'hui !">今天已经转过了，明天再来！</span></p>
                 {% else %}
-                <button id="spinBtn" class="btn" style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-radius:12px;padding:10px 30px;font-weight:700;border:none;" onclick="doSpin()">
+                <button id="spinBtn" class="btn" style="background:linear-gradient(135deg,#1d4ed8,#14245f);color:#fff;border-radius:12px;padding:10px 30px;font-weight:700;border:none;" onclick="doSpin()">
                     <i class="fas fa-play me-2"></i><span data-zh="点击抽奖" data-en="Spin Now!" data-fr="Tourner !">点击抽奖</span>
                 </button>
                 <p id="spinStatus" style="margin-top:8px;color:#94a3b8;font-size:.85rem;" data-zh="每天可转一次" data-en="One spin per day" data-fr="Un tour par jour">每天可转一次</p>
@@ -626,7 +628,7 @@
         <!-- Recent Transactions -->
         {% if point_transactions %}
         <div class="profile-card">
-            <h5 style="color:#667eea;" class="mb-3"><i class="fas fa-history me-2"></i><span data-zh="积分记录" data-en="Points History" data-fr="Historique des points">积分记录</span></h5>
+            <h5 style="color:#1d4ed8;" class="mb-3"><i class="fas fa-history me-2"></i><span data-zh="积分记录" data-en="Points History" data-fr="Historique des points">积分记录</span></h5>
             {% for tx in point_transactions %}
             <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f1f5f9;">
                 <div>
@@ -770,7 +772,7 @@ function updateProfile(e) {
     if (!canvas) return;
     var ctx = canvas.getContext('2d');
     var prizes = [10, 20, 30, 50, 80, 100, 5, 20];
-    var colors = ['#667eea','#764ba2','#10b981','#f59e0b','#ef4444','#06b6d4','#8b5cf6','#ec4899'];
+    var colors = ['#1d4ed8','#14245f','#10b981','#f59e0b','#ef4444','#06b6d4','#8b5cf6','#ec4899'];
     var slices = prizes.length;
     var arc = (2 * Math.PI) / slices;
     var currentAngle = 0;
@@ -802,10 +804,10 @@ function updateProfile(e) {
         ctx.arc(120, 120, 18, 0, 2 * Math.PI);
         ctx.fillStyle = '#fff';
         ctx.fill();
-        ctx.strokeStyle = '#667eea';
+        ctx.strokeStyle = '#1d4ed8';
         ctx.lineWidth = 3;
         ctx.stroke();
-        ctx.fillStyle = '#667eea';
+        ctx.fillStyle = '#1d4ed8';
         ctx.font = 'bold 10px sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText('SPIN', 120, 124);

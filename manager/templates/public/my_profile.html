@@ -1,4 +1,4 @@
-{% extends "public/base.html" %}
+﻿{% extends "public/base.html" %}
 {% load i18n static %}
 {% load currency_filters %}
 
@@ -9,7 +9,7 @@
 /* ===== MY PROFILE (PWA) ===== */
 .mypro-page { background: #F5F5F5; min-height: 100vh; padding-bottom: 80px; }
 .mypro-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
     padding: 28px 16px 60px;
     position: relative; overflow: hidden;
 }
@@ -34,11 +34,11 @@
 .mypro-points-card {
     background: #fff; border-radius: 16px; padding: 14px 18px;
     margin: -36px 12px 10px; position: relative; z-index: 2;
-    box-shadow: 0 6px 24px rgba(102,126,234,.2);
+    box-shadow: 0 6px 24px rgba(29,78,216,.2);
     display: flex; align-items: center; gap: 0;
 }
 .mypro-points-col { flex: 1; text-align: center; }
-.mypro-points-val { font-size: 22px; font-weight: 900; color: #667eea; }
+.mypro-points-val { font-size: 22px; font-weight: 900; color: #1d4ed8; }
 .mypro-points-label { font-size: 11px; color: #999; margin-top: 2px; }
 .mypro-divider-v { width: 1px; height: 40px; background: #f0f0f0; }
 .mypro-points-tier { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 10px; }
@@ -50,10 +50,10 @@
 /* Orders shortcuts */
 .mypro-orders-section { background: #fff; margin-bottom: 8px; padding: 12px 14px 4px; }
 .mypro-orders-title { font-size: 13px; font-weight: 700; color: #333; display: flex; justify-content: space-between; margin-bottom: 10px; }
-.mypro-orders-title a { font-size: 12px; color: #667eea; text-decoration: none; }
+.mypro-orders-title a { font-size: 12px; color: #1d4ed8; text-decoration: none; }
 .mypro-orders-tabs { display: flex; justify-content: space-around; padding-bottom: 10px; }
 .mypro-orders-tab { display: flex; flex-direction: column; align-items: center; gap: 5px; text-decoration: none; color: #555; font-size: 11px; }
-.mypro-orders-tab i { font-size: 20px; color: #667eea; }
+.mypro-orders-tab i { font-size: 20px; color: #1d4ed8; }
 .mypro-orders-tab .badge { background: #E4393C; color: #fff; font-size: 9px; padding: 1px 5px; border-radius: 8px; }
 
 .mypro-pr-section { background: #fff; margin: 0 0 8px; padding: 12px 14px 14px; }
@@ -66,7 +66,7 @@
 }
 .mypro-pr-thumb { width: 48px; height: 48px; border-radius: 10px; object-fit: cover; background: #f8fafc; flex-shrink: 0; border: 1px solid #e2e8f0; }
 .mypro-pr-name { flex: 1; min-width: 0; font-size: 12px; font-weight: 700; color: #1e293b; line-height: 1.35; }
-.mypro-pr-go { font-size: 11px; font-weight: 800; color: #667eea; white-space: nowrap; }
+.mypro-pr-go { font-size: 11px; font-weight: 800; color: #1d4ed8; white-space: nowrap; }
 
 /* Quick actions */
 .mypro-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 12px 10px; }
@@ -86,7 +86,7 @@
     padding: 12px 14px 8px; font-size: 13px; font-weight: 700; color: #333;
 }
 .mypro-wishlist-header .count {
-    font-size: 11px; font-weight: 700; color: #667eea; background: #eef2ff;
+    font-size: 11px; font-weight: 700; color: #1d4ed8; background: #eef2ff;
     border-radius: 10px; padding: 2px 8px;
 }
 .mypro-wishlist-list { padding: 0 12px 12px; display: grid; gap: 8px; }
@@ -102,7 +102,7 @@
 .mypro-wishlist-name { font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mypro-wishlist-meta { margin-top: 3px; display: flex; align-items: center; gap: 6px; }
 .mypro-wishlist-tag {
-    font-size: 9px; font-weight: 700; color: #fff; background: linear-gradient(135deg,#667eea,#764ba2);
+    font-size: 9px; font-weight: 700; color: #fff; background: linear-gradient(135deg,#1d4ed8,#14245f);
     border-radius: 8px; padding: 1px 6px;
 }
 .mypro-wishlist-price { font-size: 12px; font-weight: 800; color: #E4393C; }
@@ -110,7 +110,7 @@
 /* Followed shops */
 .mypro-shops-section { background: #fff; margin: 0 0 8px; }
 .mypro-shops-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px 8px; font-size: 13px; font-weight: 700; color: #333; }
-.mypro-shops-header a { font-size: 12px; color: #667eea; text-decoration: none; }
+.mypro-shops-header a { font-size: 12px; color: #1d4ed8; text-decoration: none; }
 .mypro-shops-list { display: flex; gap: 12px; padding: 0 14px 12px; overflow-x: auto; scrollbar-width: none; }
 .mypro-shops-list::-webkit-scrollbar { display: none; }
 .mypro-shop-chip {
@@ -119,7 +119,7 @@
 }
 .mypro-shop-avatar {
     width: 48px; height: 48px; border-radius: 50%;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #1d4ed8, #14245f);
     display: flex; align-items: center; justify-content: center;
     color: #fff; font-size: 16px;
 }
@@ -137,7 +137,7 @@
 }
 .mypro-feed-img {
     width: 100%; aspect-ratio: 3/4; object-fit: cover;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #1d4ed8, #14245f);
     display: flex; align-items: center; justify-content: center;
     color: rgba(255,255,255,.6); font-size: 2rem;
 }
@@ -153,15 +153,15 @@
     align-items: center; justify-content: center; gap: 16px; padding: 24px;
     text-align: center;
 }
-.mypro-login-icon { font-size: 64px; background: linear-gradient(135deg,#667eea,#764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.mypro-login-icon { font-size: 64px; background: linear-gradient(135deg,#1d4ed8,#14245f); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 .mypro-login-title { font-size: 20px; font-weight: 800; color: #333; }
 .mypro-login-sub { font-size: 13px; color: #999; }
 .mypro-login-btn {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #1d4ed8, #14245f);
     color: #fff; border: none; border-radius: 22px;
     padding: 13px 40px; font-size: 15px; font-weight: 700;
     cursor: pointer; text-decoration: none; display: inline-block;
-    transition: all .2s; box-shadow: 0 4px 16px rgba(102,126,234,.35);
+    transition: all .2s; box-shadow: 0 4px 16px rgba(29,78,216,.35);
 }
 .mypro-login-btn:hover { color: #fff; transform: translateY(-2px); }
 
@@ -266,7 +266,7 @@ html[data-theme="dark"] .mypro-login-sub {
     <div class="mypro-login-title" data-zh="登录后解锁全部功能" data-en="Login to unlock everything" data-fr="Connectez-vous pour tout débloquer">登录后解锁全部功能</div>
     <div class="mypro-login-sub" data-zh="查看订单 · 积分 · 收藏夹 · 关注的店铺" data-en="Orders · Points · Wishlist · Followed Shops" data-fr="Commandes · Points · Favoris · Boutiques suivies">查看订单 · 积分 · 收藏夹 · 关注的店铺</div>
     <a href="{% url 'manager:user_login' %}" class="mypro-login-btn" data-zh="立即登录" data-en="Sign In" data-fr="Se connecter">立即登录</a>
-    <a href="{% url 'manager:user_register' %}" style="font-size:13px;color:#667eea;text-decoration:none;" data-zh="还没有账号？立即注册" data-en="No account? Register now" data-fr="Pas encore inscrit ?">还没有账号？立即注册</a>
+    <a href="{% url 'manager:user_register' %}" style="font-size:13px;color:#1d4ed8;text-decoration:none;" data-zh="还没有账号？立即注册" data-en="No account? Register now" data-fr="Pas encore inscrit ?">还没有账号？立即注册</a>
 </div>
 
 {% else %}
@@ -373,7 +373,7 @@ html[data-theme="dark"] .mypro-login-sub {
         <i class="fas fa-heart"></i>
         <span data-zh="我的收藏" data-en="Wishlist" data-fr="Favoris">我的收藏</span>
     </a>
-    <a href="{% url 'manager:public_messages' %}" class="mypro-action-btn" style="color:#667eea;">
+    <a href="{% url 'manager:public_messages' %}" class="mypro-action-btn" style="color:#1d4ed8;">
         <i class="fas fa-comment-dots"></i>
         <span data-zh="消息中心" data-en="Messages" data-fr="Messages">消息中心</span>
     </a>
@@ -385,7 +385,7 @@ html[data-theme="dark"] .mypro-login-sub {
         <i class="fas fa-wallet"></i>
         <span data-zh="我的钱包" data-en="Wallet" data-fr="Portefeuille">我的钱包</span>
     </a>
-    <a href="{% url 'manager:user_profile' %}" class="mypro-action-btn" style="color:#764ba2;">
+    <a href="{% url 'manager:user_profile' %}" class="mypro-action-btn" style="color:#14245f;">
         <i class="fas fa-user-cog"></i>
         <span data-zh="账户设置" data-en="Settings" data-fr="Paramètres">账户设置</span>
     </a>
@@ -424,25 +424,25 @@ html[data-theme="dark"] .mypro-login-sub {
         <button onclick="document.getElementById('discoverSection').style.display='none';" style="background:none;border:none;color:#999;font-size:18px;cursor:pointer;">×</button>
     </div>
     {% if all_vendors %}
-    <div style="font-size:11px;color:#667eea;font-weight:700;margin-bottom:6px;" data-zh="卖家" data-en="Vendors" data-fr="Vendeurs">卖家</div>
+    <div style="font-size:11px;color:#1d4ed8;font-weight:700;margin-bottom:6px;" data-zh="卖家" data-en="Vendors" data-fr="Vendeurs">卖家</div>
     <div class="mypro-shops-list" style="margin-bottom:10px;">
         {% for v in all_vendors %}
         <div class="mypro-shop-chip" style="min-width:80px;">
             <div class="mypro-shop-avatar" style="background:linear-gradient(135deg,#f59e0b,#f97316);"><i class="fas fa-store-alt"></i></div>
             <span class="mypro-shop-name" style="max-width:80px;">{{ v.company_name|truncatechars:10 }}</span>
-            <button onclick="followVendor({{ v.id }},this)" style="font-size:10px;padding:2px 8px;border:1px solid #667eea;color:#667eea;background:#fff;border-radius:10px;cursor:pointer;margin-top:2px;" data-zh="关注" data-en="Follow" data-fr="Suivre">关注</button>
+            <button onclick="followVendor({{ v.id }},this)" style="font-size:10px;padding:2px 8px;border:1px solid #1d4ed8;color:#1d4ed8;background:#fff;border-radius:10px;cursor:pointer;margin-top:2px;" data-zh="关注" data-en="Follow" data-fr="Suivre">关注</button>
         </div>
         {% endfor %}
     </div>
     {% endif %}
     {% if all_publishers %}
-    <div style="font-size:11px;color:#667eea;font-weight:700;margin-bottom:6px;" data-zh="出版社" data-en="Publishers" data-fr="Éditeurs">出版社</div>
+    <div style="font-size:11px;color:#1d4ed8;font-weight:700;margin-bottom:6px;" data-zh="出版社" data-en="Publishers" data-fr="Éditeurs">出版社</div>
     <div class="mypro-shops-list">
         {% for p in all_publishers %}
         <div class="mypro-shop-chip" style="min-width:80px;">
             <div class="mypro-shop-avatar"><i class="fas fa-building"></i></div>
             <span class="mypro-shop-name" style="max-width:80px;">{{ p.publisher_name|truncatechars:10 }}</span>
-            <button onclick="followPublisher({{ p.id }},this)" style="font-size:10px;padding:2px 8px;border:1px solid #667eea;color:#667eea;background:#fff;border-radius:10px;cursor:pointer;margin-top:2px;" data-zh="关注" data-en="Follow" data-fr="Suivre">关注</button>
+            <button onclick="followPublisher({{ p.id }},this)" style="font-size:10px;padding:2px 8px;border:1px solid #1d4ed8;color:#1d4ed8;background:#fff;border-radius:10px;cursor:pointer;margin-top:2px;" data-zh="关注" data-en="Follow" data-fr="Suivre">关注</button>
         </div>
         {% endfor %}
     </div>
@@ -500,8 +500,8 @@ function followVendor(vendorId, btn) {
     }).then(function(r) { return r.json(); }).then(function(d) {
         if (d.login_required) { window.location.href = '{% url "manager:user_login" %}'; return; }
         btn.textContent = d.following ? '已关注' : '关注';
-        btn.style.background = d.following ? '#667eea' : '#fff';
-        btn.style.color = d.following ? '#fff' : '#667eea';
+        btn.style.background = d.following ? '#1d4ed8' : '#fff';
+        btn.style.color = d.following ? '#fff' : '#1d4ed8';
     });
 }
 function followPublisher(pubId, btn) {
@@ -514,8 +514,8 @@ function followPublisher(pubId, btn) {
     }).then(function(r) { return r.json(); }).then(function(d) {
         if (d.login_required) { window.location.href = '{% url "manager:user_login" %}'; return; }
         btn.textContent = d.following ? '已关注' : '关注';
-        btn.style.background = d.following ? '#667eea' : '#fff';
-        btn.style.color = d.following ? '#fff' : '#667eea';
+        btn.style.background = d.following ? '#1d4ed8' : '#fff';
+        btn.style.color = d.following ? '#fff' : '#1d4ed8';
     });
 }
 

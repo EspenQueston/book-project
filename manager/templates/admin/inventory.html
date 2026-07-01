@@ -1,4 +1,4 @@
-{% load i18n %}
+﻿{% load i18n %}
 {% load currency_filters %}
 <!DOCTYPE html>
 <html lang="zh-hans">
@@ -11,8 +11,8 @@
 <link href="/static/css/inventory_grid.css" rel="stylesheet">
 <style>
     :root {
-        --primary-color: #667eea;
-        --secondary-color: #764ba2;
+        --primary-color: #1d4ed8;
+        --secondary-color: #14245f;
         --success-color: #10b981;
         --warning-color: #f59e0b;
         --danger-color: #ef4444;
@@ -23,16 +23,16 @@
         min-height: 100vh;
     }
     .main-container { min-height: 100vh; padding: 20px 0; }
-    .vp-page-head { background: radial-gradient(circle at 15% 10%, rgba(255,255,255,.24), transparent 28%), linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 24px 26px; border-radius: 24px; margin-bottom: 22px; box-shadow: 0 18px 45px rgba(102, 126, 234, 0.30); position:relative; overflow:hidden; }
+    .vp-page-head { background: radial-gradient(circle at 15% 10%, rgba(255,255,255,.24), transparent 28%), linear-gradient(135deg, #1d4ed8 0%, #14245f 100%); color: #fff; padding: 24px 26px; border-radius: 24px; margin-bottom: 22px; box-shadow: 0 18px 45px rgba(29, 78, 216, 0.30); position:relative; overflow:hidden; }
     .vp-page-head::after { content:''; position:absolute; right:-80px; top:-80px; width:220px; height:220px; border-radius:50%; background:rgba(255,255,255,.12); }
-    .vp-card { background: rgba(255,255,255,.92); border-radius: 24px; box-shadow: 0 16px 42px rgba(15,23,42,.08); padding: 22px; border: 1px solid rgba(102,126,234,.10); backdrop-filter: blur(14px); }
+    .vp-card { background: rgba(255,255,255,.92); border-radius: 24px; box-shadow: 0 16px 42px rgba(15,23,42,.08); padding: 22px; border: 1px solid rgba(29,78,216,.10); backdrop-filter: blur(14px); }
     .inv-toolbar { display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:18px; flex-wrap:wrap; }
     .inv-search { position:relative; min-width:min(360px,100%); flex:1; }
-    .inv-search i { position:absolute; left:15px; top:50%; transform:translateY(-50%); color:#667eea; }
-    .inv-search input { width:100%; border:1px solid rgba(102,126,234,.16); border-radius:999px; padding:12px 18px 12px 42px; outline:none; background:rgba(255,255,255,.88); box-shadow:0 10px 24px rgba(102,126,234,.08); }
+    .inv-search i { position:absolute; left:15px; top:50%; transform:translateY(-50%); color:#1d4ed8; }
+    .inv-search input { width:100%; border:1px solid rgba(29,78,216,.16); border-radius:999px; padding:12px 18px 12px 42px; outline:none; background:rgba(255,255,255,.88); box-shadow:0 10px 24px rgba(29,78,216,.08); }
     .inv-section-title { font-size: 1.05rem; font-weight: 800; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; color:#1e293b; }
-    .inv-row { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 18px; margin-bottom: 10px; background: linear-gradient(135deg, rgba(248,250,252,.96), rgba(255,255,255,.92)); transition: transform 0.22s, box-shadow 0.22s, border-color .22s; border: 1px solid rgba(102,126,234,.08); }
-    .inv-row:hover { transform: translateX(4px) translateY(-1px); box-shadow: 0 14px 30px rgba(102,126,234,.12); border-color:rgba(102,126,234,.22); }
+    .inv-row { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 18px; margin-bottom: 10px; background: linear-gradient(135deg, rgba(248,250,252,.96), rgba(255,255,255,.92)); transition: transform 0.22s, box-shadow 0.22s, border-color .22s; border: 1px solid rgba(29,78,216,.08); }
+    .inv-row:hover { transform: translateX(4px) translateY(-1px); box-shadow: 0 14px 30px rgba(29,78,216,.12); border-color:rgba(29,78,216,.22); }
     .inv-cover { width: 52px; height: 68px; border-radius: 8px; object-fit: cover; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
     .inv-img { width: 52px; height: 52px; border-radius: 10px; object-fit: cover; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
     .inv-stock-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; }
@@ -48,15 +48,15 @@
     .inv-input { width: 64px; text-align: center; border-radius: 10px; border: 1px solid #e5e7eb; padding: 6px 8px; font-size: 0.85rem; font-weight: 600; }
     .inv-btn { border-radius: 10px; padding: 6px 14px; font-size: 0.8rem; font-weight: 700; border: none; cursor: pointer; transition: all 0.15s; }
     .inv-btn:hover { transform: scale(1.05); }
-    .inv-btn-add { background: linear-gradient(135deg,#667eea,#764ba2); color: #fff; }
+    .inv-btn-add { background: linear-gradient(135deg,#1d4ed8,#14245f); color: #fff; }
     .inv-btn-set { background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; }
     .inv-btn-set:hover { background: #e5e7eb; }
     .inv-empty { text-align: center; padding: 48px 20px; color: #9ca3af; }
     .stat-pill { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.18); border-radius: 20px; padding: 6px 14px; font-size: 0.82rem; font-weight: 600; }
     .inv-tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-    .inv-tab { padding: 11px 20px; border-radius: 999px; font-size: 0.88rem; font-weight: 800; border: 1px solid rgba(102,126,234,0.15); background: rgba(255,255,255,.86); color: #374151; cursor: pointer; transition: all 0.22s; box-shadow:0 8px 22px rgba(102,126,234,.06); }
-    .inv-tab:hover { border-color: rgba(102,126,234,0.38); transform:translateY(-2px); box-shadow:0 12px 26px rgba(102,126,234,.12); }
-    .inv-tab.active { background: linear-gradient(135deg,#667eea,#764ba2); color: #fff; border-color: transparent; box-shadow: 0 12px 24px rgba(102,126,234,0.30); }
+    .inv-tab { padding: 11px 20px; border-radius: 999px; font-size: 0.88rem; font-weight: 800; border: 1px solid rgba(29,78,216,0.15); background: rgba(255,255,255,.86); color: #374151; cursor: pointer; transition: all 0.22s; box-shadow:0 8px 22px rgba(29,78,216,.06); }
+    .inv-tab:hover { border-color: rgba(29,78,216,0.38); transform:translateY(-2px); box-shadow:0 12px 26px rgba(29,78,216,.12); }
+    .inv-tab.active { background: linear-gradient(135deg,#1d4ed8,#14245f); color: #fff; border-color: transparent; box-shadow: 0 12px 24px rgba(29,78,216,0.30); }
     .inv-tab i { margin-right: 6px; }
     .inv-panel { display: none; }
     .inv-panel.active { display: block; animation: fadeIn 0.3s ease; }

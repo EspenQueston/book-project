@@ -1,4 +1,4 @@
-{% extends 'public/vendor_panel_base.html' %}
+﻿{% extends 'public/vendor_panel_base.html' %}
 {% load i18n %}
 
 {% block panel_title %}<span data-zh="店铺设置" data-en="Store settings" data-fr="Paramètres boutique">{% trans "店铺设置" %}</span> · {{ vendor.company_name }}{% endblock %}
@@ -6,12 +6,12 @@
 {% block panel_extra_css %}
 <style>
     .vs-page-head {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
         color: #fff;
         padding: 20px 22px;
         border-radius: 15px;
         margin-bottom: 20px;
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.28);
+        box-shadow: 0 8px 25px rgba(29, 78, 216, 0.28);
     }
     .vs-card {
         background: var(--card-bg, #fff);
@@ -33,13 +33,13 @@
         padding: 12px 20px;
         border-radius: 12px;
         border: none;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
         color: #fff;
         font-weight: 700;
         text-decoration: none;
         transition: transform 0.2s, box-shadow 0.2s;
     }
-    .btn-vendor:hover { color: #fff; transform: translateY(-1px); box-shadow: 0 8px 22px rgba(102,126,234,0.35); }
+    .btn-vendor:hover { color: #fff; transform: translateY(-1px); box-shadow: 0 8px 22px rgba(29,78,216,0.35); }
     html[data-theme="dark"] .vs-card { background: var(--bg-surface, #1e293b); border-color: rgba(255,255,255,0.08); }
 </style>
 {% endblock %}
@@ -55,7 +55,7 @@
     <div class="row g-4">
         <div class="col-lg-8">
             <div class="vs-card">
-                <h5><i class="fas fa-palette me-2" style="color:#667eea;"></i><span data-zh="店铺定制" data-en="Shop customization" data-fr="Personnalisation boutique">{% trans "店铺定制" %}</span></h5>
+                <h5><i class="fas fa-palette me-2" style="color:#1d4ed8;"></i><span data-zh="店铺定制" data-en="Shop customization" data-fr="Personnalisation boutique">{% trans "店铺定制" %}</span></h5>
                 <form id="shopSettingsForm" method="post" action="{% url 'manager:vendor_settings_save' %}" enctype="multipart/form-data">
                     {% csrf_token %}
                     {% if admin_access %}
@@ -86,7 +86,7 @@
                             {% if vendor.get_logo_url %}
                             <img src="{{ vendor.get_logo_url }}" style="width:60px;height:60px;border-radius:12px;object-fit:cover;" alt="">
                             {% else %}
-                            <div style="width:60px;height:60px;border-radius:12px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.5rem;">
+                            <div style="width:60px;height:60px;border-radius:12px;background:linear-gradient(135deg,#1d4ed8,#14245f);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.5rem;">
                                 <i class="fas fa-store"></i>
                             </div>
                             {% endif %}
@@ -101,7 +101,7 @@
         </div>
         <div class="col-lg-4">
             <div class="vs-card">
-                <h5><i class="fas fa-link me-2" style="color:#667eea;"></i><span data-zh="店铺链接" data-en="Shop link" data-fr="Lien boutique">{% trans "店铺链接" %}</span></h5>
+                <h5><i class="fas fa-link me-2" style="color:#1d4ed8;"></i><span data-zh="店铺链接" data-en="Shop link" data-fr="Lien boutique">{% trans "店铺链接" %}</span></h5>
                 <p style="font-size:0.85rem;color:var(--muted-text, #64748b);" data-zh="分享您的店铺链接给客户" data-en="Share your shop link with customers" data-fr="Partagez votre lien boutique avec vos clients">{% trans "分享您的店铺链接给客户" %}</p>
                 <div style="background:var(--section-bg, #f8f9fa);padding:12px;border-radius:10px;word-break:break-all;font-size:0.82rem;font-family:monospace;" id="shopUrl">
                     {{ request.scheme }}://{{ request.get_host }}{% url 'manager:public_vendor_shop' vendor.id %}
@@ -111,7 +111,7 @@
                 </button>
             </div>
             <div class="vs-card">
-                <h5><i class="fas fa-qrcode me-2" style="color:#667eea;"></i><span data-zh="店铺预览" data-en="Shop preview" data-fr="Aperçu boutique">{% trans "店铺预览" %}</span></h5>
+                <h5><i class="fas fa-qrcode me-2" style="color:#1d4ed8;"></i><span data-zh="店铺预览" data-en="Shop preview" data-fr="Aperçu boutique">{% trans "店铺预览" %}</span></h5>
                 <a href="{% url 'manager:public_vendor_shop' vendor.id %}" target="_blank" class="btn-vendor d-block text-center" style="font-size:0.88rem;">
                     <i class="fas fa-external-link-alt"></i><span data-zh="打开店铺主页" data-en="Open shop page" data-fr="Ouvrir la boutique">{% trans "打开店铺主页" %}</span>
                 </a>

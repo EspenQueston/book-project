@@ -1,4 +1,4 @@
-{% extends 'public/base.html' %}
+﻿{% extends 'public/base.html' %}
 {% load i18n static %}
 {% load currency_filters %}
 
@@ -80,7 +80,7 @@
         margin-bottom: 10px;
         background: white;
         border-radius: 12px;
-        border-left: 4px solid #667eea;
+        border-left: 4px solid #1d4ed8;
         box-shadow: 0 2px 8px rgba(0,0,0,0.06);
         font-size: 1.05rem;
         transition: all 0.3s ease;
@@ -92,7 +92,7 @@
     .payment-checklist .step-num {
         width: 32px;
         height: 32px;
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: linear-gradient(135deg, #1d4ed8, #14245f);
         color: white;
         border-radius: 50%;
         display: flex;
@@ -132,7 +132,7 @@
     .verification-spinner {
         width: 60px; height: 60px;
         border: 5px solid #e9ecef;
-        border-top: 5px solid #667eea;
+        border-top: 5px solid #1d4ed8;
         border-radius: 50%;
         animation: spin 1s linear infinite;
         margin-bottom: 20px;
@@ -179,9 +179,9 @@
         transition: all 0.3s;
     }
     .timeline-step.active .timeline-dot {
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: linear-gradient(135deg, #1d4ed8, #14245f);
         color: white;
-        box-shadow: 0 3px 12px rgba(102,126,234,0.4);
+        box-shadow: 0 3px 12px rgba(29,78,216,0.4);
     }
     .timeline-step.done .timeline-dot {
         background: #10b981;
@@ -192,13 +192,13 @@
         color: #6c757d;
         max-width: 80px;
     }
-    .timeline-step.active .timeline-label { color: #667eea; font-weight: 600; }
+    .timeline-step.active .timeline-label { color: #1d4ed8; font-weight: 600; }
     .timeline-step.done .timeline-label { color: #10b981; }
 
     /* Next action card */
     .next-action {
-        background: linear-gradient(135deg, #667eea08, #764ba208);
-        border: 2px dashed #667eea;
+        background: linear-gradient(135deg, #1d4ed808, #14245f08);
+        border: 2px dashed #1d4ed8;
         border-radius: 12px;
         padding: 16px 20px;
         display: flex;
@@ -208,7 +208,7 @@
     }
     .next-action i {
         font-size: 1.4rem;
-        color: #667eea;
+        color: #1d4ed8;
     }
     
     .action-buttons {
@@ -295,8 +295,8 @@
         color: #818cf8;
     }
     html[data-theme="dark"] .next-action {
-        background: linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.08));
-        border-color: rgba(102,126,234,0.3);
+        background: linear-gradient(135deg, rgba(29,78,216,0.08), rgba(20,36,95,0.08));
+        border-color: rgba(29,78,216,0.3);
     }
     html[data-theme="dark"] .text-muted {
         color: var(--text-tertiary) !important;
@@ -541,7 +541,7 @@
                 <div class="verification-spinner" style="width:28px; height:28px; border-width:3px; margin-bottom:0; margin-right:12px;"></div>
                 <strong style="font-size: 1.1rem;">{% trans "验证处理中..." %}</strong>
             </div>
-            <p class="mb-2"><i class="fas fa-info-circle me-1"></i> {% trans "我们正在验证您的付款" %}，{% trans "预计" %} <strong style="color: #667eea;">5 ~ 10 {% trans "分钟" %}</strong> {% trans "内完成确认。" %}</p>
+            <p class="mb-2"><i class="fas fa-info-circle me-1"></i> {% trans "我们正在验证您的付款" %}，{% trans "预计" %} <strong style="color: #1d4ed8;">5 ~ 10 {% trans "分钟" %}</strong> {% trans "内完成确认。" %}</p>
             {% if book_order %}
             <p class="text-muted mb-3">{% trans "确认完成后，您将可以直接下载电子书。无需刷新页面，系统会自动更新状态。" %}</p>
             {% else %}
@@ -598,7 +598,7 @@
         </div>
         
         <!-- Download Section -->
-        <div class="text-center mt-4 p-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px;">
+        <div class="text-center mt-4 p-4" style="background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%); border-radius: 15px;">
             <h5 class="text-white mb-3"><i class="fas fa-download"></i> {% trans "下载您的商品" %}</h5>
             <p class="text-white mb-4">{% trans "感谢您的购买！您现在可以下载已购买的商品。" %}</p>
             {% if book_order_items %}
@@ -627,7 +627,7 @@
         </div>
         
         {% if mkt_order_items %}
-        <div class="text-center mt-4 p-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px;">
+        <div class="text-center mt-4 p-4" style="background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%); border-radius: 15px;">
             <h5 class="text-white mb-3"><i class="fas fa-check-circle"></i> {% trans "订单已完成" %}</h5>
             <p class="text-white mb-4">{% trans "感谢您的购买！您的订单已成功处理。" %}</p>
             {% for item in mkt_order_items %}
@@ -659,7 +659,7 @@
         <a href="{% url 'manager:public_books' %}" class="btn-continue">
             <i class="fas fa-book"></i> {% trans "继续购书" %}
         </a>
-        <a href="{% url 'marketplace:home' %}" class="btn-continue" style="background: #667eea;">
+        <a href="{% url 'marketplace:home' %}" class="btn-continue" style="background: #1d4ed8;">
             <i class="fas fa-store"></i> {% trans "逛市场" %}
         </a>
     </div>
