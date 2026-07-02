@@ -359,7 +359,8 @@
 {% endblock %}
 
 {% block content %}
-<section class="ct-hero">
+{% include 'public/includes/mobile_page_hero.html' with mph_icon='fa-paper-plane' mph_pill=_('联系我们') mph_title=_('与我们取得联系') mph_subtitle=_('如有任何问题、建议或合作意向，欢迎随时联系，我们的团队将尽快回复您。') %}
+<section class="ct-hero d-none d-lg-block">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-7" data-aos="fade-right">

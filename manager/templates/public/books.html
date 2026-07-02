@@ -457,10 +457,7 @@
             {% else %}
             <div class="bmf-price">{{ book.price|fcfa }}</div>
             {% endif %}
-            <div class="feed-card-actions">
-                <div class="feed-card-actions-main">
-                    <span class="bmf-badge-type" style="background:#ede9fe;color:#7c3aed;" data-zh="{% trans 'Book' %}" data-en="{% trans 'Book' %}" data-fr="{% trans 'Book' %}">{% trans "Book" %}</span>
-                </div>
+            <div class="feed-card-actions feed-card-actions--nobadge">
                 {% include 'public/includes/feed_view_details_btn.html' %}
             </div>
         </div>
@@ -812,7 +809,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     var img = item.image || item.cover_url || '/static/img/default_cover.png';
                     var type = item.type || 'book';
                     var label = item.type_label || 'Livre';
-                    card.innerHTML = '<img class="bmf-cover" src="'+img+'" alt="'+item.name+'" loading="lazy" onerror="this.src=\'/static/img/default_cover.png\'"><div class="bmf-body"><div class="bmf-title">'+item.name+'</div><div class="bmf-price">'+fmtFcfa(item.price)+'</div><div class="feed-card-actions"><div class="feed-card-actions-main"><span class="bmf-badge-type" style="'+tagStyle(type)+'">'+label+'</span></div>'+feedDetailsBtn+'</div></div>';
+                    card.innerHTML = '<img class="bmf-cover" src="'+img+'" alt="'+item.name+'" loading="lazy" onerror="this.src=\'/static/img/default_cover.png\'"><div class="bmf-body"><div class="bmf-title">'+item.name+'</div><div class="bmf-price">'+fmtFcfa(item.price)+'</div><div class="feed-card-actions feed-card-actions--nobadge">'+feedDetailsBtn+'</div></div>';
                     feedDiv.appendChild(card);
                 });
                 page = data.has_more ? page + 1 : 1;
@@ -1007,7 +1004,7 @@ document.addEventListener('DOMContentLoaded', function() {
             + '<div class="bmf-body">'
             + '<div class="bmf-title">'+book.name+'</div>'
             + priceHtml
-            + '<div class="feed-card-actions"><div class="feed-card-actions-main"><span class="bmf-badge-type" style="'+(book.type === 'course' ? 'background:#e0e7ff;color:#3730a3;' : book.type === 'product' ? 'background:#fef3c7;color:#d97706;' : book.type === 'supermarket' ? 'background:#d1fae5;color:#065f46;' : 'background:#ede9fe;color:#7c3aed;')+'">'+(book.type_label || '{% trans "Book" %}')+'</span></div>'+feedDetailsBtn+'</div>'
+            + '<div class="feed-card-actions feed-card-actions--nobadge">'+feedDetailsBtn+'</div>'
             + '</div></a>';
     }
 

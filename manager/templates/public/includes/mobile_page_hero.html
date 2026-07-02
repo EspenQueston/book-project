@@ -1,0 +1,76 @@
+{% load i18n %}
+{# =====================================================================
+   Uniform mobile hero for content pages (About / Services / Contact).
+   Shown only on mobile (d-lg-none); desktop keeps its own hero.
+   Params:
+     mph_icon     – Font Awesome icon class (e.g. 'fa-globe')
+     mph_pill     – small eyebrow label
+     mph_title    – main heading
+     mph_subtitle – supporting sentence
+   ===================================================================== #}
+<style>
+    .m-hero {
+        position: relative;
+        display: none;
+        padding: 34px 22px 30px;
+        text-align: center;
+        color: #fff;
+        background:
+            radial-gradient(circle at 20% 0%, rgba(96,165,250,.35), transparent 45%),
+            radial-gradient(circle at 88% 12%, rgba(34,211,238,.22), transparent 42%),
+            linear-gradient(135deg, #14245f 0%, #1d4ed8 100%);
+        border-radius: 0 0 26px 26px;
+        box-shadow: 0 18px 40px rgba(20,36,95,.28);
+        overflow: hidden;
+    }
+    .m-hero::after {
+        content: "";
+        position: absolute;
+        left: 0; right: 0; bottom: -1px;
+        height: 40px;
+        background: radial-gradient(120% 100% at 50% 0%, transparent 68%, var(--bg-page, #fff) 69%);
+    }
+    .m-hero__icon {
+        width: 66px; height: 66px;
+        margin: 0 auto 14px;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 20px;
+        font-size: 1.7rem;
+        color: #fff;
+        background: rgba(255,255,255,.14);
+        border: 1px solid rgba(255,255,255,.28);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.25);
+        backdrop-filter: blur(6px);
+    }
+    .m-hero__pill {
+        display: inline-flex; align-items: center; gap: 6px;
+        font-size: .68rem; font-weight: 700;
+        letter-spacing: 1.4px; text-transform: uppercase;
+        padding: 6px 14px; border-radius: 999px;
+        background: rgba(255,255,255,.16);
+        border: 1px solid rgba(255,255,255,.26);
+        margin-bottom: 12px;
+    }
+    .m-hero__title {
+        font-size: 1.62rem; font-weight: 800;
+        line-height: 1.25; letter-spacing: -.4px;
+        margin: 0 0 10px;
+    }
+    .m-hero__subtitle {
+        font-size: .92rem; line-height: 1.6;
+        color: rgba(255,255,255,.86);
+        max-width: 34ch; margin: 0 auto;
+    }
+    @media (max-width: 991.98px) {
+        .m-hero { display: block; }
+    }
+    @media (max-width: 360px) {
+        .m-hero__title { font-size: 1.44rem; }
+    }
+</style>
+<section class="m-hero">
+    <div class="m-hero__icon"><i class="fas {{ mph_icon }}"></i></div>
+    {% if mph_pill %}<div class="m-hero__pill"><i class="fas fa-circle" style="font-size:.4rem;"></i>{{ mph_pill }}</div>{% endif %}
+    <h1 class="m-hero__title">{{ mph_title }}</h1>
+    {% if mph_subtitle %}<p class="m-hero__subtitle">{{ mph_subtitle }}</p>{% endif %}
+</section>

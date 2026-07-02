@@ -388,7 +388,8 @@
 {% endblock %}
 
 {% block content %}
-<section class="srv-hero">
+{% include 'public/includes/mobile_page_hero.html' with mph_icon='fa-concierge-bell' mph_pill=_('我们的服务') mph_title=_('全方位的数字服务平台') mph_subtitle=_('从电子书与在线课程，到综合市场与智能助手，为您打造一站式的知识与生活服务体验。') %}
+<section class="srv-hero d-none d-lg-block">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-7" data-aos="fade-right">

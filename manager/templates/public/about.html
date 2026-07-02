@@ -509,7 +509,8 @@
 {% endblock %}
 
 {% block content %}
-<section class="about-hero">
+{% include 'public/includes/mobile_page_hero.html' with mph_icon='fa-globe' mph_pill=_('关于我们') mph_title=_('知识与生活的一站式平台') mph_subtitle=_('集图书、在线课程与生活商品于一体的综合数字平台，让知识与便利触手可及。') %}
+<section class="about-hero d-none d-lg-block">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-7" data-aos="fade-right">

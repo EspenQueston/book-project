@@ -30,6 +30,13 @@
         margin-top: auto;
         padding-top: 8px;
     }
+    /* Cards without a type badge: let the details button span the row */
+    .feed-card-actions--nobadge {
+        justify-content: stretch;
+    }
+    .feed-card-actions--nobadge .feed-view-details {
+        width: 100%;
+    }
     .feed-card-actions-main {
         flex: 1;
         min-width: 0;
