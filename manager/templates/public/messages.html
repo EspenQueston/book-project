@@ -36,13 +36,22 @@ html[data-theme="dark"] {
     --mx-bubble-in-text:#e6edf3;
 }
 
-/* App shell */
+/* Full-screen app shell — pinned directly to the viewport so the page itself
+   never scrolls, regardless of navbar height or dvh quirks. Only the internal
+   conversation list and message area scroll. The mobile bottom tab bar stays
+   visible on the conversation list, and is hidden only while a chat is open
+   (full-immersion chat, no double bottom bars). */
+.footer { display: none !important; }
+main { margin: 0 !important; padding: 0 !important; }
+body { overflow: hidden !important; }
+body.mx-chat-open .pwa-bottom-nav { display: none !important; }
+
 .mx-app {
     display: flex;
-    height: calc(100dvh - 76px);
+    position: fixed;
+    top: 76px; left: 0; right: 0; bottom: 0;
     background: var(--mx-bg);
     overflow: hidden;
-    position: relative;
 }
 
 /* ── Sidebar ─────────────────────────────────────────── */
@@ -86,17 +95,16 @@ html[data-theme="dark"] {
 }
 .mx-compose-btn:hover { background: rgba(255,255,255,0.3); color: #fff; }
 
-/* Search */
+/* Search — single clean pill, no double layer */
 .mx-search-wrap {
-    padding: 10px 12px 8px;
-    background: var(--mx-panel-bg);
-    border-bottom: 1px solid var(--mx-border);
+    padding: 10px 12px;
     flex-shrink: 0;
 }
 .mx-search-inner {
     display: flex;
     align-items: center;
     background: var(--mx-bg);
+    border: none;
     border-radius: 22px;
     padding: 0 14px;
     height: 38px;
@@ -104,9 +112,18 @@ html[data-theme="dark"] {
 }
 html[data-theme="dark"] .mx-search-inner { background: #0d1117; }
 .mx-search-inner i { color: var(--mx-muted); font-size: 13px; flex-shrink: 0; }
-.mx-search-inner input {
-    flex: 1; border: none; background: transparent; font-size: 0.85rem;
-    outline: none; color: var(--mx-text); padding: 0;
+/* Site-wide .form-control/textarea/input[type] rules in base.html apply their own
+   bordered pill with !important — neutralize them on this specific field so only
+   the single .mx-search-inner pill is visible (no nested box). */
+#mxSearchInput,
+#mxSearchInput:hover,
+#mxSearchInput:focus,
+html[data-theme="dark"] #mxSearchInput,
+html[data-theme="dark"] #mxSearchInput:focus {
+    flex: 1; border: none !important; background: transparent !important; font-size: 0.85rem;
+    outline: none !important; color: var(--mx-text); padding: 0 !important;
+    border-radius: 0 !important; box-shadow: none !important; min-height: 0 !important;
+    transform: none !important;
 }
 
 /* Filter tabs */
@@ -310,6 +327,25 @@ html[data-theme="dark"] .mx-convo-item.active { background: rgba(29,78,216,0.08)
 }
 .mx-dropdown-item:hover { background: rgba(29,78,216,0.08); }
 .mx-dropdown-item i { width: 18px; text-align: center; color: var(--mx-muted); }
+.mx-dropdown-item.danger { color: #ef4444; }
+.mx-dropdown-item.danger i { color: #ef4444; }
+.mx-dropdown-item.danger:hover { background: rgba(239,68,68,0.08); }
+.mx-dropdown-divider { height: 1px; background: var(--mx-border); margin: 4px 0; }
+
+/* ── Blocked-vendor banner ──────────────────────────── */
+.mx-blocked-banner {
+    display: none; align-items: center; gap: 10px;
+    background: rgba(239,68,68,0.08); color: #ef4444;
+    padding: 10px 16px; font-size: 0.82rem; font-weight: 600;
+    border-bottom: 1px solid rgba(239,68,68,0.15);
+    flex-shrink: 0;
+}
+.mx-blocked-banner button {
+    margin-left: auto; border: 1px solid #ef4444; background: transparent;
+    color: #ef4444; border-radius: 999px; padding: 4px 14px;
+    font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.18s;
+}
+.mx-blocked-banner button:hover { background: #ef4444; color: #fff; }
 
 /* Product strip */
 .mx-product-strip {
@@ -438,6 +474,43 @@ html[data-theme="dark"] .mx-row.in .mx-bubble { box-shadow: 0 1px 6px rgba(0,0,0
 .mx-tick i { font-size: 0.6rem; }
 .mx-tick.read i { color: var(--mx-read-tick); }
 
+/* Per-message action button ("...") — always subtly visible, full mobile support */
+.mx-bubble-action-btn {
+    align-self: center;
+    width: 24px; height: 24px; border-radius: 50%;
+    border: none; background: transparent; color: var(--mx-muted);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; cursor: pointer; opacity: 0.35; transition: opacity 0.15s, background 0.15s;
+    flex-shrink: 0;
+}
+.mx-bubble-action-btn:hover, .mx-bubble-action-btn:focus-visible { opacity: 1; background: rgba(0,0,0,0.06); }
+html[data-theme="dark"] .mx-bubble-action-btn:hover { background: rgba(255,255,255,0.1); }
+
+.mx-bubble-media {
+    display: block; max-width: 230px; max-height: 300px; border-radius: 12px;
+    margin-bottom: 4px; cursor: pointer; object-fit: cover;
+}
+video.mx-bubble-media { cursor: default; }
+
+/* Quoted-message reference shown inside a bubble */
+.mx-quote-ref {
+    display: flex; gap: 8px; margin-bottom: 6px; padding: 6px 8px;
+    border-radius: 8px; background: rgba(0,0,0,0.06); font-size: 0.78rem;
+}
+.mx-row.out .mx-quote-ref { background: rgba(255,255,255,0.15); }
+.mx-quote-ref-bar { width: 3px; border-radius: 2px; background: var(--mx-primary); flex-shrink: 0; }
+.mx-row.out .mx-quote-ref-bar { background: rgba(255,255,255,0.7); }
+.mx-quote-ref-body { min-width: 0; overflow: hidden; }
+.mx-quote-ref-name { font-weight: 700; opacity: 0.85; }
+.mx-quote-ref-text { opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Recalled ("unsent") message placeholder */
+.mx-bubble-recalled {
+    background: transparent !important; box-shadow: none !important;
+    border: 1px dashed var(--mx-border) !important; color: var(--mx-muted) !important;
+    font-style: italic; font-size: 0.82rem; padding: 8px 14px !important;
+}
+
 /* Group bubble tails (first/last in sequence) */
 .mx-row.out.tail .mx-bubble::after {
     content: '';
@@ -510,40 +583,146 @@ html[data-theme="dark"] .mx-row.in .mx-bubble { box-shadow: 0 1px 6px rgba(0,0,0
 }
 .mx-quick-chip:hover { background: var(--mx-primary); color: #fff; border-color: var(--mx-primary); }
 
-/* Input area */
+/* Input area — single clean layer */
 .mx-input-area {
     background: var(--mx-panel-bg);
     border-top: 1px solid var(--mx-border);
-    padding: 10px 12px;
+    padding: 8px 12px;
     display: flex;
     align-items: flex-end;
     gap: 8px;
     flex-shrink: 0;
-    box-shadow: 0 -2px 12px rgba(0,0,0,0.04);
 }
 .mx-action-btn {
-    width: 38px; height: 38px;
+    width: 36px; height: 36px;
     border-radius: 50%; border: none;
-    background: var(--mx-bg);
+    background: transparent;
     color: var(--mx-muted); cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     font-size: 1.05rem; flex-shrink: 0;
     transition: all 0.18s;
 }
-.mx-action-btn:hover { background: rgba(29,78,216,0.1); color: var(--mx-primary); }
+.mx-action-btn:hover { color: var(--mx-primary); }
+
+/* ── Emoji picker ──────────────────────────────────────── */
+.mx-emoji-picker {
+    display: none; flex-direction: column;
+    background: var(--mx-panel-bg); border: 1px solid var(--mx-border);
+    border-radius: 14px; box-shadow: 0 -4px 24px rgba(0,0,0,0.12);
+    flex-shrink: 0; overflow: hidden;
+}
+.mx-emoji-picker.show { display: flex; }
+.mx-emoji-tabs {
+    display: flex; border-bottom: 1px solid var(--mx-border); flex-shrink: 0;
+}
+.mx-emoji-tab {
+    flex: 1; border: none; background: transparent; padding: 8px 0;
+    font-size: 1.1rem; cursor: pointer; opacity: 0.5; transition: opacity 0.15s, background 0.15s;
+}
+.mx-emoji-tab:hover { opacity: 0.8; background: var(--mx-bg); }
+.mx-emoji-tab.active { opacity: 1; background: var(--mx-bg); box-shadow: inset 0 -2px 0 var(--mx-primary); }
+.mx-emoji-grid {
+    display: grid; grid-template-columns: repeat(8, 1fr);
+    gap: 2px; padding: 8px; max-height: 180px; overflow-y: auto;
+    scrollbar-width: thin;
+}
+.mx-emoji-item {
+    border: none; background: transparent; font-size: 1.35rem; line-height: 1;
+    padding: 6px 0; border-radius: 8px; cursor: pointer; transition: background 0.15s, transform 0.1s;
+}
+.mx-emoji-item:hover { background: var(--mx-bg); transform: scale(1.15); }
+@media (max-width: 768px) { .mx-emoji-grid { grid-template-columns: repeat(6, 1fr); } }
+
+/* Reply/quote banner + media attachment preview above the input */
+.mx-reply-banner, .mx-media-preview {
+    display: none; align-items: center; gap: 10px;
+    background: var(--mx-bg); border-top: 1px solid var(--mx-border);
+    padding: 8px 14px; flex-shrink: 0;
+}
+.mx-reply-banner > i, .mx-media-preview > i { color: var(--mx-primary); }
+.mx-reply-banner-body { flex: 1; min-width: 0; border-left: 3px solid var(--mx-primary); padding-left: 8px; }
+.mx-reply-banner-name { font-size: 0.78rem; font-weight: 700; color: var(--mx-primary); }
+.mx-reply-banner-text { font-size: 0.8rem; color: var(--mx-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mx-reply-banner button, .mx-media-preview button {
+    border: none; background: transparent; color: var(--mx-muted); cursor: pointer;
+    width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.mx-reply-banner button:hover, .mx-media-preview button:hover { background: rgba(0,0,0,0.08); color: #ef4444; }
+.mx-media-preview-thumb { width: 44px; height: 44px; border-radius: 8px; overflow: hidden; flex-shrink: 0; }
+.mx-media-preview-thumb img, .mx-media-preview-thumb video { width: 100%; height: 100%; object-fit: cover; }
+.mx-media-preview-name { flex: 1; min-width: 0; font-size: 0.8rem; color: var(--mx-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Floating per-message action menu */
+.mx-msg-menu {
+    position: absolute; display: none; flex-direction: column;
+    background: var(--mx-panel-bg); border: 1px solid var(--mx-border);
+    border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    min-width: 160px; z-index: 1300; overflow: hidden;
+}
+.mx-msg-menu.show { display: flex; animation: mxFadeSlideDown 0.15s ease; }
+.mx-msg-menu-item {
+    padding: 10px 14px; font-size: 0.85rem; color: var(--mx-text);
+    display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.15s;
+}
+.mx-msg-menu-item i { width: 16px; text-align: center; color: var(--mx-muted); }
+.mx-msg-menu-item:hover { background: rgba(29,78,216,0.08); }
+.mx-msg-menu-item.danger { color: #ef4444; }
+.mx-msg-menu-item.danger i { color: #ef4444; }
+.mx-msg-menu-item.danger:hover { background: rgba(239,68,68,0.08); }
+
+/* Lightbox for full-size image/video */
+.mx-lightbox {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+    z-index: 500; align-items: center; justify-content: center; padding: 30px;
+}
+.mx-lightbox.show { display: flex; }
+.mx-lightbox-content img, .mx-lightbox-content video { max-width: 100%; max-height: 90vh; border-radius: 8px; }
+.mx-lightbox-close {
+    position: absolute; top: 16px; right: 16px; width: 40px; height: 40px;
+    border-radius: 50%; background: rgba(255,255,255,0.12); border: none; color: #fff;
+    font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.mx-lightbox-close:hover { background: rgba(255,255,255,0.22); }
+
+/* Delete button + blocked pill on conversation list items */
+.mx-convo-delete-btn {
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    width: 28px; height: 28px; border-radius: 50%; border: none;
+    background: var(--mx-panel-bg); color: var(--mx-muted);
+    display: none; align-items: center; justify-content: center;
+    font-size: 0.75rem; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+.mx-convo-item:hover .mx-convo-delete-btn { display: flex; }
+.mx-convo-delete-btn:hover { color: #ef4444; }
+.mx-convo-blocked-pill {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 0.6rem; font-weight: 700; color: #ef4444;
+    background: rgba(239,68,68,0.1); border-radius: 6px; padding: 1px 6px; margin-left: 6px;
+}
 .mx-textarea-wrap {
     flex: 1;
     background: var(--mx-bg);
+    border: none;
     border-radius: 22px;
-    padding: 8px 14px;
+    padding: 6px 14px;
     display: flex; align-items: flex-end;
 }
 html[data-theme="dark"] .mx-textarea-wrap { background: #0d1117; }
-#msgInput {
-    flex: 1; border: none; background: transparent; outline: none;
+/* Site-wide .form-control/textarea rules in base.html apply their own bordered
+   pill with !important — neutralize them here so only the single
+   .mx-textarea-wrap pill is visible (no nested box). */
+#msgInput,
+#msgInput:hover,
+#msgInput:focus,
+html[data-theme="dark"] #msgInput,
+html[data-theme="dark"] #msgInput:focus {
+    flex: 1; border: none !important; background: transparent !important; outline: none !important;
     font-size: 0.88rem; color: var(--mx-text); resize: none;
-    min-height: 22px; max-height: 120px; line-height: 1.5;
+    min-height: 22px !important; max-height: 120px; line-height: 1.5;
     font-family: inherit; overflow-y: auto; scrollbar-width: none;
+    border-radius: 0 !important; box-shadow: none !important; padding: 0 !important;
+    transform: none !important;
 }
 #msgInput::placeholder { color: var(--mx-muted); }
 .mx-send-btn {
@@ -610,7 +789,10 @@ html[data-theme="dark"] .mx-textarea-wrap { background: #0d1117; }
 /* ── Mobile Responsive ───────────────────────────────── */
 @media (max-width: 768px) {
     body { overflow: hidden; }
-    .mx-app { height: calc(100dvh - 56px); }
+    /* Room reserved for the visible bottom tab bar on the conversation list;
+       collapses to full height once a chat is opened (bar hidden then). */
+    .mx-app { top: 56px; bottom: 62px; }
+    body.mx-chat-open .mx-app { bottom: 0; }
 
     .mx-sidebar {
         position: absolute; top: 0; left: 0; bottom: 0;
@@ -639,6 +821,9 @@ html[data-theme="dark"] .mx-textarea-wrap { background: #0d1117; }
     .mx-quick-wrap { padding: 6px 10px 4px; }
     .mx-input-area { padding: 8px 10px; padding-bottom: calc(8px + env(safe-area-inset-bottom)); }
     .mx-messages-area { padding: 12px 10px; }
+
+    /* No hover on touch devices — always show the delete affordance */
+    .mx-convo-delete-btn { display: flex; }
 }
 
 /* ── Scroll to bottom button ─────────────────────────── */
@@ -653,6 +838,56 @@ html[data-theme="dark"] .mx-textarea-wrap { background: #0d1117; }
     z-index: 5; transition: opacity 0.2s;
 }
 .mx-scroll-down.show { display: flex; }
+.mx-scroll-badge {
+    position: absolute; top: -5px; right: -5px;
+    min-width: 18px; height: 18px;
+    background: linear-gradient(135deg, var(--mx-primary), var(--mx-primary-dark));
+    color: #fff; font-size: 0.58rem; font-weight: 800;
+    border-radius: 999px; padding: 0 4px;
+    display: none; align-items: center; justify-content: center;
+    box-shadow: 0 2px 6px rgba(29,78,216,0.4);
+}
+.mx-scroll-badge.show { display: flex; }
+
+/* ── Character counter ──────────────────────────────── */
+.mx-char-counter {
+    font-size: 0.62rem; color: var(--mx-muted);
+    text-align: right; padding: 0 6px;
+    opacity: 0; transition: opacity 0.15s;
+    line-height: 1; flex-shrink: 0;
+}
+.mx-char-counter.show { opacity: 1; }
+.mx-char-counter.warn { color: #f59e0b; font-weight: 700; }
+.mx-char-counter.danger { color: #ef4444; font-weight: 700; }
+
+/* ── Connection status ──────────────────────────────── */
+.mx-conn-status {
+    position: absolute; top: 0; left: 0; right: 0;
+    text-align: center; font-size: 0.72rem; font-weight: 700;
+    padding: 4px 0; z-index: 20;
+    background: #ef4444; color: #fff;
+    display: none; align-items: center; justify-content: center; gap: 6px;
+    animation: mxFadeSlideDown 0.25s ease;
+}
+.mx-conn-status.show { display: flex; }
+.mx-conn-status.reconnecting { background: #f59e0b; }
+.mx-conn-status.connected { background: #10b981; }
+
+/* ── Unread total badge in header ───────────────────── */
+.mx-header-unread {
+    min-width: 22px; height: 22px;
+    background: #ef4444; color: #fff;
+    font-size: 0.65rem; font-weight: 800;
+    border-radius: 999px; padding: 0 6px;
+    display: none; align-items: center; justify-content: center;
+    box-shadow: 0 2px 6px rgba(239,68,68,0.4);
+    animation: mxPulse 1.8s infinite;
+}
+.mx-header-unread.show { display: flex; }
+
+/* ── Message long-press / hover actions ─────────────── */
+.mx-bubble:hover { filter: brightness(0.97); }
+.mx-row.out .mx-bubble:hover { filter: brightness(1.08); }
 </style>
 {% endblock %}
 
@@ -666,6 +901,7 @@ html[data-theme="dark"] .mx-textarea-wrap { background: #0d1117; }
         <div class="mx-sidebar-header">
             <i class="fas fa-comment-dots" style="font-size:1.25rem;opacity:.9;"></i>
             <h2 class="mx-sidebar-title" data-zh="消息" data-en="Messages" data-fr="Messages">Messages</h2>
+            <span class="mx-header-unread" id="mxTotalUnread"></span>
             <a class="mx-compose-btn" href="{% url 'manager:public_books' %}" title="New conversation">
                 <i class="fas fa-pen-nib"></i>
             </a>
@@ -713,7 +949,7 @@ html[data-theme="dark"] .mx-textarea-wrap { background: #0d1117; }
 
         <!-- Idle: no convo selected -->
         <div class="mx-idle-state" id="mxIdle">
-            <div class="mx-idle-icon"><i class="fas fa-comment-smile"></i></div>
+            <div class="mx-idle-icon"><i class="fas fa-comments"></i></div>
             <p class="mx-idle-title" data-zh="选择一个对话" data-en="Select a conversation" data-fr="Sélectionnez une conversation">{% trans "Select a conversation" %}</p>
             <p class="mx-idle-sub" data-zh="从左侧列表选择一个对话，或点击任意商品页的「聊天」按钮开始新对话。" data-en="Choose a conversation from the list, or tap Chat on any product page to start a new one." data-fr="Choisissez une conversation dans la liste ou appuyez sur Chat sur une page produit.">
                 {% trans "Choose a conversation from the list, or tap Chat on any product page to start a new one." %}
@@ -739,6 +975,12 @@ html[data-theme="dark"] .mx-textarea-wrap { background: #0d1117; }
                     </div>
                 </div>
                 <div class="mx-header-actions" style="position:relative;">
+                    <a class="mx-header-btn" id="mxShopBtn" href="#" title="{% trans 'Visit shop' %}" style="display:none;text-decoration:none;" target="_blank" rel="noopener">
+                        <i class="fas fa-store"></i>
+                    </a>
+                    <a class="mx-header-btn" href="/" title="{% trans 'Home' %}" style="text-decoration:none;">
+                        <i class="fas fa-home"></i>
+                    </a>
                     <button class="mx-header-btn" onclick="mxToggleDropdown()" title="Menu" id="mxMenuBtn">
                         <i class="fas fa-ellipsis-v"></i>
                     </button>
@@ -746,8 +988,18 @@ html[data-theme="dark"] .mx-textarea-wrap { background: #0d1117; }
                         <div class="mx-dropdown-item" onclick="mxMarkAllRead()">
                             <i class="fas fa-check-double"></i>{% trans "Mark all as read" %}
                         </div>
-                        <div class="mx-dropdown-item" onclick="mxToggleProductStrip()">
+                        <div class="mx-dropdown-item" id="mxDropdownProduct" onclick="mxViewProduct()" style="display:none;">
                             <i class="fas fa-tag"></i>{% trans "View product" %}
+                        </div>
+                        <div class="mx-dropdown-item" id="mxDropdownShop" onclick="mxGoToShop()" style="display:none;">
+                            <i class="fas fa-store"></i>{% trans "Visit shop" %}
+                        </div>
+                        <div class="mx-dropdown-divider"></div>
+                        <div class="mx-dropdown-item" id="mxDropdownBlock" onclick="mxToggleBlockVendor()" style="display:none;">
+                            <i class="fas fa-user-slash"></i><span id="mxDropdownBlockLabel">{% trans "Block vendor" %}</span>
+                        </div>
+                        <div class="mx-dropdown-item danger" onclick="mxDeleteConversation()">
+                            <i class="fas fa-trash-alt"></i>{% trans "Delete conversation" %}
                         </div>
                         <div class="mx-dropdown-item" onclick="mxCloseDropdown()">
                             <i class="fas fa-times"></i>{% trans "Close" %}
@@ -772,6 +1024,13 @@ html[data-theme="dark"] .mx-textarea-wrap { background: #0d1117; }
                 </button>
             </div>
 
+            <!-- Blocked-vendor banner -->
+            <div class="mx-blocked-banner" id="mxBlockedBanner" style="display:none;">
+                <i class="fas fa-ban"></i>
+                <span>{% trans "You have blocked this vendor." %}</span>
+                <button type="button" onclick="mxToggleBlockVendor()">{% trans "Unblock" %}</button>
+            </div>
+
             <!-- Messages -->
             <div class="mx-messages-area" id="mxMessages" onscroll="mxOnScroll()">
                 <!-- bubbles injected by JS -->
@@ -780,6 +1039,7 @@ html[data-theme="dark"] .mx-textarea-wrap { background: #0d1117; }
             <!-- Scroll to bottom -->
             <button class="mx-scroll-down" id="mxScrollDownBtn" onclick="mxScrollBottom()" aria-label="Scroll to bottom">
                 <i class="fas fa-chevron-down"></i>
+                <span class="mx-scroll-badge" id="mxNewMsgBadge"></span>
             </button>
 
             <!-- Typing indicator -->
@@ -802,25 +1062,76 @@ html[data-theme="dark"] .mx-textarea-wrap { background: #0d1117; }
             </div>
 
             <!-- Input area -->
-            <div class="mx-input-area">
-                <button class="mx-action-btn" onclick="mxToggleEmoji()" aria-label="Emoji" title="Emoji">
+            <div class="mx-conn-status" id="mxConnStatus">
+                <i class="fas fa-wifi-slash"></i>
+                <span id="mxConnText" data-zh="连接已断开" data-en="Connection lost" data-fr="Connexion perdue">{% trans "Connection lost" %}</span>
+            </div>
+
+            <!-- Reply/quote banner -->
+            <div class="mx-reply-banner" id="mxReplyBanner" style="display:none;">
+                <i class="fas fa-reply"></i>
+                <div class="mx-reply-banner-body">
+                    <div class="mx-reply-banner-name" id="mxReplyBannerName"></div>
+                    <div class="mx-reply-banner-text" id="mxReplyBannerText"></div>
+                </div>
+                <button type="button" onclick="mxCancelReply()" aria-label="Cancel reply"><i class="fas fa-times"></i></button>
+            </div>
+
+            <!-- Media attachment preview -->
+            <div class="mx-media-preview" id="mxMediaPreview" style="display:none;">
+                <div class="mx-media-preview-thumb" id="mxMediaPreviewThumb"></div>
+                <div class="mx-media-preview-name" id="mxMediaPreviewName"></div>
+                <button type="button" onclick="mxCancelMedia()" aria-label="Remove attachment"><i class="fas fa-times"></i></button>
+            </div>
+
+            <!-- Emoji picker -->
+            <div class="mx-emoji-picker" id="mxEmojiPicker">
+                <div class="mx-emoji-tabs">
+                    <button type="button" class="mx-emoji-tab active" data-cat="smileys" onclick="mxShowEmojiCat('smileys',this)">😀</button>
+                    <button type="button" class="mx-emoji-tab" data-cat="gestures" onclick="mxShowEmojiCat('gestures',this)">👍</button>
+                    <button type="button" class="mx-emoji-tab" data-cat="hearts" onclick="mxShowEmojiCat('hearts',this)">❤️</button>
+                    <button type="button" class="mx-emoji-tab" data-cat="objects" onclick="mxShowEmojiCat('objects',this)">📦</button>
+                </div>
+                <div class="mx-emoji-grid" id="mxEmojiGrid"></div>
+            </div>
+
+            <div class="mx-input-area" id="mxInputArea">
+                <button class="mx-action-btn" onclick="mxToggleEmoji()" aria-label="{% trans 'Emoji' %}" title="{% trans 'Emoji' %}">
                     <i class="far fa-smile"></i>
                 </button>
-                <div class="mx-textarea-wrap">
-                    <textarea id="msgInput" rows="1"
-                              placeholder="{% trans 'Type a message...' %}"
-                              onkeydown="mxKeyDown(event)"
-                              oninput="mxAutoResize(this)"></textarea>
+                <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;">
+                    <div class="mx-textarea-wrap">
+                        <textarea id="msgInput" rows="1"
+                                  placeholder="{% trans 'Type a message...' %}"
+                                  onkeydown="mxKeyDown(event)"
+                                  oninput="mxAutoResize(this);mxUpdateCharCount(this)"
+                                  maxlength="4000"></textarea>
+                    </div>
+                    <div class="mx-char-counter" id="mxCharCounter">0 / 4000</div>
                 </div>
-                <button class="mx-action-btn" onclick="mxPickFile()" aria-label="Attach" title="Attach">
-                    <i class="fas fa-paperclip"></i>
+                <input type="file" id="mxFileInput" accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime" style="display:none" onchange="mxOnFileSelected(event)">
+                <button class="mx-action-btn" onclick="mxPickFile()" aria-label="{% trans 'Attach photo or video' %}" title="{% trans 'Attach photo or video' %}">
+                    <i class="fas fa-image"></i>
                 </button>
                 <button class="mx-send-btn" id="msgSendBtn" onclick="mxSendMessage()" aria-label="Send">
                     <i class="fas fa-paper-plane"></i>
                 </button>
             </div>
         </div><!-- /mxChatPanel -->
+
+        <!-- Lightbox for full-size image/video viewing -->
+        <div class="mx-lightbox" id="mxLightbox" onclick="mxCloseLightbox(event)">
+            <button class="mx-lightbox-close" onclick="mxCloseLightbox(event)" aria-label="Close"><i class="fas fa-times"></i></button>
+            <div class="mx-lightbox-content" id="mxLightboxContent"></div>
+        </div>
     </main><!-- /mx-main -->
+
+    <!-- Floating per-message action menu (reply / recall / delete for me) -->
+    <div class="mx-msg-menu" id="mxMsgMenu">
+        <div class="mx-msg-menu-item" onclick="mxMsgMenuAction('reply')"><i class="fas fa-reply"></i>{% trans "Reply" %}</div>
+        <div class="mx-msg-menu-item" id="mxMsgMenuRecall" onclick="mxMsgMenuAction('recall')" style="display:none;"><i class="fas fa-undo"></i>{% trans "Recall" %}</div>
+        <div class="mx-msg-menu-item danger" id="mxMsgMenuDelete" onclick="mxMsgMenuAction('delete')" style="display:none;"><i class="fas fa-trash-alt"></i>{% trans "Delete for me" %}</div>
+    </div>
 </div><!-- /mx-app -->
 
 <script>
@@ -861,6 +1172,37 @@ function setAvatar(el, name) {
     el.style.background = 'linear-gradient(135deg,'+c[0]+','+c[1]+')';
     el.textContent = avatarInitials(name);
 }
+
+/* ── Client-side timestamp formatting (viewer's own local timezone) ── */
+function fmtTime(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    return d.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+}
+function fmtFullDateTime(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    return d.toLocaleDateString([], {year: 'numeric', month: 'long', day: 'numeric'}) + ' ' + fmtTime(iso);
+}
+function fmtDateSep(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    return d.toLocaleDateString([], {year: 'numeric', month: 'long', day: 'numeric'});
+}
+function fmtConvoTime(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    var now = new Date();
+    if (d.toDateString() === now.toDateString()) return fmtTime(iso);
+    var yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
+    if (d.toDateString() === yesterday.toDateString()) return '{% trans "Yesterday" %}';
+    return d.toLocaleDateString([], {month: 'numeric', day: 'numeric'});
+}
+function dayKey(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
+}
 function toast(msg, type) {
     var t = document.createElement('div');
     t.className = 'mx-toast';
@@ -877,12 +1219,15 @@ function loadConvos() {
     .then(function(data){
         _convos = data.conversations || [];
         renderConvos(_convos);
+        mxUpdateUnreadBadge();
+        mxUpdateConnStatus(true);
         document.getElementById('mxListLoading').style.display = 'none';
-        // Re-poll active convo messages
         if (activeConvoId) loadMessages(activeConvoId, false);
+        else applyDeepLink();
     })
     .catch(function(){
         document.getElementById('mxListLoading').style.display = 'none';
+        mxUpdateConnStatus(false);
     });
 }
 
@@ -910,7 +1255,7 @@ function renderConvos(convos) {
         var item = document.createElement('div');
         item.className = 'mx-convo-item' + (c.id == activeConvoId ? ' active' : '');
         item.dataset.id = c.id;
-        item.dataset.search = ((c.vendor_name||'')+(c.last_message||'')+(c.ref_item_name||'')).toLowerCase();
+        item.dataset.search = ((c.vendor_name||'')+' '+(c.subject||'')+' '+(c.last_message||'')+' '+(c.ref_item_name||'')).toLowerCase();
         item.setAttribute('role','button');
         item.setAttribute('tabindex','0');
 
@@ -919,9 +1264,10 @@ function renderConvos(convos) {
         var preview = c.last_message ? esc(c.last_message) : '<em style="opacity:.6">{% trans "Start conversation" %}</em>';
         var youPrefix = c.last_sender_type === 'buyer' ? '<span style="color:var(--mx-primary);font-weight:700;margin-right:2px;">{% trans "Me:" %}</span>' : '';
         var refPill = c.ref_item_name ? '<span class="mx-convo-ref-pill">'+esc(c.ref_item_name)+'</span>' : '';
+        var blockedPill = c.is_blocked ? '<span class="mx-convo-blocked-pill"><i class="fas fa-ban"></i> {% trans "Blocked" %}</span>' : '';
         var unreadBadge = c.unread_count > 0
             ? '<span class="mx-unread-badge">'+c.unread_count+'</span>' : '';
-        var timeStr = c.last_time || '';
+        var timeStr = fmtConvoTime(c.last_created_at);
 
         item.innerHTML = [
             '<div class="mx-avatar" style="background:linear-gradient(135deg,'+colors[0]+','+colors[1]+');">',
@@ -929,17 +1275,22 @@ function renderConvos(convos) {
                 '<div class="mx-online-dot"></div>',
             '</div>',
             '<div class="mx-convo-info">',
-                '<div class="mx-convo-name">'+esc(vendorName)+'</div>',
+                '<div class="mx-convo-name">'+esc(vendorName)+blockedPill+'</div>',
                 '<div class="mx-convo-preview">'+youPrefix+preview+refPill+'</div>',
             '</div>',
             '<div class="mx-convo-meta">',
                 '<span class="mx-convo-time">'+esc(timeStr)+'</span>',
                 unreadBadge,
             '</div>',
+            '<button type="button" class="mx-convo-delete-btn" title="{% trans "Delete conversation" %}" aria-label="Delete conversation"><i class="fas fa-trash-alt"></i></button>',
         ].join('');
 
         item.addEventListener('click', function() { mxOpenConvo(c); });
         item.addEventListener('keydown', function(e){ if(e.key==='Enter') mxOpenConvo(c); });
+        item.querySelector('.mx-convo-delete-btn').addEventListener('click', function(e) {
+            e.stopPropagation();
+            mxDeleteConversationById(c.id);
+        });
         list.insertBefore(item, empty);
     });
 }
@@ -948,6 +1299,9 @@ function renderConvos(convos) {
 function mxOpenConvo(c) {
     activeConvoId = c.id;
     activeConvoName = c.vendor_name || c.subject || '{% trans "Vendor" %}';
+    mxApplyBlockState(!!c.is_blocked);
+    mxCancelReply();
+    mxCancelMedia();
 
     // Mark active in list
     document.querySelectorAll('.mx-convo-item').forEach(function(el){
@@ -978,14 +1332,41 @@ function mxOpenConvo(c) {
         strip.classList.remove('show');
     }
 
+    // View product dropdown item
+    var dropdownProduct = document.getElementById('mxDropdownProduct');
+    if (c.ref_item_url) {
+        dropdownProduct.style.display = '';
+        dropdownProduct.dataset.productUrl = c.ref_item_url;
+    } else {
+        dropdownProduct.style.display = 'none';
+    }
+
+    // Vendor shop button
+    var shopBtn = document.getElementById('mxShopBtn');
+    var dropdownShop = document.getElementById('mxDropdownShop');
+    var dropdownBlock = document.getElementById('mxDropdownBlock');
+    if (c.vendor_id) {
+        var shopUrl = '/manager/public/shop/' + c.vendor_id + '/';
+        shopBtn.href = shopUrl;
+        shopBtn.style.display = '';
+        dropdownShop.style.display = '';
+        dropdownShop.dataset.shopUrl = shopUrl;
+        dropdownBlock.style.display = '';
+    } else {
+        shopBtn.style.display = 'none';
+        dropdownShop.style.display = 'none';
+        dropdownBlock.style.display = 'none';
+    }
+
     // Show chat panel
     document.getElementById('mxIdle').style.display = 'none';
     var panel = document.getElementById('mxChatPanel');
     panel.style.display = 'flex';
 
-    // Mobile: slide in
+    // Mobile: slide in, hide bottom tab bar for full-immersion chat
     document.getElementById('mxMain').classList.add('open');
     document.getElementById('mxSidebar').classList.add('hidden');
+    document.body.classList.add('mx-chat-open');
 
     loadMessages(c.id, true);
 
@@ -1009,6 +1390,7 @@ function loadMessages(convoId, scrollToBottom) {
     fetch(MESSAGES_API_BASE + convoId + '/messages/', {credentials:'same-origin'})
     .then(function(r){return r.json();})
     .then(function(data){
+        if (convoId === activeConvoId && data.conversation) mxApplyBlockState(!!data.conversation.is_blocked);
         renderMessages(data.messages || [], scrollToBottom !== false);
     })
     .catch(function(){});
@@ -1033,8 +1415,17 @@ function renderMessages(msgs, scrollBottom) {
         if (_msgCount === 0) {
             area.innerHTML = '<div style="text-align:center;padding:30px 20px;color:var(--mx-muted);font-size:.85rem;">{% trans "No messages yet, start the conversation!" %}</div>';
         }
+        if (_pendingAutoLink) {
+            _pendingAutoLink = false;
+            setTimeout(function() {
+                var link = document.getElementById('mxProductLink');
+                if (link && link.href && link.href !== '#' && activeConvoId) mxSendProductLink();
+            }, 300);
+        }
         return;
     }
+
+    _pendingAutoLink = false;
 
     // Find max rendered ID to know what's new
     var maxRendered = _lastRenderedId;
@@ -1046,6 +1437,14 @@ function renderMessages(msgs, scrollBottom) {
         area.innerHTML = '';
         var lastDate = null;
         msgs.forEach(function(m, idx) {
+            var dk = dayKey(m.created_at);
+            if (dk !== lastDate) {
+                var sep = document.createElement('div');
+                sep.className = 'mx-date-sep';
+                sep.innerHTML = '<span>' + esc(fmtDateSep(m.created_at)) + '</span>';
+                area.appendChild(sep);
+                lastDate = dk;
+            }
             var el = buildMessageEl(m, idx, msgs);
             area.appendChild(el);
             if (m.id > maxRendered) maxRendered = m.id;
@@ -1081,9 +1480,19 @@ function renderMessages(msgs, scrollBottom) {
     _lastRenderedId = maxRendered;
     _msgCount = msgs.length;
 
-    if (scrollBottom && hasNew) {
-        area.scrollTop = area.scrollHeight;
-        document.getElementById('mxScrollDownBtn').classList.remove('show');
+    if (hasNew) {
+        var atBottom = area.scrollHeight - area.scrollTop - area.clientHeight < 80;
+        if (scrollBottom || atBottom) {
+            area.scrollTop = area.scrollHeight;
+            document.getElementById('mxScrollDownBtn').classList.remove('show');
+            _newMsgCount = 0;
+        } else if (!isFirstRender) {
+            _newMsgCount++;
+            var badge = document.getElementById('mxNewMsgBadge');
+            badge.textContent = _newMsgCount;
+            badge.classList.add('show');
+            document.getElementById('mxScrollDownBtn').classList.add('show');
+        }
     }
 }
 
@@ -1093,38 +1502,85 @@ function buildMessageEl(m, idx, allMsgs) {
     var nextSameType = (idx < allMsgs.length - 1) && allMsgs[idx+1].sender_type === m.sender_type;
     var tail = isLast || !nextSameType;
     var rowClass = 'mx-row ' + (isOut ? 'out' : 'in') + (tail ? ' tail' : '');
+    var el = document.createElement('div');
+    el.className = rowClass;
+    el.dataset.msgId = m.id;
+    el._mxData = m;
+
+    if (m.is_recalled) {
+        el.innerHTML = '<div class="mx-bubble mx-bubble-recalled"><i class="fas fa-ban"></i> ' +
+            (isOut ? '{% trans "You deleted this message" %}' : '{% trans "This message was deleted" %}') + '</div>';
+        return el;
+    }
+
     var tickHtml = '';
     if (isOut) {
         tickHtml = m.is_read
             ? '<span class="mx-tick read"><i class="fas fa-check-double"></i></span>'
             : '<span class="mx-tick"><i class="fas fa-check"></i></span>';
     }
-    var el = document.createElement('div');
-    el.className = rowClass;
-    el.dataset.msgId = m.id;
-    el.innerHTML = '<div class="mx-bubble">' + formatContent(m.content) +
-        '<div class="mx-bubble-meta"><span class="mx-time">' + esc(m.time) + '</span>' + tickHtml + '</div></div>';
+
+    var replyHtml = '';
+    if (m.reply_to) {
+        var replyName = m.reply_to.sender_type === 'buyer' ? '{% trans "You" %}' : (m.reply_to.sender_name || activeConvoName);
+        replyHtml = '<div class="mx-quote-ref"><div class="mx-quote-ref-bar"></div><div class="mx-quote-ref-body">' +
+            '<div class="mx-quote-ref-name">' + esc(replyName) + '</div>' +
+            '<div class="mx-quote-ref-text">' + esc(m.reply_to.content) + '</div></div></div>';
+    }
+
+    var mediaHtml = '';
+    if (m.attachment_type === 'image' && m.attachment_url) {
+        mediaHtml = '<img class="mx-bubble-media" src="' + esc(m.attachment_url) + '" alt="" loading="lazy" onclick="mxOpenLightbox(\'' + esc(m.attachment_url) + '\',\'image\')">';
+    } else if (m.attachment_type === 'video' && m.attachment_url) {
+        mediaHtml = '<video class="mx-bubble-media" src="' + esc(m.attachment_url) + '" controls preload="metadata"></video>';
+    }
+
+    var textHtml = m.content ? '<div class="mx-bubble-text">' + formatContent(m.content) + '</div>' : '';
+    var actionBtn = '<button type="button" class="mx-bubble-action-btn" onclick="mxOpenMsgMenu(event,' + m.id + ')" aria-label="{% trans "Message actions" %}"><i class="fas fa-chevron-down"></i></button>';
+
+    el.innerHTML = '<div class="mx-bubble">' + replyHtml + mediaHtml + textHtml +
+        '<div class="mx-bubble-meta"><span class="mx-time" title="' + esc(fmtFullDateTime(m.created_at)) + '">' + esc(fmtTime(m.created_at)) + '</span>' + tickHtml + '</div></div>' + actionBtn;
     return el;
 }
 
 // ── Send message ──────────────────────────────────────
+var _pendingFile = null;
+var _replyToId = null;
+var _replyToBrief = null;
+
 window.mxSendMessage = function() {
     if (sending) return;
+    if (_activeIsBlocked) { toast('{% trans "You have blocked this vendor. Unblock to send messages." %}'); return; }
     var input = document.getElementById('msgInput');
     var text = (input.value || '').trim();
-    if (!text || !activeConvoId) return;
+    var file = _pendingFile;
+    if (!text && !file) return;
+    if (!activeConvoId) return;
 
     sending = true;
     var btn = document.getElementById('msgSendBtn');
     btn.disabled = true;
     input.value = '';
     mxAutoResize(input);
+    var replyBrief = _replyToBrief;
+    var replyToId = _replyToId;
+    mxCancelReply();
+    mxCancelMedia();
 
     // Optimistic bubble
     var area = document.getElementById('mxMessages');
     var temp = document.createElement('div');
     temp.className = 'mx-row out tail sending';
-    temp.innerHTML = '<div class="mx-bubble">' + esc(text) +
+    var previewMedia = file
+        ? (file.type.indexOf('image') === 0
+            ? '<img class="mx-bubble-media" src="' + URL.createObjectURL(file) + '">'
+            : '<video class="mx-bubble-media" src="' + URL.createObjectURL(file) + '"></video>')
+        : '';
+    var previewReply = replyBrief
+        ? '<div class="mx-quote-ref"><div class="mx-quote-ref-bar"></div><div class="mx-quote-ref-body"><div class="mx-quote-ref-name">' +
+          esc(replyBrief.sender_type === 'buyer' ? '{% trans "You" %}' : activeConvoName) + '</div><div class="mx-quote-ref-text">' + esc(replyBrief.content) + '</div></div></div>'
+        : '';
+    temp.innerHTML = '<div class="mx-bubble">' + previewReply + previewMedia + (text ? '<div class="mx-bubble-text">' + esc(text) + '</div>' : '') +
         '<div class="mx-bubble-meta"><span class="mx-time"><i class="fas fa-clock" style="font-size:.55rem;"></i></span><span class="mx-tick"><i class="fas fa-clock" style="font-size:.55rem;"></i></span></div>' +
         '</div>';
     area.appendChild(temp);
@@ -1134,6 +1590,8 @@ window.mxSendMessage = function() {
     fd.append('conversation_id', activeConvoId);
     fd.append('content', text);
     fd.append('message', text);
+    if (file) fd.append('attachment', file);
+    if (replyToId) fd.append('reply_to_id', replyToId);
 
     fetch(SEND_API, {
         method: 'POST', body: fd,
@@ -1143,11 +1601,14 @@ window.mxSendMessage = function() {
     .then(function(r){return r.json();})
     .then(function(data) {
         sending = false; btn.disabled = false;
+        temp.remove();
         if (data.success) {
+            _lastRenderedId = 0;
+            _msgCount = 0;
             loadMessages(activeConvoId, true);
             loadConvos();
         } else {
-            temp.remove(); input.value = text;
+            input.value = text;
             toast(data.message || '{% trans "Send failed, please retry" %}');
         }
     })
@@ -1187,6 +1648,7 @@ window.mxSetFilter = function(filter, btn) {
 window.mxGoBack = function() {
     document.getElementById('mxMain').classList.remove('open');
     document.getElementById('mxSidebar').classList.remove('hidden');
+    document.body.classList.remove('mx-chat-open');
     clearInterval(pollTimer);
     try { history.replaceState(null, '', window.location.pathname); } catch(e){}
 };
@@ -1218,34 +1680,345 @@ window.mxSendProductLink = function() {
     mxAutoResize(msgInput);
     mxSendMessage();
 };
-window.mxToggleEmoji = function() { /* future: emoji picker */ };
-window.mxPickFile = function() { /* future: file attach */ };
+window.mxViewProduct = function() {
+    var el = document.getElementById('mxDropdownProduct');
+    if (el && el.dataset.productUrl) window.open(el.dataset.productUrl, '_blank');
+    mxCloseDropdown();
+};
+window.mxGoToShop = function() {
+    var el = document.getElementById('mxDropdownShop');
+    if (el && el.dataset.shopUrl) window.open(el.dataset.shopUrl, '_blank');
+    mxCloseDropdown();
+};
+// ── Emoji picker ────────────────────────────────────────
+var MX_EMOJI = {
+    smileys: ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🥳','😏','😒','😞','😔','😟','😕','🙁','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😴','🤤','😪'],
+    gestures: ['👍','👎','👌','✌️','🤞','🤟','🤘','👏','🙌','👐','🤝','🙏','💪','🤲','👋','🤚','✋','👊','✊','☝️','👆','👇','👈','👉'],
+    hearts: ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','💕','💞','💓','💗','💖','💘','💝','💯'],
+    objects: ['📦','🛒','💰','💳','🎁','📱','💻','📷','🚚','⏰','📅','✅','❌','⭐','🔥','✨','🎉','👀','💡','📌','🔔','🏠','🛍️','💵']
+};
+window.mxToggleEmoji = function() {
+    var picker = document.getElementById('mxEmojiPicker');
+    if (picker.classList.contains('show')) { picker.classList.remove('show'); return; }
+    if (!picker.dataset.rendered) { mxShowEmojiCat('smileys', picker.querySelector('.mx-emoji-tab')); picker.dataset.rendered = '1'; }
+    picker.classList.add('show');
+};
+window.mxShowEmojiCat = function(cat, btn) {
+    document.querySelectorAll('#mxEmojiPicker .mx-emoji-tab').forEach(function(t) { t.classList.toggle('active', t === btn); });
+    var grid = document.getElementById('mxEmojiGrid');
+    grid.innerHTML = MX_EMOJI[cat].map(function(e) {
+        return '<button type="button" class="mx-emoji-item" onclick="mxInsertEmoji(\'' + e + '\')">' + e + '</button>';
+    }).join('');
+};
+window.mxInsertEmoji = function(emoji) {
+    var input = document.getElementById('msgInput');
+    var start = input.selectionStart || 0, end = input.selectionEnd || 0;
+    var text = input.value;
+    input.value = text.slice(0, start) + emoji + text.slice(end);
+    var newPos = start + emoji.length;
+    input.setSelectionRange(newPos, newPos);
+    input.focus();
+    mxAutoResize(input);
+    mxUpdateCharCount(input);
+};
+document.addEventListener('click', function(e) {
+    var picker = document.getElementById('mxEmojiPicker');
+    if (!picker || !picker.classList.contains('show')) return;
+    if (picker.contains(e.target) || e.target.closest('[onclick="mxToggleEmoji()"]')) return;
+    picker.classList.remove('show');
+});
+
+// ── Photo/video attachment ────────────────────────────
+var MX_ATTACH_MAX = {image: 10*1024*1024, video: 50*1024*1024};
+window.mxPickFile = function() {
+    if (_activeIsBlocked) { toast('{% trans "You have blocked this vendor. Unblock to send messages." %}'); return; }
+    document.getElementById('mxFileInput').click();
+};
+window.mxOnFileSelected = function(evt) {
+    var file = evt.target.files && evt.target.files[0];
+    evt.target.value = '';
+    if (!file) return;
+    var isImage = file.type.indexOf('image') === 0;
+    var isVideo = file.type.indexOf('video') === 0;
+    if (!isImage && !isVideo) {
+        toast('{% trans "Only images or videos are allowed" %}');
+        return;
+    }
+    var limit = isImage ? MX_ATTACH_MAX.image : MX_ATTACH_MAX.video;
+    if (file.size > limit) {
+        toast('{% trans "File too large" %} (max ' + Math.round(limit/1024/1024) + 'MB)');
+        return;
+    }
+    _pendingFile = file;
+    var preview = document.getElementById('mxMediaPreview');
+    var thumb = document.getElementById('mxMediaPreviewThumb');
+    thumb.innerHTML = isImage
+        ? '<img src="' + URL.createObjectURL(file) + '">'
+        : '<video src="' + URL.createObjectURL(file) + '"></video>';
+    document.getElementById('mxMediaPreviewName').textContent = file.name;
+    preview.style.display = 'flex';
+    document.getElementById('msgInput').focus();
+};
+window.mxCancelMedia = function() {
+    _pendingFile = null;
+    document.getElementById('mxMediaPreview').style.display = 'none';
+    document.getElementById('mxMediaPreviewThumb').innerHTML = '';
+};
+
+// ── Reply / quote ──────────────────────────────────────
+window.mxStartReply = function(m) {
+    _replyToId = m.id;
+    _replyToBrief = m;
+    var name = m.sender_type === 'buyer' ? '{% trans "You" %}' : activeConvoName;
+    var text = m.content || (m.attachment_type === 'image' ? '📷 {% trans "Photo" %}' : m.attachment_type === 'video' ? '🎥 {% trans "Video" %}' : '');
+    document.getElementById('mxReplyBannerName').textContent = name;
+    document.getElementById('mxReplyBannerText').textContent = text;
+    document.getElementById('mxReplyBanner').style.display = 'flex';
+    document.getElementById('msgInput').focus();
+};
+window.mxCancelReply = function() {
+    _replyToId = null;
+    _replyToBrief = null;
+    document.getElementById('mxReplyBanner').style.display = 'none';
+};
+
+// ── Per-message action menu (reply / recall / delete for me) ──
+var _msgMenuTargetId = null;
+window.mxOpenMsgMenu = function(evt, msgId) {
+    evt.stopPropagation();
+    var row = document.querySelector('.mx-row[data-msg-id="' + msgId + '"]');
+    var m = row && row._mxData;
+    if (!m) return;
+    _msgMenuTargetId = msgId;
+    var menu = document.getElementById('mxMsgMenu');
+    document.getElementById('mxMsgMenuRecall').style.display = m.can_recall ? 'flex' : 'none';
+    document.getElementById('mxMsgMenuDelete').style.display = m.can_delete_for_me ? 'flex' : 'none';
+    var btn = evt.currentTarget;
+    var btnRect = btn.getBoundingClientRect();
+    var appRect = document.getElementById('mxApp').getBoundingClientRect();
+    var itemCount = 1 + (m.can_recall ? 1 : 0) + (m.can_delete_for_me ? 1 : 0);
+    var estMenuHeight = itemCount * 40 + 6;
+    var spaceBelow = appRect.bottom - btnRect.bottom;
+    if (spaceBelow < estMenuHeight + 10) {
+        menu.style.bottom = (appRect.bottom - btnRect.top + 4) + 'px';
+        menu.style.top = 'auto';
+    } else {
+        menu.style.top = (btnRect.bottom - appRect.top + 4) + 'px';
+        menu.style.bottom = 'auto';
+    }
+    if (m.sender_type === 'buyer') {
+        menu.style.right = (appRect.right - btnRect.right) + 'px';
+        menu.style.left = 'auto';
+    } else {
+        menu.style.left = (btnRect.left - appRect.left) + 'px';
+        menu.style.right = 'auto';
+    }
+    menu.classList.add('show');
+};
+window.mxMsgMenuAction = function(action) {
+    document.getElementById('mxMsgMenu').classList.remove('show');
+    var id = _msgMenuTargetId;
+    if (!id) return;
+    var row = document.querySelector('.mx-row[data-msg-id="' + id + '"]');
+    var m = row && row._mxData;
+    if (action === 'reply' && m) mxStartReply(m);
+    else if (action === 'recall') mxRecallMessage(id);
+    else if (action === 'delete') mxDeleteMessageForMeAction(id);
+};
+document.addEventListener('click', function(e) {
+    var menu = document.getElementById('mxMsgMenu');
+    if (menu && menu.classList.contains('show') && !menu.contains(e.target)) menu.classList.remove('show');
+});
+
+window.mxRecallMessage = function(id) {
+    gConfirm('{% trans "Recall this message? It will be removed for everyone." %}', function() {
+        fetch('/manager/api/messages/' + id + '/recall/', {
+            method: 'POST', headers: {'X-CSRFToken': csrf()}, credentials: 'same-origin'
+        }).then(function(r){return r.json();}).then(function(data) {
+            if (data.success) {
+                var row = document.querySelector('.mx-row[data-msg-id="' + id + '"]');
+                if (row) {
+                    row.className = row.className.replace(' tail', '') + ' tail';
+                    row.innerHTML = '<div class="mx-bubble mx-bubble-recalled"><i class="fas fa-ban"></i> {% trans "You deleted this message" %}</div>';
+                }
+                loadConvos();
+            } else {
+                toast(data.message || '{% trans "Failed" %}');
+            }
+        }).catch(function(){ toast('{% trans "Network error" %}'); });
+    }, {danger: true, okText: '{% trans "Recall" %}'});
+};
+window.mxDeleteMessageForMeAction = function(id) {
+    gConfirm('{% trans "Delete this message for you? The vendor will still see it." %}', function() {
+        fetch('/manager/api/messages/' + id + '/delete_for_me/', {
+            method: 'POST', headers: {'X-CSRFToken': csrf()}, credentials: 'same-origin'
+        }).then(function(r){return r.json();}).then(function(data) {
+            if (data.success) {
+                var row = document.querySelector('.mx-row[data-msg-id="' + id + '"]');
+                if (row) row.remove();
+                loadConvos();
+            } else {
+                toast(data.message || '{% trans "Failed" %}');
+            }
+        }).catch(function(){ toast('{% trans "Network error" %}'); });
+    }, {danger: true, okText: '{% trans "Delete" %}'});
+};
+
+// ── Delete conversation ────────────────────────────────
+window.mxDeleteConversationById = function(id) {
+    gConfirm('{% trans "Delete this conversation? This only removes it from your list." %}', function() {
+        fetch('/manager/api/conversations/' + id + '/delete/', {
+            method: 'POST', headers: {'X-CSRFToken': csrf()}, credentials: 'same-origin'
+        }).then(function(r){return r.json();}).then(function(data) {
+            if (data.success) {
+                _convos = _convos.filter(function(c){ return c.id !== id; });
+                renderConvos(_convos);
+                mxUpdateUnreadBadge();
+                if (activeConvoId === id) mxGoBack();
+                toast('{% trans "Conversation deleted" %}', 'success');
+            } else {
+                toast(data.message || '{% trans "Failed" %}');
+            }
+        }).catch(function(){ toast('{% trans "Network error" %}'); });
+    }, {danger: true, okText: '{% trans "Delete" %}'});
+};
+window.mxDeleteConversation = function() {
+    mxCloseDropdown();
+    if (activeConvoId) mxDeleteConversationById(activeConvoId);
+};
+
+// ── Block / unblock vendor ─────────────────────────────
+var _activeIsBlocked = false;
+function mxApplyBlockState(blocked) {
+    _activeIsBlocked = blocked;
+    document.getElementById('mxBlockedBanner').style.display = blocked ? 'flex' : 'none';
+    var label = document.getElementById('mxDropdownBlockLabel');
+    if (label) label.textContent = blocked ? '{% trans "Unblock vendor" %}' : '{% trans "Block vendor" %}';
+    var sendBtn = document.getElementById('msgSendBtn');
+    var input = document.getElementById('msgInput');
+    if (sendBtn) sendBtn.disabled = blocked;
+    if (input) input.disabled = blocked;
+}
+window.mxToggleBlockVendor = function() {
+    mxCloseDropdown();
+    if (!activeConvoId) return;
+    var action = _activeIsBlocked ? 'unblock' : 'block';
+    var doIt = function() {
+        fetch('/manager/api/conversations/' + activeConvoId + '/' + action + '/', {
+            method: 'POST', headers: {'X-CSRFToken': csrf()}, credentials: 'same-origin'
+        }).then(function(r){return r.json();}).then(function(data) {
+            if (data.success) {
+                mxApplyBlockState(!_activeIsBlocked);
+                loadConvos();
+                toast(_activeIsBlocked ? '{% trans "Vendor blocked" %}' : '{% trans "Vendor unblocked" %}', 'success');
+            } else {
+                toast(data.message || '{% trans "Failed" %}');
+            }
+        }).catch(function(){ toast('{% trans "Network error" %}'); });
+    };
+    if (action === 'block') {
+        gConfirm('{% trans "Block this vendor? You will no longer exchange messages until you unblock them." %}', doIt, {danger: true, okText: '{% trans "Block" %}'});
+    } else {
+        doIt();
+    }
+};
+
+// ── Lightbox for full-size media ───────────────────────
+window.mxOpenLightbox = function(url, type) {
+    var box = document.getElementById('mxLightbox');
+    var content = document.getElementById('mxLightboxContent');
+    content.innerHTML = type === 'video'
+        ? '<video src="' + url + '" controls autoplay></video>'
+        : '<img src="' + url + '">';
+    box.classList.add('show');
+};
+window.mxCloseLightbox = function(evt) {
+    if (evt) evt.stopPropagation();
+    var box = document.getElementById('mxLightbox');
+    box.classList.remove('show');
+    document.getElementById('mxLightboxContent').innerHTML = '';
+};
 window.mxScrollBottom = function() {
     var area = document.getElementById('mxMessages');
     area.scrollTop = area.scrollHeight;
     document.getElementById('mxScrollDownBtn').classList.remove('show');
+    var badge = document.getElementById('mxNewMsgBadge');
+    badge.classList.remove('show');
+    _newMsgCount = 0;
 };
+var _newMsgCount = 0;
 window.mxOnScroll = function() {
     var area = document.getElementById('mxMessages');
     var atBottom = area.scrollHeight - area.scrollTop - area.clientHeight < 80;
     document.getElementById('mxScrollDownBtn').classList.toggle('show', !atBottom);
+    if (atBottom) {
+        var badge = document.getElementById('mxNewMsgBadge');
+        badge.classList.remove('show');
+        _newMsgCount = 0;
+    }
 };
 
-// ── Deep-link (URL param ?convo=) ─────────────────────
+// ── Character counter ────────────────────────────────
+var MSG_MAX = 4000;
+window.mxUpdateCharCount = function(el) {
+    var len = (el.value || '').length;
+    var counter = document.getElementById('mxCharCounter');
+    counter.textContent = len + ' / ' + MSG_MAX;
+    counter.classList.toggle('show', len > 0);
+    counter.classList.toggle('warn', len > MSG_MAX * 0.85 && len <= MSG_MAX);
+    counter.classList.toggle('danger', len >= MSG_MAX);
+};
+
+// ── Connection status ────────────────────────────────
+var _connOk = true;
+function mxUpdateConnStatus(online) {
+    var bar = document.getElementById('mxConnStatus');
+    if (online && !_connOk) {
+        bar.className = 'mx-conn-status show connected';
+        document.getElementById('mxConnText').textContent = '{% trans "Reconnected" %}';
+        bar.querySelector('i').className = 'fas fa-wifi';
+        setTimeout(function() { bar.classList.remove('show'); }, 2000);
+    } else if (!online && _connOk) {
+        bar.className = 'mx-conn-status show';
+        document.getElementById('mxConnText').textContent = '{% trans "Connection lost" %}';
+        bar.querySelector('i').className = 'fas fa-wifi-slash';
+    }
+    _connOk = online;
+}
+window.addEventListener('online', function() { mxUpdateConnStatus(true); });
+window.addEventListener('offline', function() { mxUpdateConnStatus(false); });
+
+// ── Unread total badge ───────────────────────────────
+function mxUpdateUnreadBadge() {
+    var total = 0;
+    _convos.forEach(function(c) { total += (c.unread_count || 0); });
+    var badge = document.getElementById('mxTotalUnread');
+    if (total > 0) {
+        badge.textContent = total > 99 ? '99+' : total;
+        badge.classList.add('show');
+    } else {
+        badge.classList.remove('show');
+    }
+}
+
+// ── Deep-link (URL param ?convo=&auto_link=) ──────────
+// Applied from loadConvos()'s own success handler (see above) once the
+// list has actually loaded, and only while no conversation is open yet —
+// a standalone timer here would race the fetch and could silently no-op
+// on a slow connection, or fire twice and reset an already-open chat.
+var _pendingAutoLink = false;
 function applyDeepLink() {
+    if (activeConvoId) return;
     var params = new URLSearchParams(window.location.search);
     var cid = params.get('convo');
     if (!cid) return;
+    _pendingAutoLink = params.get('auto_link') === '1';
     var found = _convos.find(function(c){ return String(c.id) === String(cid); });
     if (found) mxOpenConvo(found);
 }
 
 // ── Init ──────────────────────────────────────────────
 loadConvos();
-setTimeout(function() {
-    loadConvos(); // second load to get fresh data
-    setTimeout(applyDeepLink, 100);
-}, 200);
 
 // Reload convos every 10s (background tab friendly)
 setInterval(function() {

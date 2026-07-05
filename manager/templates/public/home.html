@@ -2397,7 +2397,6 @@ html[data-theme="dark"] .home-category-card:hover {
                     <div class="feed-card-actions-main">
                         <div class="feed-card-actions-row">
                             <span class="feed-card-price">{{ book.price|fcfa }}</span>
-                            <span class="feed-card-tag" style="background:#ede9fe;color:#7c3aed;" data-zh="图书" data-en="Book" data-fr="Livre">图书</span>
                         </div>
                     </div>
                     {% include 'public/includes/feed_view_details_btn.html' %}
@@ -2767,7 +2766,6 @@ html[data-theme="dark"] .home-category-card:hover {
                     {% for book in recent_books|slice:":4" %}
                     <div class="na-card">
                         <div class="na-cover">
-                            <span class="na-type-badge book" data-zh="图书" data-en="Book" data-fr="Livre">图书</span>
                             {% if book.cover_image %}<img src="{{ book.cover_image.url }}" alt="{{ book.name }}">{% else %}<i class="fas fa-book" style="font-size:3rem;color:rgba(29,78,216,.3);"></i>{% endif %}
                         </div>
                         <div class="na-body">
@@ -3278,12 +3276,12 @@ function getCsrfToken() {
                         var card = document.createElement('a');
                         card.href = item.url;
                         card.className = 'feed-card';
-                        var tagStyle = item.type === 'book'
-                            ? 'background:#ede9fe;color:#7c3aed;'
-                            : item.type === 'product'
+                        var tagStyle = item.type === 'product'
                             ? 'background:#fef3c7;color:#d97706;'
                             : 'background:#d1fae5;color:#065f46;';
-                        card.innerHTML = '<img class="feed-card-img" src="'+item.image+'" alt="'+item.name+'" loading="lazy" onerror="this.src=\'/static/img/default_cover.png\'"><div class="feed-card-body"><div class="feed-card-name">'+item.name+'</div><div class="feed-card-actions"><div class="feed-card-actions-main"><div class="feed-card-actions-row"><span class="feed-card-price">'+fmtFcfa(item.price)+'</span><span class="feed-card-tag" style="'+tagStyle+'">'+item.type_label+'</span></div></div>'+feedDetailsBtn+'</div></div>';
+                        /* Book cards carry no type tag (redundant label) */
+                        var tagHtml = item.type === 'book' ? '' : '<span class="feed-card-tag" style="'+tagStyle+'">'+item.type_label+'</span>';
+                        card.innerHTML = '<img class="feed-card-img" src="'+item.image+'" alt="'+item.name+'" loading="lazy" onerror="this.src=\'/static/img/default_cover.png\'"><div class="feed-card-body"><div class="feed-card-name">'+item.name+'</div><div class="feed-card-actions"><div class="feed-card-actions-main"><div class="feed-card-actions-row"><span class="feed-card-price">'+fmtFcfa(item.price)+'</span>'+tagHtml+'</div></div>'+feedDetailsBtn+'</div></div>';
                         feedGrid.appendChild(card);
                     });
                     page++;

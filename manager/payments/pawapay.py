@@ -2,11 +2,12 @@
 PawaPay deposit API — Central Africa mobile money.
 Docs: https://docs.pawapay.io/
 
-Fixed for PawaPay API v2:
+Uses the PawaPay v1 API (POST {base}/deposits):
   - correspondent is required at top-level (not inside payer.accountDetails)
-  - payer uses {type, address: {value}} not {type, accountDetails: {phoneNumber}}
+  - payer uses {type: MSISDN, address: {value}} — NOT the v2
+    payer.accountDetails format
   - customerTimestamp (ISO8601) is required
-  - statementDescription must be alphanumeric + spaces only
+  - statementDescription must be alphanumeric + spaces only, 4-22 chars
 """
 from __future__ import annotations
 
@@ -46,6 +47,12 @@ COUNTRY_DIAL_CODES = {
 
 # Country → available PawaPay correspondent codes
 # operator label → PawaPay correspondent code, 'default' = first choice
+#
+# IMPORTANT: this list is scoped to what is actually ACTIVE on the DUNO_360
+# PawaPay merchant account (verified against GET /active-conf on the sandbox
+# — run that check again after switching to production credentials, or
+# whenever PawaPay enables a new corridor, since correspondents that exist
+# in PawaPay's docs are not automatically active on every merchant account).
 COUNTRY_CORRESPONDENTS = {
     'Congo': {
         'MTN Mobile Money': 'MTN_MOMO_COG',
@@ -53,9 +60,12 @@ COUNTRY_CORRESPONDENTS = {
         'default': 'MTN_MOMO_COG',
     },
     'Democratic Republic of the Congo': {
+        # 'Vodacom' (bare, code VODACOM_COD) is a distinct correspondent from
+        # 'Vodacom M-Pesa' (VODACOM_COD) in PawaPay's catalogue, but only the
+        # M-Pesa one is active on this account — offering the bare option
+        # would always fail with DEPOSITS_NOT_ALLOWED, so it is omitted.
         'Vodacom M-Pesa': 'VODACOM_MPESA_COD',
         'Airtel Money': 'AIRTEL_COD',
-        'Vodacom': 'VODACOM_COD',
         'Orange Money': 'ORANGE_COD',
         'default': 'VODACOM_MPESA_COD',
     },
@@ -69,8 +79,12 @@ COUNTRY_CORRESPONDENTS = {
         'default': 'AIRTEL_GAB',
     },
     'Angola': {
-        'Unitel': 'UNITEL_AGO',
-        'default': 'UNITEL_AGO',
+        # UNITEL_AGO is documented by PawaPay but NOT active on this merchant
+        # account yet (confirmed via /active-conf — Angola is absent from the
+        # active country list, and a test deposit is rejected with
+        # DEPOSITS_NOT_ALLOWED). Leave disabled until PawaPay enables it;
+        # re-add 'Unitel': 'UNITEL_AGO' once confirmed active.
+        'default': '',
     },
     'Chad': {
         # Chad uses XAF but no dedicated correspondent in this sandbox account
@@ -86,6 +100,37 @@ COUNTRY_CORRESPONDENTS = {
         'default': '',
     },
 }
+
+# Country → settlement currency actually accepted by PawaPay for that
+# corridor (confirmed via /active-conf). This is NOT the platform's display
+# currency (orders are quoted in FCFA/XAF) — it's what must be sent to
+# PawaPay's API for the deposit to be accepted at all. Sending the wrong
+# currency code gets the deposit REJECTED with INVALID_CURRENCY even though
+# the HTTP call itself succeeds (200 OK).
+#
+# NOTE: PawaPay does not convert currency — amounts are charged at face
+# value in whatever currency is submitted. Central African corridors (Congo,
+# Cameroon, Gabon) share XAF with the platform's own pricing, so no
+# conversion is needed there. DRC settles in CDF or USD, NOT XAF — until the
+# platform has a real XAF→CDF exchange rate and applies it to the amount,
+# treat DRC checkout as a distinct price list / manual-conversion concern,
+# not just a currency-code swap.
+COUNTRY_CURRENCY = {
+    'Congo': 'XAF',
+    'Cameroon': 'XAF',
+    'Gabon': 'XAF',
+    'Chad': 'XAF',
+    'Central African Republic': 'XAF',
+    'Equatorial Guinea': 'XAF',
+    'Democratic Republic of the Congo': 'CDF',
+    'Angola': 'AOA',
+    'São Tomé and Príncipe': 'STN',
+}
+
+
+def get_country_currency(country):
+    """Return the PawaPay settlement currency for a country, falling back to the configured default."""
+    return COUNTRY_CURRENCY.get(country or '') or getattr(settings, 'PAWAPAY_CURRENCY', 'XAF')
 
 
 def get_country_correspondents(country):
@@ -209,11 +254,12 @@ def create_deposit(*, amount, phone_number, order_number, provider=None, deposit
 
     deposit_id = deposit_id or str(uuid.uuid4())
     ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+    currency = get_country_currency(country)
 
     payload = {
         'depositId': deposit_id,
         'amount': str(int(amount)),
-        'currency': cfg['currency'],
+        'currency': currency,
         'correspondent': correspondent,
         'payer': {
             'type': 'MSISDN',
@@ -248,12 +294,25 @@ def create_deposit(*, amount, phone_number, order_number, provider=None, deposit
                 'raw': raw,
             }
         status = data.get('status', 'ACCEPTED')
-        return {
+        result = {
             'success': status not in ('FAILED', 'REJECTED'),
             'deposit_id': data.get('depositId', deposit_id),
             'status': status,
             'raw': raw,
         }
+        if status in ('FAILED', 'REJECTED'):
+            # PawaPay reports rejections with HTTP 200 (the call itself
+            # succeeded; the payment did not) — extract the reason the same
+            # way the HTTP-error branch above does, so the customer/admin
+            # sees why (e.g. INVALID_CURRENCY, DEPOSITS_NOT_ALLOWED) instead
+            # of a bare "payment failed".
+            logger.warning('PawaPay deposit %s: %s', status, raw)
+            failure = data.get('failureReason') or data.get('rejectionReason') or {}
+            if isinstance(failure, dict):
+                result['error'] = failure.get('failureMessage') or failure.get('rejectionMessage') or f'Payment {status.lower()}'
+            else:
+                result['error'] = f'Payment {status.lower()}'
+        return result
     except requests.RequestException as exc:
         logger.exception('PawaPay deposit request failed: %s', exc)
         return {'success': False, 'deposit_id': deposit_id, 'status': 'FAILED', 'error': str(exc)}
@@ -287,10 +346,15 @@ def get_deposit_status(deposit_id):
                 'error': resp.text or f'HTTP {resp.status_code}',
                 'raw': raw,
             }
-        return {
-            'status': data.get('status', 'UNKNOWN'),
-            'raw': raw,
-        }
+        status = data.get('status', 'UNKNOWN')
+        result = {'status': status, 'raw': raw}
+        if status in ('FAILED', 'REJECTED'):
+            failure = data.get('failureReason') or data.get('rejectionReason') or {}
+            if isinstance(failure, dict):
+                result['error'] = failure.get('failureMessage') or failure.get('rejectionMessage') or f'Payment {status.lower()}'
+            else:
+                result['error'] = f'Payment {status.lower()}'
+        return result
     except (requests.RequestException, ValueError) as exc:
         logger.exception('PawaPay status poll failed: %s', exc)
         return {'status': 'UNKNOWN', 'error': str(exc)}

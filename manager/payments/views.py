@@ -572,8 +572,13 @@ def _find_order_by_number(order_number):
 
 
 def _pawapay_process_callback(data):
-    """Shared logic for PawaPay deposit/payout/refund webhooks."""
-    from manager.payments.pawapay import normalize_pawapay_status
+    """Shared logic for PawaPay deposit/payout/refund webhooks.
+
+    Security: the callback endpoint is unauthenticated, so the payload status
+    is never trusted directly — a SUCCESSFUL status is confirmed against the
+    PawaPay API before the order is marked paid.
+    """
+    from manager.payments.pawapay import get_deposit_status, normalize_pawapay_status
 
     payment_id = (
         data.get('depositId')
@@ -602,6 +607,20 @@ def _pawapay_process_callback(data):
 
     if order.payment_status == 'completed' and internal_status == 'SUCCESSFUL':
         return True
+
+    # Never complete an order on the callback's word alone — re-check with
+    # PawaPay. If the API is unreachable, leave the order pending; the
+    # confirmation-page poller or a later callback retry will settle it.
+    if internal_status == 'SUCCESSFUL' and data.get('depositId'):
+        verified = get_deposit_status(data['depositId'])
+        verified_status = normalize_pawapay_status(verified.get('status', 'PENDING'))
+        if verified_status != 'SUCCESSFUL':
+            logger.warning(
+                'PawaPay callback: payload said %s but API verification returned %s '
+                'for deposit %s — not completing order %s',
+                status, verified.get('status'), payment_id,
+                getattr(order, 'order_number', order.pk))
+            internal_status = verified_status
 
     _update_order_status(order, internal_status, transaction_id=payment_id)
     return True

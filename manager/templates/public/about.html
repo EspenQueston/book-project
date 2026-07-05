@@ -126,14 +126,15 @@
     .story-visual-inner {
         width: 100%;
         height: 420px;
-        background: url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=800&q=80') center/cover no-repeat;
+        /* Local gradient composition — no external image dependency */
+        background:
+            radial-gradient(circle at 18% 22%, rgba(96,165,250,.38), transparent 42%),
+            radial-gradient(circle at 82% 78%, rgba(34,211,238,.26), transparent 44%),
+            linear-gradient(150deg, #14245f 0%, #1d4ed8 62%, #0ea5b7 100%);
         position: relative;
-    }
-    .story-visual-inner::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(160deg, rgba(29,78,216,0.35) 0%, rgba(20,36,95,0.45) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
     .story-visual-inner i { font-size: 5rem; color: rgba(255,255,255,0.7); position: relative; z-index: 1; }
     .story-year {
@@ -333,30 +334,48 @@
         .sec-desc { font-size: 0.95rem; }
 
         /* Story section */
-        .story-visual-inner { height: 260px; border-radius: 18px; }
+        .story-visual-inner { height: 220px; border-radius: 18px; }
         .story-visual { border-radius: 18px; }
         .story-year { padding: 12px 20px; border-radius: 12px; bottom: 15px; right: 15px; }
         .story-year h3 { font-size: 1.5rem; }
-        .story-btn { padding: 12px 24px; font-size: 0.9rem; border-radius: 12px; }
+        /* Stack CTA buttons full-width — side-by-side overflows small screens */
+        .story-btn {
+            display: flex;
+            width: 100%;
+            justify-content: center;
+            padding: 13px 20px;
+            font-size: 0.92rem;
+            border-radius: 14px;
+            margin: 0 0 10px 0 !important;
+        }
+        .story-btn:last-child { margin-bottom: 0 !important; }
+        .story-btn:active { transform: scale(0.97); }
 
-        /* Values cards */
-        .val-card { padding: 32px 20px 28px; border-radius: 20px; }
-        .val-ico { width: 64px; height: 64px; border-radius: 18px; }
-        .val-ico i { font-size: 1.5rem; }
-        .val-card h4 { font-size: 1.05rem; }
-        .val-card p { font-size: 0.88rem; }
+        /* Values cards: 2×2 grid on mobile instead of a long single column */
+        .val-card { padding: 22px 14px 20px; border-radius: 18px; }
+        .val-ico { width: 52px; height: 52px; border-radius: 15px; margin-bottom: 14px; }
+        .val-ico i { font-size: 1.2rem; }
+        .val-card h4 { font-size: 0.95rem; margin-bottom: 8px; }
+        .val-card p { font-size: 0.8rem; line-height: 1.55; }
 
         /* Stats band */
         .stats-band { padding: 45px 0; }
         .stat-num { font-size: 2rem; }
         .stat-lbl { font-size: 0.82rem; }
 
-        /* Platform features (team-card reuse) */
-        .team-card { padding: 28px 16px; border-radius: 20px; }
-        .team-pic { width: 80px; height: 80px; }
-        .team-pic i { font-size: 2rem; }
-        .team-card h5 { font-size: 0.95rem; }
-        .team-card .role { font-size: 0.82rem; }
+        /* Platform features: compact horizontal cards on mobile */
+        .team-card {
+            padding: 16px 18px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            text-align: left;
+            gap: 15px;
+        }
+        .team-pic { width: 54px; height: 54px; margin: 0; flex-shrink: 0; }
+        .team-pic i { font-size: 1.3rem; }
+        .team-card h5 { font-size: 0.95rem; margin-bottom: 2px; }
+        .team-card .role { font-size: 0.8rem; margin: 0; }
         .hero-glow { width: 180px; height: 180px; }
         .hero-glow i { font-size: 3.5rem; }
 
@@ -442,11 +461,11 @@
     @media (max-width: 576px) {
         .about-hero { padding: 80px 0 55px; }
         .about-hero h1 { font-size: 1.85rem; }
-        .story-visual-inner { height: 220px; }
-        .val-card { padding: 26px 16px 22px; }
+        .story-visual-inner { height: 200px; }
+        .val-card { padding: 20px 12px 18px; }
         .stats-band { padding: 35px 0; }
         .stat-num { font-size: 1.7rem; }
-        .team-card { padding: 24px 14px; }
+        .team-card { padding: 14px 16px; }
         .cta-box { padding: 32px 18px 26px; border-radius: 20px; }
         .cta-box h2 { font-size: 1.35rem; }
         .cta-btn { padding: 13px 16px; font-size: 0.9rem; border-radius: 14px; }
@@ -540,7 +559,7 @@
                 <p class="sec-label">{% trans "我们的故事" %}</p>
                 <h2 class="sec-heading">{% trans "从图书管理到综合平台" %}</h2>
                 <p class="sec-desc">{% trans "最初，我们只是一个简单的DUNO 360。随着用户需求的增长，我们逐步拓展为一个集图书电商、在线教育、生活超市和多元市场于一体的综合性平台。" %}</p>
-                <p class="sec-desc mt-3">{% trans "如今，用户可以在我们的平台上购买并下载电子书、学习在线视频课程、选购各类商品，并通过智能AI助手获取即时帮助。我们用技术连接知识与生活。" %}</p>
+                <p class="sec-desc mt-3">{% trans "如今，用户可以在我们的平台上购买并下载电子书、学习在线视频课程、选购各类商品，并通过在线客服获取即时帮助。我们用技术连接知识与生活。" %}</p>
                 <div class="mt-4">
                     <a href="{% url 'manager:public_books' %}" class="story-btn me-2"><i class="fas fa-book-open"></i>{% trans "浏览图书" %}</a>
                     <a href="{% url 'marketplace:home' %}" class="story-btn" style="background:linear-gradient(135deg,#10b981,#06b6d4)"><i class="fas fa-store"></i>{% trans "逛市场" %}</a>
@@ -557,32 +576,32 @@
             <h2 class="sec-heading">{% trans "驱动我们前行的核心理念" %}</h2>
         </div>
         <div class="row g-4">
-            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+            <div class="col-lg-3 col-md-6 col-6" data-aos="fade-up" data-aos-delay="100">
                 <div class="val-card">
                     <div class="val-ico"><i class="fas fa-lightbulb"></i></div>
                     <h4>{% trans "创新" %}</h4>
-                    <p>{% trans "融合AI智能助手、在线课程和电子商务，不断探索数字平台的新可能。" %}</p>
+                    <p>{% trans "融合在线课程、电子商务与智能推荐，不断探索数字平台的新可能。" %}</p>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+            <div class="col-lg-3 col-md-6 col-6" data-aos="fade-up" data-aos-delay="200">
                 <div class="val-card">
                     <div class="val-ico"><i class="fas fa-heart"></i></div>
                     <h4>{% trans "热情" %}</h4>
                     <p>{% trans "对知识传播和用户体验的热爱驱动着我们，将最好的服务带给全球用户。" %}</p>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+            <div class="col-lg-3 col-md-6 col-6" data-aos="fade-up" data-aos-delay="300">
                 <div class="val-card">
                     <div class="val-ico"><i class="fas fa-shield-alt"></i></div>
                     <h4>{% trans "可靠" %}</h4>
                     <p>{% trans "安全的支付系统和稳定的服务体验，让用户放心购书、学习和购物。" %}</p>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+            <div class="col-lg-3 col-md-6 col-6" data-aos="fade-up" data-aos-delay="400">
                 <div class="val-card">
                     <div class="val-ico"><i class="fas fa-globe-asia"></i></div>
                     <h4>{% trans "全球化" %}</h4>
-                    <p>{% trans "支持中文、英文、法文三语，覆盖微信、支付宝、PayPal等多种支付方式，服务全球用户。" %}</p>
+                    <p>{% trans "支持法语、英语、中文三语，覆盖MTN、Airtel、Orange等Mobile Money本地支付，服务非洲及全球用户。" %}</p>
                 </div>
             </div>
         </div>

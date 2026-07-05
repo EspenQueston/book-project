@@ -798,10 +798,131 @@ def public_home(request):
     return render(request, 'public/home.html', ctx)
 
 
+# ── Direct-message guards (shared by buyer & vendor send paths) ──────────
+MESSAGE_MAX_LENGTH = 4000
+_MSG_RATE_WINDOW_SECONDS = 60
+_MSG_RATE_MAX_PER_WINDOW = 20
+MESSAGE_RECALL_WINDOW_SECONDS = 5 * 60
+MESSAGE_ATTACHMENT_MAX_BYTES = {
+    'image': 10 * 1024 * 1024,
+    'video': 50 * 1024 * 1024,
+    'file': 20 * 1024 * 1024,
+}
+MESSAGE_ATTACHMENT_EXTENSIONS = {
+    'image': {'.jpg', '.jpeg', '.png', '.gif', '.webp'},
+    'video': {'.mp4', '.webm', '.mov', '.m4v'},
+    'file': {'.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.txt', '.zip', '.rar'},
+}
+
+
+def _message_guard(request, message_text, allow_empty=False):
+    """Validate a direct-message payload. Returns an error string or None.
+
+    - caps content length (TextField is unbounded at the DB level)
+    - simple per-session sliding-window rate limit against spam floods
+    """
+    if not message_text and not allow_empty:
+        return '消息不能为空'
+    if len(message_text) > MESSAGE_MAX_LENGTH:
+        return f'消息过长（最多{MESSAGE_MAX_LENGTH}字符）'
+    now_ts = timezone.now().timestamp()
+    window = [t for t in request.session.get('msg_send_times', [])
+              if now_ts - t < _MSG_RATE_WINDOW_SECONDS]
+    if len(window) >= _MSG_RATE_MAX_PER_WINDOW:
+        return '发送过于频繁，请稍后再试'
+    window.append(now_ts)
+    request.session['msg_send_times'] = window
+    return None
+
+
+def _validate_message_attachment(f):
+    """Validate an uploaded chat attachment (image, video, or common document) within size limits.
+
+    Returns (attachment_type, error_message). attachment_type is '' on error.
+    """
+    import os as _os
+    ext = _os.path.splitext(f.name)[1].lower()
+    for kind, exts in MESSAGE_ATTACHMENT_EXTENSIONS.items():
+        if ext in exts:
+            if f.size > MESSAGE_ATTACHMENT_MAX_BYTES[kind]:
+                limit_mb = MESSAGE_ATTACHMENT_MAX_BYTES[kind] // (1024 * 1024)
+                return '', f'File too large (max {limit_mb}MB)'
+            return kind, None
+    return '', 'Unsupported file type. Allowed: images, videos, PDF, Office documents, TXT, ZIP/RAR'
+
+
+def _is_vendor_blocked(buyer_id, vendor_id):
+    if not buyer_id or not vendor_id:
+        return None
+    return models.VendorBlock.objects.filter(buyer_id=buyer_id, vendor_id=vendor_id).first()
+
+
+# ── WhatsApp-Business-style automatic replies (welcome / away / keywords) ──
+
+def _send_auto_reply(conversation, vendor, content):
+    """Send a canned message on the vendor's behalf, tagged is_auto_reply for the UI."""
+    if not content:
+        return None
+    msg = models.DirectMessage.objects.create(
+        conversation=conversation,
+        sender_type='vendor',
+        sender_name=vendor.company_name if vendor else '',
+        content=content,
+        is_auto_reply=True,
+    )
+    conversation.save(update_fields=['updated_at'])
+    return msg
+
+
+def _maybe_send_welcome_reply(conversation, vendor):
+    """Fires once, right after a buyer's first-ever message in a new conversation."""
+    if not vendor:
+        return
+    if conversation.direct_messages.filter(sender_type='buyer').count() != 1:
+        return
+    settings_obj = models.AutoReplySettings.objects.filter(vendor=vendor).first()
+    if settings_obj and settings_obj.welcome_enabled and settings_obj.welcome_message.strip():
+        _send_auto_reply(conversation, vendor, settings_obj.welcome_message.strip())
+
+
+def _maybe_send_keyword_reply(conversation, vendor, message_text):
+    """Scans the buyer's message for configured trigger keywords and auto-replies
+    with the first match (case-insensitive substring match)."""
+    if not vendor or not message_text:
+        return
+    text_lower = message_text.lower()
+    rules = models.AutoReplyKeyword.objects.filter(vendor=vendor, is_active=True)
+    for rule in rules:
+        if any(kw in text_lower for kw in rule.keyword_list()):
+            _send_auto_reply(conversation, vendor, rule.reply_message)
+            return
+
+
+def _maybe_send_away_reply(conversation, vendor, last_msg):
+    """Opportunistically checked whenever the buyer polls a conversation: if the
+    last visible message is from the buyer and has gone unanswered longer than
+    the configured delay, auto-send the away message once per waiting message."""
+    if not vendor or not last_msg or last_msg.sender_type != 'buyer':
+        return
+    settings_obj = models.AutoReplySettings.objects.filter(vendor=vendor).first()
+    if not settings_obj or not settings_obj.away_enabled or not settings_obj.away_message.strip():
+        return
+    if conversation.away_reply_sent_at and conversation.away_reply_sent_at >= last_msg.created_at:
+        return
+    delay = timezone.timedelta(minutes=settings_obj.away_delay_minutes)
+    if timezone.now() - last_msg.created_at < delay:
+        return
+    _send_auto_reply(conversation, vendor, settings_obj.away_message.strip())
+    conversation.away_reply_sent_at = timezone.now()
+    conversation.save(update_fields=['away_reply_sent_at'])
+
+
 @ensure_csrf_cookie
 def public_messages(request):
     """Messages page: buyer/vendor direct discussions plus support chatbot entries."""
     user_id = request.session.get('site_user_id')
+    if not user_id:
+        return redirect(f"/manager/public/user/login/?next={request.get_full_path()}")
     user = None
     user_messages = []
     direct_conversations = []
@@ -815,7 +936,7 @@ def public_messages(request):
                 buyer=user
             ).select_related('vendor').prefetch_related('direct_messages')[:30])
         except models.SiteUser.DoesNotExist:
-            pass
+            return redirect(f"/manager/public/user/login/?next={request.get_full_path()}")
     # Also include messages by session key
     if not request.session.session_key:
         request.session.save()
@@ -842,7 +963,7 @@ def public_messages(request):
 def start_conversation(request):
     """Create/open a buyer-seller conversation from product pages."""
     if not request.session.get('site_user_id'):
-        return redirect('manager:user_login')
+        return redirect(f"/manager/public/user/login/?next={request.get_full_path()}")
     user = get_object_or_404(models.SiteUser, pk=request.session['site_user_id'])
     item_type = request.GET.get('item_type', 'support')
     item_id = request.GET.get('item_id')
@@ -880,7 +1001,12 @@ def start_conversation(request):
         separator = '&' if '?' in referer else '?'
         return redirect(f"{referer}{separator}open_chatbot=1")
 
-    conversation, _ = models.Conversation.objects.get_or_create(
+    if _is_vendor_blocked(user.id, vendor.id):
+        referer = request.META.get('HTTP_REFERER', '/manager/public/')
+        separator = '&' if '?' in referer else '?'
+        return redirect(f"{referer}{separator}vendor_blocked=1")
+
+    conversation, created = models.Conversation.objects.get_or_create(
         buyer=user,
         vendor=vendor,
         conversation_type='buyer_seller',
@@ -888,7 +1014,8 @@ def start_conversation(request):
         ref_item_id=item_id or None,
         defaults={'subject': subject[:200] or 'Support'}
     )
-    return redirect(f"{request.build_absolute_uri('/manager/public/messages/')}?conversation={conversation.id}")
+    auto_link = '1' if (created or not conversation.direct_messages.exists()) else '0'
+    return redirect(f"/manager/public/messages/?convo={conversation.id}&auto_link={auto_link}")
 
 
 def _conversation_ref_item_payload(conversation):
@@ -954,32 +1081,51 @@ def public_send_message(request):
         return JsonResponse({'success': False, 'message': '无效请求'})
     user_id = request.session.get('site_user_id')
     message_text = request.POST.get('message', request.POST.get('content', '')).strip()
-    if not message_text:
-        return JsonResponse({'success': False, 'message': '消息不能为空'})
+    attachment_file = request.FILES.get('attachment')
+    guard_error = _message_guard(request, message_text, allow_empty=bool(attachment_file))
+    if guard_error:
+        return JsonResponse({'success': False, 'message': guard_error})
     conversation_id = request.POST.get('conversation_id')
     if conversation_id:
         if not user_id:
             return JsonResponse({'success': False, 'message': '请先登录'}, status=401)
         conversation = get_object_or_404(models.Conversation, pk=conversation_id, buyer_id=user_id)
+        if conversation.vendor_id and _is_vendor_blocked(user_id, conversation.vendor_id):
+            return JsonResponse({'success': False, 'message': 'You have blocked this vendor. Unblock to send messages.'})
+        attachment_type = ''
+        if attachment_file:
+            attachment_type, attach_error = _validate_message_attachment(attachment_file)
+            if attach_error:
+                return JsonResponse({'success': False, 'message': attach_error})
+        reply_to = None
+        reply_to_id = request.POST.get('reply_to_id')
+        if reply_to_id:
+            reply_to = conversation.direct_messages.filter(pk=reply_to_id, is_recalled=False).first()
         sender_name = request.session.get('site_user_name', '')
-        models.DirectMessage.objects.create(
+        msg = models.DirectMessage.objects.create(
             conversation=conversation,
             sender_type='buyer',
             sender_name=sender_name,
-            content=message_text
+            content=message_text,
+            attachment=attachment_file or None,
+            attachment_type=attachment_type,
+            reply_to=reply_to,
         )
         conversation.save(update_fields=['updated_at'])
         if conversation.vendor_id:
             create_vendor_notification(
                 conversation.vendor_id, 'new_message',
                 f'New message from {sender_name or "Customer"}',
-                message_text[:100],
+                (message_text[:100] if message_text else f'[{attachment_type or "attachment"}]'),
                 icon='fas fa-comment-dots',
                 color='#3b82f6',
                 link=f'/manager/vendor/messages/?conversation={conversation.id}',
                 related_id=conversation.id,
             )
-        return JsonResponse({'success': True, 'message': '消息已发送'})
+            _maybe_send_welcome_reply(conversation, conversation.vendor)
+            if message_text:
+                _maybe_send_keyword_reply(conversation, conversation.vendor, message_text)
+        return JsonResponse({'success': True, 'message': '消息已发送', 'id': msg.id})
     try:
         user = models.SiteUser.objects.get(pk=user_id) if user_id else None
         name = user.name if user else request.POST.get('name', 'Guest')
@@ -1001,33 +1147,45 @@ def public_send_message(request):
         return JsonResponse({'success': False, 'message': str(e)})
 
 
+def api_buyer_unread_count(request):
+    """API: total unread message count across all of the buyer's conversations,
+    used to badge the navbar Messages button on every page."""
+    user_id = request.session.get('site_user_id')
+    if not user_id:
+        return JsonResponse({'unread_count': 0})
+    count = models.DirectMessage.objects.filter(
+        conversation__buyer_id=user_id, conversation__buyer_hidden=False,
+        is_read=False, is_recalled=False, deleted_for_buyer=False,
+    ).exclude(sender_type='buyer').count()
+    return JsonResponse({'unread_count': count})
+
+
 def api_conversations(request):
     """API: list all conversations for the logged-in user."""
     user_id = request.session.get('site_user_id')
     if not user_id:
         return JsonResponse({'conversations': [], 'error': 'not_logged_in'})
     convos = models.Conversation.objects.filter(
-        buyer_id=user_id
+        buyer_id=user_id, buyer_hidden=False,
     ).select_related('vendor').prefetch_related('direct_messages').order_by('-updated_at')
+    blocked_vendor_ids = set(
+        models.VendorBlock.objects.filter(buyer_id=user_id).values_list('vendor_id', flat=True)
+    )
     result = []
     for c in convos:
-        last_msg = c.direct_messages.order_by('-created_at').first()
-        unread = c.direct_messages.filter(is_read=False).exclude(sender_type='buyer').count()
+        visible_msgs = c.direct_messages.filter(is_recalled=False, deleted_for_buyer=False)
+        last_msg = visible_msgs.order_by('-created_at').first()
+        if c.vendor_id:
+            _maybe_send_away_reply(c, c.vendor, last_msg)
+        unread = visible_msgs.filter(is_read=False).exclude(sender_type='buyer').count()
         vendor_name = c.vendor.company_name if c.vendor else (c.subject or 'Support')
         vendor_avatar = vendor_name[0].upper() if vendor_name else 'S'
         ref = _conversation_ref_item_payload(c)
-        last_time_str = ''
-        last_date_str = ''
-        if last_msg:
-            _now = timezone.localtime()
-            _lm = timezone.localtime(last_msg.created_at)
-            if _lm.date() == _now.date():
-                last_time_str = _lm.strftime('%H:%M')
-            elif (_now.date() - _lm.date()).days == 1:
-                last_time_str = '{% trans "Yesterday" %}'
-            else:
-                last_time_str = _lm.strftime('%m/%d')
-            last_date_str = _lm.strftime('%Y-%m-%d')
+        last_preview = last_msg.content[:80] if (last_msg and last_msg.content) else (
+            '📷 Photo' if (last_msg and last_msg.attachment_type == 'image') else
+            '🎥 Video' if (last_msg and last_msg.attachment_type == 'video') else
+            '📎 File' if (last_msg and last_msg.attachment_type == 'file') else ''
+        )
         result.append({
             'id': c.id,
             'type': c.conversation_type,
@@ -1035,21 +1193,36 @@ def api_conversations(request):
             'vendor_avatar': vendor_avatar,
             'vendor_id': c.vendor_id,
             'subject': c.subject or '',
-            'last_message': last_msg.content[:80] if last_msg else '',
+            'last_message': last_preview,
             'last_sender_type': last_msg.sender_type if last_msg else '',
-            'last_time': last_time_str,
-            'last_date': last_date_str,
+            'last_created_at': last_msg.created_at.isoformat() if last_msg else '',
             'unread_count': unread,
             'unread': unread,  # keep backward compat
             'is_closed': c.is_closed,
+            'is_blocked': c.vendor_id in blocked_vendor_ids,
             'ref_item': ref,
             # flatten ref_item fields for quick access in UI
             'ref_item_name': ref.get('name', '') if ref else '',
             'ref_item_price': ref.get('price', '') if ref else '',
-            'ref_item_image': ref.get('image_url', '') if ref else '',
+            'ref_item_image': ref.get('image', '') if ref else '',
             'ref_item_url': ref.get('url', '') if ref else '',
         })
     return JsonResponse({'conversations': result})
+
+
+def _message_brief(m):
+    """Short preview of a message, used for quote/reply snippets."""
+    if not m or m.is_recalled:
+        return None
+    if m.content:
+        text = m.content[:80]
+    elif m.attachment_type == 'image':
+        text = '📷 Photo'
+    elif m.attachment_type == 'video':
+        text = '🎥 Video'
+    else:
+        text = ''
+    return {'id': m.id, 'sender_type': m.sender_type, 'sender_name': m.sender_name, 'content': text}
 
 
 def api_conversation_messages(request, conversation_id):
@@ -1058,9 +1231,16 @@ def api_conversation_messages(request, conversation_id):
     if not user_id:
         return JsonResponse({'messages': [], 'error': 'not_logged_in'})
     convo = get_object_or_404(models.Conversation, pk=conversation_id, buyer_id=user_id)
+    if convo.vendor_id:
+        last_visible = convo.direct_messages.filter(is_recalled=False, deleted_for_buyer=False).order_by('-created_at').first()
+        _maybe_send_away_reply(convo, convo.vendor, last_visible)
     # Mark vendor messages as read (whole thread)
     convo.direct_messages.filter(is_read=False).exclude(sender_type='buyer').update(is_read=True)
-    all_msgs = convo.direct_messages.order_by('created_at')
+    block = _is_vendor_blocked(user_id, convo.vendor_id) if convo.vendor_id else None
+    all_msgs = convo.direct_messages.exclude(deleted_for_buyer=True).select_related('reply_to').order_by('created_at')
+    if block:
+        # Hide vendor messages sent after the buyer blocked them.
+        all_msgs = all_msgs.exclude(sender_type='vendor', created_at__gt=block.created_at)
     total = all_msgs.count()
     # Pagination: page 1 = newest window; higher pages = older windows (no overlap)
     try:
@@ -1076,16 +1256,27 @@ def api_conversation_messages(request, conversation_id):
         start_idx = max(0, end_idx - page_size)
         msgs = list(all_msgs[start_idx:end_idx])
         has_more = start_idx > 0
+    now = timezone.now()
     result = []
     for m in msgs:
+        can_recall = (
+            m.sender_type == 'buyer' and not m.is_recalled
+            and (now - m.created_at).total_seconds() < MESSAGE_RECALL_WINDOW_SECONDS
+        )
         result.append({
             'id': m.id,
             'sender_type': m.sender_type,
             'sender_name': m.sender_name,
-            'content': m.content,
-            'time': m.created_at.strftime('%H:%M'),
-            'date': m.created_at.strftime('%Y-%m-%d'),
+            'content': '' if m.is_recalled else m.content,
+            'attachment_url': (m.attachment.url if (m.attachment and not m.is_recalled) else ''),
+            'attachment_type': ('' if m.is_recalled else m.attachment_type),
+            'reply_to': _message_brief(m.reply_to) if m.reply_to_id else None,
+            'is_recalled': m.is_recalled,
+            'can_recall': can_recall,
+            'can_delete_for_me': m.sender_type == 'buyer' and not m.is_recalled,
+            'created_at': m.created_at.isoformat(),
             'is_read': m.is_read,
+            'is_auto_reply': m.is_auto_reply,
         })
     vendor_name = convo.vendor.company_name if convo.vendor else (convo.subject or 'Support')
     ref = _conversation_ref_item_payload(convo)
@@ -1095,16 +1286,93 @@ def api_conversation_messages(request, conversation_id):
         'conversation': {
             'id': convo.id,
             'vendor_name': vendor_name,
+            'vendor_id': convo.vendor_id,
             'subject': convo.subject or '',
             'type': convo.conversation_type,
             'is_closed': convo.is_closed,
+            'is_blocked': bool(block),
             'ref_item': ref,
             'ref_item_name': ref.get('name', '') if ref else '',
             'ref_item_price': ref.get('price', '') if ref else '',
-            'ref_item_image': ref.get('image_url', '') if ref else '',
+            'ref_item_image': ref.get('image', '') if ref else '',
             'ref_item_url': ref.get('url', '') if ref else '',
         }
     })
+
+
+def api_conversation_delete(request, conversation_id):
+    """API: buyer removes a conversation from their own list (vendor keeps it)."""
+    user_id = request.session.get('site_user_id')
+    if not user_id:
+        return JsonResponse({'success': False, 'error': 'not_logged_in'}, status=401)
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'method_not_allowed'})
+    convo = get_object_or_404(models.Conversation, pk=conversation_id, buyer_id=user_id)
+    convo.buyer_hidden = True
+    convo.save(update_fields=['buyer_hidden'])
+    return JsonResponse({'success': True})
+
+
+def api_conversation_block_vendor(request, conversation_id):
+    """API: buyer blacklists the vendor behind a conversation."""
+    user_id = request.session.get('site_user_id')
+    if not user_id:
+        return JsonResponse({'success': False, 'error': 'not_logged_in'}, status=401)
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'method_not_allowed'})
+    convo = get_object_or_404(models.Conversation, pk=conversation_id, buyer_id=user_id)
+    if not convo.vendor_id:
+        return JsonResponse({'success': False, 'message': 'No vendor to block'})
+    models.VendorBlock.objects.get_or_create(buyer_id=user_id, vendor_id=convo.vendor_id)
+    return JsonResponse({'success': True})
+
+
+def api_conversation_unblock_vendor(request, conversation_id):
+    """API: buyer removes a vendor from their blacklist."""
+    user_id = request.session.get('site_user_id')
+    if not user_id:
+        return JsonResponse({'success': False, 'error': 'not_logged_in'}, status=401)
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'method_not_allowed'})
+    convo = get_object_or_404(models.Conversation, pk=conversation_id, buyer_id=user_id)
+    if convo.vendor_id:
+        models.VendorBlock.objects.filter(buyer_id=user_id, vendor_id=convo.vendor_id).delete()
+    return JsonResponse({'success': True})
+
+
+def api_message_recall(request, message_id):
+    """API: buyer recalls (unsends) their own message within the recall window."""
+    user_id = request.session.get('site_user_id')
+    if not user_id:
+        return JsonResponse({'success': False, 'error': 'not_logged_in'}, status=401)
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'method_not_allowed'})
+    msg = get_object_or_404(
+        models.DirectMessage, pk=message_id, conversation__buyer_id=user_id, sender_type='buyer',
+    )
+    if msg.is_recalled:
+        return JsonResponse({'success': True})
+    age = (timezone.now() - msg.created_at).total_seconds()
+    if age >= MESSAGE_RECALL_WINDOW_SECONDS:
+        return JsonResponse({'success': False, 'message': 'Recall window has expired (5 minutes)'})
+    msg.is_recalled = True
+    msg.save(update_fields=['is_recalled'])
+    return JsonResponse({'success': True})
+
+
+def api_message_delete_for_me(request, message_id):
+    """API: buyer hides their own sent message from their own view only."""
+    user_id = request.session.get('site_user_id')
+    if not user_id:
+        return JsonResponse({'success': False, 'error': 'not_logged_in'}, status=401)
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'method_not_allowed'})
+    msg = get_object_or_404(
+        models.DirectMessage, pk=message_id, conversation__buyer_id=user_id, sender_type='buyer',
+    )
+    msg.deleted_for_buyer = True
+    msg.save(update_fields=['deleted_for_buyer'])
+    return JsonResponse({'success': True})
 
 
 def api_mark_conversation_read(request, conversation_id):
@@ -1125,22 +1393,27 @@ def api_vendor_conversations(request):
     if not vendor_id:
         return JsonResponse({'conversations': [], 'error': 'not_logged_in'})
     convos = models.Conversation.objects.filter(
-        vendor_id=vendor_id
+        vendor_id=vendor_id, vendor_hidden=False,
     ).select_related('buyer').prefetch_related('direct_messages').order_by('-updated_at')
     result = []
     for c in convos:
-        last_msg = c.direct_messages.order_by('-created_at').first()
-        unread = c.direct_messages.filter(is_read=False).exclude(sender_type='vendor').count()
+        visible_msgs = c.direct_messages.filter(is_recalled=False, deleted_for_vendor=False)
+        last_msg = visible_msgs.order_by('-created_at').first()
+        unread = visible_msgs.filter(is_read=False).exclude(sender_type='vendor').count()
         buyer_name = c.buyer.name if c.buyer else 'Unknown'
+        last_preview = last_msg.content[:80] if (last_msg and last_msg.content) else (
+            '📷 Photo' if (last_msg and last_msg.attachment_type == 'image') else
+            '🎥 Video' if (last_msg and last_msg.attachment_type == 'video') else
+            '📎 File' if (last_msg and last_msg.attachment_type == 'file') else ''
+        )
         result.append({
             'id': c.id,
             'buyer_name': buyer_name,
             'buyer_avatar': buyer_name[0].upper() if buyer_name else 'U',
             'buyer_id': c.buyer_id,
             'subject': c.subject,
-            'last_message': last_msg.content[:80] if last_msg else '',
-            'last_time': last_msg.created_at.strftime('%H:%M') if last_msg else '',
-            'last_date': last_msg.created_at.strftime('%Y-%m-%d') if last_msg else '',
+            'last_message': last_preview,
+            'last_created_at': last_msg.created_at.isoformat() if last_msg else '',
             'unread': unread,
             'is_closed': c.is_closed,
         })
@@ -1153,18 +1426,30 @@ def api_vendor_conversation_messages(request, conversation_id):
     if not vendor_id:
         return JsonResponse({'messages': [], 'error': 'not_logged_in'})
     convo = get_object_or_404(models.Conversation, pk=conversation_id, vendor_id=vendor_id)
-    msgs = convo.direct_messages.order_by('created_at')
+    msgs = convo.direct_messages.exclude(deleted_for_vendor=True).select_related('reply_to').order_by('created_at')
     msgs.filter(is_read=False).exclude(sender_type='vendor').update(is_read=True)
+    now = timezone.now()
     result = []
     for m in msgs:
+        can_recall = (
+            m.sender_type == 'vendor' and not m.is_recalled
+            and (now - m.created_at).total_seconds() < MESSAGE_RECALL_WINDOW_SECONDS
+        )
         result.append({
             'id': m.id,
             'sender_type': m.sender_type,
             'sender_name': m.sender_name,
-            'content': m.content,
-            'time': m.created_at.strftime('%H:%M'),
-            'date': m.created_at.strftime('%Y-%m-%d'),
+            'content': '' if m.is_recalled else m.content,
+            'attachment_url': (m.attachment.url if (m.attachment and not m.is_recalled) else ''),
+            'attachment_type': ('' if m.is_recalled else m.attachment_type),
+            'attachment_name': ('' if (m.is_recalled or not m.attachment) else m.attachment.name.rsplit('/', 1)[-1]),
+            'reply_to': _message_brief(m.reply_to) if m.reply_to_id else None,
+            'is_recalled': m.is_recalled,
+            'can_recall': can_recall,
+            'can_delete_for_me': m.sender_type == 'vendor' and not m.is_recalled,
+            'created_at': m.created_at.isoformat(),
             'is_read': m.is_read,
+            'is_auto_reply': m.is_auto_reply,
         })
     buyer_name = convo.buyer.name if convo.buyer else 'Unknown'
     return JsonResponse({
@@ -1172,11 +1457,277 @@ def api_vendor_conversation_messages(request, conversation_id):
         'conversation': {
             'id': convo.id,
             'buyer_name': buyer_name,
+            'buyer_id': convo.buyer_id,
             'subject': convo.subject,
             'type': convo.conversation_type,
             'is_closed': convo.is_closed,
         }
     })
+
+
+def api_vendor_conversation_delete(request, conversation_id):
+    """API: vendor removes a conversation from their own list (buyer keeps it)."""
+    vendor_id = request.session.get('vendor_id')
+    if not vendor_id:
+        return JsonResponse({'success': False, 'error': 'not_logged_in'}, status=401)
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'method_not_allowed'})
+    convo = get_object_or_404(models.Conversation, pk=conversation_id, vendor_id=vendor_id)
+    convo.vendor_hidden = True
+    convo.save(update_fields=['vendor_hidden'])
+    return JsonResponse({'success': True})
+
+
+def api_vendor_mark_conversation_read(request, conversation_id):
+    """API: vendor marks all buyer messages in a conversation as read."""
+    vendor_id = request.session.get('vendor_id')
+    if not vendor_id:
+        return JsonResponse({'success': False, 'error': 'not_logged_in'})
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'method_not_allowed'})
+    convo = get_object_or_404(models.Conversation, pk=conversation_id, vendor_id=vendor_id)
+    convo.direct_messages.filter(is_read=False).exclude(sender_type='vendor').update(is_read=True)
+    return JsonResponse({'success': True})
+
+
+def api_vendor_message_recall(request, message_id):
+    """API: vendor recalls (unsends) their own message within the recall window."""
+    vendor_id = request.session.get('vendor_id')
+    if not vendor_id:
+        return JsonResponse({'success': False, 'error': 'not_logged_in'}, status=401)
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'method_not_allowed'})
+    msg = get_object_or_404(
+        models.DirectMessage, pk=message_id, conversation__vendor_id=vendor_id, sender_type='vendor',
+    )
+    if msg.is_recalled:
+        return JsonResponse({'success': True})
+    age = (timezone.now() - msg.created_at).total_seconds()
+    if age >= MESSAGE_RECALL_WINDOW_SECONDS:
+        return JsonResponse({'success': False, 'message': 'Recall window has expired (5 minutes)'})
+    msg.is_recalled = True
+    msg.save(update_fields=['is_recalled'])
+    return JsonResponse({'success': True})
+
+
+def api_vendor_message_delete_for_me(request, message_id):
+    """API: vendor hides their own sent message from their own view only."""
+    vendor_id = request.session.get('vendor_id')
+    if not vendor_id:
+        return JsonResponse({'success': False, 'error': 'not_logged_in'}, status=401)
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'method_not_allowed'})
+    msg = get_object_or_404(
+        models.DirectMessage, pk=message_id, conversation__vendor_id=vendor_id, sender_type='vendor',
+    )
+    msg.deleted_for_vendor = True
+    msg.save(update_fields=['deleted_for_vendor'])
+    return JsonResponse({'success': True})
+
+
+# ── Auto-reply settings & keyword rules (shared by vendor + admin/official store) ──
+
+def _auto_reply_settings_payload(vendor):
+    settings_obj, _ = models.AutoReplySettings.objects.get_or_create(vendor=vendor)
+    return {
+        'welcome_enabled': settings_obj.welcome_enabled,
+        'welcome_message': settings_obj.welcome_message,
+        'away_enabled': settings_obj.away_enabled,
+        'away_message': settings_obj.away_message,
+        'away_delay_minutes': settings_obj.away_delay_minutes,
+    }
+
+
+def _auto_reply_settings_get_or_update(request, vendor):
+    if request.method == 'POST':
+        settings_obj, _ = models.AutoReplySettings.objects.get_or_create(vendor=vendor)
+        settings_obj.welcome_enabled = request.POST.get('welcome_enabled') == '1'
+        settings_obj.welcome_message = (request.POST.get('welcome_message') or '').strip()[:2000]
+        settings_obj.away_enabled = request.POST.get('away_enabled') == '1'
+        settings_obj.away_message = (request.POST.get('away_message') or '').strip()[:2000]
+        try:
+            delay = int(request.POST.get('away_delay_minutes', 5))
+        except (TypeError, ValueError):
+            delay = 5
+        settings_obj.away_delay_minutes = max(1, min(delay, 1440))
+        settings_obj.save()
+    return JsonResponse({'success': True, 'settings': _auto_reply_settings_payload(vendor)})
+
+
+def _auto_reply_keyword_payload(k):
+    return {'id': k.id, 'keywords': k.keywords, 'reply_message': k.reply_message, 'is_active': k.is_active}
+
+
+def _auto_reply_keywords_list(vendor):
+    rules = models.AutoReplyKeyword.objects.filter(vendor=vendor).order_by('-created_at')
+    return JsonResponse({'keywords': [_auto_reply_keyword_payload(k) for k in rules]})
+
+
+def _auto_reply_keyword_create(request, vendor):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'method_not_allowed'})
+    keywords = (request.POST.get('keywords') or '').strip()[:255]
+    reply_message = (request.POST.get('reply_message') or '').strip()[:2000]
+    if not keywords or not reply_message:
+        return JsonResponse({'success': False, 'message': 'Keywords and reply message are required'})
+    k = models.AutoReplyKeyword.objects.create(vendor=vendor, keywords=keywords, reply_message=reply_message)
+    return JsonResponse({'success': True, 'keyword': _auto_reply_keyword_payload(k)})
+
+
+def _auto_reply_keyword_update(request, vendor, keyword_id):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'method_not_allowed'})
+    k = get_object_or_404(models.AutoReplyKeyword, pk=keyword_id, vendor=vendor)
+    if 'keywords' in request.POST:
+        k.keywords = (request.POST.get('keywords') or '').strip()[:255]
+    if 'reply_message' in request.POST:
+        k.reply_message = (request.POST.get('reply_message') or '').strip()[:2000]
+    if 'is_active' in request.POST:
+        k.is_active = request.POST.get('is_active') == '1'
+    k.save()
+    return JsonResponse({'success': True, 'keyword': _auto_reply_keyword_payload(k)})
+
+
+def _auto_reply_keyword_delete(vendor, keyword_id):
+    k = get_object_or_404(models.AutoReplyKeyword, pk=keyword_id, vendor=vendor)
+    k.delete()
+    return JsonResponse({'success': True})
+
+
+def api_vendor_auto_reply_settings(request):
+    """API: vendor gets/updates their welcome + away auto-reply settings."""
+    vendor_id = request.session.get('vendor_id')
+    if not vendor_id:
+        return JsonResponse({'success': False, 'error': 'not_logged_in'}, status=401)
+    vendor = get_object_or_404(models.Vendor, pk=vendor_id)
+    return _auto_reply_settings_get_or_update(request, vendor)
+
+
+def api_vendor_auto_reply_keywords(request):
+    """API: vendor lists/creates keyword-triggered auto-reply rules."""
+    vendor_id = request.session.get('vendor_id')
+    if not vendor_id:
+        return JsonResponse({'keywords': [], 'error': 'not_logged_in'})
+    vendor = get_object_or_404(models.Vendor, pk=vendor_id)
+    if request.method == 'POST':
+        return _auto_reply_keyword_create(request, vendor)
+    return _auto_reply_keywords_list(vendor)
+
+
+def api_vendor_auto_reply_keyword_update(request, keyword_id):
+    vendor_id = request.session.get('vendor_id')
+    if not vendor_id:
+        return JsonResponse({'success': False, 'error': 'not_logged_in'}, status=401)
+    vendor = get_object_or_404(models.Vendor, pk=vendor_id)
+    return _auto_reply_keyword_update(request, vendor, keyword_id)
+
+
+def api_vendor_auto_reply_keyword_delete(request, keyword_id):
+    vendor_id = request.session.get('vendor_id')
+    if not vendor_id:
+        return JsonResponse({'success': False, 'error': 'not_logged_in'}, status=401)
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'method_not_allowed'})
+    vendor = get_object_or_404(models.Vendor, pk=vendor_id)
+    return _auto_reply_keyword_delete(vendor, keyword_id)
+
+
+def api_admin_store_auto_reply_settings(request):
+    """API: admin gets/updates the official store's welcome + away auto-reply settings."""
+    if not _admin_authed(request):
+        return JsonResponse({'success': False, 'error': 'not_logged_in'}, status=401)
+    from manager.official_store import get_official_vendor
+    vendor = get_official_vendor(create=True)
+    return _auto_reply_settings_get_or_update(request, vendor)
+
+
+def api_admin_store_auto_reply_keywords(request):
+    """API: admin lists/creates keyword-triggered auto-reply rules for the official store."""
+    if not _admin_authed(request):
+        return JsonResponse({'keywords': [], 'error': 'not_logged_in'})
+    from manager.official_store import get_official_vendor
+    vendor = get_official_vendor(create=True)
+    if request.method == 'POST':
+        return _auto_reply_keyword_create(request, vendor)
+    return _auto_reply_keywords_list(vendor)
+
+
+def api_admin_store_auto_reply_keyword_update(request, keyword_id):
+    if not _admin_authed(request):
+        return JsonResponse({'success': False, 'error': 'not_logged_in'}, status=401)
+    from manager.official_store import get_official_vendor
+    vendor = get_official_vendor(create=True)
+    return _auto_reply_keyword_update(request, vendor, keyword_id)
+
+
+def api_admin_store_auto_reply_keyword_delete(request, keyword_id):
+    if not _admin_authed(request):
+        return JsonResponse({'success': False, 'error': 'not_logged_in'}, status=401)
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'method_not_allowed'})
+    from manager.official_store import get_official_vendor
+    vendor = get_official_vendor(create=True)
+    return _auto_reply_keyword_delete(vendor, keyword_id)
+
+
+def _vendor_listing_payload(item, item_type):
+    """Normalize a vendor's own listing into a compact picker payload."""
+    if item_type == 'book':
+        return {
+            'type': 'book', 'id': item.id, 'name': item.name,
+            'price': str(item.price), 'image': item.get_cover_url(),
+            'url': f'/manager/public/books/{item.id}/',
+        }
+    if item_type == 'product':
+        return {
+            'type': 'product', 'id': item.id, 'name': item.name,
+            'price': str(item.price), 'image': item.get_image_url(),
+            'url': f'/marketplace/products/{item.slug}/',
+        }
+    if item_type == 'course':
+        return {
+            'type': 'course', 'id': item.id, 'name': item.title,
+            'price': str(item.price), 'image': item.get_image_url(),
+            'url': f'/marketplace/courses/{item.slug}/',
+        }
+    if item_type == 'supermarket':
+        return {
+            'type': 'supermarket', 'id': item.id, 'name': item.name,
+            'price': str(item.price), 'image': item.get_image_url(),
+            'url': f'/marketplace/supermarket/{item.slug}/',
+        }
+    return None
+
+
+def api_vendor_my_listings(request):
+    """API: search the vendor's own catalog, for the 'send a listing link' picker."""
+    vendor_id = request.session.get('vendor_id')
+    if not vendor_id:
+        return JsonResponse({'listings': [], 'error': 'not_logged_in'})
+    q = (request.GET.get('q') or '').strip()
+    results = []
+    vendor_books = models.VendorBook.objects.filter(vendor_id=vendor_id, is_active=True).select_related('book')
+    if q:
+        vendor_books = vendor_books.filter(book__name__icontains=q)
+    for vb in vendor_books[:15]:
+        results.append(_vendor_listing_payload(vb.book, 'book'))
+    from marketplace.models import Product, Course, SupermarketItem
+    products = Product.objects.filter(vendor_id=vendor_id, is_active=True)
+    if q:
+        products = products.filter(name__icontains=q)
+    for p in products[:15]:
+        results.append(_vendor_listing_payload(p, 'product'))
+    courses = Course.objects.filter(vendor_id=vendor_id, is_active=True)
+    if q:
+        courses = courses.filter(title__icontains=q)
+    for c in courses[:15]:
+        results.append(_vendor_listing_payload(c, 'course'))
+    items = SupermarketItem.objects.filter(vendor_id=vendor_id, is_active=True)
+    if q:
+        items = items.filter(name__icontains=q)
+    for it in items[:15]:
+        results.append(_vendor_listing_payload(it, 'supermarket'))
+    return JsonResponse({'listings': [r for r in results if r][:40]})
 
 
 def vendor_create_conversation(request):
@@ -1188,10 +1739,13 @@ def vendor_create_conversation(request):
         return JsonResponse({'success': False, 'message': 'Not logged in'}, status=401)
     vendor = get_object_or_404(models.Vendor, pk=vendor_id)
     buyer_email = request.POST.get('buyer_email', '').strip()
-    subject = request.POST.get('subject', '').strip() or 'Message from vendor'
+    subject = request.POST.get('subject', '').strip()[:200] or 'Message from vendor'
     message_text = request.POST.get('message', '').strip()
-    if not buyer_email or not message_text:
+    if not buyer_email:
         return JsonResponse({'success': False, 'message': 'Email and message are required'})
+    guard_error = _message_guard(request, message_text)
+    if guard_error:
+        return JsonResponse({'success': False, 'message': guard_error})
     buyer = models.SiteUser.objects.filter(email__iexact=buyer_email).first()
     if not buyer:
         return JsonResponse({'success': False, 'message': f'No customer found with email: {buyer_email}'})
@@ -1225,8 +1779,10 @@ def vendor_send_message(request):
         return JsonResponse({'success': False, 'message': 'Please log in first'}, status=401)
     conversation_id = request.POST.get('conversation_id')
     content = request.POST.get('content', '').strip()
-    if not content:
-        return JsonResponse({'success': False, 'message': 'Message cannot be empty'})
+    attachment_file = request.FILES.get('attachment')
+    guard_error = _message_guard(request, content, allow_empty=bool(attachment_file))
+    if guard_error:
+        return JsonResponse({'success': False, 'message': guard_error})
     if not conversation_id:
         return JsonResponse({'success': False, 'message': 'No conversation specified'})
     try:
@@ -1237,24 +1793,26 @@ def vendor_send_message(request):
         vendor = models.Vendor.objects.get(pk=vendor_id)
     except models.Vendor.DoesNotExist:
         return JsonResponse({'success': False, 'message': 'Vendor not found'}, status=404)
+    attachment_type = ''
+    if attachment_file:
+        attachment_type, attach_error = _validate_message_attachment(attachment_file)
+        if attach_error:
+            return JsonResponse({'success': False, 'message': attach_error})
+    reply_to = None
+    reply_to_id = request.POST.get('reply_to_id')
+    if reply_to_id:
+        reply_to = convo.direct_messages.filter(pk=reply_to_id, is_recalled=False).first()
     msg = models.DirectMessage.objects.create(
         conversation=convo,
         sender_type='vendor',
         sender_name=vendor.company_name,
-        content=content
+        content=content,
+        attachment=attachment_file or None,
+        attachment_type=attachment_type,
+        reply_to=reply_to,
     )
     convo.save(update_fields=['updated_at'])
-    return JsonResponse({
-        'success': True,
-        'message': {
-            'id': msg.id,
-            'sender_type': 'vendor',
-            'sender_name': vendor.company_name,
-            'content': content,
-            'time': msg.created_at.strftime('%H:%M'),
-            'date': msg.created_at.strftime('%Y-%m-%d'),
-        }
-    })
+    return JsonResponse({'success': True, 'id': msg.id})
 
 
 @ensure_csrf_cookie
@@ -1265,6 +1823,250 @@ def vendor_messages_page(request):
         return redirect('manager:vendor_login')
     vendor = get_object_or_404(models.Vendor, pk=vendor_id)
     return render(request, 'public/vendor_messages.html', {'vendor': vendor})
+
+
+# ── Admin: messages addressed to the Duno360 Official Store ──────────────
+# The official store is a platform-owned Vendor with no logged-in owner
+# (see manager/official_store.py), so its inbox is only reachable by admin
+# staff. These views mirror the vendor messaging endpoints above but are
+# gated on admin session auth instead of a vendor session.
+
+def _admin_authed(request):
+    return 'name' in request.session
+
+
+@ensure_csrf_cookie
+def admin_store_messages_page(request):
+    """Admin dashboard for conversations sent to the Duno360 Official Store."""
+    if not _admin_authed(request):
+        return redirect('/manager/login/')
+    from manager.official_store import get_official_vendor
+    vendor = get_official_vendor(create=True)
+    return render(request, 'admin/store_messages.html', {
+        'vendor': vendor,
+        'name': request.session.get('name', ''),
+    })
+
+
+def api_admin_store_conversations(request):
+    """API: list conversations addressed to the official store, for admin staff."""
+    if not _admin_authed(request):
+        return JsonResponse({'conversations': [], 'error': 'not_logged_in'})
+    from manager.official_store import get_official_vendor
+    vendor = get_official_vendor(create=True)
+    convos = models.Conversation.objects.filter(
+        vendor=vendor, vendor_hidden=False,
+    ).select_related('buyer').prefetch_related('direct_messages').order_by('-updated_at')
+    result = []
+    for c in convos:
+        visible_msgs = c.direct_messages.filter(is_recalled=False, deleted_for_vendor=False)
+        last_msg = visible_msgs.order_by('-created_at').first()
+        unread = visible_msgs.filter(is_read=False).exclude(sender_type='vendor').count()
+        buyer_name = c.buyer.name if c.buyer else 'Unknown'
+        last_preview = last_msg.content[:80] if (last_msg and last_msg.content) else (
+            '📷 Photo' if (last_msg and last_msg.attachment_type == 'image') else
+            '🎥 Video' if (last_msg and last_msg.attachment_type == 'video') else
+            '📎 File' if (last_msg and last_msg.attachment_type == 'file') else ''
+        )
+        result.append({
+            'id': c.id,
+            'buyer_name': buyer_name,
+            'buyer_avatar': buyer_name[0].upper() if buyer_name else 'U',
+            'buyer_id': c.buyer_id,
+            'buyer_email': c.buyer.email if c.buyer else '',
+            'subject': c.subject,
+            'last_message': last_preview,
+            'last_created_at': last_msg.created_at.isoformat() if last_msg else '',
+            'unread': unread,
+            'is_closed': c.is_closed,
+        })
+    return JsonResponse({'conversations': result})
+
+
+def api_admin_store_conversation_messages(request, conversation_id):
+    """API: messages in a conversation addressed to the official store."""
+    if not _admin_authed(request):
+        return JsonResponse({'messages': [], 'error': 'not_logged_in'})
+    from manager.official_store import get_official_vendor
+    vendor = get_official_vendor(create=True)
+    convo = get_object_or_404(models.Conversation, pk=conversation_id, vendor=vendor)
+    msgs = convo.direct_messages.exclude(deleted_for_vendor=True).select_related('reply_to').order_by('created_at')
+    msgs.filter(is_read=False).exclude(sender_type='vendor').update(is_read=True)
+    now = timezone.now()
+    result = []
+    for m in msgs:
+        can_recall = (
+            m.sender_type == 'vendor' and not m.is_recalled
+            and (now - m.created_at).total_seconds() < MESSAGE_RECALL_WINDOW_SECONDS
+        )
+        result.append({
+            'id': m.id,
+            'sender_type': m.sender_type,
+            'sender_name': m.sender_name,
+            'content': '' if m.is_recalled else m.content,
+            'attachment_url': (m.attachment.url if (m.attachment and not m.is_recalled) else ''),
+            'attachment_type': ('' if m.is_recalled else m.attachment_type),
+            'attachment_name': ('' if (m.is_recalled or not m.attachment) else m.attachment.name.rsplit('/', 1)[-1]),
+            'reply_to': _message_brief(m.reply_to) if m.reply_to_id else None,
+            'is_recalled': m.is_recalled,
+            'can_recall': can_recall,
+            'can_delete_for_me': m.sender_type == 'vendor' and not m.is_recalled,
+            'created_at': m.created_at.isoformat(),
+            'is_read': m.is_read,
+            'is_auto_reply': m.is_auto_reply,
+        })
+    buyer_name = convo.buyer.name if convo.buyer else 'Unknown'
+    return JsonResponse({
+        'messages': result,
+        'conversation': {
+            'id': convo.id,
+            'vendor_id': vendor.id,
+            'buyer_name': buyer_name,
+            'buyer_id': convo.buyer_id,
+            'buyer_email': convo.buyer.email if convo.buyer else '',
+            'subject': convo.subject,
+            'type': convo.conversation_type,
+            'is_closed': convo.is_closed,
+        }
+    })
+
+
+def api_admin_store_conversation_delete(request, conversation_id):
+    """API: admin removes a conversation from the store's own list (buyer keeps it)."""
+    if not _admin_authed(request):
+        return JsonResponse({'success': False, 'error': 'not_logged_in'}, status=401)
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'method_not_allowed'})
+    from manager.official_store import get_official_vendor
+    vendor = get_official_vendor(create=True)
+    convo = get_object_or_404(models.Conversation, pk=conversation_id, vendor=vendor)
+    convo.vendor_hidden = True
+    convo.save(update_fields=['vendor_hidden'])
+    return JsonResponse({'success': True})
+
+
+def api_admin_store_mark_read(request, conversation_id):
+    """API: admin marks all buyer messages in a store conversation as read."""
+    if not _admin_authed(request):
+        return JsonResponse({'success': False, 'error': 'not_logged_in'})
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'method_not_allowed'})
+    from manager.official_store import get_official_vendor
+    vendor = get_official_vendor(create=True)
+    convo = get_object_or_404(models.Conversation, pk=conversation_id, vendor=vendor)
+    convo.direct_messages.filter(is_read=False).exclude(sender_type='vendor').update(is_read=True)
+    return JsonResponse({'success': True})
+
+
+def api_admin_store_message_recall(request, message_id):
+    """API: admin recalls (unsends) a store reply within the recall window."""
+    if not _admin_authed(request):
+        return JsonResponse({'success': False, 'error': 'not_logged_in'}, status=401)
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'method_not_allowed'})
+    from manager.official_store import get_official_vendor
+    vendor = get_official_vendor(create=True)
+    msg = get_object_or_404(
+        models.DirectMessage, pk=message_id, conversation__vendor=vendor, sender_type='vendor',
+    )
+    if msg.is_recalled:
+        return JsonResponse({'success': True})
+    age = (timezone.now() - msg.created_at).total_seconds()
+    if age >= MESSAGE_RECALL_WINDOW_SECONDS:
+        return JsonResponse({'success': False, 'message': 'Recall window has expired (5 minutes)'})
+    msg.is_recalled = True
+    msg.save(update_fields=['is_recalled'])
+    return JsonResponse({'success': True})
+
+
+def api_admin_store_message_delete_for_me(request, message_id):
+    """API: admin hides a store reply from the admin panel's own view only."""
+    if not _admin_authed(request):
+        return JsonResponse({'success': False, 'error': 'not_logged_in'}, status=401)
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'method_not_allowed'})
+    from manager.official_store import get_official_vendor
+    vendor = get_official_vendor(create=True)
+    msg = get_object_or_404(
+        models.DirectMessage, pk=message_id, conversation__vendor=vendor, sender_type='vendor',
+    )
+    msg.deleted_for_vendor = True
+    msg.save(update_fields=['deleted_for_vendor'])
+    return JsonResponse({'success': True})
+
+
+def api_admin_store_listings(request):
+    """API: search the official store's own catalog, for the 'send a listing link' picker."""
+    if not _admin_authed(request):
+        return JsonResponse({'listings': [], 'error': 'not_logged_in'})
+    from manager.official_store import get_official_vendor
+    vendor = get_official_vendor(create=True)
+    q = (request.GET.get('q') or '').strip()
+    results = []
+    vendor_books = models.VendorBook.objects.filter(vendor=vendor, is_active=True).select_related('book')
+    if q:
+        vendor_books = vendor_books.filter(book__name__icontains=q)
+    for vb in vendor_books[:15]:
+        results.append(_vendor_listing_payload(vb.book, 'book'))
+    from marketplace.models import Product, Course, SupermarketItem
+    products = Product.objects.filter(vendor=vendor, is_active=True)
+    if q:
+        products = products.filter(name__icontains=q)
+    for p in products[:15]:
+        results.append(_vendor_listing_payload(p, 'product'))
+    courses = Course.objects.filter(vendor=vendor, is_active=True)
+    if q:
+        courses = courses.filter(title__icontains=q)
+    for c in courses[:15]:
+        results.append(_vendor_listing_payload(c, 'course'))
+    items = SupermarketItem.objects.filter(vendor=vendor, is_active=True)
+    if q:
+        items = items.filter(name__icontains=q)
+    for it in items[:15]:
+        results.append(_vendor_listing_payload(it, 'supermarket'))
+    return JsonResponse({'listings': [r for r in results if r][:40]})
+
+
+def admin_store_send_message(request):
+    """Admin staff replies to a buyer on behalf of the official store."""
+    if not _admin_authed(request):
+        return JsonResponse({'success': False, 'message': 'Please log in first'}, status=401)
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Invalid method'})
+    from manager.official_store import get_official_vendor
+    vendor = get_official_vendor(create=True)
+    conversation_id = request.POST.get('conversation_id')
+    content = request.POST.get('content', '').strip()
+    attachment_file = request.FILES.get('attachment')
+    guard_error = _message_guard(request, content, allow_empty=bool(attachment_file))
+    if guard_error:
+        return JsonResponse({'success': False, 'message': guard_error})
+    if not conversation_id:
+        return JsonResponse({'success': False, 'message': 'No conversation specified'})
+    convo = get_object_or_404(models.Conversation, pk=conversation_id, vendor=vendor)
+    attachment_type = ''
+    if attachment_file:
+        attachment_type, attach_error = _validate_message_attachment(attachment_file)
+        if attach_error:
+            return JsonResponse({'success': False, 'message': attach_error})
+    reply_to = None
+    reply_to_id = request.POST.get('reply_to_id')
+    if reply_to_id:
+        reply_to = convo.direct_messages.filter(pk=reply_to_id, is_recalled=False).first()
+    msg = models.DirectMessage.objects.create(
+        conversation=convo,
+        sender_type='vendor',
+        sender_name=vendor.company_name,
+        content=content,
+        attachment=attachment_file or None,
+        attachment_type=attachment_type,
+        reply_to=reply_to,
+    )
+    convo.save(update_fields=['updated_at'])
+    return JsonResponse({
+        'success': True,
+        'id': msg.id,
+    })
 
 
 def _build_user_wishlist_items(user):
@@ -2420,7 +3222,7 @@ def pawapay_pay(request, order_number):
 
     order_country = getattr(order, 'country', '') or ''
     from manager.payments.pawapay import (
-        COUNTRY_DIAL_CODES, get_country_correspondents, get_default_correspondent
+        COUNTRY_DIAL_CODES, get_country_correspondents, get_default_correspondent, get_country_currency
     )
     dial_code = COUNTRY_DIAL_CODES.get(order_country, '')
     correspondents = get_country_correspondents(order_country)   # [(label, code), ...]
@@ -2438,7 +3240,7 @@ def pawapay_pay(request, order_number):
         'correspondents': correspondents,
         'default_correspondent': default_correspondent,
         'pawapay_sandbox': getattr(django_settings, 'PAWAPAY_SANDBOX', True),
-        'pawapay_currency': getattr(django_settings, 'PAWAPAY_CURRENCY', 'XAF'),
+        'pawapay_currency': get_country_currency(order_country),
     }
     return render(request, 'public/pawapay_pay.html', context)
 
@@ -5877,7 +6679,7 @@ def user_login(request):
             request.session['vendor_id'] = linked_vendor.id
             request.session['vendor_name'] = linked_vendor.company_name
         next_url = (request.POST.get('next') or '').strip()
-        if not next_url:
+        if not next_url or not next_url.startswith('/') or next_url.startswith('//'):
             from django.urls import reverse
             next_url = (
                 reverse('manager:user_profile')

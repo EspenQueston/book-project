@@ -78,6 +78,7 @@
             <div class="auth-card" data-aos="fade-up">
                 <form id="loginForm" onsubmit="return submitLogin(event)">
                     {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.GET.next }}">
                     <div class="mb-3">
                         <label class="form-label fw-bold">{% trans "邮箱" %}</label>
                         <input type="email" name="email" class="form-control" placeholder="{% trans '请输入邮箱' %}" required>

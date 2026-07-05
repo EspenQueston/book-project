@@ -1,76 +1,80 @@
 {% load i18n %}
-{# =====================================================================
-   Uniform mobile hero for content pages (About / Services / Contact).
-   Shown only on mobile (d-lg-none); desktop keeps its own hero.
-   Params:
-     mph_icon     – Font Awesome icon class (e.g. 'fa-globe')
-     mph_pill     – small eyebrow label
-     mph_title    – main heading
-     mph_subtitle – supporting sentence
-   ===================================================================== #}
+{% comment %}
+Uniform mobile hero for content pages (About / Services / Contact).
+Shown only on mobile (d-lg-none); desktop keeps its own hero.
+Params:
+  mph_icon     – Font Awesome icon class (e.g. 'fa-globe')
+  mph_pill     – small eyebrow label
+  mph_title    – main heading
+  mph_subtitle – supporting sentence
+{% endcomment %}
 <style>
     .m-hero {
         position: relative;
         display: none;
-        padding: 34px 22px 30px;
-        text-align: center;
+        padding: 30px 22px 30px;
         color: #fff;
         background:
-            radial-gradient(circle at 20% 0%, rgba(96,165,250,.35), transparent 45%),
-            radial-gradient(circle at 88% 12%, rgba(34,211,238,.22), transparent 42%),
+            radial-gradient(circle at 12% 0%, rgba(96,165,250,.30), transparent 46%),
+            radial-gradient(circle at 92% 100%, rgba(34,211,238,.18), transparent 44%),
             linear-gradient(135deg, #14245f 0%, #1d4ed8 100%);
-        border-radius: 0 0 26px 26px;
-        box-shadow: 0 18px 40px rgba(20,36,95,.28);
+        border-radius: 0 0 22px 22px;
+        box-shadow: 0 14px 34px rgba(20,36,95,.26);
         overflow: hidden;
     }
-    .m-hero::after {
+    /* Faint oversized icon watermark, purely decorative */
+    .m-hero__watermark {
+        position: absolute;
+        right: -14px; bottom: -20px;
+        font-size: 7.5rem;
+        color: rgba(255,255,255,.055);
+        transform: rotate(-12deg);
+        pointer-events: none;
+        line-height: 1;
+    }
+    /* Thin accent line at the very top, ties pages together */
+    .m-hero::before {
         content: "";
         position: absolute;
-        left: 0; right: 0; bottom: -1px;
-        height: 40px;
-        background: radial-gradient(120% 100% at 50% 0%, transparent 68%, var(--bg-page, #fff) 69%);
-    }
-    .m-hero__icon {
-        width: 66px; height: 66px;
-        margin: 0 auto 14px;
-        display: flex; align-items: center; justify-content: center;
-        border-radius: 20px;
-        font-size: 1.7rem;
-        color: #fff;
-        background: rgba(255,255,255,.14);
-        border: 1px solid rgba(255,255,255,.28);
-        box-shadow: inset 0 1px 0 rgba(255,255,255,.25);
-        backdrop-filter: blur(6px);
+        top: 0; left: 0;
+        width: 100%; height: 3px;
+        background: linear-gradient(90deg, #22d3ee 0%, #ffd54a 55%, transparent 100%);
+        opacity: .85;
     }
     .m-hero__pill {
-        display: inline-flex; align-items: center; gap: 6px;
+        display: inline-flex; align-items: center; gap: 8px;
         font-size: .68rem; font-weight: 700;
-        letter-spacing: 1.4px; text-transform: uppercase;
-        padding: 6px 14px; border-radius: 999px;
-        background: rgba(255,255,255,.16);
-        border: 1px solid rgba(255,255,255,.26);
-        margin-bottom: 12px;
+        letter-spacing: 1.6px; text-transform: uppercase;
+        padding: 7px 14px; border-radius: 999px;
+        color: #fff;
+        background: rgba(255,255,255,.13);
+        border: 1px solid rgba(255,255,255,.24);
+        backdrop-filter: blur(6px);
+        margin-bottom: 14px;
     }
+    .m-hero__pill i { font-size: .78rem; color: #7dd3fc; }
     .m-hero__title {
-        font-size: 1.62rem; font-weight: 800;
-        line-height: 1.25; letter-spacing: -.4px;
-        margin: 0 0 10px;
+        font-size: 1.55rem; font-weight: 800;
+        line-height: 1.28; letter-spacing: -.4px;
+        margin: 0 0 8px;
+        max-width: 22ch;
     }
     .m-hero__subtitle {
-        font-size: .92rem; line-height: 1.6;
-        color: rgba(255,255,255,.86);
-        max-width: 34ch; margin: 0 auto;
+        font-size: .9rem; line-height: 1.65;
+        color: rgba(255,255,255,.84);
+        max-width: 38ch; margin: 0;
     }
     @media (max-width: 991.98px) {
         .m-hero { display: block; }
     }
     @media (max-width: 360px) {
-        .m-hero__title { font-size: 1.44rem; }
+        .m-hero__title { font-size: 1.4rem; }
+        .m-hero__subtitle { font-size: .86rem; }
     }
 </style>
 <section class="m-hero">
-    <div class="m-hero__icon"><i class="fas {{ mph_icon }}"></i></div>
-    {% if mph_pill %}<div class="m-hero__pill"><i class="fas fa-circle" style="font-size:.4rem;"></i>{{ mph_pill }}</div>{% endif %}
+    <i class="fas {{ mph_icon }} m-hero__watermark" aria-hidden="true"></i>
+    {% if mph_pill %}<div class="m-hero__pill"><i class="fas {{ mph_icon }}"></i>{{ mph_pill }}</div>{% endif %}
     <h1 class="m-hero__title">{{ mph_title }}</h1>
     {% if mph_subtitle %}<p class="m-hero__subtitle">{{ mph_subtitle }}</p>{% endif %}
 </section>

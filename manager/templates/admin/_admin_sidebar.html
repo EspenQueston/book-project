@@ -67,18 +67,18 @@
         justify-content: space-between;
         flex-wrap: wrap;
         gap: 8px;
-        margin-bottom: 12px;
-        min-height: 42px;
+        margin-bottom: 10px;
+        min-height: 36px;
     }
     .admin-sidebar-toggle {
-        width: 42px;
-        height: 42px;
+        width: 36px;
+        height: 36px;
         border: 0;
-        border-radius: 12px;
+        border-radius: 10px;
         background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
         color: #fff;
         box-shadow: 0 6px 20px rgba(29, 78, 216, 0.35);
-        font-size: 1rem;
+        font-size: 0.9rem;
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -147,6 +147,9 @@
             </a>
             <a class="nav-link {% if request.path == '/manager/email/' %}active{% endif %}" href="/manager/email/">
                 <i class="fas fa-envelope"></i><span>消息管理</span>
+            </a>
+            <a class="nav-link {% if request.path == '/manager/admin/store-messages/' %}active{% endif %}" href="/manager/admin/store-messages/">
+                <i class="fas fa-comments"></i><span data-zh="店铺消息" data-en="Store Messages" data-fr="Messages boutique">店铺消息</span>
             </a>
             <a class="nav-link {% if '/marketplace/admin/' in request.path %}active{% endif %}" href="/marketplace/admin/dashboard/">
                 <i class="fas fa-store"></i><span>市场管理</span>

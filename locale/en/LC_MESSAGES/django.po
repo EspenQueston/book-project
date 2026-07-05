@@ -3852,7 +3852,8 @@ msgid "课程管理中心"
 msgstr "Course management center"
 
 msgid "以现代化方式管理课程、讲师、内容与发布状态。"
-msgstr "Manage courses, instructors, content and publishing status in a modern way."
+msgstr ""
+"Manage courses, instructors, content and publishing status in a modern way."
 
 msgid "新增课程"
 msgstr "Add course"
@@ -3882,7 +3883,9 @@ msgid "商品管理中心"
 msgstr "Product management center"
 
 msgid "以更专业、更清晰的方式管理商品、库存、销量与展示状态。"
-msgstr "Manage products, stock, sales and display status more professionally and clearly."
+msgstr ""
+"Manage products, stock, sales and display status more professionally and "
+"clearly."
 
 msgid "新增商品"
 msgstr "Add item"
@@ -5645,3 +5648,511 @@ msgstr "Advanced stats + promotion — from 250 CFA/month"
 
 msgid "官方认证"
 msgstr "Official"
+
+msgid "如今，用户可以在我们的平台上购买并下载电子书、学习在线视频课程、选购各类商品，并通过在线客服获取即时帮助。我们用技术连接知识与生活。"
+msgstr ""
+"Today, users can buy and download e-books, take online video courses, shop "
+"for all kinds of products, and get instant help from our live chat support. "
+"We use technology to connect knowledge and everyday life."
+
+msgid "融合在线课程、电子商务与智能推荐，不断探索数字平台的新可能。"
+msgstr ""
+"Combining online courses, e-commerce and smart recommendations, we keep "
+"exploring new possibilities for the digital platform."
+
+msgid "支持法语、英语、中文三语，覆盖MTN、Airtel、Orange等Mobile Money本地支付，服务非洲及全球用户。"
+msgstr ""
+"Available in French, English and Chinese, with local Mobile Money payments "
+"(MTN, Airtel, Orange and more) — serving users across Africa and worldwide."
+
+msgid "图书与市场商品共享统一购物车和结算流程。支持MTN、Airtel、Orange等Mobile Money本地移动支付，安全便捷。"
+msgstr ""
+"Books and marketplace products share one unified cart and checkout. Pay "
+"securely and easily with local Mobile Money (MTN, Airtel, Orange and more)."
+
+msgid "Mobile Money移动支付"
+msgstr "Mobile Money payments"
+
+msgid "在线客服支持"
+msgstr "Live Chat Support"
+
+msgid "内置在线客服系统，随时为您解答关于平台使用、订单查询、支付问题等疑问，真人客服即时响应。"
+msgstr ""
+"Built-in live chat support to answer your questions about using the "
+"platform, tracking orders or payments — real agents, instant response."
+
+msgid "真人在线对话"
+msgstr "Chat with real agents"
+
+msgid "快速响应"
+msgstr "Fast response"
+
+msgid "选择MTN、Airtel、Orange等Mobile Money支付方式，完成安全便捷的在线结算。"
+msgstr ""
+"Choose a Mobile Money method (MTN, Airtel, Orange and more) and complete a "
+"safe, convenient online checkout."
+
+msgid "刚果共和国布拉柴维尔"
+msgstr "Brazzaville, Republic of the Congo"
+
+msgid "Connection lost"
+msgstr "Connection lost"
+
+msgid "Reconnected"
+msgstr "Reconnected"
+
+msgid "Message Management"
+msgstr "Message Management"
+
+msgid "Search customers..."
+msgstr "Search customers..."
+
+msgid "Select a conversation"
+msgstr "Select a conversation"
+
+msgid "Choose a customer from the list to start chatting"
+msgstr "Choose a customer from the list to start chatting"
+
+msgid "New Conversation"
+msgstr "New Conversation"
+
+msgid "Customer email"
+msgstr "Customer email"
+
+msgid "About your order..."
+msgstr "About your order..."
+
+msgid "First message"
+msgstr "First message"
+
+msgid "Write your message..."
+msgstr "Write your message..."
+
+msgid "No conversations yet"
+msgstr "No conversations yet"
+
+msgid "When customers message you, they will appear here"
+msgstr "When customers message you, they will appear here"
+
+msgid "New conversation"
+msgstr "New conversation"
+
+msgid "Customer"
+msgstr "Customer"
+
+msgid "Closed"
+msgstr "Closed"
+
+msgid "Active"
+msgstr "Active"
+
+msgid "Start the conversation by typing a reply below"
+msgstr "Start the conversation by typing a reply below"
+
+msgid "Failed to send"
+msgstr "Failed to send"
+
+msgid "Email and message are required"
+msgstr "Email and message are required"
+
+msgid "Failed"
+msgstr "Failed"
+
+msgid "Failed to load"
+msgstr "Failed to load"
+
+msgid "Back"
+msgstr "Back"
+
+msgid "New"
+msgstr "New"
+
+msgid "Subject"
+msgstr "Subject"
+
+msgid "集图书、在线课程与生活商品于一体的综合数字平台，让知识与便利触手可及。"
+msgstr ""
+"A comprehensive digital platform bringing together books, online courses, "
+"and everyday products — making knowledge and convenience accessible to all."
+
+msgid "从电子书与在线课程，到综合市场与智能助手，为您打造一站式的知识与生活服务体验。"
+msgstr ""
+"From e-books and online courses to a full marketplace and smart assistant — "
+"your one-stop platform for knowledge and everyday services."
+
+msgid "如有任何问题、建议或合作意向，欢迎随时联系，我们的团队将尽快回复您。"
+msgstr ""
+"For any questions, suggestions or collaboration inquiries, feel free to "
+"reach out — our team will get back to you as soon as possible."
+
+msgid "商品详情"
+msgstr "Product Details"
+
+msgid "商品评价"
+msgstr "Product Reviews"
+
+msgid "课程详情"
+msgstr "Course Details"
+
+msgid "课程评价"
+msgstr "Course Reviews"
+
+msgid "学员"
+msgstr "Students"
+
+msgid "开始学习"
+msgstr "Start Learning"
+
+msgid "与卖家聊天"
+msgstr "Chat with Seller"
+
+msgid "规格"
+msgstr "Specifications"
+
+msgid "Visit shop"
+msgstr "Visit shop"
+
+msgid "Home"
+msgstr "Home"
+
+msgid "Delete conversation"
+msgstr "Delete conversation"
+
+msgid "Block vendor"
+msgstr "Block vendor"
+
+msgid "Unblock vendor"
+msgstr "Unblock vendor"
+
+msgid "Unblock"
+msgstr "Unblock"
+
+msgid "You have blocked this vendor."
+msgstr "You have blocked this vendor."
+
+msgid "Blocked"
+msgstr "Blocked"
+
+msgid "Attach photo or video"
+msgstr "Attach photo or video"
+
+msgid "Message actions"
+msgstr "Message actions"
+
+msgid "Reply"
+msgstr "Reply"
+
+msgid "Recall"
+msgstr "Recall"
+
+msgid "Delete for me"
+msgstr "Delete for me"
+
+msgid "Delete"
+msgstr "Delete"
+
+msgid "Photo"
+msgstr "Photo"
+
+msgid "Video"
+msgstr "Video"
+
+msgid "You"
+msgstr "You"
+
+msgid "You deleted this message"
+msgstr "You deleted this message"
+
+msgid "This message was deleted"
+msgstr "This message was deleted"
+
+msgid "Only images or videos are allowed"
+msgstr "Only images or videos are allowed"
+
+msgid "File too large"
+msgstr "File too large"
+
+msgid "You have blocked this vendor. Unblock to send messages."
+msgstr "You have blocked this vendor. Unblock to send messages."
+
+msgid "Recall this message? It will be removed for everyone."
+msgstr "Recall this message? It will be removed for everyone."
+
+msgid "Delete this message for you? The vendor will still see it."
+msgstr "Delete this message for you? The vendor will still see it."
+
+msgid "Delete this conversation? This only removes it from your list."
+msgstr "Delete this conversation? This only removes it from your list."
+
+msgid "Conversation deleted"
+msgstr "Conversation deleted"
+
+msgid "Vendor blocked"
+msgstr "Vendor blocked"
+
+msgid "Vendor unblocked"
+msgstr "Vendor unblocked"
+
+msgid ""
+"Block this vendor? You will no longer exchange messages until you unblock "
+"them."
+msgstr ""
+"Block this vendor? You will no longer exchange messages until you unblock "
+"them."
+
+msgid "Block"
+msgstr "Block"
+
+msgid "Type a reply..."
+msgstr "Type a reply..."
+
+msgid "Attach image, video or file"
+msgstr "Attach image, video or file"
+
+msgid "Cancel"
+msgstr "Cancel"
+
+msgid "Confirm"
+msgstr "Confirm"
+
+msgid "Delete this message for you? The customer will still see it."
+msgstr "Delete this message for you? The customer will still see it."
+
+msgid "Failed to load messages"
+msgstr "Failed to load messages"
+
+msgid "File"
+msgstr "File"
+
+msgid "Loading conversations..."
+msgstr "Loading conversations..."
+
+msgid "Log in"
+msgstr "Log in"
+
+msgid "Mark as read"
+msgstr "Mark as read"
+
+msgid "Menu"
+msgstr "Menu"
+
+msgid "Messages"
+msgstr "Messages"
+
+msgid "No matching listings"
+msgstr "No matching listings"
+
+msgid "Preview my storefront"
+msgstr "Preview my storefront"
+
+msgid "Search your products, books, courses..."
+msgstr "Search your products, books, courses..."
+
+msgid "Send"
+msgstr "Send"
+
+msgid "Send a listing link"
+msgstr "Send a listing link"
+
+msgid "Sending attachment..."
+msgstr "Sending attachment..."
+
+msgid "Session expired."
+msgstr "Session expired."
+
+msgid "Type to search your catalog"
+msgstr "Type to search your catalog"
+
+msgid "Yesterday"
+msgstr "Yesterday"
+
+msgid "You recalled this message"
+msgstr "You recalled this message"
+
+msgid "All"
+msgstr "All"
+
+msgid "Any discount?"
+msgstr "Any discount?"
+
+msgid "Browse"
+msgstr "Browse"
+
+msgid "Browse Products"
+msgstr "Browse Products"
+
+msgid "Browse products and tap the Chat button"
+msgstr "Browse products and tap the Chat button"
+
+msgid ""
+"Choose a conversation from the list, or tap Chat on any product page to "
+"start a new one."
+msgstr ""
+"Choose a conversation from the list, or tap Chat on any product page to "
+"start a new one."
+
+msgid "Close"
+msgstr "Close"
+
+msgid "Conversation in progress..."
+msgstr "Conversation in progress..."
+
+msgid "Hello"
+msgstr "Hello"
+
+msgid "How soon can it ship?"
+msgstr "How soon can it ship?"
+
+msgid "Is it still in stock?"
+msgstr "Is it still in stock?"
+
+msgid "Loading..."
+msgstr "Loading..."
+
+msgid "Mark all as read"
+msgstr "Mark all as read"
+
+msgid "Me:"
+msgstr "Me:"
+
+msgid "Network error, please retry"
+msgstr "Network error, please retry"
+
+msgid "No messages yet, start the conversation!"
+msgstr "No messages yet, start the conversation!"
+
+msgid "OK, thanks!"
+msgstr "OK, thanks!"
+
+msgid "Search conversations..."
+msgstr "Search conversations..."
+
+msgid "Send Link"
+msgstr "Send Link"
+
+msgid "Send failed, please retry"
+msgstr "Send failed, please retry"
+
+msgid "Start conversation"
+msgstr "Start conversation"
+
+msgid "Tap to view details"
+msgstr "Tap to view details"
+
+msgid "Type a message..."
+msgstr "Type a message..."
+
+msgid "Unread"
+msgstr "Unread"
+
+msgid "Vendor"
+msgstr "Vendor"
+
+msgid "Vendors"
+msgstr "Vendors"
+
+msgid "View"
+msgstr "View"
+
+msgid "View product"
+msgstr "View product"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "Emoji"
+msgstr "Emoji"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "Auto-reply settings"
+msgstr "Auto-reply settings"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid ""
+"Automatically respond to customers like WhatsApp Business: a welcome message"
+" for new conversations, an away message when you haven't replied in a while,"
+" and keyword-triggered quick replies."
+msgstr ""
+"Automatically respond to customers like WhatsApp Business: a welcome message"
+" for new conversations, an away message when you haven't replied in a while,"
+" and keyword-triggered quick replies."
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "Welcome message"
+msgstr "Welcome message"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid ""
+"Sent automatically the first time a customer starts a new conversation with "
+"you."
+msgstr ""
+"Sent automatically the first time a customer starts a new conversation with "
+"you."
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "e.g. Thanks for reaching out! We usually reply within a few hours."
+msgstr "e.g. Thanks for reaching out! We usually reply within a few hours."
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "Away message"
+msgstr "Away message"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid ""
+"Sent automatically if a customer's message goes unanswered for this long:"
+msgstr ""
+"Sent automatically if a customer's message goes unanswered for this long:"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "minutes"
+msgstr "minutes"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "e.g. We are away right now, we will reply as soon as possible."
+msgstr "e.g. We are away right now, we will reply as soon as possible."
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "Keyword quick replies"
+msgstr "Keyword quick replies"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid ""
+"If a customer's message contains one of the keywords, the matching reply is "
+"sent automatically."
+msgstr ""
+"If a customer's message contains one of the keywords, the matching reply is "
+"sent automatically."
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "Keywords, comma-separated (e.g. price, shipping, delivery)"
+msgstr "Keywords, comma-separated (e.g. price, shipping, delivery)"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "Automatic reply for this keyword..."
+msgstr "Automatic reply for this keyword..."
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "Add rule"
+msgstr "Add rule"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "Save settings"
+msgstr "Save settings"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "Deactivate"
+msgstr "Deactivate"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "Activate"
+msgstr "Activate"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "No keyword rules yet."
+msgstr "No keyword rules yet."
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "Keywords and reply message are required"
+msgstr "Keywords and reply message are required"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "Auto-reply settings saved"
+msgstr "Auto-reply settings saved"

@@ -1238,6 +1238,9 @@ class Conversation(models.Model):
     ref_item_type = models.CharField(max_length=20, blank=True, default='', verbose_name='商品类型')
     ref_item_id = models.PositiveIntegerField(null=True, blank=True, verbose_name='商品ID')
     is_closed = models.BooleanField(default=False, verbose_name='已关闭')
+    buyer_hidden = models.BooleanField(default=False, verbose_name='买家已删除（仅本地隐藏）')
+    vendor_hidden = models.BooleanField(default=False, verbose_name='卖家已删除（仅本地隐藏）')
+    away_reply_sent_at = models.DateTimeField(null=True, blank=True, verbose_name='自动离开回复已发送时间')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -1246,9 +1249,37 @@ class Conversation(models.Model):
         ordering = ['-updated_at']
         verbose_name = '会话'
         verbose_name_plural = '会话'
+        indexes = [
+            models.Index(fields=['-updated_at'], name='conv_updated_idx'),
+            models.Index(fields=['buyer', '-updated_at'], name='conv_buyer_updated_idx'),
+            models.Index(fields=['vendor', '-updated_at'], name='conv_vendor_updated_idx'),
+        ]
 
     def __str__(self):
         return self.subject or f'{self.get_conversation_type_display()} #{self.pk}'
+
+
+class VendorBlock(models.Model):
+    """A buyer blocking a vendor: stops new messages flowing between them."""
+    buyer = models.ForeignKey(SiteUser, on_delete=models.CASCADE, related_name='blocked_vendors', verbose_name='买家')
+    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='blocked_by_buyers', verbose_name='卖家')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'vendor_block'
+        unique_together = [('buyer', 'vendor')]
+        verbose_name = '卖家黑名单'
+        verbose_name_plural = '卖家黑名单'
+
+    def __str__(self):
+        return f'buyer#{self.buyer_id} blocks vendor#{self.vendor_id}'
+
+
+MESSAGE_ATTACHMENT_TYPE_CHOICES = [
+    ('image', 'Image'),
+    ('video', 'Video'),
+    ('file', 'File'),
+]
 
 
 class DirectMessage(models.Model):
@@ -1256,9 +1287,15 @@ class DirectMessage(models.Model):
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='direct_messages', verbose_name='会话')
     sender_type = models.CharField(max_length=10, choices=SENDER_TYPE_CHOICES, verbose_name='发送方类型')
     sender_name = models.CharField(max_length=100, blank=True, default='', verbose_name='发送方名称')
-    content = models.TextField(verbose_name='内容')
+    content = models.TextField(blank=True, default='', verbose_name='内容')
     attachment = models.FileField(upload_to='message_attachments/%Y/%m/', blank=True, null=True, verbose_name='附件')
+    attachment_type = models.CharField(max_length=10, choices=MESSAGE_ATTACHMENT_TYPE_CHOICES, blank=True, default='', verbose_name='附件类型')
+    reply_to = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='replies', verbose_name='引用消息')
+    is_recalled = models.BooleanField(default=False, verbose_name='已撤回（双方不可见）')
+    deleted_for_buyer = models.BooleanField(default=False, verbose_name='买家已删除（仅本地隐藏）')
+    deleted_for_vendor = models.BooleanField(default=False, verbose_name='卖家已删除（仅本地隐藏）')
     is_read = models.BooleanField(default=False, verbose_name='已读')
+    is_auto_reply = models.BooleanField(default=False, verbose_name='自动回复')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -1266,9 +1303,57 @@ class DirectMessage(models.Model):
         ordering = ['created_at']
         verbose_name = '消息'
         verbose_name_plural = '消息'
+        indexes = [
+            models.Index(fields=['conversation', 'created_at'], name='dm_convo_created_idx'),
+            models.Index(fields=['conversation', 'is_read', 'sender_type'], name='dm_convo_unread_idx'),
+        ]
 
     def __str__(self):
         return f'[{self.sender_type}] {self.content[:60]}'
+
+
+class AutoReplySettings(models.Model):
+    """Per-vendor (or official-store) WhatsApp-Business-style automatic replies:
+    a welcome message for new conversations and an away message sent when the
+    vendor/admin hasn't answered a waiting buyer within a configurable delay."""
+    vendor = models.OneToOneField(Vendor, on_delete=models.CASCADE, related_name='auto_reply_settings', verbose_name='卖家')
+    welcome_enabled = models.BooleanField(default=False, verbose_name='启用欢迎语')
+    welcome_message = models.TextField(blank=True, default='', verbose_name='欢迎语内容')
+    away_enabled = models.BooleanField(default=False, verbose_name='启用离开自动回复')
+    away_message = models.TextField(blank=True, default='', verbose_name='离开自动回复内容')
+    away_delay_minutes = models.PositiveIntegerField(default=5, verbose_name='离开回复延迟（分钟）')
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'auto_reply_settings'
+        verbose_name = '自动回复设置'
+        verbose_name_plural = '自动回复设置'
+
+    def __str__(self):
+        return f'AutoReplySettings(vendor#{self.vendor_id})'
+
+
+class AutoReplyKeyword(models.Model):
+    """A keyword-triggered quick reply: if a buyer's message contains one of the
+    comma-separated keywords, the matching reply is auto-sent on the vendor's behalf."""
+    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='auto_reply_keywords', verbose_name='卖家')
+    keywords = models.CharField(max_length=255, verbose_name='关键词（英文逗号分隔）')
+    reply_message = models.TextField(verbose_name='自动回复内容')
+    is_active = models.BooleanField(default=True, verbose_name='启用')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'auto_reply_keyword'
+        ordering = ['-created_at']
+        verbose_name = '关键词自动回复'
+        verbose_name_plural = '关键词自动回复'
+
+    def __str__(self):
+        return f'{self.keywords} -> {self.reply_message[:40]}'
+
+    def keyword_list(self):
+        return [k.strip().lower() for k in self.keywords.split(',') if k.strip()]
 
 
 # ==========================================

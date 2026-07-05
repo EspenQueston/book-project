@@ -807,9 +807,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     card.href = item.url;
                     card.className = 'bmf-card';
                     var img = item.image || item.cover_url || '/static/img/default_cover.png';
-                    var type = item.type || 'book';
-                    var label = item.type_label || 'Livre';
-                    card.innerHTML = '<img class="bmf-cover" src="'+img+'" alt="'+item.name+'" loading="lazy" onerror="this.src=\'/static/img/default_cover.png\'"><div class="bmf-body"><div class="bmf-title">'+item.name+'</div><div class="bmf-price">'+fmtFcfa(item.price)+'</div><div class="feed-card-actions feed-card-actions--nobadge">'+feedDetailsBtn+'</div></div>';
+                    card.innerHTML ='<img class="bmf-cover" src="'+img+'" alt="'+item.name+'" loading="lazy" onerror="this.src=\'/static/img/default_cover.png\'"><div class="bmf-body"><div class="bmf-title">'+item.name+'</div><div class="bmf-price">'+fmtFcfa(item.price)+'</div><div class="feed-card-actions feed-card-actions--nobadge">'+feedDetailsBtn+'</div></div>';
                     feedDiv.appendChild(card);
                 });
                 page = data.has_more ? page + 1 : 1;

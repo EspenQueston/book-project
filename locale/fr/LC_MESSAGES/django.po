@@ -3894,7 +3894,9 @@ msgid "课程管理中心"
 msgstr "Centre de gestion des cours"
 
 msgid "以现代化方式管理课程、讲师、内容与发布状态。"
-msgstr "Gérez les cours, instructeurs, contenus et statuts de publication de façon moderne."
+msgstr ""
+"Gérez les cours, instructeurs, contenus et statuts de publication de façon "
+"moderne."
 
 msgid "新增课程"
 msgstr "Ajouter un cours"
@@ -3924,7 +3926,9 @@ msgid "商品管理中心"
 msgstr "Centre de gestion des produits"
 
 msgid "以更专业、更清晰的方式管理商品、库存、销量与展示状态。"
-msgstr "Gérez les produits, stocks, ventes et statuts d’affichage de manière plus claire et professionnelle."
+msgstr ""
+"Gérez les produits, stocks, ventes et statuts d’affichage de manière plus "
+"claire et professionnelle."
 
 msgid "新增商品"
 msgstr "Ajouter un article"
@@ -3948,7 +3952,9 @@ msgid "超市管理中心"
 msgstr "Centre de gestion supermarché"
 
 msgid "统一管理商品、库存、价格、状态与展示质量。"
-msgstr "Gérez les articles, stocks, prix, statuts et qualité d’affichage au même endroit."
+msgstr ""
+"Gérez les articles, stocks, prix, statuts et qualité d’affichage au même "
+"endroit."
 
 msgid "搜索名称、品牌或产地…"
 msgstr "Rechercher nom, marque ou origine…"
@@ -5709,3 +5715,523 @@ msgstr "Statistiques avancées + promotion — dès 250 FCFA/mois"
 
 msgid "官方认证"
 msgstr "Officiel"
+
+msgid "如今，用户可以在我们的平台上购买并下载电子书、学习在线视频课程、选购各类商品，并通过在线客服获取即时帮助。我们用技术连接知识与生活。"
+msgstr ""
+"Aujourd'hui, les utilisateurs peuvent acheter et télécharger des livres "
+"numériques, suivre des cours vidéo en ligne, acheter toutes sortes de "
+"produits et obtenir une aide instantanée grâce à notre support en ligne. "
+"Nous utilisons la technologie pour relier savoir et vie quotidienne."
+
+msgid "融合在线课程、电子商务与智能推荐，不断探索数字平台的新可能。"
+msgstr ""
+"En combinant cours en ligne, e-commerce et recommandations intelligentes, "
+"nous explorons sans cesse de nouvelles possibilités pour la plateforme "
+"numérique."
+
+msgid "支持法语、英语、中文三语，覆盖MTN、Airtel、Orange等Mobile Money本地支付，服务非洲及全球用户。"
+msgstr ""
+"Disponible en français, anglais et chinois, avec les paiements Mobile Money "
+"locaux (MTN, Airtel, Orange et plus) — au service des utilisateurs d'Afrique"
+" et du monde entier."
+
+msgid "图书与市场商品共享统一购物车和结算流程。支持MTN、Airtel、Orange等Mobile Money本地移动支付，安全便捷。"
+msgstr ""
+"Les livres et les produits du marché partagent un panier et un paiement "
+"unifiés. Payez en toute sécurité avec le Mobile Money local (MTN, Airtel, "
+"Orange et plus)."
+
+msgid "Mobile Money移动支付"
+msgstr "Paiements Mobile Money"
+
+msgid "在线客服支持"
+msgstr "Support client en ligne"
+
+msgid "内置在线客服系统，随时为您解答关于平台使用、订单查询、支付问题等疑问，真人客服即时响应。"
+msgstr ""
+"Un chat d'assistance intégré pour répondre à vos questions sur la "
+"plateforme, vos commandes ou vos paiements — de vrais agents, une réponse "
+"immédiate."
+
+msgid "真人在线对话"
+msgstr "Discussion avec de vrais agents"
+
+msgid "快速响应"
+msgstr "Réponse rapide"
+
+msgid "选择MTN、Airtel、Orange等Mobile Money支付方式，完成安全便捷的在线结算。"
+msgstr ""
+"Choisissez un moyen Mobile Money (MTN, Airtel, Orange et plus) et finalisez "
+"un paiement en ligne simple et sécurisé."
+
+msgid "刚果共和国布拉柴维尔"
+msgstr "Brazzaville, République du Congo"
+
+msgid "Connection lost"
+msgstr "Connexion perdue"
+
+msgid "Reconnected"
+msgstr "Reconnecté"
+
+msgid "Message Management"
+msgstr "Gestion des messages"
+
+msgid "Search customers..."
+msgstr "Rechercher des clients..."
+
+msgid "Select a conversation"
+msgstr "Sélectionnez une conversation"
+
+msgid "Choose a customer from the list to start chatting"
+msgstr "Choisissez un client dans la liste pour commencer à discuter"
+
+msgid "New Conversation"
+msgstr "Nouvelle conversation"
+
+msgid "Customer email"
+msgstr "E-mail du client"
+
+msgid "About your order..."
+msgstr "À propos de votre commande..."
+
+msgid "First message"
+msgstr "Premier message"
+
+msgid "Write your message..."
+msgstr "Écrivez votre message..."
+
+msgid "No conversations yet"
+msgstr "Aucune conversation pour le moment"
+
+msgid "When customers message you, they will appear here"
+msgstr "Lorsque des clients vous envoient un message, ils apparaîtront ici"
+
+msgid "New conversation"
+msgstr "Nouvelle conversation"
+
+msgid "Customer"
+msgstr "Client"
+
+msgid "Closed"
+msgstr "Fermé"
+
+msgid "Active"
+msgstr "Actif"
+
+msgid "Start the conversation by typing a reply below"
+msgstr "Commencez la conversation en tapant une réponse ci-dessous"
+
+msgid "Failed to send"
+msgstr "Envoi échoué"
+
+msgid "Email and message are required"
+msgstr "Adresse e-mail et message requis"
+
+msgid "Failed"
+msgstr "Échoué"
+
+msgid "Failed to load"
+msgstr "Échec du chargement"
+
+msgid "Back"
+msgstr "Retour"
+
+msgid "New"
+msgstr "Nouveau"
+
+msgid "Subject"
+msgstr "Sujet"
+
+msgid "集图书、在线课程与生活商品于一体的综合数字平台，让知识与便利触手可及。"
+msgstr ""
+"Une plateforme numérique complète réunissant livres, cours en ligne et "
+"produits du quotidien — la connaissance et la commodité à portée de main."
+
+msgid "从电子书与在线课程，到综合市场与智能助手，为您打造一站式的知识与生活服务体验。"
+msgstr ""
+"Des livres numériques et cours en ligne au marché complet et assistant "
+"intelligent — votre plateforme tout-en-un pour le savoir et les services du "
+"quotidien."
+
+msgid "如有任何问题、建议或合作意向，欢迎随时联系，我们的团队将尽快回复您。"
+msgstr ""
+"Pour toute question, suggestion ou demande de collaboration, n'hésitez pas à"
+" nous contacter — notre équipe vous répondra dans les plus brefs délais."
+
+msgid "商品详情"
+msgstr "Détails du produit"
+
+msgid "商品评价"
+msgstr "Avis sur le produit"
+
+msgid "课程详情"
+msgstr "Détails du cours"
+
+msgid "课程评价"
+msgstr "Avis sur le cours"
+
+msgid "学员"
+msgstr "Étudiants"
+
+msgid "开始学习"
+msgstr "Commencer à apprendre"
+
+msgid "与卖家聊天"
+msgstr "Discuter avec le vendeur"
+
+msgid "规格"
+msgstr "Spécifications"
+
+msgid "Visit shop"
+msgstr "Visiter la boutique"
+
+msgid "Home"
+msgstr "Accueil"
+
+msgid "Delete conversation"
+msgstr "Supprimer la conversation"
+
+msgid "Block vendor"
+msgstr "Bloquer le vendeur"
+
+msgid "Unblock vendor"
+msgstr "Débloquer le vendeur"
+
+msgid "Unblock"
+msgstr "Débloquer"
+
+msgid "You have blocked this vendor."
+msgstr "Vous avez bloqué ce vendeur."
+
+msgid "Blocked"
+msgstr "Bloqué"
+
+msgid "Attach photo or video"
+msgstr "Joindre une photo ou vidéo"
+
+msgid "Message actions"
+msgstr "Actions du message"
+
+msgid "Reply"
+msgstr "Répondre"
+
+msgid "Recall"
+msgstr "Rappeler"
+
+msgid "Delete for me"
+msgstr "Supprimer pour moi"
+
+msgid "Delete"
+msgstr "Supprimer"
+
+msgid "Photo"
+msgstr "Photo"
+
+msgid "Video"
+msgstr "Vidéo"
+
+msgid "You"
+msgstr "Vous"
+
+msgid "You deleted this message"
+msgstr "Vous avez supprimé ce message"
+
+msgid "This message was deleted"
+msgstr "Ce message a été supprimé"
+
+msgid "Only images or videos are allowed"
+msgstr "Seules les images ou vidéos sont autorisées"
+
+msgid "File too large"
+msgstr "Fichier trop volumineux"
+
+msgid "You have blocked this vendor. Unblock to send messages."
+msgstr "Vous avez bloqué ce vendeur. Débloquez-le pour envoyer des messages."
+
+msgid "Recall this message? It will be removed for everyone."
+msgstr "Rappeler ce message ? Il sera supprimé pour tout le monde."
+
+msgid "Delete this message for you? The vendor will still see it."
+msgstr "Supprimer ce message pour vous ? Le vendeur le verra toujours."
+
+msgid "Delete this conversation? This only removes it from your list."
+msgstr ""
+"Supprimer cette conversation ? Elle sera seulement retirée de votre liste."
+
+msgid "Conversation deleted"
+msgstr "Conversation supprimée"
+
+msgid "Vendor blocked"
+msgstr "Vendeur bloqué"
+
+msgid "Vendor unblocked"
+msgstr "Vendeur débloqué"
+
+msgid ""
+"Block this vendor? You will no longer exchange messages until you unblock "
+"them."
+msgstr ""
+"Bloquer ce vendeur ? Vous ne pourrez plus échanger de messages tant que vous"
+" ne le débloquez pas."
+
+msgid "Block"
+msgstr "Bloquer"
+
+msgid "Type a reply..."
+msgstr "Écrivez une réponse..."
+
+msgid "Attach image, video or file"
+msgstr "Joindre une image, une vidéo ou un fichier"
+
+msgid "Cancel"
+msgstr "Annuler"
+
+msgid "Confirm"
+msgstr "Confirmer"
+
+msgid "Delete this message for you? The customer will still see it."
+msgstr "Supprimer ce message pour vous ? Le client le verra toujours."
+
+msgid "Failed to load messages"
+msgstr "Échec du chargement des messages"
+
+msgid "File"
+msgstr "Fichier"
+
+msgid "Loading conversations..."
+msgstr "Chargement des conversations..."
+
+msgid "Log in"
+msgstr "Se connecter"
+
+msgid "Mark as read"
+msgstr "Marquer comme lu"
+
+msgid "Menu"
+msgstr "Menu"
+
+msgid "Messages"
+msgstr "Messages"
+
+msgid "No matching listings"
+msgstr "Aucun article correspondant"
+
+msgid "Preview my storefront"
+msgstr "Aperçu de ma boutique"
+
+msgid "Search your products, books, courses..."
+msgstr "Rechercher vos produits, livres, cours..."
+
+msgid "Send"
+msgstr "Envoyer"
+
+msgid "Send a listing link"
+msgstr "Envoyer un lien de produit"
+
+msgid "Sending attachment..."
+msgstr "Envoi de la pièce jointe..."
+
+msgid "Session expired."
+msgstr "Session expirée."
+
+msgid "Type to search your catalog"
+msgstr "Tapez pour rechercher dans votre catalogue"
+
+msgid "Yesterday"
+msgstr "Hier"
+
+msgid "You recalled this message"
+msgstr "Vous avez rappelé ce message"
+
+msgid "All"
+msgstr "Tous"
+
+msgid "Any discount?"
+msgstr "Une remise ?"
+
+msgid "Browse"
+msgstr "Parcourir"
+
+msgid "Browse Products"
+msgstr "Parcourir les produits"
+
+msgid "Browse products and tap the Chat button"
+msgstr "Parcourez les produits et appuyez sur le bouton Chat"
+
+msgid ""
+"Choose a conversation from the list, or tap Chat on any product page to "
+"start a new one."
+msgstr ""
+"Choisissez une conversation dans la liste, ou appuyez sur Chat sur une page "
+"produit pour en commencer une nouvelle."
+
+msgid "Close"
+msgstr "Fermer"
+
+msgid "Conversation in progress..."
+msgstr "Conversation en cours..."
+
+msgid "Hello"
+msgstr "Bonjour"
+
+msgid "How soon can it ship?"
+msgstr "Sous combien de temps peut-il être expédié ?"
+
+msgid "Is it still in stock?"
+msgstr "Est-il toujours en stock ?"
+
+msgid "Loading..."
+msgstr "Chargement..."
+
+msgid "Mark all as read"
+msgstr "Tout marquer comme lu"
+
+msgid "Me:"
+msgstr "Moi :"
+
+msgid "Network error, please retry"
+msgstr "Erreur réseau, veuillez réessayer"
+
+msgid "No messages yet, start the conversation!"
+msgstr "Aucun message pour le moment, commencez la conversation !"
+
+msgid "OK, thanks!"
+msgstr "OK, merci !"
+
+msgid "Search conversations..."
+msgstr "Rechercher des conversations..."
+
+msgid "Send Link"
+msgstr "Envoyer le lien"
+
+msgid "Send failed, please retry"
+msgstr "Envoi échoué, veuillez réessayer"
+
+msgid "Start conversation"
+msgstr "Commencer la conversation"
+
+msgid "Tap to view details"
+msgstr "Appuyez pour voir les détails"
+
+msgid "Type a message..."
+msgstr "Écrivez un message..."
+
+msgid "Unread"
+msgstr "Non lu"
+
+msgid "Vendor"
+msgstr "Vendeur"
+
+msgid "Vendors"
+msgstr "Vendeurs"
+
+msgid "View"
+msgstr "Voir"
+
+msgid "View product"
+msgstr "Voir le produit"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "Emoji"
+msgstr "Émoji"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "Auto-reply settings"
+msgstr "Paramètres de réponse automatique"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid ""
+"Automatically respond to customers like WhatsApp Business: a welcome message"
+" for new conversations, an away message when you haven't replied in a while,"
+" and keyword-triggered quick replies."
+msgstr ""
+"Répondez automatiquement à vos clients comme WhatsApp Business : un message "
+"de bienvenue pour les nouvelles conversations, un message d'absence si vous "
+"ne répondez pas assez vite, et des réponses rapides déclenchées par mots-"
+"clés."
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "Welcome message"
+msgstr "Message de bienvenue"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid ""
+"Sent automatically the first time a customer starts a new conversation with "
+"you."
+msgstr ""
+"Envoyé automatiquement la première fois qu'un client démarre une nouvelle "
+"conversation avec vous."
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "e.g. Thanks for reaching out! We usually reply within a few hours."
+msgstr ""
+"ex. Merci de nous avoir contactés ! Nous répondons généralement sous "
+"quelques heures."
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "Away message"
+msgstr "Message d'absence"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid ""
+"Sent automatically if a customer's message goes unanswered for this long:"
+msgstr ""
+"Envoyé automatiquement si le message d'un client reste sans réponse pendant "
+":"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "minutes"
+msgstr "minutes"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "e.g. We are away right now, we will reply as soon as possible."
+msgstr ""
+"ex. Nous sommes absents pour le moment, nous répondrons dès que possible."
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "Keyword quick replies"
+msgstr "Réponses rapides par mot-clé"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid ""
+"If a customer's message contains one of the keywords, the matching reply is "
+"sent automatically."
+msgstr ""
+"Si le message d'un client contient l'un des mots-clés, la réponse "
+"correspondante est envoyée automatiquement."
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "Keywords, comma-separated (e.g. price, shipping, delivery)"
+msgstr "Mots-clés séparés par des virgules (ex. prix, livraison, expédition)"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "Automatic reply for this keyword..."
+msgstr "Réponse automatique pour ce mot-clé..."
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "Add rule"
+msgstr "Ajouter une règle"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "Save settings"
+msgstr "Enregistrer les paramètres"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "Deactivate"
+msgstr "Désactiver"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "Activate"
+msgstr "Activer"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "No keyword rules yet."
+msgstr "Aucune règle de mot-clé pour le moment."
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "Keywords and reply message are required"
+msgstr "Mots-clés et réponse automatique requis"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "Auto-reply settings saved"
+msgstr "Paramètres de réponse automatique enregistrés"

@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="zh-hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>店铺消息 - DUNO 360</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1d4ed8;
+            --secondary-color: #14245f;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --asm-bg: #f8fafc;
+            --asm-card: #fff;
+            --asm-border: #e2e8f0;
+            --asm-chat-bg: #f1f5f9;
+            --asm-bubble-out: linear-gradient(135deg, #1d4ed8, #14245f);
+            --asm-bubble-in: #fff;
+            --asm-text: #0f172a;
+            --asm-text2: #64748b;
+            --asm-text3: #94a3b8;
+        }
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        /* ===== Compact single-row top bar (replaces the big hero card so the
+           chat area gets as much vertical room as possible) ===== */
+        .asm-topbar {
+            display: flex; align-items: center; gap: 14px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: #fff; border-radius: 12px; padding: 10px 16px;
+            margin-bottom: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            flex-shrink: 0;
+        }
+        .asm-topbar-icon {
+            width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.15);
+            color: #fff; display: flex; align-items: center; justify-content: center; text-decoration: none;
+            flex-shrink: 0; transition: background 0.15s; font-size: 0.9rem;
+        }
+        .asm-topbar-icon:hover { background: rgba(255,255,255,0.28); color: #fff; }
+        .asm-topbar-title { font-weight: 800; font-size: 1.05rem; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
+        .asm-topbar-vendor {
+            opacity: 0.85; font-size: 0.85rem; border-left: 1px solid rgba(255,255,255,0.3);
+            padding-left: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
+        }
+        .asm-topbar-admin { margin-left: auto; font-size: 0.82rem; opacity: 0.9; white-space: nowrap; flex-shrink: 0; }
+        @media (max-width: 768px) { .asm-topbar-vendor { display: none; } }
+
+        /* ===== Store-messages page shell — pinned, no page-level scroll ===== */
+        html, body { height: 100%; overflow: hidden; }
+        .admin-main-offset { height: 100vh; overflow: hidden; display: flex; flex-direction: column; padding: 12px 16px; }
+        .asm-page { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+        .asm-host {
+            flex: 1; min-height: 0;
+            display: flex; background: var(--asm-bg); border-radius: 16px; overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.08); border: 1px solid var(--asm-border);
+            position: relative;
+        }
+
+        /* ===== SIDEBAR ===== */
+        .asm-sidebar {
+            width: min(380px, 38vw); min-width: min(280px, 100%); max-width: 100%; flex-shrink: 0;
+            background: var(--asm-card); border-right: 1px solid var(--asm-border);
+            display: flex; flex-direction: column; min-height: 0; overflow: hidden;
+        }
+        .asm-sb-head {
+            padding: 16px 16px 12px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex; align-items: center; gap: 10px;
+        }
+        .asm-sb-head-title { flex: 1; color: #fff; font-weight: 800; font-size: 1.02rem; display: flex; align-items: center; gap: 8px; }
+        .asm-sb-unread-badge {
+            background: #ef4444; color: #fff; font-size: 0.65rem; font-weight: 800;
+            border-radius: 999px; padding: 2px 8px; display: none;
+        }
+        .asm-sb-unread-badge.show { display: inline-flex; }
+        .asm-sb-head-btn {
+            background: rgba(255,255,255,0.18); color: #fff; border-radius: 999px;
+            padding: 4px 11px; font-size: 0.68rem; font-weight: 700; text-decoration: none;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .asm-sb-head-btn:hover { background: rgba(255,255,255,0.3); color: #fff; }
+        .asm-sb-search { padding: 10px 12px; border-bottom: 1px solid var(--asm-border); }
+        .asm-sb-search-wrap { position: relative; }
+        .asm-sb-search-wrap i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--asm-text3); font-size: 0.8rem; }
+        .asm-sb-search input {
+            width: 100%; border: 1px solid var(--asm-border); border-radius: 12px;
+            padding: 9px 14px 9px 36px; font-size: 0.82rem; background: var(--asm-bg);
+            outline: none; color: var(--asm-text); transition: border-color 0.15s;
+        }
+        .asm-sb-search input:focus { border-color: var(--primary-color); }
+        .asm-convo-list { flex: 1; overflow-y: auto; scrollbar-width: thin; }
+        .asm-convo {
+            display: flex; align-items: center; gap: 12px; padding: 14px 16px; cursor: pointer;
+            border-bottom: 1px solid var(--asm-border); transition: all 0.15s; position: relative;
+        }
+        .asm-convo:hover { background: rgba(29,78,216,0.04); }
+        .asm-convo.active { background: rgba(29,78,216,0.08); border-left: 3px solid var(--primary-color); }
+        .asm-convo-avatar {
+            width: 46px; height: 46px; border-radius: 14px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: #fff; display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 1.05rem; flex-shrink: 0; box-shadow: 0 4px 12px rgba(29,78,216,0.2);
+        }
+        .asm-convo-body { flex: 1; min-width: 0; }
+        .asm-convo-name { font-weight: 700; font-size: 0.88rem; color: var(--asm-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .asm-convo-email { font-size: 0.7rem; color: var(--asm-text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .asm-convo-preview { font-size: 0.76rem; color: var(--asm-text2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .asm-convo-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+        .asm-convo-time { font-size: 0.68rem; color: var(--asm-text3); font-weight: 600; }
+        .asm-convo-badge {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: #fff; font-size: 0.62rem; font-weight: 800; min-width: 20px; height: 20px; border-radius: 999px;
+            display: flex; align-items: center; justify-content: center; padding: 0 5px; box-shadow: 0 2px 8px rgba(29,78,216,0.3);
+        }
+        .asm-convo-delete-btn {
+            position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+            width: 28px; height: 28px; border-radius: 50%; border: none;
+            background: var(--asm-card); color: var(--asm-text3);
+            display: none; align-items: center; justify-content: center;
+            font-size: 0.75rem; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        }
+        .asm-convo:hover .asm-convo-delete-btn { display: flex; }
+        .asm-convo-delete-btn:hover { color: #ef4444; }
+        .asm-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; }
+        .asm-empty i { font-size: 3rem; color: var(--asm-text3); opacity: 0.3; margin-bottom: 12px; }
+        .asm-empty h4 { font-size: 0.95rem; font-weight: 700; color: var(--asm-text2); margin: 0 0 6px; }
+        .asm-empty p { font-size: 0.78rem; color: var(--asm-text3); margin: 0; }
+
+        /* ===== CHAT AREA ===== */
+        .asm-chat { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; position: relative; background: var(--asm-chat-bg); overflow: hidden; }
+        .asm-chat-placeholder { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: var(--asm-text3); padding: 40px; }
+        .asm-chat-placeholder i { font-size: 4rem; opacity: 0.15; margin-bottom: 16px; }
+        .asm-chat-placeholder h3 { font-size: 1rem; font-weight: 700; color: var(--asm-text2); margin: 0 0 6px; }
+        .asm-chat-placeholder p { font-size: 0.82rem; margin: 0; }
+        .asm-chat-thread { display: none; flex-direction: column; flex: 1; min-height: 0; }
+        .asm-chat-thread.open { display: flex; }
+        .asm-chat-head { padding: 12px 16px; background: var(--asm-card); border-bottom: 1px solid var(--asm-border); display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+        .asm-chat-back { display: none; background: none; border: none; font-size: 1.15rem; color: var(--primary-color); cursor: pointer; padding: 4px; }
+        .asm-chat-head-avatar { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.95rem; }
+        .asm-chat-head-name { font-weight: 700; font-size: 0.92rem; color: var(--asm-text); }
+        .asm-chat-head-sub { font-size: 0.72rem; color: var(--asm-text2); margin-top: 1px; }
+        .asm-chat-head-status { font-size: 0.68rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: rgba(16,185,129,0.12); color: #059669; flex-shrink: 0; }
+        .asm-chat-head-actions { margin-left: auto; display: flex; align-items: center; gap: 6px; position: relative; }
+        .asm-chat-head-btn {
+            width: 34px; height: 34px; border-radius: 50%; background: transparent; border: 1px solid var(--asm-border);
+            color: var(--asm-text2); display: flex; align-items: center; justify-content: center;
+            font-size: 0.9rem; cursor: pointer; transition: all 0.18s; text-decoration: none;
+        }
+        .asm-chat-head-btn:hover { background: var(--asm-bg); color: var(--primary-color); border-color: var(--primary-color); }
+        .asm-dropdown {
+            position: absolute; top: 42px; right: 0; background: var(--asm-card); border: 1px solid var(--asm-border);
+            border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); display: none; flex-direction: column;
+            min-width: 190px; z-index: 100; overflow: hidden;
+        }
+        .asm-dropdown.show { display: flex; }
+        .asm-dropdown-item { padding: 10px 14px; font-size: 0.85rem; color: var(--asm-text); cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.15s; }
+        .asm-dropdown-item:hover { background: rgba(29,78,216,0.08); }
+        .asm-dropdown-item i { width: 16px; text-align: center; color: var(--asm-text3); }
+        .asm-dropdown-item.danger { color: #ef4444; }
+        .asm-dropdown-item.danger i { color: #ef4444; }
+        .asm-dropdown-item.danger:hover { background: rgba(239,68,68,0.08); }
+
+        .asm-messages { flex: 1; overflow-x: hidden; overflow-y: auto; padding: 20px 16px; display: flex; flex-direction: column; gap: 6px; min-height: 0; }
+        .asm-date-sep { text-align: center; margin: 14px 0 8px; }
+        .asm-date-sep span { background: var(--asm-card); color: var(--asm-text3); font-size: 0.68rem; padding: 4px 14px; border-radius: 999px; font-weight: 600; box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid var(--asm-border); }
+        .asm-bub-row { display: flex; align-items: center; gap: 4px; max-width: 72%; animation: asmFadeUp 0.2s ease; }
+        @keyframes asmFadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .asm-bub-row.out { align-self: flex-end; flex-direction: row-reverse; }
+        .asm-bub-row.in { align-self: flex-start; }
+        .asm-bub { padding: 10px 14px 6px; border-radius: 16px; font-size: 0.86rem; line-height: 1.5; word-break: break-word; white-space: pre-wrap; }
+        .asm-bub-row.out .asm-bub { background: var(--asm-bubble-out); color: #fff; border-bottom-right-radius: 4px; box-shadow: 0 4px 14px rgba(29,78,216,0.25); }
+        .asm-bub-row.in .asm-bub { background: var(--asm-bubble-in); color: var(--asm-text); border-bottom-left-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid var(--asm-border); }
+        .asm-bub-time { font-size: 0.62rem; text-align: right; margin-top: 4px; opacity: 0.7; }
+        .asm-bub-row.out .asm-bub-time { color: rgba(255,255,255,0.7); }
+        .asm-bub-row.in .asm-bub-time { color: var(--asm-text3); }
+        .asm-bub-read { font-size: 0.55rem; margin-left: 4px; }
+        .asm-bub-recalled { background: transparent !important; border: 1px dashed var(--asm-border) !important; color: var(--asm-text3) !important; font-style: italic; box-shadow: none !important; padding: 8px 14px !important; }
+        .asm-bub-quote { display: flex; gap: 8px; border-left: 3px solid rgba(255,255,255,0.5); padding: 4px 8px; margin-bottom: 6px; border-radius: 6px; background: rgba(0,0,0,0.08); font-size: 0.78rem; }
+        .asm-bub-row.in .asm-bub-quote { border-left-color: var(--primary-color); background: rgba(29,78,216,0.06); }
+        .asm-bub-quote-name { font-weight: 700; opacity: 0.9; }
+        .asm-bub-quote-text { opacity: 0.75; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .asm-bub-media { display: block; max-width: 230px; max-height: 300px; border-radius: 10px; margin-bottom: 4px; cursor: pointer; object-fit: cover; }
+        video.asm-bub-media { cursor: default; }
+        .asm-bub-file { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; background: rgba(0,0,0,0.06); margin-bottom: 4px; text-decoration: none; color: inherit; }
+        .asm-bub-row.in .asm-bub-file { background: rgba(29,78,216,0.06); }
+        .asm-bub-file i { font-size: 1.3rem; color: var(--primary-color); flex-shrink: 0; }
+        .asm-bub-file span { font-size: 0.78rem; word-break: break-all; }
+        .asm-bub-action-btn {
+            align-self: center; width: 24px; height: 24px; border-radius: 50%; border: none; background: transparent;
+            color: var(--asm-text3); display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem; cursor: pointer; opacity: 0.4; transition: opacity 0.15s, background 0.15s; flex-shrink: 0;
+        }
+        .asm-bub-action-btn:hover { opacity: 1; background: rgba(0,0,0,0.06); }
+
+        .asm-reply-banner, .asm-media-preview {
+            display: none; align-items: center; gap: 10px; background: var(--asm-bg); border-top: 1px solid var(--asm-border);
+            padding: 8px 14px; flex-shrink: 0;
+        }
+        .asm-reply-banner > i, .asm-media-preview > i { color: var(--primary-color); }
+        .asm-reply-banner-body { flex: 1; min-width: 0; border-left: 3px solid var(--primary-color); padding-left: 8px; }
+        .asm-reply-banner-name { font-size: 0.78rem; font-weight: 700; color: var(--primary-color); }
+        .asm-reply-banner-text { font-size: 0.8rem; color: var(--asm-text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .asm-reply-banner button, .asm-media-preview button {
+            border: none; background: transparent; color: var(--asm-text3); cursor: pointer;
+            width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .asm-reply-banner button:hover, .asm-media-preview button:hover { background: rgba(0,0,0,0.08); color: #ef4444; }
+        .asm-media-preview-thumb { width: 44px; height: 44px; border-radius: 8px; overflow: hidden; flex-shrink: 0; background: var(--asm-card); display: flex; align-items: center; justify-content: center; }
+        .asm-media-preview-thumb img, .asm-media-preview-thumb video { width: 100%; height: 100%; object-fit: cover; }
+        .asm-media-preview-thumb i { font-size: 1.2rem; color: var(--primary-color); }
+        .asm-media-preview-name { flex: 1; min-width: 0; font-size: 0.8rem; color: var(--asm-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .asm-input-bar { padding: 10px 14px; background: var(--asm-card); display: flex; align-items: flex-end; gap: 8px; border-top: 1px solid var(--asm-border); }
+        .asm-input-bar textarea {
+            flex: 1; border: 1px solid var(--asm-border); border-radius: 14px; padding: 10px 16px;
+            font-size: 0.88rem; background: var(--asm-bg); outline: none; resize: none;
+            max-height: 120px; line-height: 1.4; font-family: inherit; color: var(--asm-text); transition: border-color 0.15s;
+        }
+        .asm-input-bar textarea:focus { border-color: var(--primary-color); }
+        .asm-attach-btn {
+            width: 40px; height: 40px; border-radius: 12px; border: none; background: var(--asm-bg); color: var(--asm-text2);
+            cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; transition: all 0.15s;
+        }
+        .asm-attach-btn:hover { color: var(--primary-color); background: rgba(29,78,216,0.08); }
+
+        /* Emoji picker */
+        .asm-emoji-picker {
+            display: none; flex-direction: column;
+            background: var(--asm-card); border: 1px solid var(--asm-border);
+            border-radius: 14px; box-shadow: 0 -4px 24px rgba(0,0,0,0.12);
+            flex-shrink: 0; overflow: hidden;
+        }
+        .asm-emoji-picker.show { display: flex; }
+        .asm-emoji-tabs { display: flex; border-bottom: 1px solid var(--asm-border); flex-shrink: 0; }
+        .asm-emoji-tab {
+            flex: 1; border: none; background: transparent; padding: 8px 0;
+            font-size: 1.1rem; cursor: pointer; opacity: 0.5; transition: opacity 0.15s, background 0.15s;
+        }
+        .asm-emoji-tab:hover { opacity: 0.8; background: var(--asm-bg); }
+        .asm-emoji-tab.active { opacity: 1; background: var(--asm-bg); box-shadow: inset 0 -2px 0 var(--primary-color); }
+        .asm-emoji-grid {
+            display: grid; grid-template-columns: repeat(8, 1fr);
+            gap: 2px; padding: 8px; max-height: 180px; overflow-y: auto;
+            scrollbar-width: thin;
+        }
+        .asm-emoji-item {
+            border: none; background: transparent; font-size: 1.35rem; line-height: 1;
+            padding: 6px 0; border-radius: 8px; cursor: pointer; transition: background 0.15s, transform 0.1s;
+        }
+        .asm-emoji-item:hover { background: var(--asm-bg); transform: scale(1.15); }
+        @media (max-width: 768px) { .asm-emoji-grid { grid-template-columns: repeat(6, 1fr); } }
+        .asm-send-btn {
+            width: 44px; height: 44px; border-radius: 14px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: 1.05rem; flex-shrink: 0; transition: all 0.15s; box-shadow: 0 4px 14px rgba(29,78,216,0.25);
+        }
+        .asm-send-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(29,78,216,0.35); }
+        .asm-send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+        .asm-sending { opacity: 0.55; }
+
+        .asm-msg-menu {
+            position: absolute; display: none; flex-direction: column; background: var(--asm-card); border: 1px solid var(--asm-border);
+            border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); min-width: 160px; z-index: 1300; overflow: hidden;
+        }
+        .asm-msg-menu.show { display: flex; }
+        .asm-msg-menu-item { padding: 10px 14px; font-size: 0.85rem; color: var(--asm-text); display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.15s; }
+        .asm-msg-menu-item i { width: 16px; text-align: center; color: var(--asm-text3); }
+        .asm-msg-menu-item:hover { background: rgba(29,78,216,0.08); }
+        .asm-msg-menu-item.danger { color: #ef4444; }
+        .asm-msg-menu-item.danger i { color: #ef4444; }
+        .asm-msg-menu-item.danger:hover { background: rgba(239,68,68,0.08); }
+
+        .asm-lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 500; align-items: center; justify-content: center; padding: 30px; }
+        .asm-lightbox.show { display: flex; }
+        .asm-lightbox-content img, .asm-lightbox-content video { max-width: 100%; max-height: 90vh; border-radius: 8px; }
+        .asm-lightbox-close {
+            position: absolute; top: 16px; right: 16px; width: 40px; height: 40px; border-radius: 50%;
+            background: rgba(255,255,255,0.12); border: none; color: #fff; font-size: 1.1rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .asm-lightbox-close:hover { background: rgba(255,255,255,0.22); }
+
+        .asm-listing-item { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 10px; cursor: pointer; transition: background 0.15s; }
+        .asm-listing-item:hover { background: rgba(29,78,216,0.08); }
+        .asm-listing-item img { width: 42px; height: 42px; border-radius: 8px; object-fit: cover; background: var(--asm-bg); flex-shrink: 0; }
+        .asm-listing-item-name { font-size: 0.85rem; font-weight: 600; color: var(--asm-text); }
+        .asm-listing-item-price { font-size: 0.75rem; color: var(--asm-text2); }
+        .asm-listing-item-type { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; color: var(--primary-color); }
+
+        @media (max-width: 991px) { .asm-host { border-radius: 0; box-shadow: none; border: none; } }
+        @media (max-width: 768px) {
+            .asm-sidebar { width: 100%; border-right: none; }
+            .asm-chat { display: none; position: absolute; inset: 0; z-index: 100; background: var(--asm-chat-bg); }
+            .asm-chat.mobile-open { display: flex; }
+            .asm-chat-back { display: flex; }
+            .asm-bub-row { max-width: 85%; }
+            .asm-host { position: relative; }
+            .asm-convo-delete-btn { display: flex; }
+        }
+
+        /* Toast/confirm system (matches other admin pages) */
+        .g-toast-container{position:fixed;top:90px;right:20px;z-index:10001;display:flex;flex-direction:column;gap:10px}
+        .g-modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:10000;justify-content:center;align-items:center}
+        .g-modal-card{background:#fff;border-radius:20px;padding:40px;max-width:420px;width:90%;text-align:center;box-shadow:0 25px 60px rgba(0,0,0,0.3);animation:gModalIn .3s ease}
+        @keyframes gModalIn{from{opacity:0;transform:scale(.8) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+        .g-modal-icon{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:28px}
+        .g-modal-icon.confirm{background:#fef3c7;color:#f59e0b}.g-modal-icon.warning{background:#fee2e2;color:#ef4444}
+        .g-modal-title{font-size:1.25rem;font-weight:700;margin-bottom:10px;color:#1e293b}
+        .g-modal-message{color:#64748b;margin-bottom:25px;line-height:1.6}
+        .g-modal-actions{display:flex;gap:12px;justify-content:center}
+        .g-modal-btn{padding:10px 28px;border-radius:12px;border:none;font-weight:600;cursor:pointer;transition:all .2s;font-size:.95rem}
+        .g-modal-btn.cancel{background:#f1f5f9;color:#64748b}.g-modal-btn.cancel:hover{background:#e2e8f0}
+        .g-modal-btn.primary{background:linear-gradient(135deg,#1d4ed8,#14245f);color:#fff}.g-modal-btn.primary:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(29,78,216,.4)}
+        .g-modal-btn.danger{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff}.g-modal-btn.danger:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(239,68,68,.4)}
+        .g-toast{padding:14px 24px;border-radius:12px;color:#fff;font-weight:500;box-shadow:0 8px 25px rgba(0,0,0,.15);animation:gToastIn .3s ease;display:flex;align-items:center;gap:10px}
+        .g-toast.success{background:linear-gradient(135deg,#10b981,#059669)}.g-toast.error{background:linear-gradient(135deg,#ef4444,#dc2626)}.g-toast.warning{background:linear-gradient(135deg,#f59e0b,#d97706)}
+        @keyframes gToastIn{from{opacity:0;transform:translateX(100px)}to{opacity:1;transform:translateX(0)}}
+
+        /* Auto-reply settings modal */
+        .ar-section { border: 1px solid var(--asm-border); border-radius: 14px; padding: 14px; margin-bottom: 14px; }
+        .ar-section-head { display: flex; align-items: center; justify-content: space-between; font-weight: 700; font-size: 0.9rem; color: var(--asm-text); margin-bottom: 4px; }
+        .ar-section-head i { color: var(--primary-color); margin-right: 6px; }
+        .ar-hint { font-size: 0.76rem; color: var(--asm-text2); margin-bottom: 8px; }
+        .ar-keyword-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+        .ar-keyword-row { display: flex; align-items: flex-start; gap: 10px; background: var(--asm-bg); border-radius: 10px; padding: 8px 10px; }
+        .ar-keyword-row-body { flex: 1; min-width: 0; }
+        .ar-keyword-row-kw { font-weight: 700; font-size: 0.8rem; color: var(--primary-color); word-break: break-word; }
+        .ar-keyword-row-reply { font-size: 0.78rem; color: var(--asm-text2); margin-top: 2px; word-break: break-word; }
+        .ar-keyword-row-actions { display: flex; gap: 6px; flex-shrink: 0; }
+        .ar-keyword-row-actions button { border: none; background: transparent; cursor: pointer; width: 26px; height: 26px; border-radius: 8px; color: var(--asm-text2); display: flex; align-items: center; justify-content: center; }
+        .ar-keyword-row-actions button:hover { background: rgba(0,0,0,0.06); }
+        .ar-keyword-row-actions button.danger:hover { color: #ef4444; }
+        .ar-keyword-form { display: flex; flex-direction: column; gap: 8px; }
+    </style>
+</head>
+<body>
+    {% include "admin/_admin_sidebar.html" %}
+    <div class="admin-main-offset">
+        <div class="g-toast-container" id="toastContainer"></div>
+        <div class="asm-topbar">
+            <a href="/manager/dashboard/" class="asm-topbar-icon" title="仪表板"><i class="fas fa-home"></i></a>
+            <div class="asm-topbar-title"><i class="fas fa-comments"></i>店铺消息</div>
+            <div class="asm-topbar-vendor">{{ vendor.company_name }}</div>
+            <div class="asm-topbar-admin">欢迎回来，<strong>{{ name }}</strong></div>
+        </div>
+
+        <div class="asm-page">
+            <div class="asm-host" id="asmHost">
+                <!-- SIDEBAR -->
+                <div class="asm-sidebar" id="asmSidebar">
+                    <div class="asm-sb-head">
+                        <div class="asm-sb-head-title">
+                            <i class="fas fa-inbox"></i>会话列表
+                            <span class="asm-sb-unread-badge" id="asmTotalUnread"></span>
+                        </div>
+                        <a href="/manager/dashboard/" class="asm-sb-head-btn" title="仪表板"><i class="fas fa-home"></i></a>
+                        <button type="button" class="asm-sb-head-btn" onclick="asmOpenAutoReply()" title="自动回复设置"><i class="fas fa-robot"></i></button>
+                    </div>
+                    <div class="asm-sb-search">
+                        <div class="asm-sb-search-wrap">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="asmSearchInput" placeholder="搜索客户..." oninput="asmFilter(this.value)">
+                        </div>
+                    </div>
+                    <div class="asm-convo-list" id="asmConvoList">
+                        <div class="asm-empty" id="asmLoading">
+                            <i class="fas fa-spinner fa-spin" style="font-size:1.5rem;opacity:0.5;"></i>
+                            <p style="margin-top:8px;">加载对话中...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CHAT AREA -->
+                <div class="asm-chat" id="asmChat">
+                    <div class="asm-chat-placeholder" id="asmPlaceholder">
+                        <i class="fas fa-paper-plane"></i>
+                        <h3>选择一个对话</h3>
+                        <p>从左侧列表选择客户，查看对话详情</p>
+                    </div>
+                    <div class="asm-chat-thread" id="asmThread">
+                        <div class="asm-chat-head">
+                            <button class="asm-chat-back" onclick="asmCloseChat()"><i class="fas fa-arrow-left"></i></button>
+                            <div class="asm-chat-head-avatar" id="asmChatAvatar">U</div>
+                            <div style="flex:1;min-width:0;">
+                                <div class="asm-chat-head-name" id="asmChatName">客户</div>
+                                <div class="asm-chat-head-sub" id="asmChatSub"></div>
+                            </div>
+                            <div class="asm-chat-head-status" id="asmChatStatus">进行中</div>
+                            <div class="asm-chat-head-actions">
+                                <a class="asm-chat-head-btn" href="/manager/public/shop/{{ vendor.id }}/" target="_blank" rel="noopener" title="预览店铺前台"><i class="fas fa-store"></i></a>
+                                <button class="asm-chat-head-btn" onclick="asmToggleDropdown()" title="菜单" id="asmMenuBtn"><i class="fas fa-ellipsis-v"></i></button>
+                                <div class="asm-dropdown" id="asmDropdown">
+                                    <div class="asm-dropdown-item" onclick="asmMarkAllRead()"><i class="fas fa-check-double"></i>标为已读</div>
+                                    <div class="asm-dropdown-item danger" onclick="asmDeleteConversation()"><i class="fas fa-trash-alt"></i>删除会话</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="asm-messages" id="asmMessages"></div>
+
+                        <div class="asm-reply-banner" id="asmReplyBanner">
+                            <i class="fas fa-reply"></i>
+                            <div class="asm-reply-banner-body">
+                                <div class="asm-reply-banner-name" id="asmReplyBannerName"></div>
+                                <div class="asm-reply-banner-text" id="asmReplyBannerText"></div>
+                            </div>
+                            <button type="button" onclick="asmCancelReply()"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="asm-media-preview" id="asmMediaPreview">
+                            <div class="asm-media-preview-thumb" id="asmMediaPreviewThumb"></div>
+                            <div class="asm-media-preview-name" id="asmMediaPreviewName"></div>
+                            <button type="button" onclick="asmCancelMedia()"><i class="fas fa-times"></i></button>
+                        </div>
+
+                        <div class="asm-emoji-picker" id="asmEmojiPicker">
+                            <div class="asm-emoji-tabs">
+                                <button type="button" class="asm-emoji-tab active" data-cat="smileys" onclick="asmShowEmojiCat('smileys',this)">😀</button>
+                                <button type="button" class="asm-emoji-tab" data-cat="gestures" onclick="asmShowEmojiCat('gestures',this)">👍</button>
+                                <button type="button" class="asm-emoji-tab" data-cat="hearts" onclick="asmShowEmojiCat('hearts',this)">❤️</button>
+                                <button type="button" class="asm-emoji-tab" data-cat="objects" onclick="asmShowEmojiCat('objects',this)">📦</button>
+                            </div>
+                            <div class="asm-emoji-grid" id="asmEmojiGrid"></div>
+                        </div>
+
+                        <div class="asm-input-bar">
+                            <input type="file" id="asmFileInput" accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar" style="display:none" onchange="asmOnFileSelected(event)">
+                            <button class="asm-attach-btn" onclick="asmPickFile()" title="发送图片、视频或文件"><i class="fas fa-paperclip"></i></button>
+                            <button class="asm-attach-btn" onclick="asmShowListingPicker()" title="发送商品链接"><i class="fas fa-tag"></i></button>
+                            <button class="asm-attach-btn" onclick="asmToggleEmoji()" title="表情"><i class="far fa-smile"></i></button>
+                            <textarea id="asmInput" rows="1" placeholder="输入回复..." onkeydown="asmHandleKey(event)"></textarea>
+                            <button class="asm-send-btn" id="asmSendBtn" onclick="asmSend()"><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Floating per-message action menu -->
+                <div class="asm-msg-menu" id="asmMsgMenu">
+                    <div class="asm-msg-menu-item" onclick="asmMsgMenuAction('reply')"><i class="fas fa-reply"></i>引用回复</div>
+                    <div class="asm-msg-menu-item" id="asmMsgMenuRecall" onclick="asmMsgMenuAction('recall')" style="display:none;"><i class="fas fa-undo"></i>撤回</div>
+                    <div class="asm-msg-menu-item danger" id="asmMsgMenuDelete" onclick="asmMsgMenuAction('delete')" style="display:none;"><i class="fas fa-trash-alt"></i>为我删除</div>
+                </div>
+
+                <!-- Lightbox -->
+                <div class="asm-lightbox" id="asmLightbox" onclick="asmCloseLightbox(event)">
+                    <button class="asm-lightbox-close" onclick="asmCloseLightbox(event)"><i class="fas fa-times"></i></button>
+                    <div class="asm-lightbox-content" id="asmLightboxContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Listing picker modal -->
+    <div class="modal fade" id="listingPickerModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:18px;overflow:hidden;">
+          <div class="modal-header py-2 border-0" style="background:linear-gradient(135deg,#1d4ed8,#14245f);">
+            <h6 class="modal-title text-white fw-bold"><i class="fas fa-tag me-2"></i>发送商品链接</h6>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="asm-sb-search-wrap mb-2">
+                <i class="fas fa-search"></i>
+                <input type="text" id="listingSearchInput" class="form-control" style="border-radius:10px;padding-left:36px;" placeholder="搜索图书、商品、课程..." oninput="asmSearchListings(this.value)">
+            </div>
+            <div id="listingResults" style="max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Auto-reply settings modal -->
+    <div class="modal fade" id="autoReplyModal" tabindex="-1">
+      <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content" style="border-radius:18px;overflow:hidden;">
+          <div class="modal-header py-2 border-0" style="background:linear-gradient(135deg,#1d4ed8,#14245f);">
+            <h6 class="modal-title text-white fw-bold"><i class="fas fa-robot me-2"></i>自动回复设置</h6>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <p class="text-muted" style="font-size:0.82rem;">像 WhatsApp Business 一样自动回复客户：新会话欢迎语、长时间未回复时的自动留言，以及关键词触发的快捷回复。</p>
+
+            <div class="ar-section">
+              <div class="ar-section-head">
+                <div><i class="fas fa-hand-sparkles"></i> 欢迎语</div>
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" id="arWelcomeEnabled">
+                </div>
+              </div>
+              <p class="ar-hint">当客户第一次发起新会话时自动发送。</p>
+              <textarea id="arWelcomeMessage" class="form-control form-control-sm" rows="2" style="border-radius:10px;" placeholder="例如：感谢您的咨询！我们通常会在几小时内回复。"></textarea>
+            </div>
+
+            <div class="ar-section">
+              <div class="ar-section-head">
+                <div><i class="fas fa-moon"></i> 离开自动回复</div>
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" id="arAwayEnabled">
+                </div>
+              </div>
+              <p class="ar-hint">当客户消息超过以下时长未获回复时自动发送：</p>
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <input type="number" min="1" max="1440" id="arAwayDelay" class="form-control form-control-sm" style="border-radius:10px;width:90px;">
+                <span style="font-size:0.82rem;" class="text-muted">分钟</span>
+              </div>
+              <textarea id="arAwayMessage" class="form-control form-control-sm" rows="2" style="border-radius:10px;" placeholder="例如：我们暂时不在线，会尽快回复您。"></textarea>
+            </div>
+
+            <div class="ar-section">
+              <div class="ar-section-head">
+                <div><i class="fas fa-key"></i> 关键词快捷回复</div>
+              </div>
+              <p class="ar-hint">当客户消息中包含以下关键词之一时，自动发送对应回复。</p>
+              <div id="arKeywordList" class="ar-keyword-list"></div>
+              <div class="ar-keyword-form">
+                <input type="text" id="arNewKeywords" class="form-control form-control-sm" style="border-radius:10px;" placeholder="关键词，用英文逗号分隔（例如：价格, 发货, 配送）">
+                <textarea id="arNewReply" class="form-control form-control-sm" rows="2" style="border-radius:10px;" placeholder="该关键词的自动回复内容..."></textarea>
+                <button type="button" class="btn btn-sm fw-bold text-white" onclick="asmAddKeyword()" style="background:linear-gradient(135deg,#1d4ed8,#14245f);border-radius:10px;">
+                    <i class="fas fa-plus me-1"></i>添加规则
+                </button>
+              </div>
+            </div>
+            <div id="arError" class="text-danger mt-2" style="font-size:0.78rem;display:none;"></div>
+          </div>
+          <div class="modal-footer py-2 border-0">
+            <button class="btn btn-sm fw-bold text-white" onclick="asmSaveAutoReply()" style="background:linear-gradient(135deg,#1d4ed8,#14245f);border-radius:10px;padding:6px 18px;">
+                <i class="fas fa-check me-1"></i> 保存设置
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div class="g-modal-overlay" id="gModalOverlay">
+        <div class="g-modal-card">
+            <div class="g-modal-icon" id="gModalIcon"><i id="gModalIconI" class="fas fa-question"></i></div>
+            <div class="g-modal-title" id="gModalTitle"></div>
+            <div class="g-modal-message" id="gModalMessage"></div>
+            <div class="g-modal-actions">
+                <button class="g-modal-btn cancel" onclick="closeGModal()">取消</button>
+                <button class="g-modal-btn" id="gModalConfirmBtn" onclick="gModalCallback()">确定</button>
+            </div>
+        </div>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+(function() {
+    var convos = [];
+    var activeId = null;
+    var pollTimer = null;
+    var sending = false;
+    var _pendingFile = null;
+    var _replyToId = null;
+    var _msgMenuTargetId = null;
+    var _listingSearchTimer = null;
+    var _msgData = {};
+
+    function csrf() {
+        var m = document.cookie.match('(^|;)\\s*csrftoken=([^;]*)');
+        return m ? decodeURIComponent(m[2]) : '';
+    }
+
+    // Toast System (shared admin pattern)
+    function gToast(message, type) {
+        type = type || 'success';
+        var c = document.getElementById('toastContainer');
+        var icons = {success:'fa-check-circle',error:'fa-exclamation-circle',warning:'fa-exclamation-triangle'};
+        var t = document.createElement('div');
+        t.className = 'g-toast ' + type;
+        t.innerHTML = '<i class="fas ' + (icons[type]||icons.success) + '"></i> ' + message;
+        c.appendChild(t);
+        setTimeout(function() { t.style.animation = 'gToastIn .3s ease reverse'; setTimeout(function() { t.remove(); }, 300); }, 3000);
+    }
+
+    // Confirm Modal (shared admin pattern)
+    var _gModalCb = null;
+    window.gAdminTableConfirm = function(title, message, type, btnClass, callback) {
+        document.getElementById('gModalTitle').textContent = title;
+        document.getElementById('gModalMessage').textContent = message;
+        var icon = document.getElementById('gModalIcon');
+        icon.className = 'g-modal-icon ' + (type||'confirm');
+        var iconMap = {confirm:'fa-question',warning:'fa-exclamation-triangle'};
+        document.getElementById('gModalIconI').className = 'fas ' + (iconMap[type]||'fa-question');
+        var btn = document.getElementById('gModalConfirmBtn');
+        btn.className = 'g-modal-btn ' + (btnClass||'primary');
+        btn.textContent = '确定';
+        _gModalCb = callback;
+        var overlay = document.getElementById('gModalOverlay');
+        overlay.style.display = 'flex';
+    };
+    window.closeGModal = function() {
+        document.getElementById('gModalOverlay').style.display = 'none';
+        _gModalCb = null;
+    };
+    window.gModalCallback = function() { if (_gModalCb) _gModalCb(); closeGModal(); };
+
+    function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+    function escA(s) { return (s || '').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+
+    /* ── Client-side timestamp formatting (user's own local timezone) ── */
+    function fmtTime(iso) {
+        if (!iso) return '';
+        var d = new Date(iso);
+        return d.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+    }
+    function fmtFullDateTime(iso) {
+        if (!iso) return '';
+        var d = new Date(iso);
+        return d.toLocaleDateString([], {year: 'numeric', month: 'long', day: 'numeric'}) + ' ' + fmtTime(iso);
+    }
+    function fmtDateSep(iso) {
+        if (!iso) return '';
+        var d = new Date(iso);
+        return d.toLocaleDateString([], {year: 'numeric', month: 'long', day: 'numeric'});
+    }
+    function fmtConvoTime(iso) {
+        if (!iso) return '';
+        var d = new Date(iso);
+        var now = new Date();
+        if (d.toDateString() === now.toDateString()) return fmtTime(iso);
+        var yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
+        if (d.toDateString() === yesterday.toDateString()) return '昨天';
+        return d.toLocaleDateString([], {month: 'numeric', day: 'numeric'});
+    }
+    function dayKey(iso) {
+        if (!iso) return '';
+        var d = new Date(iso);
+        return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
+    }
+
+    function urlConvoId() {
+        var r = new URLSearchParams(window.location.search).get('conversation');
+        if (!r) return null;
+        var n = parseInt(r, 10);
+        return Number.isFinite(n) ? n : null;
+    }
+    function syncUrl(id) {
+        try {
+            var u = new URL(window.location.href);
+            if (id != null) u.searchParams.set('conversation', id);
+            else u.searchParams.delete('conversation');
+            history.replaceState({}, '', u.pathname + u.search);
+        } catch(e) {}
+    }
+
+    function loadConvos() {
+        fetch('/manager/api/admin/store-messages/conversations/', { credentials: 'same-origin' })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.error === 'not_logged_in') {
+                    document.getElementById('asmConvoList').innerHTML = '<div class="asm-empty"><i class="fas fa-lock"></i><p>登录已过期。 <a href="/manager/login/" style="color:#1d4ed8;">重新登录</a></p></div>';
+                    return;
+                }
+                convos = data.conversations || [];
+                renderList();
+                var totalUnread = convos.reduce(function(sum, c) { return sum + (c.unread || 0); }, 0);
+                var badge = document.getElementById('asmTotalUnread');
+                if (totalUnread > 0) { badge.textContent = totalUnread; badge.classList.add('show'); }
+                else { badge.classList.remove('show'); }
+                var deep = urlConvoId();
+                if (deep !== null && activeId !== deep) asmOpenChat(deep);
+            })
+            .catch(function() {
+                document.getElementById('asmConvoList').innerHTML = '<div class="asm-empty"><i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i><p style="color:#ef4444;">加载失败</p></div>';
+            });
+    }
+
+    function renderList() {
+        var list = document.getElementById('asmConvoList');
+        if (convos.length === 0) {
+            list.innerHTML = '<div class="asm-empty"><i class="fas fa-inbox"></i><h4>暂无对话</h4><p>当客户给店铺发消息时，会显示在这里</p></div>';
+            return;
+        }
+        var html = '';
+        convos.forEach(function(c) {
+            var isActive = Number(c.id) === Number(activeId);
+            html += '<div class="asm-convo' + (isActive ? ' active' : '') + '" data-id="' + c.id + '" data-search="' + escA(c.buyer_name + ' ' + c.buyer_email + ' ' + c.subject) + '">';
+            html += '<div class="asm-convo-avatar">' + esc(c.buyer_avatar) + '</div>';
+            html += '<div class="asm-convo-body">';
+            html += '<div class="asm-convo-name">' + esc(c.buyer_name) + '</div>';
+            html += '<div class="asm-convo-email">' + esc(c.buyer_email) + '</div>';
+            html += '<div class="asm-convo-preview">' + esc(c.last_message || c.subject || '新对话') + '</div>';
+            html += '</div>';
+            html += '<div class="asm-convo-meta">';
+            html += '<span class="asm-convo-time">' + fmtConvoTime(c.last_created_at) + '</span>';
+            if (c.unread > 0) html += '<span class="asm-convo-badge">' + c.unread + '</span>';
+            html += '</div>';
+            html += '<button type="button" class="asm-convo-delete-btn" title="删除会话"><i class="fas fa-trash-alt"></i></button>';
+            html += '</div>';
+        });
+        list.innerHTML = html;
+        list.querySelectorAll('.asm-convo').forEach(function(el) {
+            var id = Number(el.dataset.id);
+            el.addEventListener('click', function() { asmOpenChat(id); });
+            el.querySelector('.asm-convo-delete-btn').addEventListener('click', function(e) {
+                e.stopPropagation();
+                asmDeleteConversationById(id);
+            });
+        });
+    }
+
+    window.asmOpenChat = function(id) {
+        id = Number(id);
+        if (!Number.isFinite(id)) return;
+        activeId = id;
+        renderList();
+        syncUrl(id);
+        asmCancelReply();
+        asmCancelMedia();
+
+        document.getElementById('asmPlaceholder').style.display = 'none';
+        var thread = document.getElementById('asmThread');
+        thread.classList.add('open');
+        var chat = document.getElementById('asmChat');
+        chat.classList.add('mobile-open');
+
+        var c = convos.find(function(x) { return Number(x.id) === id; });
+        if (c) {
+            document.getElementById('asmChatAvatar').textContent = c.buyer_avatar || 'U';
+            document.getElementById('asmChatName').textContent = c.buyer_name || '客户';
+            document.getElementById('asmChatSub').textContent = c.buyer_email || c.subject || '';
+            document.getElementById('asmChatStatus').textContent = c.is_closed ? '已关闭' : '进行中';
+            document.getElementById('asmChatStatus').style.background = c.is_closed ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.12)';
+            document.getElementById('asmChatStatus').style.color = c.is_closed ? '#dc2626' : '#059669';
+        }
+
+        document.getElementById('asmMessages').innerHTML = '<div style="text-align:center;padding:20px;color:var(--asm-text3);"><i class="fas fa-spinner fa-spin"></i></div>';
+        loadMsgs(id);
+        if (pollTimer) clearInterval(pollTimer);
+        pollTimer = setInterval(function() { loadMsgs(id, true); }, 5000);
+        setTimeout(function() { document.getElementById('asmInput').focus(); }, 200);
+    };
+
+    window.asmCloseChat = function() {
+        document.getElementById('asmChat').classList.remove('mobile-open');
+        document.getElementById('asmThread').classList.remove('open');
+        document.getElementById('asmPlaceholder').style.display = 'flex';
+        activeId = null;
+        syncUrl(null);
+        if (pollTimer) clearInterval(pollTimer);
+        loadConvos();
+    };
+
+    function loadMsgs(id, silent) {
+        fetch('/manager/api/admin/store-messages/conversations/' + id + '/messages/', { credentials: 'same-origin' })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (!silent || Number(id) === Number(activeId)) renderMsgs(data.messages || []);
+                if (!silent) loadConvos();
+            })
+            .catch(function() {
+                if (!silent) document.getElementById('asmMessages').innerHTML = '<div style="text-align:center;padding:20px;color:#ef4444;">加载失败</div>';
+            });
+    }
+
+    function renderMsgs(msgs) {
+        var area = document.getElementById('asmMessages');
+        _msgData = {};
+        if (!msgs.length) {
+            area.innerHTML = '<div style="text-align:center;padding:40px;color:var(--asm-text3);font-size:0.85rem;"><i class="fas fa-hand-paper" style="font-size:2rem;opacity:0.2;display:block;margin-bottom:10px;"></i>暂无消息</div>';
+            return;
+        }
+        var html = '', lastDay = '';
+        msgs.forEach(function(m) {
+            _msgData[m.id] = m;
+            var dk = dayKey(m.created_at);
+            if (dk !== lastDay) {
+                html += '<div class="asm-date-sep"><span>' + esc(fmtDateSep(m.created_at)) + '</span></div>';
+                lastDay = dk;
+            }
+            var isOut = m.sender_type === 'vendor';
+            html += '<div class="asm-bub-row ' + (isOut ? 'out' : 'in') + '" data-msg-id="' + m.id + '">';
+            if (m.is_recalled) {
+                html += '<div class="asm-bub asm-bub-recalled"><i class="fas fa-ban"></i> ' + (isOut ? '你撤回了一条消息' : '此消息已被撤回') + '</div></div>';
+                return;
+            }
+            html += '<div class="asm-bub">';
+            if (m.reply_to) {
+                html += '<div class="asm-bub-quote"><div><div class="asm-bub-quote-name">' + esc(m.reply_to.sender_type === 'vendor' ? '你' : m.reply_to.sender_name) + '</div><div class="asm-bub-quote-text">' + esc(m.reply_to.content) + '</div></div></div>';
+            }
+            if (m.attachment_type === 'image' && m.attachment_url) {
+                html += '<img class="asm-bub-media" src="' + esc(m.attachment_url) + '" alt="" loading="lazy" onclick="asmOpenLightbox(\'' + esc(m.attachment_url) + '\',\'image\')">';
+            } else if (m.attachment_type === 'video' && m.attachment_url) {
+                html += '<video class="asm-bub-media" src="' + esc(m.attachment_url) + '" controls preload="metadata"></video>';
+            } else if (m.attachment_type === 'file' && m.attachment_url) {
+                html += '<a class="asm-bub-file" href="' + esc(m.attachment_url) + '" target="_blank" rel="noopener"><i class="fas fa-file-arrow-down"></i><span>' + esc(m.attachment_name || '文件') + '</span></a>';
+            }
+            if (m.content) html += esc(m.content);
+            html += '<div class="asm-bub-time"><span title="' + escA(fmtFullDateTime(m.created_at)) + '">' + fmtTime(m.created_at) + '</span>';
+            if (isOut && m.is_read) html += '<span class="asm-bub-read"><i class="fas fa-check-double" style="color:rgba(255,255,255,0.8);"></i></span>';
+            html += '</div></div>';
+            html += '<button type="button" class="asm-bub-action-btn" onclick="asmOpenMsgMenu(event,' + m.id + ')"><i class="fas fa-chevron-down"></i></button>';
+            html += '</div>';
+        });
+        area.innerHTML = html;
+        area.scrollTop = area.scrollHeight;
+    }
+
+    window.asmSend = function() {
+        if (sending) return;
+        var input = document.getElementById('asmInput');
+        var text = input.value.trim();
+        var file = _pendingFile;
+        if (!text && !file) return;
+        if (activeId === null) return;
+
+        sending = true;
+        document.getElementById('asmSendBtn').disabled = true;
+        input.value = '';
+        input.style.height = 'auto';
+        var replyToId = _replyToId;
+        asmCancelReply();
+        asmCancelMedia();
+
+        var area = document.getElementById('asmMessages');
+        var tmp = document.createElement('div');
+        tmp.className = 'asm-bub-row out asm-sending';
+        tmp.innerHTML = '<div class="asm-bub">' + (text ? esc(text) : '发送附件中...') + '<div class="asm-bub-time"><i class="fas fa-clock" style="font-size:0.55rem;opacity:0.6;"></i></div></div>';
+        area.appendChild(tmp);
+        area.scrollTop = area.scrollHeight;
+
+        var fd = new FormData();
+        fd.append('conversation_id', activeId);
+        fd.append('content', text);
+        if (file) fd.append('attachment', file);
+        if (replyToId) fd.append('reply_to_id', replyToId);
+
+        fetch('/manager/api/admin/store-messages/send/', {
+            method: 'POST', body: fd,
+            headers: { 'X-CSRFToken': csrf() },
+            credentials: 'same-origin'
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            sending = false;
+            document.getElementById('asmSendBtn').disabled = false;
+            tmp.remove();
+            if (data.success) {
+                loadMsgs(activeId);
+                loadConvos();
+            } else {
+                input.value = text;
+                gToast(data.message || '发送失败', 'error');
+            }
+        })
+        .catch(function() {
+            sending = false;
+            document.getElementById('asmSendBtn').disabled = false;
+            tmp.remove();
+            input.value = text;
+            gToast('网络错误', 'error');
+        });
+    };
+
+    window.asmHandleKey = function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); asmSend(); }
+        var ta = e.target; ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
+    };
+
+    // Emoji picker
+    var ASM_EMOJI = {
+        smileys: ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🥳','😏','😒','😞','😔','😟','😕','🙁','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😴','🤤','😪'],
+        gestures: ['👍','👎','👌','✌️','🤞','🤟','🤘','👏','🙌','👐','🤝','🙏','💪','🤲','👋','🤚','✋','👊','✊','☝️','👆','👇','👈','👉'],
+        hearts: ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','💕','💞','💓','💗','💖','💘','💝','💯'],
+        objects: ['📦','🛒','💰','💳','🎁','📱','💻','📷','🚚','⏰','📅','✅','❌','⭐','🔥','✨','🎉','👀','💡','📌','🔔','🏠','🛍️','💵']
+    };
+    window.asmToggleEmoji = function() {
+        var picker = document.getElementById('asmEmojiPicker');
+        if (picker.classList.contains('show')) { picker.classList.remove('show'); return; }
+        if (!picker.dataset.rendered) { asmShowEmojiCat('smileys', picker.querySelector('.asm-emoji-tab')); picker.dataset.rendered = '1'; }
+        picker.classList.add('show');
+    };
+    window.asmShowEmojiCat = function(cat, btn) {
+        document.querySelectorAll('#asmEmojiPicker .asm-emoji-tab').forEach(function(t) { t.classList.toggle('active', t === btn); });
+        var grid = document.getElementById('asmEmojiGrid');
+        grid.innerHTML = ASM_EMOJI[cat].map(function(e) {
+            return '<button type="button" class="asm-emoji-item" onclick="asmInsertEmoji(\'' + e + '\')">' + e + '</button>';
+        }).join('');
+    };
+    window.asmInsertEmoji = function(emoji) {
+        var input = document.getElementById('asmInput');
+        var start = input.selectionStart || 0, end = input.selectionEnd || 0;
+        var text = input.value;
+        input.value = text.slice(0, start) + emoji + text.slice(end);
+        var newPos = start + emoji.length;
+        input.setSelectionRange(newPos, newPos);
+        input.focus();
+        input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+    };
+    document.addEventListener('click', function(e) {
+        var picker = document.getElementById('asmEmojiPicker');
+        if (!picker || !picker.classList.contains('show')) return;
+        if (picker.contains(e.target) || e.target.closest('[onclick="asmToggleEmoji()"]')) return;
+        picker.classList.remove('show');
+    });
+
+    window.asmFilter = function(q) {
+        q = (q || '').toLowerCase();
+        document.querySelectorAll('.asm-convo').forEach(function(el) {
+            el.style.display = (el.dataset.search || '').toLowerCase().indexOf(q) !== -1 ? '' : 'none';
+        });
+    };
+
+    /* ── Header dropdown ─────────────────────────────────────────────── */
+    window.asmToggleDropdown = function() { document.getElementById('asmDropdown').classList.toggle('show'); };
+    window.asmCloseDropdown = function() { document.getElementById('asmDropdown').classList.remove('show'); };
+    document.addEventListener('click', function(e) {
+        var menu = document.getElementById('asmDropdown');
+        var btn = document.getElementById('asmMenuBtn');
+        if (menu && btn && menu.classList.contains('show') && !menu.contains(e.target) && !btn.contains(e.target)) {
+            menu.classList.remove('show');
+        }
+    });
+    window.asmMarkAllRead = function() {
+        asmCloseDropdown();
+        if (activeId === null) return;
+        fetch('/manager/api/admin/store-messages/conversations/' + activeId + '/mark_read/', {
+            method: 'POST', headers: { 'X-CSRFToken': csrf() }, credentials: 'same-origin'
+        }).then(function(r) { return r.json(); }).then(function(data) {
+            if (data.success) { loadConvos(); loadMsgs(activeId); }
+        }).catch(function() {});
+    };
+
+    window.asmDeleteConversationById = function(id) {
+        gAdminTableConfirm('删除会话', '确定要删除此会话吗？该操作仅会将其从店铺的列表中移除。', 'warning', 'danger', function() {
+            fetch('/manager/api/admin/store-messages/conversations/' + id + '/delete/', {
+                method: 'POST', headers: { 'X-CSRFToken': csrf() }, credentials: 'same-origin'
+            }).then(function(r) { return r.json(); }).then(function(data) {
+                if (data.success) {
+                    convos = convos.filter(function(c) { return c.id !== id; });
+                    renderList();
+                    if (activeId === id) asmCloseChat();
+                    gToast('会话已删除', 'success');
+                } else {
+                    gToast(data.message || '操作失败', 'error');
+                }
+            }).catch(function() { gToast('网络错误', 'error'); });
+        });
+    };
+    window.asmDeleteConversation = function() {
+        asmCloseDropdown();
+        if (activeId !== null) asmDeleteConversationById(activeId);
+    };
+
+    /* ── Reply / quote ──────────────────────────────────────────────── */
+    window.asmStartReply = function(m) {
+        _replyToId = m.id;
+        var name = m.sender_type === 'vendor' ? '你' : document.getElementById('asmChatName').textContent;
+        var text = m.content || (m.attachment_type === 'image' ? '📷 图片' : m.attachment_type === 'video' ? '🎥 视频' : m.attachment_type === 'file' ? '📎 文件' : '');
+        document.getElementById('asmReplyBannerName').textContent = name;
+        document.getElementById('asmReplyBannerText').textContent = text;
+        document.getElementById('asmReplyBanner').style.display = 'flex';
+        document.getElementById('asmInput').focus();
+    };
+    window.asmCancelReply = function() {
+        _replyToId = null;
+        document.getElementById('asmReplyBanner').style.display = 'none';
+    };
+
+    /* ── Attachments ──────────────────────────────────────────────────── */
+    var ASM_ATTACH_MAX = {image: 10*1024*1024, video: 50*1024*1024, file: 20*1024*1024};
+    window.asmPickFile = function() { document.getElementById('asmFileInput').click(); };
+    window.asmOnFileSelected = function(evt) {
+        var file = evt.target.files && evt.target.files[0];
+        evt.target.value = '';
+        if (!file) return;
+        var isImage = file.type.indexOf('image') === 0;
+        var isVideo = file.type.indexOf('video') === 0;
+        var kind = isImage ? 'image' : isVideo ? 'video' : 'file';
+        if (file.size > ASM_ATTACH_MAX[kind]) {
+            gToast('文件过大（最大 ' + Math.round(ASM_ATTACH_MAX[kind]/1024/1024) + 'MB）', 'error');
+            return;
+        }
+        _pendingFile = file;
+        var preview = document.getElementById('asmMediaPreview');
+        var thumb = document.getElementById('asmMediaPreviewThumb');
+        if (isImage) thumb.innerHTML = '<img src="' + URL.createObjectURL(file) + '">';
+        else if (isVideo) thumb.innerHTML = '<video src="' + URL.createObjectURL(file) + '"></video>';
+        else thumb.innerHTML = '<i class="fas fa-file"></i>';
+        document.getElementById('asmMediaPreviewName').textContent = file.name;
+        preview.style.display = 'flex';
+        document.getElementById('asmInput').focus();
+    };
+    window.asmCancelMedia = function() {
+        _pendingFile = null;
+        document.getElementById('asmMediaPreview').style.display = 'none';
+        document.getElementById('asmMediaPreviewThumb').innerHTML = '';
+    };
+
+    /* ── Listing picker ─────────────────────────────────────────────── */
+    window.asmShowListingPicker = function() {
+        document.getElementById('listingSearchInput').value = '';
+        document.getElementById('listingResults').innerHTML = '<div style="text-align:center;padding:16px;color:var(--asm-text3);font-size:0.82rem;">输入关键词搜索店铺商品</div>';
+        new bootstrap.Modal(document.getElementById('listingPickerModal')).show();
+    };
+    window.asmSearchListings = function(q) {
+        clearTimeout(_listingSearchTimer);
+        _listingSearchTimer = setTimeout(function() {
+            fetch('/manager/api/admin/store-messages/listings/?q=' + encodeURIComponent(q || ''), { credentials: 'same-origin' })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    var list = data.listings || [];
+                    var box = document.getElementById('listingResults');
+                    if (!list.length) {
+                        box.innerHTML = '<div style="text-align:center;padding:16px;color:var(--asm-text3);font-size:0.82rem;">未找到匹配的商品</div>';
+                        return;
+                    }
+                    box.innerHTML = list.map(function(item) {
+                        var price = item.price ? Math.round(parseFloat(item.price) || 0).toLocaleString('fr-FR') + ' FCFA' : '';
+                        return '<div class="asm-listing-item" onclick="asmSendListingLink(\'' + escA(item.name) + '\',\'' + escA(item.url) + '\')">' +
+                            '<img src="' + esc(item.image || '/static/img/default_product.png') + '">' +
+                            '<div style="flex:1;min-width:0;">' +
+                            '<div class="asm-listing-item-type">' + esc(item.type) + '</div>' +
+                            '<div class="asm-listing-item-name">' + esc(item.name) + '</div>' +
+                            '<div class="asm-listing-item-price">' + esc(price) + '</div>' +
+                            '</div></div>';
+                    }).join('');
+                })
+                .catch(function() {});
+        }, 250);
+    };
+    window.asmSendListingLink = function(name, url) {
+        var full = window.location.origin + url;
+        bootstrap.Modal.getInstance(document.getElementById('listingPickerModal')).hide();
+        var input = document.getElementById('asmInput');
+        input.value = name + ': ' + full;
+        asmSend();
+    };
+
+    /* ── Auto-reply settings (welcome / away / keyword rules) ───────── */
+    window.asmOpenAutoReply = function() {
+        new bootstrap.Modal(document.getElementById('autoReplyModal')).show();
+        asmLoadAutoReplySettings();
+        asmLoadKeywords();
+    };
+    function asmLoadAutoReplySettings() {
+        fetch('/manager/api/admin/store-messages/auto-reply/settings/', { credentials: 'same-origin' })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var s = data.settings || {};
+                document.getElementById('arWelcomeEnabled').checked = !!s.welcome_enabled;
+                document.getElementById('arWelcomeMessage').value = s.welcome_message || '';
+                document.getElementById('arAwayEnabled').checked = !!s.away_enabled;
+                document.getElementById('arAwayMessage').value = s.away_message || '';
+                document.getElementById('arAwayDelay').value = s.away_delay_minutes || 5;
+            });
+    }
+    function asmRenderKeywords(list) {
+        var box = document.getElementById('arKeywordList');
+        if (!list.length) { box.innerHTML = '<p class="ar-hint" style="margin:0;">暂无关键词规则。</p>'; return; }
+        box.innerHTML = list.map(function(k) {
+            return '<div class="ar-keyword-row" data-id="' + k.id + '">' +
+                '<div class="ar-keyword-row-body">' +
+                    '<div class="ar-keyword-row-kw">' + esc(k.keywords) + '</div>' +
+                    '<div class="ar-keyword-row-reply">' + esc(k.reply_message) + '</div>' +
+                '</div>' +
+                '<div class="ar-keyword-row-actions">' +
+                    '<button type="button" onclick="asmToggleKeyword(' + k.id + ',' + (!k.is_active) + ')" title="' + (k.is_active ? '停用此规则' : '启用此规则') + '"><i class="fas ' + (k.is_active ? 'fa-toggle-on' : 'fa-toggle-off') + '"></i></button>' +
+                    '<button type="button" class="danger" onclick="asmDeleteKeyword(' + k.id + ')" title="删除"><i class="fas fa-trash-alt"></i></button>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+    }
+    function asmLoadKeywords() {
+        fetch('/manager/api/admin/store-messages/auto-reply/keywords/', { credentials: 'same-origin' })
+            .then(function(r) { return r.json(); })
+            .then(function(data) { asmRenderKeywords(data.keywords || []); });
+    }
+    window.asmAddKeyword = function() {
+        var kw = (document.getElementById('arNewKeywords').value || '').trim();
+        var reply = (document.getElementById('arNewReply').value || '').trim();
+        var err = document.getElementById('arError');
+        err.style.display = 'none';
+        if (!kw || !reply) { err.textContent = '请填写关键词和自动回复内容'; err.style.display = 'block'; return; }
+        var fd = new FormData();
+        fd.append('keywords', kw);
+        fd.append('reply_message', reply);
+        fetch('/manager/api/admin/store-messages/auto-reply/keywords/', {
+            method: 'POST', body: fd, headers: { 'X-CSRFToken': csrf() }, credentials: 'same-origin'
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                document.getElementById('arNewKeywords').value = '';
+                document.getElementById('arNewReply').value = '';
+                asmLoadKeywords();
+            } else {
+                err.textContent = data.message || '添加失败';
+                err.style.display = 'block';
+            }
+        })
+        .catch(function() { err.textContent = '网络错误'; err.style.display = 'block'; });
+    };
+    window.asmToggleKeyword = function(id, newActive) {
+        var fd = new FormData();
+        fd.append('is_active', newActive ? '1' : '0');
+        fetch('/manager/api/admin/store-messages/auto-reply/keywords/' + id + '/update/', {
+            method: 'POST', body: fd, headers: { 'X-CSRFToken': csrf() }, credentials: 'same-origin'
+        }).then(function() { asmLoadKeywords(); });
+    };
+    window.asmDeleteKeyword = function(id) {
+        fetch('/manager/api/admin/store-messages/auto-reply/keywords/' + id + '/delete/', {
+            method: 'POST', headers: { 'X-CSRFToken': csrf() }, credentials: 'same-origin'
+        }).then(function() { asmLoadKeywords(); });
+    };
+    window.asmSaveAutoReply = function() {
+        var fd = new FormData();
+        fd.append('welcome_enabled', document.getElementById('arWelcomeEnabled').checked ? '1' : '0');
+        fd.append('welcome_message', document.getElementById('arWelcomeMessage').value || '');
+        fd.append('away_enabled', document.getElementById('arAwayEnabled').checked ? '1' : '0');
+        fd.append('away_message', document.getElementById('arAwayMessage').value || '');
+        fd.append('away_delay_minutes', document.getElementById('arAwayDelay').value || '5');
+        fetch('/manager/api/admin/store-messages/auto-reply/settings/', {
+            method: 'POST', body: fd, headers: { 'X-CSRFToken': csrf() }, credentials: 'same-origin'
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                bootstrap.Modal.getInstance(document.getElementById('autoReplyModal')).hide();
+                gToast('自动回复设置已保存', 'success');
+            }
+        });
+    };
+
+    /* ── Per-message action menu ──────────────────────────────────────── */
+    window.asmOpenMsgMenu = function(evt, msgId) {
+        evt.stopPropagation();
+        var m = _msgData[msgId];
+        if (!m) return;
+        _msgMenuTargetId = msgId;
+        var menu = document.getElementById('asmMsgMenu');
+        document.getElementById('asmMsgMenuRecall').style.display = m.can_recall ? 'flex' : 'none';
+        document.getElementById('asmMsgMenuDelete').style.display = m.can_delete_for_me ? 'flex' : 'none';
+        var btn = evt.currentTarget;
+        var btnRect = btn.getBoundingClientRect();
+        var hostRect = document.getElementById('asmHost').getBoundingClientRect();
+        var itemCount = 1 + (m.can_recall ? 1 : 0) + (m.can_delete_for_me ? 1 : 0);
+        var estMenuHeight = itemCount * 40 + 6;
+        var spaceBelow = hostRect.bottom - btnRect.bottom;
+        if (spaceBelow < estMenuHeight + 10) {
+            menu.style.bottom = (hostRect.bottom - btnRect.top + 4) + 'px';
+            menu.style.top = 'auto';
+        } else {
+            menu.style.top = (btnRect.bottom - hostRect.top + 4) + 'px';
+            menu.style.bottom = 'auto';
+        }
+        if (m.sender_type === 'vendor') {
+            menu.style.right = (hostRect.right - btnRect.right) + 'px';
+            menu.style.left = 'auto';
+        } else {
+            menu.style.left = (btnRect.left - hostRect.left) + 'px';
+            menu.style.right = 'auto';
+        }
+        menu.classList.add('show');
+    };
+    window.asmMsgMenuAction = function(action) {
+        document.getElementById('asmMsgMenu').classList.remove('show');
+        var id = _msgMenuTargetId;
+        if (!id) return;
+        var m = _msgData[id];
+        if (action === 'reply' && m) asmStartReply(m);
+        else if (action === 'recall') asmRecallMessage(id);
+        else if (action === 'delete') asmDeleteMessageForMe(id);
+    };
+    document.addEventListener('click', function(e) {
+        var menu = document.getElementById('asmMsgMenu');
+        if (menu && menu.classList.contains('show') && !menu.contains(e.target)) menu.classList.remove('show');
+    });
+
+    window.asmRecallMessage = function(id) {
+        gAdminTableConfirm('撤回消息', '确定要撤回这条消息吗？双方都将不再看到该消息。', 'warning', 'danger', function() {
+            fetch('/manager/api/admin/store-messages/messages/' + id + '/recall/', {
+                method: 'POST', headers: { 'X-CSRFToken': csrf() }, credentials: 'same-origin'
+            }).then(function(r) { return r.json(); }).then(function(data) {
+                if (data.success) { loadMsgs(activeId); loadConvos(); }
+                else gToast(data.message || '操作失败', 'error');
+            }).catch(function() { gToast('网络错误', 'error'); });
+        });
+    };
+    window.asmDeleteMessageForMe = function(id) {
+        gAdminTableConfirm('删除消息', '确定要为自己删除这条消息吗？客户仍然可以看到该消息。', 'warning', 'danger', function() {
+            fetch('/manager/api/admin/store-messages/messages/' + id + '/delete_for_me/', {
+                method: 'POST', headers: { 'X-CSRFToken': csrf() }, credentials: 'same-origin'
+            }).then(function(r) { return r.json(); }).then(function(data) {
+                if (data.success) { loadMsgs(activeId); loadConvos(); }
+                else gToast(data.message || '操作失败', 'error');
+            }).catch(function() { gToast('网络错误', 'error'); });
+        });
+    };
+
+    window.asmOpenLightbox = function(url, type) {
+        var box = document.getElementById('asmLightbox');
+        document.getElementById('asmLightboxContent').innerHTML = type === 'video'
+            ? '<video src="' + url + '" controls autoplay></video>'
+            : '<img src="' + url + '">';
+        box.classList.add('show');
+    };
+    window.asmCloseLightbox = function(evt) {
+        if (evt) evt.stopPropagation();
+        document.getElementById('asmLightbox').classList.remove('show');
+        document.getElementById('asmLightboxContent').innerHTML = '';
+    };
+
+    loadConvos();
+    // NOTE: the deep link (?conversation=) is applied inside loadConvos()'s
+    // success handler once the list has actually loaded — see above. A
+    // separate timer here would race the fetch and could open a chat before
+    // its data exists.
+})();
+</script>
+<script src="/static/js/destructive_action_guards.js"></script>
+<script src="/static/js/admin_i18n.js?v=20260706a" defer></script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 {% extends 'public/vendor_panel_base.html' %}
 {% load i18n %}
 
-{% block panel_title %}{% trans "消息管理" %} - {{ vendor.company_name }}{% endblock %}
+{% block panel_title %}{% trans "Message Management" %} - {{ vendor.company_name }}{% endblock %}
 
 {% block panel_extra_css %}
 <style>
@@ -43,20 +43,36 @@ html[data-theme="dark"] {
     overflow: hidden;
     box-shadow: 0 8px 32px rgba(0,0,0,0.08);
     border: 1px solid var(--vm-border);
+    position: relative;
 }
 @media (max-width: 991px) { .vm-host { border-radius: 0; box-shadow: none; border: none; min-height: 360px; } }
 
-/* Messages page: lock main column scroll — only inner panes scroll */
+/* ── Full app-shell fix, scoped to this page only ──────────────────────
+   vendor_panel_base.html's layout chain only sets min-height:100vh (not
+   height), so tall content pushes the whole page taller and the BROWSER
+   scrolls the page instead of the intended inner panes. Cap the chain at
+   the viewport height here (via :has, so no other vendor panel page is
+   affected) — only .vm-convo-list and .vm-messages scroll internally. */
+body.vp-body:has(#vmHost) { height: 100vh; overflow: hidden; }
+.vp-layout:has(#vmHost) { height: 100vh; }
+.vp-main:has(#vmHost) { height: 100vh; min-height: 0; }
 .vp-scroll:has(#vmHost) {
     overflow: hidden !important;
     display: flex;
     flex-direction: column;
     flex: 1 1 auto;
     min-height: 0;
-    padding-top: 10px;
-    padding-bottom: 16px;
+    padding-top: 6px;
+    padding-bottom: 8px;
 }
-.vp-scroll:has(#vmHost) .vp-top-toolbar { flex-shrink: 0; }
+/* Shrink the shared toolbar's own footprint here so the chat area gets as
+   much height as possible — the toolbar itself (language + notifications)
+   stays fully functional, just more compact. */
+.vp-scroll:has(#vmHost) .vp-top-toolbar {
+    flex-shrink: 0;
+    margin-bottom: 6px !important;
+}
+.vp-scroll:has(#vmHost) .vp-top-toolbar .btn { padding-top: 4px !important; padding-bottom: 4px !important; }
 
 /* ===== SIDEBAR ===== */
 .vm-sidebar {
@@ -77,14 +93,20 @@ html[data-theme="dark"] {
 }
 .vm-sb-head-title {
     flex: 1; color: #fff; font-weight: 800; font-size: 1.05rem;
+    display: flex; align-items: center; gap: 8px;
 }
+.vm-sb-unread-badge {
+    background: #ef4444; color: #fff; font-size: 0.65rem; font-weight: 800;
+    border-radius: 999px; padding: 2px 8px; display: none;
+}
+.vm-sb-unread-badge.show { display: inline-flex; }
 .vm-sb-head-btn {
     background: rgba(255,255,255,0.18); color: #fff; border: none;
     border-radius: 999px; padding: 6px 12px; font-size: 0.72rem;
     font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px;
-    transition: background 0.15s;
+    transition: background 0.15s; text-decoration: none;
 }
-.vm-sb-head-btn:hover { background: rgba(255,255,255,0.3); }
+.vm-sb-head-btn:hover { background: rgba(255,255,255,0.3); color: #fff; }
 .vm-sb-search {
     padding: 10px 12px; border-bottom: 1px solid var(--vm-border);
 }
@@ -129,6 +151,15 @@ html[data-theme="dark"] {
     display: flex; align-items: center; justify-content: center; padding: 0 5px;
     box-shadow: 0 2px 8px rgba(99,102,241,0.3);
 }
+.vm-convo-delete-btn {
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    width: 28px; height: 28px; border-radius: 50%; border: none;
+    background: var(--vm-card); color: var(--vm-text3);
+    display: none; align-items: center; justify-content: center;
+    font-size: 0.75rem; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+.vm-convo:hover .vm-convo-delete-btn { display: flex; }
+.vm-convo-delete-btn:hover { color: #ef4444; }
 .vm-empty {
     flex: 1; display: flex; flex-direction: column;
     align-items: center; justify-content: center; padding: 40px; text-align: center;
@@ -160,7 +191,7 @@ html[data-theme="dark"] {
     padding: 12px 16px;
     background: var(--vm-card);
     border-bottom: 1px solid var(--vm-border);
-    display: flex; align-items: center; gap: 12px;
+    display: flex; align-items: center; gap: 10px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.03);
 }
 .vm-chat-back {
@@ -176,11 +207,37 @@ html[data-theme="dark"] {
 .vm-chat-head-name { font-weight: 700; font-size: 0.92rem; color: var(--vm-text); }
 .vm-chat-head-sub { font-size: 0.72rem; color: var(--vm-text2); margin-top: 1px; }
 .vm-chat-head-status {
-    margin-left: auto;
     font-size: 0.68rem; font-weight: 700;
     padding: 4px 10px; border-radius: 999px;
     background: rgba(16,185,129,0.12); color: #059669;
+    flex-shrink: 0;
 }
+.vm-chat-head-actions { margin-left: auto; display: flex; align-items: center; gap: 6px; position: relative; }
+.vm-chat-head-btn {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: transparent; border: 1px solid var(--vm-border);
+    color: var(--vm-text2); display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem; cursor: pointer; transition: all 0.18s; text-decoration: none;
+}
+.vm-chat-head-btn:hover { background: var(--vm-bg); color: var(--vm-accent); border-color: var(--vm-accent); }
+.vm-dropdown {
+    position: absolute; top: 42px; right: 0;
+    background: var(--vm-card); border: 1px solid var(--vm-border);
+    border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    display: none; flex-direction: column; min-width: 190px;
+    z-index: 100; overflow: hidden;
+}
+.vm-dropdown.show { display: flex; }
+.vm-dropdown-item {
+    padding: 10px 14px; font-size: 0.85rem; color: var(--vm-text);
+    cursor: pointer; display: flex; align-items: center; gap: 10px;
+    transition: background 0.15s;
+}
+.vm-dropdown-item:hover { background: rgba(99,102,241,0.08); }
+.vm-dropdown-item i { width: 16px; text-align: center; color: var(--vm-text3); }
+.vm-dropdown-item.danger { color: #ef4444; }
+.vm-dropdown-item.danger i { color: #ef4444; }
+.vm-dropdown-item.danger:hover { background: rgba(239,68,68,0.08); }
 
 .vm-messages {
     flex: 1; overflow-x: hidden; overflow-y: auto; padding: 20px 16px;
@@ -194,9 +251,9 @@ html[data-theme="dark"] {
     font-weight: 600; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
     border: 1px solid var(--vm-border);
 }
-.vm-bub-row { display: flex; max-width: 72%; animation: vmFadeUp 0.2s ease; }
+.vm-bub-row { display: flex; align-items: center; gap: 4px; max-width: 72%; animation: vmFadeUp 0.2s ease; }
 @keyframes vmFadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-.vm-bub-row.out { align-self: flex-end; }
+.vm-bub-row.out { align-self: flex-end; flex-direction: row-reverse; }
 .vm-bub-row.in { align-self: flex-start; }
 .vm-bub {
     padding: 10px 14px 6px; border-radius: 16px;
@@ -220,11 +277,62 @@ html[data-theme="dark"] {
 .vm-bub-row.out .vm-bub-time { color: rgba(255,255,255,0.7); }
 .vm-bub-row.in .vm-bub-time { color: var(--vm-text3); }
 .vm-bub-read { font-size: 0.55rem; margin-left: 4px; }
+.vm-bub-recalled {
+    background: transparent !important; border: 1px dashed var(--vm-border) !important;
+    color: var(--vm-text3) !important; font-style: italic; box-shadow: none !important;
+    padding: 8px 14px !important;
+}
+.vm-bub-quote {
+    display: flex; gap: 8px; border-left: 3px solid rgba(255,255,255,0.5); padding: 4px 8px; margin-bottom: 6px;
+    border-radius: 6px; background: rgba(0,0,0,0.08); font-size: 0.78rem;
+}
+.vm-bub-row.in .vm-bub-quote { border-left-color: var(--vm-accent); background: rgba(99,102,241,0.06); }
+.vm-bub-quote-name { font-weight: 700; opacity: 0.9; }
+.vm-bub-quote-text { opacity: 0.75; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vm-bub-media { display: block; max-width: 230px; max-height: 300px; border-radius: 10px; margin-bottom: 4px; cursor: pointer; object-fit: cover; }
+video.vm-bub-media { cursor: default; }
+.vm-bub-file {
+    display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px;
+    background: rgba(0,0,0,0.06); margin-bottom: 4px; text-decoration: none; color: inherit;
+}
+.vm-bub-row.in .vm-bub-file { background: rgba(99,102,241,0.06); }
+.vm-bub-file i { font-size: 1.3rem; color: var(--vm-accent); flex-shrink: 0; }
+.vm-bub-file span { font-size: 0.78rem; word-break: break-all; }
+
+.vm-bub-action-btn {
+    align-self: center; width: 24px; height: 24px; border-radius: 50%;
+    border: none; background: transparent; color: var(--vm-text3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; cursor: pointer; opacity: 0.4; transition: opacity 0.15s, background 0.15s;
+    flex-shrink: 0;
+}
+.vm-bub-action-btn:hover { opacity: 1; background: rgba(0,0,0,0.06); }
+
+/* ── Reply banner + media preview above the input ─────────────────── */
+.vm-reply-banner, .vm-media-preview {
+    display: none; align-items: center; gap: 10px;
+    background: var(--vm-bg); border-top: 1px solid var(--vm-border);
+    padding: 8px 14px; flex-shrink: 0;
+}
+.vm-reply-banner > i, .vm-media-preview > i { color: var(--vm-accent); }
+.vm-reply-banner-body { flex: 1; min-width: 0; border-left: 3px solid var(--vm-accent); padding-left: 8px; }
+.vm-reply-banner-name { font-size: 0.78rem; font-weight: 700; color: var(--vm-accent); }
+.vm-reply-banner-text { font-size: 0.8rem; color: var(--vm-text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vm-reply-banner button, .vm-media-preview button {
+    border: none; background: transparent; color: var(--vm-text3); cursor: pointer;
+    width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.vm-reply-banner button:hover, .vm-media-preview button:hover { background: rgba(0,0,0,0.08); color: #ef4444; }
+.vm-media-preview-thumb { width: 44px; height: 44px; border-radius: 8px; overflow: hidden; flex-shrink: 0; background: var(--vm-card); display: flex; align-items: center; justify-content: center; }
+.vm-media-preview-thumb img, .vm-media-preview-thumb video { width: 100%; height: 100%; object-fit: cover; }
+.vm-media-preview-thumb i { font-size: 1.2rem; color: var(--vm-accent); }
+.vm-media-preview-name { flex: 1; min-width: 0; font-size: 0.8rem; color: var(--vm-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* ===== INPUT ===== */
 .vm-input-bar {
     padding: 10px 14px; background: var(--vm-card);
-    display: flex; align-items: flex-end; gap: 10px;
+    display: flex; align-items: flex-end; gap: 8px;
     border-top: 1px solid var(--vm-border);
 }
 .vm-input-bar textarea {
@@ -235,6 +343,40 @@ html[data-theme="dark"] {
     transition: border-color 0.15s;
 }
 .vm-input-bar textarea:focus { border-color: var(--vm-accent); }
+.vm-attach-btn {
+    width: 40px; height: 40px; border-radius: 12px; border: none;
+    background: var(--vm-bg); color: var(--vm-text2); cursor: pointer;
+    display: flex; align-items: center; justify-content: center; font-size: 1rem;
+    flex-shrink: 0; transition: all 0.15s;
+}
+.vm-attach-btn:hover { color: var(--vm-accent); background: rgba(99,102,241,0.08); }
+
+/* ── Emoji picker ──────────────────────────────────────── */
+.vm-emoji-picker {
+    display: none; flex-direction: column;
+    background: var(--vm-card); border: 1px solid var(--vm-border);
+    border-radius: 14px; box-shadow: 0 -4px 24px rgba(0,0,0,0.12);
+    flex-shrink: 0; overflow: hidden;
+}
+.vm-emoji-picker.show { display: flex; }
+.vm-emoji-tabs { display: flex; border-bottom: 1px solid var(--vm-border); flex-shrink: 0; }
+.vm-emoji-tab {
+    flex: 1; border: none; background: transparent; padding: 8px 0;
+    font-size: 1.1rem; cursor: pointer; opacity: 0.5; transition: opacity 0.15s, background 0.15s;
+}
+.vm-emoji-tab:hover { opacity: 0.8; background: var(--vm-bg); }
+.vm-emoji-tab.active { opacity: 1; background: var(--vm-bg); box-shadow: inset 0 -2px 0 var(--vm-accent); }
+.vm-emoji-grid {
+    display: grid; grid-template-columns: repeat(8, 1fr);
+    gap: 2px; padding: 8px; max-height: 180px; overflow-y: auto;
+    scrollbar-width: thin;
+}
+.vm-emoji-item {
+    border: none; background: transparent; font-size: 1.35rem; line-height: 1;
+    padding: 6px 0; border-radius: 8px; cursor: pointer; transition: background 0.15s, transform 0.1s;
+}
+.vm-emoji-item:hover { background: var(--vm-bg); transform: scale(1.15); }
+@media (max-width: 768px) { .vm-emoji-grid { grid-template-columns: repeat(6, 1fr); } }
 .vm-send-btn {
     width: 44px; height: 44px; border-radius: 14px;
     background: linear-gradient(135deg, #6366f1, #8b5cf6);
@@ -255,6 +397,72 @@ html[data-theme="dark"] {
     box-shadow: 0 8px 24px rgba(239,68,68,0.3);
     animation: vmFadeUp 0.3s;
 }
+.vm-toast.success { background: #10b981; box-shadow: 0 8px 24px rgba(16,185,129,0.3); }
+
+/* ── Floating per-message action menu ──────────────────────────────── */
+.vm-msg-menu {
+    position: absolute; display: none; flex-direction: column;
+    background: var(--vm-card); border: 1px solid var(--vm-border);
+    border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    min-width: 160px; z-index: 1300; overflow: hidden;
+}
+.vm-msg-menu.show { display: flex; }
+.vm-msg-menu-item {
+    padding: 10px 14px; font-size: 0.85rem; color: var(--vm-text);
+    display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.15s;
+}
+.vm-msg-menu-item i { width: 16px; text-align: center; color: var(--vm-text3); }
+.vm-msg-menu-item:hover { background: rgba(99,102,241,0.08); }
+.vm-msg-menu-item.danger { color: #ef4444; }
+.vm-msg-menu-item.danger i { color: #ef4444; }
+.vm-msg-menu-item.danger:hover { background: rgba(239,68,68,0.08); }
+
+/* ── Lightbox ───────────────────────────────────────────────────────── */
+.vm-lightbox {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+    z-index: 500; align-items: center; justify-content: center; padding: 30px;
+}
+.vm-lightbox.show { display: flex; }
+.vm-lightbox-content img, .vm-lightbox-content video { max-width: 100%; max-height: 90vh; border-radius: 8px; }
+.vm-lightbox-close {
+    position: absolute; top: 16px; right: 16px; width: 40px; height: 40px;
+    border-radius: 50%; background: rgba(255,255,255,0.12); border: none; color: #fff;
+    font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.vm-lightbox-close:hover { background: rgba(255,255,255,0.22); }
+
+/* ── Listing picker modal ──────────────────────────────────────────── */
+.vm-listing-item {
+    display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 10px;
+    cursor: pointer; transition: background 0.15s;
+}
+.vm-listing-item:hover { background: rgba(99,102,241,0.08); }
+.vm-listing-item img { width: 42px; height: 42px; border-radius: 8px; object-fit: cover; background: var(--vm-bg); flex-shrink: 0; }
+.vm-listing-item-name { font-size: 0.85rem; font-weight: 600; color: var(--vm-text); }
+.vm-listing-item-price { font-size: 0.75rem; color: var(--vm-text2); }
+.vm-listing-item-type { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; color: var(--vm-accent); }
+
+/* ── Auto-reply settings modal ────────────────────────────── */
+.ar-section { border: 1px solid var(--vm-border); border-radius: 14px; padding: 14px; margin-bottom: 14px; }
+.ar-section-head { display: flex; align-items: center; justify-content: space-between; font-weight: 700; font-size: 0.9rem; color: var(--vm-text); margin-bottom: 4px; }
+.ar-section-head i { color: var(--vm-accent); margin-right: 6px; }
+.ar-hint { font-size: 0.76rem; color: var(--vm-text2); margin-bottom: 8px; }
+.ar-keyword-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.ar-keyword-row {
+    display: flex; align-items: flex-start; gap: 10px; background: var(--vm-bg);
+    border-radius: 10px; padding: 8px 10px;
+}
+.ar-keyword-row-body { flex: 1; min-width: 0; }
+.ar-keyword-row-kw { font-weight: 700; font-size: 0.8rem; color: var(--vm-accent); word-break: break-word; }
+.ar-keyword-row-reply { font-size: 0.78rem; color: var(--vm-text2); margin-top: 2px; word-break: break-word; }
+.ar-keyword-row-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.ar-keyword-row-actions button {
+    border: none; background: transparent; cursor: pointer; width: 26px; height: 26px;
+    border-radius: 8px; color: var(--vm-text2); display: flex; align-items: center; justify-content: center;
+}
+.ar-keyword-row-actions button:hover { background: rgba(0,0,0,0.06); }
+.ar-keyword-row-actions button.danger:hover { color: #ef4444; }
+.ar-keyword-form { display: flex; flex-direction: column; gap: 8px; }
 
 @media (max-width: 768px) {
     .vm-sidebar { width: 100%; border-right: none; }
@@ -266,6 +474,7 @@ html[data-theme="dark"] {
     .vm-chat-back { display: flex; }
     .vm-bub-row { max-width: 85%; }
     .vm-host { position: relative; }
+    .vm-convo-delete-btn { display: flex; }
 }
 </style>
 {% endblock %}
@@ -277,25 +486,29 @@ html[data-theme="dark"] {
     <div class="vm-sidebar" id="vmSidebar">
         <div class="vm-sb-head">
             <div class="vm-sb-head-title">
-                <i class="fas fa-comments me-2"></i>Messages
+                <i class="fas fa-comments"></i>{% trans "Messages" %}
+                <span class="vm-sb-unread-badge" id="vmTotalUnread"></span>
             </div>
-            <a href="{% url 'manager:vendor_dashboard' %}" class="vm-sb-head-btn">
-                <i class="fas fa-arrow-left"></i> Back
+            <a href="{% url 'manager:vendor_dashboard' %}" class="vm-sb-head-btn" title="{% trans 'Home' %}">
+                <i class="fas fa-home"></i>
             </a>
+            <button class="vm-sb-head-btn" onclick="vmOpenAutoReply()" title="{% trans 'Auto-reply settings' %}">
+                <i class="fas fa-robot"></i>
+            </button>
             <button class="vm-sb-head-btn" onclick="showNewConvoModal()">
-                <i class="fas fa-pen-to-square"></i> New
+                <i class="fas fa-pen-to-square"></i> {% trans "New" %}
             </button>
         </div>
         <div class="vm-sb-search">
             <div class="vm-sb-search-wrap">
                 <i class="fas fa-search"></i>
-                <input type="text" id="vmSearchInput" placeholder="Search customers..." oninput="vmFilter(this.value)">
+                <input type="text" id="vmSearchInput" placeholder="{% trans 'Search customers...' %}" oninput="vmFilter(this.value)">
             </div>
         </div>
         <div class="vm-convo-list" id="vmConvoList">
             <div class="vm-empty" id="vmLoading">
                 <i class="fas fa-spinner fa-spin" style="font-size:1.5rem;opacity:0.5;"></i>
-                <p style="margin-top:8px;">Loading conversations...</p>
+                <p style="margin-top:8px;">{% trans "Loading conversations..." %}</p>
             </div>
         </div>
     </div>
@@ -304,25 +517,87 @@ html[data-theme="dark"] {
     <div class="vm-chat" id="vmChat">
         <div class="vm-chat-placeholder" id="vmPlaceholder">
             <i class="fas fa-paper-plane"></i>
-            <h3>Select a conversation</h3>
-            <p>Choose a customer from the list to start chatting</p>
+            <h3>{% trans "Select a conversation" %}</h3>
+            <p>{% trans "Choose a customer from the list to start chatting" %}</p>
         </div>
         <div class="vm-chat-thread" id="vmThread">
             <div class="vm-chat-head">
                 <button class="vm-chat-back" onclick="vmCloseChat()"><i class="fas fa-arrow-left"></i></button>
                 <div class="vm-chat-head-avatar" id="vmChatAvatar">U</div>
                 <div style="flex:1;min-width:0;">
-                    <div class="vm-chat-head-name" id="vmChatName">Customer</div>
+                    <div class="vm-chat-head-name" id="vmChatName">{% trans "Customer" %}</div>
                     <div class="vm-chat-head-sub" id="vmChatSub"></div>
                 </div>
-                <div class="vm-chat-head-status" id="vmChatStatus">Active</div>
+                <div class="vm-chat-head-status" id="vmChatStatus">{% trans "Active" %}</div>
+                <div class="vm-chat-head-actions">
+                    <a class="vm-chat-head-btn" href="{% url 'manager:public_vendor_shop' vendor.id %}" target="_blank" rel="noopener" title="{% trans 'Preview my storefront' %}">
+                        <i class="fas fa-store"></i>
+                    </a>
+                    <button class="vm-chat-head-btn" onclick="vmToggleDropdown()" title="{% trans 'Menu' %}" id="vmMenuBtn">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <div class="vm-dropdown" id="vmDropdown">
+                        <div class="vm-dropdown-item" onclick="vmMarkAllRead()">
+                            <i class="fas fa-check-double"></i>{% trans "Mark as read" %}
+                        </div>
+                        <div class="vm-dropdown-item danger" onclick="vmDeleteConversation()">
+                            <i class="fas fa-trash-alt"></i>{% trans "Delete conversation" %}
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="vm-messages" id="vmMessages"></div>
+
+            <!-- Reply/quote banner -->
+            <div class="vm-reply-banner" id="vmReplyBanner">
+                <i class="fas fa-reply"></i>
+                <div class="vm-reply-banner-body">
+                    <div class="vm-reply-banner-name" id="vmReplyBannerName"></div>
+                    <div class="vm-reply-banner-text" id="vmReplyBannerText"></div>
+                </div>
+                <button type="button" onclick="vmCancelReply()" aria-label="Cancel"><i class="fas fa-times"></i></button>
+            </div>
+
+            <!-- Media attachment preview -->
+            <div class="vm-media-preview" id="vmMediaPreview">
+                <div class="vm-media-preview-thumb" id="vmMediaPreviewThumb"></div>
+                <div class="vm-media-preview-name" id="vmMediaPreviewName"></div>
+                <button type="button" onclick="vmCancelMedia()" aria-label="Remove"><i class="fas fa-times"></i></button>
+            </div>
+
+            <!-- Emoji picker -->
+            <div class="vm-emoji-picker" id="vmEmojiPicker">
+                <div class="vm-emoji-tabs">
+                    <button type="button" class="vm-emoji-tab active" data-cat="smileys" onclick="vmShowEmojiCat('smileys',this)">😀</button>
+                    <button type="button" class="vm-emoji-tab" data-cat="gestures" onclick="vmShowEmojiCat('gestures',this)">👍</button>
+                    <button type="button" class="vm-emoji-tab" data-cat="hearts" onclick="vmShowEmojiCat('hearts',this)">❤️</button>
+                    <button type="button" class="vm-emoji-tab" data-cat="objects" onclick="vmShowEmojiCat('objects',this)">📦</button>
+                </div>
+                <div class="vm-emoji-grid" id="vmEmojiGrid"></div>
+            </div>
+
             <div class="vm-input-bar">
+                <input type="file" id="vmFileInput" accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar" style="display:none" onchange="vmOnFileSelected(event)">
+                <button class="vm-attach-btn" onclick="vmPickFile()" title="{% trans 'Attach image, video or file' %}"><i class="fas fa-paperclip"></i></button>
+                <button class="vm-attach-btn" onclick="vmShowListingPicker()" title="{% trans 'Send a listing link' %}"><i class="fas fa-tag"></i></button>
+                <button class="vm-attach-btn" onclick="vmToggleEmoji()" title="{% trans 'Emoji' %}"><i class="far fa-smile"></i></button>
                 <textarea id="vmInput" rows="1" placeholder="{% trans 'Type a reply...' %}" onkeydown="vmHandleKey(event)"></textarea>
                 <button class="vm-send-btn" id="vmSendBtn" onclick="vmSend()"><i class="fas fa-paper-plane"></i></button>
             </div>
         </div>
+    </div>
+
+    <!-- Floating per-message action menu -->
+    <div class="vm-msg-menu" id="vmMsgMenu">
+        <div class="vm-msg-menu-item" onclick="vmMsgMenuAction('reply')"><i class="fas fa-reply"></i>{% trans "Reply" %}</div>
+        <div class="vm-msg-menu-item" id="vmMsgMenuRecall" onclick="vmMsgMenuAction('recall')" style="display:none;"><i class="fas fa-undo"></i>{% trans "Recall" %}</div>
+        <div class="vm-msg-menu-item danger" id="vmMsgMenuDelete" onclick="vmMsgMenuAction('delete')" style="display:none;"><i class="fas fa-trash-alt"></i>{% trans "Delete for me" %}</div>
+    </div>
+
+    <!-- Lightbox -->
+    <div class="vm-lightbox" id="vmLightbox" onclick="vmCloseLightbox(event)">
+        <button class="vm-lightbox-close" onclick="vmCloseLightbox(event)" aria-label="Close"><i class="fas fa-times"></i></button>
+        <div class="vm-lightbox-content" id="vmLightboxContent"></div>
     </div>
 </div>
 {% endblock %}
@@ -333,32 +608,119 @@ html[data-theme="dark"] {
   <div class="modal-dialog modal-sm modal-dialog-centered">
     <div class="modal-content" style="border-radius:18px;overflow:hidden;">
       <div class="modal-header py-2 border-0" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">
-        <h6 class="modal-title text-white fw-bold"><i class="fas fa-pen-to-square me-2"></i>New Conversation</h6>
+        <h6 class="modal-title text-white fw-bold"><i class="fas fa-pen-to-square me-2"></i>{% trans "New Conversation" %}</h6>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <label class="form-label fw-bold" style="font-size:0.8rem;">Customer email</label>
+        <label class="form-label fw-bold" style="font-size:0.8rem;">{% trans "Customer email" %}</label>
         <input type="email" id="newConvoBuyerEmail" class="form-control form-control-sm mb-2" style="border-radius:10px;" placeholder="customer@example.com">
-        <label class="form-label fw-bold" style="font-size:0.8rem;">Subject</label>
-        <input type="text" id="newConvoSubject" class="form-control form-control-sm mb-2" style="border-radius:10px;" placeholder="About your order...">
-        <label class="form-label fw-bold" style="font-size:0.8rem;">First message</label>
-        <textarea id="newConvoMessage" class="form-control form-control-sm" rows="3" style="border-radius:10px;" placeholder="Write your message..."></textarea>
+        <label class="form-label fw-bold" style="font-size:0.8rem;">{% trans "Subject" %}</label>
+        <input type="text" id="newConvoSubject" class="form-control form-control-sm mb-2" style="border-radius:10px;" placeholder="{% trans 'About your order...' %}">
+        <label class="form-label fw-bold" style="font-size:0.8rem;">{% trans "First message" %}</label>
+        <textarea id="newConvoMessage" class="form-control form-control-sm" rows="3" style="border-radius:10px;" placeholder="{% trans 'Write your message...' %}"></textarea>
         <div id="newConvoError" class="text-danger mt-2" style="font-size:0.78rem;display:none;"></div>
       </div>
       <div class="modal-footer py-2 border-0">
         <button class="btn btn-sm fw-bold text-white" onclick="vmCreateConvo()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:10px;padding:6px 18px;">
-            <i class="fas fa-paper-plane me-1"></i> Send
+            <i class="fas fa-paper-plane me-1"></i> {% trans "Send" %}
         </button>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Listing picker modal -->
+<div class="modal fade" id="listingPickerModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:18px;overflow:hidden;">
+      <div class="modal-header py-2 border-0" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">
+        <h6 class="modal-title text-white fw-bold"><i class="fas fa-tag me-2"></i>{% trans "Send a listing link" %}</h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="vm-sb-search-wrap mb-2">
+            <i class="fas fa-search"></i>
+            <input type="text" id="listingSearchInput" class="form-control" style="border-radius:10px;padding-left:36px;" placeholder="{% trans 'Search your products, books, courses...' %}" oninput="vmSearchListings(this.value)">
+        </div>
+        <div id="listingResults" style="max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Auto-reply settings modal -->
+<div class="modal fade" id="autoReplyModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content" style="border-radius:18px;overflow:hidden;">
+      <div class="modal-header py-2 border-0" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">
+        <h6 class="modal-title text-white fw-bold"><i class="fas fa-robot me-2"></i>{% trans "Auto-reply settings" %}</h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted" style="font-size:0.82rem;">{% trans "Automatically respond to customers like WhatsApp Business: a welcome message for new conversations, an away message when you haven't replied in a while, and keyword-triggered quick replies." %}</p>
+
+        <div class="ar-section">
+          <div class="ar-section-head">
+            <div><i class="fas fa-hand-sparkles"></i> {% trans "Welcome message" %}</div>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="arWelcomeEnabled">
+            </div>
+          </div>
+          <p class="ar-hint">{% trans "Sent automatically the first time a customer starts a new conversation with you." %}</p>
+          <textarea id="arWelcomeMessage" class="form-control form-control-sm" rows="2" style="border-radius:10px;" placeholder="{% trans 'e.g. Thanks for reaching out! We usually reply within a few hours.' %}"></textarea>
+        </div>
+
+        <div class="ar-section">
+          <div class="ar-section-head">
+            <div><i class="fas fa-moon"></i> {% trans "Away message" %}</div>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="arAwayEnabled">
+            </div>
+          </div>
+          <p class="ar-hint">{% trans "Sent automatically if a customer's message goes unanswered for this long:" %}</p>
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <input type="number" min="1" max="1440" id="arAwayDelay" class="form-control form-control-sm" style="border-radius:10px;width:90px;">
+            <span style="font-size:0.82rem;" class="text-muted">{% trans "minutes" %}</span>
+          </div>
+          <textarea id="arAwayMessage" class="form-control form-control-sm" rows="2" style="border-radius:10px;" placeholder="{% trans 'e.g. We are away right now, we will reply as soon as possible.' %}"></textarea>
+        </div>
+
+        <div class="ar-section">
+          <div class="ar-section-head">
+            <div><i class="fas fa-key"></i> {% trans "Keyword quick replies" %}</div>
+          </div>
+          <p class="ar-hint">{% trans "If a customer's message contains one of the keywords, the matching reply is sent automatically." %}</p>
+          <div id="arKeywordList" class="ar-keyword-list"></div>
+          <div class="ar-keyword-form">
+            <input type="text" id="arNewKeywords" class="form-control form-control-sm" style="border-radius:10px;" placeholder="{% trans 'Keywords, comma-separated (e.g. price, shipping, delivery)' %}">
+            <textarea id="arNewReply" class="form-control form-control-sm" rows="2" style="border-radius:10px;" placeholder="{% trans 'Automatic reply for this keyword...' %}"></textarea>
+            <button type="button" class="btn btn-sm fw-bold text-white" onclick="vmAddKeyword()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:10px;">
+                <i class="fas fa-plus me-1"></i>{% trans "Add rule" %}
+            </button>
+          </div>
+        </div>
+        <div id="arError" class="text-danger mt-2" style="font-size:0.78rem;display:none;"></div>
+      </div>
+      <div class="modal-footer py-2 border-0">
+        <button class="btn btn-sm fw-bold text-white" onclick="vmSaveAutoReply()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:10px;padding:6px 18px;">
+            <i class="fas fa-check me-1"></i> {% trans "Save settings" %}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 (function() {
     var convos = [];
     var activeId = null;
     var pollTimer = null;
     var sending = false;
+    var _pendingFile = null;
+    var _replyToId = null;
+    var _replyToBrief = null;
+    var _msgMenuTargetId = null;
+    var _listingSearchTimer = null;
 
     function csrf() {
         var el = document.querySelector('[name=csrfmiddlewaretoken]');
@@ -367,9 +729,9 @@ html[data-theme="dark"] {
         return m ? decodeURIComponent(m[2]) : '';
     }
 
-    function toast(msg) {
+    function toast(msg, type) {
         var t = document.createElement('div');
-        t.className = 'vm-toast';
+        t.className = 'vm-toast' + (type === 'success' ? ' success' : '');
         t.textContent = msg;
         document.body.appendChild(t);
         setTimeout(function() { t.remove(); }, 3000);
@@ -377,6 +739,37 @@ html[data-theme="dark"] {
 
     function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
     function escA(s) { return (s || '').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+
+    /* ── Client-side timestamp formatting (user's own local timezone) ── */
+    function fmtTime(iso) {
+        if (!iso) return '';
+        var d = new Date(iso);
+        return d.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+    }
+    function fmtFullDateTime(iso) {
+        if (!iso) return '';
+        var d = new Date(iso);
+        return d.toLocaleDateString([], {year: 'numeric', month: 'long', day: 'numeric'}) + ' ' + fmtTime(iso);
+    }
+    function fmtDateSep(iso) {
+        if (!iso) return '';
+        var d = new Date(iso);
+        return d.toLocaleDateString([], {year: 'numeric', month: 'long', day: 'numeric'});
+    }
+    function fmtConvoTime(iso) {
+        if (!iso) return '';
+        var d = new Date(iso);
+        var now = new Date();
+        if (d.toDateString() === now.toDateString()) return fmtTime(iso);
+        var yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
+        if (d.toDateString() === yesterday.toDateString()) return '{% trans "Yesterday" %}';
+        return d.toLocaleDateString([], {month: 'numeric', day: 'numeric'});
+    }
+    function dayKey(iso) {
+        if (!iso) return '';
+        var d = new Date(iso);
+        return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
+    }
 
     function urlConvoId() {
         var r = new URLSearchParams(window.location.search).get('conversation');
@@ -399,40 +792,54 @@ html[data-theme="dark"] {
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 if (data.error === 'not_logged_in') {
-                    document.getElementById('vmConvoList').innerHTML = '<div class="vm-empty"><i class="fas fa-lock"></i><p>Session expired. <a href="{% url "manager:vendor_login" %}" style="color:#6366f1;">Log in</a></p></div>';
+                    document.getElementById('vmConvoList').innerHTML = '<div class="vm-empty"><i class="fas fa-lock"></i><p>{% trans "Session expired." %} <a href="{% url "manager:vendor_login" %}" style="color:#6366f1;">{% trans "Log in" %}</a></p></div>';
                     return;
                 }
                 convos = data.conversations || [];
                 renderList();
+                var totalUnread = convos.reduce(function(sum, c) { return sum + (c.unread || 0); }, 0);
+                var badge = document.getElementById('vmTotalUnread');
+                if (totalUnread > 0) { badge.textContent = totalUnread; badge.classList.add('show'); }
+                else { badge.classList.remove('show'); }
                 var deep = urlConvoId();
                 if (deep !== null && activeId !== deep) vmOpenChat(deep);
             })
             .catch(function() {
-                document.getElementById('vmConvoList').innerHTML = '<div class="vm-empty"><i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i><p style="color:#ef4444;">Failed to load</p></div>';
+                document.getElementById('vmConvoList').innerHTML = '<div class="vm-empty"><i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i><p style="color:#ef4444;">{% trans "Failed to load" %}</p></div>';
             });
     }
 
     function renderList() {
         var list = document.getElementById('vmConvoList');
         if (convos.length === 0) {
-            list.innerHTML = '<div class="vm-empty"><i class="fas fa-inbox"></i><h4>No conversations yet</h4><p>When customers message you, they\'ll appear here</p></div>';
+            list.innerHTML = '<div class="vm-empty"><i class="fas fa-inbox"></i><h4>{% trans "No conversations yet" %}</h4><p>{% trans "When customers message you, they will appear here" %}</p></div>';
             return;
         }
         var html = '';
         convos.forEach(function(c) {
             var isActive = Number(c.id) === Number(activeId);
-            html += '<div class="vm-convo' + (isActive ? ' active' : '') + '" data-id="' + c.id + '" data-search="' + escA(c.buyer_name + ' ' + c.subject) + '" onclick="vmOpenChat(' + c.id + ')">';
+            html += '<div class="vm-convo' + (isActive ? ' active' : '') + '" data-id="' + c.id + '" data-search="' + escA(c.buyer_name + ' ' + c.subject) + '">';
             html += '<div class="vm-convo-avatar">' + esc(c.buyer_avatar) + '</div>';
             html += '<div class="vm-convo-body">';
             html += '<div class="vm-convo-name">' + esc(c.buyer_name) + '</div>';
-            html += '<div class="vm-convo-preview">' + esc(c.last_message || c.subject || 'New conversation') + '</div>';
+            html += '<div class="vm-convo-preview">' + esc(c.last_message || c.subject || '{% trans "New conversation" %}') + '</div>';
             html += '</div>';
             html += '<div class="vm-convo-meta">';
-            html += '<span class="vm-convo-time">' + (c.last_time || '') + '</span>';
+            html += '<span class="vm-convo-time">' + fmtConvoTime(c.last_created_at) + '</span>';
             if (c.unread > 0) html += '<span class="vm-convo-badge">' + c.unread + '</span>';
-            html += '</div></div>';
+            html += '</div>';
+            html += '<button type="button" class="vm-convo-delete-btn" title="{% trans "Delete conversation" %}" aria-label="Delete conversation"><i class="fas fa-trash-alt"></i></button>';
+            html += '</div>';
         });
         list.innerHTML = html;
+        list.querySelectorAll('.vm-convo').forEach(function(el) {
+            var id = Number(el.dataset.id);
+            el.addEventListener('click', function() { vmOpenChat(id); });
+            el.querySelector('.vm-convo-delete-btn').addEventListener('click', function(e) {
+                e.stopPropagation();
+                vmDeleteConversationById(id);
+            });
+        });
     }
 
     window.vmOpenChat = function(id) {
@@ -441,6 +848,8 @@ html[data-theme="dark"] {
         activeId = id;
         renderList();
         syncUrl(id);
+        vmCancelReply();
+        vmCancelMedia();
 
         document.getElementById('vmPlaceholder').style.display = 'none';
         var thread = document.getElementById('vmThread');
@@ -451,9 +860,9 @@ html[data-theme="dark"] {
         var c = convos.find(function(x) { return Number(x.id) === id; });
         if (c) {
             document.getElementById('vmChatAvatar').textContent = c.buyer_avatar || 'U';
-            document.getElementById('vmChatName').textContent = c.buyer_name || 'Customer';
+            document.getElementById('vmChatName').textContent = c.buyer_name || '{% trans "Customer" %}';
             document.getElementById('vmChatSub').textContent = c.subject || '';
-            document.getElementById('vmChatStatus').textContent = c.is_closed ? 'Closed' : 'Active';
+            document.getElementById('vmChatStatus').textContent = c.is_closed ? '{% trans "Closed" %}' : '{% trans "Active" %}';
             document.getElementById('vmChatStatus').style.background = c.is_closed ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.12)';
             document.getElementById('vmChatStatus').style.color = c.is_closed ? '#dc2626' : '#059669';
         }
@@ -483,54 +892,84 @@ html[data-theme="dark"] {
                 if (!silent) loadConvos();
             })
             .catch(function() {
-                if (!silent) document.getElementById('vmMessages').innerHTML = '<div style="text-align:center;padding:20px;color:#ef4444;">Failed to load messages</div>';
+                if (!silent) document.getElementById('vmMessages').innerHTML = '<div style="text-align:center;padding:20px;color:#ef4444;">{% trans "Failed to load messages" %}</div>';
             });
     }
 
+    var _msgData = {};
+
     function renderMsgs(msgs) {
         var area = document.getElementById('vmMessages');
+        _msgData = {};
         if (!msgs.length) {
-            area.innerHTML = '<div style="text-align:center;padding:40px;color:var(--vm-text3);font-size:0.85rem;"><i class="fas fa-hand-wave" style="font-size:2rem;opacity:0.2;display:block;margin-bottom:10px;"></i>Start the conversation by typing a reply below</div>';
+            area.innerHTML = '<div style="text-align:center;padding:40px;color:var(--vm-text3);font-size:0.85rem;"><i class="fas fa-hand-wave" style="font-size:2rem;opacity:0.2;display:block;margin-bottom:10px;"></i>{% trans "Start the conversation by typing a reply below" %}</div>';
             return;
         }
-        var html = '', lastDate = '';
+        var html = '', lastDay = '';
         msgs.forEach(function(m) {
-            if (m.date !== lastDate) {
-                html += '<div class="vm-date-sep"><span>' + m.date + '</span></div>';
-                lastDate = m.date;
+            _msgData[m.id] = m;
+            var dk = dayKey(m.created_at);
+            if (dk !== lastDay) {
+                html += '<div class="vm-date-sep"><span>' + esc(fmtDateSep(m.created_at)) + '</span></div>';
+                lastDay = dk;
             }
             var isOut = m.sender_type === 'vendor';
-            html += '<div class="vm-bub-row ' + (isOut ? 'out' : 'in') + '">';
-            html += '<div class="vm-bub">' + esc(m.content);
-            html += '<div class="vm-bub-time">' + m.time;
+            html += '<div class="vm-bub-row ' + (isOut ? 'out' : 'in') + '" data-msg-id="' + m.id + '">';
+            if (m.is_recalled) {
+                html += '<div class="vm-bub vm-bub-recalled"><i class="fas fa-ban"></i> ' + (isOut ? '{% trans "You recalled this message" %}' : '{% trans "This message was deleted" %}') + '</div></div>';
+                return;
+            }
+            html += '<div class="vm-bub">';
+            if (m.reply_to) {
+                html += '<div class="vm-bub-quote"><div><div class="vm-bub-quote-name">' + esc(m.reply_to.sender_type === 'vendor' ? '{% trans "You" %}' : m.reply_to.sender_name) + '</div><div class="vm-bub-quote-text">' + esc(m.reply_to.content) + '</div></div></div>';
+            }
+            if (m.attachment_type === 'image' && m.attachment_url) {
+                html += '<img class="vm-bub-media" src="' + esc(m.attachment_url) + '" alt="" loading="lazy" onclick="vmOpenLightbox(\'' + esc(m.attachment_url) + '\',\'image\')">';
+            } else if (m.attachment_type === 'video' && m.attachment_url) {
+                html += '<video class="vm-bub-media" src="' + esc(m.attachment_url) + '" controls preload="metadata"></video>';
+            } else if (m.attachment_type === 'file' && m.attachment_url) {
+                html += '<a class="vm-bub-file" href="' + esc(m.attachment_url) + '" target="_blank" rel="noopener"><i class="fas fa-file-arrow-down"></i><span>' + esc(m.attachment_name || 'File') + '</span></a>';
+            }
+            if (m.content) html += esc(m.content);
+            html += '<div class="vm-bub-time"><span title="' + escA(fmtFullDateTime(m.created_at)) + '">' + fmtTime(m.created_at) + '</span>';
             if (isOut && m.is_read) html += '<span class="vm-bub-read"><i class="fas fa-check-double" style="color:rgba(255,255,255,0.8);"></i></span>';
-            html += '</div></div></div>';
+            html += '</div></div>';
+            html += '<button type="button" class="vm-bub-action-btn" onclick="vmOpenMsgMenu(event,' + m.id + ')" aria-label="{% trans "Message actions" %}"><i class="fas fa-chevron-down"></i></button>';
+            html += '</div>';
         });
         area.innerHTML = html;
         area.scrollTop = area.scrollHeight;
     }
 
+    /* ── Send message ──────────────────────────────────────────────── */
     window.vmSend = function() {
         if (sending) return;
         var input = document.getElementById('vmInput');
         var text = input.value.trim();
-        if (!text || activeId === null) return;
+        var file = _pendingFile;
+        if (!text && !file) return;
+        if (activeId === null) return;
 
         sending = true;
         document.getElementById('vmSendBtn').disabled = true;
         input.value = '';
         input.style.height = 'auto';
+        var replyToId = _replyToId;
+        vmCancelReply();
+        vmCancelMedia();
 
         var area = document.getElementById('vmMessages');
         var tmp = document.createElement('div');
         tmp.className = 'vm-bub-row out vm-sending';
-        tmp.innerHTML = '<div class="vm-bub">' + esc(text) + '<div class="vm-bub-time"><i class="fas fa-clock" style="font-size:0.55rem;opacity:0.6;"></i></div></div>';
+        tmp.innerHTML = '<div class="vm-bub">' + (text ? esc(text) : '{% trans "Sending attachment..." %}') + '<div class="vm-bub-time"><i class="fas fa-clock" style="font-size:0.55rem;opacity:0.6;"></i></div></div>';
         area.appendChild(tmp);
         area.scrollTop = area.scrollHeight;
 
         var fd = new FormData();
         fd.append('conversation_id', activeId);
         fd.append('content', text);
+        if (file) fd.append('attachment', file);
+        if (replyToId) fd.append('reply_to_id', replyToId);
 
         fetch('/manager/api/vendor/messages/send/', {
             method: 'POST', body: fd,
@@ -541,13 +980,13 @@ html[data-theme="dark"] {
         .then(function(data) {
             sending = false;
             document.getElementById('vmSendBtn').disabled = false;
+            tmp.remove();
             if (data.success) {
                 loadMsgs(activeId);
                 loadConvos();
             } else {
-                tmp.remove();
                 input.value = text;
-                toast(data.message || 'Failed to send');
+                toast(data.message || '{% trans "Failed to send" %}');
             }
         })
         .catch(function() {
@@ -555,7 +994,7 @@ html[data-theme="dark"] {
             document.getElementById('vmSendBtn').disabled = false;
             tmp.remove();
             input.value = text;
-            toast('Network error');
+            toast('{% trans "Network error" %}');
         });
     };
 
@@ -563,6 +1002,43 @@ html[data-theme="dark"] {
         if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); vmSend(); }
         var ta = e.target; ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
     };
+
+    // ── Emoji picker ────────────────────────────────────────
+    var VM_EMOJI = {
+        smileys: ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🥳','😏','😒','😞','😔','😟','😕','🙁','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😴','🤤','😪'],
+        gestures: ['👍','👎','👌','✌️','🤞','🤟','🤘','👏','🙌','👐','🤝','🙏','💪','🤲','👋','🤚','✋','👊','✊','☝️','👆','👇','👈','👉'],
+        hearts: ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','💕','💞','💓','💗','💖','💘','💝','💯'],
+        objects: ['📦','🛒','💰','💳','🎁','📱','💻','📷','🚚','⏰','📅','✅','❌','⭐','🔥','✨','🎉','👀','💡','📌','🔔','🏠','🛍️','💵']
+    };
+    window.vmToggleEmoji = function() {
+        var picker = document.getElementById('vmEmojiPicker');
+        if (picker.classList.contains('show')) { picker.classList.remove('show'); return; }
+        if (!picker.dataset.rendered) { vmShowEmojiCat('smileys', picker.querySelector('.vm-emoji-tab')); picker.dataset.rendered = '1'; }
+        picker.classList.add('show');
+    };
+    window.vmShowEmojiCat = function(cat, btn) {
+        document.querySelectorAll('#vmEmojiPicker .vm-emoji-tab').forEach(function(t) { t.classList.toggle('active', t === btn); });
+        var grid = document.getElementById('vmEmojiGrid');
+        grid.innerHTML = VM_EMOJI[cat].map(function(e) {
+            return '<button type="button" class="vm-emoji-item" onclick="vmInsertEmoji(\'' + e + '\')">' + e + '</button>';
+        }).join('');
+    };
+    window.vmInsertEmoji = function(emoji) {
+        var input = document.getElementById('vmInput');
+        var start = input.selectionStart || 0, end = input.selectionEnd || 0;
+        var text = input.value;
+        input.value = text.slice(0, start) + emoji + text.slice(end);
+        var newPos = start + emoji.length;
+        input.setSelectionRange(newPos, newPos);
+        input.focus();
+        input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+    };
+    document.addEventListener('click', function(e) {
+        var picker = document.getElementById('vmEmojiPicker');
+        if (!picker || !picker.classList.contains('show')) return;
+        if (picker.contains(e.target) || e.target.closest('[onclick="vmToggleEmoji()"]')) return;
+        picker.classList.remove('show');
+    });
 
     window.vmFilter = function(q) {
         q = (q || '').toLowerCase();
@@ -581,7 +1057,7 @@ html[data-theme="dark"] {
         var msg = (document.getElementById('newConvoMessage').value || '').trim();
         var err = document.getElementById('newConvoError');
         err.style.display = 'none';
-        if (!email || !msg) { err.textContent = 'Email and message are required'; err.style.display = 'block'; return; }
+        if (!email || !msg) { err.textContent = '{% trans "Email and message are required" %}'; err.style.display = 'block'; return; }
         var fd = new FormData();
         fd.append('buyer_email', email);
         fd.append('subject', subject);
@@ -601,15 +1077,356 @@ html[data-theme="dark"] {
                 loadConvos();
                 setTimeout(function() { vmOpenChat(data.conversation_id); }, 400);
             } else {
-                err.textContent = data.message || 'Failed';
+                err.textContent = data.message || '{% trans "Failed" %}';
                 err.style.display = 'block';
             }
         })
-        .catch(function() { err.textContent = 'Network error'; err.style.display = 'block'; });
+        .catch(function() { err.textContent = '{% trans "Network error" %}'; err.style.display = 'block'; });
     };
 
+    /* ── Auto-reply settings (welcome / away / keyword rules) ───────── */
+    window.vmOpenAutoReply = function() {
+        new bootstrap.Modal(document.getElementById('autoReplyModal')).show();
+        vmLoadAutoReplySettings();
+        vmLoadKeywords();
+    };
+    function vmLoadAutoReplySettings() {
+        fetch('/manager/api/vendor/auto-reply/settings/', { credentials: 'same-origin' })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var s = data.settings || {};
+                document.getElementById('arWelcomeEnabled').checked = !!s.welcome_enabled;
+                document.getElementById('arWelcomeMessage').value = s.welcome_message || '';
+                document.getElementById('arAwayEnabled').checked = !!s.away_enabled;
+                document.getElementById('arAwayMessage').value = s.away_message || '';
+                document.getElementById('arAwayDelay').value = s.away_delay_minutes || 5;
+            });
+    }
+    function vmRenderKeywords(list) {
+        var box = document.getElementById('arKeywordList');
+        if (!list.length) { box.innerHTML = '<p class="ar-hint" style="margin:0;">{% trans "No keyword rules yet." %}</p>'; return; }
+        box.innerHTML = list.map(function(k) {
+            return '<div class="ar-keyword-row" data-id="' + k.id + '">' +
+                '<div class="ar-keyword-row-body">' +
+                    '<div class="ar-keyword-row-kw">' + esc(k.keywords) + '</div>' +
+                    '<div class="ar-keyword-row-reply">' + esc(k.reply_message) + '</div>' +
+                '</div>' +
+                '<div class="ar-keyword-row-actions">' +
+                    '<button type="button" onclick="vmToggleKeyword(' + k.id + ',' + (!k.is_active) + ')" title="' + (k.is_active ? '{% trans "Deactivate" %}' : '{% trans "Activate" %}') + '"><i class="fas ' + (k.is_active ? 'fa-toggle-on' : 'fa-toggle-off') + '"></i></button>' +
+                    '<button type="button" class="danger" onclick="vmDeleteKeyword(' + k.id + ')" title="{% trans "Delete" %}"><i class="fas fa-trash-alt"></i></button>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+    }
+    function vmLoadKeywords() {
+        fetch('/manager/api/vendor/auto-reply/keywords/', { credentials: 'same-origin' })
+            .then(function(r) { return r.json(); })
+            .then(function(data) { vmRenderKeywords(data.keywords || []); });
+    }
+    window.vmAddKeyword = function() {
+        var kw = (document.getElementById('arNewKeywords').value || '').trim();
+        var reply = (document.getElementById('arNewReply').value || '').trim();
+        var err = document.getElementById('arError');
+        err.style.display = 'none';
+        if (!kw || !reply) { err.textContent = '{% trans "Keywords and reply message are required" %}'; err.style.display = 'block'; return; }
+        var fd = new FormData();
+        fd.append('keywords', kw);
+        fd.append('reply_message', reply);
+        fetch('/manager/api/vendor/auto-reply/keywords/', {
+            method: 'POST', body: fd, headers: { 'X-CSRFToken': csrf() }, credentials: 'same-origin'
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                document.getElementById('arNewKeywords').value = '';
+                document.getElementById('arNewReply').value = '';
+                vmLoadKeywords();
+            } else {
+                err.textContent = data.message || '{% trans "Failed" %}';
+                err.style.display = 'block';
+            }
+        })
+        .catch(function() { err.textContent = '{% trans "Network error" %}'; err.style.display = 'block'; });
+    };
+    window.vmToggleKeyword = function(id, newActive) {
+        var fd = new FormData();
+        fd.append('is_active', newActive ? '1' : '0');
+        fetch('/manager/api/vendor/auto-reply/keywords/' + id + '/update/', {
+            method: 'POST', body: fd, headers: { 'X-CSRFToken': csrf() }, credentials: 'same-origin'
+        }).then(function() { vmLoadKeywords(); });
+    };
+    window.vmDeleteKeyword = function(id) {
+        fetch('/manager/api/vendor/auto-reply/keywords/' + id + '/delete/', {
+            method: 'POST', headers: { 'X-CSRFToken': csrf() }, credentials: 'same-origin'
+        }).then(function() { vmLoadKeywords(); });
+    };
+    window.vmSaveAutoReply = function() {
+        var fd = new FormData();
+        fd.append('welcome_enabled', document.getElementById('arWelcomeEnabled').checked ? '1' : '0');
+        fd.append('welcome_message', document.getElementById('arWelcomeMessage').value || '');
+        fd.append('away_enabled', document.getElementById('arAwayEnabled').checked ? '1' : '0');
+        fd.append('away_message', document.getElementById('arAwayMessage').value || '');
+        fd.append('away_delay_minutes', document.getElementById('arAwayDelay').value || '5');
+        fetch('/manager/api/vendor/auto-reply/settings/', {
+            method: 'POST', body: fd, headers: { 'X-CSRFToken': csrf() }, credentials: 'same-origin'
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                bootstrap.Modal.getInstance(document.getElementById('autoReplyModal')).hide();
+                toast('{% trans "Auto-reply settings saved" %}');
+            }
+        });
+    };
+
+    /* ── Header dropdown (mark read / delete conversation) ─────────── */
+    window.vmToggleDropdown = function() {
+        document.getElementById('vmDropdown').classList.toggle('show');
+    };
+    window.vmCloseDropdown = function() {
+        document.getElementById('vmDropdown').classList.remove('show');
+    };
+    document.addEventListener('click', function(e) {
+        var menu = document.getElementById('vmDropdown');
+        var btn = document.getElementById('vmMenuBtn');
+        if (menu && btn && menu.classList.contains('show') && !menu.contains(e.target) && !btn.contains(e.target)) {
+            menu.classList.remove('show');
+        }
+    });
+    window.vmMarkAllRead = function() {
+        vmCloseDropdown();
+        if (activeId === null) return;
+        fetch('/manager/api/vendor/conversations/' + activeId + '/mark_read/', {
+            method: 'POST', headers: { 'X-CSRFToken': csrf() }, credentials: 'same-origin'
+        }).then(function(r) { return r.json(); }).then(function(data) {
+            if (data.success) { loadConvos(); loadMsgs(activeId); }
+        }).catch(function() {});
+    };
+
+    /* ── Delete conversation ─────────────────────────────────────────── */
+    window.vmDeleteConversationById = function(id) {
+        gConfirm('{% trans "Delete this conversation? This only removes it from your list." %}', function() {
+            fetch('/manager/api/vendor/conversations/' + id + '/delete/', {
+                method: 'POST', headers: { 'X-CSRFToken': csrf() }, credentials: 'same-origin'
+            }).then(function(r) { return r.json(); }).then(function(data) {
+                if (data.success) {
+                    convos = convos.filter(function(c) { return c.id !== id; });
+                    renderList();
+                    if (activeId === id) vmCloseChat();
+                    toast('{% trans "Conversation deleted" %}', 'success');
+                } else {
+                    toast(data.message || '{% trans "Failed" %}');
+                }
+            }).catch(function() { toast('{% trans "Network error" %}'); });
+        }, {danger: true, okText: '{% trans "Delete" %}'});
+    };
+    window.vmDeleteConversation = function() {
+        vmCloseDropdown();
+        if (activeId !== null) vmDeleteConversationById(activeId);
+    };
+
+    /* ── Reply / quote ──────────────────────────────────────────────── */
+    window.vmStartReply = function(m) {
+        _replyToId = m.id;
+        _replyToBrief = m;
+        var name = m.sender_type === 'vendor' ? '{% trans "You" %}' : (document.getElementById('vmChatName').textContent);
+        var text = m.content || (m.attachment_type === 'image' ? '📷 {% trans "Photo" %}' : m.attachment_type === 'video' ? '🎥 {% trans "Video" %}' : m.attachment_type === 'file' ? '📎 {% trans "File" %}' : '');
+        document.getElementById('vmReplyBannerName').textContent = name;
+        document.getElementById('vmReplyBannerText').textContent = text;
+        document.getElementById('vmReplyBanner').style.display = 'flex';
+        document.getElementById('vmInput').focus();
+    };
+    window.vmCancelReply = function() {
+        _replyToId = null;
+        _replyToBrief = null;
+        document.getElementById('vmReplyBanner').style.display = 'none';
+    };
+
+    /* ── Attachments (image / video / file) ─────────────────────────── */
+    var VM_ATTACH_MAX = {image: 10*1024*1024, video: 50*1024*1024, file: 20*1024*1024};
+    window.vmPickFile = function() { document.getElementById('vmFileInput').click(); };
+    window.vmOnFileSelected = function(evt) {
+        var file = evt.target.files && evt.target.files[0];
+        evt.target.value = '';
+        if (!file) return;
+        var isImage = file.type.indexOf('image') === 0;
+        var isVideo = file.type.indexOf('video') === 0;
+        var kind = isImage ? 'image' : isVideo ? 'video' : 'file';
+        if (file.size > VM_ATTACH_MAX[kind]) {
+            toast('{% trans "File too large" %} (max ' + Math.round(VM_ATTACH_MAX[kind]/1024/1024) + 'MB)');
+            return;
+        }
+        _pendingFile = file;
+        var preview = document.getElementById('vmMediaPreview');
+        var thumb = document.getElementById('vmMediaPreviewThumb');
+        if (isImage) thumb.innerHTML = '<img src="' + URL.createObjectURL(file) + '">';
+        else if (isVideo) thumb.innerHTML = '<video src="' + URL.createObjectURL(file) + '"></video>';
+        else thumb.innerHTML = '<i class="fas fa-file"></i>';
+        document.getElementById('vmMediaPreviewName').textContent = file.name;
+        preview.style.display = 'flex';
+        document.getElementById('vmInput').focus();
+    };
+    window.vmCancelMedia = function() {
+        _pendingFile = null;
+        document.getElementById('vmMediaPreview').style.display = 'none';
+        document.getElementById('vmMediaPreviewThumb').innerHTML = '';
+    };
+
+    /* ── Listing picker (send a link to my own catalog) ─────────────── */
+    window.vmShowListingPicker = function() {
+        document.getElementById('listingSearchInput').value = '';
+        document.getElementById('listingResults').innerHTML = '<div style="text-align:center;padding:16px;color:var(--vm-text3);font-size:0.82rem;">{% trans "Type to search your catalog" %}</div>';
+        new bootstrap.Modal(document.getElementById('listingPickerModal')).show();
+    };
+    window.vmSearchListings = function(q) {
+        clearTimeout(_listingSearchTimer);
+        _listingSearchTimer = setTimeout(function() {
+            fetch('/manager/api/vendor/listings/?q=' + encodeURIComponent(q || ''), { credentials: 'same-origin' })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    var list = data.listings || [];
+                    var box = document.getElementById('listingResults');
+                    if (!list.length) {
+                        box.innerHTML = '<div style="text-align:center;padding:16px;color:var(--vm-text3);font-size:0.82rem;">{% trans "No matching listings" %}</div>';
+                        return;
+                    }
+                    box.innerHTML = list.map(function(item) {
+                        var price = item.price ? Math.round(parseFloat(item.price) || 0).toLocaleString('fr-FR') + ' FCFA' : '';
+                        return '<div class="vm-listing-item" onclick="vmSendListingLink(\'' + escA(item.name) + '\',\'' + escA(item.url) + '\')">' +
+                            '<img src="' + esc(item.image || '/static/img/default_product.png') + '">' +
+                            '<div style="flex:1;min-width:0;">' +
+                            '<div class="vm-listing-item-type">' + esc(item.type) + '</div>' +
+                            '<div class="vm-listing-item-name">' + esc(item.name) + '</div>' +
+                            '<div class="vm-listing-item-price">' + esc(price) + '</div>' +
+                            '</div></div>';
+                    }).join('');
+                })
+                .catch(function() {});
+        }, 250);
+    };
+    window.vmSendListingLink = function(name, url) {
+        var full = window.location.origin + url;
+        bootstrap.Modal.getInstance(document.getElementById('listingPickerModal')).hide();
+        var input = document.getElementById('vmInput');
+        input.value = name + ': ' + full;
+        vmSend();
+    };
+
+    /* ── Per-message action menu ──────────────────────────────────────── */
+    window.vmOpenMsgMenu = function(evt, msgId) {
+        evt.stopPropagation();
+        var m = _msgData[msgId];
+        if (!m) return;
+        _msgMenuTargetId = msgId;
+        var menu = document.getElementById('vmMsgMenu');
+        document.getElementById('vmMsgMenuRecall').style.display = m.can_recall ? 'flex' : 'none';
+        document.getElementById('vmMsgMenuDelete').style.display = m.can_delete_for_me ? 'flex' : 'none';
+        var btn = evt.currentTarget;
+        var btnRect = btn.getBoundingClientRect();
+        var hostRect = document.getElementById('vmHost').getBoundingClientRect();
+        var itemCount = 1 + (m.can_recall ? 1 : 0) + (m.can_delete_for_me ? 1 : 0);
+        var estMenuHeight = itemCount * 40 + 6;
+        var spaceBelow = hostRect.bottom - btnRect.bottom;
+        if (spaceBelow < estMenuHeight + 10) {
+            menu.style.bottom = (hostRect.bottom - btnRect.top + 4) + 'px';
+            menu.style.top = 'auto';
+        } else {
+            menu.style.top = (btnRect.bottom - hostRect.top + 4) + 'px';
+            menu.style.bottom = 'auto';
+        }
+        if (m.sender_type === 'vendor') {
+            menu.style.right = (hostRect.right - btnRect.right) + 'px';
+            menu.style.left = 'auto';
+        } else {
+            menu.style.left = (btnRect.left - hostRect.left) + 'px';
+            menu.style.right = 'auto';
+        }
+        menu.classList.add('show');
+    };
+    window.vmMsgMenuAction = function(action) {
+        document.getElementById('vmMsgMenu').classList.remove('show');
+        var id = _msgMenuTargetId;
+        if (!id) return;
+        var m = _msgData[id];
+        if (action === 'reply' && m) vmStartReply(m);
+        else if (action === 'recall') vmRecallMessage(id);
+        else if (action === 'delete') vmDeleteMessageForMe(id);
+    };
+    document.addEventListener('click', function(e) {
+        var menu = document.getElementById('vmMsgMenu');
+        if (menu && menu.classList.contains('show') && !menu.contains(e.target)) menu.classList.remove('show');
+    });
+
+    window.vmRecallMessage = function(id) {
+        gConfirm('{% trans "Recall this message? It will be removed for everyone." %}', function() {
+            fetch('/manager/api/vendor/messages/' + id + '/recall/', {
+                method: 'POST', headers: { 'X-CSRFToken': csrf() }, credentials: 'same-origin'
+            }).then(function(r) { return r.json(); }).then(function(data) {
+                if (data.success) { loadMsgs(activeId); loadConvos(); }
+                else toast(data.message || '{% trans "Failed" %}');
+            }).catch(function() { toast('{% trans "Network error" %}'); });
+        }, {danger: true, okText: '{% trans "Recall" %}'});
+    };
+    window.vmDeleteMessageForMe = function(id) {
+        gConfirm('{% trans "Delete this message for you? The customer will still see it." %}', function() {
+            fetch('/manager/api/vendor/messages/' + id + '/delete_for_me/', {
+                method: 'POST', headers: { 'X-CSRFToken': csrf() }, credentials: 'same-origin'
+            }).then(function(r) { return r.json(); }).then(function(data) {
+                if (data.success) { loadMsgs(activeId); loadConvos(); }
+                else toast(data.message || '{% trans "Failed" %}');
+            }).catch(function() { toast('{% trans "Network error" %}'); });
+        }, {danger: true, okText: '{% trans "Delete" %}'});
+    };
+
+    /* ── Lightbox ─────────────────────────────────────────────────────── */
+    window.vmOpenLightbox = function(url, type) {
+        var box = document.getElementById('vmLightbox');
+        document.getElementById('vmLightboxContent').innerHTML = type === 'video'
+            ? '<video src="' + url + '" controls autoplay></video>'
+            : '<img src="' + url + '">';
+        box.classList.add('show');
+    };
+    window.vmCloseLightbox = function(evt) {
+        if (evt) evt.stopPropagation();
+        document.getElementById('vmLightbox').classList.remove('show');
+        document.getElementById('vmLightboxContent').innerHTML = '';
+    };
+
+    /* ── Tiny local confirm modal (matches admin panel g-modal style) ── */
+    function gConfirm(message, onConfirm, opts) {
+        opts = opts || {};
+        var overlay = document.getElementById('vmConfirmOverlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'vmConfirmOverlay';
+            overlay.style.cssText = 'display:flex;position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:10000;justify-content:center;align-items:center;';
+            overlay.innerHTML = '<div style="background:#fff;border-radius:20px;padding:32px;max-width:380px;width:90%;text-align:center;box-shadow:0 25px 60px rgba(0,0,0,0.3);">' +
+                '<div id="vmConfirmIcon" style="width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:24px;"><i class="fas fa-question"></i></div>' +
+                '<p id="vmConfirmMsg" style="color:#334155;margin-bottom:22px;line-height:1.6;"></p>' +
+                '<div style="display:flex;gap:10px;justify-content:center;">' +
+                '<button id="vmConfirmCancel" style="padding:9px 24px;border-radius:10px;border:none;font-weight:600;cursor:pointer;background:#f1f5f9;color:#64748b;">{% trans "Cancel" %}</button>' +
+                '<button id="vmConfirmOk" style="padding:9px 24px;border-radius:10px;border:none;font-weight:600;cursor:pointer;color:#fff;"></button>' +
+                '</div></div>';
+            document.body.appendChild(overlay);
+        }
+        overlay.style.display = 'flex';
+        document.getElementById('vmConfirmMsg').textContent = message;
+        var icon = document.getElementById('vmConfirmIcon');
+        var okBtn = document.getElementById('vmConfirmOk');
+        icon.style.background = opts.danger ? '#fee2e2' : '#e0e7ff';
+        icon.style.color = opts.danger ? '#ef4444' : '#6366f1';
+        okBtn.style.background = opts.danger ? 'linear-gradient(135deg,#ef4444,#dc2626)' : 'linear-gradient(135deg,#6366f1,#8b5cf6)';
+        okBtn.textContent = opts.okText || '{% trans "Confirm" %}';
+        function close() { overlay.style.display = 'none'; okBtn.onclick = null; document.getElementById('vmConfirmCancel').onclick = null; }
+        okBtn.onclick = function() { close(); onConfirm(); };
+        document.getElementById('vmConfirmCancel').onclick = close;
+    }
+
     loadConvos();
-    setTimeout(function() { var d = urlConvoId(); if (d) vmOpenChat(d); }, 100);
+    // NOTE: the deep link (?conversation=) is applied inside loadConvos()'s
+    // success handler once the list has actually loaded — see above. A
+    // separate timer here would race the fetch and could open a chat before
+    // its data exists.
 })();
 </script>
 {% endblock %}

@@ -341,9 +341,42 @@
     }
     .pmp-gallery img { width: 100%; height: 100%; object-fit: contain; scroll-snap-align: center; flex: 0 0 100%; }
     .pmp-gallery-counter { position: absolute; bottom: 12px; right: 14px; background: rgba(0,0,0,.55); color: #fff; font-size: 11px; padding: 3px 10px; border-radius: 10px; z-index: 10; }
-    .pmp-info { background: #fff; padding: 15px; margin-bottom: 12px; }
-    .pmp-price { color: #ef4444; font-size: 1.8rem; font-weight: 800; }
-    .pmp-title { font-size: 1.15rem; font-weight: 700; color: #1e293b; margin: 10px 0 0; }
+    /* Desktop grocery service highlights band */
+    .sup-service-band {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin: 4px 0 22px;
+        padding: 16px;
+        background: linear-gradient(135deg, #f0fdf4 0%, #eff6ff 100%);
+        border: 1px solid #dcfce7;
+        border-radius: 16px;
+    }
+    .sup-service-item { display: flex; align-items: center; gap: 12px; }
+    .sup-service-item i {
+        font-size: 1.1rem; width: 40px; height: 40px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 12px; color: #fff;
+        background: linear-gradient(135deg, #10b981, #059669);
+    }
+    .sup-service-item:nth-child(1) i { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .sup-service-item:nth-child(2) i { background: linear-gradient(135deg, #0ea5e9, #0284c7); }
+    .sup-service-item:nth-child(4) i { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+    .sup-service-item strong { display: block; font-size: 0.9rem; color: #1e293b; }
+    .sup-service-item span { font-size: 0.78rem; color: #64748b; }
+    html[data-theme="dark"] .sup-service-band { background: rgba(16,185,129,0.06); border-color: rgba(16,185,129,0.18); }
+    html[data-theme="dark"] .sup-service-item strong { color: var(--text-primary, #e2e8f0); }
+    .pmp-info { background: #fff; padding: 13px 15px 14px; margin-bottom: 6px; }
+    .pmp-title { font-size: 1.05rem; font-weight: 700; color: #1e293b; margin: 0; line-height: 1.35; }
+    /* Orange price bar — matches the marketplace product detail page */
+    .pmp-price-section { background: linear-gradient(135deg, #E4393C, #ff7a45); padding: 14px 15px 12px; margin-bottom: 6px; }
+    .pmp-price-main { font-size: 28px; font-weight: 800; color: #fff; line-height: 1; }
+    .pmp-price-main .pmp-unit { font-size: 14px; font-weight: 600; opacity: .85; }
+    .pmp-price-original { font-size: 13px; color: rgba(255,255,255,.7); text-decoration: line-through; margin-left: 8px; }
+    .pmp-price-sold { font-size: 12px; color: rgba(255,255,255,.85); }
+    .pmp-price-badges { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+    .pmp-low-badge { display: inline-block; font-size: 10px; font-weight: 700; color: #fff; background: rgba(255,255,255,.22); border: 1px solid rgba(255,255,255,.35); padding: 2px 8px; border-radius: 6px; }
+    .pmp-discount-flag { display: inline-block; font-size: 11px; font-weight: 800; color: #E4393C; background: #fff; padding: 2px 8px; border-radius: 6px; }
     .pmp-reviews-zone {
         background: #fff;
         padding: 0;
@@ -587,8 +620,23 @@
     {% if item.image_2 or item.image_3 %}
     <div class="pmp-gallery-counter" id="pmpCounter">1/{% if item.image_3 %}3{% else %}2{% endif %}</div>
     {% endif %}
+    <!-- Orange price bar -->
+    <div class="pmp-price-section">
+        <div class="d-flex align-items-baseline">
+            <div class="pmp-price-main">{{ item.price|fcfa }}<span class="pmp-unit"> / {{ item.get_unit_display }}</span></div>
+            {% if item.original_price %}<div class="pmp-price-original">{{ item.original_price|fcfa }}</div>{% endif %}
+            <div class="pmp-price-sold ms-auto">{% trans "已售" %} {{ sold_delivered }}+</div>
+        </div>
+        <div class="pmp-price-badges">
+            {% if item.get_discount_percent %}<span class="pmp-discount-flag">-{{ item.get_discount_percent }}%</span>{% endif %}
+            <span class="pmp-low-badge">{% trans "当日/次日达" %}</span>
+            <span class="pmp-low-badge">{% trans "新鲜保证" %}</span>
+            {% if item.is_organic %}<span class="pmp-low-badge">🌿 {% trans "有机" %}</span>{% endif %}
+        </div>
+    </div>
+
+    <!-- Title -->
     <div class="pmp-info">
-        <div class="pmp-price">{{ item.price|fcfa }}</div>
         <h1 class="pmp-title">{{ item.name }}</h1>
     </div>
 
@@ -598,20 +646,20 @@
         {% endwith %}
     </div>
 
-    <!-- Delivery Section -->
+    <!-- Delivery Section (grocery: same/next-day) -->
     <div class="pmp-delivery-section">
         <div class="pmp-delivery-row">
-            <i class="fas fa-truck"></i>
-            <span><span class="pmp-delivery-highlight">{% trans "同城配送" %}</span> · {% trans "预计" %} <strong>1-2 {% trans "天" %}</strong> {% trans "送达" %}</span>
+            <i class="fas fa-bolt"></i>
+            <span><span class="pmp-delivery-highlight">{% trans "当日达 / 次日达" %}</span> · {% trans "今天下单，最快" %} <strong>{% trans "当天送达" %}</strong></span>
             <i class="fas fa-chevron-right ms-auto" style="font-size:10px;color:#ccc;"></i>
         </div>
         <div class="pmp-delivery-row">
-            <i class="fas fa-map-marker-alt"></i>
-            <span>{% trans "发货地" %} <strong>{% trans "达喀尔仓库" %}</strong> · <span class="pmp-delivery-highlight">{% trans "包邮" %}</span></span>
+            <i class="fas fa-snowflake"></i>
+            <span>{% trans "生鲜冷链配送" %} · <span class="pmp-delivery-highlight">{% trans "全程保鲜" %}</span></span>
         </div>
         <div class="pmp-delivery-row">
-            <i class="fas fa-shield-alt"></i>
-            <span>{% trans "品质保障" %} · {% trans "DUNO平台保障" %}</span>
+            <i class="fas fa-leaf"></i>
+            <span>{% trans "新鲜直采" %}{% if item.origin %} · {% trans "产地" %} <strong>{{ item.origin }}</strong>{% endif %}</span>
         </div>
     </div>
 
@@ -802,6 +850,26 @@
                     <span style="font-size:1rem; color:#94a3b8; text-decoration:line-through; margin-left:10px;">{{ item.original_price|fcfa }}</span>
                     <span class="badge ms-2" style="background:linear-gradient(135deg,#ef4444,#f97316);">-{{ item.get_discount_percent }}%</span>
                     {% endif %}
+                </div>
+
+                <!-- Grocery service highlights -->
+                <div class="sup-service-band">
+                    <div class="sup-service-item">
+                        <i class="fas fa-bolt"></i>
+                        <div><strong>{% trans "当日达 / 次日达" %}</strong><span>{% trans "最快当天送达" %}</span></div>
+                    </div>
+                    <div class="sup-service-item">
+                        <i class="fas fa-snowflake"></i>
+                        <div><strong>{% trans "冷链保鲜" %}</strong><span>{% trans "全程温控配送" %}</span></div>
+                    </div>
+                    <div class="sup-service-item">
+                        <i class="fas fa-leaf"></i>
+                        <div><strong>{% trans "新鲜直采" %}</strong><span>{% trans "每日精选好货" %}</span></div>
+                    </div>
+                    <div class="sup-service-item">
+                        <i class="fas fa-shield-alt"></i>
+                        <div><strong>{% trans "品质保障" %}</strong><span>{% trans "不满意可退" %}</span></div>
+                    </div>
                 </div>
 
                 <div class="mb-4">

@@ -236,6 +236,23 @@
     .bmp-buy-btn { background: linear-gradient(135deg, #f093fb, #f5576c); color: #fff; }
 
     /* Course mobile lesson list */
+    /* Mobile "This course includes" grid */
+    .cmi-section { background: #fff; margin-bottom: 6px; padding: 12px 14px; }
+    .cmi-title { font-size: 13px; font-weight: 700; color: #333; margin-bottom: 10px; }
+    .cmi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; }
+    .cmi-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #555; }
+    .cmi-item i { color: #7c3aed; width: 16px; text-align: center; flex-shrink: 0; }
+    html[data-theme="dark"] .cmi-section { background: var(--bg-surface, #1e293b); }
+    html[data-theme="dark"] .cmi-title { color: var(--text-primary, #e2e8f0); }
+    html[data-theme="dark"] .cmi-item { color: var(--text-secondary, #cbd5e1); }
+    /* Desktop "This course includes" box */
+    .course-includes { margin: 16px 0; padding: 16px; border: 1px solid #ede9fe; border-radius: 12px; background: #faf5ff; }
+    .course-includes-title { font-size: 0.95rem; font-weight: 800; color: #1e293b; margin-bottom: 12px; }
+    .course-includes-item { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: #475569; padding: 5px 0; }
+    .course-includes-item i { color: #7c3aed; width: 18px; text-align: center; flex-shrink: 0; }
+    html[data-theme="dark"] .course-includes { background: rgba(124,58,237,0.08); border-color: rgba(124,58,237,0.2); }
+    html[data-theme="dark"] .course-includes-title { color: var(--text-primary, #e2e8f0); }
+    html[data-theme="dark"] .course-includes-item { color: var(--text-secondary, #cbd5e1); }
     .cml-section { background: #fff; margin-bottom: 6px; }
     .cml-header { padding: 12px 14px; font-size: 13px; font-weight: 700; color: #333; border-bottom: 1px solid #f5f5f5; display: flex; justify-content: space-between; }
     .cml-lesson { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid #fafafa; text-decoration: none; color: inherit; }
@@ -483,6 +500,19 @@
 
     <!-- E. Guarantee -->
     <div class="bmp-guarantee"><i class="fas fa-shield-alt"></i><span>{% trans "品质保障" %} | <strong>{% trans "七天退款" %}</strong> | {% trans "结业证书" %}</span></div>
+
+    <!-- E2. This course includes -->
+    <div class="cmi-section">
+        <div class="cmi-title">{% trans "本课程包含" %}</div>
+        <div class="cmi-grid">
+            <div class="cmi-item"><i class="fas fa-play-circle"></i>{{ course.duration_hours }}h {% trans "点播视频" %}</div>
+            <div class="cmi-item"><i class="fas fa-book-open"></i>{{ course.lessons_count }} {% trans "个课节" %}</div>
+            <div class="cmi-item"><i class="fas fa-mobile-alt"></i>{% trans "手机/电脑学习" %}</div>
+            <div class="cmi-item"><i class="fas fa-infinity"></i>{% trans "永久访问" %}</div>
+            <div class="cmi-item"><i class="fas fa-certificate"></i>{% trans "结业证书" %}</div>
+            <div class="cmi-item"><i class="fas fa-language"></i>{{ course.language }}</div>
+        </div>
+    </div>
 
     <!-- F. Specs -->
     <div class="bmp-specs-section">
@@ -759,6 +789,16 @@
                     <span class="ms-1">{{ course.rating }}</span>
                 </div>
                 {% endif %}
+
+                <!-- This course includes (Udemy-style) -->
+                <div class="course-includes">
+                    <div class="course-includes-title">{% trans "本课程包含" %}</div>
+                    <div class="course-includes-item"><i class="fas fa-play-circle"></i>{{ course.duration_hours }}h {% trans "点播视频" %}</div>
+                    <div class="course-includes-item"><i class="fas fa-book-open"></i>{{ course.lessons_count }} {% trans "个课节" %}</div>
+                    <div class="course-includes-item"><i class="fas fa-mobile-alt"></i>{% trans "手机与电脑均可学习" %}</div>
+                    <div class="course-includes-item"><i class="fas fa-infinity"></i>{% trans "永久访问权限" %}</div>
+                    <div class="course-includes-item"><i class="fas fa-certificate"></i>{% trans "完成后获得结业证书" %}</div>
+                </div>
 
                 {% if seller_vendor %}
                 {% include 'marketplace/includes/desktop_social_zone.html' with review_block_uid='course-desk' seller_vendor=seller_vendor seller_item_name=course.title listing_kind='course' listing_id=course.id seller_card_variant='sidebar' %}

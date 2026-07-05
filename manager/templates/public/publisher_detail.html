@@ -9,7 +9,6 @@
 :root { --primary-color: #1d4ed8; --secondary-color: #14245f; }
 .publisher-hero {
     background:
-        linear-gradient(180deg, transparent 72%, #f8f9ff 100%),
         radial-gradient(circle at 18% 18%, rgba(96,165,250,.30), transparent 24%),
         radial-gradient(circle at 84% 18%, rgba(14,165,233,.16), transparent 22%),
         linear-gradient(135deg, #14245f 0%, #1d4ed8 100%);
@@ -70,13 +69,43 @@
 
 /* ===== Mobile Publisher Detail (≤768px) ===== */
 @media (max-width: 768px) {
-    .publisher-hero { padding: 28px 0 36px; }
+    /* Simple, modern hero: clean navy gradient, flat corners, thin accent line */
+    .publisher-hero {
+        padding: 24px 0 30px;
+        text-align: center;
+        border-radius: 0 0 22px 22px;
+        box-shadow: 0 14px 34px rgba(20,36,95,.26);
+    }
+    .publisher-hero::before,
+    .publisher-hero::after { display: none; }
+    .publisher-hero .container::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #22d3ee 0%, #ffd54a 55%, transparent 100%);
+        opacity: .85;
+    }
     .publisher-hero + div[style*="margin-top:-30px"] { margin-top: -22px !important; }
-    .publisher-hero h1 { font-size: 1.4rem !important; line-height: 1.3; }
-    .pub-logo { width: 64px; height: 64px; border-radius: 16px; }
-    .pub-logo i { font-size: 1.6rem !important; }
-    .publisher-hero .breadcrumb { font-size: 0.7rem; }
-    .publisher-hero span { font-size: 0.75rem !important; padding: 3px 10px !important; }
+    .publisher-hero h1 { font-size: 1.35rem !important; line-height: 1.3; margin-bottom: 10px !important; }
+    /* Hide breadcrumb clutter on mobile — the back button covers navigation */
+    .publisher-hero .breadcrumb { display: none; }
+    /* Stack + center: logo on top, then title, meta, follow */
+    .publisher-hero .d-flex.align-items-center.gap-4 {
+        flex-direction: column; gap: 12px !important; text-align: center;
+    }
+    .pub-logo {
+        width: 64px; height: 64px; border-radius: 18px; margin: 0 auto;
+        border-width: 2px;
+        box-shadow: none;
+    }
+    .pub-logo i { font-size: 1.7rem !important; }
+    /* One clean meta row, centered */
+    .publisher-hero .d-flex.flex-wrap.gap-2 { justify-content: center; }
+    /* Drop the address pill on mobile (shown in the info card below) */
+    .publisher-hero .d-flex.flex-wrap.gap-2.mb-2 { display: none !important; }
+    .publisher-hero span { font-size: 0.72rem !important; padding: 4px 12px !important; }
+    .pub-follow-btn { width: 100%; justify-content: center; margin-top: 6px; padding: 11px 22px; }
 
     .stat-value { font-size: 0.95rem; word-break: break-word; line-height: 1.15; }
     .stat-label { font-size: 0.62rem; line-height: 1.2; }

@@ -258,12 +258,12 @@
         .hero-mail { width: 160px; height: 160px; }
         .hero-mail-icon { font-size: 2.5rem; }
 
-        /* Info cards: 2x2 grid feel */
-        .info-card { padding: 28px 16px 24px; border-radius: 20px; }
-        .info-ico { width: 56px; height: 56px; border-radius: 16px; margin-bottom: 14px; }
-        .info-ico i { font-size: 1.4rem; }
-        .info-card h5 { font-size: 0.95rem; }
-        .info-card p { font-size: 0.85rem; }
+        /* Info cards: true 2×2 grid on mobile */
+        .info-card { padding: 22px 12px 20px; border-radius: 18px; }
+        .info-ico { width: 50px; height: 50px; border-radius: 14px; margin-bottom: 12px; }
+        .info-ico i { font-size: 1.2rem; }
+        .info-card h5 { font-size: 0.9rem; margin-bottom: 6px; }
+        .info-card p { font-size: 0.78rem; word-break: break-word; overflow-wrap: anywhere; }
 
         /* Form */
         .form-card { padding: 28px 20px; border-radius: 22px; }
@@ -284,7 +284,7 @@
     @media (max-width: 576px) {
         .ct-hero { padding: 80px 0 55px; }
         .ct-hero h1 { font-size: 1.85rem; }
-        .info-card { padding: 24px 14px 20px; }
+        .info-card { padding: 20px 10px 18px; }
         .form-card { padding: 24px 16px; }
         .btn-send { padding: 13px 24px; font-size: 0.9rem; }
         .soc-card { padding: 14px 16px; }
@@ -383,28 +383,28 @@
 <section class="sec">
     <div class="container">
         <div class="row g-4">
-            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+            <div class="col-lg-3 col-md-6 col-6" data-aos="fade-up" data-aos-delay="100">
                 <div class="info-card">
                     <div class="info-ico" style="background:linear-gradient(135deg,#1d4ed8,#14245f)"><i class="fas fa-map-marker-alt"></i></div>
                     <h5>{% trans "地址" %}</h5>
-                    <p>{% trans "北京市海淀区中关村科技园区" %}</p>
+                    <p>{% trans "刚果共和国布拉柴维尔" %}</p>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+            <div class="col-lg-3 col-md-6 col-6" data-aos="fade-up" data-aos-delay="200">
                 <div class="info-card">
                     <div class="info-ico" style="background:linear-gradient(135deg,#f093fb,#f5576c)"><i class="fas fa-phone-alt"></i></div>
                     <h5>{% trans "电话" %}</h5>
                     <p><a href="{{ PLATFORM_PHONE_TEL }}">{{ PLATFORM_PHONE_DISPLAY }}</a></p>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+            <div class="col-lg-3 col-md-6 col-6" data-aos="fade-up" data-aos-delay="300">
                 <div class="info-card">
                     <div class="info-ico" style="background:linear-gradient(135deg,#4facfe,#00f2fe)"><i class="fas fa-envelope"></i></div>
                     <h5>{% trans "邮箱" %}</h5>
                     <p><a href="mailto:{{ PLATFORM_CONTACT_EMAIL }}">{{ PLATFORM_CONTACT_EMAIL }}</a></p>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+            <div class="col-lg-3 col-md-6 col-6" data-aos="fade-up" data-aos-delay="400">
                 <div class="info-card">
                     <div class="info-ico" style="background:linear-gradient(135deg,#43e97b,#38f9d7)"><i class="fas fa-clock"></i></div>
                     <h5>{% trans "服务时间" %}</h5>
@@ -469,7 +469,7 @@
                 </a>
                 <div class="map-box">
                     <i class="fas fa-map-marked-alt"></i>
-                    <p>{% trans "北京市海淀区中关村科技园区" %}</p>
+                    <p>{% trans "刚果共和国布拉柴维尔" %}</p>
                 </div>
             </div>
         </div>
