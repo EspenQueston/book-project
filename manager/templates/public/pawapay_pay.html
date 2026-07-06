@@ -271,7 +271,7 @@ html[data-theme="dark"] .pwp-status.info { background: #0c4a6e; color: #7dd3fc; 
             })
         }).then(parseResponse).then(function(d) {
             if (!d.success && !d.deposit_id) {
-                setStatus('❌ ' + (d.error || d.message || '{% trans "Échec de l\'initiation" %}'), 'err');
+                setStatus('❌ ' + (d.error || d.message || '{% trans "Échec du démarrage du paiement" %}'), 'err');
                 btn.disabled = false;
                 return;
             }

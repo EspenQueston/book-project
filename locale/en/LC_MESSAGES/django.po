@@ -750,7 +750,7 @@ msgstr "Site Map"
 
 #: .\manager\templates\public\base.html:1017
 msgid "最后更新: 2024年12月"
-msgstr "Last Updated: December 2024"
+msgstr "Last updated: Dec 2024"
 
 #: .\manager\templates\public\base.html:1127
 msgid "扫描或复制ID添加好友"
@@ -6156,3 +6156,181 @@ msgstr "Keywords and reply message are required"
 #: manager/templates/public/vendor_messages.html:0
 msgid "Auto-reply settings saved"
 msgstr "Auto-reply settings saved"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "Quick replies"
+msgstr "Quick replies"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "No saved quick replies yet. Add some in Auto-reply settings."
+msgstr "No saved quick replies yet. Add some in Auto-reply settings."
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "Failed to load auto-reply settings"
+msgstr "Failed to load auto-reply settings"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "Failed to load quick replies. Please reload the page."
+msgstr "Failed to load quick replies. Please reload the page."
+
+#: marketplace/templates/marketplace/supermarket_detail.html:0
+msgid "当日/次日达"
+msgstr "Same-day / next-day"
+
+#: marketplace/templates/marketplace/supermarket_detail.html:0
+msgid "当日达 / 次日达"
+msgstr "Same-day / next-day"
+
+#: marketplace/templates/marketplace/supermarket_detail.html:0
+msgid "今天下单，最快"
+msgstr "Order today — as fast as"
+
+#: marketplace/templates/marketplace/supermarket_detail.html:0
+msgid "当天送达"
+msgstr "same-day delivery"
+
+#: marketplace/templates/marketplace/supermarket_detail.html:0
+msgid "新鲜直采"
+msgstr "Fresh from source"
+
+#: marketplace/templates/marketplace/supermarket_detail.html:0
+msgid "最快当天送达"
+msgstr "Same-day at the earliest"
+
+#: marketplace/templates/marketplace/supermarket_detail.html:0
+msgid "冷链保鲜"
+msgstr "Cold-chain freshness"
+
+#: marketplace/templates/marketplace/supermarket_detail.html:0
+msgid "全程温控配送"
+msgstr "Temperature-controlled delivery"
+
+#: marketplace/templates/marketplace/supermarket_detail.html:0
+msgid "每日精选好货"
+msgstr "Daily curated picks"
+
+#: marketplace/templates/marketplace/supermarket_detail.html:0
+msgid "不满意可退"
+msgstr "Returns if unsatisfied"
+
+#: marketplace/templates/marketplace/supermarket_detail.html:0
+msgid "请通过订单查询验证您的身份后查看订单详情"
+msgstr "Please verify your identity via order lookup to view order details."
+
+#: marketplace/templates/marketplace/supermarket_detail.html:0
+msgid "您没有权限下载此文件，请先通过订单查询验证您的身份"
+msgstr ""
+"You don't have permission to download this file. Please verify your identity"
+" via order lookup first."
+
+#: marketplace/templates/marketplace/course_detail.html:0
+msgid "个课节"
+msgstr "lessons"
+
+#: marketplace/templates/marketplace/course_detail.html:0
+msgid "入驻卖家"
+msgstr "Marketplace seller"
+
+#: marketplace/templates/marketplace/course_detail.html:0
+msgid "全程保鲜"
+msgstr "Kept fresh throughout"
+
+#: marketplace/templates/marketplace/course_detail.html:0
+msgid "完成后获得结业证书"
+msgstr "Certificate upon completion"
+
+#: marketplace/templates/marketplace/course_detail.html:0
+msgid "手机/电脑学习"
+msgstr "Learn on mobile / desktop"
+
+#: marketplace/templates/marketplace/course_detail.html:0
+msgid "手机与电脑均可学习"
+msgstr "Learn on mobile and desktop"
+
+#: marketplace/templates/marketplace/course_detail.html:0
+msgid "新鲜保证"
+msgstr "Freshness guaranteed"
+
+#: marketplace/templates/marketplace/course_detail.html:0
+msgid "本课程包含"
+msgstr "This course includes"
+
+#: marketplace/templates/marketplace/course_detail.html:0
+msgid "永久访问"
+msgstr "Lifetime access"
+
+#: marketplace/templates/marketplace/course_detail.html:0
+msgid "永久访问权限"
+msgstr "Lifetime access"
+
+#: marketplace/templates/marketplace/course_detail.html:0
+msgid "点播视频"
+msgstr "On-demand video"
+
+#: marketplace/templates/marketplace/course_detail.html:0
+msgid "生鲜冷链配送"
+msgstr "Cold-chain fresh delivery"
+
+#: marketplace/templates/marketplace/course_detail.html:0
+msgid "认证卖家"
+msgstr "Certified seller"
+
+#: marketplace/models.py:0
+msgid "全部级别"
+msgstr "All levels"
+
+#: marketplace/models.py:0
+msgid "个"
+msgstr "piece"
+
+#: marketplace/models.py:0
+msgid "公斤"
+msgstr "kg"
+
+#: marketplace/models.py:0
+msgid "克"
+msgstr "g"
+
+#: marketplace/models.py:0
+msgid "升"
+msgstr "L"
+
+#: marketplace/models.py:0
+msgid "毫升"
+msgstr "ml"
+
+#: marketplace/models.py:0
+msgid "包"
+msgstr "pack"
+
+#: marketplace/models.py:0
+msgid "盒"
+msgstr "box"
+
+#: marketplace/models.py:0
+msgid "瓶"
+msgstr "bottle"
+
+#: marketplace/models.py:0
+msgid "袋"
+msgstr "bag"
+
+#: marketplace/models.py:0
+msgid "英语"
+msgstr "English"
+
+#: marketplace/models.py:0
+msgid "英文"
+msgstr "English"
+
+#: marketplace/models.py:0
+msgid "法语"
+msgstr "French"
+
+#: marketplace/models.py:0
+msgid "法文"
+msgstr "French"
+
+#: marketplace/models.py:0
+msgid "双语"
+msgstr "Bilingual"

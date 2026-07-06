@@ -759,7 +759,7 @@ msgstr "Plan du site"
 
 #: .\manager\templates\public\base.html:1017
 msgid "最后更新: 2024年12月"
-msgstr "Dernière mise à jour : 2024年12月"
+msgstr "Dernière mise à jour : déc. 2024"
 
 #: .\manager\templates\public\base.html:1127
 msgid "扫描或复制ID添加好友"
@@ -6235,3 +6235,185 @@ msgstr "Mots-clés et réponse automatique requis"
 #: manager/templates/public/vendor_messages.html:0
 msgid "Auto-reply settings saved"
 msgstr "Paramètres de réponse automatique enregistrés"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "Quick replies"
+msgstr "Réponses rapides"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "No saved quick replies yet. Add some in Auto-reply settings."
+msgstr ""
+"Aucune réponse rapide enregistrée. Ajoutez-en dans les paramètres de réponse"
+" automatique."
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "Failed to load auto-reply settings"
+msgstr "Échec du chargement des paramètres de réponse automatique"
+
+#: manager/templates/public/vendor_messages.html:0
+msgid "Failed to load quick replies. Please reload the page."
+msgstr "Échec du chargement des réponses rapides. Veuillez recharger la page."
+
+#: marketplace/templates/marketplace/supermarket_detail.html:0
+msgid "当日/次日达"
+msgstr "Jour même / lendemain"
+
+#: marketplace/templates/marketplace/supermarket_detail.html:0
+msgid "当日达 / 次日达"
+msgstr "Jour même / lendemain"
+
+#: marketplace/templates/marketplace/supermarket_detail.html:0
+msgid "今天下单，最快"
+msgstr "Commandez aujourd'hui — dès"
+
+#: marketplace/templates/marketplace/supermarket_detail.html:0
+msgid "当天送达"
+msgstr "le jour même"
+
+#: marketplace/templates/marketplace/supermarket_detail.html:0
+msgid "新鲜直采"
+msgstr "Fraîcheur d'origine"
+
+#: marketplace/templates/marketplace/supermarket_detail.html:0
+msgid "最快当天送达"
+msgstr "Dès le jour même"
+
+#: marketplace/templates/marketplace/supermarket_detail.html:0
+msgid "冷链保鲜"
+msgstr "Fraîcheur chaîne du froid"
+
+#: marketplace/templates/marketplace/supermarket_detail.html:0
+msgid "全程温控配送"
+msgstr "Livraison à température contrôlée"
+
+#: marketplace/templates/marketplace/supermarket_detail.html:0
+msgid "每日精选好货"
+msgstr "Sélection quotidienne"
+
+#: marketplace/templates/marketplace/supermarket_detail.html:0
+msgid "不满意可退"
+msgstr "Retour si insatisfait"
+
+#: marketplace/templates/marketplace/supermarket_detail.html:0
+msgid "请通过订单查询验证您的身份后查看订单详情"
+msgstr ""
+"Veuillez vérifier votre identité via la recherche de commande pour voir les "
+"détails."
+
+#: marketplace/templates/marketplace/supermarket_detail.html:0
+msgid "您没有权限下载此文件，请先通过订单查询验证您的身份"
+msgstr ""
+"Vous n'êtes pas autorisé à télécharger ce fichier. Veuillez d'abord vérifier"
+" votre identité via la recherche de commande."
+
+#: marketplace/templates/marketplace/course_detail.html:0
+msgid "个课节"
+msgstr "leçons"
+
+#: marketplace/templates/marketplace/course_detail.html:0
+msgid "入驻卖家"
+msgstr "Vendeur partenaire"
+
+#: marketplace/templates/marketplace/course_detail.html:0
+msgid "全程保鲜"
+msgstr "Fraîcheur préservée"
+
+#: marketplace/templates/marketplace/course_detail.html:0
+msgid "完成后获得结业证书"
+msgstr "Certificat à la fin du cours"
+
+#: marketplace/templates/marketplace/course_detail.html:0
+msgid "手机/电脑学习"
+msgstr "Sur mobile / ordinateur"
+
+#: marketplace/templates/marketplace/course_detail.html:0
+msgid "手机与电脑均可学习"
+msgstr "Apprenez sur mobile et ordinateur"
+
+#: marketplace/templates/marketplace/course_detail.html:0
+msgid "新鲜保证"
+msgstr "Fraîcheur garantie"
+
+#: marketplace/templates/marketplace/course_detail.html:0
+msgid "本课程包含"
+msgstr "Ce cours comprend"
+
+#: marketplace/templates/marketplace/course_detail.html:0
+msgid "永久访问"
+msgstr "Accès à vie"
+
+#: marketplace/templates/marketplace/course_detail.html:0
+msgid "永久访问权限"
+msgstr "Accès à vie"
+
+#: marketplace/templates/marketplace/course_detail.html:0
+msgid "点播视频"
+msgstr "Vidéo à la demande"
+
+#: marketplace/templates/marketplace/course_detail.html:0
+msgid "生鲜冷链配送"
+msgstr "Livraison fraîche en chaîne du froid"
+
+#: marketplace/templates/marketplace/course_detail.html:0
+msgid "认证卖家"
+msgstr "Vendeur certifié"
+
+#: marketplace/models.py:0
+msgid "全部级别"
+msgstr "Tous niveaux"
+
+#: marketplace/models.py:0
+msgid "个"
+msgstr "pièce"
+
+#: marketplace/models.py:0
+msgid "公斤"
+msgstr "kg"
+
+#: marketplace/models.py:0
+msgid "克"
+msgstr "g"
+
+#: marketplace/models.py:0
+msgid "升"
+msgstr "L"
+
+#: marketplace/models.py:0
+msgid "毫升"
+msgstr "ml"
+
+#: marketplace/models.py:0
+msgid "包"
+msgstr "paquet"
+
+#: marketplace/models.py:0
+msgid "盒"
+msgstr "boîte"
+
+#: marketplace/models.py:0
+msgid "瓶"
+msgstr "bouteille"
+
+#: marketplace/models.py:0
+msgid "袋"
+msgstr "sachet"
+
+#: marketplace/models.py:0
+msgid "英语"
+msgstr "Anglais"
+
+#: marketplace/models.py:0
+msgid "英文"
+msgstr "Anglais"
+
+#: marketplace/models.py:0
+msgid "法语"
+msgstr "Français"
+
+#: marketplace/models.py:0
+msgid "法文"
+msgstr "Français"
+
+#: marketplace/models.py:0
+msgid "双语"
+msgstr "Bilingue"

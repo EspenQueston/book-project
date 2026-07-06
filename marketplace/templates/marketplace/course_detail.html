@@ -493,7 +493,7 @@
     <!-- D. Course Info -->
     <div class="bmp-delivery-section">
         <div class="bmp-delivery-row"><i class="fas fa-play-circle"></i><span>{% trans "总计" %} <strong>{{ course.lessons_count }}</strong> {% trans "课节" %} · <strong>{{ course.duration_hours }}</strong>h</span></div>
-        <div class="bmp-delivery-row"><i class="fas fa-language"></i><span>{% trans "语言" %}: <strong>{{ course.language }}</strong></span></div>
+        <div class="bmp-delivery-row"><i class="fas fa-language"></i><span>{% trans "语言" %}: <strong>{{ course.display_language }}</strong></span></div>
         {% if course.rating %}<div class="bmp-delivery-row"><i class="fas fa-star" style="color:#f59e0b;"></i><span>{% trans "评分" %}: <strong>{{ course.rating }}/5</strong></span></div>{% endif %}
         <div class="bmp-delivery-row"><i class="fas fa-infinity"></i><span><span class="bmp-delivery-highlight">{% trans "终身畅学" %}</span> · {% trans "购买后随时学习" %}</span></div>
     </div>
@@ -510,7 +510,7 @@
             <div class="cmi-item"><i class="fas fa-mobile-alt"></i>{% trans "手机/电脑学习" %}</div>
             <div class="cmi-item"><i class="fas fa-infinity"></i>{% trans "永久访问" %}</div>
             <div class="cmi-item"><i class="fas fa-certificate"></i>{% trans "结业证书" %}</div>
-            <div class="cmi-item"><i class="fas fa-language"></i>{{ course.language }}</div>
+            <div class="cmi-item"><i class="fas fa-language"></i>{{ course.display_language }}</div>
         </div>
     </div>
 
@@ -776,7 +776,7 @@
                 <div class="info-row"><i class="fas fa-clock"></i>{% trans "时长" %}: {{ course.duration_hours }}h</div>
                 <div class="info-row"><i class="fas fa-book-open"></i>{% trans "课节" %}: {{ course.lessons_count }}</div>
                 <div class="info-row"><i class="fas fa-signal"></i>{% trans "等级" %}: {{ course.get_level_display }}</div>
-                <div class="info-row"><i class="fas fa-language"></i>{% trans "语言" %}: {{ course.language }}</div>
+                <div class="info-row"><i class="fas fa-language"></i>{% trans "语言" %}: {{ course.display_language }}</div>
                 <div class="info-row"><i class="fas fa-users"></i>{% trans "已报名" %}: {{ sold_delivered }}</div>
                 {% if course.rating %}
                 <div class="info-row">

@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 from decimal import Decimal
 import uuid
 
@@ -113,10 +114,10 @@ class Product(models.Model):
 class Course(models.Model):
     """Online courses / digital learning products."""
     LEVEL_CHOICES = [
-        ('beginner', '入门'),
-        ('intermediate', '中级'),
-        ('advanced', '高级'),
-        ('all', '全部级别'),
+        ('beginner', _('入门')),
+        ('intermediate', _('中级')),
+        ('advanced', _('高级')),
+        ('all', _('全部级别')),
     ]
 
     vendor = models.ForeignKey('manager.Vendor', on_delete=models.SET_NULL, null=True, blank=True,
@@ -156,6 +157,17 @@ class Course(models.Model):
             return self.image.url
         return '/static/img/default_course.png'
 
+    # Common teaching-language values are stored in Chinese (source language);
+    # map the well-known ones through gettext so FR/EN visitors see a localized
+    # label, while any custom free-text value is shown verbatim.
+    LANGUAGE_LABELS = {
+        '中文': _('中文'), '英语': _('英语'), '英文': _('英文'),
+        '法语': _('法语'), '法文': _('法文'), '双语': _('双语'),
+    }
+
+    def display_language(self):
+        return self.LANGUAGE_LABELS.get((self.language or '').strip(), self.language)
+
     def get_discount_percent(self):
         if self.original_price and self.original_price > self.price:
             return int(((self.original_price - self.price) / self.original_price) * 100)
@@ -176,15 +188,15 @@ class Course(models.Model):
 class SupermarketItem(models.Model):
     """Supermarket / grocery items."""
     UNIT_CHOICES = [
-        ('piece', '个'),
-        ('kg', '公斤'),
-        ('g', '克'),
-        ('liter', '升'),
-        ('ml', '毫升'),
-        ('pack', '包'),
-        ('box', '盒'),
-        ('bottle', '瓶'),
-        ('bag', '袋'),
+        ('piece', _('个')),
+        ('kg', _('公斤')),
+        ('g', _('克')),
+        ('liter', _('升')),
+        ('ml', _('毫升')),
+        ('pack', _('包')),
+        ('box', _('盒')),
+        ('bottle', _('瓶')),
+        ('bag', _('袋')),
     ]
 
     vendor = models.ForeignKey(

@@ -1312,16 +1312,30 @@ class DirectMessage(models.Model):
         return f'[{self.sender_type}] {self.content[:60]}'
 
 
+DEFAULT_WELCOME_MESSAGE = (
+    "Bonjour et bienvenue chez DUNO 360 ! Merci de nous avoir contactés, nous avons bien reçu "
+    "votre message et nous vous répondrons très rapidement.\n\n"
+    "Hello and welcome to DUNO 360! Thank you for contacting us — we've received your message "
+    "and will get back to you very soon."
+)
+DEFAULT_AWAY_MESSAGE = (
+    "Bonjour, nous ne sommes pas disponibles pour le moment et répondons généralement sous "
+    "10 minutes. Merci de votre patience, nous revenons vers vous très vite !\n\n"
+    "Hello, we're currently unavailable and usually reply within 10 minutes. Thank you for "
+    "your patience — we'll get back to you shortly!"
+)
+
+
 class AutoReplySettings(models.Model):
     """Per-vendor (or official-store) WhatsApp-Business-style automatic replies:
     a welcome message for new conversations and an away message sent when the
     vendor/admin hasn't answered a waiting buyer within a configurable delay."""
     vendor = models.OneToOneField(Vendor, on_delete=models.CASCADE, related_name='auto_reply_settings', verbose_name='卖家')
-    welcome_enabled = models.BooleanField(default=False, verbose_name='启用欢迎语')
-    welcome_message = models.TextField(blank=True, default='', verbose_name='欢迎语内容')
-    away_enabled = models.BooleanField(default=False, verbose_name='启用离开自动回复')
-    away_message = models.TextField(blank=True, default='', verbose_name='离开自动回复内容')
-    away_delay_minutes = models.PositiveIntegerField(default=5, verbose_name='离开回复延迟（分钟）')
+    welcome_enabled = models.BooleanField(default=True, verbose_name='启用欢迎语')
+    welcome_message = models.TextField(blank=True, default=DEFAULT_WELCOME_MESSAGE, verbose_name='欢迎语内容')
+    away_enabled = models.BooleanField(default=True, verbose_name='启用离开自动回复')
+    away_message = models.TextField(blank=True, default=DEFAULT_AWAY_MESSAGE, verbose_name='离开自动回复内容')
+    away_delay_minutes = models.PositiveIntegerField(default=10, verbose_name='离开回复延迟（分钟）')
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:

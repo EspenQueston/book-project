@@ -377,6 +377,32 @@ video.vm-bub-media { cursor: default; }
 }
 .vm-emoji-item:hover { background: var(--vm-bg); transform: scale(1.15); }
 @media (max-width: 768px) { .vm-emoji-grid { grid-template-columns: repeat(6, 1fr); } }
+
+/* ── Quick-reply picker (saved canned responses) ─────────── */
+.vm-quickreply-picker {
+    display: none; flex-direction: column;
+    background: var(--vm-card); border: 1px solid var(--vm-border);
+    border-radius: 14px; box-shadow: 0 -4px 24px rgba(0,0,0,0.12);
+    flex-shrink: 0; overflow: hidden; max-height: 260px;
+}
+.vm-quickreply-picker.show { display: flex; }
+.vm-quickreply-head {
+    padding: 10px 14px; font-size: 0.78rem; font-weight: 700;
+    color: var(--vm-text2); text-transform: uppercase; letter-spacing: 0.4px;
+    border-bottom: 1px solid var(--vm-border); flex-shrink: 0;
+}
+.vm-quickreply-list { overflow-y: auto; padding: 6px; }
+.vm-quickreply-item {
+    display: block; width: 100%; text-align: left; border: none; background: transparent;
+    border-radius: 10px; padding: 9px 12px; cursor: pointer; transition: background 0.15s;
+}
+.vm-quickreply-item:hover { background: var(--vm-bg); }
+.vm-quickreply-item-kw { font-weight: 700; font-size: 0.78rem; color: var(--vm-accent); }
+.vm-quickreply-item-text {
+    font-size: 0.8rem; color: var(--vm-text); margin-top: 2px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.vm-quickreply-empty { padding: 18px 14px; font-size: 0.82rem; color: var(--vm-text2); text-align: center; }
 .vm-send-btn {
     width: 44px; height: 44px; border-radius: 14px;
     background: linear-gradient(135deg, #6366f1, #8b5cf6);
@@ -576,11 +602,18 @@ video.vm-bub-media { cursor: default; }
                 <div class="vm-emoji-grid" id="vmEmojiGrid"></div>
             </div>
 
+            <!-- Quick-reply picker (saved keyword auto-reply templates, inserted manually) -->
+            <div class="vm-quickreply-picker" id="vmQuickReplyPicker">
+                <div class="vm-quickreply-head">{% trans "Quick replies" %}</div>
+                <div class="vm-quickreply-list" id="vmQuickReplyList"></div>
+            </div>
+
             <div class="vm-input-bar">
                 <input type="file" id="vmFileInput" accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar" style="display:none" onchange="vmOnFileSelected(event)">
                 <button class="vm-attach-btn" onclick="vmPickFile()" title="{% trans 'Attach image, video or file' %}"><i class="fas fa-paperclip"></i></button>
                 <button class="vm-attach-btn" onclick="vmShowListingPicker()" title="{% trans 'Send a listing link' %}"><i class="fas fa-tag"></i></button>
                 <button class="vm-attach-btn" onclick="vmToggleEmoji()" title="{% trans 'Emoji' %}"><i class="far fa-smile"></i></button>
+                <button class="vm-attach-btn" onclick="vmToggleQuickReply()" title="{% trans 'Quick replies' %}"><i class="fas fa-bolt"></i></button>
                 <textarea id="vmInput" rows="1" placeholder="{% trans 'Type a reply...' %}" onkeydown="vmHandleKey(event)"></textarea>
                 <button class="vm-send-btn" id="vmSendBtn" onclick="vmSend()"><i class="fas fa-paper-plane"></i></button>
             </div>
@@ -1040,6 +1073,52 @@ video.vm-bub-media { cursor: default; }
         picker.classList.remove('show');
     });
 
+    /* ── Quick-reply picker: manually insert a saved keyword auto-reply ── */
+    window.vmToggleQuickReply = function() {
+        var picker = document.getElementById('vmQuickReplyPicker');
+        if (picker.classList.contains('show')) { picker.classList.remove('show'); return; }
+        picker.classList.add('show');
+        var list = document.getElementById('vmQuickReplyList');
+        list.innerHTML = '<div class="vm-quickreply-empty">{% trans "Loading..." %}</div>';
+        fetch('/manager/api/vendor/auto-reply/keywords/', { credentials: 'same-origin' })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var rules = (data.keywords || []).filter(function(k) { return k.is_active; });
+                if (!rules.length) {
+                    list.innerHTML = '<div class="vm-quickreply-empty">{% trans "No saved quick replies yet. Add some in Auto-reply settings." %}</div>';
+                    return;
+                }
+                list.innerHTML = rules.map(function(k) {
+                    return '<button type="button" class="vm-quickreply-item" onclick="vmInsertQuickReply(' + k.id + ')">' +
+                        '<div class="vm-quickreply-item-kw">' + esc(k.keywords) + '</div>' +
+                        '<div class="vm-quickreply-item-text">' + esc(k.reply_message) + '</div>' +
+                    '</button>';
+                }).join('');
+                window._vmQuickReplies = rules;
+            })
+            .catch(function() { list.innerHTML = '<div class="vm-quickreply-empty">{% trans "Network error" %}</div>'; });
+    };
+    window.vmInsertQuickReply = function(id) {
+        var rule = (window._vmQuickReplies || []).find(function(k) { return k.id === id; });
+        if (!rule) return;
+        var input = document.getElementById('vmInput');
+        var start = input.selectionStart || 0, end = input.selectionEnd || 0;
+        var text = input.value;
+        var insert = rule.reply_message + (text.slice(start) ? ' ' : '');
+        input.value = text.slice(0, start) + insert + text.slice(end);
+        var newPos = start + insert.length;
+        input.setSelectionRange(newPos, newPos);
+        input.focus();
+        input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+        document.getElementById('vmQuickReplyPicker').classList.remove('show');
+    };
+    document.addEventListener('click', function(e) {
+        var picker = document.getElementById('vmQuickReplyPicker');
+        if (!picker || !picker.classList.contains('show')) return;
+        if (picker.contains(e.target) || e.target.closest('[onclick="vmToggleQuickReply()"]')) return;
+        picker.classList.remove('show');
+    });
+
     window.vmFilter = function(q) {
         q = (q || '').toLowerCase();
         document.querySelectorAll('.vm-convo').forEach(function(el) {
@@ -1048,7 +1127,7 @@ video.vm-bub-media { cursor: default; }
     };
 
     window.showNewConvoModal = function() {
-        new bootstrap.Modal(document.getElementById('newConvoModal')).show();
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('newConvoModal')).show();
     };
 
     window.vmCreateConvo = function() {
@@ -1086,7 +1165,7 @@ video.vm-bub-media { cursor: default; }
 
     /* ── Auto-reply settings (welcome / away / keyword rules) ───────── */
     window.vmOpenAutoReply = function() {
-        new bootstrap.Modal(document.getElementById('autoReplyModal')).show();
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('autoReplyModal')).show();
         vmLoadAutoReplySettings();
         vmLoadKeywords();
     };
@@ -1094,13 +1173,15 @@ video.vm-bub-media { cursor: default; }
         fetch('/manager/api/vendor/auto-reply/settings/', { credentials: 'same-origin' })
             .then(function(r) { return r.json(); })
             .then(function(data) {
+                if (data.error) { toast('{% trans "Failed to load auto-reply settings" %}'); return; }
                 var s = data.settings || {};
                 document.getElementById('arWelcomeEnabled').checked = !!s.welcome_enabled;
                 document.getElementById('arWelcomeMessage').value = s.welcome_message || '';
                 document.getElementById('arAwayEnabled').checked = !!s.away_enabled;
                 document.getElementById('arAwayMessage').value = s.away_message || '';
-                document.getElementById('arAwayDelay').value = s.away_delay_minutes || 5;
-            });
+                document.getElementById('arAwayDelay').value = s.away_delay_minutes || 10;
+            })
+            .catch(function() { toast('{% trans "Network error" %}'); });
     }
     function vmRenderKeywords(list) {
         var box = document.getElementById('arKeywordList');
@@ -1119,9 +1200,20 @@ video.vm-bub-media { cursor: default; }
         }).join('');
     }
     function vmLoadKeywords() {
+        var box = document.getElementById('arKeywordList');
+        box.innerHTML = '<p class="ar-hint" style="margin:0;">{% trans "Loading..." %}</p>';
         fetch('/manager/api/vendor/auto-reply/keywords/', { credentials: 'same-origin' })
             .then(function(r) { return r.json(); })
-            .then(function(data) { vmRenderKeywords(data.keywords || []); });
+            .then(function(data) {
+                if (data.error) {
+                    box.innerHTML = '<p class="ar-hint" style="margin:0;color:#ef4444;">{% trans "Failed to load quick replies. Please reload the page." %}</p>';
+                    return;
+                }
+                vmRenderKeywords(data.keywords || []);
+            })
+            .catch(function() {
+                box.innerHTML = '<p class="ar-hint" style="margin:0;color:#ef4444;">{% trans "Network error" %}</p>';
+            });
     }
     window.vmAddKeyword = function() {
         var kw = (document.getElementById('arNewKeywords').value || '').trim();
@@ -1276,7 +1368,7 @@ video.vm-bub-media { cursor: default; }
     window.vmShowListingPicker = function() {
         document.getElementById('listingSearchInput').value = '';
         document.getElementById('listingResults').innerHTML = '<div style="text-align:center;padding:16px;color:var(--vm-text3);font-size:0.82rem;">{% trans "Type to search your catalog" %}</div>';
-        new bootstrap.Modal(document.getElementById('listingPickerModal')).show();
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('listingPickerModal')).show();
     };
     window.vmSearchListings = function(q) {
         clearTimeout(_listingSearchTimer);
@@ -1393,7 +1485,14 @@ video.vm-bub-media { cursor: default; }
     };
 
     /* ── Tiny local confirm modal (matches admin panel g-modal style) ── */
+    function gClearStaleBackdrops() {
+        document.querySelectorAll('.modal-backdrop').forEach(function(el) { el.remove(); });
+        document.body.classList.remove('modal-open');
+        document.body.style.removeProperty('overflow');
+        document.body.style.removeProperty('padding-right');
+    }
     function gConfirm(message, onConfirm, opts) {
+        gClearStaleBackdrops();
         opts = opts || {};
         var overlay = document.getElementById('vmConfirmOverlay');
         if (!overlay) {

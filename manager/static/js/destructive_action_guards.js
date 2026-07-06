@@ -50,10 +50,14 @@
 
         var css = document.createElement('style');
         css.textContent = [
-            '.g-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);z-index:100001;display:none;align-items:center;justify-content:center;opacity:0;transition:opacity .25s}',
-            '.g-modal-overlay.show{display:flex;opacity:1}',
-            '.g-modal-card{background:#fff;border-radius:20px;padding:40px 36px 32px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.15);transform:scale(.9);transition:transform .3s cubic-bezier(.21,1.02,.73,1)}',
-            '.g-modal-overlay.show .g-modal-card{transform:scale(1)}',
+            // Namespaced as dag-modal-* so this globally-injected style never clobbers
+            // page-local confirm modals that reuse the generic .g-modal-overlay class
+            // (which would otherwise force opacity:0 and freeze the page behind an
+            // invisible full-screen overlay). See admin/store_messages, site_users, vendor_list.
+            '.dag-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);z-index:100001;display:none;align-items:center;justify-content:center;opacity:0;transition:opacity .25s}',
+            '.dag-modal-overlay.show{display:flex;opacity:1}',
+            '.dag-modal-card{background:#fff;border-radius:20px;padding:40px 36px 32px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.15);transform:scale(.9);transition:transform .3s cubic-bezier(.21,1.02,.73,1)}',
+            '.dag-modal-overlay.show .dag-modal-card{transform:scale(1)}',
             '.g-modal-icon{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:1.6rem}',
             '.g-modal-icon.confirm-icon{background:linear-gradient(135deg,rgba(102,126,234,.12),rgba(118,75,162,.12));color:#667eea}',
             '.g-modal-icon.danger-icon{background:rgba(239,68,68,.1);color:#ef4444}',
@@ -76,8 +80,8 @@
             '<span id="gI18nLogoutMessage" class="visually-hidden">Are you sure you want to sign out?</span>',
             '<span id="gI18nDeleteTitle" class="visually-hidden">Confirm deletion</span>',
             '<span id="gI18nDeleteMessage" class="visually-hidden">Are you sure you want to delete this item?</span>',
-            '<div id="gConfirmModal" class="g-modal-overlay">',
-            '  <div class="g-modal-card">',
+            '<div id="gConfirmModal" class="dag-modal-overlay">',
+            '  <div class="dag-modal-card">',
             '    <div id="gConfirmIcon" class="g-modal-icon confirm-icon"><i class="fas fa-question"></i></div>',
             '    <h5 id="gConfirmTitle" class="g-modal-title"></h5>',
             '    <p id="gConfirmText" class="g-modal-text"></p>',

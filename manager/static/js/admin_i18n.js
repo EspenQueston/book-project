@@ -1591,6 +1591,11 @@
         '停用此规则': 'Deactivate this rule',
         '启用此规则': 'Activate this rule',
         '自动回复设置已保存': 'Auto-reply settings saved',
+        '快捷回复': 'Quick replies',
+        '暂无快捷回复，可在自动回复设置中添加。': 'No quick replies yet. Add some in Auto-reply settings.',
+        '自动回复设置加载失败': 'Failed to load auto-reply settings',
+        '加载失败，请刷新页面重试。': 'Failed to load. Please reload the page.',
+        '表情': 'Emoji',
     };
 
     /* ============================
@@ -3156,6 +3161,11 @@
         '停用此规则': 'Désactiver cette règle',
         '启用此规则': 'Activer cette règle',
         '自动回复设置已保存': 'Paramètres de réponse automatique enregistrés',
+        '快捷回复': 'Réponses rapides',
+        '暂无快捷回复，可在自动回复设置中添加。': 'Aucune réponse rapide. Ajoutez-en dans les paramètres de réponse automatique.',
+        '自动回复设置加载失败': 'Échec du chargement des paramètres de réponse automatique',
+        '加载失败，请刷新页面重试。': 'Échec du chargement. Veuillez recharger la page.',
+        '表情': 'Émoji',
     };
 
     // Sort keys longest-first for proper substring matching

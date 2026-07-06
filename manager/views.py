@@ -3279,7 +3279,7 @@ def order_confirmation(request, order_number):
     # (granted at checkout or after email-verified track_order lookup).
     accessible = request.session.get('accessible_orders', [])
     if str(order_number) not in accessible:
-        messages.warning(request, '请通过订单查询验证您的身份后查看订单详情')
+        messages.warning(request, _('请通过订单查询验证您的身份后查看订单详情'))
         return redirect('manager:track_order')
     book_order = None
     book_order_items = []
@@ -3568,7 +3568,7 @@ def download_book(request, order_id, book_id):
     # Ownership check — order_number must be in session's accessible list
     accessible = request.session.get('accessible_orders', [])
     if str(order.order_number) not in accessible:
-        messages.error(request, '您没有权限下载此文件，请先通过订单查询验证您的身份')
+        messages.error(request, _('您没有权限下载此文件，请先通过订单查询验证您的身份'))
         return redirect('manager:track_order')
     
     # Check if order status allows download (shipped or delivered means payment is done)
