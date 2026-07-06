@@ -6408,3 +6408,28 @@ msgid ""
 msgstr ""
 "Books, online courses, marketplace and fresh supermarket. Secure mobile "
 "money payment."
+
+#: manager/templates/public/checkout.html:0
+msgid "即将开通"
+msgstr "Coming soon"
+
+#: manager/templates/public/checkout.html:0
+msgid "该国家的移动支付即将开通"
+msgstr "Mobile money for this country is coming soon"
+
+#: manager/templates/public/checkout.html:0
+msgid "该国家即将开通移动支付"
+msgstr "Mobile money is coming soon for this country"
+
+#: manager/templates/public/checkout.html:0
+msgid "我们正在为您所在的国家开通安全的移动支付服务，敬请期待。如需立即下单，请联系客服协助您完成付款。"
+msgstr ""
+"We're rolling out secure mobile money for your country very soon. Need to "
+"order right now? Contact our support team and we'll help you complete your "
+"payment."
+
+#: manager/views.py:0
+msgid "当前国家暂不支持该支付方式，请重新选择。"
+msgstr ""
+"This payment method is not available for your country. Please choose another"
+" one."

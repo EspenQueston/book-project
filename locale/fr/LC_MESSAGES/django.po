@@ -6445,3 +6445,28 @@ msgstr "D'un vendeur que vous suivez"
 #: manager/recommendations.py:0
 msgid "来自你常联系的卖家"
 msgstr "D'un vendeur que vous contactez souvent"
+
+#: manager/templates/public/checkout.html:0
+msgid "即将开通"
+msgstr "Bientôt disponible"
+
+#: manager/templates/public/checkout.html:0
+msgid "该国家的移动支付即将开通"
+msgstr "Le mobile money pour ce pays arrive bientôt"
+
+#: manager/templates/public/checkout.html:0
+msgid "该国家即将开通移动支付"
+msgstr "Le paiement mobile arrive bientôt pour ce pays"
+
+#: manager/templates/public/checkout.html:0
+msgid "我们正在为您所在的国家开通安全的移动支付服务，敬请期待。如需立即下单，请联系客服协助您完成付款。"
+msgstr ""
+"Nous déployons très bientôt le paiement mobile sécurisé pour votre pays. "
+"Besoin de commander dès maintenant ? Contactez notre support, nous vous "
+"aiderons à finaliser votre paiement."
+
+#: manager/views.py:0
+msgid "当前国家暂不支持该支付方式，请重新选择。"
+msgstr ""
+"Ce mode de paiement n'est pas disponible pour votre pays. Veuillez en "
+"choisir un autre."

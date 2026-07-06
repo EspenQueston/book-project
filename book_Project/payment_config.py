@@ -26,6 +26,31 @@ KKIAPAY_COUNTRY_CODES = ['BJ', 'CI', 'TG', 'SN', 'NE', 'GN', 'BF', 'ML']
 # ISO codes — PawaPay Central Africa (CEMAC + common coverage)
 PAWAPAY_COUNTRY_CODES = ['CM', 'CG', 'CF', 'TD', 'GQ', 'GA', 'AO', 'CD', 'ST']
 
+# ---------------------------------------------------------------------------
+# "Coming soon" countries — listed at checkout so shoppers see their country,
+# but mobile money isn't wired up for them yet (no active KKiaPay/PawaPay
+# corridor on this merchant account). Verified live against PawaPay's
+# GET /active-conf on 2026-07-07: Congo, DRC, Cameroon and Gabon are active;
+# Angola, Chad, CAR, Equatorial Guinea and São Tomé are absent from that
+# response and would reject every deposit with DEPOSITS_NOT_ALLOWED.
+CENTRAL_AFRICA_COMING_SOON = {
+    'Angola', 'Chad', 'Central African Republic', 'Equatorial Guinea',
+    'São Tomé and Príncipe',
+    'République centrafricaine', 'Guinée équatoriale',
+}
+
+# West African countries with no active KKiaPay corridor configured yet.
+WEST_AFRICA_COMING_SOON = {
+    'Cape Verde', 'Gambia', 'Ghana', 'Guinea-Bissau', 'Liberia',
+    'Mauritania', 'Nigeria', 'Sierra Leone',
+}
+
+COMING_SOON_COUNTRIES = CENTRAL_AFRICA_COMING_SOON | WEST_AFRICA_COMING_SOON
+
+
+def is_coming_soon(country):
+    return country in COMING_SOON_COUNTRIES
+
 PAYMENT_METHODS = {
     'kkiapay': {
         'label': 'Mobile Money (KKiaPay)',
@@ -133,11 +158,20 @@ def get_pawapay_country_codes():
 
 def build_payment_options(country=None):
     region = resolve_payment_region(country) if country else None
-    region_map = (
-        PAYMENT_METHODS_BY_REGION
-        if region is None
-        else {region: PAYMENT_METHODS_BY_REGION.get(region, [])}
-    )
+    # A specific country that falls in a "coming soon" bucket gets zero
+    # methods for its region — this is the server-side enforcement that
+    # backs the checkout UI's "coming soon" state (see is_coming_soon()).
+    # Called without a country (region is None), the full catalog is
+    # returned unfiltered — the checkout page needs every region's methods
+    # available client-side to render per-country as the shopper picks one.
+    if region is not None and is_coming_soon(country):
+        region_map = {region: []}
+    else:
+        region_map = (
+            PAYMENT_METHODS_BY_REGION
+            if region is None
+            else {region: PAYMENT_METHODS_BY_REGION.get(region, [])}
+        )
     result = {}
 
     for region_key, method_keys in region_map.items():

@@ -227,6 +227,36 @@ html[data-theme="dark"] {
 .ck-region-hint.show { display: flex; }
 .ck-region-hint.west { background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412; }
 .ck-region-hint.central { background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857; }
+.ck-region-hint.soon { background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; }
+
+.ck-coming-soon {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 44px 28px;
+    border-radius: 20px;
+    background: linear-gradient(160deg, rgba(29,78,216,0.06), rgba(20,36,95,0.03));
+    border: 1.5px dashed rgba(29,78,216,0.28);
+}
+.ck-coming-soon-icon {
+    width: 64px; height: 64px; margin: 0 auto 18px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1d4ed8, #14245f);
+    color: #fff; font-size: 1.6rem;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 10px 26px rgba(29,78,216,0.28);
+    animation: ck-soon-float 2.6s ease-in-out infinite;
+}
+@keyframes ck-soon-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+.ck-coming-soon-title {
+    font-size: 1.15rem; font-weight: 800; color: var(--ck-text); margin-bottom: 10px;
+}
+.ck-coming-soon-text {
+    max-width: 440px; margin: 0 auto; color: var(--ck-text-muted);
+    font-size: 0.92rem; line-height: 1.7;
+}
 .payment-icon {
     font-size: 2rem;
     margin-bottom: 10px;
@@ -706,17 +736,25 @@ html[data-theme="dark"] .ck-guarantee-banner {
                                         <option value="Niger" data-iso="NE" data-phone="+227" data-kkiapay="1">🇳🇪 Niger (+227)</option>
                                         <option value="Senegal" data-iso="SN" data-phone="+221" data-kkiapay="1">🇸🇳 Sénégal (+221)</option>
                                         <option value="Togo" data-iso="TG" data-phone="+228" data-kkiapay="1">🇹🇬 Togo (+228)</option>
+                                        <option value="Cape Verde" data-iso="CV" data-phone="+238" data-coming-soon="1">🇨🇻 Cap-Vert (+238) — {% trans "即将开通" %}</option>
+                                        <option value="Gambia" data-iso="GM" data-phone="+220" data-coming-soon="1">🇬🇲 Gambie (+220) — {% trans "即将开通" %}</option>
+                                        <option value="Ghana" data-iso="GH" data-phone="+233" data-coming-soon="1">🇬🇭 Ghana (+233) — {% trans "即将开通" %}</option>
+                                        <option value="Guinea-Bissau" data-iso="GW" data-phone="+245" data-coming-soon="1">🇬🇼 Guinée-Bissau (+245) — {% trans "即将开通" %}</option>
+                                        <option value="Liberia" data-iso="LR" data-phone="+231" data-coming-soon="1">🇱🇷 Libéria (+231) — {% trans "即将开通" %}</option>
+                                        <option value="Mauritania" data-iso="MR" data-phone="+222" data-coming-soon="1">🇲🇷 Mauritanie (+222) — {% trans "即将开通" %}</option>
+                                        <option value="Nigeria" data-iso="NG" data-phone="+234" data-coming-soon="1">🇳🇬 Nigéria (+234) — {% trans "即将开通" %}</option>
+                                        <option value="Sierra Leone" data-iso="SL" data-phone="+232" data-coming-soon="1">🇸🇱 Sierra Leone (+232) — {% trans "即将开通" %}</option>
                                     </optgroup>
                                     <optgroup label="{% trans '中非 — PawaPay' %}">
-                                        <option value="Angola" data-iso="AO" data-phone="+244" data-pawapay="1">🇦🇴 Angola (+244)</option>
-                                        <option value="Cameroon" data-iso="CM" data-phone="+237" data-pawapay="1">🇨🇲 Cameroun (+237)</option>
-                                        <option value="Central African Republic" data-iso="CF" data-phone="+236" data-pawapay="1">🇨🇫 {% trans "中非共和国" %} (+236)</option>
-                                        <option value="Chad" data-iso="TD" data-phone="+235" data-pawapay="1">🇹🇩 {% trans "乍得" %} (+235)</option>
                                         <option value="Congo" data-iso="CG" data-phone="+242" data-pawapay="1" selected>🇨🇬 Congo (+242)</option>
                                         <option value="Democratic Republic of the Congo" data-iso="CD" data-phone="+243" data-pawapay="1">🇨🇩 RDC (+243)</option>
-                                        <option value="Equatorial Guinea" data-iso="GQ" data-phone="+240" data-pawapay="1">🇬🇶 {% trans "赤道几内亚" %} (+240)</option>
+                                        <option value="Cameroon" data-iso="CM" data-phone="+237" data-pawapay="1">🇨🇲 Cameroun (+237)</option>
                                         <option value="Gabon" data-iso="GA" data-phone="+241" data-pawapay="1">🇬🇦 Gabon (+241)</option>
-                                        <option value="São Tomé and Príncipe" data-iso="ST" data-phone="+239" data-pawapay="1">🇸🇹 São Tomé (+239)</option>
+                                        <option value="Angola" data-iso="AO" data-phone="+244" data-coming-soon="1">🇦🇴 Angola (+244) — {% trans "即将开通" %}</option>
+                                        <option value="Chad" data-iso="TD" data-phone="+235" data-coming-soon="1">🇹🇩 {% trans "乍得" %} (+235) — {% trans "即将开通" %}</option>
+                                        <option value="Central African Republic" data-iso="CF" data-phone="+236" data-coming-soon="1">🇨🇫 {% trans "中非共和国" %} (+236) — {% trans "即将开通" %}</option>
+                                        <option value="Equatorial Guinea" data-iso="GQ" data-phone="+240" data-coming-soon="1">🇬🇶 {% trans "赤道几内亚" %} (+240) — {% trans "即将开通" %}</option>
+                                        <option value="São Tomé and Príncipe" data-iso="ST" data-phone="+239" data-coming-soon="1">🇸🇹 São Tomé (+239) — {% trans "即将开通" %}</option>
                                     </optgroup>
                                     <optgroup label="{% trans '亚洲' %}">
                                         <option value="China" data-phone="+86">🇨🇳 China (+86)</option>
@@ -916,10 +954,13 @@ const CK_I18N = {
     selectPaymentMethod: "{% filter escapejs %}{% trans '请选择支付方式' %}{% endfilter %}",
     regionWest: "{% filter escapejs %}{% trans '西非地区：通过 KKiaPay 安全支付（MTN、Orange、Wave…）' %}{% endfilter %}",
     regionCentral: "{% filter escapejs %}{% trans '中非地区：通过 PawaPay 安全支付（MTN、Orange、Airtel…）' %}{% endfilter %}",
+    regionComingSoon: "{% filter escapejs %}{% trans '该国家的移动支付即将开通' %}{% endfilter %}",
     pawapayHint: "{% filter escapejs %}{% trans '中非 Mobile Money — PawaPay' %}{% endfilter %}",
     kkiapayHint: "{% filter escapejs %}{% trans '西非 Mobile Money — KKiaPay' %}{% endfilter %}",
     phoneNoPrefix: "{% filter escapejs %}{% trans '号码（不含国家码）' %}{% endfilter %}",
     phoneWechat: "{% filter escapejs %}{% trans '微信号或电话号码' %}{% endfilter %}",
+    comingSoonTitle: "{% filter escapejs %}{% trans '该国家即将开通移动支付' %}{% endfilter %}",
+    comingSoonText: "{% filter escapejs %}{% trans '我们正在为您所在的国家开通安全的移动支付服务，敬请期待。如需立即下单，请联系客服协助您完成付款。' %}{% endfilter %}",
 };
 
 const westAfricanCountries = [
@@ -950,6 +991,9 @@ function updateRegionHint(region) {
     } else if (region === 'central_africa') {
         hint.className = 'ck-region-hint central show';
         hint.innerHTML = '<i class="fas fa-wallet"></i> ' + CK_I18N.regionCentral;
+    } else if (region === 'coming_soon') {
+        hint.className = 'ck-region-hint soon show';
+        hint.innerHTML = '<i class="fas fa-hourglass-half"></i> ' + CK_I18N.regionComingSoon;
     } else {
         hint.className = 'ck-region-hint';
         hint.innerHTML = '';
@@ -964,6 +1008,22 @@ function updatePaymentMethods(country) {
     if (!country) {
         container.innerHTML = '<p class="text-muted text-center py-4">' + CK_I18N.selectCountryForPayment + '</p>';
         updateRegionHint(null);
+        return;
+    }
+
+    const countrySelect = document.getElementById('checkoutCountry');
+    const selectedOpt = countrySelect ? countrySelect.options[countrySelect.selectedIndex] : null;
+    const comingSoon = selectedOpt && selectedOpt.getAttribute('data-coming-soon') === '1';
+
+    if (comingSoon) {
+        updateRegionHint('coming_soon');
+        container.innerHTML = `
+            <div class="ck-coming-soon">
+                <div class="ck-coming-soon-icon"><i class="fas fa-rocket"></i></div>
+                <div class="ck-coming-soon-title">${CK_I18N.comingSoonTitle}</div>
+                <p class="ck-coming-soon-text">${CK_I18N.comingSoonText}</p>
+            </div>
+        `;
         return;
     }
 

@@ -3002,7 +3002,7 @@ def checkout(request):
                 for option in region_options
             }
             if payment_method not in available_methods:
-                messages.error(request, '当前国家暂不支持该支付方式，请重新选择。')
+                messages.error(request, _('当前国家暂不支持该支付方式，请重新选择。'))
                 return redirect('manager:checkout')
 
             book_order = None

@@ -1,9 +1,11 @@
 {% load i18n %}
-{# Reusable "Recommended for you" rail.
-   Params: reco_domain (books|marketplace|mixed); optional reco_id for a unique
-   element id when the same domain rail appears twice on one page (e.g. a
-   separate mobile + desktop layout). Renders nothing for anonymous /
-   signal-less visitors (the API returns []). #}
+{% comment %}
+Reusable "Recommended for you" rail.
+Params: reco_domain (books|marketplace|mixed); optional reco_id for a unique
+element id when the same domain rail appears twice on one page (e.g. a
+separate mobile + desktop layout). Renders nothing for anonymous /
+signal-less visitors (the API returns []).
+{% endcomment %}
 {% with rid=reco_id|default:reco_domain|default:'mixed' %}
 <div class="reco-rail" id="recoRail-{{ rid }}" data-domain="{{ reco_domain|default:'mixed' }}" style="display:none;">
     <div class="reco-rail-head">
