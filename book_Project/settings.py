@@ -477,6 +477,14 @@ PAWAPAY_CURRENCY = os.environ.get('PAWAPAY_CURRENCY', 'XAF')
 PAWAPAY_CALLBACK_DEPOSITS = os.environ.get('PAWAPAY_CALLBACK_DEPOSITS', '')
 PAWAPAY_CALLBACK_PAYOUTS = os.environ.get('PAWAPAY_CALLBACK_PAYOUTS', '')
 PAWAPAY_CALLBACK_REFUNDS = os.environ.get('PAWAPAY_CALLBACK_REFUNDS', '')
+# Enable "Signed Callbacks" in the PawaPay Dashboard (Security tab) before
+# turning this on — it verifies the Signature/Content-Digest headers PawaPay
+# sends against their public key. While False, callbacks are still verified
+# opportunistically (logged, never trusted blindly) but not rejected if a
+# signature is missing/invalid — safe default for rollout before the
+# dashboard toggle is flipped. Once confirmed working, set to True to reject
+# unsigned/invalid callbacks outright.
+PAWAPAY_REQUIRE_SIGNED_CALLBACKS = os.environ.get('PAWAPAY_REQUIRE_SIGNED_CALLBACKS', 'False') == 'True'
 
 # Twilio Verify — SMS OTP for signup (optional; set all three vars to enable)
 TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID', '')

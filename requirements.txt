@@ -11,6 +11,7 @@ boto3>=1.34.0
 whitenoise>=6.7.0
 gunicorn>=22.0.0
 requests>=2.30.0,<3
+cryptography>=42.0.0  # verifies PawaPay's RFC-9421 signed callbacks (EC-P256)
 
 # Translation
 django-rosetta>=0.10.0

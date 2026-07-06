@@ -632,7 +632,24 @@ def _pawapay_process_callback(data):
 @csrf_exempt
 @require_POST
 def pawapay_callback(request):
-    """Receive PawaPay async notifications (deposits, payouts, refunds)."""
+    """Receive PawaPay async notifications (deposits, payouts, refunds).
+
+    Verifies the RFC-9421 signature PawaPay sends once "Signed Callbacks" is
+    enabled in the Dashboard. This is on top of — not instead of — the
+    existing safeguard in _pawapay_process_callback() that re-checks a
+    "SUCCESSFUL" status against the live API before ever completing an order,
+    so a missing/invalid signature can never itself mark an order paid.
+    """
+    from manager.payments.pawapay_signatures import verify_callback_signature
+
+    verified, detail = verify_callback_signature(request)
+    if verified:
+        logger.info('PawaPay callback: signature verified OK')
+    else:
+        logger.warning('PawaPay callback: signature not verified (%s)', detail)
+        if getattr(settings, 'PAWAPAY_REQUIRE_SIGNED_CALLBACKS', False):
+            return JsonResponse({'error': 'invalid or missing signature'}, status=403)
+
     try:
         body = json.loads(request.body)
         logger.info('PawaPay callback received: %s', json.dumps(body))
