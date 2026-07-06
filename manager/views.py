@@ -3744,6 +3744,39 @@ def api_home_feed(request):
     items = []
     feed_type = feed_type if feed_type in ('mixed', 'books', 'products', 'courses', 'supermarket') else 'mixed'
 
+    # ── Personalized feed for logged-in shoppers ──────────────────────────
+    # When the visitor has usable preference signals, rank the feed with the
+    # recommendation engine instead of raw popularity. Falls through to the
+    # popularity feed below for anonymous / signal-less visitors.
+    user_id = request.session.get('site_user_id')
+    if user_id:
+        try:
+            from manager import recommendations as _reco
+            domain_map = {'mixed': 'mixed', 'books': 'books',
+                          'products': 'marketplace', 'courses': 'marketplace',
+                          'supermarket': 'marketplace'}
+            if not request.session.session_key:
+                request.session.save()
+            skey = request.session.session_key or ''
+            if feed_type in ('books', 'mixed'):
+                domain = domain_map.get(feed_type, 'mixed')
+            else:
+                domain = feed_type  # single marketplace type handled by _domain_types? use per-type
+            # For single marketplace types keep them isolated.
+            if feed_type in ('products', 'courses', 'supermarket'):
+                rec_items, has_more, has_sig = _reco.recommend(
+                    user_id, skey, domain='marketplace', page=page, per_page=PER_PAGE)
+                type_key = feed_type.rstrip('s') if feed_type != 'supermarket' else 'supermarket'
+                rec_items = [it for it in rec_items if it['type'] == type_key] or rec_items
+            else:
+                rec_items, has_more, has_sig = _reco.recommend(
+                    user_id, skey, domain=domain, page=page, per_page=PER_PAGE)
+            if has_sig and rec_items:
+                return JsonResponse({'items': rec_items, 'page': page,
+                                     'has_more': has_more, 'personalized': True})
+        except Exception:
+            pass  # any issue → fall back to the popularity feed below
+
     def _slice_wrap(qs, count, limit):
         if not count or limit <= 0:
             return []
@@ -3845,6 +3878,37 @@ def api_home_feed(request):
                 items.append(src['to_item'](row))
 
     return JsonResponse({'items': items, 'page': page, 'has_more': len(items) > 0})
+
+
+def api_recommendations(request):
+    """Personalized 'Recommended for you' rail for the marketplace and book
+    catalog. Returns [] when the visitor has no usable preference signal so the
+    caller can simply hide the rail (no awkward empty/duplicate section)."""
+    user_id = request.session.get('site_user_id')
+    domain = request.GET.get('domain', 'mixed')
+    if domain not in ('mixed', 'books', 'marketplace'):
+        domain = 'mixed'
+    try:
+        limit = min(24, max(4, int(request.GET.get('limit', 12))))
+    except (TypeError, ValueError):
+        limit = 12
+    if not user_id:
+        return JsonResponse({'items': [], 'personalized': False})
+    try:
+        from manager import recommendations as _reco
+        if not request.session.session_key:
+            request.session.save()
+        skey = request.session.session_key or ''
+        items, _has_more, has_sig = _reco.recommend(
+            user_id, skey, domain=domain, page=1, per_page=limit, exclude_owned=True)
+        if not has_sig:
+            return JsonResponse({'items': [], 'personalized': False})
+        # Only surface items that actually matched a preference (a genuine
+        # recommendation), not popularity filler.
+        rec = [it for it in items if it.get('recommended')][:limit]
+        return JsonResponse({'items': rec, 'personalized': bool(rec)})
+    except Exception:
+        return JsonResponse({'items': [], 'personalized': False})
 
 
 def api_unified_search(request):

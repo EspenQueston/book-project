@@ -6334,3 +6334,31 @@ msgstr "French"
 #: marketplace/models.py:0
 msgid "双语"
 msgstr "Bilingual"
+
+#: manager/recommendations.py:0
+msgid "为你推荐"
+msgstr "Recommended for you"
+
+#: manager/recommendations.py:0
+msgid "根据你的收藏、购买和关注为你精选"
+msgstr "Handpicked from your favorites, purchases and the shops you follow"
+
+#: manager/recommendations.py:0
+msgid "上一个"
+msgstr "Previous"
+
+#: manager/recommendations.py:0
+msgid "下一个"
+msgstr "Next"
+
+#: manager/recommendations.py:0
+msgid "来自你关注的出版社"
+msgstr "From a publisher you follow"
+
+#: manager/recommendations.py:0
+msgid "来自你关注的卖家"
+msgstr "From a seller you follow"
+
+#: manager/recommendations.py:0
+msgid "来自你常联系的卖家"
+msgstr "From a seller you often chat with"

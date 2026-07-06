@@ -515,6 +515,7 @@
 <!-- Books Grid -->
 <section class="books-desktop-grid py-5">
     <div class="container">
+        {% include 'public/includes/reco_rail.html' with reco_domain='books' reco_id='books-d' %}
         {% if books %}
         <div class="row" id="booksDesktopRow">
             {% for book in books %}

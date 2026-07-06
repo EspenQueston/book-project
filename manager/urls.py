@@ -116,6 +116,7 @@ urlpatterns = [
     path('api/cancel-order/', views.api_cancel_order, name='api_cancel_order'),
     path('api/confirm-payment/', views.api_confirm_payment, name='api_confirm_payment'),
     path('api/feed/', views.api_home_feed, name='api_home_feed'),
+    path('api/recommendations/', views.api_recommendations, name='api_recommendations'),
     path('api/search/', views.api_unified_search, name='api_unified_search'),
     path('api/spin-wheel/', views.api_spin_wheel, name='api_spin_wheel'),
     path('public/search/', views.public_search, name='public_search'),
