@@ -197,7 +197,12 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # 国际化配置 / Internationalization
-LANGUAGE_CODE = 'zh-hans'
+# Default language for visitors/crawlers with no explicit preference. The public
+# platform serves the francophone market (Congo), so French is the default and
+# what search engines index — content is still authored in Chinese and
+# translated to FR/EN. Users can switch language via the navbar; their choice is
+# stored per-session and overrides this default.
+LANGUAGE_CODE = 'fr'
 
 LANGUAGES = [
     ('zh-hans', _('中文')),

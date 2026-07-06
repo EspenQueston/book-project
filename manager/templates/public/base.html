@@ -8,7 +8,30 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>{% block title %}DUNO 360{% endblock %}</title>
     <link rel="icon" type="image/svg+xml" href="{% static 'img/duno360-favicon.svg' %}">
-    
+
+    <!-- SEO — French (marché francophone : Congo). Pages may override og:title/description. -->
+    <meta name="description" content="{% block meta_description %}{% trans 'DUNO 360 — la plateforme e-commerce tout-en-un au Congo : livres, cours en ligne, marketplace et supermarché frais. Achetez, apprenez et vendez en toute simplicité, paiement mobile money sécurisé.' %}{% endblock %}">
+    <meta name="keywords" content="{% trans 'DUNO 360, e-commerce Congo, marketplace, livres, cours en ligne, supermarché, mobile money, Brazzaville, achat en ligne' %}">
+    <meta name="author" content="DUNO 360">
+    <meta name="robots" content="index, follow">
+    <meta http-equiv="content-language" content="{{ LANGUAGE_CODE }}">
+    <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+    {# {% static %} is already an absolute CDN URL in production but relative in dev — build an absolute og:image URL that works in both. #}
+    {% static 'img/duno360-logo.svg' as og_logo %}
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="DUNO 360">
+    <meta property="og:locale" content="fr_FR">
+    <meta property="og:title" content="{% block og_title %}{% trans 'DUNO 360 — livres, cours, marketplace et supermarché au Congo' %}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{% trans 'La plateforme e-commerce tout-en-un au Congo : livres, cours en ligne, marketplace et supermarché frais. Paiement mobile money sécurisé.' %}{% endblock %}">
+    <meta property="og:image" content="{% if 'http' in og_logo %}{{ og_logo }}{% else %}{{ request.scheme }}://{{ request.get_host }}{{ og_logo }}{% endif %}">
+    <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{% trans 'DUNO 360 — e-commerce tout-en-un au Congo' %}">
+    <meta name="twitter:description" content="{% trans 'Livres, cours en ligne, marketplace et supermarché frais. Paiement mobile money sécurisé.' %}">
+    <meta name="twitter:image" content="{% if 'http' in og_logo %}{{ og_logo }}{% else %}{{ request.scheme }}://{{ request.get_host }}{{ og_logo }}{% endif %}">
+
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome Icons -->
@@ -422,22 +445,30 @@
             display: inline-flex;
             align-items: center;
         }
+        /* The full-colour logo is designed for a light surface; on the dark
+           navbar/footer it sits on a clean white rounded chip so it stays crisp. */
         .duno-brand-logo {
-            height: 52px;
+            height: 40px;
             width: auto;
             display: block;
-            filter: drop-shadow(0 5px 14px rgba(15,23,42,.26));
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 7px 14px;
+            box-shadow: 0 6px 18px rgba(7,12,33,.22);
         }
         .navbar-brand.duno-brand {
-            min-width: 178px;
-            min-height: 58px;
+            min-width: 0;
+            min-height: 0;
             padding: 4px 0;
         }
         .footer-logo-image {
-            height: 54px;
+            height: 42px;
             width: auto;
             display: block;
-            filter: drop-shadow(0 6px 16px rgba(0,0,0,.18));
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 7px 14px;
+            box-shadow: 0 6px 16px rgba(0,0,0,.22);
         }
         
         .hero-section {
@@ -944,7 +975,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background: var(--brand-gradient); box-shadow: 0 8px 28px rgba(20,36,95,0.28);">
         <div class="container">
             <a class="navbar-brand duno-brand" href="{% url 'manager:public_home' %}" aria-label="DUNO 360">
-                <img src="{% static 'img/duno360-logo.svg' %}?v=20260706" alt="DUNO 360" class="duno-brand-logo">
+                <img src="{% static 'img/duno360-logo.svg' %}?v=20260707" alt="{% trans 'Logo DUNO 360 — plateforme e-commerce au Congo' %}" class="duno-brand-logo">
             </a>
             <a href="{% url 'manager:view_cart' %}" class="navbar-mobile-cart d-lg-none" aria-label="{% trans '购物车' %}">
                 <i class="fas fa-shopping-cart"></i>
@@ -1658,11 +1689,12 @@
             .navbar-mobile-cart { display: flex; }
             .duno-brand { margin-right: 0; }
             .duno-brand-logo {
-                height: 46px;
+                height: 34px;
+                padding: 6px 11px;
             }
             .navbar-brand.duno-brand {
-                min-width: 154px;
-                min-height: 50px;
+                min-width: 0;
+                min-height: 0;
             }
         }
     </style>
@@ -1681,7 +1713,7 @@
                 <div class="col-lg-4 col-md-6">
                     <div class="footer-section">
                         <div class="footer-logo">
-                            <img src="{% static 'img/duno360-logo.svg' %}?v=20260706" alt="DUNO 360" class="footer-logo-image">
+                            <img src="{% static 'img/duno360-logo.svg' %}?v=20260707" alt="{% trans 'Logo DUNO 360 — plateforme e-commerce au Congo' %}" class="footer-logo-image">
                         </div>
                         <p class="footer-description">
                             <span data-zh="综合性数字平台，融合图书、在线课程、电商市场与生鲜超市，为您提供一站式的知识获取与购物体验。" data-en="A comprehensive digital platform combining books, online courses, e-commerce marketplace and fresh supermarket — your one-stop destination for knowledge and shopping." data-fr="Plateforme numérique complète combinant livres, cours en ligne, marketplace e-commerce et supermarché — votre destination unique pour le savoir et le shopping.">综合性数字平台，融合图书、在线课程、电商市场与生鲜超市，为您提供一站式的知识获取与购物体验。</span>

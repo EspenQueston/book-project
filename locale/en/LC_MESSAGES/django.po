@@ -6362,3 +6362,49 @@ msgstr "From a seller you follow"
 #: manager/recommendations.py:0
 msgid "来自你常联系的卖家"
 msgstr "From a seller you often chat with"
+
+#: manager/templates/public/base.html:0
+msgid "Logo DUNO 360 — plateforme e-commerce au Congo"
+msgstr "DUNO 360 logo — e-commerce platform in Congo"
+
+#: manager/templates/public/base.html:0
+msgid ""
+"DUNO 360 — la plateforme e-commerce tout-en-un au Congo : livres, cours en "
+"ligne, marketplace et supermarché frais. Achetez, apprenez et vendez en "
+"toute simplicité, paiement mobile money sécurisé."
+msgstr ""
+"DUNO 360 — the all-in-one e-commerce platform in Congo: books, online "
+"courses, marketplace and fresh supermarket. Buy, learn and sell with ease, "
+"secure mobile money payment."
+
+#: manager/templates/public/base.html:0
+msgid ""
+"DUNO 360, e-commerce Congo, marketplace, livres, cours en ligne, "
+"supermarché, mobile money, Brazzaville, achat en ligne"
+msgstr ""
+"DUNO 360, e-commerce Congo, marketplace, books, online courses, supermarket,"
+" mobile money, Brazzaville, online shopping"
+
+#: manager/templates/public/base.html:0
+msgid "DUNO 360 — livres, cours, marketplace et supermarché au Congo"
+msgstr "DUNO 360 — books, courses, marketplace and supermarket in Congo"
+
+#: manager/templates/public/base.html:0
+msgid ""
+"La plateforme e-commerce tout-en-un au Congo : livres, cours en ligne, "
+"marketplace et supermarché frais. Paiement mobile money sécurisé."
+msgstr ""
+"The all-in-one e-commerce platform in Congo: books, online courses, "
+"marketplace and fresh supermarket. Secure mobile money payment."
+
+#: manager/templates/public/base.html:0
+msgid "DUNO 360 — e-commerce tout-en-un au Congo"
+msgstr "DUNO 360 — all-in-one e-commerce in Congo"
+
+#: manager/templates/public/base.html:0
+msgid ""
+"Livres, cours en ligne, marketplace et supermarché frais. Paiement mobile "
+"money sécurisé."
+msgstr ""
+"Books, online courses, marketplace and fresh supermarket. Secure mobile "
+"money payment."

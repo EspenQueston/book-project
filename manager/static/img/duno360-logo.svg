@@ -1,53 +1,45 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 470 168" role="img" aria-labelledby="title desc">
-  <title id="title">DUNO 360 logo</title>
-  <desc id="desc">DUNO 360 wordmark with circular commerce arrows and cart icon</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 545 190" role="img" aria-labelledby="logoTitle logoDesc">
+  <title id="logoTitle">Logo DUNO 360</title>
+  <desc id="logoDesc">DUNO 360 — plateforme e-commerce tout-en-un : livres, cours en ligne, marketplace et supermarché. Un globe avec un panier et des flèches de commerce.</desc>
   <defs>
-    <linearGradient id="tealGrad" x1="0" x2="1" y1="0" y2="1">
-      <stop offset="0%" stop-color="#22d3ee"/>
-      <stop offset="100%" stop-color="#67e8f9"/>
+    <linearGradient id="tealArc" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1fb6c7"/><stop offset="1" stop-color="#0f9fb0"/>
     </linearGradient>
-    <linearGradient id="yellowGrad" x1="0" x2="1" y1="0" y2="1">
-      <stop offset="0%" stop-color="#ffd54a"/>
-      <stop offset="100%" stop-color="#f5b700"/>
+    <linearGradient id="yellowArc" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffc63f"/><stop offset="1" stop-color="#f5a623"/>
     </linearGradient>
-    <marker id="arrowTeal" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
-      <path d="M0,0 L10,5 L0,10 z" fill="#22d3ee"/>
+    <marker id="mTeal" markerWidth="7" markerHeight="7" refX="3" refY="3.4" orient="auto">
+      <path d="M0 0 L7 3.4 L0 6.8 Z" fill="#0f9fb0"/>
     </marker>
-    <marker id="arrowYellow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
-      <path d="M0,0 L10,5 L0,10 z" fill="#f5b700"/>
+    <marker id="mYellow" markerWidth="7" markerHeight="7" refX="3" refY="3.4" orient="auto">
+      <path d="M0 0 L7 3.4 L0 6.8 Z" fill="#f5a623"/>
     </marker>
-    <radialGradient id="iconGlow" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.32"/>
-      <stop offset="65%" stop-color="#ffffff" stop-opacity="0.14"/>
-      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
-    </radialGradient>
   </defs>
 
   <!-- Wordmark: textLength pins glyph width so rendering is identical on every
        platform font stack (Segoe UI / Roboto / Helvetica / Arial fallbacks). -->
-  <g font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="800">
-    <text x="12" y="82" font-size="70" fill="#ffffff"
-          textLength="228" lengthAdjust="spacingAndGlyphs">DUNO</text>
-    <text x="118" y="150" font-size="66" fill="url(#yellowGrad)"
-          textLength="132" lengthAdjust="spacingAndGlyphs">360</text>
+  <g font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="800" fill="#17457e">
+    <text x="14" y="106" font-size="100" textLength="302" lengthAdjust="spacingAndGlyphs">DUNO</text>
+    <text x="176" y="178" font-size="60" textLength="120" lengthAdjust="spacingAndGlyphs">360</text>
   </g>
 
-  <!-- Growth spark above the wordmark gap -->
-  <path d="M254 84 L282 52 L300 70 L326 40" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Icon: cyclic commerce arrows wrapping a globe with a shopping cart -->
+  <!-- teal arc sweeps the left + top; orange arc sweeps the right + bottom -->
+  <path d="M404 150 A70 70 0 0 1 514 60" fill="none" stroke="url(#tealArc)" stroke-width="13" stroke-linecap="round" marker-end="url(#mTeal)"/>
+  <path d="M522 84 A70 70 0 0 1 400 150" fill="none" stroke="url(#yellowArc)" stroke-width="13" stroke-linecap="round" marker-end="url(#mYellow)"/>
 
-  <!-- Soft glow halo behind the icon cluster: guarantees contrast against any
-       navbar shade, independent of the exact teal/yellow hue used above. -->
-  <circle cx="377" cy="93" r="88" fill="url(#iconGlow)"/>
+  <!-- globe -->
+  <g stroke="#17457e" stroke-width="4" fill="none">
+    <circle cx="454" cy="92" r="46"/>
+    <ellipse cx="454" cy="92" rx="18" ry="46"/>
+    <line x1="411" y1="76" x2="497" y2="76"/>
+    <line x1="410" y1="108" x2="498" y2="108"/>
+  </g>
 
-  <!-- Circular commerce arrows -->
-  <path d="M318 62 A72 72 0 0 1 438 66" fill="none" stroke="url(#tealGrad)" stroke-width="15" stroke-linecap="round" marker-end="url(#arrowTeal)"/>
-  <path d="M440 74 A72 72 0 0 1 434 136" fill="none" stroke="url(#yellowGrad)" stroke-width="15" stroke-linecap="round" marker-end="url(#arrowYellow)"/>
-  <path d="M414 146 A72 72 0 0 1 314 128" fill="none" stroke="url(#tealGrad)" stroke-width="15" stroke-linecap="round" marker-end="url(#arrowTeal)"/>
-
-  <!-- Cart badge -->
-  <circle cx="376" cy="98" r="40" fill="none" stroke="#ffffff" stroke-width="8"/>
-  <path d="M350 84 H402 L396 110 H357 Z" fill="none" stroke="#ffffff" stroke-width="7" stroke-linejoin="round"/>
-  <circle cx="363" cy="120" r="5.5" fill="#ffffff"/>
-  <circle cx="389" cy="120" r="5.5" fill="#ffffff"/>
-  <path d="M366 84 C368 71 373 63 381 59" fill="none" stroke="#ffffff" stroke-width="6.5" stroke-linecap="round"/>
+  <!-- shopping cart -->
+  <g stroke="#0f9fb0" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M430 78 h10 l7 34 h30 l8 -25 h-42"/>
+    <circle cx="451" cy="120" r="4.6" fill="#0f9fb0" stroke="none"/>
+    <circle cx="473" cy="120" r="4.6" fill="#0f9fb0" stroke="none"/>
+  </g>
 </svg>
