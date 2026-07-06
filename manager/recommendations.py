@@ -210,7 +210,7 @@ def _score_mkt(obj, item_type, profile, pop_cap):
 
 def _book_item(b, recommended=False, reason=None):
     return {
-        'type': 'book', 'type_label': _('图书'),
+        'type': 'book', 'type_label': _('图书'), 'id': b.id,
         'name': b.name[:40], 'price': str(b.price),
         'image': b.get_cover_url(), 'url': f'/manager/public/books/{b.id}/',
         'recommended': recommended, 'reason': reason or '',
@@ -228,7 +228,7 @@ def _mkt_item(obj, item_type, recommended=False, reason=None):
         name, url = obj.name[:40], f'/marketplace/products/{obj.slug}/'
         label = _('商品')
     return {
-        'type': item_type, 'type_label': label,
+        'type': item_type, 'type_label': label, 'id': obj.id,
         'name': name, 'price': str(obj.price),
         'image': obj.get_image_url(), 'url': url,
         'recommended': recommended, 'reason': reason or '',

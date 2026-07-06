@@ -768,6 +768,25 @@ def public_home(request):
 
     total_catalog_items = book_count + product_count + course_count + supermarket_product_count + author_count + publisher_count + vendor_count + user_count
 
+    # Personalized first page of the mobile home feed (pages 2+ come from the
+    # /api/feed/ endpoint, which is personalized the same way). Falls back to
+    # the popularity-ordered featured_* loops for anonymous / signal-less users.
+    home_feed_items = []
+    home_feed_personalized = False
+    _uid = request.session.get('site_user_id')
+    if _uid:
+        try:
+            from manager import recommendations as _reco
+            if not request.session.session_key:
+                request.session.save()
+            _skey = request.session.session_key or ''
+            _items, _hm, _has_sig = _reco.recommend(_uid, _skey, domain='mixed', page=1, per_page=12)
+            if _has_sig and _items:
+                home_feed_items = _items
+                home_feed_personalized = True
+        except Exception:
+            pass
+
     ctx = {
         'book_count': book_count,
         'author_count': author_count,
@@ -793,6 +812,8 @@ def public_home(request):
         'latest_blogs': latest_blogs,
         'trending_items': trending_items,
         'search_categories': search_categories,
+        'home_feed_items': home_feed_items,
+        'home_feed_personalized': home_feed_personalized,
     }
 
     return render(request, 'public/home.html', ctx)

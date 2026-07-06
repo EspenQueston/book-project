@@ -2350,14 +2350,45 @@ html[data-theme="dark"] .home-category-card:hover {
 
 <!-- ===== PWA: 2-Column Infinite Feed ===== -->
 <section class="feed-section" id="homeFeed">
+    <style>
+        .feed-reco-chip { position:absolute; top:8px; left:8px; z-index:2; display:inline-flex; align-items:center; gap:4px; max-width:calc(100% - 52px); font-size:0.6rem; font-weight:700; color:#fff; background:linear-gradient(135deg,rgba(29,78,216,.95),rgba(20,36,95,.95)); padding:3px 8px; border-radius:999px; box-shadow:0 4px 12px rgba(20,36,95,.3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .feed-reco-chip i { font-size:0.56rem; }
+    </style>
     <div class="feed-section-header">
         <span class="feed-title">
             <span class="feed-title-dot"></span>
+            {% if home_feed_personalized %}
+            <span data-zh="✨ 为你推荐" data-en="✨ For you" data-fr="✨ Pour vous">✨ 为你推荐</span>
+            {% else %}
             <span data-zh="🔥 热门推荐" data-en="🔥 Hot Items" data-fr="🔥 En vedette">🔥 热门推荐</span>
+            {% endif %}
         </span>
         <a href="{% url 'manager:public_books' %}" class="feed-see-all" data-zh="更多 ›" data-en="More ›" data-fr="Plus ›">更多 ›</a>
     </div>
     <div class="feed-grid" id="homeFeedGrid">
+        {% if home_feed_items %}
+        {% for item in home_feed_items %}
+        <a href="{{ item.url }}" class="feed-card">
+            <img class="feed-card-img" src="{{ item.image }}" alt="{{ item.name }}" loading="lazy" onerror="this.src='/static/img/default_cover.png'">
+            {% if item.type == 'book' %}
+            <button class="feed-card-wishlist" onclick="event.preventDefault();toggleWishlistFeed(this,{{ item.id }},'book')" aria-label="Wishlist"><i class="far fa-heart"></i></button>
+            {% endif %}
+            {% if item.recommended and item.reason %}<span class="feed-reco-chip"><i class="fas fa-sparkles"></i>{{ item.reason }}</span>{% endif %}
+            <div class="feed-card-body">
+                <div class="feed-card-name">{{ item.name|truncatechars:28 }}</div>
+                <div class="feed-card-actions">
+                    <div class="feed-card-actions-main">
+                        <div class="feed-card-actions-row">
+                            <span class="feed-card-price">{{ item.price|fcfa }}</span>
+                            {% if item.type != 'book' %}<span class="feed-card-tag" style="background:#fef3c7;color:#d97706;">{{ item.type_label }}</span>{% endif %}
+                        </div>
+                    </div>
+                    {% include 'public/includes/feed_view_details_btn.html' %}
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+        {% else %}
         {% for book in featured_books %}
         <a href="{% url 'manager:public_book_detail' book.id %}" class="feed-card">
             <img class="feed-card-img" src="{{ book.get_cover_url }}" alt="{{ book.name }}" loading="lazy" onerror="this.src='/static/img/default_cover.png'">
@@ -2397,6 +2428,7 @@ html[data-theme="dark"] .home-category-card:hover {
             </div>
         </a>
         {% endfor %}
+        {% endif %}
     </div>
     <div id="feedLoader" style="display:none"><i class="fas fa-spinner fa-spin"></i> <span data-zh="加载中..." data-en="Loading..." data-fr="Chargement...">加载中...</span></div>
     <template id="feedViewDetailsBtnTpl">{% include 'public/includes/feed_view_details_btn.html' %}</template>
@@ -3254,7 +3286,9 @@ function getCsrfToken() {
                             : 'background:#d1fae5;color:#065f46;';
                         /* Book cards carry no type tag (redundant label) */
                         var tagHtml = item.type === 'book' ? '' : '<span class="feed-card-tag" style="'+tagStyle+'">'+item.type_label+'</span>';
-                        card.innerHTML = '<img class="feed-card-img" src="'+item.image+'" alt="'+item.name+'" loading="lazy" onerror="this.src=\'/static/img/default_cover.png\'"><div class="feed-card-body"><div class="feed-card-name">'+item.name+'</div><div class="feed-card-actions"><div class="feed-card-actions-main"><div class="feed-card-actions-row"><span class="feed-card-price">'+fmtFcfa(item.price)+'</span>'+tagHtml+'</div></div>'+feedDetailsBtn+'</div></div>';
+                        var recoChip = (item.recommended && item.reason)
+                            ? '<span class="feed-reco-chip"><i class="fas fa-sparkles"></i>'+item.reason+'</span>' : '';
+                        card.innerHTML = '<img class="feed-card-img" src="'+item.image+'" alt="'+item.name+'" loading="lazy" onerror="this.src=\'/static/img/default_cover.png\'">'+recoChip+'<div class="feed-card-body"><div class="feed-card-name">'+item.name+'</div><div class="feed-card-actions"><div class="feed-card-actions-main"><div class="feed-card-actions-row"><span class="feed-card-price">'+fmtFcfa(item.price)+'</span>'+tagHtml+'</div></div>'+feedDetailsBtn+'</div></div>';
                         feedGrid.appendChild(card);
                     });
                     page++;
