@@ -2,7 +2,26 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from decimal import Decimal
+import re
 import uuid
+
+
+def _to_embed_url(url):
+    """Rewrite a YouTube/Vimeo/Dailymotion watch/share link to its embeddable
+    player URL; unrecognized URLs (self-hosted mp4, other CDNs, etc.) are
+    returned unchanged so they can still be used directly as an iframe src."""
+    if not url:
+        return url
+    yt = re.search(r'(?:youtube\.com/watch\?v=|youtu\.be/|youtube\.com/shorts/)([\w-]{6,})', url)
+    if yt:
+        return f'https://www.youtube.com/embed/{yt.group(1)}'
+    vimeo = re.search(r'vimeo\.com/(\d+)', url)
+    if vimeo:
+        return f'https://player.vimeo.com/video/{vimeo.group(1)}'
+    dm = re.search(r'dailymotion\.com/video/([\w]+)', url)
+    if dm:
+        return f'https://www.dailymotion.com/embed/video/{dm.group(1)}'
+    return url
 
 
 class Category(models.Model):
@@ -721,11 +740,18 @@ class CourseLesson(models.Model):
         return self.title
 
     def get_video_source(self):
-        """Return video URL or file URL, preferring uploaded file."""
+        """Return a playable video source, preferring the uploaded file.
+
+        For external links (video_url), common platforms (YouTube, Vimeo,
+        Dailymotion) are rewritten to their embeddable player URL — a plain
+        "watch"/"share" link refuses to load inside an <iframe> (frame
+        ancestors / X-Frame-Options), which otherwise leaves the course
+        player showing a blank frame.
+        """
         if self.video_file:
             return {'type': 'file', 'url': self.video_file.url}
-        elif self.video_url:
-            return {'type': 'url', 'url': self.video_url}
+        if self.video_url:
+            return {'type': 'iframe', 'url': _to_embed_url(self.video_url)}
         return None
 
 

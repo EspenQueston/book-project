@@ -361,6 +361,14 @@ def check_payment_status(request):
                 provider_status = normalize_pawapay_status(result.get('status', 'PENDING'))
                 if provider_status in ('SUCCESSFUL', 'FAILED'):
                     _update_order_status(order, provider_status, ref_id)
+                elif result.get('status') == 'NOT_FOUND':
+                    # PawaPay: an abandoned Payment Page session is NOT_FOUND
+                    # and "should be considered FAILED after 15 minutes" —
+                    # without this the order stays stuck on 'processing'
+                    # forever if the customer never pressed Pay.
+                    age = (timezone.now() - order.created_at).total_seconds()
+                    if age >= 15 * 60:
+                        _update_order_status(order, 'FAILED', ref_id)
 
         except Exception as e:
             logger.warning('Error polling payment status: %s', e)
@@ -578,6 +586,41 @@ def _find_order_by_number(order_number):
             return None
 
 
+def _process_seller_activation_callback(order_number, payment_id, internal_status, raw_status):
+    """Handle a PawaPay webhook for a seller-activation fee payment (order
+    numbers prefixed 'SVP-', created by manager.views.publish_entry()) —
+    same re-verification safeguard as _pawapay_process_callback() below."""
+    from manager.payments.pawapay import get_deposit_status, normalize_pawapay_status
+
+    try:
+        payment = models.SellerActivationPayment.objects.get(order_number=order_number)
+    except models.SellerActivationPayment.DoesNotExist:
+        logger.warning('PawaPay callback: no SellerActivationPayment for order_number=%s', order_number)
+        return False
+
+    if payment.status == 'paid':
+        return True
+
+    if internal_status == 'SUCCESSFUL' and payment_id:
+        verified = get_deposit_status(payment_id)
+        verified_status = normalize_pawapay_status(verified.get('status', 'PENDING'))
+        if verified_status != 'SUCCESSFUL':
+            logger.warning(
+                'PawaPay callback: payload said %s but API verification returned %s '
+                'for seller-activation deposit %s — not activating %s',
+                raw_status, verified.get('status'), payment_id, order_number)
+            internal_status = verified_status
+
+    if internal_status == 'SUCCESSFUL':
+        from manager.views import _activate_seller_from_payment
+        _activate_seller_from_payment(payment)
+    elif internal_status == 'FAILED':
+        payment.status = 'failed'
+        payment.external_status = 'failed'
+        payment.save(update_fields=['status', 'external_status', 'updated_at'])
+    return True
+
+
 def _pawapay_process_callback(data):
     """Shared logic for PawaPay deposit/payout/refund webhooks.
 
@@ -596,12 +639,16 @@ def _pawapay_process_callback(data):
     status = data.get('status', '')
     internal_status = normalize_pawapay_status(status)
 
-    order = None
     order_number = None
     for meta in data.get('metadata', []) or []:
         if meta.get('fieldName') == 'orderNumber':
             order_number = meta.get('fieldValue')
             break
+
+    if order_number and order_number.startswith('SVP-'):
+        return _process_seller_activation_callback(order_number, payment_id, internal_status, status)
+
+    order = None
     if order_number:
         order = _find_order_by_number(order_number)
     if not order and payment_id:

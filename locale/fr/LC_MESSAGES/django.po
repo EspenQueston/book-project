@@ -6488,3 +6488,11 @@ msgstr ""
 #: manager/templates/public/order_confirmation.html:0
 msgid "在下方“我的订单”中下载您的电子书。"
 msgstr "Téléchargez votre e-book ci-dessous dans « Mes commandes »."
+
+#: marketplace/templates/marketplace/products.html:1
+msgid "更多筛选"
+msgstr "Plus de filtres"
+
+#: marketplace/recommendations.py:1
+msgid "可报名"
+msgstr "Inscription ouverte"

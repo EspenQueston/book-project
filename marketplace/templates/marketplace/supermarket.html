@@ -193,12 +193,13 @@
 <template id="feedViewDetailsBtnTpl">{% include 'public/includes/feed_view_details_btn.html' %}</template>
 <script>
 (function() {
-    if (window.innerWidth > 768) return;
     var grid = document.getElementById('supermarketGrid');
     var loader = document.getElementById('supermarketFeedLoader');
     var sentinel = document.getElementById('supermarketFeedSentinel');
     var feedDetailsBtn = (document.getElementById('feedViewDetailsBtnTpl') || {}).innerHTML || '';
     if (!grid || !sentinel) return;
+    var paginationNav = document.querySelector('nav.mt-5');
+    if (paginationNav) paginationNav.style.display = 'none';
 
     var page = 1;
     var hasMore = true;
@@ -219,7 +220,7 @@
     }
 
     function buildCard(item) {
-        return '<div class="col-6">'
+        return '<div class="col-6 col-md-4 col-lg-3">'
             + '<a href="' + item.url + '" style="text-decoration:none; color:inherit;">'
             + '<div class="item-card feed-card-stretch">'
             + '<div style="position:relative;"><img src="' + item.image + '" alt="' + escHtml(item.name) + '" class="item-card-img"></div>'
@@ -227,7 +228,7 @@
             + '<div class="feed-card-actions"><div class="feed-card-actions-main">'
             + '<div class="d-flex align-items-baseline justify-content-between"><div>'
             + '<span class="item-price">' + fmtFcfa(item.price) + '</span><span class="item-unit">/' + escHtml(item.unit || '') + '</span>'
-            + '</div><span class="badge ' + (item.stock_text === '有货' ? 'bg-success' : 'bg-secondary') + '" style="font-size:0.65rem;">' + item.stock_text + '</span>'
+            + '</div><span class="badge ' + (item.in_stock ? 'bg-success' : 'bg-secondary') + '" style="font-size:0.65rem;">' + escHtml(item.stock_text || '') + '</span>'
             + '</div></div>' + feedDetailsBtn + '</div>'
             + '</div></div></a></div>';
     }

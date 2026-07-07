@@ -264,6 +264,17 @@
     .cml-title { font-size: 13px; font-weight: 600; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .cml-meta { font-size: 11px; color: #999; margin-top: 2px; }
 
+    /* Mobile video player (course-mobile-page) */
+    .cmv-section { background: #fff; margin-bottom: 6px; scroll-margin-top: 62px; overflow: hidden; }
+    .cmv-player { border-radius: 0; aspect-ratio: 16/9; }
+    .cmv-lesson-info { padding: 12px 14px; }
+    .cmv-lesson-title { font-size: 14px; font-weight: 700; color: #333; margin-bottom: 4px; }
+    .cmv-lesson-meta { font-size: 11px; color: #999; }
+    .cmv-lesson-desc { font-size: 12px; color: #666; line-height: 1.6; margin-top: 8px; }
+    html[data-theme="dark"] .cmv-section { background: var(--bg-surface, #1e293b); }
+    html[data-theme="dark"] .cmv-lesson-title { color: var(--text-primary, #e2e8f0); }
+    html[data-theme="dark"] .cmv-lesson-desc { color: var(--text-secondary, #cbd5e1); }
+
     @media(max-width:991px) {
         .playlist-panel { max-height: 400px; margin-top: 20px; }
     }
@@ -526,7 +537,43 @@
         </div>
     </div>
 
-    <!-- G. Lesson List -->
+    <!-- G. Video Player (mobile) -->
+    <div class="cmv-section" id="cmvSection">
+        <div class="video-container cmv-player">
+            {% with src=current_lesson.get_video_source %}
+            {% if src %}
+                {% if src.type == 'file' %}
+                <video controls playsinline style="width:100%;height:100%;background:#000;" controlsList="nodownload">
+                    <source src="{{ src.url }}" type="video/mp4">
+                    {% trans "您的浏览器不支持视频播放" %}
+                </video>
+                {% else %}
+                <iframe src="{{ src.url }}" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture"></iframe>
+                {% endif %}
+            {% else %}
+                <div class="video-placeholder">
+                    <i class="fas fa-play-circle d-block"></i>
+                    <p>{% trans "选择课节开始学习" %}</p>
+                </div>
+            {% endif %}
+            {% endwith %}
+        </div>
+        {% if current_lesson %}
+        <div class="cmv-lesson-info">
+            <div class="cmv-lesson-title">{{ current_lesson.title }}</div>
+            <div class="cmv-lesson-meta">
+                <i class="fas fa-clock"></i> {{ current_lesson.duration_minutes }} {% trans "分钟" %}
+                {% if current_lesson.is_free %}<span class="badge-free ms-2">{% trans "免费" %}</span>{% endif %}
+                {% if current_lesson.pdf_file %}<span class="badge-pdf ms-2"><i class="fas fa-file-pdf me-1"></i>PDF</span>{% endif %}
+            </div>
+            {% if current_lesson.description %}
+            <div class="cmv-lesson-desc">{{ current_lesson.description|linebreaksbr }}</div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- H. Lesson List -->
     <div class="cml-section">
         <div class="cml-header"><span>{% trans "课程大纲" %}</span><span style="color:#999;font-weight:400;">{{ total_lessons }} {% trans "课节" %}</span></div>
         {% for section in sections %}
@@ -534,7 +581,7 @@
             <i class="fas fa-folder-open me-1"></i>{{ section.title }}
         </div>
         {% for lesson in section.lessons.all|slice:":5" %}
-        <a href="?lesson={{ lesson.id }}" class="cml-lesson {% if current_lesson and current_lesson.id == lesson.id %}active{% endif %}">
+        <a href="?lesson={{ lesson.id }}#cmvSection" class="cml-lesson {% if current_lesson and current_lesson.id == lesson.id %}active{% endif %}">
             <div class="cml-num">{{ forloop.counter }}</div>
             <div class="cml-info">
                 <div class="cml-title">{{ lesson.title }}</div>
@@ -649,19 +696,23 @@
         <div class="col-lg-7 course-detail-main">
             <!-- Video Player -->
             <div class="video-container" id="videoContainer">
-                {% if current_lesson and current_lesson.video_file %}
-                <video controls style="width:100%;height:100%;background:#000;" controlsList="nodownload">
-                    <source src="{{ current_lesson.video_file.url }}" type="video/mp4">
-                    {% trans "您的浏览器不支持视频播放" %}
-                </video>
-                {% elif current_lesson and current_lesson.video_url %}
-                <iframe src="{{ current_lesson.video_url }}" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+                {% with src=current_lesson.get_video_source %}
+                {% if src %}
+                    {% if src.type == 'file' %}
+                    <video controls style="width:100%;height:100%;background:#000;" controlsList="nodownload">
+                        <source src="{{ src.url }}" type="video/mp4">
+                        {% trans "您的浏览器不支持视频播放" %}
+                    </video>
+                    {% else %}
+                    <iframe src="{{ src.url }}" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture"></iframe>
+                    {% endif %}
                 {% else %}
                 <div class="video-placeholder">
                     <i class="fas fa-play-circle d-block"></i>
                     <p>{% trans "选择课节开始学习" %}</p>
                 </div>
                 {% endif %}
+                {% endwith %}
             </div>
 
             <!-- Current Lesson Info -->

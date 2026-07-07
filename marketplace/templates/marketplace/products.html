@@ -107,6 +107,15 @@
         .stock-badge { font-size: 0.58rem !important; padding: 2px 6px !important; }
         #productsGrid > div { margin-bottom: 0; }
         .pagination { display: none !important; }
+        .mobile-filter-extra { display: none; width: 100%; }
+        .mobile-filter-extra.open { display: block; margin-top: 10px; }
+        .mobile-filter-extra > div { margin-bottom: 10px; }
+        .mobile-filter-extra > div:last-child { margin-bottom: 0; }
+        #mobileFilterToggle { width: 42px; padding: 0; font-size: 14px; }
+        #mobileFilterToggle.active { box-shadow: inset 0 0 0 2px rgba(255,255,255,.5); }
+    }
+    @media (min-width: 769px) {
+        .mobile-filter-extra { display: contents; }
     }
 
     /* ========== DARK MODE ========== */
@@ -150,34 +159,56 @@
     <!-- Filter Bar -->
     <div class="filter-bar mb-4">
         <form method="get" class="row g-3 align-items-end">
-            <div class="col-md-4">
+            <div class="col-12 col-md-4">
                 <label class="form-label fw-bold text-muted small">{% trans "搜索" %}</label>
-                <input type="text" name="q" class="form-control" placeholder="{% trans '搜索商品...' %}" value="{{ query }}">
+                <div class="d-flex gap-2">
+                    <input type="text" name="q" class="form-control" placeholder="{% trans '搜索商品...' %}" value="{{ query }}">
+                    <button type="button" class="btn btn-filter d-md-none flex-shrink-0" id="mobileFilterToggle" aria-expanded="false" aria-controls="mobileFilterExtra" aria-label="{% trans '更多筛选' %}" title="{% trans '更多筛选' %}">
+                        <i class="fas fa-sliders-h"></i>
+                    </button>
+                </div>
             </div>
-            <div class="col-md-3">
-                <label class="form-label fw-bold text-muted small">{% trans "分类" %}</label>
-                <select name="category" class="form-select">
-                    <option value="">{% trans "全部分类" %}</option>
-                    {% for cat in categories %}
-                    <option value="{{ cat.slug }}" {% if current_category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label fw-bold text-muted small">{% trans "排序" %}</label>
-                <select name="sort" class="form-select">
-                    <option value="-created_at" {% if current_sort == '-created_at' %}selected{% endif %}>{% trans "最新" %}</option>
-                    <option value="price" {% if current_sort == 'price' %}selected{% endif %}>{% trans "价格低到高" %}</option>
-                    <option value="-price" {% if current_sort == '-price' %}selected{% endif %}>{% trans "价格高到低" %}</option>
-                    <option value="-sales_count" {% if current_sort == '-sales_count' %}selected{% endif %}>{% trans "最畅销" %}</option>
-                    <option value="name" {% if current_sort == 'name' %}selected{% endif %}>{% trans "名称" %}</option>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-filter w-100"><i class="fas fa-search me-1"></i>{% trans "筛选" %}</button>
+            <div class="mobile-filter-extra{% if current_category or current_sort != '-created_at' %} open{% endif %}" id="mobileFilterExtra">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold text-muted small">{% trans "分类" %}</label>
+                    <select name="category" class="form-select">
+                        <option value="">{% trans "全部分类" %}</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.slug }}" {% if current_category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold text-muted small">{% trans "排序" %}</label>
+                    <select name="sort" class="form-select">
+                        <option value="-created_at" {% if current_sort == '-created_at' %}selected{% endif %}>{% trans "最新" %}</option>
+                        <option value="price" {% if current_sort == 'price' %}selected{% endif %}>{% trans "价格低到高" %}</option>
+                        <option value="-price" {% if current_sort == '-price' %}selected{% endif %}>{% trans "价格高到低" %}</option>
+                        <option value="-sales_count" {% if current_sort == '-sales_count' %}selected{% endif %}>{% trans "最畅销" %}</option>
+                        <option value="name" {% if current_sort == 'name' %}selected{% endif %}>{% trans "名称" %}</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-filter w-100"><i class="fas fa-search me-1"></i>{% trans "筛选" %}</button>
+                </div>
             </div>
         </form>
     </div>
+    <script>
+    (function() {
+        var toggle = document.getElementById('mobileFilterToggle');
+        var extra = document.getElementById('mobileFilterExtra');
+        if (!toggle || !extra) return;
+        var isOpen = extra.classList.contains('open');
+        toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        toggle.classList.toggle('active', isOpen);
+        toggle.addEventListener('click', function() {
+            var open = extra.classList.toggle('open');
+            toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            toggle.classList.toggle('active', open);
+        });
+    })();
+    </script>
 
     <!-- Product Grid -->
     {% if products %}
@@ -264,12 +295,13 @@
 <template id="feedViewDetailsBtnTpl">{% include 'public/includes/feed_view_details_btn.html' %}</template>
 <script>
 (function() {
-    if (window.innerWidth > 768) return;
     var grid = document.getElementById('productsGrid');
     var loader = document.getElementById('productsFeedLoader');
     var sentinel = document.getElementById('productsFeedSentinel');
     var feedDetailsBtn = (document.getElementById('feedViewDetailsBtnTpl') || {}).innerHTML || '';
     if (!grid || !sentinel) return;
+    var paginationNav = document.querySelector('nav.mt-5');
+    if (paginationNav) paginationNav.style.display = 'none';
 
     var page = 1;
     var hasMore = true;
@@ -290,7 +322,7 @@
     }
 
     function buildCard(item) {
-        return '<div class="col-6">'
+        return '<div class="col-6 col-md-4 col-lg-3">'
             + '<a href="' + item.url + '" style="text-decoration:none; color:inherit;">'
             + '<div class="product-card feed-card-stretch">'
             + '<div style="position:relative;"><img src="' + item.image + '" alt="' + escHtml(item.name) + '" class="product-card-img"></div>'

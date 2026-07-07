@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.http import JsonResponse, HttpResponse, HttpResponseNotAllowed, FileResponse, Http404
 from django.contrib import messages
 from django.db import transaction
-from django.views.decorators.http import require_http_methods, require_POST
+from django.views.decorators.http import require_http_methods, require_POST, require_GET
 from django.db.models import Sum, Avg, Q, Count, Max, F, Prefetch, OuterRef, Subquery, Value, IntegerField
 from django.db.models.functions import Coalesce
 from django.utils import timezone
@@ -7634,73 +7634,58 @@ def publish_entry(request):
             payer_name = request.POST.get('payer_name', '').strip() or user.name
             if not phone:
                 return JsonResponse({'success': False, 'message': '请输入付款手机号。'}, status=400)
-            payment = models.SellerActivationPayment.objects.create(
-                user=user,
-                vendor=vendor,
-                order_number=f'SVP-{timezone.now().strftime("%Y%m%d%H%M%S")}-{user.id}',
-                amount=Decimal('100.00'),
-                currency='XAF',
-                provider='pawapay',
-                status='processing',
-                payer_phone=phone,
-                payer_name=payer_name,
-                external_reference=f'PAWA-SELLER-{user.id}-{uuid.uuid4().hex[:10]}',
-                external_status='queued',
-                provider_message='模拟 pawaPay 初始化成功，待确认。',
+
+            payment = pending_payment if pending_payment and pending_payment.status == 'pending' else None
+            if not payment:
+                payment = models.SellerActivationPayment.objects.create(
+                    user=user,
+                    vendor=vendor,
+                    order_number=f'SVP-{timezone.now().strftime("%Y%m%d%H%M%S")}-{user.id}',
+                    amount=Decimal('100.00'),
+                    currency='XAF',
+                    provider='pawapay',
+                    status='pending',
+                    payer_phone=phone,
+                    payer_name=payer_name,
+                )
+
+            from manager.payments.pawapay import create_payment_page_session
+            from django.utils import translation
+
+            return_url = request.build_absolute_uri(
+                reverse('manager:seller_activation_return', args=[payment.order_number])
             )
+            lang = 'EN' if translation.get_language() == 'en' else 'FR'
+            result = create_payment_page_session(
+                amount=int(payment.amount),
+                order_number=payment.order_number,
+                return_url=return_url,
+                phone_number=phone,
+                country='Congo',
+                reason='DUNO 360 - Activation vendeur',
+                language=lang,
+            )
+            if not result.get('success'):
+                payment.status = 'failed'
+                payment.provider_message = (result.get('error') or "Échec de l'initialisation du paiement pawaPay.")[:255]
+                payment.save(update_fields=['status', 'provider_message', 'updated_at'])
+                return JsonResponse({
+                    'success': False,
+                    'message': result.get('error') or "Impossible d'ouvrir la page de paiement pawaPay. Veuillez réessayer.",
+                }, status=400)
+
+            payment.external_reference = result['deposit_id']
+            payment.status = 'processing'
+            payment.external_status = 'queued'
+            payment.payer_phone = phone
+            payment.payer_name = payer_name
+            payment.save(update_fields=['external_reference', 'status', 'external_status', 'payer_phone', 'payer_name', 'updated_at'])
             request.session['pending_seller_activation_payment_id'] = payment.id
+
             return JsonResponse({
                 'success': True,
-                'requires_payment': True,
-                'payment_order': payment.order_number,
-                'amount': str(payment.amount),
-                'currency': payment.currency,
-                'provider': 'pawaPay',
-                'message': '卖家激活支付已创建，请完成 100 FCFA 支付后继续。',
+                'redirect_url': result['redirect_url'],
             })
-
-        if action == 'confirm_vendor_activation_payment':
-            payment_id = request.session.get('pending_seller_activation_payment_id') or request.POST.get('payment_id')
-            payment = get_object_or_404(models.SellerActivationPayment, id=payment_id, user=user)
-            payment.status = 'paid'
-            payment.external_status = 'completed'
-            payment.provider_message = '支付确认成功。'
-            payment.paid_at = timezone.now()
-            payment.save(update_fields=['status', 'external_status', 'provider_message', 'paid_at', 'updated_at'])
-
-            if not vendor:
-                vendor = models.Vendor.objects.create(
-                    user=user,
-                    company_name=f'{user.name} 的店铺',
-                    contact_name=user.name,
-                    email=user.email,
-                    phone=user.phone,
-                    password=user.password,
-                    description='Duno360 卖家',
-                    status='approved',
-                    is_active=True,
-                )
-            elif vendor.status == 'pending':
-                vendor.status = 'approved'
-                vendor.is_active = True
-                vendor.save(update_fields=['status', 'is_active', 'updated_at'])
-
-            payment.vendor = vendor
-            payment.save(update_fields=['vendor', 'updated_at'])
-
-            user.promote_to_seller()
-            request.session['vendor_id'] = vendor.id
-            request.session['vendor_name'] = vendor.company_name
-            create_notification(
-                'vendor_registered',
-                f'卖家激活成功: {user.name}',
-                f'{user.name} ({user.email}) 已完成 100 FCFA 的卖家激活支付并成功开通卖家身份。',
-                icon='fas fa-store',
-                color='#10b981',
-                link='/manager/admin/vendors/',
-                related_id=vendor.id,
-            )
-            return JsonResponse({'success': True, 'vendor_name': vendor.company_name, 'message': '支付成功，卖家身份已激活。'})
 
         if action == 'choose_type':
             if not vendor:
@@ -7743,6 +7728,145 @@ def publish_entry(request):
         'seller_activation_fee': Decimal('100.00'),
     }
     return render(request, 'public/publish_entry.html', context)
+
+
+def _activate_seller_from_payment(payment):
+    """Grant seller access after a SellerActivationPayment is verified paid via
+    pawaPay. Idempotent and shared between seller_activation_return() (browser
+    redirect back from the hosted Payment Page) and the async pawaPay webhook
+    (manager/payments/views.py) — whichever confirms the payment first wins."""
+    if payment.status == 'paid':
+        return payment.vendor
+
+    payment.status = 'paid'
+    payment.external_status = 'completed'
+    payment.provider_message = 'Paiement confirmé via pawaPay.'
+    payment.paid_at = timezone.now()
+    payment.save(update_fields=['status', 'external_status', 'provider_message', 'paid_at', 'updated_at'])
+
+    user = payment.user
+    vendor = payment.vendor or models.Vendor.objects.filter(user=user).first()
+    if not vendor:
+        vendor = models.Vendor.objects.create(
+            user=user,
+            company_name=f'{user.name} 的店铺',
+            contact_name=user.name,
+            email=user.email,
+            phone=user.phone,
+            password=user.password,
+            description='Duno360 卖家',
+            status='approved',
+            is_active=True,
+        )
+    elif vendor.status == 'pending':
+        vendor.status = 'approved'
+        vendor.is_active = True
+        vendor.save(update_fields=['status', 'is_active', 'updated_at'])
+
+    payment.vendor = vendor
+    payment.save(update_fields=['vendor', 'updated_at'])
+    user.promote_to_seller()
+
+    create_notification(
+        'vendor_registered',
+        f'卖家激活成功: {user.name}',
+        f'{user.name} ({user.email}) 已完成 {payment.amount} {payment.currency} 的卖家激活支付并成功开通卖家身份。',
+        icon='fas fa-store',
+        color='#10b981',
+        link='/manager/admin/vendors/',
+        related_id=vendor.id,
+    )
+    return vendor
+
+
+def seller_activation_return(request, order_number):
+    """Landing view pawaPay's hosted Payment Page redirects back to once the
+    seller-activation fee payment finishes — receives ?depositId=... and
+    verifies the real status server-side (never trusts the redirect itself
+    as proof of payment) before granting seller access."""
+    payment = get_object_or_404(models.SellerActivationPayment, order_number=order_number)
+    if payment.user_id != request.session.get('site_user_id'):
+        messages.warning(request, 'Non autorisé ou session expirée.')
+        return redirect('manager:public_home')
+
+    deposit_id = request.GET.get('depositId') or payment.external_reference
+    if payment.status not in ('paid', 'failed') and deposit_id:
+        from manager.payments.pawapay import get_deposit_status_v2, normalize_pawapay_status
+        result = get_deposit_status_v2(deposit_id)
+        internal = normalize_pawapay_status(result.get('status', 'PENDING'))
+        if internal == 'SUCCESSFUL':
+            _activate_seller_from_payment(payment)
+        elif internal == 'FAILED':
+            payment.status = 'failed'
+            payment.external_status = 'failed'
+            payment.provider_message = (result.get('error') or 'Paiement échoué.')[:255]
+            payment.save(update_fields=['status', 'external_status', 'provider_message', 'updated_at'])
+        elif result.get('status') == 'NOT_FOUND':
+            # PawaPay: "if the customer abandons the payment page, the deposit
+            # will be NOT_FOUND and should be considered FAILED after 15
+            # minutes" — without this, an abandoned Payment Page session left
+            # the record stuck on 'processing' forever, blocking a clean retry.
+            if _pawapay_deposit_expired(payment):
+                payment.status = 'failed'
+                payment.external_status = 'not_found'
+                payment.provider_message = 'Paiement annulé ou expiré (page abandonnée).'
+                payment.save(update_fields=['status', 'external_status', 'provider_message', 'updated_at'])
+            else:
+                messages.warning(request, 'Paiement annulé ou non terminé.')
+
+    if payment.status == 'failed':
+        messages.error(request, 'Le paiement a échoué. Veuillez réessayer.')
+
+    return redirect('manager:publish_entry')
+
+
+def _pawapay_deposit_expired(payment, minutes=15):
+    """True once a pawaPay Payment Page session's 15-minute window (per
+    PawaPay docs) has elapsed since the payment attempt was created — used to
+    safely convert a NOT_FOUND/abandoned deposit into 'failed' instead of
+    leaving it stuck on 'processing' forever."""
+    return (timezone.now() - payment.created_at).total_seconds() >= minutes * 60
+
+
+@require_GET
+def seller_activation_status(request):
+    """AJAX polling endpoint used by publish_entry.html while a seller
+    activation payment is still processing (same pattern as check_payment_status
+    for orders, in manager/payments/views.py)."""
+    site_user_id = request.session.get('site_user_id')
+    if not site_user_id:
+        return JsonResponse({'status': 'unknown'})
+
+    payment_id = request.session.get('pending_seller_activation_payment_id')
+    payment = None
+    if payment_id:
+        payment = models.SellerActivationPayment.objects.filter(id=payment_id, user_id=site_user_id).first()
+    if not payment:
+        # Session key can be lost across tabs/reloads — fall back to the
+        # user's most recent in-flight attempt instead of erroring out.
+        payment = models.SellerActivationPayment.objects.filter(
+            user_id=site_user_id, status__in=['pending', 'processing'],
+        ).order_by('-created_at').first()
+    if not payment:
+        return JsonResponse({'status': 'unknown'})
+
+    if payment.status == 'processing' and payment.external_reference:
+        from manager.payments.pawapay import get_deposit_status_v2, normalize_pawapay_status
+        result = get_deposit_status_v2(payment.external_reference)
+        internal = normalize_pawapay_status(result.get('status', 'PENDING'))
+        if internal == 'SUCCESSFUL':
+            _activate_seller_from_payment(payment)
+        elif internal == 'FAILED':
+            payment.status = 'failed'
+            payment.external_status = 'failed'
+            payment.save(update_fields=['status', 'external_status', 'updated_at'])
+        elif result.get('status') == 'NOT_FOUND' and _pawapay_deposit_expired(payment):
+            payment.status = 'failed'
+            payment.external_status = 'not_found'
+            payment.provider_message = 'Paiement annulé ou expiré (page abandonnée).'
+            payment.save(update_fields=['status', 'external_status', 'provider_message', 'updated_at'])
+
+    return JsonResponse({'status': payment.status})
 
 
 def _admin_apply_inventory_stock(item_type, item_id, action, delta, manual_value):

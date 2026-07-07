@@ -222,25 +222,15 @@
       <div class="modal-body p-4 text-center">
         <div class="publish-modal-icon"><i class="fas fa-credit-card"></i></div>
         <h3 class="publish-modal-title"><span data-zh="确认开通卖家身份？" data-en="Confirm seller activation?" data-fr="Confirmer l’activation vendeur ?">确认开通卖家身份？</span></h3>
-        <p class="publish-modal-text"><span data-zh="系统将创建一笔 100 FCFA 的 pawaPay 卖家激活支付，并在支付成功后自动为您开通卖家身份。" data-en="The system will create a 100 FCFA pawaPay seller activation payment and enable seller access automatically after successful payment." data-fr="Le système va créer un paiement d’activation vendeur pawaPay de 100 FCFA et activer automatiquement votre accès vendeur après paiement réussi.">系统将创建一笔 100 FCFA 的 pawaPay 卖家激活支付，并在支付成功后自动为您开通卖家身份。</span></p>
+        <p class="publish-modal-text"><span data-zh="您将被转到 pawaPay 安全支付页面完成 100 FCFA 的卖家激活支付，支付成功后系统会自动为您开通卖家身份。" data-en="You will be redirected to pawaPay's secure payment page to complete the 100 FCFA seller activation payment. Seller access is enabled automatically after a successful payment." data-fr="Vous serez redirigé vers la page de paiement sécurisée pawaPay pour effectuer le paiement d’activation vendeur de 100 FCFA. L’accès vendeur est activé automatiquement après un paiement réussi.">您将被转到 pawaPay 安全支付页面完成 100 FCFA 的卖家激活支付，支付成功后系统会自动为您开通卖家身份。</span></p>
+        <div class="text-start mt-3">
+          <label class="form-label fw-bold" for="publishPayerPhone"><span data-zh="付款手机号" data-en="Payment phone number" data-fr="Numéro de téléphone pour le paiement">付款手机号</span></label>
+          <input type="tel" id="publishPayerPhone" class="form-control" value="{{ site_user.phone|default:'' }}" placeholder="06XXXXXXXX" required>
+          <div class="form-text"><span data-zh="用于 Mobile Money 支付（Airtel / MTN）。" data-en="Used for the Mobile Money payment (Airtel / MTN)." data-fr="Utilisé pour le paiement Mobile Money (Airtel / MTN).">用于 Mobile Money 支付（Airtel / MTN）。</span></div>
+        </div>
         <div class="d-flex justify-content-center gap-2 mt-4">
           <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal" style="border-radius:999px;font-weight:800;"><span data-zh="取消" data-en="Cancel" data-fr="Annuler">取消</span></button>
-          <button type="button" class="btn px-4 publish-btn-primary" id="confirmPublishYes"><span data-zh="确认并创建支付" data-en="Confirm and create payment" data-fr="Confirmer et créer le paiement">确认并创建支付</span></button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="publishCongratsModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content" style="border:none;border-radius:24px;overflow:hidden;">
-      <div class="modal-body p-4 text-center">
-        <div style="font-size:3rem;">🎉</div>
-        <h3 class="publish-modal-title" style="margin-top:8px;"><span data-zh="支付已创建" data-en="Payment created" data-fr="Paiement créé">支付已创建</span></h3>
-        <p class="publish-modal-text"><span data-zh="请完成 100 FCFA 的卖家激活支付。支付成功后即可继续选择发布类型。" data-en="Please complete the 100 FCFA seller activation payment. After success, you can continue to choose what to publish." data-fr="Veuillez finaliser le paiement d’activation vendeur de 100 FCFA. Après succès, vous pourrez choisir quoi publier.">请完成 100 FCFA 的卖家激活支付。支付成功后即可继续选择发布类型。</span></p>
-        <div class="d-flex justify-content-center gap-2 flex-wrap mt-3">
-            <button type="button" class="btn publish-btn-primary" id="confirmPaymentDone"><span data-zh="我已完成支付" data-en="I completed the payment" data-fr="J’ai effectué le paiement">我已完成支付</span></button>
+          <button type="button" class="btn px-4 publish-btn-primary" id="confirmPublishYes"><span data-zh="继续前往支付" data-en="Continue to payment" data-fr="Continuer vers le paiement">继续前往支付</span></button>
         </div>
       </div>
     </div>
@@ -275,7 +265,6 @@
 document.addEventListener('DOMContentLoaded', function() {
   const csrftoken = (document.querySelector('[name=csrfmiddlewaretoken]') || {}).value || '{{ csrf_token }}';
   const confirmModal = new bootstrap.Modal(document.getElementById('publishConfirmModal'));
-  const congratsModal = new bootstrap.Modal(document.getElementById('publishCongratsModal'));
   const typeModal = new bootstrap.Modal(document.getElementById('publishTypeModal'));
 
   {% if direct_type_choice %}
@@ -287,38 +276,35 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   document.getElementById('confirmPublishYes').addEventListener('click', function() {
+    var btn = this;
+    var phone = (document.getElementById('publishPayerPhone').value || '').trim();
+    if (!phone) {
+      var htmlLang = document.documentElement.lang || '';
+      var phoneRequiredMsg = htmlLang.indexOf('fr') === 0
+        ? 'Veuillez saisir votre numéro de téléphone pour le paiement.'
+        : (htmlLang.indexOf('en') === 0 ? 'Please enter your payment phone number.' : '请输入付款手机号。');
+      alert(phoneRequiredMsg);
+      return;
+    }
+    btn.disabled = true;
     fetch('{% url "manager:publish_entry" %}', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrftoken },
-      body: new URLSearchParams({ action: 'activate_vendor' })
+      body: new URLSearchParams({ action: 'activate_vendor', payer_phone: phone })
     }).then(r => r.json()).then(data => {
-      if (!data.success) throw new Error(data.message || 'Erreur');
-      confirmModal.hide();
-      congratsModal.show();
-    }).catch(err => alert(err.message || 'Une erreur est survenue.'));
-  });
-
-  document.getElementById('confirmPaymentDone').addEventListener('click', function() {
-    fetch('{% url "manager:publish_entry" %}', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrftoken },
-      body: new URLSearchParams({ action: 'confirm_vendor_activation_payment' })
-    }).then(r => r.json()).then(data => {
-      if (!data.success) throw new Error(data.message || 'Erreur');
-      congratsModal.hide();
-      typeModal.show();
-    }).catch(err => alert(err.message || 'Une erreur est survenue.'));
+      if (!data.success || !data.redirect_url) throw new Error(data.message || 'Erreur');
+      window.location.href = data.redirect_url;
+    }).catch(err => {
+      btn.disabled = false;
+      alert(err.message || 'Une erreur est survenue.');
+    });
   });
 
   var publishTypeBack = document.getElementById('publishTypeBack');
   if (publishTypeBack) {
     publishTypeBack.addEventListener('click', function() {
       typeModal.hide();
-      {% if already_vendor %}
       window.location.href = '/manager/public/';
-      {% else %}
-      congratsModal.show();
-      {% endif %}
     });
   }
 
@@ -335,6 +321,27 @@ document.addEventListener('DOMContentLoaded', function() {
       }).catch(err => alert(err.message || 'Une erreur est survenue.'));
     });
   });
+
+  {% if pending_activation_payment and pending_activation_payment.status == 'processing' %}
+  (function pollSellerActivationStatus() {
+    var attempts = 0;
+    var maxAttempts = 40;
+    var poll = setInterval(function() {
+      attempts++;
+      fetch('{% url "manager:seller_activation_status" %}')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.status === 'paid' || data.status === 'failed' || attempts >= maxAttempts) {
+            clearInterval(poll);
+            if (data.status === 'paid' || data.status === 'failed') {
+              location.reload();
+            }
+          }
+        })
+        .catch(function() { /* transient network hiccup — try again next tick */ });
+    }, 3000);
+  })();
+  {% endif %}
 });
 </script>
 {% endblock %}

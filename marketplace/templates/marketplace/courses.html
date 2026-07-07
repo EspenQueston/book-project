@@ -232,12 +232,13 @@
 <template id="feedViewDetailsBtnTpl">{% include 'public/includes/feed_view_details_btn.html' %}</template>
 <script>
 (function() {
-    if (window.innerWidth > 768) return;
     var grid = document.getElementById('coursesGrid');
     var loader = document.getElementById('coursesFeedLoader');
     var sentinel = document.getElementById('coursesFeedSentinel');
     var feedDetailsBtn = (document.getElementById('feedViewDetailsBtnTpl') || {}).innerHTML || '';
     if (!grid || !sentinel) return;
+    var paginationNav = document.querySelector('nav.mt-5');
+    if (paginationNav) paginationNav.style.display = 'none';
 
     var page = 1;
     var hasMore = true;
@@ -258,7 +259,7 @@
     }
 
     function buildCard(item) {
-        return '<div class="col-6">'
+        return '<div class="col-sm-6 col-md-4 col-lg-3">'
             + '<a href="' + item.url + '" style="text-decoration:none; color:inherit;">'
             + '<div class="course-card feed-card-stretch">'
             + '<div style="position:relative;"><img src="' + item.image + '" alt="' + escHtml(item.name) + '" class="course-card-img"></div>'
