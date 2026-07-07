@@ -33,6 +33,10 @@ db.sqlite3-journal
 media/
 staticfiles/
 
+# Production data backups taken by deploy/sync_content_to_production.py —
+# may contain business data, never commit.
+deploy/backups/
+
 # Environment variables (CRITICAL - Never commit!)
 .env
 .env.local
