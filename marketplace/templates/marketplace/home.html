@@ -176,21 +176,8 @@
     }
 
     /* ========== DARK MODE ========== */
-    html[data-theme="dark"] .marketplace-hero {
-        background:
-            linear-gradient(180deg, transparent 72%, var(--bg-page) 100%),
-            linear-gradient(135deg, #4338ca 0%, #5b21b6 100%);
-    }
-    html[data-theme="dark"] .marketplace-hero::after {
-        background: linear-gradient(180deg, transparent 0%, var(--bg-page) 100%);
-    }
-    html[data-theme="dark"] .stats-banner {
-        background: var(--bg-surface);
-        box-shadow: 0 8px 30px rgba(0,0,0,0.25);
-    }
-    html[data-theme="dark"] .section-stat-label {
-        color: var(--text-tertiary);
-    }
+    /* marketplace-hero / stats-banner intentionally keep their light-mode
+       brand-blue + white look in dark mode too (no override here). */
     html[data-theme="dark"] .section-card {
         background: var(--bg-surface);
         box-shadow: 0 4px 20px rgba(0,0,0,0.2);
