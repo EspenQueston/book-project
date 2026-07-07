@@ -5,7 +5,7 @@ from manager.payments.views import (
     mtn_momo_callback, airtel_money_callback,
     initiate_momo_payment, check_payment_status,
     kkiapay_verify, kkiapay_webhook,
-    pawapay_callback, pawapay_initiate, pawapay_verify,
+    pawapay_callback,
 )
 
 # manager中转路由
@@ -107,6 +107,7 @@ urlpatterns = [
     path('checkout/', views.checkout, name='checkout'),
     path('payment/kkiapay/<str:order_number>/', views.kkiapay_pay, name='kkiapay_pay'),
     path('payment/pawapay/<str:order_number>/', views.pawapay_pay, name='pawapay_pay'),
+    path('payment/pawapay/return/<str:order_number>/', views.pawapay_return, name='pawapay_return'),
     path('public/kkiapay/success/<str:order_number>/', views.kkiapay_success_redirect, name='kkiapay_success_redirect'),
     path('order-confirmation/<str:order_number>/', views.order_confirmation, name='order_confirmation'),
     path('track-order/', views.track_order, name='track_order'),
@@ -247,8 +248,6 @@ urlpatterns = [
     # =========================KKiaPay========================
     path('api/payment/kkiapay/verify/',  kkiapay_verify,  name='kkiapay_verify'),
     path('api/payment/kkiapay/webhook/', kkiapay_webhook, name='kkiapay_webhook'),
-    path('api/payment/pawapay/initiate/', pawapay_initiate, name='pawapay_initiate'),
-    path('api/payment/pawapay/verify/', pawapay_verify, name='pawapay_verify'),
     path('api/payment/pawapay/callback/deposits/', pawapay_callback, name='pawapay_callback_deposits'),
     path('api/payment/pawapay/callback/payouts/', pawapay_callback, name='pawapay_callback_payouts'),
     path('api/payment/pawapay/callback/refunds/', pawapay_callback, name='pawapay_callback_refunds'),

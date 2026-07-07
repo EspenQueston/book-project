@@ -865,7 +865,6 @@
         '课程简介': 'Course Overview',
         '学员评价': 'Student Reviews',
         '已购买': 'Purchased',
-        '立即购买': 'Enroll Now',
         '学员人数': 'Students',
         '课程时长': 'Duration',
         '难度级别': 'Level',

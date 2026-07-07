@@ -515,8 +515,8 @@
             </div>
         </div>
 
-        {% elif order.status == 'processing' %}
-        <!-- Order Timeline -->
+        {% elif order.status == 'processing' and order.payment_status != 'completed' %}
+        <!-- Order Timeline: payment still awaiting confirmation (manual/slow methods) -->
         <div class="order-timeline mb-4">
             <div class="timeline-step done">
                 <div class="timeline-dot"><i class="fas fa-check"></i></div>
@@ -550,7 +550,7 @@
             <hr>
             <h6 class="mt-3"><i class="fab fa-weixin me-1"></i> {% trans "需要加快确认？添加客服微信" %}</h6>
             <div class="text-center my-3">
-                <img src="{% static 'payment_qr/wechat_friend_qr.jpg' %}" alt="WeChat QR Code" 
+                <img src="{% static 'payment_qr/wechat_friend_qr.jpg' %}" alt="WeChat QR Code"
                      style="width: 180px; height: 180px; border-radius: 12px; border: 2px solid #ddd;">
             </div>
             <p class="text-center mb-0">
@@ -570,6 +570,52 @@
                 {% endif %}
             </div>
         </div>
+        {% elif order.status == 'processing' and order.payment_status == 'completed' %}
+        <!-- Payment already confirmed (instant methods like PawaPay/mobile money) — now
+             fulfilling the order. No "verifying payment" messaging, no WeChat QR: that
+             block is for slow/manual confirmation and would be actively confusing here. -->
+        <div class="order-timeline mb-4">
+            <div class="timeline-step done">
+                <div class="timeline-dot"><i class="fas fa-check"></i></div>
+                <span class="timeline-label">{% trans "订单创建" %}</span>
+            </div>
+            <div class="timeline-step done">
+                <div class="timeline-dot"><i class="fas fa-check"></i></div>
+                <span class="timeline-label">{% trans "已付款" %}</span>
+            </div>
+            <div class="timeline-step done">
+                <div class="timeline-dot"><i class="fas fa-check"></i></div>
+                <span class="timeline-label">{% trans "验证中" %}</span>
+            </div>
+            <div class="timeline-step active">
+                <div class="timeline-dot">{% if book_order %}<i class="fas fa-download"></i>{% else %}<i class="fas fa-check-circle"></i>{% endif %}</div>
+                <span class="timeline-label">{% if book_order %}{% trans "可下载" %}{% else %}{% trans "已完成" %}{% endif %}</span>
+            </div>
+        </div>
+
+        <div class="alert alert-success mt-3" style="border-radius: 12px; border: none; box-shadow: 0 2px 12px rgba(0,0,0,0.08);">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-check-circle me-2" style="font-size: 1.4rem;"></i>
+                <strong style="font-size: 1.1rem;">{% trans "付款已确认！" %}</strong>
+            </div>
+            <p class="mb-0 mt-2">
+                {% if book_order %}
+                {% trans "您的电子书已可以下载。" %}
+                {% else %}
+                {% trans "您的订单正在准备中，我们会尽快为您安排发货。" %}
+                {% endif %}
+            </p>
+        </div>
+
+        {% if book_order %}
+        <!-- Next action hint -->
+        <div class="next-action">
+            <i class="fas fa-hand-pointer"></i>
+            <div>
+                <strong>{% trans "下一步" %}：</strong>{% trans "在下方“我的订单”中下载您的电子书。" %}
+            </div>
+        </div>
+        {% endif %}
         {% elif order.status == 'shipped' %}
         <!-- Order Timeline -->
         <div class="order-timeline mb-4">
@@ -711,7 +757,34 @@ document.addEventListener('DOMContentLoaded', function() {
     if (timeRemaining > 0) {
         startCountdown(timeRemaining);
     }
+
+    // Live payment-status polling for orders still "processing" (e.g. just back
+    // from PawaPay/mobile-money): the page otherwise tells the customer "no need
+    // to refresh, status updates automatically" but nothing ever checked — this
+    // makes that promise real instead of requiring a manual refresh.
+    {% if order.status == 'processing' and order.payment_status != 'completed' %}
+    startPaymentStatusPolling('{{ order.order_number }}');
+    {% endif %}
 });
+
+function startPaymentStatusPolling(orderNumber) {
+    var attempts = 0;
+    var maxAttempts = 40;  // ~2 minutes at 3s intervals, then stop pestering the API
+    var poll = setInterval(function() {
+        attempts++;
+        fetch('/manager/api/payment/status/?order_number=' + encodeURIComponent(orderNumber))
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.payment_status === 'completed' || data.payment_status === 'failed' || attempts >= maxAttempts) {
+                    clearInterval(poll);
+                    if (data.payment_status === 'completed' || data.payment_status === 'failed') {
+                        location.reload();
+                    }
+                }
+            })
+            .catch(function() { /* transient network hiccup — try again next tick */ });
+    }, 3000);
+}
 
 // Countdown timer function
 function startCountdown(seconds) {

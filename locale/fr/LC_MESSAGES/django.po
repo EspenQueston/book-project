@@ -1074,7 +1074,7 @@ msgstr "Ajouté au panier"
 #: .\manager\templates\public\book_detail_old.html:501
 #: .\manager\templates\public\home.html:1210
 msgid "添加到购物车失败，请重试"
-msgstr "Échec de l'ajout au panier, veuillez réessayer"
+msgstr "Ajout au panier échoué, veuillez réessayer"
 
 #: .\manager\templates\public\books.html:95
 msgid "浏览我们丰富的图书收藏"
@@ -1169,7 +1169,7 @@ msgstr "Retour à la page principale"
 
 #: .\manager\templates\public\books.html:306
 msgid "添加失败，请重试"
-msgstr "Échec de l'ajout, veuillez réessayer"
+msgstr "Ajout échoué, veuillez réessayer"
 
 #: .\manager\templates\public\cart.html:13
 msgid "管理您选择的商品"
@@ -1226,7 +1226,7 @@ msgstr "Supermarché"
 #: .\manager\templates\public\cart.html:250
 #: .\manager\templates\public\cart.html:291
 msgid "移除商品"
-msgstr "Supprimer l'article"
+msgstr "Retirer cet article"
 
 #: .\manager\templates\public\cart.html:146
 #: .\manager\templates\public\cart.html:207
@@ -1880,7 +1880,7 @@ msgstr "Erreur réseau, veuillez réessayer"
 #: .\manager\templates\public\order_confirmation.html:808
 msgid "确定要取消此订单吗？取消后无法恢复。"
 msgstr ""
-"Voulez-vous vraiment annuler cette commande ? L'annulation est irréversible."
+"Voulez-vous vraiment annuler cette commande ? Cette action est irreversible."
 
 #: .\manager\templates\public\order_confirmation.html:812
 msgid "取消中..."
@@ -1892,7 +1892,7 @@ msgstr "Annulé"
 
 #: .\manager\templates\public\order_confirmation.html:832
 msgid "取消失败，请重试"
-msgstr "Échec de l'annulation, veuillez réessayer"
+msgstr "Annulation échouée, veuillez réessayer"
 
 #: .\manager\templates\public\publisher_detail.html:4
 #: .\manager\templates\public\publisher_detail_old.html:4
@@ -3969,7 +3969,7 @@ msgid "Manage stock levels for all your items in one place"
 msgstr "Gérez les niveaux de stock de tous vos articles au même endroit"
 
 msgid "操作失败"
-msgstr "Échec de l'opération"
+msgstr "Opération échouée"
 
 msgid "已关注"
 msgstr "Suivi"
@@ -6470,3 +6470,21 @@ msgid "当前国家暂不支持该支付方式，请重新选择。"
 msgstr ""
 "Ce mode de paiement n'est pas disponible pour votre pays. Veuillez en "
 "choisir un autre."
+
+#: manager/templates/public/order_confirmation.html:0
+msgid "付款已确认！"
+msgstr "Paiement confirmé !"
+
+#: manager/templates/public/order_confirmation.html:0
+msgid "您的电子书已可以下载。"
+msgstr "Votre e-book est maintenant disponible au téléchargement."
+
+#: manager/templates/public/order_confirmation.html:0
+msgid "您的订单正在准备中，我们会尽快为您安排发货。"
+msgstr ""
+"Votre commande est en préparation — nous organiserons l'expédition dès que "
+"possible."
+
+#: manager/templates/public/order_confirmation.html:0
+msgid "在下方“我的订单”中下载您的电子书。"
+msgstr "Téléchargez votre e-book ci-dessous dans « Mes commandes »."

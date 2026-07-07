@@ -6433,3 +6433,20 @@ msgid "当前国家暂不支持该支付方式，请重新选择。"
 msgstr ""
 "This payment method is not available for your country. Please choose another"
 " one."
+
+#: manager/templates/public/order_confirmation.html:0
+msgid "付款已确认！"
+msgstr "Payment confirmed!"
+
+#: manager/templates/public/order_confirmation.html:0
+msgid "您的电子书已可以下载。"
+msgstr "Your e-book is now available for download."
+
+#: manager/templates/public/order_confirmation.html:0
+msgid "您的订单正在准备中，我们会尽快为您安排发货。"
+msgstr ""
+"Your order is being prepared — we will arrange shipping as soon as possible."
+
+#: manager/templates/public/order_confirmation.html:0
+msgid "在下方“我的订单”中下载您的电子书。"
+msgstr "Download your e-book below in “My Orders”."

@@ -3218,9 +3218,10 @@ def kkiapay_pay(request, order_number):
 
 
 def pawapay_pay(request, order_number):
-    """Dedicated PawaPay payment page — Central Africa mobile money."""
-    from django.conf import settings as django_settings
-
+    """PawaPay checkout — creates a hosted Payment Page session and sends the
+    customer to PawaPay's own checkout widget (operator selection, phone entry,
+    PIN-prompt waiting screen — all rendered on pawapay.io), then brings them
+    back to pawapay_return() once they finish there."""
     accessible = request.session.get('accessible_orders', [])
     if str(order_number) not in accessible:
         messages.warning(request, 'Non autorisé ou session expirée.')
@@ -3242,28 +3243,83 @@ def pawapay_pay(request, order_number):
         return redirect('manager:order_confirmation', order_number=order.order_number)
 
     order_country = getattr(order, 'country', '') or ''
-    from manager.payments.pawapay import (
-        COUNTRY_DIAL_CODES, get_country_correspondents, get_default_correspondent, get_country_currency
-    )
-    dial_code = COUNTRY_DIAL_CODES.get(order_country, '')
-    correspondents = get_country_correspondents(order_country)   # [(label, code), ...]
-    default_correspondent = get_default_correspondent(order_country)
+    customer_phone = order.customer_phone or ''
+    customer_name = order.customer_name if hasattr(order, 'customer_name') else getattr(order, 'user_name', '')
 
-    context = {
-        'order': order,
-        'order_number': order.order_number,
-        'total_amount_fcfa': int(order.total_amount),
-        'customer_name': order.customer_name if hasattr(order, 'customer_name') else getattr(order, 'user_name', ''),
-        'customer_email': order.customer_email if hasattr(order, 'customer_email') else getattr(order, 'user_email', ''),
-        'customer_phone': order.customer_phone or '',
-        'order_country': order_country,
-        'phone_dial_code': dial_code,
-        'correspondents': correspondents,
-        'default_correspondent': default_correspondent,
-        'pawapay_sandbox': getattr(django_settings, 'PAWAPAY_SANDBOX', True),
-        'pawapay_currency': get_country_currency(order_country),
-    }
-    return render(request, 'public/pawapay_pay.html', context)
+    from manager.payments.pawapay import create_payment_page_session
+    from django.utils import translation
+
+    return_url = request.build_absolute_uri(
+        reverse('manager:pawapay_return', args=[order_number])
+    )
+    lang = 'EN' if translation.get_language() == 'en' else 'FR'
+    result = create_payment_page_session(
+        amount=int(order.total_amount),
+        order_number=order_number,
+        return_url=return_url,
+        phone_number=customer_phone,
+        country=order_country,
+        reason=f'DUNO 360 — {customer_name}'[:50] if customer_name else None,
+        language=lang,
+    )
+    if not result.get('success'):
+        messages.error(
+            request,
+            result.get('error') or "Impossible d'ouvrir la page de paiement PawaPay. Veuillez réessayer."
+        )
+        return redirect('manager:checkout')
+
+    order.payment_transaction_id = result['deposit_id']
+    order.payment_status = 'processing'
+    order.save(update_fields=['payment_transaction_id', 'payment_status'])
+
+    return redirect(result['redirect_url'])
+
+
+def pawapay_return(request, order_number):
+    """Landing view PawaPay's hosted Payment Page redirects back to once the
+    customer finishes (success, failure, or cancel) — receives ?depositId=...
+    and checks the real status server-side before showing the customer
+    anything (never trust the redirect itself as proof of payment)."""
+    order = None
+    try:
+        order = models.Order.objects.get(order_number=order_number)
+    except models.Order.DoesNotExist:
+        try:
+            from marketplace.models import MarketplaceOrder
+            order = MarketplaceOrder.objects.get(order_number=order_number)
+        except MarketplaceOrder.DoesNotExist:
+            messages.error(request, 'Commande non trouvée.')
+            return redirect('manager:public_home')
+
+    deposit_id = request.GET.get('depositId') or order.payment_transaction_id
+    if not deposit_id:
+        messages.error(request, 'Paiement introuvable.')
+        return redirect('manager:pawapay_pay', order_number=order_number)
+
+    if order.payment_status != 'completed':
+        from manager.payments.pawapay import get_deposit_status_v2, normalize_pawapay_status
+        from manager.payments.views import _update_order_status
+
+        result = get_deposit_status_v2(deposit_id)
+        internal = normalize_pawapay_status(result.get('status', 'PENDING'))
+        if internal in ('SUCCESSFUL', 'FAILED'):
+            _update_order_status(order, internal, transaction_id=deposit_id)
+        elif result.get('status') == 'NOT_FOUND':
+            # Customer left the Payment Page without completing anything.
+            messages.warning(request, 'Paiement annulé ou non terminé.')
+            return redirect('manager:pawapay_pay', order_number=order_number)
+
+    if order.payment_status == 'completed':
+        return redirect('manager:order_confirmation', order_number=order_number)
+    if order.payment_status == 'failed':
+        messages.error(request, 'Le paiement a échoué. Veuillez réessayer.')
+        return redirect('manager:pawapay_pay', order_number=order_number)
+
+    # Still pending/processing — PawaPay confirms most sandbox test flows
+    # instantly, but leave room for the rare async case; send the customer to
+    # the order confirmation page, which already polls payment status.
+    return redirect('manager:order_confirmation', order_number=order_number)
 
 
 def kkiapay_success_redirect(request, order_number):
@@ -3327,12 +3383,17 @@ def order_confirmation(request, order_number):
         return redirect('manager:public_home')
 
     resolved_order = book_order or mkt_order
-    payment_time_remaining = None
     payment_time_remaining_seconds = 0
     if hasattr(resolved_order, 'get_payment_time_remaining'):
         payment_time_remaining = resolved_order.get_payment_time_remaining()
         if payment_time_remaining:
-            payment_time_remaining_seconds = max(int(payment_time_remaining.total_seconds()), 0)
+            # Order.get_payment_time_remaining() (book orders) returns an int of
+            # seconds; MarketplaceOrder's returns a timedelta. Handle both rather
+            # than assuming one shape (previously crashed every fresh book order).
+            if hasattr(payment_time_remaining, 'total_seconds'):
+                payment_time_remaining_seconds = max(int(payment_time_remaining.total_seconds()), 0)
+            else:
+                payment_time_remaining_seconds = max(int(payment_time_remaining), 0)
 
     context = {
         'order': resolved_order,

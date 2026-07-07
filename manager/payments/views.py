@@ -349,8 +349,15 @@ def check_payment_status(request):
                     _update_order_status(order, provider_status, ref_id)
 
             elif payment_method == 'pawapay':
-                from manager.payments.pawapay import get_deposit_status, normalize_pawapay_status
-                result = get_deposit_status(ref_id)
+                # Deposits created via the hosted Payment Page (create_payment_page_session,
+                # used by pawapay_pay()) are v2 deposits — the v1 status endpoint does not
+                # reliably see them (confirmed empty result in testing). Check v2 first and
+                # only fall back to v1 for any older/direct-API deposit that predates the
+                # hosted-page integration.
+                from manager.payments.pawapay import get_deposit_status, get_deposit_status_v2, normalize_pawapay_status
+                result = get_deposit_status_v2(ref_id)
+                if result.get('status') == 'NOT_FOUND':
+                    result = get_deposit_status(ref_id)
                 provider_status = normalize_pawapay_status(result.get('status', 'PENDING'))
                 if provider_status in ('SUCCESSFUL', 'FAILED'):
                     _update_order_status(order, provider_status, ref_id)
@@ -664,93 +671,3 @@ def pawapay_callback(request):
     except Exception as exc:
         logger.exception('PawaPay callback error: %s', exc)
         return JsonResponse({'error': str(exc)}, status=400)
-
-
-@csrf_exempt
-@require_POST
-def pawapay_initiate(request):
-    """
-    AJAX: initiate PawaPay deposit from payment page.
-    POST JSON: order_number, phone_number, amount (optional)
-    """
-    try:
-        body = json.loads(request.body)
-        order_number = body.get('order_number', '').strip()
-        phone_number = body.get('phone_number', '').strip()
-        if not order_number or not phone_number:
-            return JsonResponse({'success': False, 'error': 'order_number and phone_number required'}, status=400)
-
-        order = _find_order_by_number(order_number)
-        if not order:
-            return JsonResponse({'success': False, 'error': 'Order not found'}, status=404)
-
-        amount = body.get('amount') or float(order.total_amount)
-        order_country = getattr(order, 'country', None) or body.get('country')
-        from manager.payments.pawapay import create_deposit
-        result = create_deposit(
-            amount=amount,
-            phone_number=phone_number,
-            order_number=order_number,
-            provider=body.get('provider'),
-            country=order_country,
-        )
-        if result.get('deposit_id'):
-            order.payment_transaction_id = result['deposit_id']
-            order.payment_status = 'processing'
-            order.save(update_fields=['payment_transaction_id', 'payment_status'])
-
-        return JsonResponse({
-            'success': result.get('success', False),
-            'deposit_id': result.get('deposit_id', ''),
-            'status': result.get('status', 'UNKNOWN'),
-            'error': result.get('error', ''),
-        })
-    except json.JSONDecodeError:
-        return JsonResponse({'success': False, 'error': 'Invalid JSON'}, status=400)
-    except Exception as exc:
-        logger.exception('PawaPay initiate error: %s', exc)
-        return JsonResponse({'success': False, 'error': str(exc)}, status=500)
-
-
-@csrf_exempt
-@require_POST
-def pawapay_verify(request):
-    """Verify PawaPay deposit status server-side after user completes payment."""
-    try:
-        body = json.loads(request.body)
-        deposit_id = body.get('deposit_id', '').strip()
-        order_number = body.get('order_number', '').strip()
-        if not deposit_id or not order_number:
-            return JsonResponse({'success': False, 'message': 'deposit_id and order_number required'}, status=400)
-
-        order = _find_order_by_number(order_number)
-        if not order:
-            return JsonResponse({'success': False, 'message': 'Order not found'}, status=404)
-
-        if order.payment_status == 'completed':
-            return JsonResponse({'success': True, 'payment_status': 'completed', 'message': 'Already paid'})
-
-        from manager.payments.pawapay import get_deposit_status, normalize_pawapay_status
-        result = get_deposit_status(deposit_id)
-        if result.get('error') and result.get('status') == 'UNKNOWN':
-            return JsonResponse({
-                'success': False,
-                'payment_status': 'pending',
-                'message': result.get('error', 'Unable to reach PawaPay'),
-            })
-
-        internal = normalize_pawapay_status(result.get('status', 'PENDING'))
-
-        if internal == 'SUCCESSFUL':
-            _update_order_status(order, 'SUCCESSFUL', transaction_id=deposit_id)
-            return JsonResponse({'success': True, 'payment_status': 'completed', 'message': 'Payment confirmed'})
-        if internal == 'FAILED':
-            _update_order_status(order, 'FAILED', transaction_id=deposit_id)
-            return JsonResponse({'success': False, 'payment_status': 'failed', 'message': 'Payment failed'})
-
-        return JsonResponse({'success': False, 'payment_status': 'pending', 'message': 'Payment still pending'})
-    except json.JSONDecodeError:
-        return JsonResponse({'success': False, 'message': 'Invalid JSON'}, status=400)
-    except Exception as exc:
-        logger.exception('PawaPay verify error: %s', exc)
-        return JsonResponse({'success': False, 'message': 'Server error'}, status=500)

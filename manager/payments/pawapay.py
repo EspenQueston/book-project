@@ -128,6 +128,21 @@ COUNTRY_CURRENCY = {
 }
 
 
+# ISO 3166-1 alpha-3 codes for the Payment Page's optional `country` field
+# (v2 /v2/paymentpage). Only needed for corridors we actually offer.
+COUNTRY_ALPHA3 = {
+    'Congo': 'COG',
+    'Democratic Republic of the Congo': 'COD',
+    'Cameroon': 'CMR',
+    'Gabon': 'GAB',
+    'Angola': 'AGO',
+    'Chad': 'TCD',
+    'Central African Republic': 'CAF',
+    'Equatorial Guinea': 'GNQ',
+    'São Tomé and Príncipe': 'STP',
+}
+
+
 def get_country_currency(country):
     """Return the PawaPay settlement currency for a country, falling back to the configured default."""
     return COUNTRY_CURRENCY.get(country or '') or getattr(settings, 'PAWAPAY_CURRENCY', 'XAF')
@@ -159,6 +174,13 @@ def normalize_msisdn(phone_number, country=None):
     if dial:
         if digits.startswith(dial) and len(digits) >= len(dial) + 6:
             return digits
+        if country == 'Congo':
+            # Republic of the Congo keeps the trunk 0 in international format:
+            # 06 612 34 56 -> 242066123456 (PawaPay sandbox numbers confirm:
+            # 242053456039). Stripping the 0 yields an 11-digit MSISDN that
+            # PawaPay rejects as INVALID_PHONE_NUMBER.
+            local = digits if digits.startswith('0') else '0' + digits
+            return f'{dial}{local}'
         local = digits.lstrip('0')
         return f'{dial}{local}'
 
@@ -316,6 +338,121 @@ def create_deposit(*, amount, phone_number, order_number, provider=None, deposit
     except requests.RequestException as exc:
         logger.exception('PawaPay deposit request failed: %s', exc)
         return {'success': False, 'deposit_id': deposit_id, 'status': 'FAILED', 'error': str(exc)}
+
+
+def create_payment_page_session(*, amount, order_number, return_url, phone_number=None,
+                                 country=None, reason=None, language='FR', deposit_id=None):
+    """
+    Create a PawaPay Payment Page (hosted checkout widget) session — PawaPay's
+    own polished payment UI (operator selection, phone entry, PIN-prompt
+    waiting screen), rendered entirely on pawapay.io's domain.
+
+    Uses the v2 API (POST {base}/v2/paymentpage), which is a distinct surface
+    from the v1 `/deposits` endpoint used by create_deposit(): only `depositId`
+    and `returnUrl` are required; everything else (amount, phone, country) is
+    an optional hint that pre-fills / narrows the widget, and the customer can
+    still adjust it there. The widget redirects the browser back to
+    `return_url` with `?depositId=...` once the customer finishes.
+
+    Returns {'success': True, 'deposit_id', 'redirect_url'} or
+    {'success': False, 'error', 'deposit_id'}.
+    """
+    cfg = _cfg()
+    if not cfg['token']:
+        return {'success': False, 'error': 'PAWAPAY_API_TOKEN not configured'}
+
+    deposit_id = deposit_id or str(uuid.uuid4())
+    currency = get_country_currency(country)
+
+    # PawaPay's returnUrl validator rejects the literal hostname "localhost"
+    # but accepts 127.0.0.1 (verified empirically against the sandbox API).
+    # Rewrite so the hosted page also works during local development;
+    # production URLs are untouched.
+    if return_url:
+        return_url = return_url.replace('://localhost', '://127.0.0.1')
+
+    payload = {
+        'depositId': deposit_id,
+        'returnUrl': return_url,
+        'amountDetails': {'amount': str(int(amount)), 'currency': currency},
+        'reason': (reason or _clean_statement(order_number))[:50],
+        'language': 'EN' if str(language or '').upper().startswith('EN') else 'FR',
+        'metadata': [
+            {'fieldName': 'orderNumber', 'fieldValue': str(order_number)},
+        ],
+    }
+    if phone_number:
+        msisdn = normalize_msisdn(phone_number, country)
+        if msisdn:
+            payload['phoneNumber'] = msisdn
+    alpha3 = COUNTRY_ALPHA3.get(country or '')
+    if alpha3:
+        payload['country'] = alpha3
+
+    url = f"{cfg['base_url']}/v2/paymentpage"
+    try:
+        resp = requests.post(url, json=payload, headers=_headers(cfg['token']), timeout=30)
+        raw = resp.json() if resp.content else {}
+        if resp.status_code >= 400:
+            logger.warning('PawaPay paymentpage HTTP %s: %s', resp.status_code, raw)
+            failure = raw.get('failureReason') or {}
+            err_msg = failure.get('failureMessage') if isinstance(failure, dict) else None
+            return {'success': False, 'deposit_id': deposit_id, 'error': err_msg or str(raw), 'raw': raw}
+        redirect_url = raw.get('redirectUrl')
+        if not redirect_url:
+            # PawaPay sometimes reports failures (e.g. INVALID_PHONE_NUMBER)
+            # in a 2xx body with a failureReason instead of an HTTP error.
+            logger.warning('PawaPay paymentpage returned no redirectUrl: %s', raw)
+            failure = raw.get('failureReason') or {}
+            err_msg = failure.get('failureMessage') if isinstance(failure, dict) else None
+            return {'success': False, 'deposit_id': deposit_id,
+                    'error': err_msg or 'No redirectUrl in PawaPay response', 'raw': raw}
+        return {'success': True, 'deposit_id': raw.get('depositId', deposit_id), 'redirect_url': redirect_url, 'raw': raw}
+    except requests.RequestException as exc:
+        logger.exception('PawaPay paymentpage request failed: %s', exc)
+        return {'success': False, 'deposit_id': deposit_id, 'error': str(exc)}
+
+
+def get_deposit_status_v2(deposit_id):
+    """Check deposit status via the v2 endpoint (GET {base}/v2/deposits/{id}).
+
+    Needed specifically for deposits created through create_payment_page_session():
+    the v1 status endpoint used by get_deposit_status() does not reliably see
+    deposits created via the v2 Payment Page (confirmed empty result in
+    testing), because v2 wraps the payload differently
+    ({"status": "FOUND"/"NOT_FOUND", "data": {...}}) and uses its own status
+    vocabulary (ACCEPTED/PROCESSING/IN_RECONCILIATION/COMPLETED/FAILED).
+    Returns the same shape as get_deposit_status() so callers (and
+    normalize_pawapay_status) don't need to care which version created it.
+    """
+    cfg = _cfg()
+    if not cfg['token']:
+        return {'status': 'UNKNOWN', 'error': 'PAWAPAY_API_TOKEN not configured'}
+
+    url = f"{cfg['base_url']}/v2/deposits/{deposit_id}"
+    try:
+        resp = requests.get(url, headers=_headers(cfg['token']), timeout=30)
+        raw = resp.json() if resp.content else {}
+        if resp.status_code >= 400:
+            logger.warning('PawaPay v2 status HTTP %s for %s: %s', resp.status_code, deposit_id, raw)
+            return {'status': 'UNKNOWN', 'error': resp.text or f'HTTP {resp.status_code}', 'raw': raw}
+
+        if raw.get('status') == 'NOT_FOUND' or not raw.get('data'):
+            return {'status': 'NOT_FOUND', 'raw': raw}
+
+        data = raw.get('data') or {}
+        status = data.get('status', 'UNKNOWN')
+        result = {'status': status, 'raw': raw}
+        if status == 'FAILED':
+            failure = data.get('failureReason') or {}
+            if isinstance(failure, dict):
+                result['error'] = failure.get('failureMessage') or f'Payment {status.lower()}'
+            else:
+                result['error'] = f'Payment {status.lower()}'
+        return result
+    except (requests.RequestException, ValueError) as exc:
+        logger.exception('PawaPay v2 status poll failed: %s', exc)
+        return {'status': 'UNKNOWN', 'error': str(exc)}
 
 
 def _get_all_correspondent_codes():
