@@ -1,0 +1,48 @@
+name: Deploy to production (IONOS)
+
+# Manual trigger only — go to the "Actions" tab on GitHub, pick this workflow,
+# and click "Run workflow". Pushing to main does NOT auto-deploy.
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "deploy" to confirm you want to deploy origin/main to duno360.com'
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.confirm == 'deploy' }}
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DUNO360_VPS_HOST }}
+          username: root
+          key: ${{ secrets.DUNO360_DEPLOY_SSH_KEY }}
+          timeout: 120s
+          command_timeout: 15m
+          script: |
+            set -e
+            chown -R duno360:www-data /opt/duno360/app || true
+            if ! command -v msgfmt >/dev/null 2>&1; then
+              export DEBIAN_FRONTEND=noninteractive
+              apt-get update -qq && apt-get install -y gettext
+            fi
+            sudo -u duno360 bash -lc '
+              cd /opt/duno360/app &&
+              git -c safe.directory=/opt/duno360/app fetch origin &&
+              git -c safe.directory=/opt/duno360/app checkout -- locale/en/LC_MESSAGES/django.mo locale/fr/LC_MESSAGES/django.mo locale/zh_Hans/LC_MESSAGES/django.mo 2>/dev/null || true &&
+              git -c safe.directory=/opt/duno360/app reset --hard HEAD &&
+              git -c safe.directory=/opt/duno360/app pull origin main
+            '
+            sudo -u duno360 bash -lc '
+              cd /opt/duno360/app &&
+              set -a && . /opt/duno360/.env && set +a &&
+              .venv/bin/python manage.py migrate --noinput &&
+              .venv/bin/python manage.py collectstatic --noinput &&
+              .venv/bin/python manage.py compilemessages -l en -l fr
+            '
+            systemctl restart duno360
+            sleep 2
+            systemctl is-active duno360
