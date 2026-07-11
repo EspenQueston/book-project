@@ -2250,6 +2250,17 @@
     {% block extra_js %}{% endblock %}
 
     <!-- Client-side i18n: translates data-zh/data-en/data-fr elements -->
+    <script>
+    /* Set the JS i18n language from Django's LANGUAGE_CODE BEFORE admin_i18n.js
+       runs its first translatePage() pass. Without this, admin_i18n.js falls
+       back to whatever 'adminLang' was last left in localStorage (e.g. 'en'
+       from a previous admin-panel visit), translating this page into the
+       wrong language on first paint — and a same-language, same-node
+       re-translation later cannot undo it because the dictionary only
+       matches Chinese source text. */
+    var djangoLangEarly = '{{ LANGUAGE_CODE }}';
+    window.__ADMIN_I18N_LANG__ = djangoLangEarly === 'zh-hans' ? 'zh' : djangoLangEarly;
+    </script>
     <script src="{% static 'js/admin_i18n.js' %}"></script>
     <script>
     /* Bridge: apply JS i18n for data-zh/data-en/data-fr using Django LANGUAGE_CODE.

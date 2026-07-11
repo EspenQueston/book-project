@@ -3211,13 +3211,22 @@
         var text = node.textContent;
         if (!text || !text.trim()) return;
 
-        // Only process if text contains Chinese characters (when translating away from zh)
-        if (!/[\u4e00-\u9fff]/.test(text) && lang !== 'zh') return;
-
         if (lang !== 'zh') {
+            // Always translate from the cached ORIGINAL Chinese text, never
+            // from the node's current textContent. Without this, re-running
+            // translatePage() with a different language (e.g. the public-page
+            // bridge correcting a stale 'en' localStorage value to 'fr' after
+            // DOMContentLoaded) re-translates already-translated text \u2014
+            // dictionary keys are Chinese-only, so a second pass over
+            // "Select\u8eab\u4efd" finds no more matches and the English word sticks,
+            // producing garbled mixed-language output like "Select\u8eab\u4efd".
+            if (!originalMap.has(node)) {
+                if (!/[\u4e00-\u9fff]/.test(text)) return;
+                originalMap.set(node, text);
+            }
+            var source = originalMap.get(node);
             var D = getDict();
-            if (!originalMap.has(node)) originalMap.set(node, text);
-            node.textContent = replaceWithDict(text, D);
+            node.textContent = replaceWithDict(source, D);
         } else {
             var orig = originalMap.get(node);
             if (orig !== undefined) node.textContent = orig;

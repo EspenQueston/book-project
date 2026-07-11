@@ -1315,10 +1315,18 @@ function bmpAddToCart(bookId) {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrf.value },
         body: 'quantity=1'
     }).then(r => r.json()).then(d => {
-        if (typeof gToast === 'function') gToast(d.message || '已加入购物车', 'success');
+        if (typeof gToast === 'function') gToast(d.message || bmpAddToCartMsg('added'), 'success');
     }).catch(function() {
-        if (typeof gToast === 'function') gToast('加入失败，请重试', 'error');
+        if (typeof gToast === 'function') gToast(bmpAddToCartMsg('failed'), 'error');
     });
+}
+function bmpAddToCartMsg(kind) {
+    var htmlLang = document.documentElement.lang || '';
+    var msgs = {
+        added: htmlLang.indexOf('fr') === 0 ? 'Ajouté au panier' : (htmlLang.indexOf('en') === 0 ? 'Added to cart' : '已加入购物车'),
+        failed: htmlLang.indexOf('fr') === 0 ? "Échec de l'ajout, veuillez réessayer" : (htmlLang.indexOf('en') === 0 ? 'Failed to add, please retry' : '加入失败，请重试'),
+    };
+    return msgs[kind];
 }
 </script>
 <script src="/static/js/listing_follow.js"></script>

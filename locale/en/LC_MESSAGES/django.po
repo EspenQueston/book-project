@@ -980,6 +980,14 @@ msgstr "Back"
 msgid "购物车"
 msgstr "Cart"
 
+#: .\manager\templates\public\base.html:1007
+msgid "访客"
+msgstr "Guest"
+
+#: .\manager\templates\public\base.html:1110
+msgid "选择身份"
+msgstr "Select profile"
+
 #: .\manager\templates\public\book_detail.html:284
 #: .\manager\templates\public\book_detail_old.html:267
 msgid "相关推荐"
@@ -2874,6 +2882,10 @@ msgstr "Save Changes"
 msgid "保存中..."
 msgstr "Saving..."
 
+#: .\manager\templates\public\base.html:1130
+msgid "普通用户登录"
+msgstr "User login"
+
 #: .\manager\templates\public\vendor_login.html:4
 #: .\manager\templates\public\vendor_login.html:47
 msgid "卖家登录"
@@ -4532,6 +4544,9 @@ msgstr "Official Store"
 
 msgid "发货地"
 msgstr "Shipped from"
+
+msgid "北京/达喀尔"
+msgstr "Beijing/Dakar"
 
 msgid "达喀尔仓库"
 msgstr "Dakar Warehouse"
