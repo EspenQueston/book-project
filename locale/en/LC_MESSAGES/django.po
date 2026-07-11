@@ -3893,9 +3893,6 @@ msgstr "Add item"
 msgid "已上架"
 msgstr "Active"
 
-msgid "总库存"
-msgstr "Total stock"
-
 msgid "搜索商品名称、SKU 或分类…"
 msgstr "Search product name, SKU or category…"
 
@@ -4072,29 +4069,17 @@ msgstr ""
 msgid "修改"
 msgstr "Edit"
 
-msgid "详情"
-msgstr "Details"
-
 msgid "订单与支付状态"
 msgstr "Order & payment status"
 
 msgid "仅对您店铺相关的订单生效。"
 msgstr "Applies only to orders linked to your shop."
 
-msgid "商品+课程"
-msgstr "Products + courses"
-
 msgid "管理生鲜与日用品上架、库存与规格"
 msgstr "Manage fresh & daily goods, stock and specifications"
 
 msgid "搜索名称或品牌…"
 msgstr "Search name or brand…"
-
-msgid "全部商品"
-msgstr "All listings"
-
-msgid "总览"
-msgstr "Overview"
 
 msgid "未付款订单（已下单未支付）"
 msgstr "Unpaid orders (placed, not paid)"
@@ -4111,34 +4096,11 @@ msgstr "Recent marketplace orders"
 msgid "保存状态"
 msgstr "Save status"
 
-msgid "保存联系信息"
-msgstr "Save contact info"
-
-msgid "编辑客户与收货信息"
-msgstr "Edit customer & shipping info"
-
-msgid "电话 / 微信"
-msgstr "Phone / WeChat"
-
-msgid "国家 / 地区"
-msgstr "Country / region"
-
-msgid "客户备注"
-msgstr "Customer notes"
-
 msgid "备注记录"
 msgstr "Notes log"
 
 msgid "备注（可选）"
 msgstr "Note (optional)"
-
-msgid "用于更正买家联系方式或配送地址（订单未取消 / 未退款时可编辑）。"
-msgstr ""
-"Correct buyer contact or shipping address (editable unless "
-"cancelled/refunded)."
-
-msgid "更正联系方式或收货地址（订单未取消 / 未退款时可编辑）。"
-msgstr "Correct contact or shipping address (unless cancelled/refunded)."
 
 msgid "全部付款明细"
 msgstr "All payment lines"
@@ -4481,9 +4443,6 @@ msgstr "Please select"
 msgid "关注的店铺"
 msgstr "Followed Shops"
 
-msgid "全部商品"
-msgstr "All Products"
-
 msgid "在线咨询"
 msgstr "Chat Now"
 
@@ -4505,9 +4464,6 @@ msgstr "Limited"
 msgid "成色"
 msgstr "Condition"
 
-msgid "进店"
-msgstr "Shop"
-
 msgid "已报名"
 msgstr "Enrolled"
 
@@ -4523,23 +4479,14 @@ msgstr "Certificate"
 msgid "终身畅学"
 msgstr "Lifetime Access"
 
-msgid "购买后随时学习"
-msgstr "Learn anytime after purchase"
-
 msgid "七天退款"
 msgstr "7-Day Refund"
 
 msgid "课程大纲"
 msgstr "Course Curriculum"
 
-msgid "您的浏览器不支持视频播放"
-msgstr "Your browser does not support video playback"
-
 msgid "选择课节开始学习"
 msgstr "Select a lesson to start learning"
-
-msgid "课时描述"
-msgstr "Lesson Description"
 
 msgid "课程PDF"
 msgstr "Course PDF"
@@ -4547,17 +4494,11 @@ msgstr "Course PDF"
 msgid "本课暂无描述"
 msgstr "No description for this lesson"
 
-msgid "下载PDF"
-msgstr "Download PDF"
-
 msgid "课程大纲即将上线"
 msgstr "Course curriculum coming soon"
 
 msgid "七天退换"
 msgstr "7-Day Return"
-
-msgid "正品保证"
-msgstr "Authentic Guarantee"
 
 msgid "快递配送"
 msgstr "Express Delivery"
@@ -4583,17 +4524,11 @@ msgstr "Fast Refund"
 msgid "十五天退换"
 msgstr "15-Day Return"
 
-msgid "运费险"
-msgstr "Shipping Insurance"
-
 msgid "质量检测"
 msgstr "Quality Inspection"
 
 msgid "官方旗舰店"
 msgstr "Official Store"
-
-msgid "同城配送"
-msgstr "Local Delivery"
 
 msgid "发货地"
 msgstr "Shipped from"
@@ -4735,9 +4670,6 @@ msgstr "Enter your Mobile Money number to receive the payment prompt."
 msgid "例：2376XXXXXXXX"
 msgstr "e.g. 2376XXXXXXXX"
 
-msgid "立即支付"
-msgstr "Pay now"
-
 msgid "正在发起支付…"
 msgstr "Initiating payment…"
 
@@ -4755,9 +4687,6 @@ msgstr "Please enter a phone number"
 
 msgid "发起失败"
 msgstr "Failed to initiate payment"
-
-msgid "网络错误，请重试"
-msgstr "Network error — please try again"
 
 msgid "中非共和国"
 msgstr "Central African Republic"
@@ -4797,12 +4726,6 @@ msgstr "Other"
 
 msgid "其他国家"
 msgstr "Other country"
-
-msgid "西非 — KKiaPay"
-msgstr "West Africa — KKiaPay"
-
-msgid "中非 — PawaPay"
-msgstr "Central Africa — PawaPay"
 
 msgid "请先选择国家"
 msgstr "Please select a country first"
@@ -6474,3 +6397,4 @@ msgstr "Switch to dark mode"
 #: manager/templates/public/base.html:1
 msgid "切换亮色模式"
 msgstr "Switch to light mode"
+
