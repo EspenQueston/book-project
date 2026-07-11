@@ -14,6 +14,7 @@
     var T = {
         // ---------- Page Titles ----------
         '管理员仪表板 - DUNO 360': 'Dashboard - DUNO 360',
+        '管理员仪表板': 'Admin Dashboard',
         '图书列表 - DUNO 360': 'Books - DUNO 360',
         '作者列表 - DUNO 360': 'Authors - DUNO 360',
         '出版社列表 - DUNO 360': 'Publishers - DUNO 360',
@@ -532,6 +533,8 @@
         '保存': 'Save',
 
         // ---------- Breadcrumbs ----------
+        '图书仪表板': 'Book Dashboard',
+        '图书仪表盘': 'Book Dashboard',
         '图书': 'Books',
         '作家': 'Authors',
 
@@ -1603,6 +1606,7 @@
     var F = {
         // ---------- Page Titles ----------
         '管理员仪表板 - DUNO 360': 'Tableau de bord - DUNO 360',
+        '管理员仪表板': 'Tableau de bord administrateur',
         '图书列表 - DUNO 360': 'Livres - DUNO 360',
         '作者列表 - DUNO 360': 'Auteurs - DUNO 360',
         '出版社列表 - DUNO 360': 'Éditeurs - DUNO 360',
@@ -2116,6 +2120,8 @@
         '未发送': 'Non envoyé',
 
         // ---------- Breadcrumbs ----------
+        '图书仪表板': 'Tableau de bord des livres',
+        '图书仪表盘': 'Tableau de bord des livres',
         '图书': 'Livres',
         '作家': 'Auteurs',
 

@@ -1960,6 +1960,27 @@
         setTimeout(function(){ if(el.parentElement) el.parentElement.removeChild(el); }, 350);
     }
 
+    /* ===== Auto-render Django messages framework via the toast system =====
+       Many views call messages.success()/error()/warning() but no template
+       ever displayed them (no global messages loop existed), so those
+       messages were silently dropped. Render them here once, site-wide. */
+    {% if messages %}
+    document.addEventListener('DOMContentLoaded', function() {
+        var gDjangoMessages = [
+            {% for message in messages %}
+            {text: "{{ message.message|escapejs }}", tags: "{{ message.tags|escapejs }}"}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+        gDjangoMessages.forEach(function(m) {
+            var type = 'info';
+            if (m.tags.indexOf('error') !== -1) type = 'error';
+            else if (m.tags.indexOf('success') !== -1) type = 'success';
+            else if (m.tags.indexOf('warning') !== -1) type = 'warning';
+            gToast(m.text, type, 5500);
+        });
+    });
+    {% endif %}
+
     /* ===== Global Confirm Modal ===== */
     var _gConfirmCb = null;
     var _G_I18N = {

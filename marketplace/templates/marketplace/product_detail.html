@@ -503,11 +503,11 @@
     <div class="bmp-specs-section">
         <div class="bmp-specs-label">{% trans "规格参数" %}</div>
         <div class="bmp-specs-scroll">
-            {% if product.brand %}<div class="bmp-spec-chip"><strong>{% trans "品牌" %}</strong>{{ product.brand }}</div>{% endif %}
-            {% if product.weight %}<div class="bmp-spec-chip"><strong>{% trans "重量" %}</strong>{{ product.weight }}kg</div>{% endif %}
-            <div class="bmp-spec-chip"><strong>{% trans "成色" %}</strong>{{ product.get_condition_display }}</div>
-            <div class="bmp-spec-chip"><strong>{% trans "库存" %}</strong>{{ product.stock }} {% trans "件" %}</div>
-            <div class="bmp-spec-chip"><strong>{% trans "已售" %}</strong>{{ sold_delivered }}+</div>
+            {% if product.brand %}<div class="bmp-spec-chip"><strong>{% trans "品牌" %}</strong> {{ product.brand }}</div>{% endif %}
+            {% if product.weight %}<div class="bmp-spec-chip"><strong>{% trans "重量" %}</strong> {{ product.weight }}kg</div>{% endif %}
+            <div class="bmp-spec-chip"><strong>{% trans "成色" %}</strong> {{ product.get_condition_display }}</div>
+            <div class="bmp-spec-chip"><strong>{% trans "库存" %}</strong> {{ product.stock }} {% trans "件" %}</div>
+            <div class="bmp-spec-chip"><strong>{% trans "已售" %}</strong> {{ sold_delivered }}+</div>
         </div>
     </div>
 

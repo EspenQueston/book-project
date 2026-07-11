@@ -6124,3 +6124,19 @@ msgstr "更多筛选"
 #: marketplace/recommendations.py:1
 msgid "可报名"
 msgstr "可报名"
+
+#: manager/templates/public/base.html:1
+msgid "已登录"
+msgstr "已登录"
+
+#: manager/templates/public/base.html:1
+msgid "请先登录"
+msgstr "请先登录"
+
+#: manager/templates/public/base.html:1
+msgid "切换暗色模式"
+msgstr "切换暗色模式"
+
+#: manager/templates/public/base.html:1
+msgid "切换亮色模式"
+msgstr "切换亮色模式"

@@ -331,10 +331,21 @@
         </div>
         
         <div class="detail-row">
+            <span><strong>{% trans "支付状态" %}:</strong></span>
+            {% if order.payment_status == 'completed' %}
+            <span class="badge bg-success"><i class="fas fa-check-circle"></i> {% trans "已付款" %}</span>
+            {% elif order.payment_status == 'failed' %}
+            <span class="badge bg-danger"><i class="fas fa-times-circle"></i> {% trans "支付失败" %}</span>
+            {% else %}
+            <span class="badge bg-warning text-dark"><i class="fas fa-spinner fa-spin"></i> {% trans "等待确认" %}</span>
+            {% endif %}
+        </div>
+
+        <div class="detail-row">
             <span><strong>{% trans "订单状态" %}:</strong></span>
             <span class="status-badge status-{{ order.status }}">{{ order.get_status_display }}</span>
         </div>
-        
+
         <div class="detail-row">
             <span><strong>{% trans "客户姓名" %}:</strong></span>
             <span>{{ order.customer_name }}</span>

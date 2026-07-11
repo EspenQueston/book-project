@@ -164,6 +164,9 @@
         background: rgba(129,140,248,0.16);
         color: #a5b4fc;
     }
+    html[data-theme="dark"] .fee-value {
+        color: #a5b4fc !important;
+    }
     html[data-theme="dark"] .modal-content .btn-light {
         background: var(--bg-elevated);
         color: var(--text-primary);
@@ -178,26 +181,21 @@
         <div class="mx-auto" style="max-width:820px;">
             <div class="text-center mb-4">
                 <span class="publish-badge"><span data-zh="卖家发布入口" data-en="Seller publishing entry" data-fr="Entrée de publication vendeur">卖家发布入口</span></span>
-                <h1 class="publish-title"><span data-zh="发布图书、商品、课程与超市商品" data-en="Publish books, products, courses and supermarket items" data-fr="Publier des livres, produits, cours et articles de supermarché">发布图书、商品、课程与超市商品</span></h1>
-                <p class="publish-lead"><span data-zh="先完成 100 FCFA 的卖家激活安全支付，再选择要发布的内容类型。您的普通用户身份会继续保留。" data-en="Complete the 100 FCFA secure seller activation payment first, then choose what to publish. Your regular user account remains active." data-fr="Effectuez d'abord le paiement sécurisé d’activation vendeur de 100 FCFA, puis choisissez ce que vous souhaitez publier. Votre compte utilisateur normal reste actif.">先完成 100 FCFA 的卖家激活安全支付，再选择要发布的内容类型。您的普通用户身份会继续保留。</span></p>
+                <h1 class="publish-title"><span data-zh="开始在 DUNO 360 上架销售" data-en="Start selling on DUNO 360" data-fr="Commencez à vendre sur DUNO 360">开始在 DUNO 360 上架销售</span></h1>
+                <p class="publish-lead"><span data-zh="支付一次性 100 FCFA 激活费，即可发布图书、商品、课程或超市商品。" data-en="Pay a one-time 100 FCFA fee to unlock publishing for books, products, courses and supermarket items." data-fr="Payez des frais uniques de 100 FCFA pour publier livres, produits, cours et articles de supermarché.">支付一次性 100 FCFA 激活费，即可发布图书、商品、课程或超市商品。</span></p>
             </div>
 
             <div class="publish-card">
                 <div class="publish-icon">
                     <i class="fas fa-store"></i>
                 </div>
-                <h2><span data-zh="准备开通卖家身份？" data-en="Ready to activate seller access?" data-fr="Prêt à activer l’accès vendeur ?">准备开通卖家身份？</span></h2>
-                <p><span data-zh="完成支付后，您将获得卖家后台，并可发布图书、普通商品、课程和超市商品。" data-en="After payment, you will get seller panel access and be able to publish books, standard products, courses and supermarket items." data-fr="Après paiement, vous aurez accès au panneau vendeur et pourrez publier des livres, produits, cours et articles de supermarché.">完成支付后，您将获得卖家后台，并可发布图书、普通商品、课程和超市商品。</span></p>
+                <h2><span data-zh="卖家激活费用" data-en="Seller activation fee" data-fr="Frais d’activation vendeur">卖家激活费用</span></h2>
 
                 <div class="fee-box">
                     <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
-                        <div>
-                            <div class="fee-meta"><span data-zh="卖家激活费用" data-en="Seller activation fee" data-fr="Frais d’activation vendeur">卖家激活费用</span></div>
-                            <div class="fee-value">{{ seller_activation_fee|default:'100.00' }} FCFA</div>
-                        </div>
+                        <div class="fee-value">{{ seller_activation_fee|default:'100.00' }} FCFA</div>
                         <div class="fee-meta text-end">
-                            <div>pawaPay</div>
-                            <div><span data-zh="数据库已跟踪" data-en="Tracked in database" data-fr="Suivi en base de données">数据库已跟踪</span></div>
+                            <i class="fas fa-shield-alt me-1"></i>pawaPay
                         </div>
                     </div>
                     {% if pending_activation_payment %}

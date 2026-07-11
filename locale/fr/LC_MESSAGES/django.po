@@ -6496,3 +6496,19 @@ msgstr "Plus de filtres"
 #: marketplace/recommendations.py:1
 msgid "可报名"
 msgstr "Inscription ouverte"
+
+#: manager/templates/public/base.html:1
+msgid "已登录"
+msgstr "Connecté"
+
+#: manager/templates/public/base.html:1
+msgid "请先登录"
+msgstr "Veuillez vous connecter d'abord"
+
+#: manager/templates/public/base.html:1
+msgid "切换暗色模式"
+msgstr "Passer en mode sombre"
+
+#: manager/templates/public/base.html:1
+msgid "切换亮色模式"
+msgstr "Passer en mode clair"

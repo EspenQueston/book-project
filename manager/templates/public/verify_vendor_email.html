@@ -24,6 +24,7 @@
         width: 44px; height: 52px; text-align: center; font-size: 1.4rem;
         font-weight: 800; border: 2px solid var(--input-border, #e8ecf1);
         border-radius: 12px; outline: none; transition: all 0.3s;
+        appearance: none; -webkit-appearance: none;
         background: var(--input-bg, #fff); color: var(--dark-text, #333);
         pointer-events: none;
     }
@@ -63,7 +64,15 @@
     .email-icon-box i { font-size: 2rem; color: #1d4ed8; }
     .resend-link { color: #1d4ed8; font-weight: 600; cursor: pointer; text-decoration: none; }
     html[data-theme="dark"] .auth-card { background: var(--bg-surface); box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
-    html[data-theme="dark"] .pin-input { background: var(--input-bg); border-color: var(--input-border); color: var(--text-primary); }
+    html[data-theme="dark"] .pin-input {
+        background: var(--input-bg, #1e293b) !important;
+        border-color: var(--input-border, #475569) !important;
+        color: var(--text-primary, #f8fafc) !important;
+    }
+    html[data-theme="dark"] .pin-input.filled {
+        border-color: #10b981 !important;
+        background: rgba(16,185,129,0.12) !important;
+    }
     html[data-theme="dark"] .verify-fallback-banner { background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.3); color: var(--text-primary); }
     html[data-theme="dark"] .auth-card .text-muted { color: var(--text-tertiary) !important; }
 </style>

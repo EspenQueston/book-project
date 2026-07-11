@@ -7816,6 +7816,8 @@ def seller_activation_return(request, order_number):
 
     if payment.status == 'failed':
         messages.error(request, 'Le paiement a échoué. Veuillez réessayer.')
+    elif payment.status == 'paid':
+        messages.success(request, '✅ Paiement de 100 FCFA confirmé — votre espace vendeur est activé !')
 
     return redirect('manager:publish_entry')
 
@@ -7856,6 +7858,7 @@ def seller_activation_status(request):
         internal = normalize_pawapay_status(result.get('status', 'PENDING'))
         if internal == 'SUCCESSFUL':
             _activate_seller_from_payment(payment)
+            messages.success(request, '✅ Paiement de 100 FCFA confirmé — votre espace vendeur est activé !')
         elif internal == 'FAILED':
             payment.status = 'failed'
             payment.external_status = 'failed'

@@ -674,13 +674,13 @@
         <div class="pmp-specs-label">{% trans "规格参数" %}</div>
         <div class="pmp-specs-scroll">
             {% if item.brand %}
-            <div class="pmp-spec-chip"><strong>{% trans "品牌" %}</strong>{{ item.brand }}</div>
+            <div class="pmp-spec-chip"><strong>{% trans "品牌" %}</strong> {{ item.brand }}</div>
             {% endif %}
             {% if item.origin %}
-            <div class="pmp-spec-chip"><strong>{% trans "产地" %}</strong>{{ item.origin }}</div>
+            <div class="pmp-spec-chip"><strong>{% trans "产地" %}</strong> {{ item.origin }}</div>
             {% endif %}
-            <div class="pmp-spec-chip"><strong>{% trans "库存" %}</strong>{{ item.stock }} {{ item.get_unit_display }}</div>
-            <div class="pmp-spec-chip"><strong>{% trans "已售" %}</strong>{{ sold_delivered }}+</div>
+            <div class="pmp-spec-chip"><strong>{% trans "库存" %}</strong> {{ item.stock }} {{ item.get_unit_display }}</div>
+            <div class="pmp-spec-chip"><strong>{% trans "已售" %}</strong> {{ sold_delivered }}+</div>
             {% if item.is_organic %}
             <div class="pmp-spec-chip"><strong>{% trans "有机" %}</strong>{% trans "有机食品" %}</div>
             {% endif %}

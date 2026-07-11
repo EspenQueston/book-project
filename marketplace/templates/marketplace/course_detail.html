@@ -529,11 +529,11 @@
     <div class="bmp-specs-section">
         <div class="bmp-specs-label">{% trans "课程信息" %}</div>
         <div class="bmp-specs-scroll">
-            <div class="bmp-spec-chip"><strong>{% trans "讲师" %}</strong>{{ course.instructor }}</div>
-            <div class="bmp-spec-chip"><strong>{% trans "课节" %}</strong>{{ course.lessons_count }} {% trans "课节" %}</div>
-            <div class="bmp-spec-chip"><strong>{% trans "时长" %}</strong>{{ course.duration_hours }}h</div>
-            <div class="bmp-spec-chip"><strong>{% trans "等级" %}</strong>{{ course.get_level_display }}</div>
-            <div class="bmp-spec-chip"><strong>{% trans "已报名" %}</strong>{{ sold_delivered }}+</div>
+            <div class="bmp-spec-chip"><strong>{% trans "讲师" %}</strong> {{ course.instructor }}</div>
+            <div class="bmp-spec-chip"><strong>{% trans "课节" %}</strong> {{ course.lessons_count }} {% trans "课节" %}</div>
+            <div class="bmp-spec-chip"><strong>{% trans "时长" %}</strong> {{ course.duration_hours }}h</div>
+            <div class="bmp-spec-chip"><strong>{% trans "等级" %}</strong> {{ course.get_level_display }}</div>
+            <div class="bmp-spec-chip"><strong>{% trans "已报名" %}</strong> {{ sold_delivered }}+</div>
         </div>
     </div>
 

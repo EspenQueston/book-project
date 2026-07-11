@@ -757,11 +757,11 @@ html[data-theme="dark"] .bmp-feed-meta {
         <div class="bmp-specs-label">{% trans "规格参数" %}</div>
         <div class="bmp-specs-scroll">
             {% if book.author_set.all %}
-            <div class="bmp-spec-chip"><strong>{% trans "作者" %}</strong>{{ book.author_set.first.name|default:"—" }}</div>
+            <div class="bmp-spec-chip"><strong>{% trans "作者" %}</strong> {{ book.author_set.first.name|default:"—" }}</div>
             {% endif %}
-            <div class="bmp-spec-chip"><strong>{% trans "出版社" %}</strong>{{ book.publisher.publisher_name }}</div>
-            <div class="bmp-spec-chip"><strong>{% trans "库存" %}</strong>{{ book.inventory }} {% trans "件" %}</div>
-            <div class="bmp-spec-chip"><strong>{% trans "已售" %}</strong>{{ sold_delivered }}+</div>
+            <div class="bmp-spec-chip"><strong>{% trans "出版社" %}</strong> {{ book.publisher.publisher_name }}</div>
+            <div class="bmp-spec-chip"><strong>{% trans "库存" %}</strong> {{ book.inventory }} {% trans "件" %}</div>
+            <div class="bmp-spec-chip"><strong>{% trans "已售" %}</strong> {{ sold_delivered }}+</div>
             {% if book.description %}
             <div class="bmp-spec-chip"><strong>{% trans "简介" %}</strong>{{ book.description|truncatechars:15 }}</div>
             {% endif %}
