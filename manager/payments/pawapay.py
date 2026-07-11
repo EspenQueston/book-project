@@ -49,10 +49,10 @@ COUNTRY_DIAL_CODES = {
 # operator label → PawaPay correspondent code, 'default' = first choice
 #
 # IMPORTANT: this list is scoped to what is actually ACTIVE on the DUNO_360
-# PawaPay merchant account (verified against GET /active-conf on the sandbox
-# — run that check again after switching to production credentials, or
-# whenever PawaPay enables a new corridor, since correspondents that exist
-# in PawaPay's docs are not automatically active on every merchant account).
+# PawaPay merchant account (re-verified against GET /v2/active-conf on the
+# LIVE production account on 2026-07-11 — re-run that check whenever PawaPay
+# enables a new corridor, since correspondents that exist in PawaPay's docs
+# are not automatically active on every merchant account).
 COUNTRY_CORRESPONDENTS = {
     'Congo': {
         'MTN Mobile Money': 'MTN_MOMO_COG',
@@ -70,8 +70,12 @@ COUNTRY_CORRESPONDENTS = {
         'default': 'VODACOM_MPESA_COD',
     },
     'Cameroon': {
+        # 'Orange Money' (ORANGE_CMR) is documented by PawaPay but NOT active
+        # on the LIVE merchant account (confirmed via GET /v2/active-conf on
+        # production — only MTN_MOMO_CMR is listed for CMR). Offering it would
+        # fail every real deposit with DEPOSITS_NOT_ALLOWED. Re-add once
+        # PawaPay confirms it active for this account.
         'MTN Mobile Money': 'MTN_MOMO_CMR',
-        'Orange Money': 'ORANGE_CMR',
         'default': 'MTN_MOMO_CMR',
     },
     'Gabon': {
