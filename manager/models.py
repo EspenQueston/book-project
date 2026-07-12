@@ -111,6 +111,12 @@ class Book(models.Model):
     publisher = models.ForeignKey(to='Publisher', on_delete=models.CASCADE)
     category = models.ForeignKey(BookCategory, on_delete=models.SET_NULL, null=True, blank=True, related_name='books', verbose_name='分类')
     is_active = models.BooleanField(default=True, verbose_name='是否上架')
+    delivery_days_min = models.PositiveSmallIntegerField(
+        null=True, blank=True, verbose_name='Délai de livraison — min (jours), remplace le défaut du vendeur',
+    )
+    delivery_days_max = models.PositiveSmallIntegerField(
+        null=True, blank=True, verbose_name='Délai de livraison — max (jours), remplace le défaut du vendeur',
+    )
 
     class Meta:
         db_table = "book"
@@ -265,7 +271,11 @@ class Order(models.Model):
         null=True,
         verbose_name="支付完成时间"
     )
-    
+    donation_amount = models.DecimalField(
+        max_digits=8, decimal_places=2, default=Decimal('0.00'),
+        verbose_name="爱心捐赠金额",
+    )
+
     customer_notes = models.TextField(blank=True, verbose_name="客户备注")
     admin_notes = models.TextField(blank=True, verbose_name="管理员备注")
       # 时间戳
@@ -354,7 +364,15 @@ class Order(models.Model):
         return max(0, int(remaining.total_seconds()))
 
     def apply_ttl_rules(self):
-        """Platform TTL: unpaid → cancelled after 24h; paid → auto-delivered after 14 days if not terminal."""
+        """Platform TTL: unpaid → cancelled after 24h.
+
+        The old second half of this rule ('paid, no further status change
+        after 14 days → force status=delivered') was removed: it could mark
+        an order delivered — and start the vendor's escrow payout — even
+        when it was never actually shipped. Delivery confirmation is now
+        handled per-vendor-shipment by fulfillment_service.confirm_delivery()
+        and its safety-net timer (process_auto_confirmations()), which only
+        ever applies to shipments that were genuinely marked shipped."""
         from datetime import timedelta
         now = timezone.now()
         terminal = {'cancelled', 'refunded', 'delivered'}
@@ -366,22 +384,9 @@ class Order(models.Model):
                     self.status = 'cancelled'
                     self.payment_status = 'cancelled'
                     changed_fields.extend(['status', 'payment_status'])
-        else:
-            ref = self.payment_completed_at or self.created_at
-            if self.status not in terminal and ref:
-                if now > ref + timedelta(days=self.PAID_AUTO_COMPLETE_DAYS):
-                    self.status = 'delivered'
-                    changed_fields.append('status')
 
         if changed_fields:
             self.save(update_fields=list(dict.fromkeys(changed_fields)) + ['updated_at'])
-            if 'status' in changed_fields and self.status == 'delivered':
-                try:
-                    from manager.escrow_service import mark_order_escrow_delivered, process_due_escrow_releases
-                    mark_order_escrow_delivered('book', self.id)
-                    process_due_escrow_releases()
-                except Exception:
-                    pass
             return True
         return False
 
@@ -400,7 +405,11 @@ class OrderItem(models.Model):
     quantity = models.PositiveIntegerField(verbose_name="数量")
     unit_price = models.DecimalField(max_digits=8, decimal_places=2, verbose_name="单价")
     total_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="小计")
-    
+    shipment = models.ForeignKey(
+        'Shipment', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='book_items', verbose_name='Expédition',
+    )
+
     class Meta:
         db_table = "order_item"
         verbose_name = "订单项目"
@@ -930,6 +939,12 @@ class Vendor(models.Model):
     is_official = models.BooleanField(default=False, verbose_name='官方直营店', db_index=True)
     is_certified = models.BooleanField(default=False, verbose_name='认证卖家', db_index=True)
     certified_at = models.DateTimeField(null=True, blank=True, verbose_name='认证时间')
+    default_delivery_days_min = models.PositiveSmallIntegerField(
+        null=True, blank=True, verbose_name='Délai de livraison habituel — min (jours)',
+    )
+    default_delivery_days_max = models.PositiveSmallIntegerField(
+        null=True, blank=True, verbose_name='Délai de livraison habituel — max (jours)',
+    )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='注册时间')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='更新时间')
 
@@ -1028,6 +1043,7 @@ NOTIFICATION_TYPE_CHOICES = [
     ('low_stock', '库存不足'),
     ('contact_message', '联系消息'),
     ('cs_chat', '客服聊天'),
+    ('donation_received', '收到爱心捐赠'),
 ]
 
 
@@ -1656,6 +1672,230 @@ class DonationContribution(models.Model):
 
     def __str__(self):
         return f'{self.campaign.title} — {self.amount}'
+
+
+# ==========================================
+# Fulfillment: per-vendor shipments & returns
+#
+# Order.status stays as a coarse, backward-compatible summary field —
+# everything that actually drives delivery is here. A single order (book or
+# marketplace) can fan out into multiple Shipment rows, one per vendor,
+# because a marketplace cart can mix items from several sellers. Order.status
+# is kept in sync from these via sync_order_status_from_shipments() in
+# fulfillment_service.py, so every existing view/template/filter that reads
+# order.status keeps working unchanged.
+# ==========================================
+
+class Shipment(models.Model):
+    """One shipment per vendor's portion of an order — the real source of
+    truth for fulfillment. 'delivered' is only ever set from a buyer
+    confirmation or a timed safety-net (never a vendor self-report), because
+    it is also what starts the escrow release countdown for that vendor."""
+
+    ORDER_SOURCE_CHOICES = [
+        ('book', '图书订单'),
+        ('marketplace', '商城订单'),
+    ]
+    FULFILLMENT_STATUS_CHOICES = [
+        ('awaiting_acceptance', "En attente d'acceptation"),
+        ('accepted', 'Acceptée'),
+        ('rejected', 'Refusée'),
+        ('packing', 'En préparation'),
+        ('shipped', 'Expédiée'),
+        ('in_transit', 'En transit'),
+        ('out_for_delivery', 'En livraison'),
+        ('delivered', 'Livrée'),
+        ('completed', 'Terminée'),
+        ('cancelled', 'Annulée'),
+        ('return_requested', 'Retour demandé'),
+        ('return_approved', 'Retour approuvé'),
+        ('return_rejected', 'Retour refusé'),
+        ('returned', 'Retournée'),
+    ]
+    DELIVERY_CONFIRMED_BY_CHOICES = [
+        ('buyer', 'Acheteur'),
+        ('auto_timeout', 'Automatique'),
+        ('admin', 'Admin'),
+    ]
+
+    order_source = models.CharField(max_length=20, choices=ORDER_SOURCE_CHOICES, verbose_name='Source commande')
+    order_id = models.PositiveIntegerField(db_index=True, verbose_name='ID commande')
+    order_number = models.CharField(max_length=32, db_index=True, verbose_name='N° commande')
+    vendor = models.ForeignKey(
+        'Vendor', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='shipments', verbose_name='Vendeur',
+    )
+
+    fulfillment_status = models.CharField(
+        max_length=20, choices=FULFILLMENT_STATUS_CHOICES,
+        default='awaiting_acceptance', db_index=True, verbose_name='Statut logistique',
+    )
+
+    tracking_number = models.CharField(max_length=100, blank=True, default='', verbose_name='N° de suivi')
+    carrier = models.CharField(max_length=100, blank=True, default='', verbose_name='Transporteur')
+
+    accept_by = models.DateTimeField(null=True, blank=True, verbose_name='Accepter avant (SLA)')
+    accepted_at = models.DateTimeField(null=True, blank=True, verbose_name='Acceptée le')
+    rejected_at = models.DateTimeField(null=True, blank=True, verbose_name='Refusée le')
+    rejection_reason = models.CharField(max_length=255, blank=True, default='', verbose_name='Motif de refus')
+
+    packed_at = models.DateTimeField(null=True, blank=True, verbose_name='Préparée le')
+    shipped_at = models.DateTimeField(null=True, blank=True, verbose_name='Expédiée le')
+    estimated_delivery_date = models.DateField(null=True, blank=True, verbose_name='Livraison estimée')
+    out_for_delivery_at = models.DateTimeField(null=True, blank=True, verbose_name='En livraison depuis')
+
+    delivered_at = models.DateTimeField(null=True, blank=True, verbose_name='Livrée le')
+    delivered_confirmed_by = models.CharField(
+        max_length=20, choices=DELIVERY_CONFIRMED_BY_CHOICES, blank=True, default='',
+        verbose_name='Confirmée par',
+    )
+    review_request_sent_at = models.DateTimeField(null=True, blank=True, verbose_name='Rappel avis envoyé le')
+    auto_confirm_at = models.DateTimeField(null=True, blank=True, verbose_name='Confirmation automatique prévue')
+
+    completed_at = models.DateTimeField(null=True, blank=True, verbose_name='Terminée le (escrow libéré)')
+    cancelled_at = models.DateTimeField(null=True, blank=True, verbose_name='Annulée le')
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Créée le')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Mise à jour le')
+
+    class Meta:
+        db_table = 'shipment'
+        ordering = ['-created_at']
+        verbose_name = 'Expédition'
+        verbose_name_plural = 'Expéditions'
+        indexes = [
+            models.Index(fields=['order_source', 'order_id']),
+            models.Index(fields=['vendor', 'fulfillment_status']),
+            models.Index(fields=['order_number']),
+            models.Index(fields=['fulfillment_status', 'auto_confirm_at']),
+            models.Index(fields=['fulfillment_status', 'accept_by']),
+        ]
+
+    def __str__(self):
+        vendor_name = self.vendor.company_name if self.vendor else '—'
+        return f'{self.order_number} → {vendor_name} ({self.get_fulfillment_status_display()})'
+
+    @property
+    def items(self):
+        """All order line items (book or marketplace) attached to this shipment."""
+        if self.order_source == 'book':
+            return self.book_items.all()
+        return self.marketplace_items.all()
+
+    @property
+    def is_terminal(self):
+        return self.fulfillment_status in ('cancelled', 'completed', 'returned', 'rejected')
+
+    @property
+    def can_open_return(self):
+        return self.fulfillment_status in ('delivered', 'completed')
+
+    @property
+    def can_confirm_receipt(self):
+        return self.fulfillment_status in ('shipped', 'in_transit', 'out_for_delivery')
+
+
+class OrderReturnRequest(models.Model):
+    """Buyer-initiated return/dispute on a delivered shipment."""
+
+    REASON_CHOICES = [
+        ('not_received', 'Colis non reçu'),
+        ('damaged', 'Article endommagé'),
+        ('wrong_item', 'Mauvais article reçu'),
+        ('not_as_described', 'Non conforme à la description'),
+        ('other', 'Autre'),
+    ]
+    STATUS_CHOICES = [
+        ('pending', 'En attente'),
+        ('approved', 'Approuvée'),
+        ('rejected', 'Refusée'),
+        ('resolved', 'Résolue'),
+    ]
+    RESOLVED_BY_CHOICES = [
+        ('vendor', 'Vendeur'),
+        ('admin', 'Admin'),
+    ]
+
+    shipment = models.ForeignKey(
+        Shipment, on_delete=models.CASCADE, related_name='return_requests', verbose_name='Expédition',
+    )
+    buyer_name = models.CharField(max_length=100, blank=True, default='', verbose_name='Nom acheteur')
+    buyer_email = models.EmailField(db_index=True, verbose_name='Email acheteur')
+    reason = models.CharField(max_length=30, choices=REASON_CHOICES, verbose_name='Motif')
+    description = models.TextField(blank=True, default='', verbose_name='Description')
+    images = models.JSONField(default=list, blank=True, verbose_name='Photos justificatives')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', db_index=True, verbose_name='Statut')
+    resolution_note = models.TextField(blank=True, default='', verbose_name='Note de résolution')
+    resolved_by = models.CharField(max_length=20, choices=RESOLVED_BY_CHOICES, blank=True, default='', verbose_name='Résolu par')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Créée le')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Mise à jour le')
+
+    class Meta:
+        db_table = 'order_return_request'
+        ordering = ['-created_at']
+        verbose_name = 'Demande de retour'
+        verbose_name_plural = 'Demandes de retour'
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['buyer_email']),
+        ]
+
+    def __str__(self):
+        return f'Retour {self.shipment.order_number} — {self.get_reason_display()} ({self.get_status_display()})'
+
+
+class OrderRefund(models.Model):
+    """Audit trail + idempotency guard for real gateway refunds. Replaces the
+    old behaviour of an admin flipping payment_status='refunded' with no
+    money actually moving — every row here corresponds to a real API call
+    to the payment provider's refund endpoint."""
+
+    ORDER_SOURCE_CHOICES = [
+        ('book', '图书订单'),
+        ('marketplace', '商城订单'),
+    ]
+    PROVIDER_CHOICES = [
+        ('pawapay', 'pawaPay'),
+    ]
+    STATUS_CHOICES = [
+        ('pending', 'En attente'),
+        ('completed', 'Terminé'),
+        ('failed', 'Échoué'),
+    ]
+
+    order_source = models.CharField(max_length=20, choices=ORDER_SOURCE_CHOICES, verbose_name='Source commande')
+    order_id = models.PositiveIntegerField(db_index=True, verbose_name='ID commande')
+    order_number = models.CharField(max_length=32, db_index=True, verbose_name='N° commande')
+    shipment = models.ForeignKey(
+        Shipment, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='refunds', verbose_name='Expédition (vide = remboursement commande entière)',
+    )
+
+    provider = models.CharField(max_length=20, choices=PROVIDER_CHOICES, default='pawapay', verbose_name='Prestataire')
+    provider_refund_id = models.CharField(max_length=64, unique=True, verbose_name='ID remboursement externe')
+    provider_deposit_id = models.CharField(max_length=64, blank=True, default='', verbose_name='ID dépôt externe')
+    amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Montant')
+    currency = models.CharField(max_length=10, default='XAF', verbose_name='Devise')
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', db_index=True, verbose_name='Statut')
+    provider_message = models.CharField(max_length=255, blank=True, default='', verbose_name='Message prestataire')
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Initié le')
+    completed_at = models.DateTimeField(null=True, blank=True, verbose_name='Terminé le')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Mise à jour le')
+
+    class Meta:
+        db_table = 'order_refund'
+        ordering = ['-created_at']
+        verbose_name = 'Remboursement'
+        verbose_name_plural = 'Remboursements'
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['order_number']),
+        ]
+
+    def __str__(self):
+        return f'Remboursement {self.order_number} — {self.amount} {self.currency} ({self.get_status_display()})'
 
 
 # ==========================================

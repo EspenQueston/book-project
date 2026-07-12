@@ -602,6 +602,70 @@ html[data-theme="dark"] .ck-guarantee-banner {
         font-weight: 900;
     }
 
+    /* Optional donation toggle */
+    .ck-donation-card {
+        margin-top: 14px;
+        border-radius: 14px;
+        padding: 14px 16px;
+        background: linear-gradient(135deg, rgba(29,78,216,0.06), rgba(20,36,95,0.06));
+        border: 1.5px solid rgba(29,78,216,0.18);
+    }
+    .ck-donation-toggle {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        cursor: pointer;
+        margin: 0;
+    }
+    .ck-donation-toggle input[type="checkbox"] {
+        position: absolute;
+        opacity: 0;
+        width: 0; height: 0;
+    }
+    .ck-donation-switch {
+        flex: 0 0 auto;
+        width: 42px; height: 24px;
+        border-radius: 999px;
+        background: #cbd5e1;
+        position: relative;
+        transition: background .2s ease;
+        margin-top: 2px;
+    }
+    .ck-donation-switch::after {
+        content: '';
+        position: absolute;
+        top: 3px; left: 3px;
+        width: 18px; height: 18px;
+        border-radius: 50%;
+        background: #fff;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+        transition: transform .2s ease;
+    }
+    .ck-donation-toggle input:checked + .ck-donation-switch {
+        background: linear-gradient(135deg, #14245f, #1d4ed8);
+    }
+    .ck-donation-toggle input:checked + .ck-donation-switch::after {
+        transform: translateX(18px);
+    }
+    .ck-donation-copy { min-width: 0; }
+    .ck-donation-title {
+        display: flex; align-items: center; gap: 8px;
+        font-weight: 700; font-size: 0.92rem;
+        color: var(--ck-text);
+    }
+    .ck-donation-title i { color: #ef4444; }
+    .ck-donation-sub {
+        display: block;
+        font-size: 0.78rem;
+        color: var(--ck-text-muted);
+        margin-top: 2px;
+        line-height: 1.4;
+    }
+    html[data-theme="dark"] .ck-donation-card {
+        background: linear-gradient(135deg, rgba(29,78,216,0.12), rgba(20,36,95,0.12));
+        border-color: rgba(29,78,216,0.3);
+    }
+
     /* Price highlight */
     .book-info strong {
         color: var(--ck-accent);
@@ -904,10 +968,29 @@ html[data-theme="dark"] .ck-guarantee-banner {
                             <span data-zh="运费" data-en="Shipping" data-fr="Livraison">{% trans "运费" %}:</span>
                             <span class="text-success" data-zh="免费" data-en="Free" data-fr="Gratuit">{% trans "免费" %}</span>
                         </div>
+                        <div class="summary-item" id="ckDonationLine" style="display:none;">
+                            <span data-zh="Don solidaire" data-en="Donation" data-fr="Don solidaire">Don solidaire</span>
+                            <span id="ckDonationAmount">+{{ donation_amount|fcfa }}</span>
+                        </div>
                         <div class="summary-item">
                             <span data-zh="订单总额" data-en="Total" data-fr="Total">{% trans "订单总额" %}:</span>
-                            <span class="text-primary">{{ total_amount|fcfa }}</span>
+                            <span class="text-primary" id="ckSummaryTotal">{{ total_amount|fcfa }}</span>
                         </div>
+                    </div>
+
+                    <!-- Optional donation toggle -->
+                    <div class="ck-donation-card" id="ckDonationCard">
+                        <label class="ck-donation-toggle" for="ckDonateCheckbox">
+                            <input type="checkbox" id="ckDonateCheckbox" name="donate" value="yes">
+                            <span class="ck-donation-switch"></span>
+                            <span class="ck-donation-copy">
+                                <span class="ck-donation-title">
+                                    <i class="fas fa-heart"></i>
+                                    <span data-zh="Ajouter un don de {{ donation_amount|fcfa }}" data-en="Add a {{ donation_amount|fcfa }} donation" data-fr="Ajouter un don de {{ donation_amount|fcfa }}">Ajouter un don de {{ donation_amount|fcfa }}</span>
+                                </span>
+                                <span class="ck-donation-sub" data-zh="Facultatif — pour soutenir les enfants dans le besoin dans le monde." data-en="Optional — supports children in need around the world." data-fr="Facultatif — pour soutenir les enfants dans le besoin dans le monde.">Facultatif — pour soutenir les enfants dans le besoin dans le monde.</span>
+                            </span>
+                        </label>
                     </div>
 
                     <!-- Desktop Checkout Button -->
@@ -1144,6 +1227,34 @@ function updateCityOptions(country) {
     citySelect.setAttribute('required', 'required');
     citySelect.removeAttribute('aria-disabled');
 }
+
+/* Optional donation toggle — recomputes both the desktop summary total and
+   the mobile sticky-bar total client-side; the server recomputes the real
+   charged amount independently from the same 'donate' field, so this is
+   purely a UI reflection and never the source of truth for what's charged. */
+(function () {
+    const CK_SUBTOTAL = {{ total_amount_fcfa|default:0 }};
+    const CK_DONATION = {{ donation_amount|fcfa_raw|default:0 }};
+    const checkbox = document.getElementById('ckDonateCheckbox');
+    if (!checkbox) return;
+
+    function fmtFcfa(n) {
+        return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' FCFA';
+    }
+
+    function refresh() {
+        const donating = checkbox.checked;
+        const total = CK_SUBTOTAL + (donating ? CK_DONATION : 0);
+        document.getElementById('ckDonationLine').style.display = donating ? 'flex' : 'none';
+        document.getElementById('ckSummaryTotal').textContent = fmtFcfa(total);
+        const payTotal = document.getElementById('ckPayTotal');
+        if (payTotal) payTotal.textContent = fmtFcfa(total);
+        document.getElementById('ckDonationCard').classList.toggle('active', donating);
+    }
+
+    checkbox.addEventListener('change', refresh);
+    refresh();
+})();
 
 document.getElementById('checkoutForm').addEventListener('submit', function(e) {
     e.preventDefault();

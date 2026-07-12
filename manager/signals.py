@@ -61,16 +61,21 @@ def handle_payment_status_change(sender, instance, created, **kwargs):
 
     if old_status and old_status != current_status:
         logger.info(f"Payment status changed for order {instance.order_number}: {old_status} -> {current_status}")
-        
+
         # Create notification record
         create_payment_notification(instance, old_status, current_status)
-        
-        # Send email notification if payment is successful
-        if current_status == 'paid':
-            send_payment_confirmation(instance)
-        
-        # Handle refund notifications
-        elif current_status == 'refunded':
+
+        # 'completed' (payment confirmed) is handled explicitly from
+        # manager/payments/views.py::_update_order_status — not here — so it
+        # fires exactly once and covers marketplace orders too (this signal
+        # only watches manager.Order). This branch used to check for a
+        # 'paid' status value that doesn't exist in PAYMENT_STATUS_CHOICES
+        # (the real value is 'completed'), so it never actually fired.
+
+        # Refund emails not routed through the new fulfillment/refund flow
+        # (e.g. an admin manually flips payment_status in Django admin)
+        # still get a notification here.
+        if current_status == 'refunded':
             send_refund_notification(instance)
     else:
         logger.debug(
@@ -115,122 +120,19 @@ def create_payment_notification(order, old_status, new_status):
         logger.error(f"Failed to create payment notification for order {order.order_number}: {str(e)}")
 
 
-def send_payment_confirmation(order):
-    """Send payment confirmation email to customer"""
-    try:
-        if not order.customer_email:
-            logger.warning(f"No email address for order {order.order_number}")
-            return
-        
-        subject = f'Payment confirmed - Order {order.order_number} / Paiement confirmé - Commande {order.order_number}'
-        message = f"""
-Hello {order.customer_name},
-
-Your order has been paid successfully!
-
-Order details:
-Order number: {order.order_number}
-Amount paid: {order.total_amount}
-Payment time: {timezone.now().strftime('%Y-%m-%d %H:%M:%S')}
-
-We will process your order as soon as possible. Thank you for your purchase!
-
-This is an automated message — please do not reply.
-
----
-
-Bonjour {order.customer_name},
-
-Votre commande a été payée avec succès !
-
-Détails de la commande :
-Numéro de commande : {order.order_number}
-Montant payé : {order.total_amount}
-Date de paiement : {timezone.now().strftime('%Y-%m-%d %H:%M:%S')}
-
-Nous traiterons votre commande dans les plus brefs délais. Merci pour votre achat !
-
-Message automatique — merci de ne pas répondre.
-        """
-        
-        send_mail(
-            subject=subject,
-            message=message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[order.customer_email],
-            fail_silently=False
-        )
-        
-        logger.info(f"Payment confirmation email sent for order {order.order_number}")
-        
-    except Exception as e:
-        logger.error(f"Failed to send payment confirmation email for order {order.order_number}: {str(e)}")
-
-
 def send_refund_notification(order):
-    """Send refund notification email to customer"""
+    """Send refund notification email to customer — covers the fallback path
+    where payment_status is set to 'refunded' directly (e.g. manually in
+    Django admin) rather than through fulfillment_service's real gateway
+    refund flow, which sends its own email once the refund actually
+    completes at the provider."""
     try:
-        if not order.customer_email:
-            logger.warning(f"No email address for order {order.order_number}")
-            return
-        
-        subject = f'Refund processed - Order {order.order_number} / Remboursement - Commande {order.order_number}'
-        message = f"""
-Hello {order.customer_name},
-
-Your order refund has been processed.
-
-Order details:
-Order number: {order.order_number}
-Refund amount: {order.total_amount}
-Refund time: {timezone.now().strftime('%Y-%m-%d %H:%M:%S')}
-
-The refund should appear within 3–5 business days.
-
-If you have any questions, please contact us at admin@duno360.com.
-
-This is an automated message — please do not reply.
-
----
-
-Bonjour {order.customer_name},
-
-Le remboursement de votre commande a été traité.
-
-Détails de la commande :
-Numéro de commande : {order.order_number}
-Montant remboursé : {order.total_amount}
-Date du remboursement : {timezone.now().strftime('%Y-%m-%d %H:%M:%S')}
-
-Le remboursement devrait apparaître sous 3 à 5 jours ouvrables.
-
-Pour toute question, contactez-nous à admin@duno360.com.
-
-Message automatique — merci de ne pas répondre.
-        """
-        
-        send_mail(
-            subject=subject,
-            message=message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[order.customer_email],
-            fail_silently=False
-        )
-        
-        logger.info(f"Refund notification email sent for order {order.order_number}")
-        
+        from manager import notifications_service
+        notifications_service.send_refund_processed(order, 'book', order.total_amount)
     except Exception as e:
         logger.error(f"Failed to send refund notification email for order {order.order_number}: {str(e)}")
 
 
-@receiver(post_save, sender=Order)
-def update_order_status_on_payment(sender, instance, created, **kwargs):
-    """Automatically update order status when payment is confirmed"""
-
-    if not created and instance.payment_status == 'paid' and instance.status == 'pending':
-        # Automatically move to processing when payment is confirmed
-        Order.objects.filter(pk=instance.pk).update(status='processing')
-        logger.info(f"Order {instance.order_number} status automatically updated to processing after payment")
 
 
 # ──────────────────────────────────────────────────────────────────────────────

@@ -88,6 +88,12 @@ class Product(models.Model):
     is_active = models.BooleanField(default=True, verbose_name='是否上架')
     sales_count = models.PositiveIntegerField(default=0, verbose_name='销量')
     views_count = models.PositiveIntegerField(default=0, verbose_name='浏览量')
+    delivery_days_min = models.PositiveSmallIntegerField(
+        null=True, blank=True, verbose_name='Délai de livraison — min (jours), remplace le défaut du vendeur',
+    )
+    delivery_days_max = models.PositiveSmallIntegerField(
+        null=True, blank=True, verbose_name='Délai de livraison — max (jours), remplace le défaut du vendeur',
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -247,6 +253,12 @@ class SupermarketItem(models.Model):
     is_featured = models.BooleanField(default=False, verbose_name='推荐商品')
     is_active = models.BooleanField(default=True, verbose_name='是否上架')
     sales_count = models.PositiveIntegerField(default=0, verbose_name='销量')
+    delivery_days_min = models.PositiveSmallIntegerField(
+        null=True, blank=True, verbose_name='Délai de livraison — min (jours), remplace le défaut du vendeur',
+    )
+    delivery_days_max = models.PositiveSmallIntegerField(
+        null=True, blank=True, verbose_name='Délai de livraison — max (jours), remplace le défaut du vendeur',
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -373,6 +385,7 @@ class MarketplaceOrder(models.Model):
     payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending', verbose_name='支付状态')
     payment_transaction_id = models.CharField(max_length=100, blank=True, null=True, verbose_name='支付交易号')
     payment_completed_at = models.DateTimeField(blank=True, null=True, verbose_name='支付完成时间')
+    donation_amount = models.DecimalField(max_digits=8, decimal_places=2, default=Decimal('0.00'), verbose_name='爱心捐赠金额')
     shipping_address = models.TextField(blank=True, verbose_name='收货地址')
     notes = models.TextField(blank=True, verbose_name='备注')
     customer_notes = models.TextField(blank=True, verbose_name='客户备注')
@@ -428,7 +441,15 @@ class MarketplaceOrder(models.Model):
         return remaining
 
     def apply_ttl_rules(self):
-        """Unpaid → cancelled after 24h; paid → auto-delivered after 14 days if not terminal."""
+        """Unpaid → cancelled after 24h.
+
+        The old 'paid, no further status change after 14 days → force
+        status=delivered' half of this rule was removed: it could mark an
+        order delivered — and start the vendor's escrow payout — even when
+        it was never actually shipped. Delivery confirmation is now handled
+        per-vendor-shipment by fulfillment_service.confirm_delivery() and its
+        safety-net timer (process_auto_confirmations()), which only ever
+        applies to shipments that were genuinely marked shipped."""
         from datetime import timedelta
         now = timezone.now()
         terminal = {'cancelled', 'refunded', 'delivered'}
@@ -440,22 +461,9 @@ class MarketplaceOrder(models.Model):
                     self.status = 'cancelled'
                     self.payment_status = 'cancelled'
                     changed_fields.extend(['status', 'payment_status'])
-        else:
-            ref = self.payment_completed_at or self.created_at
-            if self.status not in terminal and ref:
-                if now > ref + timedelta(days=self.PAID_AUTO_COMPLETE_DAYS):
-                    self.status = 'delivered'
-                    changed_fields.append('status')
 
         if changed_fields:
             self.save(update_fields=list(dict.fromkeys(changed_fields)) + ['updated_at'])
-            if 'status' in changed_fields and self.status == 'delivered':
-                try:
-                    from manager.escrow_service import mark_order_escrow_delivered, process_due_escrow_releases
-                    mark_order_escrow_delivered('marketplace', self.id)
-                    process_due_escrow_releases()
-                except Exception:
-                    pass
             return True
         return False
 
@@ -503,6 +511,10 @@ class MarketplaceOrderItem(models.Model):
     quantity = models.PositiveIntegerField(default=1, verbose_name='数量')
     unit_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='单价')
     subtotal = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='小计')
+    shipment = models.ForeignKey(
+        'manager.Shipment', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='marketplace_items', verbose_name='Expédition',
+    )
     selected_attributes = models.JSONField(default=dict, blank=True, verbose_name='已选属性')
     pricing_rule_log = models.JSONField(default=dict, blank=True, verbose_name='价格规则日志')
 

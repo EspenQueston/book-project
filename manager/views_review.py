@@ -23,12 +23,26 @@ def _mkt_order_owned_by_user(order, user: models.SiteUser) -> bool:
     return False
 
 
+def _item_delivered(order, item):
+    """Check delivery per-item via its own Shipment, not the whole order's
+    status. Necessary for multi-vendor orders: one vendor's parcel being
+    delivered must make THAT item reviewable even if another vendor's item
+    in the same order hasn't shipped yet — order.status alone reflects the
+    order's least-advanced shipment, which would incorrectly block this.
+    Falls back to the coarse order.status for legacy items with no
+    shipment (pre-dates the fulfillment system)."""
+    shipment = getattr(item, 'shipment', None)
+    if shipment is not None:
+        return shipment.fulfillment_status in ('delivered', 'completed')
+    return order.status == 'delivered'
+
+
 def _eligible_book_order_item(user: models.SiteUser, oi_id: int) -> models.OrderItem | None:
-    oi = get_object_or_404(models.OrderItem.objects.select_related('order', 'book'), pk=oi_id)
+    oi = get_object_or_404(models.OrderItem.objects.select_related('order', 'book', 'shipment'), pk=oi_id)
     o = oi.order
     if o.customer_email.strip().lower() != user.email.strip().lower():
         return None
-    if o.status != 'delivered' or o.payment_status != 'completed':
+    if not _item_delivered(o, oi) or o.payment_status != 'completed':
         return None
     if PostDeliveryReview.objects.filter(book_order_item=oi).exists():
         return None
@@ -36,11 +50,11 @@ def _eligible_book_order_item(user: models.SiteUser, oi_id: int) -> models.Order
 
 
 def _eligible_marketplace_order_item(user: models.SiteUser, mi_id: int) -> MarketplaceOrderItem | None:
-    mi = get_object_or_404(MarketplaceOrderItem.objects.select_related('order'), pk=mi_id)
+    mi = get_object_or_404(MarketplaceOrderItem.objects.select_related('order', 'shipment'), pk=mi_id)
     o = mi.order
     if not _mkt_order_owned_by_user(o, user):
         return None
-    if o.status != 'delivered' or o.payment_status != 'completed':
+    if not _item_delivered(o, mi) or o.payment_status != 'completed':
         return None
     if PostDeliveryReview.objects.filter(marketplace_order_item=mi).exists():
         return None
@@ -175,21 +189,29 @@ def review_submit(request):
 
 
 def collect_pending_reviews_for_user(user: models.SiteUser) -> list[dict]:
-    """Build CTA rows for track order / profile."""
+    """Build CTA rows for track order / profile.
+
+    Filters at the order level by status in ('shipped', 'delivered') rather
+    than only 'delivered' — a multi-vendor order's coarse status reflects its
+    least-advanced shipment, so an order with one vendor's item genuinely
+    delivered can still show 'shipped' overall. The per-item
+    _item_delivered() check below is what actually decides eligibility."""
     from django.db.models import Q
 
     out: list[dict] = []
     orders = (
         models.Order.objects.filter(
             customer_email__iexact=user.email,
-            status='delivered',
+            status__in=('shipped', 'delivered'),
             payment_status='completed',
         )
         .order_by('-created_at')[:40]
-        .prefetch_related('orderitem_set__book')
+        .prefetch_related('orderitem_set__book', 'orderitem_set__shipment')
     )
     for o in orders:
         for oi in o.orderitem_set.all():
+            if not _item_delivered(o, oi):
+                continue
             if PostDeliveryReview.objects.filter(book_order_item=oi).exists():
                 continue
             out.append(
@@ -201,13 +223,15 @@ def collect_pending_reviews_for_user(user: models.SiteUser) -> list[dict]:
             )
 
     morders = (
-        MarketplaceOrder.objects.filter(status='delivered', payment_status='completed')
+        MarketplaceOrder.objects.filter(status__in=('shipped', 'delivered'), payment_status='completed')
         .filter(Q(user_id=user.id) | Q(user_email__iexact=user.email))
         .order_by('-created_at')[:40]
-        .prefetch_related('items')
+        .prefetch_related('items', 'items__shipment')
     )
     for mo in morders:
         for mi in mo.items.all():
+            if not _item_delivered(mo, mi):
+                continue
             if PostDeliveryReview.objects.filter(marketplace_order_item=mi).exists():
                 continue
             img = mi.item_image or ''

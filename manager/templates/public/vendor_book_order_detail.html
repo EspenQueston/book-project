@@ -150,6 +150,9 @@
             </div>
         </div>
         <div class="col-md-6">
+            {% include 'includes/vendor_shipment_panel.html' %}
+        </div>
+        <div class="col-md-6">
             <div class="vo-card h-100">
                 <h6><i class="fas fa-user me-2 text-primary"></i>{% trans "客户" %}</h6>
                 <p class="fw-bold mb-1">{{ order.customer_name }}</p>

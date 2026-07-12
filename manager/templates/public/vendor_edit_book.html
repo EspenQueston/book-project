@@ -114,6 +114,7 @@
                             <label class="form-label fw-bold">{% trans "图书描述" %} <span class="text-danger">*</span></label>
                             <textarea name="description" class="form-control" rows="4" required minlength="12">{{ book.description|default:"" }}</textarea>
                         </div>
+                        {% include 'includes/delivery_days_override_field.html' with item=book %}
                         <div class="col-12">
                             <label class="form-label fw-bold">{% trans "封面图片" %}</label>
                             {% if book.cover_image %}

@@ -45,6 +45,8 @@ def _find_order(reference_id):
 
 def _update_order_status(order, status, transaction_id=None):
     """Update order payment status based on provider callback."""
+    was_already_completed = order.payment_status == 'completed'
+
     if status == 'SUCCESSFUL':
         order.payment_status = 'completed'
         order.payment_completed_at = timezone.now()
@@ -64,15 +66,36 @@ def _update_order_status(order, status, transaction_id=None):
     logger.info('Order %s updated: payment_status=%s',
                 getattr(order, 'order_number', order.pk),
                 order.payment_status)
+    order_source = 'marketplace' if isinstance(order, MarketplaceOrder) else 'book'
     if order.payment_status == 'completed':
         try:
-            from manager.escrow_service import sync_escrow_on_payment
-            if isinstance(order, MarketplaceOrder):
-                sync_escrow_on_payment(order, 'marketplace')
-            else:
-                sync_escrow_on_payment(order, 'book')
+            from manager.fulfillment_service import create_shipments_for_order
+            create_shipments_for_order(order, order_source)
         except Exception as exc:
-            logger.exception('Escrow payment sync failed: %s', exc)
+            logger.exception('Shipment/escrow creation failed: %s', exc)
+        if not was_already_completed:
+            try:
+                from manager import notifications_service
+                notifications_service.send_payment_confirmed(order, order_source)
+            except Exception:
+                logger.exception('Payment confirmation email failed for %s', order.order_number)
+
+            if getattr(order, 'donation_amount', None):
+                try:
+                    from manager.views import create_notification
+                    from manager.templatetags.currency_filters import to_fcfa
+                    create_notification(
+                        'donation_received',
+                        f'\U0001F49B Don reçu — {order.order_number}',
+                        f'Ce paiement inclut un don solidaire de {to_fcfa(order.donation_amount)} '
+                        f'(commande {order.order_number}, {to_fcfa(order.total_amount)} au total). '
+                        f'À ne pas compter comme chiffre d\'affaires produit.',
+                        icon='fas fa-heart', color='#ef4444',
+                        link=f'/manager/order_detail/{order.id}/' if order_source == 'book' else '',
+                        related_id=order.id,
+                    )
+                except Exception:
+                    logger.exception('Donation admin notification failed for %s', order.order_number)
 
 
 # =========================================================================

@@ -1,0 +1,118 @@
+{% load i18n %}
+{# Expects: shipment (Shipment or None), csrf_token #}
+{% comment %}
+Self-contained inline styling so this include looks right regardless of
+whether the host page defines .vo-card (book vendor pages) or .vmo-card
+(marketplace vendor pages) — it deliberately doesn't depend on either.
+{% endcomment %}
+<div class="h-100" id="vsPanel" style="background:var(--card-bg,#fff);border-radius:16px;padding:22px;box-shadow:0 6px 28px rgba(15,23,42,0.06);border:1px solid var(--card-border,rgba(15,23,42,0.06));">
+    <h6 style="font-weight:700;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.08em;color:#64748b;margin-bottom:16px;"><i class="fas fa-truck me-2 text-primary"></i>{% trans "Logistique" %}</h6>
+    {% if not shipment %}
+    <p class="text-muted small mb-0">{% trans "Aucune expédition associée à cette commande pour votre boutique." %}</p>
+    {% else %}
+    <div class="mb-3">
+        <span class="badge rounded-pill px-3 py-2" style="background:rgba(29,78,216,0.12);color:#1d4ed8;font-size:0.85rem;">
+            {{ shipment.get_fulfillment_status_display }}
+        </span>
+    </div>
+
+    {% if shipment.fulfillment_status == 'awaiting_acceptance' %}
+    <p class="small text-muted mb-3">{% trans "Nouvelle commande payée — merci de l'accepter ou de la refuser." %}</p>
+    <div class="d-flex flex-wrap gap-2">
+        <button type="button" class="btn text-white fw-semibold rounded-pill px-4" style="background:linear-gradient(135deg,#10b981,#059669);" onclick="vsAccept({{ shipment.id }})">
+            <i class="fas fa-check me-1"></i>{% trans "Accepter" %}
+        </button>
+        <button type="button" class="btn btn-outline-danger rounded-pill px-4" onclick="vsShowReject({{ shipment.id }})">
+            <i class="fas fa-times me-1"></i>{% trans "Refuser" %}
+        </button>
+    </div>
+    <div id="vsRejectBox" class="mt-3" style="display:none;">
+        <label class="form-label small fw-semibold">{% trans "Motif du refus" %}</label>
+        <textarea id="vsRejectReason" class="form-control rounded-3 mb-2" rows="2" placeholder="{% trans 'Ex. : rupture de stock' %}"></textarea>
+        <button type="button" class="btn btn-danger rounded-pill px-4" onclick="vsReject({{ shipment.id }})">{% trans "Confirmer le refus" %}</button>
+    </div>
+
+    {% elif shipment.fulfillment_status == 'accepted' or shipment.fulfillment_status == 'packing' %}
+    <p class="small text-muted mb-3">{% trans "Renseignez le numéro de suivi et le transporteur pour marquer comme expédiée." %}</p>
+    <div class="row g-2">
+        <div class="col-md-6">
+            <label class="form-label small fw-semibold">{% trans "N° de suivi" %}</label>
+            <input type="text" id="vsTracking" class="form-control rounded-3" placeholder="TRK123456789">
+        </div>
+        <div class="col-md-6">
+            <label class="form-label small fw-semibold">{% trans "Transporteur" %}</label>
+            <input type="text" id="vsCarrier" class="form-control rounded-3" placeholder="DHL, Bolloré, coursier local…">
+        </div>
+        <div class="col-md-6">
+            <label class="form-label small fw-semibold">{% trans "Livraison estimée (optionnel)" %}</label>
+            <input type="date" id="vsEta" class="form-control rounded-3" value="{{ suggested_delivery_date|date:'Y-m-d' }}">
+            {% if suggested_delivery_date %}
+            <div class="form-text" style="font-size:0.75rem;">
+                <span data-zh="根据默认配送时长自动预填，可修改" data-en="Pre-filled from your default delivery time — you can change it" data-fr="Pré-rempli selon votre délai de livraison par défaut — modifiable">Pré-rempli selon votre délai de livraison par défaut — modifiable</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <button type="button" class="btn text-white fw-semibold rounded-pill px-4 mt-3" style="background:linear-gradient(135deg,#1d4ed8,#14245f);" onclick="vsShip({{ shipment.id }})">
+        <i class="fas fa-shipping-fast me-1"></i>{% trans "Marquer comme expédiée" %}
+    </button>
+
+    {% elif shipment.fulfillment_status == 'shipped' or shipment.fulfillment_status == 'in_transit' or shipment.fulfillment_status == 'out_for_delivery' %}
+    <p class="small mb-1"><strong>{% trans "N° de suivi" %}:</strong> {{ shipment.tracking_number }}</p>
+    <p class="small mb-1"><strong>{% trans "Transporteur" %}:</strong> {{ shipment.carrier }}</p>
+    {% if shipment.estimated_delivery_date %}
+    <p class="small mb-1"><strong>{% trans "Livraison estimée" %}:</strong> {{ shipment.estimated_delivery_date|date:"d/m/Y" }}</p>
+    {% endif %}
+    <p class="small text-muted mb-0">{% trans "En attente de confirmation de réception par l'acheteur." %}</p>
+
+    {% elif shipment.fulfillment_status == 'delivered' or shipment.fulfillment_status == 'completed' %}
+    <p class="small mb-1"><i class="fas fa-check-circle text-success me-1"></i>{% trans "Livrée le" %} {{ shipment.delivered_at|date:"d/m/Y H:i" }}</p>
+    <p class="small text-muted mb-0">{% trans "Confirmée par" %}: {{ shipment.get_delivered_confirmed_by_display }}</p>
+
+    {% elif shipment.fulfillment_status == 'rejected' %}
+    <p class="small text-danger mb-0"><strong>{% trans "Refusée" %}:</strong> {{ shipment.rejection_reason }}</p>
+
+    {% else %}
+    <p class="small text-muted mb-0">{{ shipment.get_fulfillment_status_display }}</p>
+    {% endif %}
+    {% endif %}
+</div>
+
+<script>
+function vsShowReject(id) {
+    document.getElementById('vsRejectBox').style.display = 'block';
+}
+function vsPost(shipmentId, action, extra) {
+    var body = new URLSearchParams(extra || {});
+    body.append('shipment_id', shipmentId);
+    body.append('action', action);
+    body.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    return fetch('{% url "manager:vendor_shipment_action" %}', {
+        method: 'POST',
+        headers: {'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/x-www-form-urlencoded'},
+        body: body.toString()
+    }).then(function(r){ return r.json(); }).then(function(d){
+        if (d.success) {
+            if (typeof gToast === 'function') gToast(d.message || 'OK', 'success');
+            location.reload();
+        } else {
+            if (typeof gToast === 'function') gToast(d.message || 'Error', 'error');
+            else alert(d.message || 'Error');
+        }
+        return d;
+    }).catch(function(){ alert('Network error'); });
+}
+function vsAccept(id) { vsPost(id, 'accept'); }
+function vsReject(id) {
+    var reason = document.getElementById('vsRejectReason').value.trim();
+    if (!reason) { alert('{% trans "Merci de préciser le motif du refus." %}'); return; }
+    vsPost(id, 'reject', {reason: reason});
+}
+function vsShip(id) {
+    var tracking = document.getElementById('vsTracking').value.trim();
+    var carrier = document.getElementById('vsCarrier').value.trim();
+    var eta = document.getElementById('vsEta').value;
+    if (!tracking || !carrier) { alert('{% trans "N° de suivi et transporteur sont obligatoires." %}'); return; }
+    vsPost(id, 'ship', {tracking_number: tracking, carrier: carrier, estimated_delivery_date: eta});
+}
+</script>

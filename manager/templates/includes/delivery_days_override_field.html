@@ -1,0 +1,31 @@
+{% load i18n %}
+{% comment %}
+Optional per-item delivery-days override, shared by every vendor add/edit
+product form (books, marketplace products, supermarket items). Falls back to
+the vendor's own default (Vendor settings) and then the platform default
+when left blank — see manager/fulfillment_service.py::resolve_delivery_days.
+Expects: item (optional, for edit forms — object with delivery_days_min/max)
+{% endcomment %}
+<div class="col-12">
+    <label class="form-label fw-bold">
+        <i class="fas fa-truck me-1"></i>
+        <span data-zh="配送时长（可选）" data-en="Delivery time (optional)" data-fr="Délai de livraison (facultatif)">Délai de livraison (facultatif)</span>
+    </label>
+    <div class="form-text mb-2" style="font-size:0.78rem;">
+        <span data-zh="留空则使用您在店铺设置中配置的默认配送时长。" data-en="Leave blank to use the default delivery time configured in your shop settings." data-fr="Laissez vide pour utiliser le délai par défaut configuré dans les paramètres de votre boutique.">Laissez vide pour utiliser le délai par défaut configuré dans les paramètres de votre boutique.</span>
+    </div>
+    <div class="row g-2 align-items-center" style="max-width:360px;">
+        <div class="col-auto">
+            <input type="number" min="1" max="90" class="form-control" style="width:90px;"
+                   name="delivery_days_min" value="{{ item.delivery_days_min|default:'' }}"
+                   placeholder="{% trans '最少' %}">
+        </div>
+        <div class="col-auto text-muted" data-zh="至" data-en="to" data-fr="à">à</div>
+        <div class="col-auto">
+            <input type="number" min="1" max="90" class="form-control" style="width:90px;"
+                   name="delivery_days_max" value="{{ item.delivery_days_max|default:'' }}"
+                   placeholder="{% trans '最多' %}">
+        </div>
+        <div class="col-auto text-muted" data-zh="天" data-en="days" data-fr="jours">jours</div>
+    </div>
+</div>

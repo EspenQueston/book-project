@@ -2941,6 +2941,45 @@ def buy_now(request, book_id):
         messages.error(request, '购买失败，请重试')
         return redirect('manager:public_book_detail', book_id=book_id)
 
+# Optional checkout donation supporting children in need — flat amount,
+# not user-adjustable, shown as a clearly optional toggle at checkout.
+DONATION_AMOUNT = Decimal('500.00')
+
+
+def donation_admin_note(amount):
+    """Bilingual note auto-attached to admin_notes whenever a checkout
+    included a donation, so whoever ends up looking at the order/payment
+    (admin, finance, vendor) immediately sees that part of what was
+    collected is a solidarity donation, not revenue for an item."""
+    from manager.templatetags.currency_filters import to_fcfa
+    amt = to_fcfa(amount)
+    return (
+        f"\U0001F49B Ce paiement inclut un don solidaire de {amt} "
+        f"(soutien aux enfants dans le besoin) — à ne pas compter comme "
+        f"chiffre d'affaires produit.\n"
+        f"This payment includes a {amt} solidarity donation "
+        f"(supporting children in need) — do not count as product revenue."
+    )
+
+
+def _parse_delivery_days_override(post_data, prefix=''):
+    """Parse an optional per-item delivery-days override from a POST dict.
+    Returns (None, None) unless both min and max are present, positive
+    integers, min <= max, and within a sane 1-90 day range — an invalid or
+    partial submission just falls back to no override (vendor default /
+    platform default) rather than erroring the whole form."""
+    min_raw = post_data.get(f'{prefix}delivery_days_min', '').strip()
+    max_raw = post_data.get(f'{prefix}delivery_days_max', '').strip()
+    if not min_raw or not max_raw:
+        return None, None
+    if not (min_raw.isdigit() and max_raw.isdigit()):
+        return None, None
+    d_min, d_max = int(min_raw), int(max_raw)
+    if 0 < d_min <= d_max <= 90:
+        return d_min, d_max
+    return None, None
+
+
 def checkout(request):
     """Unified checkout - handles books and marketplace items together"""
     session_key = get_session_key(request)
@@ -3005,12 +3044,20 @@ def checkout(request):
                 messages.error(request, _('当前国家暂不支持该支付方式，请重新选择。'))
                 return redirect('manager:checkout')
 
+            # Optional 500 FCFA donation supporting children in need — added
+            # to whichever order actually gets charged (matches the
+            # target_order selection below: book_order takes priority when
+            # both book and marketplace items are in the same cart).
+            donation = DONATION_AMOUNT if request.POST.get('donate') == 'yes' else Decimal('0.00')
+            book_donation = donation if book_items else Decimal('0.00')
+            mkt_donation = donation if not book_items else Decimal('0.00')
+
             book_order = None
             mkt_order = None
 
             # Create book order if there are book items
             if book_items:
-                book_total = sum(i['total_price'] for i in book_items)
+                book_total = sum(i['total_price'] for i in book_items) + book_donation
                 book_order = models.Order.objects.create(
                     customer_name=customer_name,
                     customer_email=customer_email,
@@ -3020,9 +3067,11 @@ def checkout(request):
                     shipping_address=shipping_address,
                     payment_method=payment_method,
                     total_amount=book_total,
+                    donation_amount=book_donation,
                     status=initial_status,
                     payment_status=payment_status,
                     customer_notes=customer_notes,
+                    admin_notes=donation_admin_note(book_donation) if book_donation else '',
                     payment_transaction_id=kkiapay_transaction_id or None,
                 )
                 for item in book_items:
@@ -3063,7 +3112,7 @@ def checkout(request):
                         if item['quantity'] > obj.stock:
                             messages.error(request, f'库存不足！当前库存：{obj.stock}')
                             return redirect('manager:checkout')
-                mkt_total = sum(i['total_price'] for i in marketplace_items)
+                mkt_total = sum(i['total_price'] for i in marketplace_items) + mkt_donation
                 mkt_order = MarketplaceOrder(
                     user_name=customer_name,
                     user_email=customer_email,
@@ -3072,11 +3121,13 @@ def checkout(request):
                     city=city,
                     payment_method=payment_method,
                     total_amount=mkt_total,
+                    donation_amount=mkt_donation,
                     status=initial_status,
                     payment_status=payment_status,
                     shipping_address=shipping_address or request.POST.get('shipping_address', ''),
                     notes=customer_notes,
                     customer_notes=customer_notes,
+                    admin_notes=donation_admin_note(mkt_donation) if mkt_donation else '',
                     payment_transaction_id=kkiapay_transaction_id or None,
                 )
                 mkt_order.save()
@@ -3164,8 +3215,9 @@ def checkout(request):
         'kkiapay_countries': kkiapay_countries,
         'kkiapay_countries_data': kkiapay_countries_data,
         'checkout_cities_by_country': get_checkout_cities_by_country(),
+        'donation_amount': DONATION_AMOUNT,
     }
-    
+
     response = render(request, 'public/checkout.html', context)
     # Prevent browser from caching the checkout page (avoids stale JS bugs)
     response['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
@@ -3395,6 +3447,13 @@ def order_confirmation(request, order_number):
             else:
                 payment_time_remaining_seconds = max(int(payment_time_remaining), 0)
 
+    order_source = 'book' if book_order else 'marketplace'
+    shipments = list(
+        models.Shipment.objects.filter(order_source=order_source, order_id=resolved_order.id)
+        .select_related('vendor')
+        .prefetch_related('return_requests')
+    )
+
     context = {
         'order': resolved_order,
         'book_order': book_order,
@@ -3403,9 +3462,77 @@ def order_confirmation(request, order_number):
         'mkt_order_items': mkt_order_items,
         'order_items': book_order_items,  # backward compat
         'payment_time_remaining_seconds': payment_time_remaining_seconds,
+        'shipments': shipments,
+        'order_source': order_source,
+        'return_reasons': models.OrderReturnRequest.REASON_CHOICES,
     }
-    
+
     return render(request, 'public/order_confirmation.html', context)
+
+
+def _buyer_owns_shipment(request, shipment):
+    """Ownership check mirrors order_confirmation()'s: order_number must be
+    in the session's accessible_orders list — this platform doesn't require
+    login for guest book checkout, so shipments are protected the same way
+    orders already are, not via a hard user FK."""
+    accessible = request.session.get('accessible_orders', [])
+    return shipment.order_number in accessible
+
+
+@require_POST
+def confirm_delivery_receipt(request):
+    """Buyer clicks 'Confirm receipt' — the ONLY normal path to a shipment
+    being marked delivered (see fulfillment_service docstring for why it's
+    never the seller). Starts the escrow release countdown for this
+    shipment's items."""
+    from manager import fulfillment_service as fs
+
+    shipment_id = request.POST.get('shipment_id')
+    shipment = get_object_or_404(models.Shipment, id=shipment_id)
+    if not _buyer_owns_shipment(request, shipment):
+        return JsonResponse({'success': False, 'message': str(_('Non autorisé.'))}, status=403)
+
+    if not shipment.can_confirm_receipt:
+        return JsonResponse({'success': False, 'message': str(_('Cette expédition ne peut pas être confirmée maintenant.'))}, status=400)
+
+    ok = fs.confirm_delivery(shipment, confirmed_by='buyer')
+    if not ok:
+        return JsonResponse({'success': False, 'message': str(_('Action impossible.'))}, status=400)
+    return JsonResponse({'success': True, 'message': str(_('Réception confirmée — merci !'))})
+
+
+@require_POST
+def submit_return_request(request):
+    """Buyer opens a return/dispute on a delivered shipment."""
+    from manager import fulfillment_service as fs
+
+    shipment_id = request.POST.get('shipment_id')
+    shipment = get_object_or_404(models.Shipment, id=shipment_id)
+    if not _buyer_owns_shipment(request, shipment):
+        return JsonResponse({'success': False, 'message': str(_('Non autorisé.'))}, status=403)
+
+    reason = request.POST.get('reason', '').strip()
+    description = request.POST.get('description', '').strip()
+    valid_reasons = dict(models.OrderReturnRequest.REASON_CHOICES)
+    if reason not in valid_reasons:
+        return JsonResponse({'success': False, 'message': str(_('Motif invalide.'))}, status=400)
+
+    buyer_name = getattr(shipment, '_buyer_name', '') or ''
+    order = None
+    if shipment.order_source == 'book':
+        order = models.Order.objects.filter(id=shipment.order_id).first()
+        buyer_email = order.customer_email if order else ''
+        buyer_name = order.customer_name if order else ''
+    else:
+        order = MarketplaceOrder.objects.filter(id=shipment.order_id).first()
+        buyer_email = order.user_email if order else ''
+        buyer_name = order.user_name if order else ''
+
+    req = fs.open_return_request(shipment, buyer_name, buyer_email, reason, description=description)
+    if not req:
+        return JsonResponse({'success': False, 'message': str(_('Impossible d\'ouvrir une demande de retour pour cette expédition (délai dépassé ou statut invalide).'))}, status=400)
+    return JsonResponse({'success': True, 'message': str(_('Demande de retour envoyée.'))})
+
 
 def track_order(request):
     """Order tracking page - Search by order number or email"""
@@ -3775,17 +3902,27 @@ def api_cancel_order(request):
 
 
 def api_confirm_payment(request):
-    """API endpoint to confirm payment"""
+    """API endpoint for the customer to self-report 'I've paid' on manual/QR
+    payment methods with no real-time gateway webhook (WeChat Pay, Alipay,
+    bank transfer) — status moves to 'processing' as a signal for ops to go
+    verify manually; payment_status stays 'pending' until an admin actually
+    confirms it, so this alone cannot mark an order paid or trigger escrow/
+    shipment creation. It had no ownership check at all before this fix —
+    anyone who could guess/enumerate an order_number could flip its status."""
     from django.http import JsonResponse
     import json
-    
+
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             order_number = data.get('order_number')
-            
+
+            accessible = request.session.get('accessible_orders', [])
+            if str(order_number) not in accessible:
+                return JsonResponse({'success': False, 'message': '未授权'}, status=403)
+
             order = models.Order.objects.get(order_number=order_number)
-            
+
             # Update order status to processing
             if order.status == 'payment_pending':
                 order.status = 'processing'
@@ -6376,7 +6513,7 @@ def _send_verification_email(email, pin_code, name):
     subject = 'DUNO 360 - Email Verification / Vérification e-mail'
     html_body = f'''
     <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:520px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
-        <div style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:32px 28px;text-align:center;">
+        <div style="background:linear-gradient(135deg,#14245f 0%,#1d4ed8 100%);padding:32px 28px;text-align:center;">
             <h1 style="color:#fff;margin:0;font-size:1.5rem;">DUNO 360</h1>
             <p style="color:rgba(255,255,255,0.85);margin:8px 0 0;font-size:0.95rem;">Email &amp; phone verification / Vérification e-mail et téléphone</p>
         </div>
@@ -6388,8 +6525,8 @@ def _send_verification_email(email, pin_code, name):
             <p style="color:#666;font-size:0.93rem;line-height:1.7;margin:0 0 24px;">
                 Merci de vous être inscrit sur DUNO 360. Utilisez le code ci-dessous pour finaliser la création de votre compte&nbsp;:
             </p>
-            <div style="background:linear-gradient(135deg,rgba(102,126,234,0.08),rgba(118,75,162,0.08));border:2px dashed #667eea;border-radius:14px;padding:24px;text-align:center;margin:0 0 24px;">
-                <span style="font-size:2.5rem;font-weight:800;letter-spacing:12px;color:#667eea;">{pin_code}</span>
+            <div style="background:linear-gradient(135deg,rgba(20,36,95,0.08),rgba(29,78,216,0.08));border:2px dashed #1d4ed8;border-radius:14px;padding:24px;text-align:center;margin:0 0 24px;">
+                <span style="font-size:2.5rem;font-weight:800;letter-spacing:12px;color:#1d4ed8;">{pin_code}</span>
             </div>
             <p style="color:#999;font-size:0.85rem;text-align:center;margin:0;">
                 ⏰ This code expires in <strong>15 minutes</strong>. / Ce code expire dans <strong>15 minutes</strong>.
@@ -7429,7 +7566,7 @@ def _send_reset_email(email, pin_code, name):
     subject = 'DUNO 360 - Password Reset / Réinitialisation du mot de passe'
     html_body = f'''
     <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:520px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
-        <div style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:32px 28px;text-align:center;">
+        <div style="background:linear-gradient(135deg,#14245f 0%,#1d4ed8 100%);padding:32px 28px;text-align:center;">
             <h1 style="color:#fff;margin:0;font-size:1.5rem;">🔐 DUNO 360</h1>
             <p style="color:rgba(255,255,255,0.85);margin:8px 0 0;font-size:0.95rem;">Password Reset / Réinitialisation du mot de passe</p>
         </div>
@@ -7441,8 +7578,8 @@ def _send_reset_email(email, pin_code, name):
             <p style="color:#666;font-size:0.93rem;line-height:1.7;margin:0 0 24px;">
                 Vous avez demandé une réinitialisation de mot de passe. Utilisez le code ci-dessous&nbsp;:
             </p>
-            <div style="background:linear-gradient(135deg,rgba(102,126,234,0.08),rgba(118,75,162,0.08));border:2px dashed #667eea;border-radius:14px;padding:24px;text-align:center;margin:0 0 24px;">
-                <span style="font-size:2.5rem;font-weight:800;letter-spacing:12px;color:#667eea;">{pin_code}</span>
+            <div style="background:linear-gradient(135deg,rgba(20,36,95,0.08),rgba(29,78,216,0.08));border:2px dashed #1d4ed8;border-radius:14px;padding:24px;text-align:center;margin:0 0 24px;">
+                <span style="font-size:2.5rem;font-weight:800;letter-spacing:12px;color:#1d4ed8;">{pin_code}</span>
             </div>
             <p style="color:#999;font-size:0.85rem;text-align:center;margin:0;">
                 ⏰ This code expires in <strong>15 minutes</strong>. / Ce code expire dans <strong>15 minutes</strong>.
@@ -8756,6 +8893,19 @@ def vendor_settings_save(request):
     if 'logo' in request.FILES:
         vendor.logo = request.FILES['logo']
 
+    delivery_min_raw = request.POST.get('default_delivery_days_min', '').strip()
+    delivery_max_raw = request.POST.get('default_delivery_days_max', '').strip()
+    if not delivery_min_raw and not delivery_max_raw:
+        vendor.default_delivery_days_min = None
+        vendor.default_delivery_days_max = None
+    elif delivery_min_raw.isdigit() and delivery_max_raw.isdigit():
+        d_min, d_max = int(delivery_min_raw), int(delivery_max_raw)
+        if 0 < d_min <= d_max <= 90:
+            vendor.default_delivery_days_min = d_min
+            vendor.default_delivery_days_max = d_max
+        else:
+            messages.error(request, _('délai de livraison invalide (min doit être ≤ max, entre 1 et 90 jours).'))
+
     vendor.save()
     messages.success(request, _('店铺设置已保存'))
     vid = request.POST.get('vendor_id') or request.GET.get('vendor_id')
@@ -8844,7 +8994,10 @@ def _vendor_book_order_can_update_fulfillment(order):
     return order.status not in ('cancelled', 'refunded')
 
 
-VENDOR_BOOK_ORDER_ALLOWED_STATUSES = frozenset({'confirmed', 'processing', 'shipped', 'delivered'})
+# 'shipped'/'delivered' are deliberately excluded — those now require the
+# shipment-based flow (vendor_shipment_action) which enforces tracking info
+# on ship and never lets the vendor self-report delivery.
+VENDOR_BOOK_ORDER_ALLOWED_STATUSES = frozenset({'confirmed', 'processing'})
 
 
 def _vendor_book_order_customer_editable(order):
@@ -8928,6 +9081,13 @@ def vendor_book_order_detail(request, order_id):
         models.OrderItem.objects.filter(order=order, book_id__in=book_ids).select_related('book')
     )
     vendor_lines_total = sum((item.total_price for item in order_items), Decimal('0'))
+    vendor_shipment = models.Shipment.objects.filter(
+        order_source='book', order_id=order.id, vendor=vendor,
+    ).first()
+    suggested_delivery_date = None
+    if vendor_shipment and vendor_shipment.fulfillment_status in ('accepted', 'packing'):
+        from manager.fulfillment_service import suggested_delivery_date as _suggest
+        suggested_delivery_date = _suggest(vendor_shipment)
 
     context = {
         'vendor': vendor,
@@ -8935,8 +9095,14 @@ def vendor_book_order_detail(request, order_id):
         'order': order,
         'order_items': order_items,
         'vendor_lines_total': vendor_lines_total,
+        'shipment': vendor_shipment,
+        'suggested_delivery_date': suggested_delivery_date,
         'can_update_fulfillment': _vendor_book_order_can_update_fulfillment(order),
-        'fulfillment_statuses': [(k, v) for k, v in models.ORDER_STATUS_CHOICES if k not in ('cancelled', 'refunded')],
+        'fulfillment_statuses': (
+            [(k, v) for k, v in models.ORDER_STATUS_CHOICES if k not in ('cancelled', 'refunded')]
+            if admin_access else
+            [(k, v) for k, v in models.ORDER_STATUS_CHOICES if k in ('confirmed', 'processing')]
+        ),
         'status_choices': models.ORDER_STATUS_CHOICES,
         'payment_status_choices': models.PAYMENT_STATUS_CHOICES,
         'can_edit_customer': _vendor_book_order_customer_editable(order),
@@ -8979,6 +9145,65 @@ def vendor_book_order_update_status(request):
         'new_status': new_status,
         'new_status_display': status_dict.get(new_status, new_status),
         'new_status_color': order.get_status_color(),
+    })
+
+
+@require_POST
+def vendor_shipment_action(request):
+    """Vendor-facing shipment actions: accept / reject / ship. Shared by
+    book and marketplace order detail pages — Shipment is a single model
+    regardless of order_source. This is the only path to 'shipped'; there is
+    no way to mark something shipped without a tracking number and carrier,
+    and vendors can never set 'delivered' themselves (see fulfillment_service
+    docstring for why)."""
+    from manager import fulfillment_service as fs
+
+    vendor = _get_vendor(request)
+    admin_access = request.session.get('name')
+    if not vendor and not admin_access:
+        return JsonResponse({'success': False, 'message': '请以卖家身份登录'}, status=403)
+
+    shipment_id = request.POST.get('shipment_id')
+    action = request.POST.get('action', '').strip()
+    shipment = get_object_or_404(models.Shipment, id=shipment_id)
+
+    if vendor and shipment.vendor_id != vendor.id:
+        return JsonResponse({'success': False, 'message': '无权操作此订单'}, status=403)
+
+    if action == 'accept':
+        ok = fs.accept_shipment(shipment)
+    elif action == 'reject':
+        reason = request.POST.get('reason', '').strip()
+        if not reason:
+            return JsonResponse({'success': False, 'message': '请填写拒绝原因'}, status=400)
+        ok = fs.reject_shipment(shipment, reason)
+    elif action == 'ship':
+        tracking_number = request.POST.get('tracking_number', '').strip()
+        carrier = request.POST.get('carrier', '').strip()
+        eta_raw = request.POST.get('estimated_delivery_date', '').strip()
+        eta = None
+        if eta_raw:
+            try:
+                from datetime import datetime as _dt
+                eta = _dt.strptime(eta_raw, '%Y-%m-%d').date()
+            except ValueError:
+                eta = None
+        try:
+            ok = fs.mark_shipped(shipment, tracking_number, carrier, estimated_delivery_date=eta)
+        except ValueError as exc:
+            return JsonResponse({'success': False, 'message': str(exc)}, status=400)
+    else:
+        return JsonResponse({'success': False, 'message': '无效操作'}, status=400)
+
+    if not ok:
+        return JsonResponse({'success': False, 'message': '当前状态无法执行此操作'}, status=400)
+
+    shipment.refresh_from_db()
+    return JsonResponse({
+        'success': True,
+        'message': '已更新',
+        'fulfillment_status': shipment.fulfillment_status,
+        'fulfillment_status_display': shipment.get_fulfillment_status_display(),
     })
 
 
@@ -9180,6 +9405,21 @@ def vendor_hub_order_update(request):
     mkt_status_ok = dict(MarketplaceOrder.STATUS_CHOICES)
     mkt_pay_ok = dict(MarketplaceOrder.PAYMENT_STATUS_CHOICES)
 
+    # SECURITY: a genuine vendor (not admin-impersonation) must never be able
+    # to self-report payment_status, nor set status to shipped/delivered/
+    # cancelled/refunded directly — that used to let any vendor mark their
+    # own unpaid order 'payment completed' and 'delivered' with zero
+    # verification, releasing their own escrow payout. Those transitions now
+    # only happen via real gateway webhooks (payment) or the shipment-based
+    # accept/reject/ship/confirm-delivery flow in fulfillment_service.py.
+    # Admin (staff) impersonating a vendor keeps the full override for
+    # legitimate manual fixes.
+    VENDOR_SAFE_STATUSES = {'confirmed', 'processing'}
+    if not admin_access:
+        new_pay = ''
+        if new_status not in VENDOR_SAFE_STATUSES:
+            new_status = ''
+
     if kind == 'book':
         allowed = set(_vendor_book_order_ids(vendor))
         order = get_object_or_404(models.Order, id=order_id)
@@ -9307,6 +9547,7 @@ def vendor_add_book(request):
         author_ids = request.POST.getlist('author_ids')
         book_file = request.FILES.get('book_file')
         download_link = request.POST.get('download_link', '').strip()
+        delivery_days_min, delivery_days_max = _parse_delivery_days_override(request.POST)
 
         if not name:
             return JsonResponse(_vendor_book_error('name', 'Le titre du livre est obligatoire.'))
@@ -9328,6 +9569,8 @@ def vendor_add_book(request):
             sale_num=0,
             description=description,
             publisher_id=int(publisher_id) if publisher_id else None,
+            delivery_days_min=delivery_days_min,
+            delivery_days_max=delivery_days_max,
         )
         if 'cover_image' in request.FILES:
             book.cover_image = request.FILES['cover_image']
@@ -9484,10 +9727,13 @@ def vendor_edit_book(request):
             except ValidationError:
                 return JsonResponse({'success': False, 'message': '请输入有效的下载链接 URL。', 'field': 'download_link'})
 
+        delivery_days_min, delivery_days_max = _parse_delivery_days_override(request.POST)
         book.name = name
         book.price = Decimal(price)
         book.inventory = int(inventory)
         book.description = description
+        book.delivery_days_min = delivery_days_min
+        book.delivery_days_max = delivery_days_max
         if publisher_id:
             book.publisher_id = int(publisher_id)
         if 'cover_image' in request.FILES:
@@ -9528,6 +9774,134 @@ def vendor_delete_book(request):
         vb.delete()
         return JsonResponse({'success': True, 'message': '图书已从您的店铺中移除'})
     return JsonResponse({'success': False})
+
+
+# Admin returns & shipment oversight
+@ensure_csrf_cookie
+def admin_returns_queue(request):
+    """Admin queue for open return/dispute requests, plus a proactive alert
+    list for shipments running late (past their seller-acceptance SLA or
+    approaching their auto-confirm-delivery safety net), and a full
+    fulfillment-funnel breakdown — the kind of visibility the platform had
+    none of before this system existed."""
+    if "name" not in request.session:
+        return redirect('/manager/login/')
+
+    from django.utils import timezone as _tz
+
+    search_q = request.GET.get('search', '').strip()
+
+    pending_qs = models.OrderReturnRequest.objects.filter(status='pending').select_related(
+        'shipment', 'shipment__vendor',
+    )
+    if search_q:
+        pending_qs = pending_qs.filter(shipment__order_number__icontains=search_q)
+    pending_returns = list(pending_qs.order_by('-created_at'))
+
+    resolved_qs = models.OrderReturnRequest.objects.exclude(status='pending').select_related(
+        'shipment', 'shipment__vendor',
+    )
+    if search_q:
+        resolved_qs = resolved_qs.filter(shipment__order_number__icontains=search_q)
+    resolved_paginator = Paginator(resolved_qs.order_by('-updated_at'), 10)
+    resolved_returns = resolved_paginator.get_page(request.GET.get('page', 1))
+
+    now = _tz.now()
+    late_acceptance = list(
+        models.Shipment.objects.filter(fulfillment_status='awaiting_acceptance', accept_by__lt=now)
+        .select_related('vendor').order_by('accept_by')
+    )
+    approaching_auto_confirm = list(
+        models.Shipment.objects.filter(
+            fulfillment_status__in=('shipped', 'in_transit', 'out_for_delivery'),
+            auto_confirm_at__lt=now + timedelta(days=2),
+        ).select_related('vendor').order_by('auto_confirm_at')
+    )
+
+    # Full fulfillment-funnel breakdown — every status, one query.
+    status_counts = dict(
+        models.Shipment.objects.values_list('fulfillment_status')
+        .annotate(c=Count('id')).values_list('fulfillment_status', 'c')
+    )
+    total_shipments = sum(status_counts.values())
+    active_statuses = ('awaiting_acceptance', 'accepted', 'packing', 'shipped', 'in_transit', 'out_for_delivery')
+    active_shipments_count = sum(status_counts.get(s, 0) for s in active_statuses)
+    dispute_statuses = ('return_requested', 'return_approved')
+    open_dispute_count = sum(status_counts.get(s, 0) for s in dispute_statuses)
+
+    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    returned_this_month = models.Shipment.objects.filter(
+        fulfillment_status='returned', updated_at__gte=month_start,
+    ).count()
+    delivered_this_month = models.Shipment.objects.filter(
+        fulfillment_status__in=('delivered', 'completed'), delivered_at__gte=month_start,
+    ).count()
+    resolved_this_week = models.OrderReturnRequest.objects.exclude(status='pending').filter(
+        updated_at__gte=now - timedelta(days=7),
+    ).count()
+
+    status_funnel = [
+        {'key': key, 'label': label, 'count': status_counts.get(key, 0)}
+        for key, label in models.Shipment.FULFILLMENT_STATUS_CHOICES
+    ]
+    max_funnel_count = max((row['count'] for row in status_funnel), default=0)
+
+    context = {
+        'name': request.session.get('name'),
+        'pending_returns': pending_returns,
+        'resolved_returns': resolved_returns,
+        'late_acceptance': late_acceptance,
+        'approaching_auto_confirm': approaching_auto_confirm,
+        'pending_returns_count': len(pending_returns),
+        'search_query': search_q,
+        'total_shipments': total_shipments,
+        'active_shipments_count': active_shipments_count,
+        'open_dispute_count': open_dispute_count,
+        'returned_this_month': returned_this_month,
+        'delivered_this_month': delivered_this_month,
+        'resolved_this_week': resolved_this_week,
+        'status_funnel': status_funnel,
+        'max_funnel_count': max_funnel_count,
+    }
+    return render(request, 'admin/returns_queue.html', context)
+
+
+@require_POST
+def admin_resolve_return(request):
+    """Admin approves/rejects a pending return request."""
+    from manager import fulfillment_service as fs
+
+    if "name" not in request.session:
+        return JsonResponse({'success': False, 'message': '未授权'}, status=403)
+
+    return_id = request.POST.get('return_id')
+    decision = request.POST.get('decision', '').strip()
+    note = request.POST.get('note', '').strip()
+    return_request = get_object_or_404(models.OrderReturnRequest, id=return_id)
+
+    ok = fs.resolve_return_request(return_request, decision, resolution_note=note, resolved_by='admin')
+    if not ok:
+        return JsonResponse({'success': False, 'message': '操作失败（状态已变更或参数无效）'}, status=400)
+    return JsonResponse({'success': True, 'message': '已处理'})
+
+
+@require_POST
+def admin_confirm_return_received(request):
+    """Admin confirms a returned item was physically received back —
+    finalizes the return and issues the real refund."""
+    from manager import fulfillment_service as fs
+
+    if "name" not in request.session:
+        return JsonResponse({'success': False, 'message': '未授权'}, status=403)
+
+    return_id = request.POST.get('return_id')
+    note = request.POST.get('note', '').strip()
+    return_request = get_object_or_404(models.OrderReturnRequest, id=return_id)
+
+    ok = fs.confirm_return_received(return_request, resolution_note=note)
+    if not ok:
+        return JsonResponse({'success': False, 'message': '操作失败（退货尚未获批准）'}, status=400)
+    return JsonResponse({'success': True, 'message': '已确认收货并发起退款'})
 
 
 # Admin vendor management

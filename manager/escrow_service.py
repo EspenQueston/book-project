@@ -139,17 +139,25 @@ def create_escrow_for_marketplace_order(order):
     return created
 
 
-def mark_order_escrow_delivered(order_source, order_id):
-    """Mark escrow as releasable after delivery is confirmed."""
+def mark_order_escrow_delivered(order_source, order_id, order_item_ids=None):
+    """Mark escrow as releasable after delivery is confirmed.
+
+    order_item_ids, when given, scopes this to a single shipment's line
+    items — required for multi-vendor orders, where one vendor's parcel
+    being confirmed delivered must never start the payout clock for another
+    vendor's still-in-transit parcel in the same order."""
     from manager.models import PlatformEscrowTransaction
 
     now = timezone.now()
     eligible_at = now + timedelta(days=REFUND_HOLD_DAYS)
-    updated = PlatformEscrowTransaction.objects.filter(
+    qs = PlatformEscrowTransaction.objects.filter(
         order_source=order_source,
         order_id=order_id,
         status='held',
-    ).update(
+    )
+    if order_item_ids is not None:
+        qs = qs.filter(order_item_id__in=list(order_item_ids))
+    updated = qs.update(
         status='releasable',
         delivered_at=now,
         release_eligible_at=eligible_at,
@@ -157,15 +165,19 @@ def mark_order_escrow_delivered(order_source, order_id):
     return updated
 
 
-def cancel_escrow_for_order(order_source, order_id, new_status='refunded'):
-    """Cancel or refund escrow when order is cancelled/refunded."""
+def cancel_escrow_for_order(order_source, order_id, new_status='refunded', order_item_ids=None):
+    """Cancel or refund escrow when an order (or a single shipment within a
+    multi-vendor order) is cancelled/refunded."""
     from manager.models import PlatformEscrowTransaction
 
-    return PlatformEscrowTransaction.objects.filter(
+    qs = PlatformEscrowTransaction.objects.filter(
         order_source=order_source,
         order_id=order_id,
         status__in=('held', 'releasable'),
-    ).update(status=new_status)
+    )
+    if order_item_ids is not None:
+        qs = qs.filter(order_item_id__in=list(order_item_ids))
+    return qs.update(status=new_status)
 
 
 def release_escrow_transaction(escrow_tx):

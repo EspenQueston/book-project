@@ -116,6 +116,9 @@
                     <input type="text" name="origin" class="form-control rounded-3" value="{% if form_state.values.origin %}{{ form_state.values.origin }}{% elif item %}{{ item.origin }}{% endif %}">
                 </div>
                 <div class="mb-3">
+                    {% include 'includes/delivery_days_override_field.html' %}
+                </div>
+                <div class="mb-3">
                     <label class="form-label fw-semibold">Image principale</label>
                     <input type="file" name="image" class="form-control rounded-3 {% if form_state.errors.image %}is-invalid{% endif %}" accept="image/*">
                     {% if form_state.errors.image %}<div class="invalid-feedback d-block">{{ form_state.errors.image }}</div>{% endif %}

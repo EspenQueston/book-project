@@ -3409,6 +3409,33 @@ msgstr "Choisir la spécification"
 msgid "订单中心"
 msgstr "Centre des commandes"
 
+msgid "统一查看图书、商品、课程与超市订单，快速识别支付状态与处理优先级。"
+msgstr "Consultez livres, produits, cours et commandes du supermarché en un seul endroit — repérez rapidement le statut de paiement et les priorités."
+
+msgid "订单总计"
+msgstr "Total des commandes"
+
+msgid "待支付合计"
+msgstr "En attente de paiement"
+
+msgid "商城订单"
+msgstr "Commandes marketplace"
+
+msgid "全部状态"
+msgstr "Tous les statuts"
+
+msgid "全部支付"
+msgstr "Tous les statuts de paiement"
+
+msgid "订单号、客户、邮箱…"
+msgstr "N° de commande, client, e-mail…"
+
+msgid "超市/商城"
+msgstr "Supermarché/Marketplace"
+
+msgid "重置"
+msgstr "Réinitialiser"
+
 msgid "图书、商城商品与课程订单统一管理"
 msgstr "Vue unifiée des commandes livres et marketplace (produits et cours)"
 

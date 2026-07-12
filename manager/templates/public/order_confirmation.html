@@ -304,6 +304,48 @@
     html[data-theme="dark"] .border-bottom {
         border-bottom-color: var(--border-default) !important;
     }
+
+    /* Per-vendor shipment tracking cards */
+    .shp-card {
+        background: var(--card-bg, #fff);
+        border: 1px solid var(--card-border, rgba(15,23,42,0.08));
+        border-radius: 16px;
+        padding: 20px 22px;
+        margin-bottom: 16px;
+        box-shadow: 0 6px 24px rgba(15,23,42,0.05);
+    }
+    .shp-card-head {
+        display: flex; justify-content: space-between; align-items: center;
+        flex-wrap: wrap; gap: 10px; margin-bottom: 14px;
+    }
+    .shp-vendor { font-weight: 700; font-size: 0.95rem; }
+    .shp-badge {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 6px 14px; border-radius: 999px; font-size: 0.8rem; font-weight: 700;
+    }
+    .shp-badge.st-progress { background: rgba(29,78,216,0.12); color: #1d4ed8; }
+    .shp-badge.st-transit { background: rgba(245,158,11,0.14); color: #b45309; }
+    .shp-badge.st-done { background: rgba(16,185,129,0.14); color: #059669; }
+    .shp-badge.st-issue { background: rgba(239,68,68,0.14); color: #dc2626; }
+    .shp-steps {
+        display: flex; gap: 6px; margin: 14px 0;
+    }
+    .shp-step {
+        flex: 1; height: 6px; border-radius: 999px; background: rgba(100,116,139,0.18);
+    }
+    .shp-step.done { background: linear-gradient(135deg, #1d4ed8, #10b981); }
+    .shp-tracking { font-size: 0.86rem; color: var(--text-secondary, #475569); margin-bottom: 10px; }
+    .shp-confirm-btn {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: #fff; border: none; border-radius: 12px;
+        padding: 12px 22px; font-weight: 700; font-size: 0.9rem;
+    }
+    .shp-return-link {
+        color: #64748b; font-size: 0.82rem; text-decoration: underline; cursor: pointer; background: none; border: none;
+    }
+    html[data-theme="dark"] .shp-card {
+        background: var(--bg-surface); border-color: #334155;
+    }
 </style>
 
 <div class="confirmation-container">
@@ -371,6 +413,12 @@
             <span>{{ order.get_payment_method_display }}</span>
         </div>
         
+        {% if order.donation_amount %}
+        <div class="detail-row">
+            <span><strong><i class="fas fa-heart text-danger me-1"></i><span data-zh="Don solidaire" data-en="Donation" data-fr="Don solidaire">Don solidaire</span>:</strong></span>
+            <span>{{ order.donation_amount|fcfa }}</span>
+        </div>
+        {% endif %}
         <div class="detail-row">
             <span><strong>{% trans "订单总额" %}:</strong></span>
             <span class="text-success">{{ order.total_amount|fcfa }}</span>
@@ -700,6 +748,81 @@
         {% endif %}
     </div>
 
+    <!-- Per-vendor shipment tracking -->
+    {% if shipments %}
+    <div class="order-details">
+        <h4 class="mb-4"><i class="fas fa-truck"></i> {% trans "Suivi de livraison" %}</h4>
+        {% for shipment in shipments %}
+        <div class="shp-card">
+            <div class="shp-card-head">
+                <span class="shp-vendor"><i class="fas fa-store me-1 text-muted"></i>{{ shipment.vendor.company_name|default:"DUNO 360" }}</span>
+                {% if shipment.fulfillment_status == 'delivered' or shipment.fulfillment_status == 'completed' %}
+                <span class="shp-badge st-done"><i class="fas fa-check-circle"></i> {{ shipment.get_fulfillment_status_display }}</span>
+                {% elif shipment.fulfillment_status == 'shipped' or shipment.fulfillment_status == 'in_transit' or shipment.fulfillment_status == 'out_for_delivery' %}
+                <span class="shp-badge st-transit"><i class="fas fa-shipping-fast"></i> {{ shipment.get_fulfillment_status_display }}</span>
+                {% elif shipment.fulfillment_status == 'rejected' or shipment.fulfillment_status == 'cancelled' or shipment.fulfillment_status == 'return_rejected' %}
+                <span class="shp-badge st-issue"><i class="fas fa-exclamation-circle"></i> {{ shipment.get_fulfillment_status_display }}</span>
+                {% else %}
+                <span class="shp-badge st-progress"><i class="fas fa-cog"></i> {{ shipment.get_fulfillment_status_display }}</span>
+                {% endif %}
+            </div>
+
+            <div class="shp-steps">
+                <div class="shp-step done"></div>
+                <div class="shp-step {% if shipment.fulfillment_status != 'awaiting_acceptance' and shipment.fulfillment_status != 'rejected' %}done{% endif %}"></div>
+                <div class="shp-step {% if shipment.shipped_at %}done{% endif %}"></div>
+                <div class="shp-step {% if shipment.fulfillment_status == 'delivered' or shipment.fulfillment_status == 'completed' %}done{% endif %}"></div>
+            </div>
+
+            {% if shipment.tracking_number %}
+            <p class="shp-tracking">
+                <strong>{% trans "N° de suivi" %}:</strong> {{ shipment.tracking_number }}
+                &nbsp;·&nbsp; <strong>{% trans "Transporteur" %}:</strong> {{ shipment.carrier }}
+                {% if shipment.estimated_delivery_date %}<br><strong>{% trans "Livraison estimée" %}:</strong> {{ shipment.estimated_delivery_date|date:"d/m/Y" }}{% endif %}
+            </p>
+            {% endif %}
+
+            {% if shipment.fulfillment_status == 'rejected' %}
+            <p class="small text-danger mb-2"><strong>{% trans "Motif" %}:</strong> {{ shipment.rejection_reason }}</p>
+            {% endif %}
+
+            {% if shipment.can_confirm_receipt %}
+            <button type="button" class="shp-confirm-btn" onclick="shpConfirmReceipt({{ shipment.id }})">
+                <i class="fas fa-box-open me-1"></i>{% trans "Confirmer la réception" %}
+            </button>
+            {% endif %}
+
+            {% if shipment.can_open_return %}
+                {% with open_req=shipment.return_requests.all|first %}
+                {% if open_req %}
+                <p class="small mt-2 mb-0">
+                    <i class="fas fa-undo-alt me-1 text-muted"></i>
+                    {% trans "Demande de retour" %}: <strong>{{ open_req.get_status_display }}</strong>
+                    {% if open_req.resolution_note %}— {{ open_req.resolution_note }}{% endif %}
+                </p>
+                {% else %}
+                <button type="button" class="shp-return-link mt-2" onclick="shpShowReturn({{ shipment.id }})">
+                    {% trans "Un problème avec cet article ? Demander un retour" %}
+                </button>
+                {% endif %}
+                {% endwith %}
+            {% endif %}
+
+            <div id="shpReturnForm{{ shipment.id }}" class="mt-3" style="display:none;">
+                <label class="form-label small fw-semibold">{% trans "Motif" %}</label>
+                <select id="shpReason{{ shipment.id }}" class="form-select form-select-sm rounded-3 mb-2">
+                    {% for val, label in return_reasons %}
+                    <option value="{{ val }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <textarea id="shpDesc{{ shipment.id }}" class="form-control form-control-sm rounded-3 mb-2" rows="2" placeholder="{% trans 'Détails (optionnel)' %}"></textarea>
+                <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="shpSubmitReturn({{ shipment.id }})">{% trans "Envoyer la demande" %}</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <!-- Customer Notes -->
     {% if order.customer_notes %}
     <div class="order-details">
@@ -994,6 +1117,51 @@ function getCookie(name) {
         }
     }
     return cookieValue;
+}
+
+function shpConfirmReceipt(shipmentId) {
+    var body = new URLSearchParams();
+    body.append('shipment_id', shipmentId);
+    fetch('{% url "manager:confirm_delivery_receipt" %}', {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/x-www-form-urlencoded'},
+        body: body.toString()
+    }).then(function(r){ return r.json(); }).then(function(d){
+        if (d.success) {
+            if (typeof gToast === 'function') gToast(d.message || 'OK', 'success');
+            setTimeout(function(){ location.reload(); }, 900);
+        } else {
+            if (typeof gToast === 'function') gToast(d.message || 'Error', 'error');
+            else alert(d.message || 'Error');
+        }
+    }).catch(function(){ alert('{% trans "网络错误，请重试" %}'); });
+}
+
+function shpShowReturn(shipmentId) {
+    var el = document.getElementById('shpReturnForm' + shipmentId);
+    if (el) el.style.display = 'block';
+}
+
+function shpSubmitReturn(shipmentId) {
+    var reason = document.getElementById('shpReason' + shipmentId).value;
+    var description = document.getElementById('shpDesc' + shipmentId).value.trim();
+    var body = new URLSearchParams();
+    body.append('shipment_id', shipmentId);
+    body.append('reason', reason);
+    body.append('description', description);
+    fetch('{% url "manager:submit_return_request" %}', {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/x-www-form-urlencoded'},
+        body: body.toString()
+    }).then(function(r){ return r.json(); }).then(function(d){
+        if (d.success) {
+            if (typeof gToast === 'function') gToast(d.message || 'OK', 'success');
+            setTimeout(function(){ location.reload(); }, 900);
+        } else {
+            if (typeof gToast === 'function') gToast(d.message || 'Error', 'error');
+            else alert(d.message || 'Error');
+        }
+    }).catch(function(){ alert('{% trans "网络错误，请重试" %}'); });
 }
 </script>
 {% endblock %}

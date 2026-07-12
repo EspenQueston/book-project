@@ -3369,6 +3369,33 @@ msgstr "Choose specification"
 msgid "订单中心"
 msgstr "Order hub"
 
+msgid "统一查看图书、商品、课程与超市订单，快速识别支付状态与处理优先级。"
+msgstr "View books, products, courses and supermarket orders in one place — quickly spot payment status and what needs attention."
+
+msgid "订单总计"
+msgstr "Total orders"
+
+msgid "待支付合计"
+msgstr "Awaiting payment"
+
+msgid "商城订单"
+msgstr "Marketplace orders"
+
+msgid "全部状态"
+msgstr "All statuses"
+
+msgid "全部支付"
+msgstr "All payment statuses"
+
+msgid "订单号、客户、邮箱…"
+msgstr "Order number, customer, email…"
+
+msgid "超市/商城"
+msgstr "Supermarket/Marketplace"
+
+msgid "重置"
+msgstr "Reset"
+
 msgid "图书、商城商品与课程订单统一管理"
 msgstr ""
 "Unified management for book and marketplace (products & courses) orders"

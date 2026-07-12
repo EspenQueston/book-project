@@ -186,6 +186,9 @@
                     <label class="form-label fw-bold">Poids (kg)</label>
                     <input type="number" name="weight" class="form-control" step="0.01" value="{% if form_state.values.weight is not None %}{{ form_state.values.weight }}{% elif product %}{{ product.weight|default:'' }}{% endif %}">
                 </div>
+                <div class="mb-3">
+                    {% include 'includes/delivery_days_override_field.html' with item=product %}
+                </div>
                 <div class="switch-card">
                     <div class="form-check form-switch mb-2">
                         <input type="checkbox" name="is_active" class="form-check-input" id="isActive" {% if form_state.values.is_active or product.is_active and not form_state.values or not product and not form_state.values %}checked{% endif %}>

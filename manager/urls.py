@@ -112,6 +112,8 @@ urlpatterns = [
     path('api/payment/seller-activation/status/', views.seller_activation_status, name='seller_activation_status'),
     path('public/kkiapay/success/<str:order_number>/', views.kkiapay_success_redirect, name='kkiapay_success_redirect'),
     path('order-confirmation/<str:order_number>/', views.order_confirmation, name='order_confirmation'),
+    path('api/shipment/confirm-receipt/', views.confirm_delivery_receipt, name='confirm_delivery_receipt'),
+    path('api/shipment/return-request/', views.submit_return_request, name='submit_return_request'),
     path('track-order/', views.track_order, name='track_order'),
     path('download/<int:order_id>/<int:book_id>/', views.download_book, name='download_book'),
 
@@ -205,6 +207,7 @@ urlpatterns = [
     path('vendor/orders/books/', views.vendor_book_orders, name='vendor_book_orders'),
     path('vendor/orders/books/<int:order_id>/', views.vendor_book_order_detail, name='vendor_book_order_detail'),
     path('vendor/orders/books/update-status/', views.vendor_book_order_update_status, name='vendor_book_order_update_status'),
+    path('vendor/shipments/action/', views.vendor_shipment_action, name='vendor_shipment_action'),
     path('vendor/orders/books/customer/', views.vendor_book_order_update_customer, name='vendor_book_order_update_customer'),
     path('vendor/messages/', views.vendor_messages_page, name='vendor_messages'),
     path('vendor/notifications/', views.vendor_notifications_page, name='vendor_notifications'),
@@ -229,6 +232,9 @@ urlpatterns = [
     path('vendor/toggle-book/', views.vendor_toggle_book, name='vendor_toggle_book'),
 
     # =========================Admin Vendor Management========================
+    path('admin/returns/', views.admin_returns_queue, name='admin_returns_queue'),
+    path('admin/returns/resolve/', views.admin_resolve_return, name='admin_resolve_return'),
+    path('admin/returns/confirm-received/', views.admin_confirm_return_received, name='admin_confirm_return_received'),
     path('admin/vendors/', views.admin_vendor_list, name='admin_vendor_list'),
     path('admin/vendors/status/', views.admin_vendor_status, name='admin_vendor_status'),
     path('admin/vendors/certify/', views.admin_vendor_certify, name='admin_vendor_certify'),

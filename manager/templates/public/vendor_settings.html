@@ -81,6 +81,29 @@
                         {% include 'includes/congo_location_select.html' with select_id='vendorShopLocation' city_id='vendorShopCity' selected_location=vendor.location selected_city=vendor.city %}
                     </div>
                     <div class="mb-3">
+                        <label class="form-label fw-bold" style="font-size:0.88rem;">
+                            <i class="fas fa-truck me-1" style="color:#1d4ed8;"></i>
+                            <span data-zh="常规配送时长" data-en="Default delivery time" data-fr="Délai de livraison habituel">Délai de livraison habituel</span>
+                        </label>
+                        <div class="form-text mb-2" style="font-size:0.78rem;">
+                            <span data-zh="用于预填每次发货时的预计送达日期，某个商品可单独设置以覆盖此默认值。" data-en="Used to pre-fill the estimated delivery date each time you ship — an individual product can override this default." data-fr="Utilisé pour pré-remplir la date de livraison estimée à chaque expédition — un produit précis peut définir son propre délai pour remplacer ce défaut.">Utilisé pour pré-remplir la date de livraison estimée à chaque expédition — un produit précis peut définir son propre délai pour remplacer ce défaut.</span>
+                        </div>
+                        <div class="row g-2 align-items-center">
+                            <div class="col-auto">
+                                <input type="number" min="1" max="90" class="form-control" style="width:90px;border-radius:10px;"
+                                       name="default_delivery_days_min" value="{{ vendor.default_delivery_days_min|default:'' }}"
+                                       placeholder="{% trans '最少' %}">
+                            </div>
+                            <div class="col-auto text-muted" data-zh="至" data-en="to" data-fr="à">à</div>
+                            <div class="col-auto">
+                                <input type="number" min="1" max="90" class="form-control" style="width:90px;border-radius:10px;"
+                                       name="default_delivery_days_max" value="{{ vendor.default_delivery_days_max|default:'' }}"
+                                       placeholder="{% trans '最多' %}">
+                            </div>
+                            <div class="col-auto text-muted" data-zh="天" data-en="days" data-fr="jours">jours</div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label fw-bold" style="font-size:0.88rem;"><span data-zh="店铺 Logo" data-en="Shop logo" data-fr="Logo boutique">{% trans "店铺 Logo" %}</span></label>
                         <div class="d-flex align-items-center gap-3">
                             {% if vendor.get_logo_url %}

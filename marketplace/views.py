@@ -917,6 +917,29 @@ def buy_now(request):
     return redirect('manager:checkout')
 
 
+# Optional checkout donation supporting children in need — flat amount,
+# not user-adjustable, shown as a clearly optional toggle at checkout.
+DONATION_AMOUNT = Decimal('500.00')
+
+
+def _donation_admin_note(amount):
+    """Bilingual note auto-attached to admin_notes whenever a checkout
+    included a donation, so whoever ends up looking at the order/payment
+    (admin, finance, vendor) immediately sees that part of what was
+    collected is a solidarity donation, not revenue for an item. Mirrors
+    manager.views.donation_admin_note (kept local to avoid a manager.views
+    <-> marketplace.views circular import for a 10-line helper)."""
+    from manager.templatetags.currency_filters import to_fcfa
+    amt = to_fcfa(amount)
+    return (
+        f"\U0001F49B Ce paiement inclut un don solidaire de {amt} "
+        f"(soutien aux enfants dans le besoin) — à ne pas compter comme "
+        f"chiffre d'affaires produit.\n"
+        f"This payment includes a {amt} solidarity donation "
+        f"(supporting children in need) — do not count as product revenue."
+    )
+
+
 def checkout(request):
     """Checkout page with payment methods."""
     session_key = _get_session_key(request)
@@ -981,6 +1004,12 @@ def checkout(request):
                 messages.error(request, _('当前国家暂不支持该支付方式，请重新选择。'))
                 return redirect('marketplace:checkout')
 
+            # Optional 500 FCFA donation supporting children in need — added
+            # to the charged total before the wallet-balance check below, so
+            # a wallet payment can't succeed while under-covering it.
+            donation = DONATION_AMOUNT if request.POST.get('donate') == 'yes' else Decimal('0.00')
+            total_amount = total_amount + donation
+
             # Handle wallet payment
             user_id = request.session.get('site_user_id')
             if payment_method == 'wallet':
@@ -1007,8 +1036,10 @@ def checkout(request):
                 city=city,
                 payment_method=payment_method,
                 total_amount=total_amount,
+                donation_amount=donation,
                 shipping_address=shipping_address,
                 notes=request.POST.get('notes', ''),
+                admin_notes=_donation_admin_note(donation) if donation else '',
             )
             order.save()
 
@@ -1096,6 +1127,7 @@ def checkout(request):
         'payment_methods': payment_methods,
         'wallet_balance': wallet_balance,
         'checkout_cities_by_country': get_checkout_cities_by_country(),
+        'donation_amount': DONATION_AMOUNT,
     }
     return render(request, 'marketplace/checkout.html', context)
 
@@ -2256,7 +2288,10 @@ def _vendor_mkt_order_can_update_fulfillment(order):
     return order.status not in ('cancelled', 'refunded')
 
 
-VENDOR_MKT_ORDER_ALLOWED_STATUSES = frozenset({'processing', 'shipped', 'delivered'})
+# 'shipped'/'delivered' are deliberately excluded — those now require the
+# shipment-based flow (manager:vendor_shipment_action) which enforces
+# tracking info on ship and never lets the vendor self-report delivery.
+VENDOR_MKT_ORDER_ALLOWED_STATUSES = frozenset({'processing'})
 
 
 def _vendor_mkt_order_customer_editable(order):
@@ -2336,14 +2371,24 @@ def vendor_marketplace_order_detail(request, pk):
     vendor_items = list(order.items.filter(q_items).select_related()) if q_items is not None else []
 
     vendor_subtotal = sum((it.subtotal for it in vendor_items), Decimal('0'))
+    from manager.models import Shipment
+    vendor_shipment = Shipment.objects.filter(
+        order_source='marketplace', order_id=order.id, vendor=vendor,
+    ).first()
+    suggested_delivery_date = None
+    if vendor_shipment and vendor_shipment.fulfillment_status in ('accepted', 'packing'):
+        from manager.fulfillment_service import suggested_delivery_date as _suggest
+        suggested_delivery_date = _suggest(vendor_shipment)
 
     context = {
         'vendor': vendor,
         'order': order,
         'vendor_items': vendor_items,
         'vendor_subtotal': vendor_subtotal,
+        'shipment': vendor_shipment,
+        'suggested_delivery_date': suggested_delivery_date,
         'can_update_fulfillment': _vendor_mkt_order_can_update_fulfillment(order),
-        'fulfillment_statuses': [(k, v) for k, v in MarketplaceOrder.STATUS_CHOICES if k not in ('cancelled', 'refunded')],
+        'fulfillment_statuses': [(k, v) for k, v in MarketplaceOrder.STATUS_CHOICES if k in VENDOR_MKT_ORDER_ALLOWED_STATUSES],
         'status_choices': MarketplaceOrder.STATUS_CHOICES,
         'payment_status_choices': MarketplaceOrder.PAYMENT_STATUS_CHOICES,
         'can_edit_customer': _vendor_mkt_order_customer_editable(order),
@@ -2551,6 +2596,9 @@ def _handle_vendor_product_form_submission(request, vendor, redirect_name='marke
         context = _form_context_with_pricing({'vendor': vendor, 'categories': categories, 'form_state': _build_marketplace_form_state(request)}, None)
         return render(request, 'marketplace/vendor/product_form.html', context)
 
+    from manager.views import _parse_delivery_days_override
+    delivery_days_min, delivery_days_max = _parse_delivery_days_override(request.POST)
+
     with transaction.atomic():
         product = Product(
             vendor_id=vendor.pk,
@@ -2570,6 +2618,8 @@ def _handle_vendor_product_form_submission(request, vendor, redirect_name='marke
             is_featured=False,
             is_active=request.POST.get('is_active', 'on') == 'on',
             category=category,
+            delivery_days_min=delivery_days_min,
+            delivery_days_max=delivery_days_max,
         )
         if request.FILES.get('image'):
             product.image = request.FILES['image']
@@ -2683,6 +2733,8 @@ def vendor_product_edit(request, pk):
         product.condition = request.POST.get('condition', 'new')
         product.weight = request.POST.get('weight') or None
         product.is_active = request.POST.get('is_active', 'on') == 'on'
+        from manager.views import _parse_delivery_days_override
+        product.delivery_days_min, product.delivery_days_max = _parse_delivery_days_override(request.POST)
         category = _required_category(request, 'products', 'marketplace:vendor_product_edit', pk=product.pk)
         if not category:
             categories = Category.objects.filter(section='products', is_active=True)
@@ -3080,6 +3132,9 @@ def vendor_supermarket_add(request):
             context = _form_context_with_pricing({'vendor': vendor, 'item': None, 'categories': categories, 'unit_choices': SupermarketItem.UNIT_CHOICES, 'form_state': _build_marketplace_form_state(request)}, None)
             return render(request, 'marketplace/vendor/supermarket_form.html', context)
 
+        from manager.views import _parse_delivery_days_override
+        delivery_days_min, delivery_days_max = _parse_delivery_days_override(request.POST)
+
         item = SupermarketItem(
             vendor_id=vendor.pk,
             name=name,
@@ -3099,6 +3154,8 @@ def vendor_supermarket_add(request):
             is_organic=request.POST.get('is_organic') == 'on',
             is_featured=False,
             is_active=request.POST.get('is_active', 'on') == 'on',
+            delivery_days_min=delivery_days_min,
+            delivery_days_max=delivery_days_max,
         )
         item.category = category
         if 'image' in request.FILES:
@@ -3161,6 +3218,13 @@ def vendor_supermarket_edit(request, pk):
         item.origin = request.POST.get('origin', '').strip()
         item.is_organic = request.POST.get('is_organic') == 'on'
         item.is_active = request.POST.get('is_active', 'on') == 'on'
+        from manager.views import _parse_delivery_days_override
+        item.delivery_days_min, item.delivery_days_max = _parse_delivery_days_override(request.POST)
+        category = _required_category(request, 'supermarket', 'marketplace:vendor_supermarket_edit', pk=item.pk)
+        if not category:
+            categories = Category.objects.filter(section='supermarket', is_active=True)
+            context = _form_context_with_pricing({'vendor': vendor, 'categories': categories, 'item': item, 'unit_choices': SupermarketItem.UNIT_CHOICES, 'form_state': _build_marketplace_form_state(request, item)}, item)
+            return render(request, 'marketplace/vendor/supermarket_form.html', context)
         item.category = category
         if 'image' in request.FILES:
             item.image = request.FILES['image']

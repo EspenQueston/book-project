@@ -1,11 +1,16 @@
 """Republic of Congo departments and cities for user/vendor location."""
 
 DEFAULT_CONGO_LOCATION = 'Brazzaville'
-DEFAULT_CONGO_CITY = 'Brazzaville'
+DEFAULT_CONGO_CITY = 'Makélékélé'
 
 CONGO_DEPARTMENTS = [
-    {'code': 'Brazzaville', 'name': 'Brazzaville', 'chef_lieu': 'Brazzaville', 'cities': ['Brazzaville', 'Kintélé']},
-    {'code': 'Pointe-Noire', 'name': 'Pointe-Noire', 'chef_lieu': 'Pointe-Noire', 'cities': ['Pointe-Noire', 'Loandjili']},
+    {'code': 'Brazzaville', 'name': 'Brazzaville', 'chef_lieu': 'Makélékélé', 'cities': [
+        'Makélékélé', 'Bacongo', 'Poto-Poto', 'Moungali', 'Ouenzé',
+        'Talangaï', 'Mfilou', 'Madibou', 'Djiri',
+    ]},
+    {'code': 'Pointe-Noire', 'name': 'Pointe-Noire', 'chef_lieu': 'Lumumba', 'cities': [
+        'Lumumba', 'Mvou-Mvou', 'Tié-Tié', 'Loandjili', 'Mongo-Mpoukou', 'Ngoyo',
+    ]},
     {'code': 'Bouenza', 'name': 'Bouenza', 'chef_lieu': 'Madingou', 'cities': ['Madingou', 'Nkayi', 'Loudima', 'Mouyondzi']},
     {'code': 'Niari', 'name': 'Niari', 'chef_lieu': 'Dolisie', 'cities': ['Dolisie', 'Mossendjo', 'Kimongo']},
     {'code': 'Pool', 'name': 'Pool', 'chef_lieu': 'Kinkala', 'cities': ['Kinkala', 'Kindamba', 'Mindouli']},

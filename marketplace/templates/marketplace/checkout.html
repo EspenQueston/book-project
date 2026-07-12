@@ -86,6 +86,30 @@
     .summary-total { display: flex; justify-content: space-between; padding: 16px 0; border-top: 2px solid #f1f5f9; margin-top: 8px; }
     .summary-total span:last-child { font-size: 1.5rem; font-weight: 800; color: var(--danger-color); }
 
+    .mk-donation-card {
+        margin-top: 4px; border-radius: 14px; padding: 14px 16px;
+        background: linear-gradient(135deg, rgba(29,78,216,0.06), rgba(20,36,95,0.06));
+        border: 1.5px solid rgba(29,78,216,0.18);
+    }
+    .mk-donation-toggle { display: flex; align-items: flex-start; gap: 12px; cursor: pointer; margin: 0; }
+    .mk-donation-toggle input[type="checkbox"] { position: absolute; opacity: 0; width: 0; height: 0; }
+    .mk-donation-switch {
+        flex: 0 0 auto; width: 42px; height: 24px; border-radius: 999px;
+        background: #cbd5e1; position: relative; transition: background .2s ease; margin-top: 2px;
+    }
+    .mk-donation-switch::after {
+        content: ''; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px;
+        border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.25); transition: transform .2s ease;
+    }
+    .mk-donation-toggle input:checked + .mk-donation-switch { background: linear-gradient(135deg, #14245f, #1d4ed8); }
+    .mk-donation-toggle input:checked + .mk-donation-switch::after { transform: translateX(18px); }
+    .mk-donation-copy { min-width: 0; }
+    .mk-donation-title { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.92rem; color: #1e293b; }
+    .mk-donation-title i { color: #ef4444; }
+    .mk-donation-sub { display: block; font-size: 0.78rem; color: #94a3b8; margin-top: 2px; line-height: 1.4; }
+    html[data-theme="dark"] .mk-donation-card { background: linear-gradient(135deg, rgba(29,78,216,0.12), rgba(20,36,95,0.12)); border-color: rgba(29,78,216,0.3); }
+    html[data-theme="dark"] .mk-donation-title { color: #e2e8f0; }
+
     .btn-pay {
         width: 100%; padding: 16px; border-radius: 12px; border: none;
         background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
@@ -319,9 +343,27 @@
                         <span>{% trans "商品数量" %}</span>
                         <span>{{ total_quantity }} {% trans "件" %}</span>
                     </div>
+                    <div class="summary-row" id="mkDonationLine" style="display:none;">
+                        <span data-zh="Don solidaire" data-en="Donation" data-fr="Don solidaire">Don solidaire</span>
+                        <span id="mkDonationAmount">+{{ donation_amount|fcfa }}</span>
+                    </div>
                     <div class="summary-total">
                         <span style="font-weight:700;">{% trans "应付金额" %}</span>
-                        <span>{{ total_price|fcfa }}</span>
+                        <span id="mkSummaryTotal">{{ total_price|fcfa }}</span>
+                    </div>
+
+                    <div class="mk-donation-card" id="mkDonationCard">
+                        <label class="mk-donation-toggle" for="mkDonateCheckbox">
+                            <input type="checkbox" id="mkDonateCheckbox" name="donate" value="yes">
+                            <span class="mk-donation-switch"></span>
+                            <span class="mk-donation-copy">
+                                <span class="mk-donation-title">
+                                    <i class="fas fa-heart"></i>
+                                    <span data-zh="Ajouter un don de {{ donation_amount|fcfa }}" data-en="Add a {{ donation_amount|fcfa }} donation" data-fr="Ajouter un don de {{ donation_amount|fcfa }}">Ajouter un don de {{ donation_amount|fcfa }}</span>
+                                </span>
+                                <span class="mk-donation-sub" data-zh="Facultatif — pour soutenir les enfants dans le besoin dans le monde." data-en="Optional — supports children in need around the world." data-fr="Facultatif — pour soutenir les enfants dans le besoin dans le monde.">Facultatif — pour soutenir les enfants dans le besoin dans le monde.</span>
+                            </span>
+                        </label>
                     </div>
 
                     <button type="submit" class="btn-pay">
@@ -385,6 +427,31 @@ const centralAfricanCountries = ['Angola','Cameroon','Central African Republic',
 
 const paymentMethodsByRegion = JSON.parse(document.getElementById('payment-method-catalog').textContent);
 const checkoutCitiesByCountry = JSON.parse(document.getElementById('checkout-cities-catalog').textContent);
+
+/* Optional donation toggle — see manager/templates/public/checkout.html for
+   the equivalent on the unified checkout; the server recomputes the real
+   charged amount independently from the same 'donate' field. */
+(function () {
+    const MK_SUBTOTAL = {{ total_price|fcfa_raw|default:0 }};
+    const MK_DONATION = {{ donation_amount|fcfa_raw|default:0 }};
+    const checkbox = document.getElementById('mkDonateCheckbox');
+    if (!checkbox) return;
+
+    function fmtFcfa(n) {
+        return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' FCFA';
+    }
+
+    function refresh() {
+        const donating = checkbox.checked;
+        const total = MK_SUBTOTAL + (donating ? MK_DONATION : 0);
+        document.getElementById('mkDonationLine').style.display = donating ? 'flex' : 'none';
+        document.getElementById('mkSummaryTotal').textContent = fmtFcfa(total);
+        document.getElementById('mkDonationCard').classList.toggle('active', donating);
+    }
+
+    checkbox.addEventListener('change', refresh);
+    refresh();
+})();
 
 function resolveRegion(country) {
     if (westAfricanCountries.includes(country)) return 'west_africa';

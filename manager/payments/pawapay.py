@@ -501,6 +501,91 @@ def get_deposit_status(deposit_id):
         return {'status': 'UNKNOWN', 'error': str(exc)}
 
 
+def create_refund(*, deposit_id, amount, currency, refund_id=None):
+    """
+    Initiate a real refund against a completed deposit (POST {base}/v2/refunds).
+
+    Unlike the old behaviour (an admin flipping payment_status='refunded' in
+    Django admin with no money actually moving), this calls PawaPay's own
+    refund endpoint — the customer's mobile money account is actually
+    credited back. The call is idempotent: resubmitting the same refund_id
+    returns DUPLICATE_IGNORED instead of double-refunding.
+
+    Returns {'success': True, 'refund_id', 'status'} or
+    {'success': False, 'refund_id', 'error'}. A 'success' True here means
+    PawaPay *accepted* the refund request (status ACCEPTED) — the refund
+    still needs to be verified via get_refund_status()/its callback before
+    treating it as actually completed, same pattern as deposits.
+    """
+    cfg = _cfg()
+    if not cfg['token']:
+        return {'success': False, 'error': 'PAWAPAY_API_TOKEN not configured'}
+
+    refund_id = refund_id or str(uuid.uuid4())
+    payload = {
+        'refundId': refund_id,
+        'depositId': deposit_id,
+        'amount': str(int(amount)) if float(amount) == int(amount) else str(amount),
+        'currency': currency,
+    }
+
+    url = f"{cfg['base_url']}/v2/refunds"
+    try:
+        resp = requests.post(url, json=payload, headers=_headers(cfg['token']), timeout=30)
+        raw = resp.json() if resp.content else {}
+        if resp.status_code >= 400:
+            logger.warning('PawaPay refund HTTP %s: %s', resp.status_code, raw)
+            failure = raw.get('failureReason') or {}
+            err_msg = failure.get('failureMessage') if isinstance(failure, dict) else None
+            return {'success': False, 'refund_id': refund_id, 'error': err_msg or str(raw), 'raw': raw}
+
+        status = raw.get('status', 'UNKNOWN')
+        if status == 'REJECTED':
+            failure = raw.get('failureReason') or {}
+            err_msg = failure.get('failureMessage') if isinstance(failure, dict) else None
+            return {'success': False, 'refund_id': refund_id, 'status': status, 'error': err_msg or 'Refund rejected', 'raw': raw}
+
+        return {'success': True, 'refund_id': raw.get('refundId', refund_id), 'status': status, 'raw': raw}
+    except requests.RequestException as exc:
+        logger.exception('PawaPay refund request failed: %s', exc)
+        return {'success': False, 'refund_id': refund_id, 'error': str(exc)}
+
+
+def get_refund_status(refund_id):
+    """Check refund status via GET {base}/v2/refunds/{refundId}.
+
+    Refund statuses: ACCEPTED, ENQUEUED, PROCESSING, IN_RECONCILIATION,
+    COMPLETED, FAILED — COMPLETED/FAILED are final."""
+    cfg = _cfg()
+    if not cfg['token']:
+        return {'status': 'UNKNOWN', 'error': 'PAWAPAY_API_TOKEN not configured'}
+
+    url = f"{cfg['base_url']}/v2/refunds/{refund_id}"
+    try:
+        resp = requests.get(url, headers=_headers(cfg['token']), timeout=30)
+        raw = resp.json() if resp.content else {}
+        if resp.status_code >= 400:
+            logger.warning('PawaPay refund status HTTP %s for %s: %s', resp.status_code, refund_id, raw)
+            return {'status': 'UNKNOWN', 'error': resp.text or f'HTTP {resp.status_code}', 'raw': raw}
+
+        if raw.get('status') == 'NOT_FOUND' or not raw.get('data'):
+            return {'status': 'NOT_FOUND', 'raw': raw}
+
+        data = raw.get('data') or {}
+        status = data.get('status', 'UNKNOWN')
+        result = {'status': status, 'raw': raw}
+        if status == 'FAILED':
+            failure = data.get('failureReason') or {}
+            if isinstance(failure, dict):
+                result['error'] = failure.get('failureMessage') or 'Refund failed'
+            else:
+                result['error'] = 'Refund failed'
+        return result
+    except (requests.RequestException, ValueError) as exc:
+        logger.exception('PawaPay refund status poll failed: %s', exc)
+        return {'status': 'UNKNOWN', 'error': str(exc)}
+
+
 def normalize_pawapay_status(status):
     """Map PawaPay statuses to internal SUCCESSFUL / FAILED / PENDING."""
     if status in ('COMPLETED', 'SUCCESSFUL'):

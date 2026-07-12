@@ -142,6 +142,9 @@
             <a class="nav-link {% if request.path == '/manager/order_list/' %}active{% endif %}" href="/manager/order_list/">
                 <i class="fas fa-shopping-cart"></i><span>订单管理</span>
             </a>
+            <a class="nav-link {% if request.path == '/manager/admin/returns/' %}active{% endif %}" href="/manager/admin/returns/">
+                <i class="fas fa-undo-alt"></i><span data-zh="退货与物流" data-en="Returns & Shipments" data-fr="Retours & expéditions">退货与物流</span>
+            </a>
             <a class="nav-link {% if request.path == '/manager/blog_list/' %}active{% endif %}" href="/manager/blog_list/">
                 <i class="fas fa-blog"></i><span>博客管理</span>
             </a>
