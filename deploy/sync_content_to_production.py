@@ -132,8 +132,34 @@ AUTHOR_PLAN = ('manager', 'Author', ('name',))
 SKIP_FIELDS = {'id', 'created_at'}
 
 
+def _translated_base_fields(model):
+    """Base field names (e.g. 'name') registered with django-modeltranslation
+    for this model — these have no reliable single DB column: reading or
+    writing the bare name goes through a descriptor that resolves to
+    name_<active_language>, which depends on ambient state this script never
+    sets (no request, no LocaleMiddleware). Two real bugs came from this:
+    natural-key matching against the bare field silently compared the wrong
+    language column between local/production (e.g. local resolved to
+    name_fr while production's name_fr was empty and fell back to
+    name_zh_hans — an exact-string match against two different columns
+    that happened to both be called 'name'), and copying the bare field's
+    value could overwrite one of the real language columns with a
+    different language's text. The suffixed columns (name_zh_hans, _en,
+    _fr) are ordinary, unambiguous fields and are copied/matched directly
+    instead — see MODELTRANSLATION_DEFAULT_LANGUAGE in settings.py."""
+    from modeltranslation.translator import translator, NotRegistered
+    try:
+        return set(translator.get_options_for_model(model).fields)
+    except NotRegistered:
+        return set()
+
+
 def model_field_names(model):
-    return [f.name for f in model._meta.get_fields() if getattr(f, 'concrete', False) and not f.many_to_many]
+    translated = _translated_base_fields(model)
+    return [
+        f.name for f in model._meta.get_fields()
+        if getattr(f, 'concrete', False) and not f.many_to_many and f.name not in translated
+    ]
 
 
 def get_fk_field_ids(model):
@@ -157,6 +183,7 @@ def sync_models(apply: bool, backup_dir: Path):
         Model = django_apps.get_model(app_label, model_name)
         fk_targets = get_fk_field_ids(Model)
         fields = [f for f in model_field_names(Model) if f not in SKIP_FIELDS]
+        translated_fields = _translated_base_fields(Model)
 
         local_qs = Model.objects.using('default').all().order_by('pk')
         created, updated, skipped = 0, 0, 0
@@ -203,10 +230,15 @@ def sync_models(apply: bool, backup_dir: Path):
                 continue
 
             # Build the natural-key filter for matching an existing production row.
+            # A translated field (e.g. 'name') has no reliable single value in
+            # `values` — it was deliberately excluded from the copy loop above —
+            # so match on its unambiguous name_zh_hans column instead.
             nk_filter = {}
             for nk_field in natural_key:
                 if nk_field in fk_config:
                     nk_filter[f'{nk_field}_id'] = values.get(f'{nk_field}_id')
+                elif nk_field in translated_fields:
+                    nk_filter[f'{nk_field}_zh_hans'] = getattr(obj, f'{nk_field}_zh_hans')
                 else:
                     nk_filter[nk_field] = values.get(nk_field)
 
@@ -257,7 +289,13 @@ def sync_authors(apply: bool, pk_map: dict, backup_rows: dict):
 
     created, updated, partial_links = 0, 0, 0
     for obj in Model.objects.using('default').all().order_by('pk'):
-        name = getattr(obj, natural_key[0])
+        # Match/write via the unambiguous suffixed column — see
+        # _translated_base_fields() docstring in sync_models() above; the
+        # bare `name` attribute resolves through an active-language proxy
+        # this bare script never sets, which previously caused every
+        # author to compare against the wrong column and be recreated
+        # instead of matched.
+        name_zh = obj.name_zh_hans
         local_book_ids = list(obj.book.values_list('pk', flat=True))
         prod_book_ids = [book_pk_map[bid] for bid in local_book_ids if bid in book_pk_map and book_pk_map[bid] > 0]
         book_link_complete = len(prod_book_ids) == len(local_book_ids)
@@ -267,18 +305,21 @@ def sync_authors(apply: bool, pk_map: dict, backup_rows: dict):
             # touch the M2M yet rather than link a partial set.
             partial_links += 1
 
-        existing = Model.objects.using('production').filter(**{natural_key[0]: name}).first()
+        existing = Model.objects.using('production').filter(name_zh_hans=name_zh).first()
         if existing is not None:
             if apply:
                 if ('manager', 'Author') not in backup_rows:
                     backup_rows[('manager', 'Author')] = []
                 backup_rows[('manager', 'Author')].append(_serialize(existing))
+                existing.name_en = obj.name_en
+                existing.name_fr = obj.name_fr
+                existing.save(update_fields=['name_en', 'name_fr'])
                 if book_link_complete:
                     existing.book.set(prod_book_ids)
             updated += 1
         else:
             if apply:
-                new_obj = Model(name=name)
+                new_obj = Model(name_zh_hans=name_zh, name_en=obj.name_en, name_fr=obj.name_fr)
                 new_obj.save(using='production')
                 if book_link_complete:
                     new_obj.book.set(prod_book_ids)
