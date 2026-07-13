@@ -1370,11 +1370,14 @@ def admin_product_add(request):
             messages.error(request, '商品名称不能为空')
             return redirect('marketplace:admin_product_add')
 
+        from manager.views import _parse_delivery_days_override
+        delivery_days_min, delivery_days_max = _parse_delivery_days_override(request.POST)
+
         product = Product(
             name=name,
             name_en=request.POST.get('name_en', '').strip(),
             slug=slugify(name) or f'product-{uuid.uuid4().hex[:8]}',
-            description=description,
+            description=request.POST.get('description', ''),
             price=request.POST.get('price', 0),
             original_price=request.POST.get('original_price') or None,
             stock=request.POST.get('stock', 0),
@@ -1387,6 +1390,8 @@ def admin_product_add(request):
             weight=request.POST.get('weight') or None,
             is_featured=request.POST.get('is_featured') == 'on',
             is_active=request.POST.get('is_active', 'on') == 'on',
+            delivery_days_min=delivery_days_min,
+            delivery_days_max=delivery_days_max,
         )
         cat_id = request.POST.get('category')
         if cat_id:
@@ -1436,8 +1441,10 @@ def admin_product_edit(request, pk):
         product_description = _required_text(request, 'description', '商品描述', min_length=12)
         if not product_name or not product_description or not _validate_marketplace_business_rules(request, require_images=0, allow_existing_images=bool(product.image or product.image_2 or product.image_3)):
             categories = Category.objects.filter(section='products', is_active=True)
-            context = _form_context_with_pricing({'vendor': vendor, 'product': product, 'categories': categories, 'form_state': _build_marketplace_form_state(request, product)}, product)
-            return render(request, 'marketplace/vendor/product_form.html', context)
+            context = _form_context_with_pricing({'product': product, 'categories': categories, 'form_state': _build_marketplace_form_state(request, product)}, product)
+            return render(request, 'marketplace/admin/product_form.html', context)
+        from manager.views import _parse_delivery_days_override
+        product.delivery_days_min, product.delivery_days_max = _parse_delivery_days_override(request.POST)
         product.name = product_name
         product.name_en = request.POST.get('name_en', '').strip()
         product.description = product_description
@@ -1476,13 +1483,6 @@ def admin_product_edit(request, pk):
             value = raw_value.strip() if isinstance(raw_value, str) else str(raw_value).strip()
             if value:
                 ProductAttribute.objects.create(product=product, name=label, value=value)
-        phone = request.POST.get('seller_phone', '').strip()
-        if phone and vendor.phone != phone:
-            vendor.phone = phone
-            vendor.save(update_fields=['phone'])
-        if phone and vendor.user_id and vendor.user.phone != phone:
-            vendor.user.phone = phone
-            vendor.user.save(update_fields=['phone', 'updated_at'])
 
         attr_names = request.POST.getlist('attr_name')
         attr_values = request.POST.getlist('attr_value')
@@ -1558,7 +1558,9 @@ def admin_course_add(request):
             is_featured=request.POST.get('is_featured') == 'on',
             is_active=request.POST.get('is_active', 'on') == 'on',
         )
-        course.category = category
+        cat_id = request.POST.get('category')
+        if cat_id:
+            course.category_id = int(cat_id)
         if 'image' in request.FILES:
             course.image = request.FILES['image']
 
@@ -1598,7 +1600,8 @@ def admin_course_edit(request, pk):
         course.preview_url = request.POST.get('preview_url', '')
         course.is_featured = request.POST.get('is_featured') == 'on'
         course.is_active = request.POST.get('is_active', 'on') == 'on'
-        course.category = category
+        cat_id = request.POST.get('category')
+        course.category_id = int(cat_id) if cat_id else None
         if 'image' in request.FILES:
             course.image = request.FILES['image']
         assign_official_vendor(course)
@@ -1829,6 +1832,14 @@ def admin_supermarket_add(request):
             messages.error(request, '商品名称不能为空')
             return redirect('marketplace:admin_supermarket_add')
 
+        category = _required_category(request, 'supermarket', 'marketplace:admin_supermarket_add')
+        if not category:
+            messages.error(request, 'La catégorie est obligatoire.')
+            return redirect('marketplace:admin_supermarket_add')
+
+        from manager.views import _parse_delivery_days_override
+        delivery_days_min, delivery_days_max = _parse_delivery_days_override(request.POST)
+
         item = SupermarketItem(
             name=name,
             name_en=request.POST.get('name_en', '').strip(),
@@ -1847,6 +1858,8 @@ def admin_supermarket_add(request):
             is_organic=request.POST.get('is_organic') == 'on',
             is_featured=request.POST.get('is_featured') == 'on',
             is_active=request.POST.get('is_active', 'on') == 'on',
+            delivery_days_min=delivery_days_min,
+            delivery_days_max=delivery_days_max,
         )
         item.category = category
         vendor_id = request.POST.get('vendor')
@@ -1893,11 +1906,13 @@ def admin_supermarket_edit(request, pk):
     if request.method == 'POST':
         item_name = _required_text(request, 'name', '商品名称', min_length=3)
         item_description = _required_text(request, 'description', '商品描述', min_length=12)
-        category = _required_category(request, 'supermarket', 'marketplace:vendor_supermarket_edit', pk=item.pk)
+        category = _required_category(request, 'supermarket', 'marketplace:admin_supermarket_edit', pk=item.pk)
         if not item_name or not item_description or not category or not _validate_marketplace_business_rules(request, require_images=0, allow_existing_images=bool(item.image or item.image_2 or item.image_3)):
             categories = Category.objects.filter(section='supermarket', is_active=True)
-            context = _form_context_with_pricing({'vendor': vendor, 'categories': categories, 'item': item, 'unit_choices': SupermarketItem.UNIT_CHOICES, 'form_state': _build_marketplace_form_state(request, item)}, item)
-            return render(request, 'marketplace/vendor/supermarket_form.html', context)
+            context = _form_context_with_pricing({'categories': categories, 'item': item, 'unit_choices': SupermarketItem.UNIT_CHOICES, 'form_state': _build_marketplace_form_state(request, item)}, item)
+            return render(request, 'marketplace/admin/supermarket_form.html', context)
+        from manager.views import _parse_delivery_days_override
+        item.delivery_days_min, item.delivery_days_max = _parse_delivery_days_override(request.POST)
         item.name = item_name
         item.name_en = request.POST.get('name_en', '').strip()
         item.description = item_description

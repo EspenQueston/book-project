@@ -326,16 +326,19 @@ def add_book(request):
         cover_image = request.FILES.get('cover_image')
         book_file = request.FILES.get('book_file')
         download_link = request.POST.get('download_link', '').strip()
-        
+        delivery_days_min, delivery_days_max = _parse_delivery_days_override(request.POST)
+
         # 2保存到数据库（insert）
         book = models.Book.objects.create(
-            name=name, 
+            name=name,
             description=description,
-            price=price, 
-            inventory=inventory, 
+            price=price,
+            inventory=inventory,
             sale_num=sale_num,
             publisher_id=publisher_id,
             category_id=category_id,
+            delivery_days_min=delivery_days_min,
+            delivery_days_max=delivery_days_max,
         )
         
         # Handle image upload or auto-generate cover
@@ -371,7 +374,7 @@ def add_book(request):
             models.VendorBook.objects.get_or_create(
                 vendor=official,
                 book=book,
-                defaults={'vendor_price': book.price, 'is_active': True},
+                defaults={'is_active': True},
             )
         
         # 3重定向到图书列表页面
@@ -418,10 +421,10 @@ def edit_book(request):
         cover_image = request.FILES.get('cover_image')
         book_file = request.FILES.get('book_file')
         download_link = request.POST.get('download_link', '').strip()
-        
+
         # 获取要更新的图书对象
         book = models.Book.objects.get(id=id)
-        
+
         # 数据库中更新图书信息
         book.name = name
         book.description = description
@@ -430,6 +433,7 @@ def edit_book(request):
         book.sale_num = sale_num
         book.publisher_id = publisher_id
         book.category_id = category_id
+        book.delivery_days_min, book.delivery_days_max = _parse_delivery_days_override(request.POST)
         
         # Handle image upload
         if cover_image:

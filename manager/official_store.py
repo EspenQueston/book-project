@@ -110,10 +110,7 @@ def ensure_official_store(*, backfill: bool = True):
             VendorBook.objects.get_or_create(
                 vendor=vendor,
                 book=book,
-                defaults={
-                    'vendor_price': book.price,
-                    'is_active': True,
-                },
+                defaults={'is_active': True},
             )
 
     return vendor, created

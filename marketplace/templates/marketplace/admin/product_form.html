@@ -56,6 +56,9 @@
                     </div>
                 </div>
                 <div class="mt-3">{% include "marketplace/includes/pricing_rules_form.html" %}</div>
+                <div class="row g-3 mt-1">
+                    {% include 'includes/delivery_days_override_field.html' with item=product %}
+                </div>
             </div>
             <div class="col-md-4">
                 <div class="mb-3">
