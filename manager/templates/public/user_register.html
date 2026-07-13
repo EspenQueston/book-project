@@ -1,5 +1,5 @@
 {% extends 'public/base.html' %}
-{% load i18n static %}
+{% load i18n static static_version %}
 
 {% block title %}{% trans "Create account" %} - {% trans "DUNO 360" %}{% endblock %}
 
@@ -106,10 +106,10 @@
 {% block extra_js %}
 {% if use_local_static %}
 <script src="/static/js/signup_auth.js"></script>
-<script src="/static/js/signup_location.js"></script>
+<script src="{% versioned_local_static 'js/signup_location.js' %}"></script>
 {% else %}
 <script src="{% static 'js/signup_auth.js' %}"></script>
-<script src="{% static 'js/signup_location.js' %}"></script>
+<script src="{% versioned_static 'js/signup_location.js' %}"></script>
 {% endif %}
 <script>
 (function() {

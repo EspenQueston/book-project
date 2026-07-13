@@ -78,7 +78,7 @@
                         <input type="email" class="form-control" value="{{ vendor.email }}" name="email" style="border-radius:10px;">
                     </div>
                     <div class="mb-3">
-                        {% include 'includes/congo_location_select.html' with select_id='vendorShopLocation' city_id='vendorShopCity' selected_location=vendor.location selected_city=vendor.city %}
+                        {% include 'includes/congo_location_select.html' with country_id='vendorShopCountry' select_id='vendorShopLocation' city_id='vendorShopCity' selected_country=vendor.country selected_location=vendor.location selected_city=vendor.city %}
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold" style="font-size:0.88rem;">
@@ -145,11 +145,11 @@
 {% endblock vendor_panel_content %}
 
 {% block panel_extra_js %}
-{% load static %}
+{% load static static_version %}
 {% if use_local_static %}
-<script src="/static/js/signup_location.js"></script>
+<script src="{% versioned_local_static 'js/signup_location.js' %}"></script>
 {% else %}
-<script src="{% static 'js/signup_location.js' %}"></script>
+<script src="{% versioned_static 'js/signup_location.js' %}"></script>
 {% endif %}
 <script>
 function copyShopUrl() {

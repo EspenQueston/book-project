@@ -275,7 +275,7 @@
                         <input type="text" name="phone" class="form-control" value="{{ site_user.phone }}">
                     </div>
                     <div class="col-md-6">
-                        {% include 'includes/congo_location_select.html' with select_id='profileLocation' city_id='profileCity' selected_location=site_user.location selected_city=site_user.city %}
+                        {% include 'includes/congo_location_select.html' with country_id='profileCountry' select_id='profileLocation' city_id='profileCity' selected_country=site_user.country selected_location=site_user.location selected_city=site_user.city %}
                     </div>
                     <div class="col-12">
                         <label class="form-label fw-bold">{% trans "头像" %}</label>
@@ -655,11 +655,11 @@
 {% endblock %}
 
 {% block extra_js %}
-{% load static %}
+{% load static static_version %}
 {% if use_local_static %}
-<script src="/static/js/signup_location.js"></script>
+<script src="{% versioned_local_static 'js/signup_location.js' %}"></script>
 {% else %}
-<script src="{% static 'js/signup_location.js' %}"></script>
+<script src="{% versioned_static 'js/signup_location.js' %}"></script>
 {% endif %}
 <script>
 function showTab(name, btn) {

@@ -7028,12 +7028,10 @@ def user_profile(request):
     if request.method == 'POST':
         user.name = request.POST.get('name', user.name).strip()
         user.phone = request.POST.get('phone', '').strip()
-        from manager.congo_locations import normalize_congo_city, normalize_congo_location
-        dept = normalize_congo_location(request.POST.get('location', ''))
-        city = normalize_congo_city(dept, request.POST.get('city', ''))
-        if dept:
+        country, dept, city, loc_err = _parse_signup_location(request)
+        if not loc_err:
+            user.country = country
             user.location = dept
-        if city:
             user.city = city
         if 'avatar' in request.FILES:
             user.avatar = request.FILES['avatar']
@@ -8903,9 +8901,7 @@ def vendor_settings_save(request):
     description = request.POST.get('description', '').strip()
     phone = request.POST.get('phone', '').strip()
     email = request.POST.get('email', '').strip()
-    from manager.congo_locations import normalize_congo_city, normalize_congo_location
-    dept = normalize_congo_location(request.POST.get('location', ''))
-    city = normalize_congo_city(dept, request.POST.get('city', ''))
+    country, dept, city, loc_err = _parse_signup_location(request)
 
     if company_name:
         vendor.company_name = company_name
@@ -8915,14 +8911,15 @@ def vendor_settings_save(request):
         vendor.phone = phone
     if email:
         vendor.email = email
-    if dept:
+    if not loc_err:
+        vendor.country = country
         vendor.location = dept
-    if city:
         vendor.city = city
         if vendor.user_id:
-            vendor.user.location = dept or vendor.user.location
+            vendor.user.country = country
+            vendor.user.location = dept
             vendor.user.city = city
-            vendor.user.save(update_fields=['location', 'city', 'updated_at'])
+            vendor.user.save(update_fields=['country', 'location', 'city', 'updated_at'])
 
     if 'logo' in request.FILES:
         vendor.logo = request.FILES['logo']
