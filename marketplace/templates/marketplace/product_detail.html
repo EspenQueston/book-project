@@ -792,6 +792,10 @@
                 <div class="mb-3 text-muted small">Vente par multiples de {{ product.quantity_step }}.</div>
                 {% endif %}
 
+                {% if pricing_display.has_wholesale %}
+                {% include 'marketplace/includes/wholesale_ladder.html' with pricing_display=pricing_display %}
+                {% endif %}
+
                 <!-- Actions -->
                 <div class="action-buttons">
                     <button class="btn-add-cart" onclick="addToCart()" style="flex:1;">

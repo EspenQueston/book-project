@@ -4545,6 +4545,24 @@ msgstr "Express Delivery"
 msgid "天"
 msgstr "days"
 
+msgid "最少"
+msgstr "Min"
+
+msgid "最多"
+msgstr "Max"
+
+msgid "批发优惠 · 买得越多省得越多"
+msgstr "Wholesale savings · buy more, save more"
+
+msgid "买 %(buy)s 件送 %(get)s 件"
+msgstr "Buy %(buy)s, get %(get)s free"
+
+msgid "买 %(buy)s 件，第 %(get)s 件享折扣价"
+msgstr "Buy %(buy)s, get %(get)s at a discount"
+
+msgid "再买 %(n)s 件即可享 %(price)s/件"
+msgstr "Buy %(n)s more to unlock %(price)s/unit"
+
 msgid "DUNO平台正品保障"
 msgstr "DUNO Platform Guarantee · Authentic"
 

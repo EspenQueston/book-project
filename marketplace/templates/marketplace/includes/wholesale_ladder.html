@@ -1,0 +1,170 @@
+{% load i18n %}
+{% load currency_filters %}
+<style>
+    .wholesale-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+        border: 1px solid rgba(29, 78, 216, 0.14);
+        border-radius: 18px;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+        overflow: hidden;
+        margin-bottom: 18px;
+    }
+    .wholesale-card-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 16px;
+        background: linear-gradient(135deg, rgba(29,78,216,.12), rgba(20,36,95,.08));
+        font-weight: 900;
+        color: #172554;
+        font-size: .92rem;
+    }
+    .wholesale-card-head i { color: #1d4ed8; }
+    .wholesale-tiers { padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+    .wholesale-tier-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 10px 14px;
+        border-radius: 12px;
+        border: 1.5px solid rgba(29,78,216,.14);
+        background: #fff;
+        transition: all .2s ease;
+    }
+    .wholesale-tier-row.active {
+        border-color: #1d4ed8;
+        background: linear-gradient(135deg, rgba(29,78,216,.08), rgba(20,36,95,.05));
+        box-shadow: 0 6px 18px rgba(29,78,216,.14);
+    }
+    .wholesale-tier-qty { font-weight: 700; color: #334155; font-size: .86rem; }
+    .wholesale-tier-row.active .wholesale-tier-qty { color: #1d4ed8; }
+    .wholesale-tier-price { display: flex; align-items: center; gap: 8px; }
+    .wholesale-tier-unit { font-weight: 900; color: #0f172a; font-size: .96rem; }
+    .wholesale-tier-save {
+        font-size: .72rem;
+        font-weight: 800;
+        color: #fff;
+        background: linear-gradient(135deg, #ef4444, #f97316);
+        border-radius: 999px;
+        padding: 2px 9px;
+    }
+    .wholesale-bogo-badge {
+        margin: 0 10px 10px;
+        padding: 10px 14px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #ef4444, #f97316);
+        color: #fff;
+        font-weight: 800;
+        font-size: .84rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .wholesale-nudge {
+        margin: 0 10px 10px;
+        padding: 8px 12px;
+        border-radius: 10px;
+        background: rgba(29,78,216,.06);
+        color: #1d4ed8;
+        font-size: .78rem;
+        font-weight: 700;
+    }
+</style>
+
+<div class="wholesale-card" id="wholesaleLadderCard">
+    <div class="wholesale-card-head">
+        <i class="fas fa-layer-group"></i>
+        <span>{% trans "批发优惠 · 买得越多省得越多" %}</span>
+    </div>
+
+    {% if pricing_display.bogo %}
+    <div class="wholesale-bogo-badge">
+        <i class="fas fa-gift"></i>
+        {% if pricing_display.bogo.is_free %}
+        <span>{% blocktrans with buy=pricing_display.bogo.buy_qty get=pricing_display.bogo.get_qty %}买 {{ buy }} 件送 {{ get }} 件{% endblocktrans %}</span>
+        {% else %}
+        <span>{% blocktrans with buy=pricing_display.bogo.buy_qty get=pricing_display.bogo.get_qty %}买 {{ buy }} 件，第 {{ get }} 件享折扣价{% endblocktrans %}</span>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if pricing_display.tiers %}
+    <div class="wholesale-tiers" id="wholesaleTierRows">
+        {% for tier in pricing_display.tiers %}
+        <div class="wholesale-tier-row" data-min="{{ tier.min }}" data-max="{{ tier.max|default:'' }}">
+            <span class="wholesale-tier-qty">
+                {% if tier.max %}{{ tier.min }}–{{ tier.max }} {% trans "件" %}{% else %}{{ tier.min }}+ {% trans "件" %}{% endif %}
+            </span>
+            <span class="wholesale-tier-price">
+                <span class="wholesale-tier-unit">{{ tier.unit_price|fcfa }} / {% trans "件" %}</span>
+                {% if tier.savings_percent > 0 %}
+                <span class="wholesale-tier-save">-{{ tier.savings_percent }}%</span>
+                {% endif %}
+            </span>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="wholesale-nudge" id="wholesaleNudge" style="display:none;"></div>
+    {% endif %}
+</div>
+
+<script>
+(function(){
+    var tierData = [
+        {% for tier in pricing_display.tiers %}
+        {min: {{ tier.min }}, max: {{ tier.max|default:'null' }}, unitPrice: {{ tier.unit_price }}},
+        {% endfor %}
+    ];
+    if (!tierData.length) return;
+
+    var nudgeTemplate = '{% trans "再买 %(n)s 件即可享 %(price)s/件" %}';
+
+    function fmtFcfa(n) {
+        return Math.round(n).toLocaleString('fr-FR') + ' FCFA';
+    }
+
+    function updateWholesaleLadder() {
+        var input = document.getElementById('qtyInput');
+        if (!input) return;
+        var qty = parseInt(input.value, 10) || 1;
+        var rows = document.querySelectorAll('#wholesaleTierRows .wholesale-tier-row');
+        rows.forEach(function(row){
+            var min = parseInt(row.dataset.min, 10);
+            var max = row.dataset.max ? parseInt(row.dataset.max, 10) : null;
+            var isActive = qty >= min && (max === null || qty <= max);
+            row.classList.toggle('active', isActive);
+        });
+
+        var nudge = document.getElementById('wholesaleNudge');
+        if (!nudge) return;
+        var nextTier = null;
+        for (var i = 0; i < tierData.length; i++) {
+            if (tierData[i].min > qty) { nextTier = tierData[i]; break; }
+        }
+        if (nextTier) {
+            var remaining = nextTier.min - qty;
+            nudge.textContent = nudgeTemplate
+                .replace('%(n)s', remaining)
+                .replace('%(price)s', fmtFcfa(nextTier.unitPrice));
+            nudge.style.display = 'block';
+        } else {
+            nudge.style.display = 'none';
+        }
+    }
+
+    var qtyInput = document.getElementById('qtyInput');
+    if (qtyInput) {
+        qtyInput.addEventListener('input', updateWholesaleLadder);
+        qtyInput.addEventListener('change', updateWholesaleLadder);
+    }
+    var origChangeQty = window.changeQty;
+    if (typeof origChangeQty === 'function') {
+        window.changeQty = function(d) {
+            origChangeQty(d);
+            updateWholesaleLadder();
+        };
+    }
+    updateWholesaleLadder();
+})();
+</script>

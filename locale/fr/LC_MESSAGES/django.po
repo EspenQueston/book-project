@@ -4598,6 +4598,24 @@ msgstr "Livraison express"
 msgid "天"
 msgstr "jours"
 
+msgid "最少"
+msgstr "Min"
+
+msgid "最多"
+msgstr "Max"
+
+msgid "批发优惠 · 买得越多省得越多"
+msgstr "Tarifs de gros · achetez plus, économisez plus"
+
+msgid "买 %(buy)s 件送 %(get)s 件"
+msgstr "Achetez %(buy)s, recevez %(get)s gratuit(s)"
+
+msgid "买 %(buy)s 件，第 %(get)s 件享折扣价"
+msgstr "Achetez %(buy)s, obtenez %(get)s à prix réduit"
+
+msgid "再买 %(n)s 件即可享 %(price)s/件"
+msgstr "Achetez %(n)s de plus pour débloquer %(price)s/unité"
+
 msgid "DUNO平台正品保障"
 msgstr "Garantie authenticité plateforme DUNO"
 

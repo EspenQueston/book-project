@@ -617,6 +617,9 @@ def process_pending_refunds():
             refund.completed_at = timezone.now()
             refund.save(update_fields=['status', 'completed_at', 'updated_at'])
             updated += 1
+            if refund.shipment:
+                from manager.inventory_service import restore_inventory_for_shipment
+                restore_inventory_for_shipment(refund.shipment)
             order = _get_order(refund.order_source, refund.order_id)
             if order:
                 from manager import notifications_service

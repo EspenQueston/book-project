@@ -1,0 +1,92 @@
+"""Centralized, idempotent stock/inventory and sales-counter adjustments.
+
+Stock must only ever move on a real business event — a confirmed successful
+payment, or a completed refund — never at order creation. The previous
+implementation decremented book.inventory / product.stock / course
+enrollment_count unconditionally the moment an order row was created,
+regardless of whether the payment ever actually completed. A customer who
+abandoned a PawaPay/KKiaPay checkout, or an unpaid cash-on-delivery order
+that later auto-cancelled, permanently lost that stock from the count even
+though nothing was ever sold — understating real availability over time.
+
+apply_inventory_for_order() is the single place stock/sales move down, and
+is guarded by Order.inventory_applied / MarketplaceOrder.inventory_applied
+so it only ever runs once per order, no matter how many times a webhook or
+admin action re-touches payment_status. restore_inventory_for_shipment() is
+the mirror image, used once a real refund for that shipment's items
+completes at the gateway.
+"""
+
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+def apply_inventory_for_order(order, order_source):
+    """Deduct stock/inventory and bump sales counters for every item in this
+    order. Call exactly when payment_status first becomes 'completed'.
+    Safe to call more than once — a no-op after the first successful call."""
+    if getattr(order, 'inventory_applied', False):
+        return False
+
+    if order_source == 'book':
+        from manager.models import OrderItem
+        for item in OrderItem.objects.filter(order=order).select_related('book'):
+            book = item.book
+            book.inventory = max(0, book.inventory - item.quantity)
+            book.sale_num += item.quantity
+            book.save(update_fields=['inventory', 'sale_num'])
+    else:
+        from marketplace.models import MarketplaceOrderItem
+        for item in MarketplaceOrderItem.objects.filter(order=order):
+            _apply_marketplace_item(item)
+
+    order.inventory_applied = True
+    order.save(update_fields=['inventory_applied'])
+    logger.info('Inventory applied for %s order %s', order_source, getattr(order, 'order_number', order.pk))
+    return True
+
+
+def _apply_marketplace_item(item):
+    obj = item.get_related_object()
+    if not obj:
+        return
+    if item.item_type in ('product', 'supermarket'):
+        obj.stock = max(0, obj.stock - item.quantity)
+        obj.sales_count += item.quantity
+        obj.save(update_fields=['stock', 'sales_count'])
+    elif item.item_type == 'course':
+        obj.enrollment_count += 1
+        obj.save(update_fields=['enrollment_count'])
+
+
+def _restore_marketplace_item(item):
+    obj = item.get_related_object()
+    if not obj:
+        return
+    if item.item_type in ('product', 'supermarket'):
+        obj.stock = obj.stock + item.quantity
+        obj.sales_count = max(0, obj.sales_count - item.quantity)
+        obj.save(update_fields=['stock', 'sales_count'])
+    elif item.item_type == 'course':
+        obj.enrollment_count = max(0, obj.enrollment_count - 1)
+        obj.save(update_fields=['enrollment_count'])
+
+
+def restore_inventory_for_shipment(shipment):
+    """Reverse the stock/sales effect for exactly the items covered by this
+    shipment. Called once a refund for it actually completes at the gateway
+    (a shipment is only ever refunded after inventory was applied, since
+    that only happens post-payment — so this is always reversing a real
+    deduction, never restoring stock that was never taken)."""
+    if shipment.order_source == 'book':
+        for item in shipment.items.select_related('book'):
+            book = item.book
+            book.inventory += item.quantity
+            book.sale_num = max(0, book.sale_num - item.quantity)
+            book.save(update_fields=['inventory', 'sale_num'])
+    else:
+        for item in shipment.items.all():
+            _restore_marketplace_item(item)
+    logger.info('Inventory restored for shipment %s (%s order %s)',
+                shipment.id, shipment.order_source, shipment.order_number)

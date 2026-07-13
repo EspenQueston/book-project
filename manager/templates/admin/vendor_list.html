@@ -652,6 +652,22 @@
                             <label class="form-label fw-bold">描述</label>
                             <textarea class="form-control" id="vendorDescription" name="description" rows="2" style="border-radius:10px;"></textarea>
                         </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-truck me-1" style="color:#1d4ed8;"></i>
+                                <span data-zh="常规配送时长" data-en="Default delivery time" data-fr="Délai de livraison habituel">Délai de livraison habituel</span>
+                            </label>
+                            <div class="row g-2 align-items-center">
+                                <div class="col-auto">
+                                    <input type="number" min="1" max="90" class="form-control" id="vendorDeliveryMin" name="default_delivery_days_min" style="width:90px;border-radius:10px;" placeholder="{% trans '最少' %}">
+                                </div>
+                                <div class="col-auto text-muted" data-zh="至" data-en="to" data-fr="à">à</div>
+                                <div class="col-auto">
+                                    <input type="number" min="1" max="90" class="form-control" id="vendorDeliveryMax" name="default_delivery_days_max" style="width:90px;border-radius:10px;" placeholder="{% trans '最多' %}">
+                                </div>
+                                <div class="col-auto text-muted" data-zh="天" data-en="days" data-fr="jours">jours</div>
+                            </div>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -845,6 +861,8 @@
                     document.getElementById('vendorStatus').value = v.status;
                     document.getElementById('certifiedGroup').style.display = '';
                     document.getElementById('vendorCertified').value = v.is_certified ? '1' : '0';
+                    document.getElementById('vendorDeliveryMin').value = v.default_delivery_days_min || '';
+                    document.getElementById('vendorDeliveryMax').value = v.default_delivery_days_max || '';
                     _editingVendorName = v.company_name;
                     _editingVendorOfficial = !!v.is_official;
                     document.getElementById('modalDeleteVendorBtn').style.display = v.is_official ? 'none' : '';

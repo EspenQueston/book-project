@@ -946,6 +946,11 @@
                 {% if item.quantity_step > 1 %}
                 <div class="mb-3 text-muted small">Vente par multiples de {{ item.quantity_step }}.</div>
                 {% endif %}
+
+                {% if pricing_display.has_wholesale %}
+                {% include 'marketplace/includes/wholesale_ladder.html' with pricing_display=pricing_display %}
+                {% endif %}
+
                 <div class="desk-single-action-row">
                     <button class="btn-buy-now" onclick="buyNow()" {% if not item.in_stock or max_purchase_quantity < item.min_order_quantity %}disabled{% endif %}>
                         <i class="fas fa-bolt"></i> {% trans "立即购买" %}

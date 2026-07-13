@@ -3069,7 +3069,11 @@ def checkout(request):
                     total_amount=book_total,
                     donation_amount=book_donation,
                     status=initial_status,
-                    payment_status=payment_status,
+                    # Always created 'pending' — even for the already-verified
+                    # kkiapay_success case — so _update_order_status below is
+                    # the one place that ever promotes it to 'completed' and
+                    # fires shipment creation / email / inventory exactly once.
+                    payment_status='pending',
                     customer_notes=customer_notes,
                     admin_notes=donation_admin_note(book_donation) if book_donation else '',
                     payment_transaction_id=kkiapay_transaction_id or None,
@@ -3082,14 +3086,14 @@ def checkout(request):
                         unit_price=item['price'],
                         total_price=item['total_price']
                     )
-                    book = item['item_obj']
-                    book.inventory -= item['quantity']
-                    book.sale_num += item['quantity']
-                    book.save()
-                
+                # Stock/sales are deducted only once payment is actually
+                # confirmed (see below and manager.payments.views), never
+                # here at order creation — an abandoned/failed payment must
+                # never permanently reduce stock.
+
                 # Clear book cart
                 models.CartItem.objects.filter(session_key=session_key).delete()
-                
+
                 create_notification(
                     'new_order',
                     f'新订单 {book_order.order_number}',
@@ -3099,6 +3103,14 @@ def checkout(request):
                     link=f'/manager/order_detail/{book_order.id}/',
                     related_id=book_order.id,
                 )
+
+                if payment_status == 'completed':
+                    # KKiaPay was already verified synchronously above — run
+                    # it through the same pipeline a webhook would (creates
+                    # shipments, sends confirmation email, deducts stock)
+                    # instead of leaving those permanently skipped.
+                    from manager.payments.views import _update_order_status
+                    _update_order_status(book_order, 'SUCCESSFUL', transaction_id=kkiapay_transaction_id or None)
 
             # Create marketplace order if there are marketplace items
             if marketplace_items:
@@ -3123,7 +3135,9 @@ def checkout(request):
                     total_amount=mkt_total,
                     donation_amount=mkt_donation,
                     status=initial_status,
-                    payment_status=payment_status,
+                    # See book_order above — always created 'pending';
+                    # _update_order_status is the only place that promotes it.
+                    payment_status='pending',
                     shipping_address=shipping_address or request.POST.get('shipping_address', ''),
                     notes=customer_notes,
                     customer_notes=customer_notes,
@@ -3144,22 +3158,15 @@ def checkout(request):
                         selected_attributes=item.get('selected_attributes', {}),
                         pricing_rule_log=item.get('pricing_rule_log', {}),
                     )
-                    # Update stock/sales
-                    obj = item['item_obj']
-                    if item['item_type'] == 'product':
-                        obj.stock = max(0, obj.stock - item['quantity'])
-                        obj.sales_count += item['quantity']
-                        obj.save()
-                    elif item['item_type'] == 'supermarket':
-                        obj.stock = max(0, obj.stock - item['quantity'])
-                        obj.sales_count += item['quantity']
-                        obj.save()
-                    elif item['item_type'] == 'course':
-                        obj.enrollment_count += 1
-                        obj.save()
-                
+                    # Stock/sales/enrollment are deducted only once payment is
+                    # actually confirmed (see below), never here.
+
                 # Clear marketplace cart
                 MarketplaceCartItem.objects.filter(session_key=session_key).delete()
+
+                if payment_status == 'completed':
+                    from manager.payments.views import _update_order_status
+                    _update_order_status(mkt_order, 'SUCCESSFUL', transaction_id=kkiapay_transaction_id or None)
 
             # Grant access via session before redirecting
             if book_order:
@@ -3393,11 +3400,12 @@ def kkiapay_success_redirect(request, order_number):
         if order and order.payment_status != 'completed':
             success, tx = is_transaction_successful(transaction_id)
             if success:
-                order.payment_status = 'completed'
-                order.payment_transaction_id = transaction_id
-                if hasattr(order, 'status') and order.status in ('payment_pending', 'pending'):
-                    order.status = 'processing'
-                order.save()
+                # Route through the shared pipeline instead of setting
+                # fields directly — this used to silently skip shipment
+                # creation, the confirmation email, and inventory deduction
+                # whenever this GET landing page ran before the webhook did.
+                from manager.payments.views import _update_order_status
+                _update_order_status(order, 'SUCCESSFUL', transaction_id=transaction_id)
     
     return redirect('manager:order_confirmation', order_number=order_number)
 
@@ -4394,20 +4402,21 @@ def update_payment_status(request):
         
         order = get_object_or_404(models.Order, id=order_id)
         old_payment_status = order.payment_status
-        
-        order.payment_status = new_payment_status
-        if transaction_id:
-            order.payment_transaction_id = transaction_id
-        
-        # If payment is completed, also update payment completion time
+
         if new_payment_status == 'completed':
-            order.payment_completed_at = timezone.now()
-            # Also update order status if it's still pending
-            if order.status == 'pending':
-                order.status = 'paid'
-        
-        order.save()
-        
+            # Route through the shared pipeline (shipment creation,
+            # confirmation email, inventory deduction) instead of just
+            # flipping the field — this used to silently skip all of that
+            # whenever an admin manually marked an order paid (e.g. cash on
+            # delivery, bank transfer confirmed by hand).
+            from manager.payments.views import _update_order_status
+            _update_order_status(order, 'SUCCESSFUL', transaction_id=transaction_id or None)
+        else:
+            order.payment_status = new_payment_status
+            if transaction_id:
+                order.payment_transaction_id = transaction_id
+            order.save()
+
         return JsonResponse({
             'success': True, 
             'message': f'支付状态已从 "{dict(models.PAYMENT_STATUS_CHOICES)[old_payment_status]}" 更新为 "{dict(models.PAYMENT_STATUS_CHOICES)[new_payment_status]}"',
@@ -9426,15 +9435,23 @@ def vendor_hub_order_update(request):
         if order.id not in allowed:
             return JsonResponse({'success': False, 'message': str(_('无权操作此订单'))}, status=403)
         uf = []
-        if new_status and new_status in book_status_ok:
-            order.status = new_status
-            uf.append('status')
-        if new_pay and new_pay in book_pay_ok:
+        payment_routed_via_pipeline = False
+        if new_pay == 'completed' and new_pay in book_pay_ok and order.payment_status != 'completed':
+            # Route through the shared pipeline (shipment creation,
+            # confirmation email, inventory deduction) instead of just
+            # flipping the field.
+            from manager.payments.views import _update_order_status
+            _update_order_status(order, 'SUCCESSFUL')
+            payment_routed_via_pipeline = True
+        elif new_pay and new_pay in book_pay_ok:
             order.payment_status = new_pay
             uf.append('payment_status')
             if new_pay == 'completed' and not order.payment_completed_at:
                 order.payment_completed_at = timezone.now()
                 uf.append('payment_completed_at')
+        if new_status and new_status in book_status_ok:
+            order.status = new_status
+            uf.append('status')
         if uf:
             note_fields = []
             if vendor_note:
@@ -9446,7 +9463,7 @@ def vendor_hub_order_update(request):
             prefix = '[Vendor %s] ' % vendor.company_name[:40]
             order.admin_notes = (prefix + vendor_note + '\n' + (order.admin_notes or '')).strip()
             order.save(update_fields=['admin_notes', 'updated_at'])
-        else:
+        elif not payment_routed_via_pipeline:
             return JsonResponse({'success': False, 'message': str(_('未更改'))}, status=400)
         return JsonResponse({'success': True, 'message': str(_('已更新'))})
 
@@ -9456,15 +9473,20 @@ def vendor_hub_order_update(request):
         if order.id not in allowed_ids:
             return JsonResponse({'success': False, 'message': str(_('无权操作此订单'))}, status=403)
         uf = []
-        if new_status and new_status in mkt_status_ok:
-            order.status = new_status
-            uf.append('status')
-        if new_pay and new_pay in mkt_pay_ok:
+        payment_routed_via_pipeline = False
+        if new_pay == 'completed' and new_pay in mkt_pay_ok and order.payment_status != 'completed':
+            from manager.payments.views import _update_order_status
+            _update_order_status(order, 'SUCCESSFUL')
+            payment_routed_via_pipeline = True
+        elif new_pay and new_pay in mkt_pay_ok:
             order.payment_status = new_pay
             uf.append('payment_status')
             if new_pay == 'completed' and not order.payment_completed_at:
                 order.payment_completed_at = timezone.now()
                 uf.append('payment_completed_at')
+        if new_status and new_status in mkt_status_ok:
+            order.status = new_status
+            uf.append('status')
         if uf:
             note_fields = []
             if vendor_note:
@@ -9476,7 +9498,7 @@ def vendor_hub_order_update(request):
             prefix = '[Vendor %s] ' % vendor.company_name[:40]
             order.admin_notes = (prefix + vendor_note + '\n' + (order.admin_notes or '')).strip()
             order.save(update_fields=['admin_notes', 'updated_at'])
-        else:
+        elif not payment_routed_via_pipeline:
             return JsonResponse({'success': False, 'message': str(_('未更改'))}, status=400)
         return JsonResponse({'success': True, 'message': str(_('已更新'))})
 
@@ -10722,6 +10744,8 @@ def admin_edit_vendor(request):
                 'is_active': vendor.is_active,
                 'is_certified': vendor.is_certified,
                 'is_official': vendor.is_official,
+                'default_delivery_days_min': vendor.default_delivery_days_min,
+                'default_delivery_days_max': vendor.default_delivery_days_max,
             }
         })
 
@@ -10747,6 +10771,9 @@ def admin_edit_vendor(request):
                 vendor.certified_at = timezone.now() if vendor.is_certified else None
         if 'logo' in request.FILES:
             vendor.logo = request.FILES['logo']
+        delivery_min, delivery_max = _parse_delivery_days_override(request.POST, prefix='default_')
+        vendor.default_delivery_days_min = delivery_min
+        vendor.default_delivery_days_max = delivery_max
         vendor.save()
         return JsonResponse({'success': True, 'message': '卖家信息已更新'})
 
@@ -10775,6 +10802,7 @@ def admin_add_vendor(request):
 
         hashed = _set_unified_password(email, password)
         site_user = models.SiteUser.objects.filter(email__iexact=email, is_active=True).first()
+        delivery_min, delivery_max = _parse_delivery_days_override(request.POST, prefix='default_')
         vendor = models.Vendor.objects.create(
             company_name=company_name,
             contact_name=contact_name,
@@ -10784,6 +10812,8 @@ def admin_add_vendor(request):
             description=description,
             status=status,
             user=site_user,
+            default_delivery_days_min=delivery_min,
+            default_delivery_days_max=delivery_max,
         )
         if site_user:
             site_user.promote_to_seller()

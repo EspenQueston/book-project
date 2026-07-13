@@ -21,7 +21,7 @@ from .models import (
 )
 from .utils import build_attribute_groups, validate_selected_attributes, normalize_selected_attributes
 from .review_service import reviews_for_listing, review_summary, filter_reviews, serialize_review
-from .pricing_rules import validate_quantity
+from .pricing_rules import validate_quantity, pricing_display_context
 from .presence import (
     get_visitor_id,
     touch_product_presence,
@@ -472,6 +472,7 @@ def product_detail(request, slug):
         'listing_kind': 'product',
         'listing_id': product.pk,
         'max_purchase_quantity': _max_purchase_quantity(product),
+        'pricing_display': pricing_display_context(product),
         **_seller_follow_context(request, seller_vendor),
     }
     return render(request, 'marketplace/product_detail.html', context)
@@ -689,6 +690,7 @@ def supermarket_detail(request, slug):
         'listing_kind': 'supermarket',
         'listing_id': item.pk,
         'max_purchase_quantity': _max_purchase_quantity(item),
+        'pricing_display': pricing_display_context(item),
         **_seller_follow_context(request, seller_vendor),
     }
     return render(request, 'marketplace/supermarket_detail.html', context)
@@ -1000,7 +1002,11 @@ def checkout(request):
                 for region_options in build_payment_options(country).values()
                 for option in region_options
             }
-            if payment_method not in available_methods:
+            # Wallet balance isn't a region-gated gateway like the others —
+            # it's available to any logged-in user regardless of country —
+            # so it's never listed in build_payment_options() and must be
+            # exempted here rather than added to a region.
+            if payment_method != 'wallet' and payment_method not in available_methods:
                 messages.error(request, _('当前国家暂不支持该支付方式，请重新选择。'))
                 return redirect('marketplace:checkout')
 
@@ -1018,7 +1024,12 @@ def checkout(request):
                     messages.error(request, 'Please log in to use wallet payment.')
                     return redirect('manager:user_login')
                 site_user = get_object_or_404(mgr_models.SiteUser, pk=user_id)
-                wallet, _ = mgr_models.UserWallet.objects.get_or_create(user=site_user, defaults={
+                # Named (not "_") — Django's gettext "_" is imported at module
+                # level; shadowing it with a local throwaway variable made
+                # every _('...') call later in this function raise
+                # UnboundLocalError instead of translating, crashing checkout
+                # whenever an earlier validation error needed to render.
+                wallet, _wallet_created = mgr_models.UserWallet.objects.get_or_create(user=site_user, defaults={
                     'balance': Decimal('0.00'),
                     'total_deposited': Decimal('0.00'),
                     'total_spent': Decimal('0.00'),
@@ -1043,7 +1054,11 @@ def checkout(request):
             )
             order.save()
 
-            # Debit wallet after order is created
+            # Debit wallet after order is created. Payment confirmation
+            # (status flip, shipment creation, email, inventory deduction)
+            # happens once below via _update_order_status — not here — so a
+            # wallet payment goes through the exact same pipeline every
+            # other payment method uses.
             if payment_method == 'wallet' and user_id:
                 from django.db import transaction
                 with transaction.atomic():
@@ -1058,7 +1073,6 @@ def checkout(request):
                         description=f'Payment for {order.order_number}',
                         source_id=str(order.id),
                     )
-                    order.mark_as_paid(transaction_id='wallet')
 
             for detail in items_with_details:
                 ci = detail['cart_item']
@@ -1073,20 +1087,14 @@ def checkout(request):
                     selected_attributes=detail.get('selected_attributes', {}),
                     pricing_rule_log=detail.get('pricing_rule_log', {}),
                 )
+                # Stock/sales/enrollment are deducted only once payment is
+                # actually confirmed (see below), never here at order
+                # creation — an abandoned/failed payment must never
+                # permanently reduce stock.
 
-                # Update stock/sales
-                item = detail['item']
-                if ci.item_type == 'product':
-                    item.stock = max(0, item.stock - ci.quantity)
-                    item.sales_count += ci.quantity
-                    item.save()
-                elif ci.item_type == 'supermarket':
-                    item.stock = max(0, item.stock - ci.quantity)
-                    item.sales_count += ci.quantity
-                    item.save()
-                elif ci.item_type == 'course':
-                    item.enrollment_count += 1
-                    item.save()
+            if payment_method == 'wallet':
+                from manager.payments.views import _update_order_status
+                _update_order_status(order, 'SUCCESSFUL', transaction_id='wallet')
 
             cart_items.delete()
             _accessible = request.session.get('accessible_orders', [])
@@ -2159,16 +2167,17 @@ def admin_update_payment_status(request):
         order = get_object_or_404(MarketplaceOrder, id=order_id)
         old_payment_status = order.payment_status
 
-        order.payment_status = new_payment_status
-        if transaction_id:
-            order.payment_transaction_id = transaction_id
-
         if new_payment_status == 'completed':
-            order.payment_completed_at = timezone.now()
-            if order.status == 'pending':
-                order.status = 'paid'
-
-        order.save()
+            # Route through the shared pipeline (shipment creation,
+            # confirmation email, inventory deduction) instead of just
+            # flipping the field.
+            from manager.payments.views import _update_order_status
+            _update_order_status(order, 'SUCCESSFUL', transaction_id=transaction_id or None)
+        else:
+            order.payment_status = new_payment_status
+            if transaction_id:
+                order.payment_transaction_id = transaction_id
+            order.save()
 
         payment_dict = dict(MarketplaceOrder.PAYMENT_STATUS_CHOICES)
         status_dict = dict(MarketplaceOrder.STATUS_CHOICES)
@@ -2482,7 +2491,11 @@ def vendor_products(request):
     products = all_products.order_by('-created_at')
     q = request.GET.get('q', '').strip()
     if q:
-        products = products.filter(Q(name__icontains=q) | Q(sku__icontains=q))
+        # The search box promises "name, SKU, or category" — it only ever
+        # matched name/SKU before, silently dropping category matches.
+        products = products.filter(
+            Q(name__icontains=q) | Q(sku__icontains=q) | Q(category__name__icontains=q)
+        )
 
     # Stats
     total_products = all_products.count()
@@ -2801,7 +2814,12 @@ def vendor_courses(request):
     courses = Course.objects.filter(vendor=vendor).order_by('-created_at')
     q = request.GET.get('q', '').strip()
     if q:
-        courses = courses.filter(Q(title__icontains=q))
+        # The search box promises "title, instructor, or keyword" — it only
+        # ever matched title before, silently dropping instructor/description
+        # matches despite what the placeholder tells the vendor to expect.
+        courses = courses.filter(
+            Q(title__icontains=q) | Q(instructor__icontains=q) | Q(description__icontains=q)
+        )
 
     paginator = Paginator(courses, 15)
     page = paginator.get_page(request.GET.get('page', 1))
@@ -3101,7 +3119,9 @@ def vendor_supermarket(request):
     qs = base.order_by('-created_at')
     q = request.GET.get('q', '').strip()
     if q:
-        qs = qs.filter(Q(name__icontains=q) | Q(brand__icontains=q))
+        # The search box promises "name, brand, or origin" — it only ever
+        # matched name/brand before, silently dropping origin matches.
+        qs = qs.filter(Q(name__icontains=q) | Q(brand__icontains=q) | Q(origin__icontains=q))
     paginator = Paginator(qs, 15)
     page = paginator.get_page(request.GET.get('page', 1))
 

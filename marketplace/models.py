@@ -386,6 +386,7 @@ class MarketplaceOrder(models.Model):
     payment_transaction_id = models.CharField(max_length=100, blank=True, null=True, verbose_name='支付交易号')
     payment_completed_at = models.DateTimeField(blank=True, null=True, verbose_name='支付完成时间')
     donation_amount = models.DecimalField(max_digits=8, decimal_places=2, default=Decimal('0.00'), verbose_name='爱心捐赠金额')
+    inventory_applied = models.BooleanField(default=False, verbose_name='库存已扣减')
     shipping_address = models.TextField(blank=True, verbose_name='收货地址')
     notes = models.TextField(blank=True, verbose_name='备注')
     customer_notes = models.TextField(blank=True, verbose_name='客户备注')

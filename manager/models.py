@@ -275,6 +275,13 @@ class Order(models.Model):
         max_digits=8, decimal_places=2, default=Decimal('0.00'),
         verbose_name="爱心捐赠金额",
     )
+    inventory_applied = models.BooleanField(
+        default=False,
+        verbose_name="库存已扣减",
+        help_text="Set once stock/sales counters have been deducted for this "
+                  "order's items — happens exactly once, when payment is first "
+                  "confirmed, never at order creation. Guards against double-deduction.",
+    )
 
     customer_notes = models.TextField(blank=True, verbose_name="客户备注")
     admin_notes = models.TextField(blank=True, verbose_name="管理员备注")

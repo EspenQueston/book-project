@@ -126,6 +126,52 @@ def _bogo_subtotal(unit_price, quantity, rules, applied):
     return subtotal
 
 
+def pricing_display_context(item):
+    """Ready-to-render summary of an item's active wholesale rules (tier
+    ladder + BOGO) for the storefront product/supermarket detail pages —
+    the engine in evaluate_pricing() was already applied correctly at
+    cart/checkout time, but nothing ever showed the shopper the ladder
+    itself, so there was no visible incentive to buy more."""
+    base_price = _money(getattr(item, 'price', 0))
+    rules = _rules(item)
+
+    tiers = []
+    for tier in sorted(rules.get('tiers') or [], key=lambda t: _int(t.get('min'), 1)):
+        min_qty = _int(tier.get('min'), 1)
+        max_raw = tier.get('max')
+        max_qty = _int(max_raw, 0) if max_raw not in ('', None) else None
+        unit_price = _money(tier.get('unit_price'), base_price)
+        savings_percent = 0
+        if base_price > 0 and unit_price < base_price:
+            savings_percent = int(((base_price - unit_price) / base_price) * 100)
+        tiers.append({
+            'min': min_qty,
+            'max': max_qty,
+            'unit_price': unit_price,
+            'savings_percent': savings_percent,
+        })
+
+    bogo = rules.get('bogo') or {}
+    bogo_display = None
+    buy_qty = _int(bogo.get('buy_qty'), 0)
+    get_qty = _int(bogo.get('get_qty'), 0)
+    if buy_qty > 0 and get_qty > 0:
+        discount_percent = _money(bogo.get('discount_percent'), '100')
+        bogo_display = {
+            'buy_qty': buy_qty,
+            'get_qty': get_qty,
+            'discount_percent': discount_percent,
+            'is_free': discount_percent >= 100,
+        }
+
+    return {
+        'base_price': base_price,
+        'tiers': tiers,
+        'bogo': bogo_display,
+        'has_wholesale': bool(tiers) or bogo_display is not None,
+    }
+
+
 def evaluate_pricing(item, item_type, quantity, context=None):
     """Evaluate active pricing rules without database lookups."""
     context = context or {}

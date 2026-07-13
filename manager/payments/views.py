@@ -75,6 +75,11 @@ def _update_order_status(order, status, transaction_id=None):
             logger.exception('Shipment/escrow creation failed: %s', exc)
         if not was_already_completed:
             try:
+                from manager.inventory_service import apply_inventory_for_order
+                apply_inventory_for_order(order, order_source)
+            except Exception:
+                logger.exception('Inventory deduction failed for %s', order.order_number)
+            try:
                 from manager import notifications_service
                 notifications_service.send_payment_confirmed(order, order_source)
             except Exception:
