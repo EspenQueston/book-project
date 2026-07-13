@@ -178,6 +178,7 @@ def sync_models(apply: bool, backup_dir: Path):
     report = []
     backup_rows = {}
     vendor_misses = []
+    local_key_collisions = []  # two+ local rows resolving to the same natural key
 
     for app_label, model_name, natural_key, fk_config in SYNC_PLAN:
         Model = django_apps.get_model(app_label, model_name)
@@ -188,6 +189,7 @@ def sync_models(apply: bool, backup_dir: Path):
         local_qs = Model.objects.using('default').all().order_by('pk')
         created, updated, skipped = 0, 0, 0
         pk_map[(app_label, model_name)] = {}
+        seen_keys = {}  # resolved nk_filter tuple -> first local pk that produced it
 
         for obj in local_qs:
             values = {}
@@ -242,6 +244,20 @@ def sync_models(apply: bool, backup_dir: Path):
                 else:
                     nk_filter[nk_field] = values.get(nk_field)
 
+            # Two local rows resolving to the identical natural key (e.g. two
+            # duplicate-named Publisher rows causing the same book to exist
+            # twice locally, once under each) would each independently try to
+            # create/update the same production row — surface it instead of
+            # silently duplicating on --apply.
+            key_tuple = tuple(sorted(nk_filter.items()))
+            if key_tuple in seen_keys:
+                local_key_collisions.append(
+                    f'{app_label}.{model_name}: local pk={seen_keys[key_tuple]} and pk={obj.pk} '
+                    f'both resolve to the same natural key {dict(nk_filter)!r} — likely duplicate source data.'
+                )
+            else:
+                seen_keys[key_tuple] = obj.pk
+
             existing = Model.objects.using('production').filter(**nk_filter).first()
             if existing is not None:
                 if apply:
@@ -264,7 +280,7 @@ def sync_models(apply: bool, backup_dir: Path):
 
         report.append((f'{app_label}.{model_name}', created, updated, skipped))
 
-    return report, vendor_misses, pk_map, backup_rows
+    return report, vendor_misses, pk_map, backup_rows, local_key_collisions
 
 
 def write_backup(apply: bool, backup_rows: dict, backup_dir: Path):
@@ -348,13 +364,24 @@ def main():
     print('DRY RUN (no writes)' if not args.apply else 'APPLYING CHANGES TO PRODUCTION')
     print('=' * 70)
 
-    report, vendor_misses, pk_map, backup_rows = sync_models(apply=args.apply, backup_dir=Path(args.backup_dir))
+    report, vendor_misses, pk_map, backup_rows, local_key_collisions = sync_models(
+        apply=args.apply, backup_dir=Path(args.backup_dir)
+    )
     report += sync_authors(apply=args.apply, pk_map=pk_map, backup_rows=backup_rows)
     write_backup(args.apply, backup_rows, Path(args.backup_dir))
 
     print(f"\n{'Model':<28} {'to create':>10} {'to update':>10} {'skipped':>10}")
     for name, created, updated, skipped in report:
         print(f'{name:<28} {created:>10} {updated:>10} {skipped:>10}')
+
+    if local_key_collisions:
+        print(f'\n⚠ {len(local_key_collisions)} duplicate-source-data collision(s) found — '
+              f'these WILL create duplicate rows in production on --apply. Fix the local '
+              f'duplicate (e.g. merge duplicate Publisher/Category rows) before applying:')
+        for line in local_key_collisions[:20]:
+            print(' -', line)
+        if len(local_key_collisions) > 20:
+            print(f'   ... and {len(local_key_collisions) - 20} more')
 
     if vendor_misses:
         print(f'\n{len(vendor_misses)} item(s) reference a vendor not found in production (linked to no vendor instead):')
