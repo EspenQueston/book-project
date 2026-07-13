@@ -320,6 +320,23 @@
             color: var(--text-primary);
             box-shadow: 0 0 0 3px rgba(29,78,216,0.15);
         }
+        /* Native <option> popups aren't covered by the .form-select/.form-control
+           rules above — color-scheme:dark alone isn't consistently honored by
+           every browser for the dropdown's own list, so every select's options
+           explicitly get the dark palette too (Chrome/Edge do respect
+           background-color/color set directly on <option>). Without this the
+           popup falls back to a plain white list with barely-visible text. */
+        html[data-theme="dark"] select option,
+        html[data-theme="dark"] .form-select option,
+        html[data-theme="dark"] .form-control option,
+        html[data-theme="dark"] .auth-field option {
+            background-color: var(--input-bg);
+            color: var(--text-primary);
+        }
+        html[data-theme="dark"] select option:checked,
+        html[data-theme="dark"] select option:hover {
+            background-color: var(--button-hover);
+        }
         html[data-theme="dark"] .dropdown-menu {
             background: var(--bg-elevated);
             border-color: var(--border-default);
