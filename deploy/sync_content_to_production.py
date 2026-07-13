@@ -2,11 +2,12 @@
 """
 sync_content_to_production.py
 ==============================
-Upsert marketplace CATALOG content (Category, Product, Course + its
-sections/lessons, SupermarketItem) from the LOCAL dev database into
-PRODUCTION, matched by natural key (slug / title) — never by raw primary
-key, since local and production auto-increment IDs do not correspond to
-the same real-world rows.
+Upsert catalog content — books (Publisher, BookCategory, Book, Author) and
+marketplace items (Category, Product, Course + its sections/lessons,
+SupermarketItem) — from the LOCAL dev database into PRODUCTION, matched by
+natural key (slug / title / name) — never by raw primary key, since local
+and production auto-increment IDs do not correspond to the same real-world
+rows.
 
 Deliberately excludes everything involving real users, accounts, orders,
 wallets, or messages. `vendor` foreign keys are resolved with a READ-ONLY
@@ -106,6 +107,14 @@ def setup_production_alias():
 #   a READ-ONLY match against an excluded model (e.g. Vendor by email).
 # ---------------------------------------------------------------------------
 SYNC_PLAN = [
+    ('manager', 'Publisher', ('publisher_name',), {}),
+    ('manager', 'BookCategory', ('slug',), {'parent': ('own',)}),
+    # Book has no unique slug/ISBN field in this schema — (name, publisher)
+    # is the best available natural key. If two different books from the
+    # same publisher genuinely share a title, the second will update the
+    # first's row instead of creating a new one; the dry-run report is the
+    # place to catch that before using --apply.
+    ('manager', 'Book', ('name', 'publisher'), {'publisher': ('own',), 'category': ('own',)}),
     ('marketplace', 'Category', ('slug',), {'parent': ('own',)}),
     ('marketplace', 'Product', ('slug',), {'category': ('own',), 'vendor': ('lookup', 'manager', 'Vendor', 'email')}),
     ('marketplace', 'Course', ('slug',), {'category': ('own',), 'vendor': ('lookup', 'manager', 'Vendor', 'email')}),
@@ -113,6 +122,11 @@ SYNC_PLAN = [
     ('marketplace', 'CourseLesson', ('section', 'title'), {'section': ('own',)}),
     ('marketplace', 'SupermarketItem', ('slug',), {'category': ('own',), 'vendor': ('lookup', 'manager', 'Vendor', 'email')}),
 ]
+
+# Author is many-to-many with Book (no FK column to resolve through the
+# generic loop above), so it's synced separately, after Book — matched by
+# name, with its `book` M2M rebuilt from the already-synced Book pk_map.
+AUTHOR_PLAN = ('manager', 'Author', ('name',))
 
 # Fields never copied across (auto/managed or purely local bookkeeping).
 SKIP_FIELDS = {'id', 'created_at'}
@@ -218,15 +232,59 @@ def sync_models(apply: bool, backup_dir: Path):
 
         report.append((f'{app_label}.{model_name}', created, updated, skipped))
 
-    if apply and backup_rows:
-        backup_dir.mkdir(parents=True, exist_ok=True)
-        ts = datetime.now(dt_timezone.utc).strftime('%Y%m%dT%H%M%SZ')
-        backup_file = backup_dir / f'pre_sync_backup_{ts}.json'
-        with open(backup_file, 'w', encoding='utf-8') as fh:
-            json.dump({f'{k[0]}.{k[1]}': v for k, v in backup_rows.items()}, fh, default=str, ensure_ascii=False, indent=2)
-        print(f'\nBacked up {sum(len(v) for v in backup_rows.values())} pre-existing production rows to {backup_file}')
+    return report, vendor_misses, pk_map, backup_rows
 
-    return report, vendor_misses
+
+def write_backup(apply: bool, backup_rows: dict, backup_dir: Path):
+    if not apply or not backup_rows:
+        return
+    backup_dir.mkdir(parents=True, exist_ok=True)
+    ts = datetime.now(dt_timezone.utc).strftime('%Y%m%dT%H%M%SZ')
+    backup_file = backup_dir / f'pre_sync_backup_{ts}.json'
+    with open(backup_file, 'w', encoding='utf-8') as fh:
+        json.dump({f'{k[0]}.{k[1]}': v for k, v in backup_rows.items()}, fh, default=str, ensure_ascii=False, indent=2)
+    print(f'\nBacked up {sum(len(v) for v in backup_rows.values())} pre-existing production rows to {backup_file}')
+
+
+def sync_authors(apply: bool, pk_map: dict, backup_rows: dict):
+    """Upsert Author by name, then rebuild its `book` M2M from the Book
+    pk_map already built by sync_models() — must run after Book."""
+    from django.apps import apps as django_apps
+
+    app_label, model_name, natural_key = AUTHOR_PLAN
+    Model = django_apps.get_model(app_label, model_name)
+    book_pk_map = pk_map.get(('manager', 'Book'), {})
+
+    created, updated, partial_links = 0, 0, 0
+    for obj in Model.objects.using('default').all().order_by('pk'):
+        name = getattr(obj, natural_key[0])
+        local_book_ids = list(obj.book.values_list('pk', flat=True))
+        prod_book_ids = [book_pk_map[bid] for bid in local_book_ids if bid in book_pk_map and book_pk_map[bid] > 0]
+        book_link_complete = len(prod_book_ids) == len(local_book_ids)
+        if not book_link_complete:
+            # Some of this author's books weren't synced (dry-run, or a
+            # skipped Book row) — still upsert the author, just don't
+            # touch the M2M yet rather than link a partial set.
+            partial_links += 1
+
+        existing = Model.objects.using('production').filter(**{natural_key[0]: name}).first()
+        if existing is not None:
+            if apply:
+                if ('manager', 'Author') not in backup_rows:
+                    backup_rows[('manager', 'Author')] = []
+                backup_rows[('manager', 'Author')].append(_serialize(existing))
+                if book_link_complete:
+                    existing.book.set(prod_book_ids)
+            updated += 1
+        else:
+            if apply:
+                new_obj = Model(name=name)
+                new_obj.save(using='production')
+                if book_link_complete:
+                    new_obj.book.set(prod_book_ids)
+            created += 1
+
+    return [('manager.Author', created, updated, partial_links)]
 
 
 def _serialize(instance):
@@ -249,11 +307,12 @@ def main():
     print('DRY RUN (no writes)' if not args.apply else 'APPLYING CHANGES TO PRODUCTION')
     print('=' * 70)
 
-    report, vendor_misses = sync_models(apply=args.apply, backup_dir=Path(args.backup_dir))
+    report, vendor_misses, pk_map, backup_rows = sync_models(apply=args.apply, backup_dir=Path(args.backup_dir))
+    report += sync_authors(apply=args.apply, pk_map=pk_map, backup_rows=backup_rows)
+    write_backup(args.apply, backup_rows, Path(args.backup_dir))
 
     print(f"\n{'Model':<28} {'to create':>10} {'to update':>10} {'skipped':>10}")
     for name, created, updated, skipped in report:
-        verb = 'created' if args.apply else 'to create'
         print(f'{name:<28} {created:>10} {updated:>10} {skipped:>10}')
 
     if vendor_misses:
@@ -265,6 +324,9 @@ def main():
 
     print('\nNote: image/file fields copy the stored path only — verify the')
     print('actual media file also exists in production storage (R2/Supabase).')
+    print('Note: manager.Author "skipped" column counts authors whose book')
+    print('list could not be fully linked yet (a referenced Book was itself')
+    print('skipped, or this was a dry run) — re-run after those resolve.')
 
     if not args.apply:
         print('\nThis was a DRY RUN — nothing was written. Re-run with --apply to write.')
