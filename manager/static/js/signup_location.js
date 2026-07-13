@@ -19,6 +19,22 @@
         'São Tomé and Príncipe': '🇸🇹',
     };
 
+    // Example phone format per country — updates the phone field's
+    // placeholder live as the country changes, so the hint always matches
+    // the selected country's calling code and typical mobile number shape.
+    var COUNTRY_PHONE_PLACEHOLDERS = {
+        'Congo': '+242 06 123 4567',
+        'Democratic Republic of the Congo': '+243 81 234 5678',
+        'Cameroon': '+237 6 12 34 56 78',
+        'Gabon': '+241 06 12 34 56',
+        'Angola': '+244 923 456 789',
+        'Chad': '+235 66 12 34 56',
+        'Central African Republic': '+236 70 12 34 56',
+        'Equatorial Guinea': '+240 222 123 456',
+        'São Tomé and Príncipe': '+239 991 2345',
+    };
+    var DEFAULT_PHONE_PLACEHOLDER = 'Phone';
+
     function getCountries() {
         if (_countries) return _countries;
         var el = document.getElementById('signupCountriesData');
@@ -97,8 +113,23 @@
         if (wrap) wrap.classList.toggle('has-department', visible);
     }
 
+    function findPhoneInput(countrySelect) {
+        var form = countrySelect.closest('form');
+        if (!form) return null;
+        return form.querySelector('input[name="phone"]');
+    }
+
+    function updatePhonePlaceholder(countrySelect, countryCode) {
+        var phoneInput = findPhoneInput(countrySelect);
+        if (!phoneInput) return;
+        var label = phoneInput.getAttribute('data-phone-label') || DEFAULT_PHONE_PLACEHOLDER;
+        var example = COUNTRY_PHONE_PLACEHOLDERS[countryCode];
+        phoneInput.placeholder = example ? (label + ' (' + example + ')') : label;
+    }
+
     /** country changed (or initial load): rebuild department/city selects. */
     function onCountryChange(countrySelect, deptSelect, citySelect, deptPh, cityPh, selectedDept, selectedCity) {
+        updatePhonePlaceholder(countrySelect, countrySelect.value);
         var country = findCountry(countrySelect.value);
         if (!country) {
             setDeptVisible(deptSelect, false);

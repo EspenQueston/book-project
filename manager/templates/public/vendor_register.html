@@ -72,17 +72,17 @@
                         <div class="col-md-6">
                             <input type="text" name="contact_name" id="vContact" class="form-control auth-field" placeholder="{% trans 'Contact name' %}" required>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-12">
                             <input type="email" name="email" id="vEmail" class="form-control auth-field" placeholder="{% trans 'Email address' %}" required autocomplete="email">
-                        </div>
-                        <div class="col-md-6">
-                            <div class="phone-input-wrap">
-                                <span class="phone-input-prefix"><i class="fas fa-phone-alt"></i></span>
-                                <input type="tel" name="phone" id="vPhone" class="form-control auth-field" placeholder="{% trans 'Phone (+242 06 123 4567)' %}" required autocomplete="tel" inputmode="tel">
-                            </div>
                         </div>
                         <div class="col-12">
                             {% include 'includes/congo_location_select.html' with country_id='vCountry' select_id='vLocation' city_id='vCity' placeholders_only=True %}
+                        </div>
+                        <div class="col-12">
+                            <div class="phone-input-wrap">
+                                <span class="phone-input-prefix"><i class="fas fa-phone-alt"></i></span>
+                                <input type="tel" name="phone" id="vPhone" class="form-control auth-field" placeholder="{% trans 'Phone (+242 06 123 4567)' %}" data-phone-label="{% trans 'Phone' %}" required autocomplete="tel" inputmode="tel">
+                            </div>
                         </div>
                         <div class="col-12">
                             <textarea name="description" class="form-control auth-field" rows="3" placeholder="{% trans 'Shop description (optional)' %}"></textarea>

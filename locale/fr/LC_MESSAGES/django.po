@@ -4247,6 +4247,9 @@ msgstr "Adresse e-mail"
 msgid "Phone (+242 06 123 4567)"
 msgstr "Téléphone (+242 06 123 4567)"
 
+msgid "Phone"
+msgstr "Téléphone"
+
 msgid "Select your country"
 msgstr "Choisissez votre pays"
 

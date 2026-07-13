@@ -4201,6 +4201,9 @@ msgstr "Email address"
 msgid "Phone (+242 06 123 4567)"
 msgstr "Phone (+242 06 123 4567)"
 
+msgid "Phone"
+msgstr "Phone"
+
 msgid "Select your country"
 msgstr "Select your country"
 

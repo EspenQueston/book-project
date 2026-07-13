@@ -71,13 +71,13 @@
                     <div class="mb-3">
                         <input type="email" name="email" id="regEmail" class="form-control auth-field" placeholder="{% trans 'Email address' %}" required autocomplete="email">
                     </div>
+                    {% include 'includes/congo_location_select.html' with country_id='regCountry' select_id='regLocation' city_id='regCity' placeholders_only=True %}
                     <div class="mb-3">
                         <div class="phone-input-wrap">
                             <span class="phone-input-prefix"><i class="fas fa-phone-alt"></i></span>
-                            <input type="tel" name="phone" id="regPhone" class="form-control auth-field" placeholder="{% trans 'Phone (+242 06 123 4567)' %}" required autocomplete="tel" inputmode="tel">
+                            <input type="tel" name="phone" id="regPhone" class="form-control auth-field" placeholder="{% trans 'Phone (+242 06 123 4567)' %}" data-phone-label="{% trans 'Phone' %}" required autocomplete="tel" inputmode="tel">
                         </div>
                     </div>
-                    {% include 'includes/congo_location_select.html' with country_id='regCountry' select_id='regLocation' city_id='regCity' placeholders_only=True %}
                     <div class="mb-3">
                         <input type="password" name="password" id="regPassword" class="form-control auth-field" placeholder="{% trans 'Password (min. 6 characters)' %}" required minlength="6" autocomplete="new-password">
                     </div>
