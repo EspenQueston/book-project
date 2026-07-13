@@ -1,11 +1,20 @@
 {% load i18n %}
 <div class="signup-location-group mb-3" data-location-cascade>
+    <select name="country"
+            id="{{ country_id|default:'regCountry' }}"
+            class="form-select form-control signup-country-select auth-field{% if placeholders_only %} auth-field-placeholder{% endif %}"
+            data-placeholder="{% trans 'Select your country' %}"
+            data-selected="{{ selected_country|default:'' }}"
+            required
+            aria-label="{% trans 'Country' %}">
+        <option value="" disabled selected>{% trans "Select your country" %}</option>
+    </select>
     <select name="location"
             id="{{ select_id|default:'regLocation' }}"
-            class="form-select form-control signup-dept-select auth-field{% if placeholders_only %} auth-field-placeholder{% endif %}"
+            class="form-select form-control signup-dept-select auth-field mt-3{% if placeholders_only %} auth-field-placeholder{% endif %}"
             data-placeholder="{% trans 'Select your department' %}"
             data-selected="{{ selected_location|default:'' }}"
-            required
+            disabled
             aria-label="{% trans 'Department' %}">
         <option value="" disabled selected>{% trans "Select your department" %}</option>
     </select>

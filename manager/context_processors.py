@@ -27,10 +27,11 @@ def use_local_static(request):
 
 def congo_locations_context(request):
     import json
-    from manager.congo_locations import CONGO_DEPARTMENTS, get_departments_for_js
+    from manager.congo_locations import CONGO_DEPARTMENTS, get_departments_for_js, get_signup_countries_for_js
     return {
         'congo_departments': CONGO_DEPARTMENTS,
         'congo_departments_json': json.dumps(get_departments_for_js()),
+        'signup_countries_json': json.dumps(get_signup_countries_for_js()),
     }
 
 

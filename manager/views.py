@@ -6671,19 +6671,33 @@ def _verification_page_context(email, verification_type='user', request=None):
 
 
 def _parse_signup_location(request):
-    """Validate Congo department + city from POST data."""
+    """Validate country + city (Congo also requires a department) from POST
+    data. Returns (country, location, city, error) — location is the Congo
+    department code, blank for every other country."""
     from django.utils.translation import gettext as _
     from manager.congo_locations import (
         normalize_congo_city,
         normalize_congo_location,
+        normalize_country,
+        normalize_country_city,
     )
-    dept = normalize_congo_location(request.POST.get('location', ''))
-    city = normalize_congo_city(dept, request.POST.get('city', ''))
-    if not dept:
-        return None, None, _('Please select your department.')
+    country = normalize_country(request.POST.get('country', '') or 'Congo')
+    if not country:
+        return None, None, None, _('Please select your country.')
+
+    if country == 'Congo':
+        dept = normalize_congo_location(request.POST.get('location', ''))
+        if not dept:
+            return None, None, None, _('Please select your department.')
+        city = normalize_congo_city(dept, request.POST.get('city', ''))
+        if not city:
+            return None, None, None, _('Please select your city.')
+        return country, dept, city, None
+
+    city = normalize_country_city(country, request.POST.get('city', ''))
     if not city:
-        return None, None, _('Please select your city.')
-    return dept, city, None
+        return None, None, None, _('Please select your city.')
+    return country, '', city, None
 
 
 def _signup_page_context():
@@ -6702,7 +6716,7 @@ def user_register(request):
         password = request.POST.get('password', '').strip()
         password2 = request.POST.get('password2', '').strip()
         phone = request.POST.get('phone', '').strip()
-        location, city, loc_err = _parse_signup_location(request)
+        country, location, city, loc_err = _parse_signup_location(request)
         if loc_err:
             return JsonResponse({'success': False, 'message': loc_err})
 
@@ -6740,6 +6754,7 @@ def user_register(request):
             name=name,
             password=_hash_password(password),
             phone=phone_e164 or phone,
+            country=country,
             location=location,
             city=city,
             expires_at=expires_at,
@@ -6798,13 +6813,15 @@ def verify_email_pin(request):
         if models.SiteUser.objects.filter(email=email).exists():
             return JsonResponse({'success': False, 'message': _('This email is already registered.')})
 
+        from manager.congo_locations import DEFAULT_COUNTRY, DEFAULT_CONGO_CITY
         user = models.SiteUser.objects.create(
             name=verification.name,
             email=verification.email,
             password=verification.password,
             phone=verification.phone,
-            location=verification.location or 'Brazzaville',
-            city=verification.city or 'Brazzaville',
+            country=verification.country or DEFAULT_COUNTRY,
+            location=verification.location,
+            city=verification.city or DEFAULT_CONGO_CITY,
         )
         _sync_password_by_email(verification.email, verification.password)
         _link_dual_accounts_by_email(verification.email)
@@ -7347,7 +7364,7 @@ def vendor_register(request):
                 'message': _('Phone number is required.'),
             })
 
-        location, city, loc_err = _parse_signup_location(request)
+        country, location, city, loc_err = _parse_signup_location(request)
         if loc_err:
             return JsonResponse({'success': False, 'message': loc_err})
 
@@ -7369,6 +7386,7 @@ def vendor_register(request):
             name=contact_name,
             password=_hash_password(password),
             phone=phone_e164 or phone,
+            country=country,
             location=location,
             city=city,
             verification_type='vendor',
@@ -7447,14 +7465,16 @@ def verify_vendor_pin(request):
                 'message': _('This email is already registered as a vendor.'),
             })
 
+        from manager.congo_locations import DEFAULT_COUNTRY, DEFAULT_CONGO_CITY
         vendor = models.Vendor.objects.create(
             company_name=verification.company_name,
             contact_name=verification.name,
             email=verification.email,
             password=verification.password,
             phone=verification.phone,
-            location=verification.location or 'Brazzaville',
-            city=verification.city or 'Brazzaville',
+            country=verification.country or DEFAULT_COUNTRY,
+            location=verification.location,
+            city=verification.city or DEFAULT_CONGO_CITY,
             description=verification.description,
         )
         site_user = models.SiteUser.objects.filter(email__iexact=email, is_active=True).first()
@@ -7462,10 +7482,11 @@ def verify_vendor_pin(request):
             vendor.user = site_user
             vendor.save(update_fields=['user', 'updated_at'])
             site_user.promote_to_seller()
-            if verification.location:
+            if verification.city:
+                site_user.country = verification.country or DEFAULT_COUNTRY
                 site_user.location = verification.location
-                site_user.city = verification.city or verification.location
-                site_user.save(update_fields=['location', 'city', 'updated_at'])
+                site_user.city = verification.city
+                site_user.save(update_fields=['country', 'location', 'city', 'updated_at'])
         _sync_password_by_email(email, verification.password)
         _link_dual_accounts_by_email(email)
 

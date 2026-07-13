@@ -1,27 +1,48 @@
 /**
- * Cascading Congo department → city selects.
+ * Cascading sign-up location selects: country -> (Congo: department -> city)
+ * or (any other PawaPay-supported country: city only).
  */
 (function (global) {
     'use strict';
 
-    var _data = null;
+    var _countries = null;
 
-    function getData() {
-        if (_data) return _data;
-        var el = document.getElementById('congoLocationsData');
+    var COUNTRY_FLAGS = {
+        'Congo': '🇨🇬',
+        'Democratic Republic of the Congo': '🇨🇩',
+        'Cameroon': '🇨🇲',
+        'Gabon': '🇬🇦',
+        'Angola': '🇦🇴',
+        'Chad': '🇹🇩',
+        'Central African Republic': '🇨🇫',
+        'Equatorial Guinea': '🇬🇶',
+        'São Tomé and Príncipe': '🇸🇹',
+    };
+
+    function getCountries() {
+        if (_countries) return _countries;
+        var el = document.getElementById('signupCountriesData');
         if (!el) return [];
         try {
-            _data = JSON.parse(el.textContent);
+            _countries = JSON.parse(el.textContent);
         } catch (e) {
-            _data = [];
+            _countries = [];
         }
-        return _data;
+        return _countries;
     }
 
-    function findDept(code) {
-        var depts = getData();
-        for (var i = 0; i < depts.length; i++) {
-            if (depts[i].code === code) return depts[i];
+    function findCountry(code) {
+        var countries = getCountries();
+        for (var i = 0; i < countries.length; i++) {
+            if (countries[i].code === code) return countries[i];
+        }
+        return null;
+    }
+
+    function findDept(country, code) {
+        if (!country || !country.departments) return null;
+        for (var i = 0; i < country.departments.length; i++) {
+            if (country.departments[i].code === code) return country.departments[i];
         }
         return null;
     }
@@ -36,10 +57,20 @@
         select.appendChild(opt);
     }
 
-    function fillDepartments(deptSelect, placeholder) {
+    function fillCountries(countrySelect, placeholder) {
+        clearSelect(countrySelect, placeholder);
+        getCountries().forEach(function (c) {
+            var opt = document.createElement('option');
+            opt.value = c.code;
+            var flag = COUNTRY_FLAGS[c.code];
+            opt.textContent = flag ? (flag + '  ' + c.name) : c.name;
+            countrySelect.appendChild(opt);
+        });
+    }
+
+    function fillDepartments(deptSelect, country, placeholder) {
         clearSelect(deptSelect, placeholder);
-        var depts = getData();
-        depts.forEach(function (d) {
+        (country.departments || []).forEach(function (d) {
             var opt = document.createElement('option');
             opt.value = d.code;
             opt.textContent = d.name;
@@ -47,15 +78,9 @@
         });
     }
 
-    function fillCities(citySelect, deptCode, placeholder, selectedCity) {
-        var dept = findDept(deptCode);
+    function fillCitiesFlat(citySelect, cities, placeholder, selectedCity) {
         clearSelect(citySelect, placeholder);
-        if (!dept) {
-            citySelect.disabled = true;
-            citySelect.required = false;
-            return;
-        }
-        dept.cities.forEach(function (city) {
+        cities.forEach(function (city) {
             var opt = document.createElement('option');
             opt.value = city;
             opt.textContent = city;
@@ -64,32 +89,91 @@
         });
         citySelect.disabled = false;
         citySelect.required = true;
-        if (selectedCity && dept.cities.indexOf(selectedCity) === -1) {
-            citySelect.selectedIndex = 0;
+    }
+
+    function setDeptVisible(deptSelect, visible) {
+        var wrap = deptSelect.closest('.signup-location-group');
+        deptSelect.style.display = visible ? '' : 'none';
+        if (wrap) wrap.classList.toggle('has-department', visible);
+    }
+
+    /** country changed (or initial load): rebuild department/city selects. */
+    function onCountryChange(countrySelect, deptSelect, citySelect, deptPh, cityPh, selectedDept, selectedCity) {
+        var country = findCountry(countrySelect.value);
+        if (!country) {
+            setDeptVisible(deptSelect, false);
+            clearSelect(citySelect, cityPh);
+            citySelect.disabled = true;
+            citySelect.required = false;
+            return;
+        }
+
+        if (country.departments) {
+            setDeptVisible(deptSelect, true);
+            fillDepartments(deptSelect, country, deptPh);
+            deptSelect.disabled = false;
+            deptSelect.required = true;
+            if (selectedDept) {
+                deptSelect.value = selectedDept;
+                var dept = findDept(country, selectedDept);
+                if (dept) {
+                    fillCitiesFlat(citySelect, dept.cities, cityPh, selectedCity);
+                } else {
+                    clearSelect(citySelect, cityPh);
+                    citySelect.disabled = true;
+                }
+            } else {
+                clearSelect(citySelect, cityPh);
+                citySelect.disabled = true;
+                citySelect.required = false;
+            }
+            deptSelect.onchange = function () {
+                var d = findDept(country, deptSelect.value);
+                if (d) {
+                    fillCitiesFlat(citySelect, d.cities, cityPh, '');
+                } else {
+                    clearSelect(citySelect, cityPh);
+                    citySelect.disabled = true;
+                }
+            };
+        } else {
+            setDeptVisible(deptSelect, false);
+            deptSelect.disabled = true;
+            deptSelect.required = false;
+            deptSelect.value = '';
+            fillCitiesFlat(citySelect, country.cities || [], cityPh, selectedCity);
         }
     }
 
     function initRoot(root) {
         if (!root || root.dataset.locationInit === '1') return;
+        var countrySelect = root.querySelector('.signup-country-select');
         var deptSelect = root.querySelector('.signup-dept-select');
         var citySelect = root.querySelector('.signup-city-select');
-        if (!deptSelect || !citySelect) return;
+        if (!countrySelect || !deptSelect || !citySelect) return;
 
+        var countryPh = countrySelect.getAttribute('data-placeholder') || '';
         var deptPh = deptSelect.getAttribute('data-placeholder') || '';
         var cityPh = citySelect.getAttribute('data-placeholder') || '';
+        var selectedCountry = countrySelect.getAttribute('data-selected') || '';
         var selectedDept = deptSelect.getAttribute('data-selected') || '';
         var selectedCity = citySelect.getAttribute('data-selected') || '';
 
-        fillDepartments(deptSelect, deptPh);
-        if (selectedDept) {
-            deptSelect.value = selectedDept;
-            fillCities(citySelect, selectedDept, cityPh, selectedCity);
+        fillCountries(countrySelect, countryPh);
+        setDeptVisible(deptSelect, false);
+
+        if (selectedCountry) {
+            countrySelect.value = selectedCountry;
+            onCountryChange(countrySelect, deptSelect, citySelect, deptPh, cityPh, selectedDept, selectedCity);
         } else {
-            fillCities(citySelect, '', cityPh, '');
+            // Default to Congo so the richer department cascade is the
+            // out-of-the-box experience for the platform's home market.
+            countrySelect.value = 'Congo';
+            onCountryChange(countrySelect, deptSelect, citySelect, deptPh, cityPh, '', '');
         }
 
-        deptSelect.addEventListener('change', function () {
-            fillCities(citySelect, deptSelect.value, cityPh, '');
+        countrySelect.addEventListener('change', function () {
+            onCountryChange(countrySelect, deptSelect, citySelect, deptPh, cityPh, '', '');
         });
 
         root.dataset.locationInit = '1';

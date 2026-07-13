@@ -4201,11 +4201,20 @@ msgstr "Email address"
 msgid "Phone (+242 06 123 4567)"
 msgstr "Phone (+242 06 123 4567)"
 
+msgid "Select your country"
+msgstr "Select your country"
+
 msgid "Select your department"
 msgstr "Select your department"
 
 msgid "Select your city"
 msgstr "Select your city"
+
+msgid "Country"
+msgstr "Country"
+
+msgid "Please select your country."
+msgstr "Please select your country."
 
 msgid "Department"
 msgstr "Department"

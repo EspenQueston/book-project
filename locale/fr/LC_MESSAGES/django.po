@@ -4247,11 +4247,20 @@ msgstr "Adresse e-mail"
 msgid "Phone (+242 06 123 4567)"
 msgstr "Téléphone (+242 06 123 4567)"
 
+msgid "Select your country"
+msgstr "Choisissez votre pays"
+
 msgid "Select your department"
 msgstr "Choisissez votre département"
 
 msgid "Select your city"
 msgstr "Choisissez votre ville"
+
+msgid "Country"
+msgstr "Pays"
+
+msgid "Please select your country."
+msgstr "Veuillez sélectionner votre pays."
 
 msgid "Department"
 msgstr "Département"

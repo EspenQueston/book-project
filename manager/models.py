@@ -4,7 +4,10 @@ from decimal import Decimal
 import os
 import uuid
 
-from manager.congo_locations import CONGO_DEPARTMENT_CHOICES, DEFAULT_CONGO_LOCATION, DEFAULT_CONGO_CITY
+from manager.congo_locations import (
+    CONGO_DEPARTMENT_CHOICES, DEFAULT_CONGO_LOCATION, DEFAULT_CONGO_CITY,
+    COUNTRY_CHOICES, DEFAULT_COUNTRY,
+)
 
 
 # 创建数据库对象模型
@@ -763,10 +766,12 @@ class SiteUser(models.Model):
     password = models.CharField(max_length=128, verbose_name='密码')
     name = models.CharField(max_length=100, verbose_name='姓名')
     phone = models.CharField(max_length=20, verbose_name='电话')
+    country = models.CharField(max_length=64, choices=COUNTRY_CHOICES, default=DEFAULT_COUNTRY, verbose_name='Pays')
     location = models.CharField(
         max_length=64,
         choices=CONGO_DEPARTMENT_CHOICES,
         default=DEFAULT_CONGO_LOCATION,
+        blank=True,
         verbose_name='Localisation',
     )
     city = models.CharField(max_length=64, default=DEFAULT_CONGO_CITY, verbose_name='Ville')
@@ -817,10 +822,12 @@ class EmailVerification(models.Model):
     name = models.CharField(max_length=100, verbose_name='姓名')
     password = models.CharField(max_length=128, verbose_name='密码(已加密)')
     phone = models.CharField(max_length=20, blank=True, default='', verbose_name='电话')
+    country = models.CharField(max_length=64, choices=COUNTRY_CHOICES, default=DEFAULT_COUNTRY, verbose_name='Pays')
     location = models.CharField(
         max_length=64,
         choices=CONGO_DEPARTMENT_CHOICES,
         default=DEFAULT_CONGO_LOCATION,
+        blank=True,
         verbose_name='Localisation',
     )
     city = models.CharField(max_length=64, default=DEFAULT_CONGO_CITY, verbose_name='Ville')
@@ -931,10 +938,12 @@ class Vendor(models.Model):
     contact_name = models.CharField(max_length=100, verbose_name='联系人')
     email = models.EmailField(verbose_name='邮箱')
     phone = models.CharField(max_length=20, blank=True, default='', verbose_name='电话')
+    country = models.CharField(max_length=64, choices=COUNTRY_CHOICES, default=DEFAULT_COUNTRY, verbose_name='Pays')
     location = models.CharField(
         max_length=64,
         choices=CONGO_DEPARTMENT_CHOICES,
         default=DEFAULT_CONGO_LOCATION,
+        blank=True,
         verbose_name='Localisation',
     )
     city = models.CharField(max_length=64, default=DEFAULT_CONGO_CITY, verbose_name='Ville')
