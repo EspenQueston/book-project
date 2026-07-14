@@ -1,6 +1,6 @@
 /**
  * Cascading sign-up location selects: country -> (Congo: department -> city)
- * or (any other PawaPay-supported country: city only).
+ * or (any other supported country: city only).
  */
 (function (global) {
     'use strict';
@@ -17,6 +17,24 @@
         'Central African Republic': '🇨🇫',
         'Equatorial Guinea': '🇬🇶',
         'São Tomé and Príncipe': '🇸🇹',
+        'Benin': '🇧🇯',
+        'Burkina Faso': '🇧🇫',
+        "Côte d'Ivoire": '🇨🇮',
+        'Ghana': '🇬🇭',
+        'Nigeria': '🇳🇬',
+        'Senegal': '🇸🇳',
+        'Sierra Leone': '🇸🇱',
+        'Kenya': '🇰🇪',
+        'Uganda': '🇺🇬',
+        'Tanzania': '🇹🇿',
+        'Rwanda': '🇷🇼',
+        'Zambia': '🇿🇲',
+        'Malawi': '🇲🇼',
+        'Mozambique': '🇲🇿',
+        'Lesotho': '🇱🇸',
+        'France': '🇫🇷',
+        'Turkey': '🇹🇷',
+        'China': '🇨🇳',
     };
 
     // Example phone format per country — updates the phone field's
@@ -32,6 +50,24 @@
         'Central African Republic': '+236 70 12 34 56',
         'Equatorial Guinea': '+240 222 123 456',
         'São Tomé and Príncipe': '+239 991 2345',
+        'Benin': '+229 90 12 34 56',
+        'Burkina Faso': '+226 70 12 34 56',
+        "Côte d'Ivoire": '+225 07 12 34 56 78',
+        'Ghana': '+233 24 123 4567',
+        'Nigeria': '+234 802 123 4567',
+        'Senegal': '+221 77 123 45 67',
+        'Sierra Leone': '+232 76 123456',
+        'Kenya': '+254 712 345 678',
+        'Uganda': '+256 772 123456',
+        'Tanzania': '+255 754 123 456',
+        'Rwanda': '+250 788 123 456',
+        'Zambia': '+260 97 1234567',
+        'Malawi': '+265 99 123 4567',
+        'Mozambique': '+258 82 123 4567',
+        'Lesotho': '+266 5012 3456',
+        'France': '+33 6 12 34 56 78',
+        'Turkey': '+90 532 123 45 67',
+        'China': '+86 138 1234 5678',
     };
     var DEFAULT_PHONE_PLACEHOLDER = 'Phone';
 

@@ -1,12 +1,22 @@
 """Signup location data: Republic of Congo departments/districts, plus the
-full list of countries PawaPay actually settles payments for (see
-manager/payments/pawapay.py::COUNTRY_CORRESPONDENTS) — the sign-up form is
-no longer Congo-only, so any of these countries can be selected there.
+full set of countries offered at sign-up for users and vendors — every
+country PawaPay operates in (per pawapay.io's own supported-country list,
+a broader set than the handful this account's COUNTRY_CORRESPONDENTS/
+COUNTRY_CURRENCY in manager/payments/pawapay.py currently has live payment
+routing configured for), plus France, Turkey, and China for
+diaspora/international sign-ups.
 
 Congo keeps its richer department → district cascade (real administrative
 divisions). Every other country uses a flat list of major cities, reusing
 the exact same lists already trusted for checkout in
 book_Project/checkout_cities.py, so the two stay consistent.
+
+Note: sign-up accepting a country here does not by itself mean checkout
+can process a payment from it — that's governed separately by
+manager/payments/pawapay.py's COUNTRY_CORRESPONDENTS/COUNTRY_CURRENCY
+(Central Africa only, as of this writing) and book_Project/payment_config.py
+(KKiaPay's West Africa list). A user from, say, Kenya or Nigeria can sign
+up today; enabling them to actually pay is a separate, follow-up change.
 """
 
 DEFAULT_CONGO_LOCATION = 'Brazzaville'
@@ -75,15 +85,14 @@ _DEPT_BY_CODE = {d['code']: d for d in CONGO_DEPARTMENTS}
 
 
 # ---------------------------------------------------------------------------
-# Countries PawaPay actually settles payments for — see
-# manager/payments/pawapay.py::COUNTRY_CORRESPONDENTS / COUNTRY_CURRENCY.
-# Congo is first (the platform's home market) and uses the department
-# cascade above instead of a flat city list. The rest reuse
-# book_Project/checkout_cities.py's per-country city lists so signup and
-# checkout never disagree about what "a city in Cameroon" means.
+# Countries offered at sign-up. Congo is first (the platform's home market)
+# and uses the department cascade above instead of a flat city list. The
+# rest reuse book_Project/checkout_cities.py's per-country city lists so
+# signup and checkout never disagree about what "a city in Cameroon" means.
 # ---------------------------------------------------------------------------
-PAWAPAY_COUNTRY_ORDER = [
+SIGNUP_COUNTRY_ORDER = [
     'Congo',
+    # Central Africa
     'Democratic Republic of the Congo',
     'Cameroon',
     'Gabon',
@@ -92,11 +101,32 @@ PAWAPAY_COUNTRY_ORDER = [
     'Central African Republic',
     'Equatorial Guinea',
     'São Tomé and Príncipe',
+    # West Africa
+    'Benin',
+    'Burkina Faso',
+    "Côte d'Ivoire",
+    'Ghana',
+    'Nigeria',
+    'Senegal',
+    'Sierra Leone',
+    # East / Southern Africa
+    'Kenya',
+    'Uganda',
+    'Tanzania',
+    'Rwanda',
+    'Zambia',
+    'Malawi',
+    'Mozambique',
+    'Lesotho',
+    # International
+    'France',
+    'Turkey',
+    'China',
 ]
 
-COUNTRY_CHOICES = [(c, c) for c in PAWAPAY_COUNTRY_ORDER]
+COUNTRY_CHOICES = [(c, c) for c in SIGNUP_COUNTRY_ORDER]
 
-_NON_CONGO_COUNTRIES = set(PAWAPAY_COUNTRY_ORDER) - {'Congo'}
+_NON_CONGO_COUNTRIES = set(SIGNUP_COUNTRY_ORDER) - {'Congo'}
 
 
 def _country_cities():
@@ -113,11 +143,11 @@ def get_departments_for_js():
 
 def get_signup_countries_for_js():
     """Unified data for the sign-up location cascade: Congo carries its
-    department list (cascading select), every other PawaPay country carries
-    a flat city list (single select)."""
+    department list (cascading select), every other country carries a
+    flat city list (single select)."""
     country_cities = _country_cities()
     result = []
-    for country in PAWAPAY_COUNTRY_ORDER:
+    for country in SIGNUP_COUNTRY_ORDER:
         if country == 'Congo':
             result.append({'code': 'Congo', 'name': 'Congo', 'departments': get_departments_for_js()})
         else:
@@ -161,7 +191,7 @@ def default_city_for_department(department_code: str) -> str:
 
 
 def is_valid_country(value: str) -> bool:
-    return (value or '').strip() in PAWAPAY_COUNTRY_ORDER
+    return (value or '').strip() in SIGNUP_COUNTRY_ORDER
 
 
 def normalize_country(value: str) -> str:

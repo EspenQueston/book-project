@@ -20,11 +20,26 @@ CHECKOUT_CITIES_BY_COUNTRY = {
     'Equatorial Guinea': ['Malabo', 'Bata', 'Ebebiyín', 'Aconibe', 'Añisoc', 'Evinayong', 'Mongomo'],
     'Gabon': ['Libreville', 'Port-Gentil', 'Franceville', 'Oyem', 'Moanda', 'Mouila', 'Lambaréné'],
     'São Tomé and Príncipe': ['São Tomé', 'Trindade', 'Santana', 'Neves', 'Guadalupe', 'Santo António', 'Ribeira Afonso'],
+    # West/East/Southern Africa — PawaPay
+    'Ghana': ['Accra', 'Kumasi', 'Tamale', 'Sekondi-Takoradi', 'Ashaiman', 'Sunyani', 'Cape Coast'],
+    'Nigeria': ['Lagos', 'Kano', 'Ibadan', 'Abuja', 'Port Harcourt', 'Benin City', 'Kaduna'],
+    'Kenya': ['Nairobi', 'Mombasa', 'Kisumu', 'Nakuru', 'Eldoret', 'Thika', 'Malindi'],
+    'Uganda': ['Kampala', 'Gulu', 'Lira', 'Mbarara', 'Jinja', 'Mbale', 'Entebbe'],
+    'Tanzania': ['Dar es Salaam', 'Dodoma', 'Mwanza', 'Arusha', 'Mbeya', 'Morogoro', 'Tanga'],
+    'Rwanda': ['Kigali', 'Butare', 'Gitarama', 'Ruhengeri', 'Gisenyi', 'Byumba', 'Cyangugu'],
+    'Zambia': ['Lusaka', 'Kitwe', 'Ndola', 'Kabwe', 'Chingola', 'Mufulira', 'Livingstone'],
+    'Malawi': ['Lilongwe', 'Blantyre', 'Mzuzu', 'Zomba', 'Kasungu', 'Mangochi', 'Karonga'],
+    'Mozambique': ['Maputo', 'Matola', 'Beira', 'Nampula', 'Chimoio', 'Nacala', 'Quelimane'],
+    'Lesotho': ['Maseru', 'Teyateyaneng', 'Mafeteng', 'Hlotse', "Mohale's Hoek", 'Maputsoe', 'Butha-Buthe'],
+    'Sierra Leone': ['Freetown', 'Bo', 'Kenema', 'Makeni', 'Koidu', 'Waterloo', 'Lunsar'],
     # Asia
     'China': ['北京', '上海', '广州', '深圳', '成都', '杭州', '武汉'],
     'Hong Kong': ['Central', 'Kowloon', 'Tsuen Wan', 'Sha Tin', 'Tuen Mun', 'Yuen Long', 'Tseung Kwan O'],
     'Taiwan': ['台北', '高雄', '台中', '台南', '新北', '桃园', '新竹'],
     'Japan': ['东京', '大阪', '横滨', '名古屋', '札幌', '福冈', '京都'],
+    # International
+    'France': ['Paris', 'Marseille', 'Lyon', 'Toulouse', 'Nice', 'Nantes', 'Strasbourg'],
+    'Turkey': ['Istanbul', 'Ankara', 'Izmir', 'Bursa', 'Antalya', 'Adana', 'Konya'],
 }
 
 
