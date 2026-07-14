@@ -1,13 +1,51 @@
+"""Password hashing and account-linking helpers for the custom SiteUser/
+Vendor auth system (this project does not use Django's built-in User model).
+
+Passwords are hashed with Django's own make_password/check_password —
+PBKDF2 by default, a random salt generated per password, and a tunable
+iteration count — instead of a hand-rolled hasher. Accounts created before
+this change stored a single hardcoded-salt SHA-256 digest (a fast hash,
+with one salt shared by every user, sitting in source control) — those are
+verified once via the old method on their next login attempt and
+transparently re-hashed with the secure format at that point, so no forced
+password reset is needed and no account is left on the weaker hash after
+they've successfully logged in even once post-migration.
+"""
 import hashlib
 
+from django.contrib.auth.hashers import check_password as _django_check_password
+from django.contrib.auth.hashers import make_password as _django_make_password
 from django.utils import timezone
 
 from manager import models
 
+_LEGACY_SALT = 'book_project_salt_2024'
+
+
+def _legacy_hash(password):
+    return hashlib.sha256(f'{_LEGACY_SALT}{password}'.encode()).hexdigest()
+
+
+def _is_legacy_hash(value):
+    """Legacy hashes are bare 64-char hex SHA-256 digests. Django's
+    make_password output always contains '$' (e.g. 'pbkdf2_sha256$...'),
+    so the two formats are unambiguous."""
+    return bool(value) and '$' not in value and len(value) == 64
+
 
 def hash_password(password):
-    salt = 'book_project_salt_2024'
-    return hashlib.sha256(f'{salt}{password}'.encode()).hexdigest()
+    """Hash a NEW password. Always the secure Django hasher — the legacy
+    one below exists only to verify passwords hashed before this change."""
+    return _django_make_password(password)
+
+
+def verify_password(raw_password, stored_hash):
+    """True if raw_password matches stored_hash, in whichever format it's in."""
+    if not stored_hash or not raw_password:
+        return False
+    if _is_legacy_hash(stored_hash):
+        return _legacy_hash(raw_password) == stored_hash
+    return _django_check_password(raw_password, stored_hash)
 
 
 def normalize_auth_email(email):
@@ -61,18 +99,23 @@ def set_unified_password(email, raw_password):
 
 
 def check_email_password(email, raw_password):
-    """Return True if password matches SiteUser and/or Vendor; heal password drift."""
+    """Return True if password matches SiteUser and/or Vendor; heal
+    password drift and transparently upgrade a legacy hash to the secure
+    format the moment it's confirmed correct."""
     email_key = normalize_auth_email(email)
     if not email_key or not raw_password:
         return False
-    hashed = hash_password(raw_password)
     user, vendor = get_linked_site_user_and_vendor(email_key)
-    user_ok = user and user.password == hashed
-    vendor_ok = vendor and vendor.password == hashed
-    if user_ok or vendor_ok:
-        sync_password_by_email(email_key, hashed)
-        return True
-    return False
+    user_ok = bool(user) and verify_password(raw_password, user.password)
+    vendor_ok = bool(vendor) and verify_password(raw_password, vendor.password)
+    if not (user_ok or vendor_ok):
+        return False
+
+    # Re-hash with the secure format now that the password is confirmed
+    # correct — a no-op (no rows changed) if it's already on the new
+    # format, and a transparent upgrade if it was still the legacy hash.
+    sync_password_by_email(email_key, hash_password(raw_password))
+    return True
 
 
 def link_dual_accounts_by_email(email):

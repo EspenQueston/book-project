@@ -2,8 +2,7 @@ from django.urls import path, re_path
 from manager import views
 from manager import views_review
 from manager.payments.views import (
-    mtn_momo_callback, airtel_money_callback,
-    initiate_momo_payment, check_payment_status,
+    check_payment_status,
     kkiapay_verify, kkiapay_webhook,
     pawapay_callback,
 )
@@ -247,10 +246,7 @@ urlpatterns = [
     path('admin/notifications/', views.admin_notifications_api, name='admin_notifications'),
     path('admin/notifications/page/', views.admin_notifications_page, name='admin_notifications_page'),
 
-    # =========================Payment Callbacks (MoMo/Airtel)========================
-    path('api/payment/mtn/callback/', mtn_momo_callback, name='mtn_momo_callback'),
-    path('api/payment/airtel/callback/', airtel_money_callback, name='airtel_money_callback'),
-    path('api/payment/initiate/', initiate_momo_payment, name='initiate_momo_payment'),
+    # =========================Payment Status Polling========================
     path('api/payment/status/', check_payment_status, name='check_payment_status'),
 
     # =========================KKiaPay========================

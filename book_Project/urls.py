@@ -1,4 +1,3 @@
-from django.contrib import admin
 from django.urls import path, include, re_path
 from django.shortcuts import redirect
 from django.conf import settings
@@ -34,7 +33,12 @@ class RosettaAdminMiddleware:
 
 # Main URL patterns
 urlpatterns = [
-    path('admin/', admin.site.urls),  # Django admin
+    # Django's built-in admin (django.contrib.admin) was deliberately never
+    # mounted here — the custom "manager" admin panel fully covers every
+    # model, and a second, separately-authenticated admin surface sitting
+    # at a well-known public path is just extra attack surface for no
+    # operational benefit. See marketplace/admin.py — its ModelAdmin
+    # registrations are now inert with no URL to reach them.
     path('i18n/', include('django.conf.urls.i18n')),  # Language switching
     path('marketplace/', include('marketplace.urls')),  # Marketplace
     path('manager/', include('manager.urls')),  # Public interface at /manager/

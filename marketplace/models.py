@@ -354,9 +354,9 @@ class MarketplaceOrder(models.Model):
     PAYMENT_METHOD_CHOICES = [
         ('wechat_pay', '微信支付'),
         ('alipay', '支付宝'),
-        ('mtn_money', 'MTN Money'),
+        ('pawapay', 'PawaPay'),
+        ('kkiapay', 'KKiaPay'),
         ('orange_money', 'Orange Money'),
-        ('airtel_money', 'Airtel Money'),
         ('paypal', 'PayPal'),
         ('credit_card', '信用卡'),
         ('bank_transfer', '银行转账'),

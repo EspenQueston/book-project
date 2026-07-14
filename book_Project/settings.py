@@ -434,29 +434,6 @@ CSRF_TRUSTED_ORIGINS = os.environ.get(
 ).split(',')
 
 # ============================================================
-# MTN MoMo Sandbox Configuration
-# ============================================================
-MTN_MOMO_BASE_URL = os.environ.get(
-    'MTN_MOMO_BASE_URL', 'https://sandbox.momodeveloper.mtn.com')
-MTN_MOMO_SUBSCRIPTION_KEY = os.environ.get('MTN_MOMO_SUBSCRIPTION_KEY', '')
-MTN_MOMO_API_USER = os.environ.get('MTN_MOMO_API_USER', '')
-MTN_MOMO_API_KEY = os.environ.get('MTN_MOMO_API_KEY', '')
-MTN_MOMO_ENVIRONMENT = os.environ.get('MTN_MOMO_ENVIRONMENT', 'sandbox')
-MTN_MOMO_CURRENCY = os.environ.get('MTN_MOMO_CURRENCY', 'EUR')
-MTN_MOMO_CALLBACK_URL = os.environ.get('MTN_MOMO_CALLBACK_URL', '')
-
-# ============================================================
-# Airtel Money Sandbox Configuration
-# ============================================================
-AIRTEL_MONEY_BASE_URL = os.environ.get(
-    'AIRTEL_MONEY_BASE_URL', 'https://openapiuat.airtel.africa')
-AIRTEL_MONEY_CLIENT_ID = os.environ.get('AIRTEL_MONEY_CLIENT_ID', '')
-AIRTEL_MONEY_CLIENT_SECRET = os.environ.get('AIRTEL_MONEY_CLIENT_SECRET', '')
-AIRTEL_MONEY_COUNTRY = os.environ.get('AIRTEL_MONEY_COUNTRY', 'CG')
-AIRTEL_MONEY_CURRENCY = os.environ.get('AIRTEL_MONEY_CURRENCY', 'XAF')
-AIRTEL_MONEY_CALLBACK_URL = os.environ.get('AIRTEL_MONEY_CALLBACK_URL', '')
-
-# ============================================================
 # KKiaPay Payment Aggregator — West Africa
 # ============================================================
 KKIAPAY_PUBLIC_KEY     = os.environ.get('KKIAPAY_PUBLIC_KEY',     '')

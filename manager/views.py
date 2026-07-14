@@ -10937,9 +10937,9 @@ def public_wallet_topup(request):
     return render(request, 'public/wallet_topup.html', {
         'user': user,
         'payment_methods': [
-            ('mtn_money', 'MTN Money'),
+            ('pawapay', 'Mobile Money (PawaPay)'),
+            ('kkiapay', 'Mobile Money (KKiaPay)'),
             ('orange_money', 'Orange Money'),
-            ('airtel_money', 'Airtel Money'),
             ('paypal', 'PayPal'),
             ('credit_card', 'Credit Card'),
             ('bank_transfer', 'Bank Transfer'),

@@ -90,9 +90,8 @@
                 <label class="method-item">
                     <input type="radio" name="payment_method" value="{{ val }}" {% if forloop.first %}checked{% endif %}>
                     <span class="method-icon">
-                        {% if val == 'mtn_money' %}<i class="fas fa-mobile-alt" style="color:#ffcc00;"></i>
+                        {% if val == 'pawapay' or val == 'kkiapay' %}<i class="fas fa-mobile-alt" style="color:#1d4ed8;"></i>
                         {% elif val == 'orange_money' %}<i class="fas fa-mobile-alt" style="color:#ff6600;"></i>
-                        {% elif val == 'airtel_money' %}<i class="fas fa-mobile-alt" style="color:#e60000;"></i>
                         {% elif val == 'paypal' %}<i class="fab fa-paypal" style="color:#003087;"></i>
                         {% elif val == 'credit_card' %}<i class="fas fa-credit-card" style="color:#1e293b;"></i>
                         {% else %}<i class="fas fa-university" style="color:#475569;"></i>{% endif %}

@@ -14,7 +14,7 @@ Full-stack Django commerce platform for **DUNO 360**: bookstore, multi-vendor ma
 | **Vendor center** | Dashboard, inventory, orders hub, customer messaging, marketplace listing management |
 | **Admin panel** | Catalog, vendors, users, orders, blog, analytics, inventory, email/messages, AI chatbot config |
 | **Marketplace** | Products with variants, bulk/wholesale pricing rules, courses with lessons, supermarket items |
-| **Payments** | KKiaPay, PawaPay (Central Africa), MTN MoMo, Airtel Money, wallet top-up |
+| **Payments** | KKiaPay, PawaPay (Central Africa), wallet top-up |
 | **Communications** | Contact form, Zoho SMTP, admin email inbox, vendor/customer chat, Twilio SMS OTP at signup |
 
 ---
@@ -66,9 +66,7 @@ Full-stack Django commerce platform for **DUNO 360**: bookstore, multi-vendor ma
 
 ### Payments (Africa-focused)
 - **KKiaPay** — West Africa mobile money aggregator
-- **PawaPay** — Central Africa deposits/payouts/refunds with webhook callbacks
-- **MTN MoMo** sandbox/production API
-- **Airtel Money** integration
+- **PawaPay** — Central Africa deposits/payouts/refunds with webhook callbacks (also covers MTN Mobile Money / Airtel Money as PawaPay correspondents in supported countries)
 - ngrok helper for local payment callback testing (`run_with_ngrok`)
 
 ### AI & Integrations
@@ -91,9 +89,9 @@ Full-stack Django commerce platform for **DUNO 360**: bookstore, multi-vendor ma
 | **i18n** | django-modeltranslation, django-rosetta, polib, custom page catalogs |
 | **Email** | Zoho Mail SMTP (SSL, port 465) |
 | **SMS** | Twilio Verify |
-| **Payments** | kkiapay SDK, custom PawaPay / MTN MoMo / Airtel Money clients |
+| **Payments** | kkiapay SDK, custom PawaPay client |
 | **Dev tooling** | django-extensions, python-dotenv, ngrok (callbacks) |
-| **Deployment** | Gunicorn, Nginx, IONOS VPS (Ubuntu 24.04); optional cPanel assets |
+| **Deployment** | Gunicorn, Nginx, IONOS VPS (Ubuntu 24.04) |
 
 ---
 
@@ -153,8 +151,6 @@ copy .env.example .env   # Windows
 |----------|---------|
 | `KKIAPAY_*` | KKiaPay keys, sandbox flag, webhook secret |
 | `PAWAPAY_*` | PawaPay token, callbacks, currency |
-| `MTN_MOMO_*` | MTN MoMo sandbox/production |
-| `AIRTEL_MONEY_*` | Airtel Money OAuth + callbacks |
 
 ### Signup SMS (optional)
 
@@ -251,7 +247,6 @@ python manage.py sync_page_i18n
 python manage.py compilemessages_po
 
 # Payments setup
-python manage.py setup_mtn_sandbox
 python manage.py seed_kkiapay_countries
 python manage.py setup_twilio_verify --create
 

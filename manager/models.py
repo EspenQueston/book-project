@@ -198,9 +198,9 @@ class Author(models.Model):
 # E-commerce Models for Shopping Cart and Orders
 
 PAYMENT_METHOD_CHOICES = [
-    ('mtn_money', 'MTN Money'),
+    ('pawapay', 'PawaPay'),
+    ('kkiapay', 'KKiaPay'),
     ('orange_money', 'Orange Money'),
-    ('airtel_money', 'Airtel Money'),
     ('wechat_pay', '微信支付'),
     ('alipay', '支付宝'),
     ('paypal', 'PayPal'),

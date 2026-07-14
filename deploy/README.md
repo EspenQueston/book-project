@@ -84,6 +84,26 @@ set DUNO360_VPS_HOST=217.160.36.235
 python deploy/remote_prod_update.py
 ```
 
+## Confirming Redis is actually active in production
+
+Gunicorn runs **3 worker processes** (see `--workers 3` above). If `REDIS_URL`
+isn't set (or Django can't reach it and silently falls back — only possible
+in `DEBUG=True`; production is configured to refuse to start instead), the
+cache falls back to `LocMemCache`, which is **not shared between those 3
+processes** — each worker ends up with its own private cache, so anything
+you expect to be cached consistently (live product presence, etc.) silently
+behaves differently depending on which worker handles a given request.
+
+Run this on the server to get a definitive answer:
+
+```bash
+cd /opt/duno360/app && set -a && . /opt/duno360/.env && set +a && .venv/bin/python manage.py check_cache_backend
+```
+
+It reports whether `REDIS_URL` is set, which backend is actually active,
+and (if Redis) does a live round-trip probe to confirm it's really
+reachable right now — not just configured.
+
 ## Syncing local database content to production (without overwriting it)
 
 Code changes go through git (above). **Data** you created locally — new
