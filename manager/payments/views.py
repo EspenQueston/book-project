@@ -11,6 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 from django.conf import settings
 from django.utils import timezone
+from django.db import transaction
 
 from manager import models
 from marketplace.models import MarketplaceOrder
@@ -42,63 +43,81 @@ def _find_order(reference_id):
 
 
 def _update_order_status(order, status, transaction_id=None):
-    """Update order payment status based on provider callback."""
-    was_already_completed = order.payment_status == 'completed'
+    """Update order payment status based on provider callback.
 
-    if status == 'SUCCESSFUL':
-        order.payment_status = 'completed'
-        order.payment_completed_at = timezone.now()
-        if hasattr(order, 'status'):
-            if order.status in ('payment_pending', 'pending'):
-                order.status = 'processing'
-    elif status == 'FAILED':
-        order.payment_status = 'failed'
-        if hasattr(order, 'status'):
-            if order.status == 'payment_pending':
-                order.status = 'cancelled'
-    # Keep 'pending'/'processing' as-is for PENDING status
+    Wrapped in select_for_update() so two concurrent webhook deliveries for
+    the same order (common with mobile-money retry behavior) can't both
+    read payment_status as not-yet-completed and both run the completion
+    side effects (duplicate inventory decrement / confirmation emails). The
+    second delivery blocks on the row lock until the first commits, then
+    sees payment_status already 'completed' and skips the side effects.
+    """
+    model = type(order)
+    with transaction.atomic():
+        locked = model.objects.select_for_update().get(pk=order.pk)
+        was_already_completed = locked.payment_status == 'completed'
 
-    if transaction_id:
-        order.payment_transaction_id = transaction_id
-    order.save()
-    logger.info('Order %s updated: payment_status=%s',
-                getattr(order, 'order_number', order.pk),
-                order.payment_status)
-    order_source = 'marketplace' if isinstance(order, MarketplaceOrder) else 'book'
-    if order.payment_status == 'completed':
-        try:
-            from manager.fulfillment_service import create_shipments_for_order
-            create_shipments_for_order(order, order_source)
-        except Exception as exc:
-            logger.exception('Shipment/escrow creation failed: %s', exc)
-        if not was_already_completed:
+        if status == 'SUCCESSFUL':
+            locked.payment_status = 'completed'
+            locked.payment_completed_at = timezone.now()
+            if hasattr(locked, 'status'):
+                if locked.status in ('payment_pending', 'pending'):
+                    locked.status = 'processing'
+        elif status == 'FAILED':
+            locked.payment_status = 'failed'
+            if hasattr(locked, 'status'):
+                if locked.status == 'payment_pending':
+                    locked.status = 'cancelled'
+        # Keep 'pending'/'processing' as-is for PENDING status
+
+        if transaction_id:
+            locked.payment_transaction_id = transaction_id
+        locked.save()
+
+        order_source = 'marketplace' if isinstance(locked, MarketplaceOrder) else 'book'
+        if locked.payment_status == 'completed' and not was_already_completed:
+            try:
+                from manager.fulfillment_service import create_shipments_for_order
+                create_shipments_for_order(locked, order_source)
+            except Exception as exc:
+                logger.exception('Shipment/escrow creation failed: %s', exc)
             try:
                 from manager.inventory_service import apply_inventory_for_order
-                apply_inventory_for_order(order, order_source)
+                apply_inventory_for_order(locked, order_source)
             except Exception:
-                logger.exception('Inventory deduction failed for %s', order.order_number)
+                logger.exception('Inventory deduction failed for %s', locked.order_number)
             try:
                 from manager import notifications_service
-                notifications_service.send_payment_confirmed(order, order_source)
+                notifications_service.send_payment_confirmed(locked, order_source)
             except Exception:
-                logger.exception('Payment confirmation email failed for %s', order.order_number)
+                logger.exception('Payment confirmation email failed for %s', locked.order_number)
 
-            if getattr(order, 'donation_amount', None):
+            if getattr(locked, 'donation_amount', None):
                 try:
                     from manager.views import create_notification
                     from manager.templatetags.currency_filters import to_fcfa
                     create_notification(
                         'donation_received',
-                        f'\U0001F49B Don reçu — {order.order_number}',
-                        f'Ce paiement inclut un don solidaire de {to_fcfa(order.donation_amount)} '
-                        f'(commande {order.order_number}, {to_fcfa(order.total_amount)} au total). '
+                        f'\U0001F49B Don reçu — {locked.order_number}',
+                        f'Ce paiement inclut un don solidaire de {to_fcfa(locked.donation_amount)} '
+                        f'(commande {locked.order_number}, {to_fcfa(locked.total_amount)} au total). '
                         f'À ne pas compter comme chiffre d\'affaires produit.',
                         icon='fas fa-heart', color='#ef4444',
-                        link=f'/manager/order_detail/{order.id}/' if order_source == 'book' else '',
-                        related_id=order.id,
+                        link=f'/manager/order_detail/{locked.id}/' if order_source == 'book' else '',
+                        related_id=locked.id,
                     )
                 except Exception:
-                    logger.exception('Donation admin notification failed for %s', order.order_number)
+                    logger.exception('Donation admin notification failed for %s', locked.order_number)
+
+    # Reflect the authoritative, locked state back onto the caller's instance.
+    order.payment_status = locked.payment_status
+    order.payment_completed_at = locked.payment_completed_at
+    order.payment_transaction_id = locked.payment_transaction_id
+    if hasattr(locked, 'status'):
+        order.status = locked.status
+    logger.info('Order %s updated: payment_status=%s',
+                getattr(order, 'order_number', order.pk),
+                order.payment_status)
 
 
 # =========================================================================
@@ -117,6 +136,13 @@ def check_payment_status(request):
         "order_status": "processing" | "cancelled" | ...
     }
     """
+    from manager.views import _get_client_ip, _is_rate_limited_key, _record_attempt_key
+    ip = _get_client_ip(request)
+    rl_key = f'pay_poll:{ip}'
+    if _is_rate_limited_key(rl_key, 30):
+        return JsonResponse({'error': 'Too many requests'}, status=429)
+    _record_attempt_key(rl_key, 60)
+
     order_number = request.GET.get('order_number', '')
     if not order_number:
         return JsonResponse({'error': 'Missing order_number'}, status=400)
@@ -193,6 +219,13 @@ def kkiapay_verify(request):
 
     Security: always verify server-side — never trust the JS callback alone.
     """
+    from manager.views import _get_client_ip, _is_rate_limited_key, _record_attempt_key
+    ip = _get_client_ip(request)
+    rl_key = f'pay_poll:{ip}'
+    if _is_rate_limited_key(rl_key, 30):
+        return JsonResponse({'success': False, 'message': 'Too many requests'}, status=429)
+    _record_attempt_key(rl_key, 60)
+
     try:
         body = json.loads(request.body)
         transaction_id = body.get('transaction_id', '').strip()

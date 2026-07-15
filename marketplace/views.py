@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
-from django.http import JsonResponse, FileResponse, Http404
+from django.http import JsonResponse, FileResponse, Http404, HttpResponseForbidden
 from django.db.models import Q, Sum, Count, Avg, OuterRef, Subquery, Value, IntegerField, F
 from django.db.models.functions import Coalesce, TruncMonth
 from django.core.paginator import Paginator
@@ -38,10 +38,28 @@ except ModuleNotFoundError:
 from decimal import Decimal
 from datetime import timedelta
 from django.db import transaction
+from django.core.cache import cache
 import uuid
 import json
+import io
+import zipfile
 from manager.models import SiteUser, Vendor, UserFollowedVendor
 from manager.official_store import assign_official_vendor, resolve_listing_vendor
+
+
+def _cached_categories(section):
+    """Active categories for a listing section — identical for every visitor
+    and requested on every listing page load, so it's cached with a short
+    TTL (matches the trending-feed cache pattern) rather than hitting the
+    DB fresh each time. Never used on admin pages, which need to see a
+    just-added category immediately."""
+    cache_key = f'listing:categories:{section}:v1'
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+    result = list(Category.objects.filter(section=section, is_active=True))
+    cache.set(cache_key, result, 300)
+    return result
 
 
 def _seller_follow_context(request, vendor=None):
@@ -384,7 +402,7 @@ def product_list(request):
     products = _annotate_product_delivered(
         Product.objects.filter(is_active=True).select_related('category')
     )
-    categories = Category.objects.filter(section='products', is_active=True)
+    categories = _cached_categories('products')
 
     q = request.GET.get('q', '').strip()
     cat = request.GET.get('category', '')
@@ -492,7 +510,7 @@ def course_list(request):
     courses = _annotate_course_delivered(
         Course.objects.filter(is_active=True).select_related('category')
     )
-    categories = Category.objects.filter(section='courses', is_active=True)
+    categories = _cached_categories('courses')
 
     q = request.GET.get('q', '').strip()
     cat = request.GET.get('category', '')
@@ -546,6 +564,54 @@ def course_list(request):
     return render(request, 'marketplace/courses.html', context)
 
 
+def user_can_access_course(request, course):
+    """True if the current visitor has a completed purchase of this course,
+    OR is the vendor who owns it.
+
+    Checked at course level, not per-lesson, since ownership of a course
+    unlocks every non-free lesson in it — this keeps the check to a single
+    query per request regardless of how many lessons are rendered.
+
+    Payment completion (not order/shipment status) is the gate for buyers:
+    courses are digital, so tying access to the physical-goods fulfillment
+    pipeline (which can take up to 14 days to reach 'delivered') would lock
+    out a buyer who already paid.
+
+    A logged-in vendor always has full access to their own course's content
+    — they don't need to "buy" what they're selling to preview or download
+    it, whether they're on the public course page or their own dashboard.
+    """
+    vendor_id = request.session.get('vendor_id')
+    if vendor_id and course.vendor_id == vendor_id:
+        return True
+
+    order_filter = {
+        'item_type': 'course',
+        'item_id': course.pk,
+        'order__payment_status': 'completed',
+    }
+    site_user_id = request.session.get('site_user_id')
+    if site_user_id and MarketplaceOrderItem.objects.filter(
+        order__user_id=site_user_id, **order_filter
+    ).exists():
+        return True
+
+    accessible = request.session.get('accessible_orders') or []
+    if accessible and MarketplaceOrderItem.objects.filter(
+        order__order_number__in=accessible, **order_filter
+    ).exists():
+        return True
+
+    return False
+
+
+def user_can_access_lesson(request, lesson):
+    """True if the current visitor may view/download this lesson's content."""
+    if lesson.is_free:
+        return True
+    return user_can_access_course(request, lesson.section.course)
+
+
 def course_detail(request, slug):
     """Single course detail page with video playlist and progress tracking."""
     course = get_object_or_404(Course, slug=slug, is_active=True)
@@ -591,6 +657,24 @@ def course_detail(request, slug):
             if first_section and first_section.lessons.exists():
                 current_lesson = first_section.lessons.first()
 
+    # Access control: ownership unlocks every non-free lesson at once, so
+    # this is a single check regardless of how many lessons are rendered.
+    can_access_course = user_can_access_course(request, course)
+    locked_lesson_ids = set()
+    remaining_minutes = 0
+    for section in sections:
+        for lesson in section.lessons.all():
+            if lesson.is_free or can_access_course:
+                if lesson.id not in completed_ids:
+                    remaining_minutes += lesson.duration_minutes
+            else:
+                locked_lesson_ids.add(lesson.id)
+
+    current_lesson_locked = bool(current_lesson and current_lesson.id in locked_lesson_ids)
+    current_lesson_source = None
+    if current_lesson and not current_lesson_locked:
+        current_lesson_source = current_lesson.get_video_source()
+
     seller_vendor = resolve_listing_vendor(course.vendor)
     context = {
         'course': course,
@@ -602,6 +686,11 @@ def course_detail(request, slug):
         'completed_count': completed_count,
         'progress_percent': progress_percent,
         'current_lesson': current_lesson,
+        'current_lesson_locked': current_lesson_locked,
+        'current_lesson_source': current_lesson_source,
+        'can_access_course': can_access_course,
+        'locked_lesson_ids': locked_lesson_ids,
+        'remaining_minutes': remaining_minutes,
         'sold_delivered': course.get_units_sold_delivered(),
         'listing_reviews_preview': list(reviews_for_listing('course', course.pk)[:3]),
         'listing_review_summary': review_summary('course', course.pk),
@@ -617,7 +706,7 @@ def supermarket_list(request):
     items = _annotate_supermarket_delivered(
         SupermarketItem.objects.filter(is_active=True).select_related('category')
     )
-    categories = Category.objects.filter(section='supermarket', is_active=True)
+    categories = _cached_categories('supermarket')
 
     q = request.GET.get('q', '').strip()
     cat = request.GET.get('category', '')
@@ -975,6 +1064,13 @@ def checkout(request):
             })
 
     if request.method == 'POST':
+        from manager.views import _get_client_ip, _is_rate_limited_key, _record_attempt_key
+        ip = _get_client_ip(request)
+        rl_key = f'checkout_fail:{ip}'
+        if _is_rate_limited_key(rl_key, 20):
+            messages.error(request, '请求过于频繁，请稍后再试。')
+            return redirect('marketplace:checkout')
+        _record_attempt_key(rl_key, 300)
         try:
             for detail in items_with_details:
                 item = detail['item']
@@ -1161,6 +1257,9 @@ def toggle_lesson_complete(request, lesson_id):
     lesson = get_object_or_404(CourseLesson, pk=lesson_id)
     course = lesson.section.course
 
+    if not user_can_access_lesson(request, lesson):
+        return JsonResponse({'success': False, 'message': _('请先购买本课程')}, status=403)
+
     progress, created = CourseProgress.objects.get_or_create(
         session_key=session_key,
         course=course,
@@ -1200,8 +1299,61 @@ def serve_lesson_pdf(request, lesson_id):
     lesson = get_object_or_404(CourseLesson, pk=lesson_id)
     if not lesson.pdf_file:
         return JsonResponse({'error': 'No PDF available'}, status=404)
+    if not user_can_access_lesson(request, lesson):
+        return HttpResponseForbidden(_('请先购买本课程后再查看该文件'))
     response = FileResponse(lesson.pdf_file.open('rb'), content_type='application/pdf')
     response['Content-Disposition'] = 'inline'
+    return response
+
+
+def download_lesson(request, lesson_id):
+    """Download a single lesson's video file for offline viewing."""
+    lesson = get_object_or_404(CourseLesson, pk=lesson_id)
+    if not user_can_access_lesson(request, lesson):
+        return HttpResponseForbidden(_('请先购买本课程后再下载该文件'))
+    if not lesson.video_file:
+        raise Http404('No downloadable video for this lesson')
+    filename = f'{lesson.order:02d}_{slugify(lesson.title) or "lesson"}.mp4'
+    response = FileResponse(lesson.video_file.open('rb'), content_type='video/mp4', as_attachment=True, filename=filename)
+    return response
+
+
+def _write_lesson_to_zip(zf, lesson):
+    """Add one lesson's downloadable content to an open ZipFile."""
+    base = f'{lesson.order:02d}_{slugify(lesson.title) or "lesson"}'
+    if lesson.video_file:
+        with lesson.video_file.open('rb') as f:
+            zf.writestr(f'{base}.mp4', f.read())
+    elif lesson.video_url:
+        note = _('本课时为外部视频链接，无法打包下载，请在线观看：') + lesson.video_url
+        zf.writestr(f'{base}_external_link.txt', note)
+    if lesson.pdf_file:
+        with lesson.pdf_file.open('rb') as f:
+            zf.writestr(f'{base}.pdf', f.read())
+
+
+def download_course_bundle(request, slug):
+    """Download all accessible lessons of a course (or one section) as a zip."""
+    course = get_object_or_404(Course, slug=slug, is_active=True)
+    if not user_can_access_course(request, course):
+        return HttpResponseForbidden(_('请先购买本课程后再下载课程内容'))
+
+    section_id = request.GET.get('section')
+    sections = course.sections.prefetch_related('lessons').all()
+    if section_id:
+        sections = sections.filter(pk=section_id)
+        if not sections.exists():
+            raise Http404('Section not found')
+
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_STORED) as zf:
+        for section in sections:
+            for lesson in section.lessons.all():
+                _write_lesson_to_zip(zf, lesson)
+    buffer.seek(0)
+
+    filename = f'{course.slug}-lessons.zip'
+    response = FileResponse(buffer, as_attachment=True, filename=filename)
     return response
 
 

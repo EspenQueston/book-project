@@ -19,30 +19,44 @@ completes at the gateway.
 
 import logging
 
+from django.db import transaction
+from django.db.models import F
+from django.db.models.functions import Greatest
+
 logger = logging.getLogger(__name__)
 
 
 def apply_inventory_for_order(order, order_source):
     """Deduct stock/inventory and bump sales counters for every item in this
     order. Call exactly when payment_status first becomes 'completed'.
-    Safe to call more than once — a no-op after the first successful call."""
-    if getattr(order, 'inventory_applied', False):
-        return False
+    Safe to call more than once — a no-op after the first successful call.
 
-    if order_source == 'book':
-        from manager.models import OrderItem
-        for item in OrderItem.objects.filter(order=order).select_related('book'):
-            book = item.book
-            book.inventory = max(0, book.inventory - item.quantity)
-            book.sale_num += item.quantity
-            book.save(update_fields=['inventory', 'sale_num'])
-    else:
-        from marketplace.models import MarketplaceOrderItem
-        for item in MarketplaceOrderItem.objects.filter(order=order):
-            _apply_marketplace_item(item)
+    Stock decrements use a single atomic UPDATE (F()/Greatest), not a
+    Python read-modify-write, so two orders for the same book/product
+    completing at the same moment can't both read the same starting stock
+    value and silently lose one of the decrements."""
+    model = type(order)
+    with transaction.atomic():
+        locked = model.objects.select_for_update().get(pk=order.pk)
+        if locked.inventory_applied:
+            return False
+
+        if order_source == 'book':
+            from manager.models import OrderItem
+            for item in OrderItem.objects.filter(order=locked).select_related('book'):
+                type(item.book).objects.filter(pk=item.book_id).update(
+                    inventory=Greatest(F('inventory') - item.quantity, 0),
+                    sale_num=F('sale_num') + item.quantity,
+                )
+        else:
+            from marketplace.models import MarketplaceOrderItem
+            for item in MarketplaceOrderItem.objects.filter(order=locked):
+                _apply_marketplace_item(item)
+
+        locked.inventory_applied = True
+        locked.save(update_fields=['inventory_applied'])
 
     order.inventory_applied = True
-    order.save(update_fields=['inventory_applied'])
     logger.info('Inventory applied for %s order %s', order_source, getattr(order, 'order_number', order.pk))
     return True
 
@@ -51,13 +65,16 @@ def _apply_marketplace_item(item):
     obj = item.get_related_object()
     if not obj:
         return
+    model = type(obj)
     if item.item_type in ('product', 'supermarket'):
-        obj.stock = max(0, obj.stock - item.quantity)
-        obj.sales_count += item.quantity
-        obj.save(update_fields=['stock', 'sales_count'])
+        model.objects.filter(pk=obj.pk).update(
+            stock=Greatest(F('stock') - item.quantity, 0),
+            sales_count=F('sales_count') + item.quantity,
+        )
     elif item.item_type == 'course':
-        obj.enrollment_count += 1
-        obj.save(update_fields=['enrollment_count'])
+        model.objects.filter(pk=obj.pk).update(
+            enrollment_count=F('enrollment_count') + 1,
+        )
 
 
 def _restore_marketplace_item(item):

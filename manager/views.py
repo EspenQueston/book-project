@@ -132,6 +132,26 @@ def _reset_login_failures(ip: str) -> None:
     cache.delete(f"login_fail:{ip}")
 
 
+# ---------------------------------------------------------------------------
+# Generalized keyed rate limiter — same cache-based approach as the login
+# guard above, reused for any endpoint that needs a per-IP request cap
+# (signup, password reset, checkout, payment polling) without duplicating
+# the counter logic per endpoint.
+# ---------------------------------------------------------------------------
+def _is_rate_limited_key(key: str, max_attempts: int) -> bool:
+    """True when `key`'s counter has already reached/exceeded max_attempts."""
+    return cache.get(key, 0) >= max_attempts
+
+
+def _record_attempt_key(key: str, window_seconds: int) -> int:
+    """Increment (or start) `key`'s counter; returns the new count."""
+    try:
+        return cache.incr(key)
+    except ValueError:
+        cache.set(key, 1, window_seconds)
+        return 1
+
+
 # 方法实现（数据库操作和页面跳转）
 # ====================   默认跳转  ===========================
 def index(request):
@@ -3002,6 +3022,12 @@ def checkout(request):
     total_items_count = sum(i['quantity'] for i in unified_items)
     
     if request.method == 'POST':
+        ip = _get_client_ip(request)
+        rl_key = f'checkout_fail:{ip}'
+        if _is_rate_limited_key(rl_key, 20):
+            messages.error(request, '请求过于频繁，请稍后再试。')
+            return redirect('manager:checkout')
+        _record_attempt_key(rl_key, 300)
         try:
             payment_confirmed = request.POST.get('payment_confirmed', 'no')
             kkiapay_transaction_id = request.POST.get('kkiapay_transaction_id', '').strip()
@@ -6711,6 +6737,15 @@ def user_register(request):
     from django.utils.translation import gettext as _
 
     if request.method == 'POST':
+        ip = _get_client_ip(request)
+        rl_key = f'signup_fail:{ip}'
+        if _is_rate_limited_key(rl_key, 5):
+            return JsonResponse({
+                'success': False,
+                'message': _('Too many attempts. Please try again in a few minutes.'),
+            }, status=429)
+        _record_attempt_key(rl_key, 300)
+
         name = request.POST.get('name', '').strip()
         email = request.POST.get('email', '').strip()
         password = request.POST.get('password', '').strip()
@@ -7645,6 +7680,15 @@ def forgot_password(request):
     account_type = request.GET.get('type', 'user')
 
     if request.method == 'POST':
+        ip = _get_client_ip(request)
+        rl_key = f'pwreset_fail:{ip}'
+        if _is_rate_limited_key(rl_key, 5):
+            return JsonResponse({
+                'success': False,
+                'message': _('Too many attempts. Please try again in a few minutes.'),
+            }, status=429)
+        _record_attempt_key(rl_key, 300)
+
         email = request.POST.get('email', '').strip()
         account_type = request.POST.get('account_type', 'user')
 

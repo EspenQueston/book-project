@@ -24,6 +24,34 @@
     .video-placeholder i { font-size: 4rem; opacity: 0.3; margin-bottom: 16px; }
     .video-placeholder p { opacity: 0.6; font-size: 0.9rem; }
 
+    /* Locked video placeholder */
+    .video-locked { color: #fff; text-align: center; padding: 40px; max-width: 320px; }
+    .video-locked i { font-size: 3.2rem; opacity: 0.55; margin-bottom: 14px; color: #f5576c; }
+    .video-locked p { opacity: 0.9; font-size: 0.95rem; margin-bottom: 18px; }
+    .video-locked .btn-enroll { padding: 12px 24px; width: auto; }
+
+    /* Sticky/theater video area (desktop) */
+    @media (min-width: 992px) {
+        .video-container-wrap { position: sticky; top: 80px; z-index: 5; }
+    }
+    .theater-toggle-btn {
+        position: absolute; top: 12px; right: 12px; z-index: 3;
+        background: rgba(0,0,0,0.45); color: #fff; border: none; border-radius: 8px;
+        width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+        cursor: pointer; transition: background 0.2s; font-size: 0.95rem;
+    }
+    .theater-toggle-btn:hover { background: rgba(0,0,0,0.7); }
+    @media (min-width: 992px) {
+        .course-detail-layout.theater-mode .course-detail-sidebar { display: none; }
+        .course-detail-layout.theater-mode .course-detail-main { flex: 0 0 100%; width: 100%; }
+    }
+
+    /* Plyr skin tuned to brand colors */
+    .plyr { border-radius: 20px; overflow: hidden; }
+    .plyr--video .plyr__control--overlaid { background: var(--primary-color); }
+    .plyr__control.plyr__tab-focus, .plyr__control:hover, .plyr--video .plyr__control.plyr__control--pressed { background: var(--primary-color); }
+    .plyr--full-ui input[type="range"] { color: var(--primary-color); }
+
     /* Current lesson info */
     .lesson-info { padding: 20px 0; }
     .lesson-title { font-size: 1.3rem; font-weight: 800; color: #1e293b; margin-bottom: 6px; }
@@ -85,6 +113,23 @@
     .lesson-item-badges { display: flex; gap: 4px; }
     .badge-free { background: #dcfce7; color: #16a34a; font-size: 0.65rem; padding: 1px 6px; border-radius: 8px; font-weight: 600; }
     .badge-pdf { background: #fee2e2; color: #dc2626; font-size: 0.65rem; padding: 1px 6px; border-radius: 8px; font-weight: 600; }
+    .badge-locked { background: #f1f5f9; color: #64748b; font-size: 0.65rem; padding: 1px 6px; border-radius: 8px; font-weight: 600; }
+
+    /* Locked lesson row */
+    .lesson-item.locked { cursor: pointer; opacity: 0.65; }
+    .lesson-item.locked .lesson-item-title { color: #94a3b8; }
+    .lesson-item.locked .lesson-check { background: #f1f5f9; border-color: #e2e8f0; }
+    .lesson-item.locked .lesson-check i.fa-check { display: none; }
+    .lesson-item.locked .lesson-check i.fa-lock { display: block; font-size: 0.65rem; color: #94a3b8; }
+    .lesson-item .lesson-check i.fa-lock { display: none; }
+
+    /* Completion ring */
+    .completion-ring-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .completion-ring { width: 46px; height: 46px; flex-shrink: 0; }
+    .completion-ring-label { font-size: 0.85rem; font-weight: 700; color: #1e293b; }
+    .completion-ring-sub { font-size: 0.75rem; color: #94a3b8; }
+    .remaining-time-text { font-size: 0.78rem; opacity: 0.9; margin-top: 6px; }
+    .remaining-time-text i { margin-right: 4px; }
 
     /* Course Info Sidebar */
     .course-info-card {
@@ -258,8 +303,10 @@
     .cml-lesson { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid #fafafa; text-decoration: none; color: inherit; }
     .cml-lesson:last-child { border-bottom: none; }
     .cml-lesson.active { background: rgba(240,147,251,.06); }
+    .cml-lesson.locked { opacity: 0.6; }
     .cml-num { width: 24px; height: 24px; border-radius: 50%; background: #f5f5f5; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #999; flex-shrink: 0; }
     .cml-lesson.active .cml-num { background: linear-gradient(135deg,#f093fb,#f5576c); color: #fff; }
+    .cml-lesson.locked .cml-num { background: #f1f5f9; color: #94a3b8; }
     .cml-info { flex: 1; min-width: 0; }
     .cml-title { font-size: 13px; font-weight: 600; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .cml-meta { font-size: 11px; color: #999; margin-top: 2px; }
@@ -322,6 +369,27 @@
         color: var(--text-primary);
     }
     html[data-theme="dark"] .lesson-item-meta {
+        color: var(--text-tertiary);
+    }
+    html[data-theme="dark"] .lesson-item.locked .lesson-item-title {
+        color: var(--text-tertiary);
+    }
+    html[data-theme="dark"] .lesson-item.locked .lesson-check {
+        background: var(--bg-elevated);
+        border-color: var(--border-default);
+    }
+    html[data-theme="dark"] .badge-locked {
+        background: var(--bg-elevated);
+        color: var(--text-tertiary);
+    }
+    html[data-theme="dark"] .cml-lesson.locked .cml-num {
+        background: var(--bg-elevated);
+        color: var(--text-tertiary);
+    }
+    html[data-theme="dark"] .completion-ring-label {
+        color: var(--text-primary);
+    }
+    html[data-theme="dark"] .completion-ring-sub {
         color: var(--text-tertiary);
     }
     html[data-theme="dark"] .course-info-card {
@@ -460,6 +528,7 @@
         }
     }
 </style>
+<link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
 {% include 'marketplace/includes/seller_card_theme.html' %}
 {% endblock %}
 
@@ -540,15 +609,19 @@
     <!-- G. Video Player (mobile) -->
     <div class="cmv-section" id="cmvSection">
         <div class="video-container cmv-player">
-            {% with src=current_lesson.get_video_source %}
-            {% if src %}
-                {% if src.type == 'file' %}
-                <video controls playsinline style="width:100%;height:100%;background:#000;" controlsList="nodownload">
-                    <source src="{{ src.url }}" type="video/mp4">
+            {% if current_lesson_locked %}
+                <div class="video-locked">
+                    <i class="fas fa-lock d-block"></i>
+                    <p>{% trans "购买课程后即可观看本课时" %}</p>
+                </div>
+            {% elif current_lesson_source %}
+                {% if current_lesson_source.type == 'file' %}
+                <video id="lessonVideoMobile" controls playsinline style="width:100%;height:100%;background:#000;" controlsList="nodownload">
+                    <source src="{{ current_lesson_source.url }}" type="video/mp4">
                     {% trans "您的浏览器不支持视频播放" %}
                 </video>
                 {% else %}
-                <iframe src="{{ src.url }}" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture"></iframe>
+                <iframe src="{{ current_lesson_source.url }}" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture"></iframe>
                 {% endif %}
             {% else %}
                 <div class="video-placeholder">
@@ -556,7 +629,6 @@
                     <p>{% trans "选择课节开始学习" %}</p>
                 </div>
             {% endif %}
-            {% endwith %}
         </div>
         {% if current_lesson %}
         <div class="cmv-lesson-info">
@@ -564,7 +636,8 @@
             <div class="cmv-lesson-meta">
                 <i class="fas fa-clock"></i> {{ current_lesson.duration_minutes }} {% trans "分钟" %}
                 {% if current_lesson.is_free %}<span class="badge-free ms-2">{% trans "免费" %}</span>{% endif %}
-                {% if current_lesson.pdf_file %}<span class="badge-pdf ms-2"><i class="fas fa-file-pdf me-1"></i>PDF</span>{% endif %}
+                {% if current_lesson_locked %}<span class="badge-locked ms-2"><i class="fas fa-lock me-1"></i>{% trans "已锁定" %}</span>{% endif %}
+                {% if current_lesson.pdf_file and not current_lesson_locked %}<span class="badge-pdf ms-2"><i class="fas fa-file-pdf me-1"></i>PDF</span>{% endif %}
             </div>
             {% if current_lesson.description %}
             <div class="cmv-lesson-desc">{{ current_lesson.description|linebreaksbr }}</div>
@@ -581,6 +654,15 @@
             <i class="fas fa-folder-open me-1"></i>{{ section.title }}
         </div>
         {% for lesson in section.lessons.all|slice:":5" %}
+        {% if lesson.id in locked_lesson_ids %}
+        <a href="javascript:void(0)" class="cml-lesson locked" onclick="showLockedToast()">
+            <div class="cml-num"><i class="fas fa-lock"></i></div>
+            <div class="cml-info">
+                <div class="cml-title">{{ lesson.title }}</div>
+                <div class="cml-meta">{{ lesson.duration_minutes }} {% trans "分钟" %} <span style="color:#94a3b8;">{% trans "已锁定" %}</span></div>
+            </div>
+        </a>
+        {% else %}
         <a href="?lesson={{ lesson.id }}#cmvSection" class="cml-lesson {% if current_lesson and current_lesson.id == lesson.id %}active{% endif %}">
             <div class="cml-num">{{ forloop.counter }}</div>
             <div class="cml-info">
@@ -588,6 +670,7 @@
                 <div class="cml-meta">{{ lesson.duration_minutes }} {% trans "分钟" %} {% if lesson.is_free %}<span style="color:#10b981;font-weight:600;">{% trans "免费" %}</span>{% endif %}</div>
             </div>
         </a>
+        {% endif %}
         {% endfor %}
         {% endfor %}
     </div>
@@ -695,24 +778,33 @@
         <!-- Main Content: Video + Playlist -->
         <div class="col-lg-7 course-detail-main">
             <!-- Video Player -->
+            <div class="video-container-wrap">
             <div class="video-container" id="videoContainer">
-                {% with src=current_lesson.get_video_source %}
-                {% if src %}
-                    {% if src.type == 'file' %}
-                    <video controls style="width:100%;height:100%;background:#000;" controlsList="nodownload">
-                        <source src="{{ src.url }}" type="video/mp4">
+                {% if current_lesson_locked %}
+                    <div class="video-locked">
+                        <i class="fas fa-lock d-block"></i>
+                        <p>{% trans "购买课程后即可观看本课时" %}</p>
+                        <button class="btn-enroll" onclick="buyNowCourse()"><i class="fas fa-bolt"></i> {% trans "立即报名" %}</button>
+                    </div>
+                {% elif current_lesson_source %}
+                    {% if current_lesson_source.type == 'file' %}
+                    <video id="lessonVideo" controls playsinline style="width:100%;height:100%;background:#000;" controlsList="nodownload">
+                        <source src="{{ current_lesson_source.url }}" type="video/mp4">
                         {% trans "您的浏览器不支持视频播放" %}
                     </video>
                     {% else %}
-                    <iframe src="{{ src.url }}" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture"></iframe>
+                    <iframe src="{{ current_lesson_source.url }}" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture"></iframe>
                     {% endif %}
+                    <button type="button" class="theater-toggle-btn" id="theaterToggleBtn" onclick="toggleTheaterMode()" title="{% trans '剧场模式' %}">
+                        <i class="fas fa-expand" id="theaterToggleIcon"></i>
+                    </button>
                 {% else %}
                 <div class="video-placeholder">
                     <i class="fas fa-play-circle d-block"></i>
                     <p>{% trans "选择课节开始学习" %}</p>
                 </div>
                 {% endif %}
-                {% endwith %}
+            </div>
             </div>
 
             <!-- Current Lesson Info -->
@@ -722,7 +814,11 @@
                 <div class="lesson-meta">
                     <i class="fas fa-clock"></i> {{ current_lesson.duration_minutes }} {% trans "分钟" %}
                     {% if current_lesson.is_free %}<span class="badge-free ms-2">{% trans "免费" %}</span>{% endif %}
-                    {% if current_lesson.pdf_file %}<span class="badge-pdf ms-2"><i class="fas fa-file-pdf me-1"></i>PDF</span>{% endif %}
+                    {% if current_lesson_locked %}<span class="badge-locked ms-2"><i class="fas fa-lock me-1"></i>{% trans "已锁定" %}</span>{% endif %}
+                    {% if current_lesson.pdf_file and not current_lesson_locked %}<span class="badge-pdf ms-2"><i class="fas fa-file-pdf me-1"></i>PDF</span>{% endif %}
+                    {% if current_lesson.video_file and not current_lesson_locked %}
+                    <a href="{% url 'marketplace:download_lesson' current_lesson.id %}" class="ms-2" style="font-size:0.78rem;color:var(--primary-color);text-decoration:none;font-weight:700;"><i class="fas fa-download me-1"></i>{% trans "下载视频" %}</a>
+                    {% endif %}
                 </div>
             </div>
             {% endif %}
@@ -733,7 +829,7 @@
                     <li class="nav-item">
                         <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#descTab">{% trans "课时描述" %}</button>
                     </li>
-                    {% if current_lesson and current_lesson.pdf_file %}
+                    {% if current_lesson and current_lesson.pdf_file and not current_lesson_locked %}
                     <li class="nav-item">
                         <button class="nav-link" data-bs-toggle="tab" data-bs-target="#pdfTab"><i class="fas fa-file-pdf me-1"></i>{% trans "课程PDF" %}</button>
                     </li>
@@ -750,7 +846,7 @@
                         <p class="text-muted">{% trans "本课暂无描述" %}</p>
                         {% endif %}
                     </div>
-                    {% if current_lesson and current_lesson.pdf_file %}
+                    {% if current_lesson and current_lesson.pdf_file and not current_lesson_locked %}
                     <div class="tab-pane fade" id="pdfTab">
                         <div class="pdf-viewer-container">
                             <div class="mb-3">
@@ -779,14 +875,42 @@
                     <div class="progress-bar-custom">
                         <div class="progress-bar-fill" id="progressBar" style="width:{{ progress_percent }}%;"></div>
                     </div>
+                    {% if remaining_minutes > 0 %}
+                    <div class="remaining-time-text"><i class="fas fa-hourglass-half"></i>{% blocktrans %}还剩 {{ remaining_minutes }} 分钟{% endblocktrans %}</div>
+                    {% endif %}
+                    {% if can_access_course %}
+                    <a href="{% url 'marketplace:download_course_bundle' course.slug %}" class="remaining-time-text d-block mt-1" style="color:#fff;text-decoration:underline;">
+                        <i class="fas fa-file-zipper"></i>{% trans "下载全部课时（离线观看）" %}
+                    </a>
+                    {% endif %}
                 </div>
                 <div class="playlist-body">
                     {% for section in sections %}
                     <div class="section-header">
                         <i class="fas fa-folder-open me-2"></i>{{ section.title }}
-                        <span style="float:right; font-weight:400; font-size:0.75rem;">{{ section.lessons.count }} {% trans "课节" %}</span>
+                        <span style="float:right; font-weight:400; font-size:0.75rem;">
+                            {% if can_access_course %}<a href="{% url 'marketplace:download_course_bundle' course.slug %}?section={{ section.id }}" style="color:inherit;" title="{% trans '下载本章节' %}"><i class="fas fa-download me-2"></i></a>{% endif %}
+                            {{ section.lessons.count }} {% trans "课节" %}
+                        </span>
                     </div>
                     {% for lesson in section.lessons.all %}
+                    {% if lesson.id in locked_lesson_ids %}
+                    <a href="javascript:void(0)" class="lesson-item locked" onclick="showLockedToast()">
+                        <div class="lesson-check">
+                            <i class="fas fa-check"></i>
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <div class="lesson-item-info">
+                            <div class="lesson-item-title">{{ lesson.title }}</div>
+                            <div class="lesson-item-meta">
+                                <i class="fas fa-clock"></i> {{ lesson.duration_minutes }}{% trans "分钟" %}
+                                <span class="lesson-item-badges ms-1">
+                                    <span class="badge-locked"><i class="fas fa-lock me-1"></i>{% trans "已锁定" %}</span>
+                                </span>
+                            </div>
+                        </div>
+                    </a>
+                    {% else %}
                     <a href="?lesson={{ lesson.id }}" class="lesson-item {% if current_lesson and current_lesson.id == lesson.id %}active{% endif %} {% if lesson.id in completed_ids %}completed{% endif %}">
                         <div class="lesson-check" onclick="event.preventDefault(); toggleComplete({{ lesson.id }}, this);">
                             <i class="fas fa-check"></i>
@@ -798,10 +922,12 @@
                                 <span class="lesson-item-badges ms-1">
                                     {% if lesson.is_free %}<span class="badge-free">{% trans "免费" %}</span>{% endif %}
                                     {% if lesson.pdf_file %}<span class="badge-pdf">PDF</span>{% endif %}
+                                    {% if lesson.video_file %}<a href="{% url 'marketplace:download_lesson' lesson.id %}" style="color:#94a3b8;" title="{% trans '下载' %}" onclick="event.stopPropagation();"><i class="fas fa-download"></i></a>{% endif %}
                                 </span>
                             </div>
                         </div>
                     </a>
+                    {% endif %}
                     {% endfor %}
                     {% empty %}
                     <div style="padding:40px 20px; text-align:center; color:#94a3b8;">
@@ -814,6 +940,18 @@
 
             <!-- Course Info Card -->
             <div class="course-info-card">
+                <div class="completion-ring-wrap">
+                    <svg class="completion-ring" viewBox="0 0 36 36">
+                        <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#e2e8f0" stroke-width="3"/>
+                        <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="url(#courseRingGrad)" stroke-width="3" stroke-dasharray="{{ progress_percent }}, 100"/>
+                        <defs><linearGradient id="courseRingGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f093fb"/><stop offset="100%" stop-color="#f5576c"/></linearGradient></defs>
+                        <text x="18" y="20.5" text-anchor="middle" font-size="9" font-weight="700" fill="#1e293b">{{ progress_percent }}%</text>
+                    </svg>
+                    <div>
+                        <div class="completion-ring-label">{% trans "学习进度" %}</div>
+                        <div class="completion-ring-sub">{{ completed_count }}/{{ total_lessons }} {% trans "已完成" %}</div>
+                    </div>
+                </div>
                 <img src="{{ course.get_image_url }}" alt="{{ course.title }}" class="course-cover">
 
                 <div class="mb-3">
@@ -911,15 +1049,32 @@ function showToast(msg, type){
     setTimeout(()=>{ t.style.display='none'; }, 3000);
 }
 
+function showLockedToast(){
+    showToast('{% trans "请先购买本课程后再观看该课时" %}', 'error');
+}
+
+function toggleTheaterMode(){
+    const layout = document.querySelector('.course-detail-layout');
+    const icon = document.getElementById('theaterToggleIcon');
+    if(!layout) return;
+    const on = layout.classList.toggle('theater-mode');
+    if(icon) icon.className = on ? 'fas fa-compress' : 'fas fa-expand';
+}
+
 function toggleComplete(lessonId, el){
     fetch("/marketplace/lesson/" + lessonId + "/toggle/", {
         method: 'POST',
         headers: {'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json'},
-    }).then(r=>r.json()).then(d=>{
+    }).then(r=>{
+        if(r.status === 403){ showLockedToast(); return null; }
+        return r.json();
+    }).then(d=>{
+        if(!d) return;
         if(d.success){
             const item = el.closest('.lesson-item');
             if(d.completed){
                 item.classList.add('completed');
+                showToast('{% trans "✓ 课时已完成" %}', 'success');
             } else {
                 item.classList.remove('completed');
             }
@@ -1025,6 +1180,17 @@ function mobileToggleWish() {
         }
     });
 }
+</script>
+<script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+<script>
+(function(){
+    if (typeof Plyr === 'undefined') return;
+    var opts = { controls: ['play-large','play','progress','current-time','mute','volume','settings','pip','fullscreen'], settings: ['speed'] };
+    var v1 = document.getElementById('lessonVideo');
+    if (v1) new Plyr(v1, opts);
+    var v2 = document.getElementById('lessonVideoMobile');
+    if (v2) new Plyr(v2, opts);
+})();
 </script>
 <script src="/static/js/listing_follow.js"></script>
 </div>
