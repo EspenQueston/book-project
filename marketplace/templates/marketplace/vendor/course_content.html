@@ -327,7 +327,7 @@ function deleteSection(id, name){
         .then(r=>r.json()).then(d=>{
             if(d.success){ location.reload(); }
             else { alert(d.message); }
-        });
+        }).catch(()=> alert('操作失败'));
     }, { danger: true });
 }
 
@@ -438,7 +438,7 @@ function deleteLesson(id, name){
         .then(r=>r.json()).then(d=>{
             if(d.success){ location.reload(); }
             else { alert(d.message); }
-        });
+        }).catch(()=> alert('操作失败'));
     }, { danger: true });
 }
 </script>
