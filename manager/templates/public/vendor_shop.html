@@ -44,8 +44,17 @@
 .vs-follow-btn:hover { background: rgba(255,255,255,0.15); transform: translateY(-2px); }
 .vs-follow-btn.following { background: rgba(255,255,255,0.2); }
 .vs-meta-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; align-items: center; }
-.vs-meta-pills .v-badge { box-shadow: 0 4px 14px rgba(0,0,0,0.15); }
-.vs-meta-pills .v-badge-approved { background: rgba(255,255,255,0.2); color: #fff; border-color: rgba(255,255,255,0.35); }
+.vs-meta-pills .v-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 14px; border-radius: 999px; font-size: 0.78rem; font-weight: 700;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+}
+/* Official/certified badges need their own solid, high-contrast color —
+   without this they inherit no background at all on the dark blue header
+   and become nearly invisible plain text. */
+.vs-meta-pills .v-badge-official { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #1e293b; }
+.vs-meta-pills .v-badge-certified { background: linear-gradient(135deg, #38bdf8, #6366f1); color: #fff; }
+.vs-meta-pills .v-badge-approved { background: rgba(255,255,255,0.2); color: #fff; border: 1px solid rgba(255,255,255,0.35); }
 .vs-meta-pill {
     background: rgba(255,255,255,0.12); backdrop-filter: blur(8px);
     padding: 5px 14px; border-radius: 20px; font-size: 0.8rem; color: #fff;
@@ -148,12 +157,14 @@
 
 /* ===== Contact Vendor btn ===== */
 .vs-contact-btn {
-    display: block; width: 100%; padding: 12px; border-radius: 12px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    width: 100%; padding: 12px; border-radius: 12px;
     background: linear-gradient(135deg, #f59e0b, #f97316); color: #fff;
     text-align: center; font-weight: 700; text-decoration: none;
-    transition: all 0.3s; border: none; font-size: 0.9rem;
+    transition: all 0.3s; border: none; font-size: 0.9rem; white-space: nowrap;
+    box-shadow: 0 4px 14px rgba(245,158,11,0.3);
 }
-.vs-contact-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245,158,11,0.35); color: #fff; }
+.vs-contact-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245,158,11,0.45); color: #fff; }
 
 /* ===== Dark Mode ===== */
 html[data-theme="dark"] .vs-card {

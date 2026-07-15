@@ -6470,3 +6470,59 @@ msgstr "Switch to dark mode"
 msgid "切换亮色模式"
 msgstr "Switch to light mode"
 
+
+#: marketplace/templates/marketplace/course_detail.html
+msgid "购买课程后即可观看本课时"
+msgstr "Purchase this course to watch this lesson"
+
+#: marketplace/templates/marketplace/course_detail.html
+msgid "已锁定"
+msgstr "Locked"
+
+#: marketplace/templates/marketplace/course_detail.html
+msgid "下载视频"
+msgstr "Download video"
+
+#: marketplace/templates/marketplace/course_detail.html
+msgid "还剩 %(remaining_minutes)s 分钟"
+msgstr "%(remaining_minutes)s minutes remaining"
+
+#: marketplace/templates/marketplace/course_detail.html
+msgid "下载全部课时（离线观看）"
+msgstr "Download all lessons (watch offline)"
+
+#: marketplace/templates/marketplace/course_detail.html
+msgid "下载本章节"
+msgstr "Download this section"
+
+#: marketplace/templates/marketplace/course_detail.html
+msgid "学习进度"
+msgstr "Progress"
+
+#: marketplace/templates/marketplace/course_detail.html
+msgid "请先购买本课程后再观看该课时"
+msgstr "Please purchase this course first to watch this lesson"
+
+#: marketplace/templates/marketplace/course_detail.html
+msgid "✓ 课时已完成"
+msgstr "✓ Lesson completed"
+
+#: marketplace/views.py
+msgid "请先购买本课程"
+msgstr "Please purchase this course first"
+
+#: marketplace/views.py
+msgid "请先购买本课程后再查看该文件"
+msgstr "Please purchase this course first to view this file"
+
+#: marketplace/views.py
+msgid "请先购买本课程后再下载该文件"
+msgstr "Please purchase this course first to download this file"
+
+#: marketplace/views.py
+msgid "本课时为外部视频链接，无法打包下载，请在线观看："
+msgstr "This lesson is an external video link and can't be bundled for download — please watch it online: "
+
+#: marketplace/views.py
+msgid "请先购买本课程后再下载课程内容"
+msgstr "Please purchase this course first to download its content"

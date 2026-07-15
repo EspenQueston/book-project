@@ -6508,3 +6508,59 @@ msgstr "Passer en mode sombre"
 msgid "切换亮色模式"
 msgstr "Passer en mode clair"
 
+
+#: marketplace/templates/marketplace/course_detail.html
+msgid "购买课程后即可观看本课时"
+msgstr "Achetez ce cours pour regarder cette leçon"
+
+#: marketplace/templates/marketplace/course_detail.html
+msgid "已锁定"
+msgstr "Verrouillé"
+
+#: marketplace/templates/marketplace/course_detail.html
+msgid "下载视频"
+msgstr "Télécharger la vidéo"
+
+#: marketplace/templates/marketplace/course_detail.html
+msgid "还剩 %(remaining_minutes)s 分钟"
+msgstr "Il reste %(remaining_minutes)s minutes"
+
+#: marketplace/templates/marketplace/course_detail.html
+msgid "下载全部课时（离线观看）"
+msgstr "Télécharger toutes les leçons (voir hors ligne)"
+
+#: marketplace/templates/marketplace/course_detail.html
+msgid "下载本章节"
+msgstr "Télécharger cette section"
+
+#: marketplace/templates/marketplace/course_detail.html
+msgid "学习进度"
+msgstr "Progression"
+
+#: marketplace/templates/marketplace/course_detail.html
+msgid "请先购买本课程后再观看该课时"
+msgstr "Veuillez d'abord acheter ce cours pour regarder cette leçon"
+
+#: marketplace/templates/marketplace/course_detail.html
+msgid "✓ 课时已完成"
+msgstr "✓ Leçon terminée"
+
+#: marketplace/views.py
+msgid "请先购买本课程"
+msgstr "Veuillez d'abord acheter ce cours"
+
+#: marketplace/views.py
+msgid "请先购买本课程后再查看该文件"
+msgstr "Veuillez d'abord acheter ce cours pour consulter ce fichier"
+
+#: marketplace/views.py
+msgid "请先购买本课程后再下载该文件"
+msgstr "Veuillez d'abord acheter ce cours pour télécharger ce fichier"
+
+#: marketplace/views.py
+msgid "本课时为外部视频链接，无法打包下载，请在线观看："
+msgstr "Cette leçon est un lien vidéo externe et ne peut pas être téléchargée — veuillez la regarder en ligne : "
+
+#: marketplace/views.py
+msgid "请先购买本课程后再下载课程内容"
+msgstr "Veuillez d'abord acheter ce cours pour télécharger son contenu"

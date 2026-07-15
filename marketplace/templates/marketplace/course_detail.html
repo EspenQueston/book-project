@@ -131,6 +131,28 @@
     .remaining-time-text { font-size: 0.78rem; opacity: 0.9; margin-top: 6px; }
     .remaining-time-text i { margin-right: 4px; }
 
+    /* Course-wide download button — a clearly visible white pill against
+       the pink/red playlist header, not a small underlined text link. */
+    .playlist-download-btn {
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        margin-top: 14px; padding: 11px 16px; border-radius: 12px;
+        background: #fff; color: #f5576c; font-weight: 700; font-size: 0.85rem;
+        text-decoration: none; transition: all 0.25s;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+    }
+    .playlist-download-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.22); color: #f5576c; }
+    .playlist-download-btn i { font-size: 0.95rem; }
+
+    .section-header-right { display: flex; align-items: center; gap: 10px; float: right; font-weight: 400; font-size: 0.75rem; }
+    .section-download-btn {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 26px; height: 26px; border-radius: 50%;
+        background: rgba(29,78,216,0.08); color: var(--primary-color);
+        transition: all 0.2s;
+    }
+    .section-download-btn:hover { background: rgba(29,78,216,0.18); transform: scale(1.08); }
+    html[data-theme="dark"] .section-download-btn { background: rgba(255,255,255,0.08); color: var(--text-secondary); }
+
     /* Course Info Sidebar */
     .course-info-card {
         background: #fff; border-radius: 20px; padding: 28px;
@@ -879,7 +901,7 @@
                     <div class="remaining-time-text"><i class="fas fa-hourglass-half"></i>{% blocktrans %}还剩 {{ remaining_minutes }} 分钟{% endblocktrans %}</div>
                     {% endif %}
                     {% if can_access_course %}
-                    <a href="{% url 'marketplace:download_course_bundle' course.slug %}" class="remaining-time-text d-block mt-1" style="color:#fff;text-decoration:underline;">
+                    <a href="{% url 'marketplace:download_course_bundle' course.slug %}" class="playlist-download-btn">
                         <i class="fas fa-file-zipper"></i>{% trans "下载全部课时（离线观看）" %}
                     </a>
                     {% endif %}
@@ -888,9 +910,9 @@
                     {% for section in sections %}
                     <div class="section-header">
                         <i class="fas fa-folder-open me-2"></i>{{ section.title }}
-                        <span style="float:right; font-weight:400; font-size:0.75rem;">
-                            {% if can_access_course %}<a href="{% url 'marketplace:download_course_bundle' course.slug %}?section={{ section.id }}" style="color:inherit;" title="{% trans '下载本章节' %}"><i class="fas fa-download me-2"></i></a>{% endif %}
-                            {{ section.lessons.count }} {% trans "课节" %}
+                        <span class="section-header-right">
+                            {% if can_access_course %}<a href="{% url 'marketplace:download_course_bundle' course.slug %}?section={{ section.id }}" class="section-download-btn" title="{% trans '下载本章节' %}"><i class="fas fa-download"></i></a>{% endif %}
+                            <span class="section-lesson-count">{{ section.lessons.count }} {% trans "课节" %}</span>
                         </span>
                     </div>
                     {% for lesson in section.lessons.all %}
