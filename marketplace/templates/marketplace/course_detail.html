@@ -99,7 +99,7 @@
         width: 24px; height: 24px; border-radius: 50%;
         border: 2px solid #d1d5db; display: flex; align-items: center;
         justify-content: center; flex-shrink: 0; font-size: 0.7rem;
-        transition: all 0.2s;
+        transition: all 0.2s; cursor: default;
     }
     .lesson-check i { display: none; }
     .lesson-item.completed .lesson-check i { display: block; }
@@ -204,6 +204,14 @@
     }
     .tab-content { padding: 20px 0; }
     .desc-text { line-height: 1.8; color: #475569; font-size: 0.92rem; }
+    .lesson-resource-link {
+        display: inline-flex; align-items: center; gap: 6px; margin-top: 14px;
+        padding: 9px 16px; border-radius: 10px; background: rgba(29,78,216,0.08);
+        color: var(--primary-color); font-weight: 700; font-size: 0.85rem;
+        text-decoration: none; transition: all 0.2s;
+    }
+    .lesson-resource-link:hover { background: rgba(29,78,216,0.15); color: var(--primary-color); }
+    html[data-theme="dark"] .lesson-resource-link { background: rgba(255,255,255,0.08); color: var(--text-secondary); }
 
     .pdf-viewer-container {
         background: #f8fafc; border-radius: 12px; padding: 20px;
@@ -664,6 +672,11 @@
             {% if current_lesson.description %}
             <div class="cmv-lesson-desc">{{ current_lesson.description|linebreaksbr }}</div>
             {% endif %}
+            {% if current_lesson.resource_file and not current_lesson_locked %}
+            <a href="{% url 'marketplace:download_lesson_resource' current_lesson.id %}" class="lesson-resource-link">
+                <i class="fas fa-paperclip me-1"></i>{% trans "下载附件" %}: {{ current_lesson.resource_file.name|cut:"marketplace/course_resources/" }}
+            </a>
+            {% endif %}
         </div>
         {% endif %}
     </div>
@@ -867,6 +880,11 @@
                         {% else %}
                         <p class="text-muted">{% trans "本课暂无描述" %}</p>
                         {% endif %}
+                        {% if current_lesson.resource_file and not current_lesson_locked %}
+                        <a href="{% url 'marketplace:download_lesson_resource' current_lesson.id %}" class="lesson-resource-link">
+                            <i class="fas fa-paperclip me-1"></i>{% trans "下载附件" %}: {{ current_lesson.resource_file.name|cut:"marketplace/course_resources/" }}
+                        </a>
+                        {% endif %}
                     </div>
                     {% if current_lesson and current_lesson.pdf_file and not current_lesson_locked %}
                     <div class="tab-pane fade" id="pdfTab">
@@ -933,8 +951,8 @@
                         </div>
                     </a>
                     {% else %}
-                    <a href="?lesson={{ lesson.id }}" class="lesson-item {% if current_lesson and current_lesson.id == lesson.id %}active{% endif %} {% if lesson.id in completed_ids %}completed{% endif %}">
-                        <div class="lesson-check" onclick="event.preventDefault(); toggleComplete({{ lesson.id }}, this);">
+                    <a href="?lesson={{ lesson.id }}" class="lesson-item {% if current_lesson and current_lesson.id == lesson.id %}active{% endif %} {% if lesson.id in completed_ids %}completed{% endif %}" data-lesson-id="{{ lesson.id }}">
+                        <div class="lesson-check" title="{% trans '观看完成后自动标记' %}">
                             <i class="fas fa-check"></i>
                         </div>
                         <div class="lesson-item-info">
@@ -1083,27 +1101,30 @@ function toggleTheaterMode(){
     if(icon) icon.className = on ? 'fas fa-compress' : 'fas fa-expand';
 }
 
-function toggleComplete(lessonId, el){
+// Completion is automatic, driven by actual watch progress — never a
+// manual click. COMPLETED_LESSON_IDS guards against re-firing the toggle
+// endpoint (which flips state) once a lesson is already marked done, e.g.
+// if a video's "ended" event fires again on replay.
+var COMPLETED_LESSON_IDS = new Set([{% for id in completed_ids %}{{ id }}{% if not forloop.last %},{% endif %}{% endfor %}]);
+
+function autoMarkLessonComplete(lessonId){
+    if (!lessonId || COMPLETED_LESSON_IDS.has(lessonId)) return;
     fetch("/marketplace/lesson/" + lessonId + "/toggle/", {
         method: 'POST',
         headers: {'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json'},
-    }).then(r=>{
-        if(r.status === 403){ showLockedToast(); return null; }
-        return r.json();
-    }).then(d=>{
-        if(!d) return;
-        if(d.success){
-            const item = el.closest('.lesson-item');
-            if(d.completed){
-                item.classList.add('completed');
-                showToast('{% trans "✓ 课时已完成" %}', 'success');
-            } else {
-                item.classList.remove('completed');
-            }
-            document.getElementById('progressText').textContent = d.completed_count + '/' + d.total_lessons + ' {% trans "已完成" %}';
-            document.getElementById('progressBar').style.width = d.progress_percent + '%';
-        }
-    }).catch(()=> showToast('{% trans "操作失败" %}', 'error'));
+    }).then(function(r){
+        return r.status === 403 ? null : r.json();
+    }).then(function(d){
+        if(!d || !d.success || !d.completed) return;
+        COMPLETED_LESSON_IDS.add(lessonId);
+        var item = document.querySelector('.lesson-item[data-lesson-id="' + lessonId + '"]');
+        if(item) item.classList.add('completed');
+        showToast('{% trans "✓ 课时已完成" %}', 'success');
+        var progressText = document.getElementById('progressText');
+        var progressBar = document.getElementById('progressBar');
+        if(progressText) progressText.textContent = d.completed_count + '/' + d.total_lessons + ' {% trans "已完成" %}';
+        if(progressBar) progressBar.style.width = d.progress_percent + '%';
+    }).catch(function(){});
 }
 
 function addCourseToCart(){
@@ -1208,10 +1229,17 @@ function mobileToggleWish() {
 (function(){
     if (typeof Plyr === 'undefined') return;
     var opts = { controls: ['play-large','play','progress','current-time','mute','volume','settings','pip','fullscreen'], settings: ['speed'] };
+    var currentLessonId = {{ current_lesson.id|default:"null" }};
     var v1 = document.getElementById('lessonVideo');
-    if (v1) new Plyr(v1, opts);
+    if (v1) {
+        var player1 = new Plyr(v1, opts);
+        player1.on('ended', function(){ autoMarkLessonComplete(currentLessonId); });
+    }
     var v2 = document.getElementById('lessonVideoMobile');
-    if (v2) new Plyr(v2, opts);
+    if (v2) {
+        var player2 = new Plyr(v2, opts);
+        player2.on('ended', function(){ autoMarkLessonComplete(currentLessonId); });
+    }
 })();
 </script>
 <script src="/static/js/listing_follow.js"></script>

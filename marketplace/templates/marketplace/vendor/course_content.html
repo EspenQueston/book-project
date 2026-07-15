@@ -220,6 +220,18 @@
                             </div>
                         </div>
                     </div>
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold"><i class="fas fa-paperclip me-1" style="color:#1d4ed8;"></i>课时附件（可下载）</label>
+                            <input type="file" id="lessonResourceFile" name="resource_file" class="form-control" style="border-radius:10px;">
+                            <div class="upload-info">任意文件类型 — 用户可在课时说明中下载</div>
+                            <div class="file-current" id="currentResourceFile" style="display:none;"></div>
+                            <div class="form-check mt-1" id="clearResourceGroup" style="display:none;">
+                                <input type="checkbox" class="form-check-input" id="clearResourceFile" name="clear_resource_file" value="1">
+                                <label class="form-check-label" for="clearResourceFile" style="font-size:0.8rem;">删除当前附件</label>
+                            </div>
+                        </div>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -247,6 +259,7 @@ const lessonDataCache = {
         video_url: '{{ lesson.video_url|escapejs }}',
         video_file_name: '{{ lesson.video_file.name|default:""|escapejs }}',
         pdf_file_name: '{{ lesson.pdf_file.name|default:""|escapejs }}',
+        resource_file_name: '{{ lesson.resource_file.name|default:""|escapejs }}',
         duration_minutes: {{ lesson.duration_minutes }},
         order: {{ lesson.order }},
         is_free: {{ lesson.is_free|yesno:"true,false" }},
@@ -341,6 +354,7 @@ function showAddLessonModal(sectionId, sectionTitle){
     document.getElementById('lessonVideoUrl').value = '';
     document.getElementById('lessonVideoFile').value = '';
     document.getElementById('lessonPdfFile').value = '';
+    document.getElementById('lessonResourceFile').value = '';
     document.getElementById('lessonDuration').value = '0';
     document.getElementById('lessonOrder').value = '0';
     document.getElementById('lessonIsFree').checked = false;
@@ -348,6 +362,8 @@ function showAddLessonModal(sectionId, sectionTitle){
     document.getElementById('clearVideoGroup').style.display = 'none';
     document.getElementById('currentPdfFile').style.display = 'none';
     document.getElementById('clearPdfGroup').style.display = 'none';
+    document.getElementById('currentResourceFile').style.display = 'none';
+    document.getElementById('clearResourceGroup').style.display = 'none';
     document.getElementById('lessonModalTitle').innerHTML = `<i class="fas fa-plus-circle me-2"></i>添加课时 - ${sectionTitle}`;
     bootstrap.Modal.getOrCreateInstance(document.getElementById('lessonModal')).show();
 }
@@ -363,6 +379,7 @@ function showEditLessonModal(lessonId, sectionId){
     document.getElementById('lessonVideoUrl').value = data.video_url;
     document.getElementById('lessonVideoFile').value = '';
     document.getElementById('lessonPdfFile').value = '';
+    document.getElementById('lessonResourceFile').value = '';
     document.getElementById('lessonDuration').value = data.duration_minutes;
     document.getElementById('lessonOrder').value = data.order;
     document.getElementById('lessonIsFree').checked = data.is_free;
@@ -384,6 +401,15 @@ function showEditLessonModal(lessonId, sectionId){
         cpg.style.display = 'block';
         document.getElementById('clearPdfFile').checked = false;
     } else { cpf.style.display = 'none'; cpg.style.display = 'none'; }
+
+    const crf = document.getElementById('currentResourceFile');
+    const crg = document.getElementById('clearResourceGroup');
+    if(data.resource_file_name){
+        crf.innerHTML = '<i class="fas fa-paperclip"></i> ' + data.resource_file_name.split('/').pop();
+        crf.style.display = 'block';
+        crg.style.display = 'block';
+        document.getElementById('clearResourceFile').checked = false;
+    } else { crf.style.display = 'none'; crg.style.display = 'none'; }
 
     document.getElementById('lessonModalTitle').innerHTML = '<i class="fas fa-edit me-2"></i>编辑课时';
     bootstrap.Modal.getOrCreateInstance(document.getElementById('lessonModal')).show();

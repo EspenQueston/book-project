@@ -1318,6 +1318,20 @@ def download_lesson(request, lesson_id):
     return response
 
 
+def download_lesson_resource(request, lesson_id):
+    """Download a lesson's attached resource file (any file type, uploaded
+    by the vendor/admin as supplementary material — slides, source code,
+    datasets, etc.), distinct from the lesson's own video/PDF."""
+    lesson = get_object_or_404(CourseLesson, pk=lesson_id)
+    if not user_can_access_lesson(request, lesson):
+        return HttpResponseForbidden(_('请先购买本课程后再下载该文件'))
+    if not lesson.resource_file:
+        raise Http404('No resource file for this lesson')
+    filename = lesson.resource_file.name.split('/')[-1]
+    response = FileResponse(lesson.resource_file.open('rb'), as_attachment=True, filename=filename)
+    return response
+
+
 def _write_lesson_to_zip(zf, lesson):
     """Add one lesson's downloadable content to an open ZipFile."""
     base = f'{lesson.order:02d}_{slugify(lesson.title) or "lesson"}'
@@ -1330,6 +1344,10 @@ def _write_lesson_to_zip(zf, lesson):
     if lesson.pdf_file:
         with lesson.pdf_file.open('rb') as f:
             zf.writestr(f'{base}.pdf', f.read())
+    if lesson.resource_file:
+        resource_name = lesson.resource_file.name.split('/')[-1]
+        with lesson.resource_file.open('rb') as f:
+            zf.writestr(f'{base}_{resource_name}', f.read())
 
 
 def download_course_bundle(request, slug):
@@ -1886,6 +1904,8 @@ def admin_lesson_add(request, section_pk):
         lesson.video_file = request.FILES['video_file']
     if 'pdf_file' in request.FILES:
         lesson.pdf_file = request.FILES['pdf_file']
+    if 'resource_file' in request.FILES:
+        lesson.resource_file = request.FILES['resource_file']
     lesson.save()
 
     return JsonResponse({
@@ -1898,6 +1918,7 @@ def admin_lesson_add(request, section_pk):
             'is_free': lesson.is_free,
             'has_video': bool(lesson.video_file or lesson.video_url),
             'has_pdf': bool(lesson.pdf_file),
+            'has_resource': bool(lesson.resource_file),
         }
     })
 
@@ -1937,6 +1958,10 @@ def admin_lesson_edit(request, pk):
         lesson.pdf_file = request.FILES['pdf_file']
     if request.POST.get('clear_pdf_file') == '1':
         lesson.pdf_file = None
+    if 'resource_file' in request.FILES:
+        lesson.resource_file = request.FILES['resource_file']
+    if request.POST.get('clear_resource_file') == '1':
+        lesson.resource_file = None
     lesson.save()
 
     return JsonResponse({'success': True, 'message': f'课时 "{title}" 已更新'})
@@ -3215,6 +3240,8 @@ def vendor_lesson_add(request, section_pk):
         lesson.video_file = request.FILES['video_file']
     if 'pdf_file' in request.FILES:
         lesson.pdf_file = request.FILES['pdf_file']
+    if 'resource_file' in request.FILES:
+        lesson.resource_file = request.FILES['resource_file']
     lesson.save()
     return JsonResponse({
         'success': True, 'message': f'课时 "{title}" 已添加',
@@ -3223,6 +3250,7 @@ def vendor_lesson_add(request, section_pk):
             'duration_minutes': lesson.duration_minutes, 'is_free': lesson.is_free,
             'has_video': bool(lesson.video_file or lesson.video_url),
             'has_pdf': bool(lesson.pdf_file),
+            'has_resource': bool(lesson.resource_file),
         }
     })
 
@@ -3257,6 +3285,10 @@ def vendor_lesson_edit(request, pk):
         lesson.pdf_file = request.FILES['pdf_file']
     if request.POST.get('clear_pdf_file') == '1':
         lesson.pdf_file = None
+    if 'resource_file' in request.FILES:
+        lesson.resource_file = request.FILES['resource_file']
+    if request.POST.get('clear_resource_file') == '1':
+        lesson.resource_file = None
     lesson.save()
     return JsonResponse({'success': True, 'message': f'课时 "{title}" 已更新'})
 

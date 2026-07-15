@@ -6572,3 +6572,11 @@ msgstr "Contenu"
 #: marketplace/templates/marketplace/vendor/products.html
 msgid "查看前台"
 msgstr "Voir sur la boutique"
+
+#: marketplace/templates/marketplace/course_detail.html
+msgid "观看完成后自动标记"
+msgstr "Marqué automatiquement après visionnage"
+
+#: marketplace/templates/marketplace/course_detail.html
+msgid "下载附件"
+msgstr "Télécharger la pièce jointe"

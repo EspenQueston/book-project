@@ -29,6 +29,7 @@ urlpatterns = [
     path('lesson/<int:lesson_id>/toggle/', views.toggle_lesson_complete, name='toggle_lesson_complete'),
     path('lesson/<int:lesson_id>/pdf/', views.serve_lesson_pdf, name='serve_lesson_pdf'),
     path('lesson/<int:lesson_id>/download/', views.download_lesson, name='download_lesson'),
+    path('lesson/<int:lesson_id>/download-resource/', views.download_lesson_resource, name='download_lesson_resource'),
     path('courses/<slug:slug>/download/', views.download_course_bundle, name='download_course_bundle'),
 
     # Admin management

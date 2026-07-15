@@ -741,6 +741,7 @@ class CourseLesson(models.Model):
     order = models.PositiveIntegerField(default=0, verbose_name='排序')
     is_free = models.BooleanField(default=False, verbose_name='免费试看')
     pdf_file = models.FileField(upload_to='marketplace/course_pdfs/', blank=True, null=True, verbose_name='PDF文件')
+    resource_file = models.FileField(upload_to='marketplace/course_resources/', blank=True, null=True, verbose_name='课时附件')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
