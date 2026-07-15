@@ -141,7 +141,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">取消</button>
-                <button type="button" class="btn btn-primary-gradient px-4" onclick="saveSection()"><i class="fas fa-save me-1"></i>保存</button>
+                <button type="button" id="sectionSaveBtn" class="btn btn-primary-gradient px-4" onclick="saveSection()"><i class="fas fa-save me-1"></i>保存</button>
             </div>
         </div>
     </div>
@@ -263,7 +263,7 @@ function showAddSectionModal(){
     document.getElementById('sectionTitleEn').value = '';
     document.getElementById('sectionOrderGroup').style.display = 'none';
     document.getElementById('sectionModalTitle').innerHTML = '<i class="fas fa-folder-plus me-2"></i>添加章节';
-    new bootstrap.Modal(document.getElementById('sectionModal')).show();
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('sectionModal')).show();
 }
 function showEditSectionModal(id, title, titleEn, order){
     document.getElementById('sectionId').value = id;
@@ -272,9 +272,12 @@ function showEditSectionModal(id, title, titleEn, order){
     document.getElementById('sectionOrder').value = order;
     document.getElementById('sectionOrderGroup').style.display = 'block';
     document.getElementById('sectionModalTitle').innerHTML = '<i class="fas fa-edit me-2"></i>编辑章节';
-    new bootstrap.Modal(document.getElementById('sectionModal')).show();
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('sectionModal')).show();
 }
 function saveSection(){
+    const saveBtn = document.getElementById('sectionSaveBtn');
+    if(saveBtn.disabled) return; // already saving — ignore a double-click instead of firing a second request
+
     const id = document.getElementById('sectionId').value;
     const title = document.getElementById('sectionTitle').value.trim();
     const titleEn = document.getElementById('sectionTitleEn').value.trim();
@@ -293,11 +296,28 @@ function saveSection(){
         url = `/marketplace/vendor/courses/${COURSE_PK}/sections/add/`;
     }
 
-    fetch(url, {method:'POST', body:fd})
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>保存中...';
+
+    // A hung request (dropped connection, dev-server autoreload, etc.) would
+    // otherwise leave the modal open with no way out but a hard refresh —
+    // this guarantees the button re-enables and the modal stays usable.
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    const resetButton = () => {
+        clearTimeout(timeoutId);
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '<i class="fas fa-save me-1"></i>保存';
+    };
+
+    fetch(url, {method:'POST', body:fd, signal: controller.signal})
     .then(r=>r.json()).then(d=>{
         if(d.success){ location.reload(); }
-        else { alert(d.message); }
-    }).catch(()=>alert('操作失败'));
+        else { resetButton(); alert(d.message); }
+    }).catch((err)=>{
+        resetButton();
+        alert(err.name === 'AbortError' ? '{% trans "请求超时，请重试" %}' : '操作失败');
+    });
 }
 function deleteSection(id, name){
     gConfirmAction('{% trans "Delete this section and all its lessons?" %}', function() {
@@ -329,7 +349,7 @@ function showAddLessonModal(sectionId, sectionTitle){
     document.getElementById('currentPdfFile').style.display = 'none';
     document.getElementById('clearPdfGroup').style.display = 'none';
     document.getElementById('lessonModalTitle').innerHTML = `<i class="fas fa-plus-circle me-2"></i>添加课时 - ${sectionTitle}`;
-    new bootstrap.Modal(document.getElementById('lessonModal')).show();
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('lessonModal')).show();
 }
 function showEditLessonModal(lessonId, sectionId){
     const data = lessonDataCache[lessonId];
@@ -366,9 +386,12 @@ function showEditLessonModal(lessonId, sectionId){
     } else { cpf.style.display = 'none'; cpg.style.display = 'none'; }
 
     document.getElementById('lessonModalTitle').innerHTML = '<i class="fas fa-edit me-2"></i>编辑课时';
-    new bootstrap.Modal(document.getElementById('lessonModal')).show();
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('lessonModal')).show();
 }
 function saveLesson(){
+    const saveBtn = document.getElementById('saveLessonBtn');
+    if(saveBtn.disabled) return; // already saving — ignore a double-click instead of firing a second request
+
     const id = document.getElementById('lessonId').value;
     const sectionId = document.getElementById('lessonSectionId').value;
     const title = document.getElementById('lessonTitle').value.trim();
@@ -384,21 +407,27 @@ function saveLesson(){
         url = `/marketplace/vendor/courses/sections/${sectionId}/lessons/add/`;
     }
 
-    document.getElementById('saveLessonBtn').disabled = true;
-    document.getElementById('saveLessonBtn').innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>保存中...';
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>保存中...';
 
-    fetch(url, {method:'POST', body:fd})
+    // A hung upload (large video file, dropped connection, dev-server
+    // autoreload, etc.) would otherwise leave the modal open with no way
+    // out but a hard refresh — this guarantees the button re-enables.
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000); // generous: video uploads take longer than a text save
+    const resetButton = () => {
+        clearTimeout(timeoutId);
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '<i class="fas fa-save me-1"></i>保存';
+    };
+
+    fetch(url, {method:'POST', body:fd, signal: controller.signal})
     .then(r=>r.json()).then(d=>{
         if(d.success){ location.reload(); }
-        else {
-            alert(d.message);
-            document.getElementById('saveLessonBtn').disabled = false;
-            document.getElementById('saveLessonBtn').innerHTML = '<i class="fas fa-save me-1"></i>保存';
-        }
-    }).catch(()=>{
-        alert('操作失败');
-        document.getElementById('saveLessonBtn').disabled = false;
-        document.getElementById('saveLessonBtn').innerHTML = '<i class="fas fa-save me-1"></i>保存';
+        else { resetButton(); alert(d.message); }
+    }).catch((err)=>{
+        resetButton();
+        alert(err.name === 'AbortError' ? '{% trans "请求超时，请重试" %}' : '操作失败');
     });
 }
 function deleteLesson(id, name){

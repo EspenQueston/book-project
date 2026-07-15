@@ -6564,3 +6564,11 @@ msgstr "Cette leçon est un lien vidéo externe et ne peut pas être télécharg
 #: marketplace/views.py
 msgid "请先购买本课程后再下载课程内容"
 msgstr "Veuillez d'abord acheter ce cours pour télécharger son contenu"
+
+#: marketplace/templates/marketplace/vendor/courses.html
+msgid "内容"
+msgstr "Contenu"
+
+#: marketplace/templates/marketplace/vendor/products.html
+msgid "查看前台"
+msgstr "Voir sur la boutique"

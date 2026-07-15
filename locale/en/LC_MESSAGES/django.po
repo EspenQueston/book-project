@@ -6526,3 +6526,11 @@ msgstr "This lesson is an external video link and can't be bundled for download 
 #: marketplace/views.py
 msgid "请先购买本课程后再下载课程内容"
 msgstr "Please purchase this course first to download its content"
+
+#: marketplace/templates/marketplace/vendor/courses.html
+msgid "内容"
+msgstr "Content"
+
+#: marketplace/templates/marketplace/vendor/products.html
+msgid "查看前台"
+msgstr "View on storefront"
