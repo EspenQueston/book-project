@@ -9,6 +9,15 @@
     <title>{% block title %}DUNO 360{% endblock %}</title>
     <link rel="icon" type="image/svg+xml" href="{% static 'img/duno360-favicon.svg' %}">
 
+    <!-- PWA: installable app (manifest + service worker are served same-origin, see book_Project/pwa_views.py) -->
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#14245f">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="DUNO 360">
+    <link rel="apple-touch-icon" href="{% static 'img/apple-touch-icon.png' %}">
+
     <!-- SEO — French (marché francophone : Congo). Pages may override og:title/description. -->
     <meta name="description" content="{% block meta_description %}{% trans 'DUNO 360 — la plateforme e-commerce tout-en-un au Congo : livres, cours en ligne, marketplace et supermarché frais. Achetez, apprenez et vendez en toute simplicité, paiement mobile money sécurisé.' %}{% endblock %}">
     <meta name="keywords" content="{% trans 'DUNO 360, e-commerce Congo, marketplace, livres, cours en ligne, supermarché, mobile money, Brazzaville, achat en ligne' %}">
@@ -2474,6 +2483,63 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             observer.observe(mainBadge, {childList: true, characterData: true, subtree: true});
         }
+    })();
+    </script>
+
+    <!-- PWA: install banner + service worker registration -->
+    <div id="pwaInstallBanner" style="display:none;position:fixed;left:16px;right:16px;bottom:76px;z-index:10000;background:linear-gradient(135deg,#14245f,#1d4ed8);color:#fff;border-radius:18px;padding:14px 16px;box-shadow:0 14px 40px rgba(2,6,23,.4);align-items:center;gap:12px;max-width:430px;margin:0 auto;">
+        <img src="{% static 'img/pwa-icon-192.png' %}" alt="DUNO 360" style="width:44px;height:44px;border-radius:12px;flex-shrink:0;">
+        <div style="flex:1;min-width:0;">
+            <div style="font-weight:800;font-size:.92rem;" data-zh="安装 DUNO 360 应用" data-en="Install the DUNO 360 app" data-fr="Installez l'appli DUNO 360">Installez l'appli DUNO 360</div>
+            <div style="font-size:.75rem;opacity:.8;" data-zh="快速访问，可离线浏览" data-en="Quick access, works offline" data-fr="Accès rapide, fonctionne hors ligne">Accès rapide, fonctionne hors ligne</div>
+        </div>
+        <button id="pwaInstallBtn" type="button" style="border:none;border-radius:999px;padding:9px 18px;background:#fff;color:#14245f;font-weight:800;font-size:.82rem;cursor:pointer;white-space:nowrap;" data-zh="安装" data-en="Install" data-fr="Installer">Installer</button>
+        <button id="pwaInstallClose" type="button" aria-label="Close" style="border:none;background:transparent;color:rgba(255,255,255,.6);font-size:1.1rem;cursor:pointer;padding:4px;line-height:1;">&times;</button>
+    </div>
+    <script>
+    (function () {
+        if (!('serviceWorker' in navigator)) return;
+        window.addEventListener('load', function () {
+            navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+
+        // Custom install flow: Chrome/Edge/Android fire beforeinstallprompt;
+        // we stash it and show our own banner (once per week if dismissed).
+        var deferredPrompt = null;
+        var banner = document.getElementById('pwaInstallBanner');
+        var DISMISS_KEY = 'pwaInstallDismissedAt';
+
+        function dismissedRecently() {
+            var at = parseInt(localStorage.getItem(DISMISS_KEY) || '0', 10);
+            return at && (Date.now() - at) < 7 * 24 * 3600 * 1000;
+        }
+
+        window.addEventListener('beforeinstallprompt', function (e) {
+            e.preventDefault();
+            deferredPrompt = e;
+            if (banner && !dismissedRecently() &&
+                !window.matchMedia('(display-mode: standalone)').matches) {
+                banner.style.display = 'flex';
+            }
+        });
+
+        var installBtn = document.getElementById('pwaInstallBtn');
+        if (installBtn) installBtn.addEventListener('click', function () {
+            if (!deferredPrompt) return;
+            banner.style.display = 'none';
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.finally(function () { deferredPrompt = null; });
+        });
+
+        var closeBtn = document.getElementById('pwaInstallClose');
+        if (closeBtn) closeBtn.addEventListener('click', function () {
+            banner.style.display = 'none';
+            localStorage.setItem(DISMISS_KEY, String(Date.now()));
+        });
+
+        window.addEventListener('appinstalled', function () {
+            if (banner) banner.style.display = 'none';
+        });
     })();
     </script>
 </body>

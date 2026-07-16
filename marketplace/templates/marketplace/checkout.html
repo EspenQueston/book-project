@@ -86,28 +86,61 @@
     .summary-total { display: flex; justify-content: space-between; padding: 16px 0; border-top: 2px solid #f1f5f9; margin-top: 8px; }
     .summary-total span:last-child { font-size: 1.5rem; font-weight: 800; color: var(--danger-color); }
 
+    /* Donation card — charity-fintech style: heart badge, copy, switch on
+       the right, celebratory active state. Shared design with the book
+       checkout (ck-donation-*), keep the two in sync. */
     .mk-donation-card {
-        margin-top: 4px; border-radius: 14px; padding: 14px 16px;
-        background: linear-gradient(135deg, rgba(29,78,216,0.06), rgba(20,36,95,0.06));
-        border: 1.5px solid rgba(29,78,216,0.18);
+        margin-top: 4px; border-radius: 16px; padding: 16px;
+        background: linear-gradient(135deg, rgba(244,63,94,0.05), rgba(251,146,60,0.06));
+        border: 1.5px solid rgba(244,63,94,0.16);
+        position: relative; overflow: hidden;
+        transition: border-color .25s ease, box-shadow .25s ease;
     }
-    .mk-donation-toggle { display: flex; align-items: flex-start; gap: 12px; cursor: pointer; margin: 0; }
+    .mk-donation-card::before {
+        content: ''; position: absolute; top: -30px; right: -30px; width: 110px; height: 110px;
+        border-radius: 50%; background: radial-gradient(circle, rgba(244,63,94,0.10), transparent 70%);
+        pointer-events: none;
+    }
+    .mk-donation-card.active {
+        border-color: rgba(244,63,94,0.45);
+        box-shadow: 0 6px 22px rgba(244,63,94,0.12);
+    }
+    .mk-donation-toggle { display: flex; align-items: center; gap: 12px; cursor: pointer; margin: 0; }
     .mk-donation-toggle input[type="checkbox"] { position: absolute; opacity: 0; width: 0; height: 0; }
+    .mk-donation-heart {
+        flex: 0 0 auto; width: 42px; height: 42px; border-radius: 50%;
+        background: linear-gradient(135deg, #fb7185, #e11d48); color: #fff;
+        display: flex; align-items: center; justify-content: center; font-size: 1.05rem;
+        box-shadow: 0 4px 12px rgba(225,29,72,0.28);
+    }
+    .mk-donation-card.active .mk-donation-heart { animation: mkHeartBeat 1.1s ease-in-out infinite; }
+    @keyframes mkHeartBeat {
+        0%, 100% { transform: scale(1); }
+        12% { transform: scale(1.14); }
+        24% { transform: scale(1); }
+        36% { transform: scale(1.1); }
+        48% { transform: scale(1); }
+    }
+    .mk-donation-copy { min-width: 0; flex: 1; }
+    .mk-donation-title { display: flex; align-items: center; gap: 6px; font-weight: 800; font-size: 0.92rem; color: #1e293b; }
+    .mk-donation-badge {
+        font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+        background: rgba(244,63,94,0.12); color: #e11d48; padding: 2px 8px; border-radius: 999px;
+    }
+    .mk-donation-sub { display: block; font-size: 0.78rem; color: #94a3b8; margin-top: 3px; line-height: 1.45; }
+    .mk-donation-thanks { display: none; font-size: 0.75rem; font-weight: 700; color: #e11d48; margin-top: 4px; }
+    .mk-donation-card.active .mk-donation-thanks { display: block; }
     .mk-donation-switch {
-        flex: 0 0 auto; width: 42px; height: 24px; border-radius: 999px;
-        background: #cbd5e1; position: relative; transition: background .2s ease; margin-top: 2px;
+        flex: 0 0 auto; width: 46px; height: 26px; border-radius: 999px;
+        background: #cbd5e1; position: relative; transition: background .25s ease;
     }
     .mk-donation-switch::after {
-        content: ''; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px;
-        border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.25); transition: transform .2s ease;
+        content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px;
+        border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.25); transition: transform .25s ease;
     }
-    .mk-donation-toggle input:checked + .mk-donation-switch { background: linear-gradient(135deg, #14245f, #1d4ed8); }
-    .mk-donation-toggle input:checked + .mk-donation-switch::after { transform: translateX(18px); }
-    .mk-donation-copy { min-width: 0; }
-    .mk-donation-title { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.92rem; color: #1e293b; }
-    .mk-donation-title i { color: #ef4444; }
-    .mk-donation-sub { display: block; font-size: 0.78rem; color: #94a3b8; margin-top: 2px; line-height: 1.4; }
-    html[data-theme="dark"] .mk-donation-card { background: linear-gradient(135deg, rgba(29,78,216,0.12), rgba(20,36,95,0.12)); border-color: rgba(29,78,216,0.3); }
+    .mk-donation-toggle input:checked ~ .mk-donation-switch { background: linear-gradient(135deg, #fb7185, #e11d48); }
+    .mk-donation-toggle input:checked ~ .mk-donation-switch::after { transform: translateX(20px); }
+    html[data-theme="dark"] .mk-donation-card { background: linear-gradient(135deg, rgba(244,63,94,0.10), rgba(251,146,60,0.08)); border-color: rgba(244,63,94,0.28); }
     html[data-theme="dark"] .mk-donation-title { color: #e2e8f0; }
 
     .btn-pay {
@@ -355,14 +388,16 @@
                     <div class="mk-donation-card" id="mkDonationCard">
                         <label class="mk-donation-toggle" for="mkDonateCheckbox">
                             <input type="checkbox" id="mkDonateCheckbox" name="donate" value="yes">
-                            <span class="mk-donation-switch"></span>
+                            <span class="mk-donation-heart"><i class="fas fa-heart"></i></span>
                             <span class="mk-donation-copy">
                                 <span class="mk-donation-title">
-                                    <i class="fas fa-heart"></i>
                                     <span data-zh="Ajouter un don de {{ donation_amount|fcfa }}" data-en="Add a {{ donation_amount|fcfa }} donation" data-fr="Ajouter un don de {{ donation_amount|fcfa }}">Ajouter un don de {{ donation_amount|fcfa }}</span>
+                                    <span class="mk-donation-badge" data-zh="Facultatif" data-en="Optional" data-fr="Facultatif">Facultatif</span>
                                 </span>
-                                <span class="mk-donation-sub" data-zh="Facultatif — pour soutenir les enfants dans le besoin dans le monde." data-en="Optional — supports children in need around the world." data-fr="Facultatif — pour soutenir les enfants dans le besoin dans le monde.">Facultatif — pour soutenir les enfants dans le besoin dans le monde.</span>
+                                <span class="mk-donation-sub" data-zh="Pour soutenir les enfants dans le besoin dans le monde." data-en="Supports children in need around the world." data-fr="Pour soutenir les enfants dans le besoin dans le monde.">Pour soutenir les enfants dans le besoin dans le monde.</span>
+                                <span class="mk-donation-thanks" data-zh="Merci pour votre générosité 💛" data-en="Thank you for your generosity 💛" data-fr="Merci pour votre générosité 💛">Merci pour votre générosité 💛</span>
                             </span>
+                            <span class="mk-donation-switch"></span>
                         </label>
                     </div>
 

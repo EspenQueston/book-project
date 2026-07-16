@@ -6,6 +6,8 @@ from django.contrib.staticfiles.views import serve as staticfiles_serve
 from django.http import HttpResponseForbidden
 import sys
 
+from . import pwa_views
+
 
 def home_redirect(request):
     """Redirect root URL to manager app"""
@@ -42,6 +44,9 @@ urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),  # Language switching
     path('marketplace/', include('marketplace.urls')),  # Marketplace
     path('manager/', include('manager.urls')),  # Public interface at /manager/
+    # PWA: both must be same-origin (see book_Project/pwa_views.py)
+    path('manifest.webmanifest', pwa_views.manifest, name='pwa_manifest'),
+    path('sw.js', pwa_views.service_worker, name='pwa_service_worker'),
     path('', home_redirect, name='home'),  # Add this line for root URL
 ]
 
