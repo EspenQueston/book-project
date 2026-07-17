@@ -3659,45 +3659,65 @@ function toggleWishlistFeed(btn, id, type) {
         background: rgba(0,0,0,0.2); padding: 5px 12px; border-radius: 999px;
         font-size: 0.8rem; font-weight: 700; font-variant-numeric: tabular-nums;
     }
-    .deals-popup-body { padding: 22px; margin-top: -22px; }
+    .deals-popup-body { padding: 18px 0 22px; margin-top: -22px; }
+    .deals-popup-scroll-wrap { position: relative; }
     .deals-popup-grid {
-        display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
-        background: #fff; border-radius: 16px; padding: 4px;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch; scrollbar-width: none;
+        background: #fff; border-radius: 16px; padding: 12px 22px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08); margin: 0 22px;
     }
+    .deals-popup-grid::-webkit-scrollbar { display: none; }
     html[data-theme="dark"] .deals-popup-grid { background: var(--bg-elevated, #0f172a); }
-    .deals-popup-card {
-        display: none; flex-direction: column; text-decoration: none; color: inherit;
-        border-radius: 12px; overflow: hidden; border: 1px solid rgba(0,0,0,0.06);
-        opacity: 0; animation: dealsCardIn .35s ease both;
+    /* Fade hints at both edges signal there's more to scroll — the popup
+       has no page chrome around it to imply that on its own. */
+    .deals-popup-scroll-wrap::before, .deals-popup-scroll-wrap::after {
+        content: ''; position: absolute; top: 12px; bottom: 12px; width: 22px; z-index: 2; pointer-events: none;
     }
-    .deals-popup-card.active { display: flex; }
-    @keyframes dealsCardIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .deals-popup-scroll-wrap::before { left: 0; background: linear-gradient(90deg, #fff, transparent); border-radius: 16px 0 0 16px; }
+    .deals-popup-scroll-wrap::after { right: 0; background: linear-gradient(270deg, #fff, transparent); border-radius: 0 16px 16px 0; transition: opacity .2s ease; }
+    .deals-popup-scroll-wrap.at-end::after { opacity: 0; }
+    html[data-theme="dark"] .deals-popup-scroll-wrap::before { background: linear-gradient(90deg, var(--bg-elevated, #0f172a), transparent); }
+    html[data-theme="dark"] .deals-popup-scroll-wrap::after { background: linear-gradient(270deg, var(--bg-elevated, #0f172a), transparent); }
+    .deals-popup-card {
+        flex: 0 0 128px; scroll-snap-align: start;
+        display: flex; flex-direction: column; text-decoration: none; color: inherit;
+        border-radius: 12px; overflow: hidden; border: 1px solid rgba(0,0,0,0.06);
+    }
     html[data-theme="dark"] .deals-popup-card { border-color: rgba(255,255,255,0.08); }
     .deals-popup-card-img { width: 100%; aspect-ratio: 1; object-fit: cover; background: #f1f5f9; }
     .deals-popup-card-body { padding: 8px 10px 10px; position: relative; }
     .deals-popup-card-name {
         font-size: 0.78rem; font-weight: 600; color: #1e293b; line-height: 1.3;
-        display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;
+        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+        min-height: 2.05em;
     }
     html[data-theme="dark"] .deals-popup-card-name { color: var(--text-primary, #e2e8f0); }
-    .deals-popup-card-prices { display: flex; align-items: baseline; gap: 6px; margin-top: 4px; }
+    .deals-popup-card-prices { display: flex; align-items: baseline; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
     .deals-popup-card-price { font-size: 0.92rem; font-weight: 800; color: #ef4444; }
     .deals-popup-card-orig { font-size: 0.68rem; color: #94a3b8; text-decoration: line-through; }
     .deals-popup-card-badge {
         position: absolute; top: -18px; right: 6px; background: #f5576c; color: #fff;
         font-size: 0.62rem; font-weight: 800; padding: 2px 7px; border-radius: 6px;
     }
-    .deals-popup-dots { display: flex; justify-content: center; gap: 6px; margin-top: 14px; }
-    .deals-popup-dot { width: 6px; height: 6px; border-radius: 50%; background: #e2e8f0; transition: all .25s ease; }
-    .deals-popup-dot.active { width: 18px; border-radius: 4px; background: #f5576c; }
+    .deals-popup-scroll-hint {
+        display: flex; align-items: center; justify-content: center; gap: 5px;
+        margin-top: 10px; font-size: 0.7rem; color: #94a3b8;
+    }
+    .deals-popup-scroll-hint i { animation: dealsScrollHint 1.4s ease-in-out infinite; }
+    @keyframes dealsScrollHint { 0%,100% { transform: translateX(0); opacity:.6; } 50% { transform: translateX(4px); opacity:1; } }
     .deals-popup-cta {
         display: flex; align-items: center; justify-content: center; gap: 6px;
-        margin-top: 16px; padding: 13px; border-radius: 12px; text-decoration: none;
+        margin: 16px 22px 0; padding: 13px; border-radius: 12px; text-decoration: none;
         background: linear-gradient(135deg, #1d4ed8, #14245f); color: #fff;
         font-weight: 700; font-size: 0.9rem; transition: transform .2s ease;
     }
     .deals-popup-cta:hover { color: #fff; transform: translateY(-2px); }
+    @media (max-width: 480px) {
+        .deals-popup-grid { padding: 10px 16px; margin: 0 16px; }
+        .deals-popup-card { flex-basis: 112px; }
+        .deals-popup-cta { margin: 14px 16px 0; }
+    }
 </style>
 <div class="deals-popup-overlay" id="dealsPopupOverlay">
     <div class="deals-popup">
@@ -3716,22 +3736,29 @@ function toggleWishlistFeed(btn, id, type) {
             {% endif %}
         </div>
         <div class="deals-popup-body">
-            <div class="deals-popup-grid" id="dealsPopupGrid">
-                {% for deal in popup_deals %}
-                <a href="{{ deal.detail_url }}" class="deals-popup-card{% if deal.batch == 0 %} active{% endif %}" data-batch="{{ deal.batch }}">
-                    <img class="deals-popup-card-img" src="{{ deal.image_url }}" alt="{{ deal.name }}" loading="lazy" onerror="this.src='/static/img/default_product.png'">
-                    <div class="deals-popup-card-body">
-                        {% if deal.discount_percent > 0 %}<span class="deals-popup-card-badge">-{{ deal.discount_percent }}%</span>{% endif %}
-                        <div class="deals-popup-card-name">{{ deal.name }}</div>
-                        <div class="deals-popup-card-prices">
-                            <span class="deals-popup-card-price">{{ deal.price|fcfa }}</span>
-                            {% if deal.original_price and deal.original_price != deal.price %}<span class="deals-popup-card-orig">{{ deal.original_price|fcfa }}</span>{% endif %}
+            <div class="deals-popup-scroll-wrap">
+                <div class="deals-popup-grid" id="dealsPopupGrid">
+                    {% for deal in popup_deals %}
+                    <a href="{{ deal.detail_url }}" class="deals-popup-card">
+                        <img class="deals-popup-card-img" src="{{ deal.image_url }}" alt="{{ deal.name }}" loading="lazy" onerror="this.src='/static/img/default_product.png'">
+                        <div class="deals-popup-card-body">
+                            {% if deal.discount_percent > 0 %}<span class="deals-popup-card-badge">-{{ deal.discount_percent }}%</span>{% endif %}
+                            <div class="deals-popup-card-name">{{ deal.name }}</div>
+                            <div class="deals-popup-card-prices">
+                                <span class="deals-popup-card-price">{{ deal.price|fcfa }}</span>
+                                {% if deal.original_price and deal.original_price != deal.price %}<span class="deals-popup-card-orig">{{ deal.original_price|fcfa }}</span>{% endif %}
+                            </div>
                         </div>
-                    </div>
-                </a>
-                {% endfor %}
+                    </a>
+                    {% endfor %}
+                </div>
             </div>
-            <div class="deals-popup-dots" id="dealsPopupDots"></div>
+            {% if popup_deals|length > 2 %}
+            <div class="deals-popup-scroll-hint">
+                <span data-zh="左右滑动查看更多" data-en="Scroll for more" data-fr="Glissez pour voir plus">Glissez pour voir plus</span>
+                <i class="fas fa-arrow-right"></i>
+            </div>
+            {% endif %}
             <a href="/marketplace/" class="deals-popup-cta">
                 <span data-zh="查看全部优惠" data-en="View all deals" data-fr="Voir toutes les offres">Voir toutes les offres</span>
                 <i class="fas fa-arrow-right"></i>
@@ -3745,40 +3772,19 @@ function toggleWishlistFeed(btn, id, type) {
     if (!overlay) return;
     var SESSION_KEY = 'duno_deals_popup_shown';
 
-    // Rotate through batches of cards every few seconds — the "dynamic,
-    // not static" behavior: different items appear on their own without
-    // any user interaction.
-    var cards = Array.prototype.slice.call(overlay.querySelectorAll('.deals-popup-card'));
-    var batches = [];
-    cards.forEach(function(c){
-        var b = parseInt(c.dataset.batch, 10) || 0;
-        (batches[b] = batches[b] || []).push(c);
-    });
-    var dotsWrap = document.getElementById('dealsPopupDots');
-    if (batches.length > 1 && dotsWrap) {
-        batches.forEach(function(_, i){
-            var dot = document.createElement('span');
-            dot.className = 'deals-popup-dot' + (i === 0 ? ' active' : '');
-            dotsWrap.appendChild(dot);
-        });
-    }
-    var current = 0;
-    var rotateTimer = null;
-    function showBatch(idx){
-        batches.forEach(function(batch, i){
-            batch.forEach(function(card){ card.classList.toggle('active', i === idx); });
-        });
-        if (dotsWrap) {
-            Array.prototype.forEach.call(dotsWrap.children, function(dot, i){
-                dot.classList.toggle('active', i === idx);
-            });
-        }
-    }
-    if (batches.length > 1) {
-        rotateTimer = setInterval(function(){
-            current = (current + 1) % batches.length;
-            showBatch(current);
-        }, 3500);
+    // Hide the "scroll for more" hint once the user has actually scrolled,
+    // and fade the right-edge cue when they reach the end of the list.
+    var scrollWrap = overlay.querySelector('.deals-popup-scroll-wrap');
+    var scrollHint = overlay.querySelector('.deals-popup-scroll-hint');
+    var grid = document.getElementById('dealsPopupGrid');
+    if (grid) {
+        grid.addEventListener('scroll', function(){
+            if (scrollHint && grid.scrollLeft > 20) scrollHint.style.opacity = '0';
+            if (scrollWrap) {
+                var atEnd = grid.scrollLeft + grid.clientWidth >= grid.scrollWidth - 4;
+                scrollWrap.classList.toggle('at-end', atEnd);
+            }
+        }, { passive: true });
     }
 
     // Live countdown to the nearest flash sale's end time, if present.
@@ -3800,7 +3806,6 @@ function toggleWishlistFeed(btn, id, type) {
     function closePopup(){
         overlay.classList.remove('in');
         setTimeout(function(){ overlay.classList.remove('show'); }, 200);
-        if (rotateTimer) clearInterval(rotateTimer);
     }
     document.getElementById('dealsPopupClose').addEventListener('click', closePopup);
     overlay.addEventListener('click', function(e){ if (e.target === overlay) closePopup(); });

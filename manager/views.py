@@ -794,7 +794,8 @@ def public_home(request):
     # flash_sales and trending_items querysets already built above (no new
     # DB queries), normalized into one shape the popup template can loop
     # over regardless of source. Flash sales first (real discounts), then
-    # top-selling ("hot") trending items fill any remaining slots.
+    # top-selling ("hot") trending items fill any remaining slots. Rendered
+    # as a horizontally scrollable list, so more items is fine.
     popup_deals = []
     for sale in flash_sales[:6]:
         popup_deals.append({
@@ -806,9 +807,9 @@ def public_home(request):
             'discount_percent': sale.get_discount_percent(),
             'is_flash': True,
         })
-    if len(popup_deals) < 8:
+    if len(popup_deals) < 10:
         for item in trending_items:
-            if item.get('tag') != 'hot' or len(popup_deals) >= 8:
+            if item.get('tag') != 'hot' or len(popup_deals) >= 10:
                 continue
             popup_deals.append({
                 'name': item['name'],
@@ -819,8 +820,6 @@ def public_home(request):
                 'discount_percent': 0,
                 'is_flash': False,
             })
-    for i, deal in enumerate(popup_deals):
-        deal['batch'] = i // 4
 
     total_catalog_items = book_count + product_count + course_count + supermarket_product_count + author_count + publisher_count + vendor_count + user_count
 
