@@ -45,18 +45,34 @@
 .info-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f3f4f6; }
 .info-item:last-child { border-bottom: none; }
 .info-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.profile-role-tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.68);
+    margin-bottom: 6px;
+}
 
 /* ===== Mobile Author Detail (≤768px) ===== */
 @media (max-width: 768px) {
-    /* Simple, modern hero: clean navy gradient, flat corners, thin accent line */
+    /* Human, profile-card style hero: soft ambient glow kept (not stripped),
+       a ringed avatar with real depth, a role label for context, and a
+       clean "meta line" instead of badge soup — reads like a real profile
+       rather than a stat dashboard. */
     .author-hero {
-        padding: 24px 0 30px;
+        padding: 30px 0 38px;
         text-align: center;
-        border-radius: 0 0 22px 22px;
+        border-radius: 0 0 26px 26px;
         box-shadow: 0 14px 34px rgba(20,36,95,.26);
     }
-    .author-hero::before,
-    .author-hero::after { display: none; }
+    .author-hero::before {
+        display: block; width: 200px; height: 200px; top: -60px; right: -60px; opacity: .5;
+    }
+    .author-hero::after {
+        display: block; width: 150px; height: 150px; bottom: -40px; left: -30px; opacity: .4;
+    }
     .author-hero .container::before {
         content: "";
         position: absolute;
@@ -67,16 +83,29 @@
     }
     .author-hero .breadcrumb { display: none; }
     .author-hero .d-flex.align-items-center.gap-4 {
-        flex-direction: column; gap: 12px !important; text-align: center;
+        flex-direction: column; gap: 14px !important; text-align: center;
     }
     .author-avatar {
-        width: 64px; height: 64px; margin: 0 auto;
-        border-width: 2px; box-shadow: none;
+        width: 82px; height: 82px; margin: 0 auto;
+        border: none;
+        box-shadow: 0 0 0 3px rgba(255,255,255,0.85), 0 0 0 7px rgba(255,255,255,0.14), 0 14px 30px rgba(2,6,23,0.35);
     }
-    .author-avatar i { font-size: 1.7rem !important; }
-    .author-hero h1 { font-size: 1.35rem !important; line-height: 1.3; margin-bottom: 10px !important; }
-    .author-hero .d-flex.flex-wrap.gap-2 { justify-content: center; }
-    .author-hero .d-flex.flex-wrap.gap-2 > span { font-size: 0.72rem !important; padding: 4px 12px !important; }
+    .author-avatar i { font-size: 2.1rem !important; }
+    .author-hero h1 {
+        font-size: 1.5rem !important; font-weight: 800 !important; line-height: 1.28;
+        margin-bottom: 4px !important; letter-spacing: -0.01em;
+    }
+    /* Clean bio-style meta line — icon + text + soft dot separators,
+       instead of individually-boxed pill badges. */
+    .author-hero .d-flex.flex-wrap.gap-2 { justify-content: center; gap: 0 !important; row-gap: 6px !important; }
+    .author-hero .d-flex.flex-wrap.gap-2 > span {
+        background: transparent !important; backdrop-filter: none !important;
+        padding: 0 !important; font-size: 0.8rem !important; font-weight: 500;
+        color: rgba(255,255,255,0.85);
+    }
+    .author-hero .d-flex.flex-wrap.gap-2 > span:not(:last-of-type)::after {
+        content: '·'; margin: 0 9px 0 9px; color: rgba(255,255,255,0.4); font-weight: 700;
+    }
 
     /* Stats: compact 2×2 */
     .stat-card { padding: 12px 6px; border-radius: 10px; }
@@ -171,6 +200,7 @@
                 <i class="fas fa-user" style="font-size:2.8rem;color:rgba(255,255,255,0.85);"></i>
             </div>
             <div>
+                <span class="profile-role-tag" data-zh="作者" data-en="Author" data-fr="Auteur">{% trans "作者" %}</span>
                 <h1 class="fw-bold mb-2" style="font-size:2.2rem; text-shadow:0 2px 8px rgba(0,0,0,0.2);">{{ author.name }}</h1>
                 <div class="d-flex flex-wrap gap-2">
                     <span style="background:rgba(255,255,255,0.15);padding:5px 14px;border-radius:20px;font-size:0.85rem;backdrop-filter:blur(10px);">

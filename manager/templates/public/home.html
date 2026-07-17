@@ -908,7 +908,10 @@
 
         .hero-section {
             min-height: auto;
-            padding: 64px 0 58px;
+            /* Was 64px — with the fixed navbar's own 76px clearance (see
+               <main style="margin-top:76px">) that stacked into a large
+               dead-blue gap before the eyebrow pill on phones. */
+            padding: 26px 0 58px;
             border-bottom-left-radius: 0;
             border-bottom-right-radius: 0;
         }
@@ -920,15 +923,22 @@
         .hero-aurora-a { width: 180px; height: 180px; opacity: 0.22; }
         .hero-aurora-b { width: 140px; height: 140px; opacity: 0.18; }
         .hero-title {
-            font-size: 2rem;
-            line-height: 1.12;
-            margin-bottom: 6px;
+            font-size: 2.7rem;
+            line-height: 1.05;
+            margin-bottom: 10px;
             font-weight: 900;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
+            color: #ffffff; /* fallback if background-clip:text isn't supported */
+            background: linear-gradient(135deg, #ffffff 20%, #dbeafe 60%, #93c5fd 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 10px 30px rgba(37,99,235,0.45);
         }
         .hero-subtitle {
             font-size: 0.88rem;
-            margin-bottom: 10px;
+            /* More breathing room before the CTA buttons, per feedback. */
+            margin-bottom: 22px;
             line-height: 1.5;
             opacity: 0.92;
         }
