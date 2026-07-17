@@ -3620,4 +3620,200 @@ function toggleWishlistFeed(btn, id, type) {
         <span data-zh="我的" data-en="Me" data-fr="Moi">我的</span>
     </a>
 </nav>
+
+<!-- ===== Welcome Deals Popup — once per browser session, auto-rotating
+     real flash-sale + best-seller data (Taobao/JD "welcome deals" style) ===== -->
+{% if popup_deals %}
+<style>
+    .deals-popup-overlay {
+        display: none; position: fixed; inset: 0; z-index: 10500;
+        background: rgba(8,11,30,0.6); backdrop-filter: blur(4px);
+        align-items: center; justify-content: center; padding: 16px;
+        opacity: 0; transition: opacity .25s ease;
+    }
+    .deals-popup-overlay.show { display: flex; }
+    .deals-popup-overlay.show.in { opacity: 1; }
+    .deals-popup {
+        position: relative; width: 100%; max-width: 480px;
+        background: #fff; border-radius: 22px; overflow: hidden;
+        box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+        transform: scale(.92) translateY(10px); transition: transform .3s cubic-bezier(.2,.9,.25,1);
+    }
+    .deals-popup-overlay.show.in .deals-popup { transform: scale(1) translateY(0); }
+    html[data-theme="dark"] .deals-popup { background: var(--bg-surface, #1e293b); }
+    .deals-popup-close {
+        position: absolute; top: 12px; right: 12px; z-index: 2;
+        width: 30px; height: 30px; border-radius: 50%; border: none;
+        background: rgba(0,0,0,0.35); color: #fff; font-size: 1.15rem; line-height: 1;
+        display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+    .deals-popup-header {
+        background: linear-gradient(135deg, #f5576c, #f093fb);
+        padding: 20px 22px 34px; color: #fff; position: relative;
+    }
+    .deals-popup-title { display: flex; align-items: center; gap: 8px; font-size: 1.15rem; font-weight: 800; }
+    .deals-popup-icon { font-size: 1.1rem; }
+    .deals-popup-sub { font-size: 0.8rem; opacity: 0.9; margin-top: 4px; }
+    .deals-popup-countdown {
+        display: inline-flex; align-items: center; gap: 6px; margin-top: 10px;
+        background: rgba(0,0,0,0.2); padding: 5px 12px; border-radius: 999px;
+        font-size: 0.8rem; font-weight: 700; font-variant-numeric: tabular-nums;
+    }
+    .deals-popup-body { padding: 22px; margin-top: -22px; }
+    .deals-popup-grid {
+        display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
+        background: #fff; border-radius: 16px; padding: 4px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+    html[data-theme="dark"] .deals-popup-grid { background: var(--bg-elevated, #0f172a); }
+    .deals-popup-card {
+        display: none; flex-direction: column; text-decoration: none; color: inherit;
+        border-radius: 12px; overflow: hidden; border: 1px solid rgba(0,0,0,0.06);
+        opacity: 0; animation: dealsCardIn .35s ease both;
+    }
+    .deals-popup-card.active { display: flex; }
+    @keyframes dealsCardIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    html[data-theme="dark"] .deals-popup-card { border-color: rgba(255,255,255,0.08); }
+    .deals-popup-card-img { width: 100%; aspect-ratio: 1; object-fit: cover; background: #f1f5f9; }
+    .deals-popup-card-body { padding: 8px 10px 10px; position: relative; }
+    .deals-popup-card-name {
+        font-size: 0.78rem; font-weight: 600; color: #1e293b; line-height: 1.3;
+        display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    html[data-theme="dark"] .deals-popup-card-name { color: var(--text-primary, #e2e8f0); }
+    .deals-popup-card-prices { display: flex; align-items: baseline; gap: 6px; margin-top: 4px; }
+    .deals-popup-card-price { font-size: 0.92rem; font-weight: 800; color: #ef4444; }
+    .deals-popup-card-orig { font-size: 0.68rem; color: #94a3b8; text-decoration: line-through; }
+    .deals-popup-card-badge {
+        position: absolute; top: -18px; right: 6px; background: #f5576c; color: #fff;
+        font-size: 0.62rem; font-weight: 800; padding: 2px 7px; border-radius: 6px;
+    }
+    .deals-popup-dots { display: flex; justify-content: center; gap: 6px; margin-top: 14px; }
+    .deals-popup-dot { width: 6px; height: 6px; border-radius: 50%; background: #e2e8f0; transition: all .25s ease; }
+    .deals-popup-dot.active { width: 18px; border-radius: 4px; background: #f5576c; }
+    .deals-popup-cta {
+        display: flex; align-items: center; justify-content: center; gap: 6px;
+        margin-top: 16px; padding: 13px; border-radius: 12px; text-decoration: none;
+        background: linear-gradient(135deg, #1d4ed8, #14245f); color: #fff;
+        font-weight: 700; font-size: 0.9rem; transition: transform .2s ease;
+    }
+    .deals-popup-cta:hover { color: #fff; transform: translateY(-2px); }
+</style>
+<div class="deals-popup-overlay" id="dealsPopupOverlay">
+    <div class="deals-popup">
+        <button type="button" class="deals-popup-close" id="dealsPopupClose" aria-label="Close">&times;</button>
+        <div class="deals-popup-header">
+            <div class="deals-popup-title">
+                <span class="deals-popup-icon">⚡</span>
+                <span data-zh="今日爆款推荐" data-en="Today's Hot Deals" data-fr="Offres du jour">Offres du jour</span>
+            </div>
+            <div class="deals-popup-sub" data-zh="限时优惠，先到先得" data-en="Limited-time picks, while stocks last" data-fr="Offres limitées, jusqu'à épuisement des stocks">Offres limitées, jusqu'à épuisement des stocks</div>
+            {% if flash_sale_end %}
+            <div class="deals-popup-countdown" id="dealsPopupCountdown">
+                <i class="fas fa-clock"></i>
+                <span id="dpCdH">00</span>:<span id="dpCdM">00</span>:<span id="dpCdS">00</span>
+            </div>
+            {% endif %}
+        </div>
+        <div class="deals-popup-body">
+            <div class="deals-popup-grid" id="dealsPopupGrid">
+                {% for deal in popup_deals %}
+                <a href="{{ deal.detail_url }}" class="deals-popup-card{% if deal.batch == 0 %} active{% endif %}" data-batch="{{ deal.batch }}">
+                    <img class="deals-popup-card-img" src="{{ deal.image_url }}" alt="{{ deal.name }}" loading="lazy" onerror="this.src='/static/img/default_product.png'">
+                    <div class="deals-popup-card-body">
+                        {% if deal.discount_percent > 0 %}<span class="deals-popup-card-badge">-{{ deal.discount_percent }}%</span>{% endif %}
+                        <div class="deals-popup-card-name">{{ deal.name }}</div>
+                        <div class="deals-popup-card-prices">
+                            <span class="deals-popup-card-price">{{ deal.price|fcfa }}</span>
+                            {% if deal.original_price and deal.original_price != deal.price %}<span class="deals-popup-card-orig">{{ deal.original_price|fcfa }}</span>{% endif %}
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            <div class="deals-popup-dots" id="dealsPopupDots"></div>
+            <a href="/marketplace/" class="deals-popup-cta">
+                <span data-zh="查看全部优惠" data-en="View all deals" data-fr="Voir toutes les offres">Voir toutes les offres</span>
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</div>
+<script>
+(function(){
+    var overlay = document.getElementById('dealsPopupOverlay');
+    if (!overlay) return;
+    var SESSION_KEY = 'duno_deals_popup_shown';
+
+    // Rotate through batches of cards every few seconds — the "dynamic,
+    // not static" behavior: different items appear on their own without
+    // any user interaction.
+    var cards = Array.prototype.slice.call(overlay.querySelectorAll('.deals-popup-card'));
+    var batches = [];
+    cards.forEach(function(c){
+        var b = parseInt(c.dataset.batch, 10) || 0;
+        (batches[b] = batches[b] || []).push(c);
+    });
+    var dotsWrap = document.getElementById('dealsPopupDots');
+    if (batches.length > 1 && dotsWrap) {
+        batches.forEach(function(_, i){
+            var dot = document.createElement('span');
+            dot.className = 'deals-popup-dot' + (i === 0 ? ' active' : '');
+            dotsWrap.appendChild(dot);
+        });
+    }
+    var current = 0;
+    var rotateTimer = null;
+    function showBatch(idx){
+        batches.forEach(function(batch, i){
+            batch.forEach(function(card){ card.classList.toggle('active', i === idx); });
+        });
+        if (dotsWrap) {
+            Array.prototype.forEach.call(dotsWrap.children, function(dot, i){
+                dot.classList.toggle('active', i === idx);
+            });
+        }
+    }
+    if (batches.length > 1) {
+        rotateTimer = setInterval(function(){
+            current = (current + 1) % batches.length;
+            showBatch(current);
+        }, 3500);
+    }
+
+    // Live countdown to the nearest flash sale's end time, if present.
+    {% if flash_sale_end %}
+    var dealsEndTime = new Date("{{ flash_sale_end|date:'c' }}").getTime();
+    var cdH = document.getElementById('dpCdH'), cdM = document.getElementById('dpCdM'), cdS = document.getElementById('dpCdS');
+    var countdownTimer = setInterval(function(){
+        var diff = Math.max(0, dealsEndTime - Date.now());
+        var h = Math.floor(diff / 3600000);
+        var m = Math.floor((diff % 3600000) / 60000);
+        var s = Math.floor((diff % 60000) / 1000);
+        if (cdH) cdH.textContent = String(h).padStart(2, '0');
+        if (cdM) cdM.textContent = String(m).padStart(2, '0');
+        if (cdS) cdS.textContent = String(s).padStart(2, '0');
+        if (diff <= 0) clearInterval(countdownTimer);
+    }, 1000);
+    {% endif %}
+
+    function closePopup(){
+        overlay.classList.remove('in');
+        setTimeout(function(){ overlay.classList.remove('show'); }, 200);
+        if (rotateTimer) clearInterval(rotateTimer);
+    }
+    document.getElementById('dealsPopupClose').addEventListener('click', closePopup);
+    overlay.addEventListener('click', function(e){ if (e.target === overlay) closePopup(); });
+    document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && overlay.classList.contains('show')) closePopup(); });
+
+    if (!sessionStorage.getItem(SESSION_KEY)) {
+        sessionStorage.setItem(SESSION_KEY, '1');
+        setTimeout(function(){
+            overlay.classList.add('show');
+            requestAnimationFrame(function(){ overlay.classList.add('in'); });
+        }, 1200);
+    }
+})();
+</script>
+{% endif %}
 {% endblock %}

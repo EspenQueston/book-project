@@ -2487,11 +2487,30 @@ document.addEventListener('DOMContentLoaded', function() {
     </script>
 
     <!-- PWA: install banner + service worker registration -->
-    <div id="pwaInstallBanner" style="display:none;position:fixed;left:16px;right:16px;bottom:76px;z-index:10000;background:linear-gradient(135deg,#14245f,#1d4ed8);color:#fff;border-radius:18px;padding:14px 16px;box-shadow:0 14px 40px rgba(2,6,23,.4);align-items:center;gap:12px;max-width:430px;margin:0 auto;">
+    <style>
+        /* bottom:76px clears the mobile-only 62px bottom nav (see
+           .pwa-bottom-nav, display:none above 768px) — without a separate
+           desktop value the banner floated in an empty gap with nothing
+           to clear on wider screens. */
+        #pwaInstallBanner {
+            display: none; position: fixed; left: 16px; right: 16px; bottom: 20px; z-index: 10000;
+            background: linear-gradient(135deg,#14245f,#1d4ed8); color: #fff; border-radius: 18px;
+            padding: 14px 16px; box-shadow: 0 14px 40px rgba(2,6,23,.4);
+            align-items: center; gap: 12px; max-width: 430px; margin: 0 auto;
+        }
+        @media (max-width: 768px) {
+            #pwaInstallBanner { bottom: 76px; }
+        }
+        #pwaInstallBanner.show { display: flex; }
+        #pwaInstallIosHint { font-size: .78rem; opacity: .9; margin-top: 2px; display: none; }
+        #pwaInstallIosHint.show { display: block; }
+    </style>
+    <div id="pwaInstallBanner">
         <img src="{% static 'img/pwa-icon-192.png' %}" alt="DUNO 360" style="width:44px;height:44px;border-radius:12px;flex-shrink:0;">
         <div style="flex:1;min-width:0;">
             <div style="font-weight:800;font-size:.92rem;" data-zh="安装 DUNO 360 应用" data-en="Install the DUNO 360 app" data-fr="Installez l'appli DUNO 360">Installez l'appli DUNO 360</div>
             <div style="font-size:.75rem;opacity:.8;" data-zh="快速访问，可离线浏览" data-en="Quick access, works offline" data-fr="Accès rapide, fonctionne hors ligne">Accès rapide, fonctionne hors ligne</div>
+            <div id="pwaInstallIosHint" data-zh="点击分享 ⬆️ 然后选择“添加到主屏幕”" data-en="Tap Share ⬆️ then \"Add to Home Screen\"" data-fr="Appuyez sur Partager ⬆️ puis « Sur l'écran d'accueil »">Appuyez sur Partager ⬆️ puis « Sur l'écran d'accueil »</div>
         </div>
         <button id="pwaInstallBtn" type="button" style="border:none;border-radius:999px;padding:9px 18px;background:#fff;color:#14245f;font-weight:800;font-size:.82rem;cursor:pointer;white-space:nowrap;" data-zh="安装" data-en="Install" data-fr="Installer">Installer</button>
         <button id="pwaInstallClose" type="button" aria-label="Close" style="border:none;background:transparent;color:rgba(255,255,255,.6);font-size:1.1rem;cursor:pointer;padding:4px;line-height:1;">&times;</button>
@@ -2503,10 +2522,9 @@ document.addEventListener('DOMContentLoaded', function() {
             navigator.serviceWorker.register('/sw.js').catch(function () {});
         });
 
-        // Custom install flow: Chrome/Edge/Android fire beforeinstallprompt;
-        // we stash it and show our own banner (once per week if dismissed).
-        var deferredPrompt = null;
         var banner = document.getElementById('pwaInstallBanner');
+        var iosHint = document.getElementById('pwaInstallIosHint');
+        var installBtn = document.getElementById('pwaInstallBtn');
         var DISMISS_KEY = 'pwaInstallDismissedAt';
 
         function dismissedRecently() {
@@ -2514,31 +2532,58 @@ document.addEventListener('DOMContentLoaded', function() {
             return at && (Date.now() - at) < 7 * 24 * 3600 * 1000;
         }
 
+        // "Already installed" detection differs by platform: Chrome/Edge/
+        // Android/desktop expose display-mode:standalone; iOS Safari
+        // exposes navigator.standalone instead (display-mode never matches
+        // there even when launched from the home screen icon).
+        function isStandalone() {
+            return window.matchMedia('(display-mode: standalone)').matches ||
+                   window.navigator.standalone === true;
+        }
+
+        // iOS Safari never fires beforeinstallprompt and has no
+        // programmatic install API — Add to Home Screen is manual, via the
+        // Share sheet. Without this check, iOS visitors (a large share of
+        // mobile traffic) never saw any install banner at all.
+        function isIosSafari() {
+            var ua = window.navigator.userAgent;
+            var isIos = /iPad|iPhone|iPod/.test(ua) || (ua.includes('Macintosh') && 'ontouchend' in document);
+            var isSafari = /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);
+            return isIos && isSafari;
+        }
+
+        if (banner && !dismissedRecently() && !isStandalone() && isIosSafari()) {
+            if (installBtn) installBtn.style.display = 'none';
+            if (iosHint) iosHint.classList.add('show');
+            banner.classList.add('show');
+        }
+
+        // Custom install flow: Chrome/Edge/Android fire beforeinstallprompt;
+        // we stash it and show our own banner (once per week if dismissed).
+        var deferredPrompt = null;
         window.addEventListener('beforeinstallprompt', function (e) {
             e.preventDefault();
             deferredPrompt = e;
-            if (banner && !dismissedRecently() &&
-                !window.matchMedia('(display-mode: standalone)').matches) {
-                banner.style.display = 'flex';
+            if (banner && !dismissedRecently() && !isStandalone()) {
+                banner.classList.add('show');
             }
         });
 
-        var installBtn = document.getElementById('pwaInstallBtn');
         if (installBtn) installBtn.addEventListener('click', function () {
             if (!deferredPrompt) return;
-            banner.style.display = 'none';
+            banner.classList.remove('show');
             deferredPrompt.prompt();
             deferredPrompt.userChoice.finally(function () { deferredPrompt = null; });
         });
 
         var closeBtn = document.getElementById('pwaInstallClose');
         if (closeBtn) closeBtn.addEventListener('click', function () {
-            banner.style.display = 'none';
+            banner.classList.remove('show');
             localStorage.setItem(DISMISS_KEY, String(Date.now()));
         });
 
         window.addEventListener('appinstalled', function () {
-            if (banner) banner.style.display = 'none';
+            if (banner) banner.classList.remove('show');
         });
     })();
     </script>

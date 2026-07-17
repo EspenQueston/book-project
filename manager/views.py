@@ -790,6 +790,38 @@ def public_home(request):
     latest_blogs = list(models.BlogPost.objects.filter(status='published').order_by('-created_at')[:3])
     trending_items = _build_trending_feed(24)
 
+    # Deals for the once-per-session "welcome deals" popup — reuses the
+    # flash_sales and trending_items querysets already built above (no new
+    # DB queries), normalized into one shape the popup template can loop
+    # over regardless of source. Flash sales first (real discounts), then
+    # top-selling ("hot") trending items fill any remaining slots.
+    popup_deals = []
+    for sale in flash_sales[:6]:
+        popup_deals.append({
+            'name': sale.get_item_name(),
+            'image_url': sale.get_item_image_url(),
+            'detail_url': sale.get_item_url(),
+            'price': sale.flash_price,
+            'original_price': sale.get_original_price(),
+            'discount_percent': sale.get_discount_percent(),
+            'is_flash': True,
+        })
+    if len(popup_deals) < 8:
+        for item in trending_items:
+            if item.get('tag') != 'hot' or len(popup_deals) >= 8:
+                continue
+            popup_deals.append({
+                'name': item['name'],
+                'image_url': item['image_url'],
+                'detail_url': item['detail_url'],
+                'price': item['price'],
+                'original_price': None,
+                'discount_percent': 0,
+                'is_flash': False,
+            })
+    for i, deal in enumerate(popup_deals):
+        deal['batch'] = i // 4
+
     total_catalog_items = book_count + product_count + course_count + supermarket_product_count + author_count + publisher_count + vendor_count + user_count
 
     # Personalized first page of the mobile home feed (pages 2+ come from the
@@ -835,6 +867,7 @@ def public_home(request):
         'flash_sale_end': flash_sale_end,
         'latest_blogs': latest_blogs,
         'trending_items': trending_items,
+        'popup_deals': popup_deals,
         'search_categories': search_categories,
         'home_feed_items': home_feed_items,
         'home_feed_personalized': home_feed_personalized,
