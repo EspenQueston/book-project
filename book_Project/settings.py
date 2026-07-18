@@ -217,7 +217,12 @@ LOCALE_PATHS = [
 # django-modeltranslation — langue par défaut pour les champs traduits
 MODELTRANSLATION_DEFAULT_LANGUAGE = 'zh-hans'
 MODELTRANSLATION_LANGUAGES = ('zh-hans', 'en', 'fr')
-MODELTRANSLATION_FALLBACK_LANGUAGES = {'default': ('zh-hans', 'en', 'fr')}
+# French first: this site's primary market is Francophone Central Africa
+# (LANGUAGE_CODE='fr'). With the old order (zh-hans, en, fr), any row
+# missing its name_fr fell straight back to raw Chinese instead of trying
+# French/English translations first — e.g. category names showing as "服装"
+# to French-speaking visitors.
+MODELTRANSLATION_FALLBACK_LANGUAGES = {'default': ('fr', 'en', 'zh-hans')}
 
 # translatebot — traduction automatique des .po via OpenRouter / LLM
 OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY', '')

@@ -1,9 +1,11 @@
 ﻿{% extends "marketplace/vendor/base.html" %}
 {% load i18n %}
+{% load static %}
 {% block title %}{% if product %}{% trans "编辑商品" %}{% else %}{% if public_publish_mode %}{% trans "发布广告" %}{% else %}{% trans "新增商品" %}{% endif %}{% endif %} - {{ vendor.company_name }}{% endblock %}
 {% block nav_products %}active{% endblock %}
 
 {% block extra_vendor_css %}
+    @import url("{% static 'css/media_upload_progress.css' %}");
     .vendor-form-shell { display:grid; grid-template-columns:minmax(0,1.35fr) minmax(340px,.82fr); gap:24px; }
     .vendor-form-card { background:#fff; border-radius:24px; padding:26px; box-shadow:0 16px 44px rgba(15,23,42,.08); border:1px solid rgba(29,78,216,.12); }
     .vendor-form-title { font-size:1.05rem; font-weight:800; color:#1e293b; margin-bottom:18px; display:flex; align-items:center; gap:10px; }
@@ -204,26 +206,37 @@
             {% include "marketplace/includes/pricing_rules_form.html" %}
 
             <div class="vendor-form-card">
-                <div class="vendor-form-title"><i class="fas fa-images"></i><span>Images du produit</span></div>
-                <div class="preview-grid">
-                    <div class="preview-box">
-                        {% if product and product.image %}<img src="{{ product.image.url }}" class="preview-thumb" alt="Image 1">{% else %}<div class="preview-thumb d-flex align-items-center justify-content-center"><i class="fas fa-image text-muted"></i></div>{% endif %}
-                        <label class="form-label small fw-bold">Image principale</label>
-                        <input type="file" name="image" class="form-control mt-2" accept="image/*">
+                <div class="vendor-form-title"><i class="fas fa-images"></i><span>Images &amp; vidéo du produit</span></div>
+                <div class="media-upload-grid">
+                    {% for slot in '12345' %}
+                    <div data-media-slot data-kind="image" class="media-slot">
+                        <div class="media-slot-preview" data-preview>
+                            {% if slot == '1' and product and product.image %}<img src="{{ product.image.url }}" class="media-slot-media" alt="Image 1">
+                            {% elif slot == '2' and product and product.image_2 %}<img src="{{ product.image_2.url }}" class="media-slot-media" alt="Image 2">
+                            {% elif slot == '3' and product and product.image_3 %}<img src="{{ product.image_3.url }}" class="media-slot-media" alt="Image 3">
+                            {% elif slot == '4' and product and product.image_4 %}<img src="{{ product.image_4.url }}" class="media-slot-media" alt="Image 4">
+                            {% elif slot == '5' and product and product.image_5 %}<img src="{{ product.image_5.url }}" class="media-slot-media" alt="Image 5">
+                            {% else %}<i class="fas fa-image text-muted"></i>{% endif %}
+                        </div>
+                        <label class="media-slot-label">{% if slot == '1' %}Image principale{% else %}Image {{ slot }}{% endif %}</label>
+                        <input type="file" name="image{% if slot != '1' %}_{{ slot }}{% endif %}" class="media-slot-input" accept="image/*">
+                        <div class="media-slot-progress"><div class="media-slot-progress-bar"></div></div>
+                        <div class="media-slot-status"></div>
                     </div>
-                    <div class="preview-box">
-                        {% if product and product.image_2 %}<img src="{{ product.image_2.url }}" class="preview-thumb" alt="Image 2">{% else %}<div class="preview-thumb d-flex align-items-center justify-content-center"><i class="fas fa-image text-muted"></i></div>{% endif %}
-                        <label class="form-label small fw-bold">Image 2</label>
-                        <input type="file" name="image_2" class="form-control mt-2" accept="image/*">
-                    </div>
-                    <div class="preview-box">
-                        {% if product and product.image_3 %}<img src="{{ product.image_3.url }}" class="preview-thumb" alt="Image 3">{% else %}<div class="preview-thumb d-flex align-items-center justify-content-center"><i class="fas fa-image text-muted"></i></div>{% endif %}
-                        <label class="form-label small fw-bold">Image 3</label>
-                        <input type="file" name="image_3" class="form-control mt-2" accept="image/*">
+                    {% endfor %}
+                    <div data-media-slot data-kind="video" class="media-slot">
+                        <div class="media-slot-preview" data-preview>
+                            {% if product and product.video %}<video src="{{ product.video.url }}" class="media-slot-media" controls muted></video>
+                            {% else %}<i class="fas fa-video text-muted"></i>{% endif %}
+                        </div>
+                        <label class="media-slot-label">Vidéo courte (optionnel)</label>
+                        <input type="file" name="video" class="media-slot-input" accept="video/*">
+                        <div class="media-slot-progress"><div class="media-slot-progress-bar"></div></div>
+                        <div class="media-slot-status"></div>
                     </div>
                 </div>
-                {% if form_state.errors.image %}<div class="invalid-feedback d-block mb-2">{{ form_state.errors.image }}</div>{% endif %}
-                <div class="helper-text mt-3">{% if public_publish_mode %}Au moins 2 photos sont requises pour publier une annonce.{% else %}Au moins 1 photo est requise (2 ou plus recommandées).{% endif %}</div>
+                {% if form_state.errors.image %}<div class="invalid-feedback d-block mt-2">{{ form_state.errors.image }}</div>{% endif %}
+                <div class="helper-text mt-3">{% if public_publish_mode %}Au moins 2 photos sont requises pour publier une annonce.{% else %}Au moins 1 photo est requise (2 ou plus recommandées).{% endif %} Jusqu'à 5 images et 1 courte vidéo.</div>
             </div>
 
             <div class="vendor-form-card">
@@ -239,6 +252,7 @@
 {% endblock %}
 
 {% block extra_vendor_js %}
+<script src="{% static 'js/media_upload_progress.js' %}"></script>
 <script>
 function addAttribute(name, value) {
     var container = document.getElementById('attributes-container');

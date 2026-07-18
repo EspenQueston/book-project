@@ -5,6 +5,7 @@
 {% block title %}{{ book.name }} - {% trans "图书详情" %}{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="/static/css/delivery_estimate.css">
 <style>
 :root { --primary-color: #1d4ed8; --secondary-color: #14245f; --success-color: #10b981; --warning-color: #f59e0b; --danger-color: #ef4444; }
 .detail-hero {
@@ -717,6 +718,8 @@ html[data-theme="dark"] .bmp-feed-meta {
         {% endif %}
     </div>
 
+    <div style="background:#fff;padding:0 14px;">{% include 'includes/delivery_estimate_badge.html' %}</div>
+
     <!-- C. Title -->
     <div class="bmp-title-section">
         <div class="bmp-title">{{ book.name }}</div>
@@ -1068,6 +1071,8 @@ html[data-theme="dark"] .bmp-feed-meta {
                             <div class="price-tag">{{ book.price|fcfa }}</div>
                             <small class="text-muted">{% trans "含税价格" %}</small>
                         </div>
+
+                        {% include 'includes/delivery_estimate_badge.html' %}
 
                         <!-- Quantity -->
                         <div class="mb-3">

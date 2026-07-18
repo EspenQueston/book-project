@@ -61,7 +61,7 @@
     /* Playlist Panel */
     .playlist-panel {
         background: #fff; border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.08);
-        overflow: hidden; max-height: 600px; display: flex; flex-direction: column;
+        overflow: hidden; display: flex; flex-direction: column;
         border: 1px solid rgba(0,0,0,0.04);
     }
     .playlist-header {
@@ -80,7 +80,7 @@
         transition: width 0.5s ease;
     }
 
-    .playlist-body { overflow-y: auto; flex: 1; }
+    .playlist-body { flex: 1; }
     .section-header {
         padding: 12px 20px; background: #f8fafc; font-weight: 700;
         font-size: 0.85rem; color: #64748b; border-bottom: 1px solid #f1f5f9;
@@ -166,6 +166,15 @@
         .course-detail-layout .course-detail-sidebar {
             flex: 0 0 auto;
             width: 41.66666667%;
+            /* One scroll region for the whole sidebar (lesson list + info
+               card) instead of a separately-capped lesson list — the list
+               used to have its own overflow:auto while the rest of the
+               sidebar had none, so scrolling past it fell through to the
+               document and dragged the sticky video along with it. */
+            position: sticky;
+            top: 80px;
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
         }
         .course-info-card {
             padding: 30px 26px;
@@ -353,7 +362,10 @@
     html[data-theme="dark"] .cmv-lesson-desc { color: var(--text-secondary, #cbd5e1); }
 
     @media(max-width:991px) {
-        .playlist-panel { max-height: 400px; margin-top: 20px; }
+        /* Below desktop the sidebar isn't its own sticky/scroll region, so
+           the lesson list needs to cap + scroll internally again here. */
+        .playlist-panel { max-height: 400px; overflow: hidden; margin-top: 20px; }
+        .playlist-body { overflow-y: auto; }
     }
     @media (max-width: 768px) {
         .course-mobile-page {

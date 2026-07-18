@@ -82,7 +82,7 @@
 {% with rn=request.resolver_match %}
 <aside class="vp-sidebar-inner" aria-label="{% trans '卖家导航' %}">
     <div class="vp-sn-brand">
-        <div class="vp-sn-name">{% if vendor %}{{ vendor.company_name }}{% else %}DUNO 360 Admin{% endif %}</div>
+        <div class="vp-sn-name" data-i18n-skip>{% if vendor %}{{ vendor.company_name }}{% else %}DUNO 360 Admin{% endif %}</div>
         <div class="vp-sn-sub">{% if vendor %}{% trans "卖家中心" %}{% else %}{% trans "Admin Panel" %}{% endif %}</div>
     </div>
     <nav class="vp-sn-scroll">

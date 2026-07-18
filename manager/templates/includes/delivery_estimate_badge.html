@@ -1,0 +1,11 @@
+{% load i18n %}
+{% if delivery_estimate %}
+<div class="delivery-estimate-badge">
+    <i class="fas fa-truck"></i>
+    <span>
+        <span data-zh="预计送达" data-en="Estimated delivery" data-fr="Livraison estimée">{% trans "预计送达" %}</span>:
+        <strong>{{ delivery_estimate.date_min|date:"d M" }} – {{ delivery_estimate.date_max|date:"d M" }}</strong>
+        <span class="delivery-estimate-days">({{ delivery_estimate.days_min }}-{{ delivery_estimate.days_max }} <span data-zh="天" data-en="days" data-fr="jours">{% trans "天" %}</span>)</span>
+    </span>
+</div>
+{% endif %}

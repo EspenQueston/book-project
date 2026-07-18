@@ -5,6 +5,8 @@
 {% block title %}{{ item.name }} - {% trans "超市" %}{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="/static/css/image_zoom.css">
+<link rel="stylesheet" href="/static/css/delivery_estimate.css">
 <style>
     :root { --primary-color: #1d4ed8; --secondary-color: #14245f; --danger-color: #ef4444; }
     .breadcrumb-section { background: linear-gradient(135deg, rgba(79,172,254,0.05), rgba(0,242,254,0.05)); padding: 20px 0; }
@@ -339,7 +341,10 @@
         overflow-x: auto;
         scroll-snap-type: x mandatory;
     }
-    .pmp-gallery img { width: 100%; height: 100%; object-fit: contain; scroll-snap-align: center; flex: 0 0 100%; }
+    /* Each slide is now a .zoom-hover-wrap so the image can zoom-on-hover;
+       the wrapper (not the bare img) is the flex/scroll-snap item. */
+    .pmp-gallery .zoom-hover-wrap { flex: 0 0 100%; scroll-snap-align: center; height: 100%; }
+    .pmp-gallery img { width: 100%; height: 100%; object-fit: contain; }
     .pmp-gallery-counter { position: absolute; bottom: 12px; right: 14px; background: rgba(0,0,0,.55); color: #fff; font-size: 11px; padding: 3px 10px; border-radius: 10px; z-index: 10; }
     /* Desktop grocery service highlights band */
     .sup-service-band {
@@ -613,12 +618,14 @@
 <!-- ===== PWA T1 & T2: MOBILE ONLY ===== -->
 <div class="product-mobile-page">
     <div class="pmp-gallery" id="pmpGallery">
-        <img src="{{ item.get_image_url }}" alt="{{ item.name }}">
-        {% if item.image_2 %}<img src="{{ item.image_2.url }}" alt="{{ item.name }}">{% endif %}
-        {% if item.image_3 %}<img src="{{ item.image_3.url }}" alt="{{ item.name }}">{% endif %}
+        {% for img_url in item.get_gallery_images %}
+        <div class="zoom-hover-wrap"><img src="{{ img_url }}" alt="{{ item.name }}"></div>
+        {% empty %}
+        <div class="zoom-hover-wrap"><img src="{{ item.get_image_url }}" alt="{{ item.name }}"></div>
+        {% endfor %}
     </div>
-    {% if item.image_2 or item.image_3 %}
-    <div class="pmp-gallery-counter" id="pmpCounter">1/{% if item.image_3 %}3{% else %}2{% endif %}</div>
+    {% if item.get_gallery_images|length > 1 %}
+    <div class="pmp-gallery-counter" id="pmpCounter">1/{{ item.get_gallery_images|length }}</div>
     {% endif %}
     <!-- Orange price bar -->
     <div class="pmp-price-section">
@@ -634,6 +641,8 @@
             {% if item.is_organic %}<span class="pmp-low-badge">🌿 {% trans "有机" %}</span>{% endif %}
         </div>
     </div>
+
+    <div style="background:#fff;padding:0 14px;">{% include 'includes/delivery_estimate_badge.html' %}</div>
 
     <!-- Title -->
     <div class="pmp-info">
@@ -811,18 +820,19 @@
         {% include 'marketplace/includes/desktop_single_social_styles.html' %}
         <div class="desk-single-hero">
             <div class="desk-single-gallery">
-                <img src="{{ item.get_image_url }}" alt="{{ item.name }}" class="detail-img" id="mainImage">
-                {% if item.image_2 or item.image_3 %}
+                <div class="zoom-hover-wrap">
+                    <img src="{{ item.get_image_url }}" alt="{{ item.name }}" class="detail-img" id="mainImage">
+                </div>
+                {% if item.get_gallery_images|length > 1 %}
                 <div class="thumb-row" style="display:flex;gap:10px;margin-top:12px;">
-                    {% if item.image %}
-                    <img src="{{ item.image.url }}" class="thumb active" style="width:70px;height:70px;object-fit:cover;border-radius:10px;border:2px solid #4facfe;cursor:pointer;" onclick="switchImage(this)">
-                    {% endif %}
-                    {% if item.image_2 %}
-                    <img src="{{ item.image_2.url }}" class="thumb" style="width:70px;height:70px;object-fit:cover;border-radius:10px;border:2px solid transparent;cursor:pointer;" onclick="switchImage(this)">
-                    {% endif %}
-                    {% if item.image_3 %}
-                    <img src="{{ item.image_3.url }}" class="thumb" style="width:70px;height:70px;object-fit:cover;border-radius:10px;border:2px solid transparent;cursor:pointer;" onclick="switchImage(this)">
-                    {% endif %}
+                    {% for img_url in item.get_gallery_images %}
+                    <img src="{{ img_url }}" class="thumb{% if forloop.first %} active{% endif %}" style="width:70px;height:70px;object-fit:cover;border-radius:10px;border:2px solid {% if forloop.first %}#4facfe{% else %}transparent{% endif %};cursor:pointer;" onclick="switchImage(this)">
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% if item.get_video_url %}
+                <div class="mt-2">
+                    <video src="{{ item.get_video_url }}" controls muted style="width:100%;border-radius:12px;max-height:220px;background:#000;"></video>
                 </div>
                 {% endif %}
             </div>
@@ -851,6 +861,8 @@
                     <span class="badge ms-2" style="background:linear-gradient(135deg,#ef4444,#f97316);">-{{ item.get_discount_percent }}%</span>
                     {% endif %}
                 </div>
+
+                {% include 'includes/delivery_estimate_badge.html' %}
 
                 <!-- Grocery service highlights -->
                 <div class="sup-service-band">
@@ -1130,6 +1142,7 @@ function toggleWishlist(){
 
 </script>
 <script src="/static/js/listing_follow.js"></script>
+<script src="/static/js/image_zoom.js"></script>
 <script>
 function switchImage(thumb) {
     var main = document.getElementById('mainImage');

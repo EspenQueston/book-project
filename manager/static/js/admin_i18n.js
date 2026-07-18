@@ -1598,6 +1598,19 @@
         '自动回复设置加载失败': 'Failed to load auto-reply settings',
         '加载失败，请刷新页面重试。': 'Failed to load. Please reload the page.',
         '表情': 'Emoji',
+
+        // ---------- Vendor book form (add/edit) ----------
+        '图书发布工作台': 'Book publishing workspace',
+        '更宽的工作区、更清晰的分组、更少的操作负担，让卖家可以更快完成图书发布。': 'A wider workspace, clearer grouping, fewer actions — helping sellers publish books faster.',
+        '建议写清内容亮点、适合人群与版本信息': 'Recommended: clearly describe key highlights, target readers, and edition details',
+        '作者与出版社': 'Author & Publisher',
+        '建议上传封面图，以获得更专业的展示效果。': 'Recommended: upload a cover image for a more professional look.',
+        '库存与下载资源应保持真实一致。': 'Stock and download resources should stay accurate and consistent.',
+        '按住 Ctrl/Cmd 可多选，适合合著图书。': 'Hold Ctrl/Cmd to select multiple — useful for co-authored books.',
+        '发布建议': 'Publishing tips',
+        '图书分类': 'Book category',
+        '管理分类': 'Manage categories',
+        '此分类会同步用于移动端和桌面端的图书筛选。': 'This category is used for book filtering on both mobile and desktop.',
     };
 
     /* ============================
@@ -3171,6 +3184,19 @@
         '自动回复设置加载失败': 'Échec du chargement des paramètres de réponse automatique',
         '加载失败，请刷新页面重试。': 'Échec du chargement. Veuillez recharger la page.',
         '表情': 'Émoji',
+
+        // ---------- Vendor book form (add/edit) ----------
+        '图书发布工作台': 'Espace de publication de livres',
+        '更宽的工作区、更清晰的分组、更少的操作负担，让卖家可以更快完成图书发布。': 'Un espace de travail plus large, des groupes plus clairs, moins d\'actions — pour publier vos livres plus vite.',
+        '建议写清内容亮点、适合人群与版本信息': 'Recommandé : précisez les points forts, le public visé et les informations d\'édition',
+        '作者与出版社': 'Auteur et éditeur',
+        '建议上传封面图，以获得更专业的展示效果。': 'Recommandé : ajoutez une image de couverture pour un rendu plus professionnel.',
+        '库存与下载资源应保持真实一致。': 'Le stock et les ressources téléchargeables doivent rester exacts.',
+        '按住 Ctrl/Cmd 可多选，适合合著图书。': 'Maintenez Ctrl/Cmd pour une sélection multiple — utile pour les ouvrages en collaboration.',
+        '发布建议': 'Conseils de publication',
+        '图书分类': 'Catégorie du livre',
+        '管理分类': 'Gérer les catégories',
+        '此分类会同步用于移动端和桌面端的图书筛选。': 'Cette catégorie est utilisée pour le filtrage des livres sur mobile et ordinateur.',
     };
 
     // Sort keys longest-first for proper substring matching
@@ -3285,6 +3311,13 @@
                 if (p.closest && p.closest('.vp-lang-bar')) return NodeFilter.FILTER_REJECT;
                 // Don't translate inside the lang toggle itself
                 if (p.id === 'adminLangToggle' || p.closest('#adminLangToggle'))
+                    return NodeFilter.FILTER_REJECT;
+                // Raw user-generated data (vendor/shop names, product titles...)
+                // must never go through the UI dictionary — a name that happens
+                // to contain a common Chinese word (e.g. "店铺") would otherwise
+                // get partially substring-replaced into garbled mixed text like
+                // "Zeke 的Shop". Mark such spots with data-i18n-skip.
+                if (p.closest && p.closest('[data-i18n-skip]'))
                     return NodeFilter.FILTER_REJECT;
                 return NodeFilter.FILTER_ACCEPT;
             }

@@ -87,19 +87,39 @@
                     <label class="form-label fw-bold" data-zh="重量 (kg)" data-en="Weight (kg)" data-fr="Poids (kg)">重量 (kg)</label>
                     <input type="number" name="weight" class="form-control" step="0.01" value="{{ product.weight|default:'' }}" style="border-radius:10px;">
                 </div>
+                <link rel="stylesheet" href="/static/css/media_upload_progress.css">
                 <div class="mb-3">
-                    <label class="form-label fw-bold" data-zh="主图" data-en="Main Image" data-fr="Image principale">主图</label>
-                    <input type="file" name="image" class="form-control" accept="image/*" style="border-radius:10px;">
-                    {% if product.image %}<small class="text-muted"><span data-zh="当前" data-en="Current" data-fr="Actuel">当前</span>: {{ product.image.name }}</small>{% endif %}
+                    <label class="form-label fw-bold" data-zh="图片与视频（最多5张图片 + 1个短视频）" data-en="Images &amp; video (up to 5 images + 1 short video)" data-fr="Images &amp; vidéo (5 photos max + 1 courte vidéo)">图片与视频（最多5张图片 + 1个短视频）</label>
+                    <div class="media-upload-grid">
+                        {% for slot in '12345' %}
+                        <div data-media-slot data-kind="image" class="media-slot">
+                            <div class="media-slot-preview" data-preview>
+                                {% if slot == '1' and product.image %}<img src="{{ product.image.url }}" class="media-slot-media" alt="Image 1">
+                                {% elif slot == '2' and product.image_2 %}<img src="{{ product.image_2.url }}" class="media-slot-media" alt="Image 2">
+                                {% elif slot == '3' and product.image_3 %}<img src="{{ product.image_3.url }}" class="media-slot-media" alt="Image 3">
+                                {% elif slot == '4' and product.image_4 %}<img src="{{ product.image_4.url }}" class="media-slot-media" alt="Image 4">
+                                {% elif slot == '5' and product.image_5 %}<img src="{{ product.image_5.url }}" class="media-slot-media" alt="Image 5">
+                                {% else %}<i class="fas fa-image text-muted"></i>{% endif %}
+                            </div>
+                            <label class="media-slot-label">{% if slot == '1' %}<span data-zh="主图" data-en="Main Image" data-fr="Image principale">主图</span>{% else %}<span data-zh="图片{{ slot }}" data-en="Image {{ slot }}" data-fr="Image {{ slot }}">图片{{ slot }}</span>{% endif %}</label>
+                            <input type="file" name="image{% if slot != '1' %}_{{ slot }}{% endif %}" class="media-slot-input" accept="image/*">
+                            <div class="media-slot-progress"><div class="media-slot-progress-bar"></div></div>
+                            <div class="media-slot-status"></div>
+                        </div>
+                        {% endfor %}
+                        <div data-media-slot data-kind="video" class="media-slot">
+                            <div class="media-slot-preview" data-preview>
+                                {% if product.video %}<video src="{{ product.video.url }}" class="media-slot-media" controls muted></video>
+                                {% else %}<i class="fas fa-video text-muted"></i>{% endif %}
+                            </div>
+                            <label class="media-slot-label"><span data-zh="短视频（可选）" data-en="Short video (optional)" data-fr="Courte vidéo (optionnel)">短视频（可选）</span></label>
+                            <input type="file" name="video" class="media-slot-input" accept="video/*">
+                            <div class="media-slot-progress"><div class="media-slot-progress-bar"></div></div>
+                            <div class="media-slot-status"></div>
+                        </div>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label fw-bold" data-zh="图片2" data-en="Image 2" data-fr="Image 2">图片2</label>
-                    <input type="file" name="image_2" class="form-control" accept="image/*" style="border-radius:10px;">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label fw-bold" data-zh="图片3" data-en="Image 3" data-fr="Image 3">图片3</label>
-                    <input type="file" name="image_3" class="form-control" accept="image/*" style="border-radius:10px;">
-                </div>
+                <script src="/static/js/media_upload_progress.js"></script>
                 <div class="form-check form-switch mb-2">
                     <input type="checkbox" name="is_active" class="form-check-input" id="isActive" {% if product.is_active or not product %}checked{% endif %}>
                     <label class="form-check-label" for="isActive" data-zh="上架" data-en="Active" data-fr="Actif">上架</label>

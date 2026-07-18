@@ -1,0 +1,56 @@
+/* Hover-zoom + click-to-enlarge for product/supermarket gallery images.
+   See image_zoom.js for the mouse-tracked zoom origin and lightbox. */
+.zoom-hover-wrap {
+    position: relative;
+    overflow: hidden;
+    cursor: zoom-in;
+}
+.zoom-hover-wrap img,
+.zoom-hover-wrap .media-slot-media {
+    transition: transform 0.35s ease;
+    will-change: transform;
+}
+.zoom-hover-wrap:hover img,
+.zoom-hover-wrap.zoom-active img {
+    transform: scale(1.55);
+}
+
+.img-zoom-lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 20000;
+    background: rgba(8, 11, 30, 0.86);
+    backdrop-filter: blur(4px);
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+.img-zoom-lightbox.show { display: flex; }
+.img-zoom-lightbox.show.in { opacity: 1; }
+.img-zoom-lightbox img {
+    max-width: 92vw;
+    max-height: 88vh;
+    border-radius: 12px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+    transform: scale(0.94);
+    transition: transform 0.2s ease;
+}
+.img-zoom-lightbox.show.in img { transform: scale(1); }
+.img-zoom-lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+}
+.img-zoom-lightbox-close:hover { background: rgba(255, 255, 255, 0.24); }

@@ -5,6 +5,7 @@
 {% block title %}{% trans "结账" %} - {% trans "DUNO 360" %}{% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="{% static 'css/delivery_estimate.css' %}">
 <style>
 /* ===== Base / Desktop Styles ===== */
 :root {
@@ -934,6 +935,8 @@ html[data-theme="dark"] .ck-guarantee-banner {
                         <i class="fas fa-receipt" style="color:var(--ck-primary);"></i>
                         <span data-zh="订单摘要" data-en="Order Summary" data-fr="Récapitulatif">{% trans "订单摘要" %}</span>
                     </h4>
+
+                    {% include 'includes/delivery_estimate_badge.html' %}
 
                     <!-- Cart Items -->
                     <div class="cart-items mb-3">

@@ -2495,6 +2495,7 @@ def public_book_detail(request, book_id):
         ).exists()
     publisher_follower_count = models.UserFollowedShop.objects.filter(publisher=book.publisher).count()
 
+    from manager.fulfillment_service import get_delivery_estimate
     context = {
         'book': book,
         'authors': authors,
@@ -2509,6 +2510,7 @@ def public_book_detail(request, book_id):
         'listing_review_summary': review_summary('book', book.pk),
         'listing_kind': 'book',
         'listing_id': book.pk,
+        'delivery_estimate': get_delivery_estimate('book', book.pk),
     }
     return render(request, 'public/book_detail.html', context)
 
@@ -3048,10 +3050,21 @@ def checkout(request):
     # Separate items by type
     book_items = [i for i in unified_items if i['item_type'] == 'book']
     marketplace_items = [i for i in unified_items if i['item_type'] != 'book']
-    
+
     # Calculate totals - books use actual price, marketplace uses item price
     total_amount = sum(i['total_price'] for i in unified_items)
     total_items_count = sum(i['quantity'] for i in unified_items)
+
+    # Delivery estimate: most conservative (widest) range across every
+    # physical item in the cart. Courses are digital and skipped.
+    from manager.fulfillment_service import get_delivery_estimate
+    overall_delivery_estimate = None
+    for i in unified_items:
+        if i['item_type'] == 'course':
+            continue
+        est = get_delivery_estimate(i['item_type'], i['item_id'])
+        if overall_delivery_estimate is None or est['days_max'] > overall_delivery_estimate['days_max']:
+            overall_delivery_estimate = est
     
     if request.method == 'POST':
         ip = _get_client_ip(request)
@@ -3285,6 +3298,7 @@ def checkout(request):
         'kkiapay_countries_data': kkiapay_countries_data,
         'checkout_cities_by_country': get_checkout_cities_by_country(),
         'donation_amount': DONATION_AMOUNT,
+        'delivery_estimate': overall_delivery_estimate,
     }
 
     response = render(request, 'public/checkout.html', context)
@@ -9664,6 +9678,7 @@ def vendor_add_book(request):
         inventory = request.POST.get('inventory', '0')
         description = request.POST.get('description', '').strip()
         publisher_id = request.POST.get('publisher_id')
+        category_id = request.POST.get('category_id') or None
         author_ids = request.POST.getlist('author_ids')
         book_file = request.FILES.get('book_file')
         download_link = request.POST.get('download_link', '').strip()
@@ -9689,6 +9704,7 @@ def vendor_add_book(request):
             sale_num=0,
             description=description,
             publisher_id=int(publisher_id) if publisher_id else None,
+            category_id=category_id,
             delivery_days_min=delivery_days_min,
             delivery_days_max=delivery_days_max,
         )
@@ -9723,10 +9739,12 @@ def vendor_add_book(request):
 
     publishers = models.Publisher.objects.all()
     authors = models.Author.objects.all()
+    categories = models.BookCategory.objects.filter(is_active=True)
     context = {
         'vendor': vendor,
         'publishers': publishers,
         'authors': authors,
+        'categories': categories,
         'admin_access': admin_access,
     }
     return render(request, 'public/vendor_add_book.html', context)
@@ -9765,12 +9783,14 @@ def vendor_edit_book(request):
         authors = models.Author.objects.all()
         book_author_ids = list(book.author_set.values_list('id', flat=True))
         publishers = models.Publisher.objects.all()
+        categories = models.BookCategory.objects.filter(is_active=True)
         return render(request, 'public/vendor_edit_book.html', {
             'vendor': vendor or vb.vendor,
             'vb': vb,
             'book': book,
             'publishers': publishers,
             'authors': authors,
+            'categories': categories,
             'book_author_ids': book_author_ids,
             'admin_access': admin_access,
         })
@@ -9804,6 +9824,7 @@ def vendor_edit_book(request):
         inventory = request.POST.get('inventory', '0')
         description = request.POST.get('description', '').strip()
         publisher_id = request.POST.get('publisher_id')
+        category_id = request.POST.get('category_id') or None
         author_ids = request.POST.getlist('author_ids')
 
         if not name:
@@ -9828,16 +9849,7 @@ def vendor_edit_book(request):
                 return JsonResponse({'success': False, 'message': '库存不能小于 0。', 'field': 'inventory'})
         except Exception:
             return JsonResponse({'success': False, 'message': '库存格式无效。', 'field': 'inventory'})
-        try:
-            if Decimal(price) <= 0:
-                return JsonResponse({'success': False, 'message': '价格必须大于 0。', 'field': 'price'})
-        except Exception:
-            return JsonResponse({'success': False, 'message': '价格格式无效。', 'field': 'price'})
-        try:
-            if int(inventory) < 0:
-                return JsonResponse({'success': False, 'message': '库存不能小于 0。', 'field': 'inventory'})
-        except Exception:
-            return JsonResponse({'success': False, 'message': '库存格式无效。', 'field': 'inventory'})
+        download_link = request.POST.get('download_link', '').strip()
         if download_link:
             from django.core.validators import URLValidator
             from django.core.exceptions import ValidationError
@@ -9856,11 +9868,11 @@ def vendor_edit_book(request):
         book.delivery_days_max = delivery_days_max
         if publisher_id:
             book.publisher_id = int(publisher_id)
+        book.category_id = category_id
         if 'cover_image' in request.FILES:
             book.cover_image = request.FILES['cover_image']
         if 'book_file' in request.FILES:
             book.book_file = request.FILES['book_file']
-        download_link = request.POST.get('download_link', '').strip()
         if download_link:
             book.download_link = download_link
         elif request.POST.get('clear_download_link') == '1':

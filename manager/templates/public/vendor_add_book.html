@@ -109,6 +109,21 @@
                             <label class="book-label">{% trans "封面图片" %}</label>
                             <input type="file" name="cover_image" class="form-control" accept="image/*">
                         </div>
+                        <div class="col-md-6">
+                            <label class="book-label d-flex align-items-center justify-content-between">
+                                <span>{% trans "图书分类" %}</span>
+                                <a href="{% url 'manager:book_categories' %}" class="inline-add-btn" style="text-decoration:none;" target="_blank">
+                                    <i class="fas fa-layer-group me-1"></i>{% trans "管理分类" %}
+                                </a>
+                            </label>
+                            <select name="category_id" class="form-select">
+                                <option value="">{% trans "未分类" %}</option>
+                                {% for cat in categories %}
+                                <option value="{{ cat.id }}">{{ cat.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="book-help">{% trans "此分类会同步用于移动端和桌面端的图书筛选。" %}</div>
+                        </div>
                         <div class="col-12">
                             <label class="book-label d-flex align-items-center justify-content-between gap-2 flex-wrap">
                                 <span>{% trans "图书描述" %} <span class="text-danger">*</span></span>

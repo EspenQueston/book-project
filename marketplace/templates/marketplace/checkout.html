@@ -5,6 +5,7 @@
 {% block title %}{% trans "结算" %} - {% trans "市场" %}{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="/static/css/delivery_estimate.css">
 <style>
     :root { --primary-color: #1d4ed8; --secondary-color: #14245f; --danger-color: #ef4444; }
     .checkout-header {
@@ -362,6 +363,8 @@
             <div class="col-lg-4">
                 <div class="summary-card">
                     <h5 style="font-weight:700; margin-bottom:16px;">{% trans "订单详情" %}</h5>
+
+                    {% include 'includes/delivery_estimate_badge.html' %}
 
                     {% for ci in cart_items %}
                     <div class="order-item">

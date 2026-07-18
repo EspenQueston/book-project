@@ -1,0 +1,26 @@
+.delivery-estimate-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.22);
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin: 12px 0;
+    font-size: 0.86rem;
+    color: #065f46;
+}
+.delivery-estimate-badge i {
+    color: #10b981;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+.delivery-estimate-badge strong { font-weight: 700; }
+.delivery-estimate-days { color: #64748b; font-size: 0.8rem; }
+
+html[data-theme="dark"] .delivery-estimate-badge {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.3);
+    color: #6ee7b7;
+}
+html[data-theme="dark"] .delivery-estimate-days { color: var(--text-tertiary, #94a3b8); }

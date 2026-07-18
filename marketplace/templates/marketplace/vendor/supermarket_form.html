@@ -1,10 +1,12 @@
 {% extends "marketplace/vendor/base.html" %}
 {% load i18n %}
+{% load static %}
 
 {% block title %}{% if item|default:None %}Modifier l'article supermarché{% else %}Ajouter un article supermarché{% endif %} · {{ vendor.company_name }}{% endblock %}
 
 {% block extra_vendor_css %}
 <style>
+    @import url("{% static 'css/media_upload_progress.css' %}");
     .sm-form-hero { background:linear-gradient(135deg,#064e3b,#16a34a 58%,#84cc16); color:#fff; border-radius:26px; padding:26px; margin-bottom:24px; box-shadow:0 18px 45px rgba(15,23,42,.20); }
     .sm-form-hero h4 { font-weight:900; margin-bottom:8px; }
     .sm-form-hero p { opacity:.84; margin:0; }
@@ -119,20 +121,36 @@
                     {% include 'includes/delivery_days_override_field.html' %}
                 </div>
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">Image principale</label>
-                    <input type="file" name="image" class="form-control rounded-3 {% if form_state.errors.image %}is-invalid{% endif %}" accept="image/*">
-                    {% if form_state.errors.image %}<div class="invalid-feedback d-block">{{ form_state.errors.image }}</div>{% endif %}
-                    {% if item and item.image %}<small class="text-muted d-block mt-1">{{ item.image.name }}</small>{% endif %}
-                </div>
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">{% trans "Image 2" %}</label>
-                    <input type="file" name="image_2" class="form-control rounded-3" accept="image/*">
-                    {% if item and item.image_2 %}<small class="text-muted d-block mt-1">{{ item.image_2.name }}</small>{% endif %}
-                </div>
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">{% trans "Image 3" %}</label>
-                    <input type="file" name="image_3" class="form-control rounded-3" accept="image/*">
-                    {% if item and item.image_3 %}<small class="text-muted d-block mt-1">{{ item.image_3.name }}</small>{% endif %}
+                    <label class="form-label fw-semibold">Images &amp; vidéo (5 photos max + 1 courte vidéo)</label>
+                    {% if form_state.errors.image %}<div class="invalid-feedback d-block mb-2">{{ form_state.errors.image }}</div>{% endif %}
+                    <div class="media-upload-grid">
+                        {% for slot in '12345' %}
+                        <div data-media-slot data-kind="image" class="media-slot">
+                            <div class="media-slot-preview" data-preview>
+                                {% if slot == '1' and item and item.image %}<img src="{{ item.image.url }}" class="media-slot-media" alt="Image 1">
+                                {% elif slot == '2' and item and item.image_2 %}<img src="{{ item.image_2.url }}" class="media-slot-media" alt="Image 2">
+                                {% elif slot == '3' and item and item.image_3 %}<img src="{{ item.image_3.url }}" class="media-slot-media" alt="Image 3">
+                                {% elif slot == '4' and item and item.image_4 %}<img src="{{ item.image_4.url }}" class="media-slot-media" alt="Image 4">
+                                {% elif slot == '5' and item and item.image_5 %}<img src="{{ item.image_5.url }}" class="media-slot-media" alt="Image 5">
+                                {% else %}<i class="fas fa-image text-muted"></i>{% endif %}
+                            </div>
+                            <label class="media-slot-label">{% if slot == '1' %}Image principale{% else %}Image {{ slot }}{% endif %}</label>
+                            <input type="file" name="image{% if slot != '1' %}_{{ slot }}{% endif %}" class="media-slot-input" accept="image/*">
+                            <div class="media-slot-progress"><div class="media-slot-progress-bar"></div></div>
+                            <div class="media-slot-status"></div>
+                        </div>
+                        {% endfor %}
+                        <div data-media-slot data-kind="video" class="media-slot">
+                            <div class="media-slot-preview" data-preview>
+                                {% if item and item.video %}<video src="{{ item.video.url }}" class="media-slot-media" controls muted></video>
+                                {% else %}<i class="fas fa-video text-muted"></i>{% endif %}
+                            </div>
+                            <label class="media-slot-label">Vidéo courte (optionnel)</label>
+                            <input type="file" name="video" class="media-slot-input" accept="video/*">
+                            <div class="media-slot-progress"><div class="media-slot-progress-bar"></div></div>
+                            <div class="media-slot-status"></div>
+                        </div>
+                    </div>
                 </div>
                 <div class="form-check form-switch mb-2">
                     <input class="form-check-input" type="checkbox" name="is_active" id="smActive" {% if form_state.values.is_active or item.is_active and not form_state.values or not item and not form_state.values %}checked{% endif %}>
@@ -168,6 +186,7 @@
     </form>
 </div>
 
+<script src="{% static 'js/media_upload_progress.js' %}"></script>
 <script>
 function smAddAttr() {
     var wrap = document.createElement('div');

@@ -21,7 +21,35 @@ def _to_embed_url(url):
     dm = re.search(r'dailymotion\.com/video/([\w]+)', url)
     if dm:
         return f'https://www.dailymotion.com/embed/video/{dm.group(1)}'
+    if 'player.bilibili.com' in url:
+        return url
+    bili = re.search(r'bilibili\.com/video/(BV[\w]+)', url)
+    if bili:
+        return f'https://player.bilibili.com/player.html?bvid={bili.group(1)}&autoplay=0'
     return url
+
+
+_EMBED_PROVIDER_PATTERNS = (
+    r'youtube\.com/watch\?v=', r'youtu\.be/', r'youtube\.com/shorts/', r'youtube\.com/embed/',
+    r'vimeo\.com/', r'player\.vimeo\.com/',
+    r'dailymotion\.com/',
+    r'bilibili\.com/',
+)
+
+
+def _is_embeddable_page_url(url):
+    """True only for links to known page-embed providers (YouTube, Vimeo,
+    Dailymotion, Bilibili — including their already-in-embed-form player
+    URLs) — the only case that actually needs an <iframe>. Direct media
+    links (CDN/Pexels/S3 "download" endpoints, which often have no file
+    extension in the path at all) and any other unrecognized URL are NOT
+    embeddable pages, so get_video_source() plays them with a native
+    <video> tag instead: routing them through an <iframe> just navigates
+    to the URL and honors its Content-Disposition: attachment header,
+    popping a download prompt instead of playing inline."""
+    if not url:
+        return False
+    return any(re.search(p, url) for p in _EMBED_PROVIDER_PATTERNS)
 
 
 class Category(models.Model):
@@ -74,6 +102,9 @@ class Product(models.Model):
     image = models.ImageField(upload_to='marketplace/products/', blank=True, null=True, verbose_name='主图')
     image_2 = models.ImageField(upload_to='marketplace/products/', blank=True, null=True, verbose_name='图片2')
     image_3 = models.ImageField(upload_to='marketplace/products/', blank=True, null=True, verbose_name='图片3')
+    image_4 = models.ImageField(upload_to='marketplace/products/', blank=True, null=True, verbose_name='图片4')
+    image_5 = models.ImageField(upload_to='marketplace/products/', blank=True, null=True, verbose_name='图片5')
+    video = models.FileField(upload_to='marketplace/products/videos/', blank=True, null=True, verbose_name='短视频')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='products')
     stock = models.PositiveIntegerField(default=0, verbose_name='库存')
     min_order_quantity = models.PositiveIntegerField(default=1, verbose_name='最低购买数量')
@@ -107,9 +138,25 @@ class Product(models.Model):
         return self.name
 
     def get_image_url(self):
+        # Fall back through the other 4 slots before the generic
+        # placeholder — a vendor uploading only into "Image 2" (skipping
+        # the main slot) used to show a placeholder despite having real
+        # photos attached.
         if self.image and hasattr(self.image, 'url'):
             return self.image.url
+        gallery = self.get_gallery_images()
+        if gallery:
+            return gallery[0]
         return '/static/img/default_product.png'
+
+    def get_gallery_images(self):
+        """Non-empty image URLs across all 5 slots, in slot order."""
+        return [f.url for f in (self.image, self.image_2, self.image_3, self.image_4, self.image_5) if f]
+
+    def get_video_url(self):
+        if self.video and hasattr(self.video, 'url'):
+            return self.video.url
+        return ''
 
     def get_discount_percent(self):
         if self.original_price and self.original_price > self.price:
@@ -240,6 +287,9 @@ class SupermarketItem(models.Model):
     image = models.ImageField(upload_to='marketplace/supermarket/', blank=True, null=True, verbose_name='商品图片')
     image_2 = models.ImageField(upload_to='marketplace/supermarket/', blank=True, null=True, verbose_name='图片2')
     image_3 = models.ImageField(upload_to='marketplace/supermarket/', blank=True, null=True, verbose_name='图片3')
+    image_4 = models.ImageField(upload_to='marketplace/supermarket/', blank=True, null=True, verbose_name='图片4')
+    image_5 = models.ImageField(upload_to='marketplace/supermarket/', blank=True, null=True, verbose_name='图片5')
+    video = models.FileField(upload_to='marketplace/supermarket/videos/', blank=True, null=True, verbose_name='短视频')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='supermarket_items')
     stock = models.PositiveIntegerField(default=0, verbose_name='库存')
     min_order_quantity = models.PositiveIntegerField(default=1, verbose_name='最低购买数量')
@@ -272,9 +322,16 @@ class SupermarketItem(models.Model):
         return self.name
 
     def get_image_url(self):
+        # Fall back through the other 4 slots before the generic
+        # placeholder — a vendor uploading only into "Image 2" (skipping
+        # the main slot) used to show a placeholder despite having real
+        # photos attached.
         if self.image and hasattr(self.image, 'url'):
             return self.image.url
-        return '/static/img/default_product.png'
+        gallery = self.get_gallery_images()
+        if gallery:
+            return gallery[0]
+        return '/static/img/default_supermarket.png'
 
     def get_image_2_url(self):
         if self.image_2 and hasattr(self.image_2, 'url'):
@@ -284,6 +341,15 @@ class SupermarketItem(models.Model):
     def get_image_3_url(self):
         if self.image_3 and hasattr(self.image_3, 'url'):
             return self.image_3.url
+        return ''
+
+    def get_gallery_images(self):
+        """Non-empty image URLs across all 5 slots, in slot order."""
+        return [f.url for f in (self.image, self.image_2, self.image_3, self.image_4, self.image_5) if f]
+
+    def get_video_url(self):
+        if self.video and hasattr(self.video, 'url'):
+            return self.video.url
         return ''
 
     def get_discount_percent(self):
@@ -756,8 +822,12 @@ class CourseLesson(models.Model):
     def get_video_source(self):
         """Return a playable video source, preferring the uploaded file.
 
-        For external links (video_url), common platforms (YouTube, Vimeo,
-        Dailymotion) are rewritten to their embeddable player URL — a plain
+        For external links (video_url): a direct media file link (.mp4,
+        .webm, ...) is played with a native <video> tag, same as an
+        uploaded file — an <iframe> would just navigate to it and trigger
+        a download instead of playing inline. Everything else is treated
+        as a page to embed, with common platforms (YouTube, Vimeo,
+        Dailymotion) rewritten to their embeddable player URL — a plain
         "watch"/"share" link refuses to load inside an <iframe> (frame
         ancestors / X-Frame-Options), which otherwise leaves the course
         player showing a blank frame.
@@ -765,7 +835,9 @@ class CourseLesson(models.Model):
         if self.video_file:
             return {'type': 'file', 'url': self.video_file.url}
         if self.video_url:
-            return {'type': 'iframe', 'url': _to_embed_url(self.video_url)}
+            if _is_embeddable_page_url(self.video_url):
+                return {'type': 'iframe', 'url': _to_embed_url(self.video_url)}
+            return {'type': 'file', 'url': self.video_url}
         return None
 
 

@@ -423,7 +423,7 @@
 <div class="books-filter-tabs" style="display:none;" id="booksFilterTabs">
     <a href="{% url 'manager:public_books' %}" class="bft-item {% if not current_category %}active{% endif %}" data-zh="{% trans 'All' %}" data-en="{% trans 'All' %}" data-fr="{% trans 'All' %}">{% trans "All" %}</a>
     {% for cat in categories %}
-    <a href="{% url 'manager:public_books' %}?category={{ cat.slug }}" class="bft-item {% if current_category == cat.slug %}active{% endif %}" data-zh="{{ cat.name }}" data-en="{{ cat.name_en|default:cat.name }}" data-fr="{{ cat.name_fr|default:cat.name }}">{{ cat.name }}</a>
+    <a href="{% url 'manager:public_books' %}?category={{ cat.slug }}" class="bft-item {% if current_category == cat.slug %}active{% endif %}" data-zh="{{ cat.name }}" data-en="{{ cat.name_en|default:cat.name }}" data-fr="{{ cat.name_fr|default:cat.name }}">{{ cat.name_fr|default:cat.name }}</a>
     {% endfor %}
     <a href="{% url 'marketplace:course_list' %}" class="bft-item" data-zh="{% trans 'Courses' %}" data-en="{% trans 'Courses' %}" data-fr="{% trans 'Courses' %}">{% trans "Courses" %}</a>
 </div>
@@ -433,7 +433,7 @@
     {% for cat in categories|slice:":10" %}
     <a href="{% url 'manager:public_books' %}?category={{ cat.slug }}" class="bkk-item">
         <div class="bkk-icon" style="background:{{ cat.color|default:'#1d4ed8' }}"><i class="{{ cat.icon|default:'fas fa-book' }}"></i></div>
-        <span data-zh="{{ cat.name }}" data-en="{{ cat.name_en|default:cat.name }}" data-fr="{{ cat.name_fr|default:cat.name }}">{{ cat.name }}</span>
+        <span data-zh="{{ cat.name }}" data-en="{{ cat.name_en|default:cat.name }}" data-fr="{{ cat.name_fr|default:cat.name }}">{{ cat.name_fr|default:cat.name }}</span>
     </a>
     {% endfor %}
 </div>
@@ -490,7 +490,7 @@
                     <select name="category" class="form-select" style="width: auto;">
                         <option value="" {% if not current_category %}selected{% endif %}>{% trans "所有分类" %}</option>
                         {% for cat in categories %}
-                        <option value="{{ cat.slug }}" {% if current_category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
+                        <option value="{{ cat.slug }}" {% if current_category == cat.slug %}selected{% endif %}>{{ cat.name_fr|default:cat.name }}</option>
                         {% endfor %}
                     </select>
                     <select name="sort" class="form-select" style="width: auto;">

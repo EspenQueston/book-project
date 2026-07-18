@@ -124,6 +124,17 @@ def _admin_required(request):
     return None
 
 
+def _apply_uploaded_media(obj, request):
+    """Attach any uploaded image_4/image_5/video files from request.FILES
+    onto obj (Product or SupermarketItem). Mirrors the existing per-field
+    image/image_2/image_3 handling at each call site — kept separate so the
+    5-image + 1-video slots stay in sync across all 4 product/supermarket
+    admin+vendor create/edit views without duplicating this list everywhere."""
+    for field in ('image_4', 'image_5', 'video'):
+        if request.FILES.get(field):
+            setattr(obj, field, request.FILES[field])
+
+
 def _positive_int(value, default=1):
     try:
         return max(1, int(value))
@@ -475,6 +486,7 @@ def product_detail(request, slug):
     preview = list(reviews_for_listing('product', product.pk)[:3])
     summary = review_summary('product', product.pk)
     seller_vendor = resolve_listing_vendor(product.vendor)
+    from manager.fulfillment_service import get_delivery_estimate
     context = {
         'product': product,
         'seller_vendor': seller_vendor,
@@ -491,6 +503,7 @@ def product_detail(request, slug):
         'listing_id': product.pk,
         'max_purchase_quantity': _max_purchase_quantity(product),
         'pricing_display': pricing_display_context(product),
+        'delivery_estimate': get_delivery_estimate('product', product.pk),
         **_seller_follow_context(request, seller_vendor),
     }
     return render(request, 'marketplace/product_detail.html', context)
@@ -766,6 +779,7 @@ def supermarket_detail(request, slug):
 
     seller_vendor = resolve_listing_vendor(item.vendor)
 
+    from manager.fulfillment_service import get_delivery_estimate
     context = {
         'item': item,
         'seller_vendor': seller_vendor,
@@ -780,6 +794,7 @@ def supermarket_detail(request, slug):
         'listing_id': item.pk,
         'max_purchase_quantity': _max_purchase_quantity(item),
         'pricing_display': pricing_display_context(item),
+        'delivery_estimate': get_delivery_estimate('supermarket', item.pk),
         **_seller_follow_context(request, seller_vendor),
     }
     return render(request, 'marketplace/supermarket_detail.html', context)
@@ -1040,15 +1055,22 @@ def checkout(request):
         messages.warning(request, '购物车为空')
         return redirect('marketplace:home')
 
+    from manager.fulfillment_service import get_delivery_estimate
+
     items_with_details = []
     total_amount = Decimal('0')
     total_qty = 0
+    overall_delivery_estimate = None
     for ci in cart_items:
         item = ci.get_item()
         if item:
             subtotal = ci.get_total_price()
             total_amount += subtotal
             total_qty += ci.quantity
+            # Courses are digital — no shipping estimate applies.
+            item_delivery = get_delivery_estimate(ci.item_type, item.pk) if ci.item_type != 'course' else None
+            if item_delivery and (overall_delivery_estimate is None or item_delivery['days_max'] > overall_delivery_estimate['days_max']):
+                overall_delivery_estimate = item_delivery
             items_with_details.append({
                 'cart_item': ci,
                 'cart_item_id': ci.id,
@@ -1061,6 +1083,7 @@ def checkout(request):
                 'total_price': subtotal,
                 'selected_attributes': ci.selected_attributes or {},
                 'pricing_rule_log': ci.pricing_rule_log or {},
+                'delivery_estimate': item_delivery,
             })
 
     if request.method == 'POST':
@@ -1232,6 +1255,7 @@ def checkout(request):
         'wallet_balance': wallet_balance,
         'checkout_cities_by_country': get_checkout_cities_by_country(),
         'donation_amount': DONATION_AMOUNT,
+        'delivery_estimate': overall_delivery_estimate,
     }
     return render(request, 'marketplace/checkout.html', context)
 
@@ -1572,6 +1596,7 @@ def admin_product_add(request):
             product.image_2 = request.FILES['image_2']
         if 'image_3' in request.FILES:
             product.image_3 = request.FILES['image_3']
+        _apply_uploaded_media(product, request)
 
         # Ensure unique slug
         base_slug = product.slug
@@ -1638,6 +1663,7 @@ def admin_product_edit(request, pk):
             product.image_2 = request.FILES['image_2']
         if 'image_3' in request.FILES:
             product.image_3 = request.FILES['image_3']
+        _apply_uploaded_media(product, request)
         assign_official_vendor(product)
         product.save()
 
@@ -2044,6 +2070,11 @@ def admin_supermarket_add(request):
             item.vendor_id = int(vendor_id)
         if 'image' in request.FILES:
             item.image = request.FILES['image']
+        if 'image_2' in request.FILES:
+            item.image_2 = request.FILES['image_2']
+        if 'image_3' in request.FILES:
+            item.image_3 = request.FILES['image_3']
+        _apply_uploaded_media(item, request)
 
         base_slug = item.slug
         counter = 1
@@ -2115,6 +2146,11 @@ def admin_supermarket_edit(request, pk):
             assign_official_vendor(item)
         if 'image' in request.FILES:
             item.image = request.FILES['image']
+        if 'image_2' in request.FILES:
+            item.image_2 = request.FILES['image_2']
+        if 'image_3' in request.FILES:
+            item.image_3 = request.FILES['image_3']
+        _apply_uploaded_media(item, request)
         item.save()
 
         # Update dynamic attributes: clear old, save new
@@ -2832,6 +2868,7 @@ def _handle_vendor_product_form_submission(request, vendor, redirect_name='marke
             product.image_2 = request.FILES['image_2']
         if request.FILES.get('image_3'):
             product.image_3 = request.FILES['image_3']
+        _apply_uploaded_media(product, request)
 
         base_slug = product.slug
         counter = 1
@@ -2952,6 +2989,7 @@ def vendor_product_edit(request, pk):
             product.image_2 = request.FILES['image_2']
         if 'image_3' in request.FILES:
             product.image_3 = request.FILES['image_3']
+        _apply_uploaded_media(product, request)
         product.save()
 
         product.attributes.all().delete()
@@ -3383,6 +3421,7 @@ def vendor_supermarket_add(request):
             item.image_2 = request.FILES['image_2']
         if 'image_3' in request.FILES:
             item.image_3 = request.FILES['image_3']
+        _apply_uploaded_media(item, request)
 
         base_slug = item.slug
         counter = 1
@@ -3451,6 +3490,7 @@ def vendor_supermarket_edit(request, pk):
             item.image_2 = request.FILES['image_2']
         if 'image_3' in request.FILES:
             item.image_3 = request.FILES['image_3']
+        _apply_uploaded_media(item, request)
         item.save()
 
         item.attributes.all().delete()

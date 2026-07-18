@@ -122,6 +122,21 @@ def resolve_delivery_days(item_type, item_id):
     return PLATFORM_DEFAULT_DELIVERY_DAYS_MIN, PLATFORM_DEFAULT_DELIVERY_DAYS_MAX
 
 
+def get_delivery_estimate(item_type, item_id):
+    """Display-ready delivery estimate for a single listing (product/
+    supermarket/course/book detail pages, checkout line items). Wraps
+    resolve_delivery_days() with the calendar dates a shopper actually
+    reads, rather than the raw day counts a vendor's admin form deals in."""
+    days_min, days_max = resolve_delivery_days(item_type, item_id)
+    today = timezone.now().date()
+    return {
+        'days_min': days_min,
+        'days_max': days_max,
+        'date_min': today + timedelta(days=days_min),
+        'date_max': today + timedelta(days=days_max),
+    }
+
+
 def suggested_delivery_date(shipment):
     """Conservative (max-days) estimated delivery date across every item in
     a shipment — used to pre-fill the vendor's ship-form date input, which
