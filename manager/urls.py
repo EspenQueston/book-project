@@ -229,6 +229,10 @@ urlpatterns = [
     path('vendor/edit-book/', views.vendor_edit_book, name='vendor_edit_book'),
     path('vendor/delete-book/', views.vendor_delete_book, name='vendor_delete_book'),
     path('vendor/toggle-book/', views.vendor_toggle_book, name='vendor_toggle_book'),
+    path('vendor/book-categories/', views.vendor_book_categories, name='vendor_book_categories'),
+    path('vendor/book-categories/add/', views.vendor_book_category_add, name='vendor_book_category_add'),
+    path('vendor/book-categories/<int:pk>/edit/', views.vendor_book_category_edit, name='vendor_book_category_edit'),
+    path('vendor/book-categories/<int:pk>/delete/', views.vendor_book_category_delete, name='vendor_book_category_delete'),
 
     # =========================Admin Vendor Management========================
     path('admin/returns/', views.admin_returns_queue, name='admin_returns_queue'),

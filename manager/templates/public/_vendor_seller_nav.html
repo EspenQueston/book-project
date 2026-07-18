@@ -108,6 +108,10 @@
            href="{% url 'manager:vendor_books' %}">
             <i class="fas fa-book-open"></i>{% trans "图书管理" %}
         </a>
+        <a class="vp-sn-link {% if rn.namespace == 'manager' and rn.url_name == 'vendor_book_categories' or rn.namespace == 'manager' and rn.url_name == 'vendor_book_category_add' or rn.namespace == 'manager' and rn.url_name == 'vendor_book_category_edit' %}nav-active{% endif %}"
+           href="{% url 'manager:vendor_book_categories' %}">
+            <i class="fas fa-tags"></i>{% trans "图书分类" %}
+        </a>
 
         <div class="vp-sn-label">Marketplace</div>
         <a class="vp-sn-link {% if rn.namespace == 'marketplace' and rn.url_name == 'vendor_products' %}nav-active{% endif %}"
@@ -121,6 +125,10 @@
         <a class="vp-sn-link {% if rn.namespace == 'marketplace' and rn.url_name == 'vendor_courses' %}nav-active{% endif %}"
            href="{% url 'marketplace:vendor_courses' %}">
             <i class="fas fa-graduation-cap"></i>{% trans "课程列表" %}
+        </a>
+        <a class="vp-sn-link {% if rn.namespace == 'marketplace' and rn.url_name == 'vendor_categories' or rn.namespace == 'marketplace' and rn.url_name == 'vendor_category_add' or rn.namespace == 'marketplace' and rn.url_name == 'vendor_category_edit' %}nav-active{% endif %}"
+           href="{% url 'marketplace:vendor_categories' %}">
+            <i class="fas fa-tags"></i>{% trans "我的分类" %}
         </a>
 
         <div class="vp-sn-divider"></div>

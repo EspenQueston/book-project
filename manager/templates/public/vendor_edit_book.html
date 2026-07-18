@@ -112,14 +112,14 @@
                         <div class="col-md-6">
                             <label class="book-label d-flex align-items-center justify-content-between">
                                 <span>{% trans "图书分类" %}</span>
-                                <a href="{% url 'manager:book_categories' %}" class="inline-add-btn" style="text-decoration:none;" target="_blank">
+                                <a href="{% url 'manager:vendor_book_categories' %}" class="inline-add-btn" style="text-decoration:none;" target="_blank">
                                     <i class="fas fa-layer-group me-1"></i>{% trans "管理分类" %}
                                 </a>
                             </label>
                             <select name="category_id" class="form-select">
                                 <option value="">{% trans "未分类" %}</option>
                                 {% for cat in categories %}
-                                <option value="{{ cat.id }}" {% if book.category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+                                <option value="{{ cat.id }}" {% if book.category_id == cat.id %}selected{% endif %}>{{ cat.get_display_name }}</option>
                                 {% endfor %}
                             </select>
                             <div class="book-help">{% trans "此分类会同步用于移动端和桌面端的图书筛选。" %}</div>
@@ -235,7 +235,7 @@ function submitEdit(e) {
             btn.innerHTML = '<i class="fas fa-save me-2"></i>{% trans "保存修改" %}';
         }
     }).catch(() => {
-        gToast('网络错误', 'error');
+        gToast('{% trans "网络错误" %}', 'error');
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-save me-2"></i>{% trans "保存修改" %}';
     });

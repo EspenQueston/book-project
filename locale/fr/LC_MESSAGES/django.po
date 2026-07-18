@@ -6580,3 +6580,19 @@ msgstr "Marqué automatiquement après visionnage"
 #: marketplace/templates/marketplace/course_detail.html
 msgid "下载附件"
 msgstr "Télécharger la pièce jointe"
+
+#: manager/templates/includes/global_popups.html
+msgid "Are you sure you want to sign out?"
+msgstr "Voulez-vous vraiment vous déconnecter ?"
+
+#: manager/templates/includes/global_popups.html
+msgid "Confirm deletion"
+msgstr "Confirmer la suppression"
+
+#: manager/templates/includes/global_popups.html
+msgid "Are you sure you want to delete this item?"
+msgstr "Voulez-vous vraiment supprimer cet élément ?"
+
+#: manager/templates/includes/global_popups.html
+msgid "Sign out"
+msgstr "Déconnexion"

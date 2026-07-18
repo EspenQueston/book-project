@@ -1,0 +1,66 @@
+{% extends 'public/vendor_panel_base.html' %}
+{% load i18n %}
+
+{% block panel_title %}{% if category %}{% trans "编辑图书分类" %}{% else %}{% trans "新增图书分类" %}{% endif %} · {% trans "卖家中心" %}{% endblock %}
+
+{% block panel_extra_css %}
+<style>
+    .book-hero {
+        background: linear-gradient(135deg, #0f172a 0%, #7c3aed 55%, #c084fc 100%);
+        color:#fff; border-radius:24px; padding:26px; box-shadow:0 18px 45px rgba(15,23,42,.22); margin-bottom:22px;
+    }
+    .book-hero h2 { font-size:1.4rem; font-weight:800; margin:0 0 8px; }
+    .book-card { background:var(--card-bg,#fff); border:1px solid rgba(148,163,184,.18); border-radius:24px; padding:24px; box-shadow:0 16px 44px rgba(15,23,42,.08); }
+    .book-card .form-control { min-height:48px; border-radius:16px; border:1.5px solid #dbe3f3; padding:12px 16px; box-shadow:none; }
+    .book-card .form-control:focus { border-color:#7c3aed; box-shadow:0 0 0 4px rgba(124,58,237,.10); }
+    .book-label { font-weight:700; color:#334155; margin-bottom:8px; }
+    .book-help { font-size:.8rem; color:#64748b; margin-top:6px; }
+    .btn-submit { background: linear-gradient(135deg, #7c3aed, #c084fc); color:#fff; border:none; border-radius:999px; padding:14px 28px; font-weight:800; }
+    .book-outline-btn { border-radius:999px; padding:14px 28px; font-weight:700; }
+</style>
+{% endblock %}
+
+{% block vendor_panel_content %}
+<section class="book-hero">
+    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+        <div>
+            <div class="text-uppercase small fw-bold opacity-75 mb-2">{% trans "分类工作台" %}</div>
+            <h2><i class="fas fa-tags me-2"></i>{% if category %}{% trans "编辑图书分类" %}{% else %}{% trans "新增图书分类" %}{% endif %}</h2>
+        </div>
+        <a href="{% url 'manager:vendor_book_categories' %}" class="btn btn-light rounded-pill px-4 fw-semibold">
+            <i class="fas fa-arrow-left me-2"></i>{% trans "返回分类列表" %}
+        </a>
+    </div>
+</section>
+
+<div class="book-card">
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label class="book-label">{% trans "分类名称" %} <span class="text-danger">*</span></label>
+            <input type="text" name="name" class="form-control" value="{{ category.name|default:'' }}" required minlength="2">
+            {% if not category %}<div class="book-help">{% trans "创建后会自动翻译成其他语言。" %}</div>{% endif %}
+        </div>
+        {% if category %}
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="book-label">English name</label>
+                <input type="text" name="name_en" class="form-control" value="{{ category.name_en|default:'' }}">
+            </div>
+            <div class="col-md-6">
+                <label class="book-label">Nom français</label>
+                <input type="text" name="name_fr" class="form-control" value="{{ category.name_fr|default:'' }}">
+            </div>
+        </div>
+        {% endif %}
+        <div class="mb-3 mt-3">
+            <label class="book-label">{% trans "描述" %}</label>
+            <textarea name="description" class="form-control" rows="3">{{ category.description|default:'' }}</textarea>
+        </div>
+        <div class="d-flex gap-2 mt-3">
+            <button type="submit" class="btn-submit"><i class="fas fa-check me-2"></i>{% trans "保存" %}</button>
+            <a href="{% url 'manager:vendor_book_categories' %}" class="btn btn-outline-secondary book-outline-btn">{% trans "取消" %}</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

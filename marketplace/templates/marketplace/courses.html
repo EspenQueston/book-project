@@ -32,7 +32,7 @@
         height: 100%;
     }
     .course-card:hover { transform: translateY(-5px); box-shadow: 0 12px 30px rgba(240,147,251,0.2); }
-    .course-card-img { width: 100%; height: 200px; object-fit: contain; background: linear-gradient(135deg, #fdf2f8, #fce7f3); padding: 8px; }
+    .course-card-img { width: 100%; height: 200px; object-fit: cover; }
     .course-card-body { padding: 20px; }
     .course-card-body h5 { font-weight: 700; font-size: 1rem; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .course-price { font-size: 1.3rem; font-weight: 800; color: #ef4444; }
@@ -79,9 +79,6 @@
     html[data-theme="dark"] .course-card {
         background: var(--bg-surface);
         box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    }
-    html[data-theme="dark"] .course-card-img {
-        background: linear-gradient(135deg, #1e1b4b, #312e81);
     }
     html[data-theme="dark"] .course-card-body h5 {
         color: var(--text-primary);

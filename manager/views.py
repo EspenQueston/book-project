@@ -5566,7 +5566,7 @@ def manage_book_categories(request):
         elif action == 'delete':
             cat_id = request.POST.get('category_id')
             try:
-                cat = models.BookCategory.objects.get(id=cat_id)
+                cat = models.BookCategory.objects.get(id=cat_id, vendor__isnull=True)
                 name = cat.name
                 cat.delete()
                 messages.success(request, f'图书分类 "{name}" 已删除')
@@ -5576,7 +5576,7 @@ def manage_book_categories(request):
         elif action == 'toggle':
             cat_id = request.POST.get('category_id')
             try:
-                cat = models.BookCategory.objects.get(id=cat_id)
+                cat = models.BookCategory.objects.get(id=cat_id, vendor__isnull=True)
                 cat.is_active = not cat.is_active
                 cat.save(update_fields=['is_active'])
                 messages.success(request, f'图书分类 "{cat.name}" 状态已更新')
@@ -5585,7 +5585,9 @@ def manage_book_categories(request):
 
         return redirect('/manager/book_categories/')
 
-    categories = models.BookCategory.objects.filter(parent__isnull=True).annotate(
+    # Admin manages only admin/global categories (vendor=NULL) — vendor-owned
+    # ones are managed independently from the vendor panel.
+    categories = models.BookCategory.objects.filter(parent__isnull=True, vendor__isnull=True).annotate(
         book_count=Count('books')
     )
     return render(request, 'book/book_categories.html', {'categories': categories, 'name': request.session["name"]})
@@ -9724,6 +9726,8 @@ def vendor_add_book(request):
             return JsonResponse(_vendor_book_error('description', 'La description du livre est obligatoire.'))
         if len(description) < 12:
             return JsonResponse(_vendor_book_error('description', 'La description du livre doit contenir au moins 12 caractères.'))
+        if models.VendorBook.objects.filter(vendor=vendor, book__name__iexact=name).exists():
+            return JsonResponse(_vendor_book_error('name', 'Vous avez déjà publié un livre avec ce titre. Utilisez un titre différent.'))
         if not publisher_id:
             return JsonResponse(_vendor_book_error('publisher_id', 'La maison d’édition est obligatoire.'))
         if not author_ids:
@@ -9776,7 +9780,7 @@ def vendor_add_book(request):
 
     publishers = models.Publisher.objects.all()
     authors = models.Author.objects.all()
-    categories = models.BookCategory.objects.filter(is_active=True)
+    categories = models.BookCategory.objects.filter(Q(vendor__isnull=True) | Q(vendor=vendor), is_active=True)
     context = {
         'vendor': vendor,
         'publishers': publishers,
@@ -9820,7 +9824,7 @@ def vendor_edit_book(request):
         authors = models.Author.objects.all()
         book_author_ids = list(book.author_set.values_list('id', flat=True))
         publishers = models.Publisher.objects.all()
-        categories = models.BookCategory.objects.filter(is_active=True)
+        categories = models.BookCategory.objects.filter(Q(vendor__isnull=True) | Q(vendor=vb.vendor), is_active=True)
         return render(request, 'public/vendor_edit_book.html', {
             'vendor': vendor or vb.vendor,
             'vb': vb,
@@ -9880,6 +9884,8 @@ def vendor_edit_book(request):
             return JsonResponse({'success': False, 'message': '图书描述不能为空。', 'field': 'description'})
         if len(description) < 12:
             return JsonResponse({'success': False, 'message': '图书描述至少需要 12 个字符。', 'field': 'description'})
+        if models.VendorBook.objects.filter(vendor=vb.vendor, book__name__iexact=name).exclude(pk=vb.pk).exists():
+            return JsonResponse({'success': False, 'message': 'Vous avez déjà publié un livre avec ce titre. Utilisez un titre différent.', 'field': 'name'})
         if not publisher_id:
             return JsonResponse({'success': False, 'message': '出版社不能为空。', 'field': 'publisher_id'})
         if not author_ids:
@@ -9934,6 +9940,132 @@ def vendor_edit_book(request):
         return JsonResponse({'success': True, 'message': '图书信息已更新', 'redirect_url': reverse('manager:vendor_books')})
 
     return JsonResponse({'success': False})
+
+
+# ─── Vendor Book Categories (own categories, separate from admin's) ────────
+
+def vendor_book_categories(request):
+    """
+    Show the vendor's own book categories (editable) plus the platform
+    admin's global ones (read-only reference — managed only from the admin
+    panel), each with a book count. Category names are unique per vendor
+    only, not checked against admin's, so seeing both side by side avoids
+    a vendor unknowingly re-creating something that already exists.
+    """
+    vendor = _get_vendor(request)
+    if not vendor:
+        return redirect('/manager/vendor/login/')
+    own_categories = models.BookCategory.objects.filter(vendor=vendor).annotate(
+        book_count=Count('books')
+    ).order_by('display_order', 'name')
+    admin_categories = models.BookCategory.objects.filter(vendor__isnull=True).annotate(
+        book_count=Count('books')
+    ).order_by('display_order', 'name')
+    return render(request, 'public/vendor_book_categories.html', {
+        'vendor': vendor,
+        'categories': own_categories,
+        'admin_categories': admin_categories,
+    })
+
+
+def _translate_book_category_names(name, source_lang):
+    """
+    Fills in name_en/name_fr for a vendor-created BookCategory via OpenRouter.
+    BookCategory doesn't use django-modeltranslation (plain name_en/name_fr
+    CharFields, no auto-translate signal), so this is called directly at
+    save time instead of relying on a post_save hook like Product/Course do.
+    """
+    from core.services.translation_service import TranslationService
+    targets = [lang for lang in ('en', 'fr', 'zh-hans') if lang != source_lang][:2]
+    svc = TranslationService()
+    translated = svc.translate_fields(name, source=source_lang, targets=tuple(targets), content_type='general')
+    return {
+        'name_en': translated.get('en', ''),
+        'name_fr': translated.get('fr', ''),
+    }
+
+
+def vendor_book_category_add(request):
+    vendor = _get_vendor(request)
+    if not vendor:
+        return redirect('/manager/vendor/login/')
+
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        description = request.POST.get('description', '').strip()
+        if not name:
+            messages.error(request, 'Le nom de la catégorie est obligatoire.')
+            return render(request, 'public/vendor_book_category_form.html', {'vendor': vendor, 'category': None})
+        if len(name) < 2:
+            messages.error(request, 'Le nom de la catégorie doit contenir au moins 2 caractères.')
+            return render(request, 'public/vendor_book_category_form.html', {'vendor': vendor, 'category': None})
+        if models.BookCategory.objects.filter(vendor=vendor, name__iexact=name).exists():
+            messages.error(request, 'Vous avez déjà une catégorie avec ce nom.')
+            return render(request, 'public/vendor_book_category_form.html', {'vendor': vendor, 'category': None})
+
+        base_slug = slugify(name, allow_unicode=True) or f'vcat-{uuid.uuid4().hex[:8]}'
+        slug = base_slug
+        counter = 1
+        while models.BookCategory.objects.filter(slug=slug).exists():
+            slug = f'{base_slug}-{counter}'
+            counter += 1
+
+        from django.utils import translation
+        current_lang = translation.get_language()
+        source_lang = current_lang if current_lang in ('en', 'fr', 'zh-hans') else 'fr'
+        names = _translate_book_category_names(name, source_lang)
+
+        category = models.BookCategory.objects.create(
+            vendor=vendor,
+            name=name,
+            name_en=names['name_en'] if source_lang != 'en' else name,
+            name_fr=names['name_fr'] if source_lang != 'fr' else name,
+            slug=slug,
+            description=description,
+            is_active=True,
+        )
+        messages.success(request, f'Catégorie "{category.name}" créée.')
+        return redirect('manager:vendor_book_categories')
+
+    return render(request, 'public/vendor_book_category_form.html', {'vendor': vendor, 'category': None})
+
+
+def vendor_book_category_edit(request, pk):
+    vendor = _get_vendor(request)
+    if not vendor:
+        return redirect('/manager/vendor/login/')
+    category = get_object_or_404(models.BookCategory, pk=pk, vendor=vendor)
+
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        description = request.POST.get('description', '').strip()
+        if not name or len(name) < 2:
+            messages.error(request, 'Le nom de la catégorie doit contenir au moins 2 caractères.')
+            return render(request, 'public/vendor_book_category_form.html', {'vendor': vendor, 'category': category})
+        if models.BookCategory.objects.filter(vendor=vendor, name__iexact=name).exclude(pk=category.pk).exists():
+            messages.error(request, 'Vous avez déjà une catégorie avec ce nom.')
+            return render(request, 'public/vendor_book_category_form.html', {'vendor': vendor, 'category': category})
+
+        category.name = name
+        category.name_en = request.POST.get('name_en', '').strip()
+        category.name_fr = request.POST.get('name_fr', '').strip()
+        category.description = description
+        category.save()
+        messages.success(request, f'Catégorie "{category.name}" mise à jour.')
+        return redirect('manager:vendor_book_categories')
+
+    return render(request, 'public/vendor_book_category_form.html', {'vendor': vendor, 'category': category})
+
+
+@require_POST
+def vendor_book_category_delete(request, pk):
+    vendor = _get_vendor(request)
+    if not vendor:
+        return redirect('/manager/vendor/login/')
+    category = get_object_or_404(models.BookCategory, pk=pk, vendor=vendor)
+    category.delete()
+    messages.success(request, 'Catégorie supprimée.')
+    return redirect('manager:vendor_book_categories')
 
 
 def vendor_delete_book(request):

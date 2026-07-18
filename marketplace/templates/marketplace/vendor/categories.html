@@ -1,0 +1,123 @@
+{% extends "marketplace/vendor/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "我的分类" %} · {{ vendor.company_name }}{% endblock %}
+
+{% block extra_vendor_css %}
+    .vendor-unified-shell { display:flex; flex-direction:column; gap:20px; }
+    .vendor-hero { background:linear-gradient(135deg,#0f172a,#7c3aed 55%,#c084fc); border-radius:28px; color:#fff; padding:26px; box-shadow:0 18px 45px rgba(15,23,42,.22); }
+    .vendor-hero-actions .btn { border-radius:999px; padding:12px 20px; font-weight:700; }
+    .vendor-panel-card { background:#fff; border:1px solid #e2e8f0; border-radius:24px; box-shadow:0 10px 30px rgba(15,23,42,.06); }
+    .vendor-table thead th { font-size:.76rem; letter-spacing:.06em; text-transform:uppercase; color:#64748b; border-bottom:none; }
+    .vendor-table tbody td { padding:18px 16px; vertical-align:middle; }
+    .vendor-row-title { font-weight:800; color:#0f172a; }
+    .vendor-actions { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    .vendor-actions .btn { border-radius:999px; }
+    .cat-section-tabs { display:flex; gap:8px; padding:18px; flex-wrap:wrap; }
+    .cat-section-tabs a { border-radius:999px; padding:8px 18px; font-weight:700; font-size:.85rem; text-decoration:none; border:1.5px solid #e2e8f0; color:#475569; }
+    .cat-section-tabs a.active { background:#7c3aed; border-color:#7c3aed; color:#fff; }
+
+    .cat-section-title { font-weight:800; font-size:1.05rem; color:#0f172a; display:flex; align-items:center; gap:10px; margin-bottom:4px; }
+    .cat-section-hint { color:#64748b; font-size:.85rem; margin-bottom:16px; }
+
+    /* Modern card grid for platform (read-only) categories */
+    .platform-cat-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:14px; }
+    .platform-cat-card {
+        background:#fff; border:1px solid rgba(148,163,184,.16); border-radius:18px; overflow:hidden;
+        display:flex; flex-direction:column; transition:transform .18s ease, box-shadow .18s ease;
+    }
+    .platform-cat-card:hover { transform:translateY(-3px); box-shadow:0 14px 30px rgba(15,23,42,.10); }
+    .platform-cat-media { width:100%; height:100px; object-fit:cover; background:linear-gradient(135deg,#7c3aed,#c084fc); }
+    .platform-cat-media-fallback {
+        width:100%; height:100px; display:flex; align-items:center; justify-content:center;
+        background:linear-gradient(135deg,#7c3aed,#c084fc); color:#fff; font-size:1.6rem;
+    }
+    .platform-cat-body { padding:14px; display:flex; flex-direction:column; gap:8px; }
+    .platform-cat-name { font-weight:800; color:#0f172a; font-size:.95rem; line-height:1.25; }
+    .platform-cat-desc { color:#64748b; font-size:.78rem; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; min-height:2.1em; }
+    .platform-cat-count { align-self:flex-start; font-size:.74rem; font-weight:700; padding:4px 11px; border-radius:999px; background:#f1f5f9; color:#475569; }
+    .platform-cat-empty { grid-column:1/-1; text-align:center; padding:40px 20px; color:#94a3b8; }
+{% endblock %}
+
+{% block vendor_content %}
+<div class="vendor-unified-shell">
+    <section class="vendor-hero">
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+            <div>
+                <div class="text-uppercase small fw-bold opacity-75 mb-2">{% trans "分类工作台" %}</div>
+                <h3 class="mb-2 fw-bold"><i class="fas fa-tags me-2"></i>{% trans "我的分类" %}</h3>
+                <p class="mb-0 opacity-75">{% trans "创建您自己的分类，独立于平台管理员的分类，用于您的商品、课程与超市商品。" %}</p>
+            </div>
+            <div class="vendor-hero-actions d-flex gap-2 flex-wrap">
+                <a href="{% url 'marketplace:vendor_category_add' %}?section={{ section }}" class="btn btn-light text-dark"><i class="fas fa-plus me-2"></i>{% trans "新增分类" %}</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="vendor-panel-card overflow-hidden">
+        <div class="cat-section-tabs">
+            {% for value, label in section_choices %}
+            <a href="?section={{ value }}" class="{% if section == value %}active{% endif %}">
+                {% if value == 'products' %}{% trans "商品" %}{% elif value == 'courses' %}{% trans "课程" %}{% else %}{% trans "超市" %}{% endif %}
+            </a>
+            {% endfor %}
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 vendor-table">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">{% trans "分类名称" %}</th>
+                        <th>{% trans "描述" %}</th>
+                        <th>{% trans "数量" %}</th>
+                        <th class="pe-4">{% trans "操作" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category in categories %}
+                    <tr>
+                        <td class="ps-4"><span class="vendor-row-title">{{ category.name }}</span></td>
+                        <td class="text-muted text-truncate" style="max-width:320px;">{{ category.description|default:"" }}</td>
+                        <td><span class="badge rounded-pill text-bg-light">{{ category.item_count }}</span></td>
+                        <td class="pe-4">
+                            <div class="vendor-actions">
+                                <a href="{% url 'marketplace:vendor_category_edit' category.pk %}" class="btn btn-sm btn-outline-primary">{% trans "编辑" %}</a>
+                                <form method="post" action="{% url 'marketplace:vendor_category_delete' category.pk %}" class="d-inline" data-confirm-message="{% trans '确定删除此分类吗？' %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">{% trans "删除" %}</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4" class="text-center py-5 text-muted">{% trans "暂无分类" %}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section>
+        <div class="cat-section-title"><i class="fas fa-shield-halved text-muted"></i>{% trans "平台分类" %}</div>
+        <div class="platform-cat-grid">
+            {% for category in admin_categories %}
+            <div class="platform-cat-card">
+                {% if category.image %}
+                <img src="{{ category.image.url }}" class="platform-cat-media" alt="">
+                {% else %}
+                <div class="platform-cat-media-fallback">
+                    <i class="fas {% if section == 'products' %}fa-shopping-bag{% elif section == 'courses' %}fa-graduation-cap{% else %}fa-apple-alt{% endif %}"></i>
+                </div>
+                {% endif %}
+                <div class="platform-cat-body">
+                    <div class="platform-cat-name">{{ category.name }}</div>
+                    <div class="platform-cat-desc">{{ category.description|default:"" }}</div>
+                    <span class="platform-cat-count"><i class="fas fa-layer-group me-1"></i>{{ category.item_count }}</span>
+                </div>
+            </div>
+            {% empty %}
+            <div class="platform-cat-empty">{% trans "暂无分类" %}</div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}

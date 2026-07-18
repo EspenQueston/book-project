@@ -29,7 +29,6 @@ urlpatterns = [
     path('lesson/<int:lesson_id>/toggle/', views.toggle_lesson_complete, name='toggle_lesson_complete'),
     path('lesson/<int:lesson_id>/pdf/', views.serve_lesson_pdf, name='serve_lesson_pdf'),
     path('lesson/<int:lesson_id>/download/', views.download_lesson, name='download_lesson'),
-    path('lesson/<int:lesson_id>/download-resource/', views.download_lesson_resource, name='download_lesson_resource'),
     path('courses/<slug:slug>/download/', views.download_course_bundle, name='download_course_bundle'),
 
     # Admin management
@@ -82,6 +81,10 @@ urlpatterns = [
     path('vendor/supermarket/<int:pk>/edit/', views.vendor_supermarket_edit, name='vendor_supermarket_edit'),
     path('vendor/supermarket/<int:pk>/delete/', views.vendor_supermarket_delete, name='vendor_supermarket_delete'),
     path('vendor/supermarket/<int:pk>/toggle/', views.vendor_supermarket_toggle, name='vendor_supermarket_toggle'),
+    path('vendor/categories/', views.vendor_categories, name='vendor_categories'),
+    path('vendor/categories/add/', views.vendor_category_add, name='vendor_category_add'),
+    path('vendor/categories/<int:pk>/edit/', views.vendor_category_edit, name='vendor_category_edit'),
+    path('vendor/categories/<int:pk>/delete/', views.vendor_category_delete, name='vendor_category_delete'),
     path('vendor/courses/', views.vendor_courses, name='vendor_courses'),
     path('vendor/courses/add/', views.vendor_course_add, name='vendor_course_add'),
     path('vendor/courses/<int:pk>/edit/', views.vendor_course_edit, name='vendor_course_edit'),

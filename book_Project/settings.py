@@ -224,11 +224,15 @@ MODELTRANSLATION_LANGUAGES = ('zh-hans', 'en', 'fr')
 # to French-speaking visitors.
 MODELTRANSLATION_FALLBACK_LANGUAGES = {'default': ('fr', 'en', 'zh-hans')}
 
-# translatebot — traduction automatique des .po via OpenRouter / LLM
+# translatebot — traduction automatique des contenus vendeur via OpenRouter.
+# Calls the OpenRouter REST API directly (core/services/translation_service.py)
+# — not litellm, which mishandled OpenRouter's padded responses in this env.
+# Primary model first; TRANSLATEBOT_FALLBACK_MODEL is retried if the primary
+# fails or is rate-limited (both are OpenRouter's free tier, so either can
+# throttle under load).
 OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY', '')
-TRANSLATEBOT_PROVIDER = 'litellm'
-TRANSLATEBOT_MODEL = 'openrouter/openai/gpt-oss-20b:free'
-TRANSLATEBOT_API_KEY = os.environ.get('OPENROUTER_API_KEY', '')
+TRANSLATEBOT_MODEL = 'nvidia/nemotron-3-ultra-550b-a55b:free'
+TRANSLATEBOT_FALLBACK_MODEL = 'google/gemma-4-31b-it:free'
 TRANSLATEBOT_SOURCE_LANGUAGE = 'zh-hans'
 
 # Tawk.to Live Chat Widget
@@ -283,42 +287,64 @@ _supabase_ready = all([
 
 if _supabase_ready:
     STORAGES = {
-        'default': {
-            'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage',
-            'OPTIONS': {
-                'bucket_name': _supabase_bucket,
-                'location': 'media',
-                'access_key': _supabase_s3_key,
-                'secret_key': _supabase_s3_secret,
-                'region_name': _supabase_s3_region,
-                'endpoint_url': _supabase_storage_endpoint,
-                'custom_domain': _r2_public_domain or None,
-                'default_acl': None,
-                'querystring_auth': False,
-                'file_overwrite': False,
-                'addressing_style': 'path',
-                'signature_version': 's3v4',
-            },
-        },
-        'staticfiles': {
-            'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage',
-            'OPTIONS': {
-                'bucket_name': _supabase_bucket,
-                'location': 'static',
-                'access_key': _supabase_s3_key,
-                'secret_key': _supabase_s3_secret,
-                'region_name': _supabase_s3_region,
-                'endpoint_url': _supabase_storage_endpoint,
-                'custom_domain': _r2_public_domain or None,
-                'default_acl': None,
-                'querystring_auth': False,
-                'file_overwrite': True,
-                'addressing_style': 'path',
-                'signature_version': 's3v4',
-            },
-        },
+        # In DEBUG, every image/video field assignment (product photos, book
+        # covers, etc.) otherwise uploads synchronously to R2 as part of
+        # .save() — measured at ~2.3s per file in this environment, so a
+        # 3-image product save takes ~7s and a save with 5 images is worse.
+        # Same fix as 'staticfiles' below: local FileSystemStorage in DEBUG
+        # so saves are instant; production (DEBUG=False) is unaffected.
+        'default': (
+            {'BACKEND': 'django.core.files.storage.FileSystemStorage'}
+            if DEBUG else
+            {
+                'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage',
+                'OPTIONS': {
+                    'bucket_name': _supabase_bucket,
+                    'location': 'media',
+                    'access_key': _supabase_s3_key,
+                    'secret_key': _supabase_s3_secret,
+                    'region_name': _supabase_s3_region,
+                    'endpoint_url': _supabase_storage_endpoint,
+                    'custom_domain': _r2_public_domain or None,
+                    'default_acl': None,
+                    'querystring_auth': False,
+                    'file_overwrite': False,
+                    'addressing_style': 'path',
+                    'signature_version': 's3v4',
+                },
+            }
+        ),
+        # In DEBUG, {% static %} must resolve through Django's own storage
+        # class (not S3Boto3Storage) or edits to local JS/CSS never reach the
+        # browser — the STATIC_URL override below only changes the URL
+        # string, but {% static %} calls staticfiles_storage.url(), which is
+        # governed by this BACKEND class regardless of STATIC_URL. Without
+        # this branch, local admin_i18n.js/CSS edits silently keep serving
+        # whatever was last uploaded to R2 no matter how many times the file
+        # on disk changes.
+        'staticfiles': (
+            {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'}
+            if DEBUG else
+            {
+                'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage',
+                'OPTIONS': {
+                    'bucket_name': _supabase_bucket,
+                    'location': 'static',
+                    'access_key': _supabase_s3_key,
+                    'secret_key': _supabase_s3_secret,
+                    'region_name': _supabase_s3_region,
+                    'endpoint_url': _supabase_storage_endpoint,
+                    'custom_domain': _r2_public_domain or None,
+                    'default_acl': None,
+                    'querystring_auth': False,
+                    'file_overwrite': True,
+                    'addressing_style': 'path',
+                    'signature_version': 's3v4',
+                },
+            }
+        ),
     }
-    if _supabase_public_base:
+    if _supabase_public_base and not DEBUG:
         MEDIA_URL = f'{_supabase_public_base}/media/'
         STATIC_URL = f'{_supabase_public_base}/static/'
 elif _whitenoise_available:

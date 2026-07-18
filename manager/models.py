@@ -58,6 +58,10 @@ class BookCategory(models.Model):
     display_order = models.IntegerField(default=0, verbose_name='排序权重')
     is_active = models.BooleanField(default=True, verbose_name='是否启用')
     parent = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='children', verbose_name='父分类')
+    # NULL = admin/global category (today's behavior, unchanged). Set = owned
+    # by that vendor only, managed from the vendor panel's own category
+    # section — separate from admin's, per product requirement.
+    vendor = models.ForeignKey('Vendor', on_delete=models.CASCADE, null=True, blank=True, related_name='book_categories', verbose_name='所属商家')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -70,6 +74,19 @@ class BookCategory(models.Model):
         return self.name
 
     def get_display_name(self):
+        """
+        Name in the current active language. BookCategory doesn't use
+        django-modeltranslation (plain name_en/name_fr CharFields instead),
+        so — unlike Product/Course/etc. name fields — self.name never
+        auto-switches by language; callers must go through this instead of
+        reading self.name directly.
+        """
+        from django.utils import translation
+        lang = translation.get_language()
+        if lang == 'fr' and self.name_fr:
+            return self.name_fr
+        if lang == 'en' and self.name_en:
+            return self.name_en
         return self.name
 
 

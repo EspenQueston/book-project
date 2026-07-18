@@ -23,6 +23,16 @@
     }
     .video-placeholder i { font-size: 4rem; opacity: 0.3; margin-bottom: 16px; }
     .video-placeholder p { opacity: 0.6; font-size: 0.9rem; }
+    /* A PDF-only lesson (no video file/URL) used to still reserve a full
+       16:9 empty black box before the PDF content even started — on a
+       9-page PDF that pushed the actual preview almost entirely off
+       screen, forcing a lot of scrolling just to reach it. Collapse to a
+       compact banner instead when there's nothing to actually play. */
+    .video-container.video-container-compact {
+        aspect-ratio: auto; padding: 22px 20px;
+    }
+    .video-container-compact .video-placeholder { padding: 0; }
+    .video-container-compact .video-placeholder i { font-size: 1.8rem; margin-bottom: 8px; }
 
     /* Locked video placeholder */
     .video-locked { color: #fff; text-align: center; padding: 40px; max-width: 320px; }
@@ -659,7 +669,7 @@
 
     <!-- G. Video Player (mobile) -->
     <div class="cmv-section" id="cmvSection">
-        <div class="video-container cmv-player">
+        <div class="video-container cmv-player{% if not current_lesson_locked and not current_lesson_source %} video-container-compact{% endif %}">
             {% if current_lesson_locked %}
                 <div class="video-locked">
                     <i class="fas fa-lock d-block"></i>
@@ -692,11 +702,6 @@
             </div>
             {% if current_lesson.description %}
             <div class="cmv-lesson-desc">{{ current_lesson.description|linebreaksbr }}</div>
-            {% endif %}
-            {% if current_lesson.resource_file and not current_lesson_locked %}
-            <a href="{% url 'marketplace:download_lesson_resource' current_lesson.id %}" class="lesson-resource-link">
-                <i class="fas fa-paperclip me-1"></i>{% trans "下载附件" %}: {{ current_lesson.resource_file.name|cut:"marketplace/course_resources/" }}
-            </a>
             {% endif %}
         </div>
         {% endif %}
@@ -835,7 +840,7 @@
         <div class="col-lg-7 course-detail-main">
             <!-- Video Player -->
             <div class="video-container-wrap">
-            <div class="video-container" id="videoContainer">
+            <div class="video-container{% if not current_lesson_locked and not current_lesson_source %} video-container-compact{% endif %}" id="videoContainer">
                 {% if current_lesson_locked %}
                     <div class="video-locked">
                         <i class="fas fa-lock d-block"></i>
@@ -879,15 +884,18 @@
             </div>
             {% endif %}
 
-            <!-- Tabs: Description / PDF -->
+            <!-- Tabs: Description / PDF — when a lesson has no playable
+                 video (PDF-only lesson), open straight on the PDF tab
+                 instead of the empty description tab, so the reader
+                 doesn't have to find and click it manually first. -->
             <div class="desc-tabs">
                 <ul class="nav nav-tabs" role="tablist">
                     <li class="nav-item">
-                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#descTab">{% trans "课时描述" %}</button>
+                        <button class="nav-link{% if current_lesson_source or not current_lesson.pdf_file %} active{% endif %}" data-bs-toggle="tab" data-bs-target="#descTab">{% trans "课时描述" %}</button>
                     </li>
                     {% if current_lesson and current_lesson.pdf_file and not current_lesson_locked %}
                     <li class="nav-item">
-                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#pdfTab"><i class="fas fa-file-pdf me-1"></i>{% trans "课程PDF" %}</button>
+                        <button class="nav-link{% if not current_lesson_source %} active{% endif %}" data-bs-toggle="tab" data-bs-target="#pdfTab"><i class="fas fa-file-pdf me-1"></i>{% trans "课程PDF" %}</button>
                     </li>
                     {% endif %}
                     <li class="nav-item">
@@ -895,20 +903,15 @@
                     </li>
                 </ul>
                 <div class="tab-content">
-                    <div class="tab-pane fade show active" id="descTab">
+                    <div class="tab-pane fade{% if current_lesson_source or not current_lesson.pdf_file %} show active{% endif %}" id="descTab">
                         {% if current_lesson and current_lesson.description %}
                         <div class="desc-text">{{ current_lesson.description|linebreaksbr }}</div>
                         {% else %}
                         <p class="text-muted">{% trans "本课暂无描述" %}</p>
                         {% endif %}
-                        {% if current_lesson.resource_file and not current_lesson_locked %}
-                        <a href="{% url 'marketplace:download_lesson_resource' current_lesson.id %}" class="lesson-resource-link">
-                            <i class="fas fa-paperclip me-1"></i>{% trans "下载附件" %}: {{ current_lesson.resource_file.name|cut:"marketplace/course_resources/" }}
-                        </a>
-                        {% endif %}
                     </div>
                     {% if current_lesson and current_lesson.pdf_file and not current_lesson_locked %}
-                    <div class="tab-pane fade" id="pdfTab">
+                    <div class="tab-pane fade{% if not current_lesson_source %} show active{% endif %}" id="pdfTab">
                         <div class="pdf-viewer-container">
                             <div class="mb-3">
                                 <a href="{% url 'marketplace:serve_lesson_pdf' current_lesson.id %}" class="btn btn-sm" style="background:var(--danger-color);color:#fff;border-radius:8px;" target="_blank">

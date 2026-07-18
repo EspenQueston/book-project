@@ -12,6 +12,27 @@
      * Keys sorted longest-first at runtime to ensure proper matching.
      * ============================ */
     var T = {
+        // ---------- Vendor categories (products/courses/supermarket + books) ----------
+        '我的分类': 'My categories',
+        '分类工作台': 'Category workspace',
+        '新增分类': 'Add category',
+        '平台分类': 'Platform categories',
+        '由平台管理员管理，仅供参考，无法在此编辑或删除。': "Managed by the platform admin, shown for reference — cannot be edited or deleted here.",
+        '编辑图书分类': 'Edit book category',
+        '新增图书分类': 'Add book category',
+        '我的图书分类': 'My book categories',
+        '返回分类列表': 'Back to category list',
+        '确定删除此分类吗？': 'Are you sure you want to delete this category?',
+        '创建您自己的分类，独立于平台管理员的分类，用于您的商品、课程与超市商品。': "Create your own categories, separate from the platform admin's, for your products, courses and supermarket items.",
+        '创建您自己的图书分类，独立于平台管理员的分类。': "Create your own book categories, separate from the platform admin's.",
+        '创建后无法更改所属版块。': 'The section cannot be changed after creation.',
+        '创建后会自动翻译成其他语言。': 'Automatically translated into the other languages after creation.',
+        '无效的版块。': 'Invalid section.',
+        '分类已创建': 'Category created',
+        '分类已更新': 'Category updated',
+        '分类已删除': 'Category deleted',
+        '您已经发布过同名的商品，请使用不同的标题。': "You've already published a listing with this title. Please use a different title.",
+
         // ---------- Page Titles ----------
         '管理员仪表板 - DUNO 360': 'Dashboard - DUNO 360',
         '管理员仪表板': 'Admin Dashboard',
@@ -1624,6 +1645,27 @@
      * French Translation Dictionary (Chinese → French)
      * ============================ */
     var F = {
+        // ---------- Vendor categories (products/courses/supermarket + books) ----------
+        '我的分类': 'Mes catégories',
+        '分类工作台': 'Espace catégories',
+        '新增分类': 'Ajouter une catégorie',
+        '平台分类': 'Catégories de la plateforme',
+        '由平台管理员管理，仅供参考，无法在此编辑或删除。': "Gérées par l'administrateur de la plateforme, à titre indicatif — ne peuvent pas être modifiées ou supprimées ici.",
+        '编辑图书分类': 'Modifier la catégorie de livre',
+        '新增图书分类': 'Ajouter une catégorie de livre',
+        '我的图书分类': 'Mes catégories de livres',
+        '返回分类列表': 'Retour à la liste des catégories',
+        '确定删除此分类吗？': 'Voulez-vous vraiment supprimer cette catégorie ?',
+        '创建您自己的分类，独立于平台管理员的分类，用于您的商品、课程与超市商品。': "Créez vos propres catégories, indépendantes de celles de l'administrateur, pour vos produits, cours et articles supermarché.",
+        '创建您自己的图书分类，独立于平台管理员的分类。': "Créez vos propres catégories de livres, indépendantes de celles de l'administrateur.",
+        '创建后无法更改所属版块。': 'La section ne peut plus être modifiée après la création.',
+        '创建后会自动翻译成其他语言。': 'Traduit automatiquement dans les autres langues après la création.',
+        '无效的版块。': 'Section invalide.',
+        '分类已创建': 'Catégorie créée',
+        '分类已更新': 'Catégorie mise à jour',
+        '分类已删除': 'Catégorie supprimée',
+        '您已经发布过同名的商品，请使用不同的标题。': 'Vous avez déjà publié une annonce avec ce titre. Utilisez un titre différent.',
+
         // ---------- Page Titles ----------
         '管理员仪表板 - DUNO 360': 'Tableau de bord - DUNO 360',
         '管理员仪表板': 'Tableau de bord administrateur',

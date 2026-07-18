@@ -139,50 +139,57 @@ def send_refund_notification(order):
 # Traduction automatique — Book / Author
 # ──────────────────────────────────────────────────────────────────────────────
 
-def _get_translation_service():
-    """Import lazy pour éviter les problèmes de démarrage."""
-    from core.services.translation_service import TranslationService
-    return TranslationService()
-
-
 @receiver(post_save, sender='manager.Book')
 def auto_translate_book(sender, instance, created, **kwargs):
-    """Translate Book name & description to EN and FR on creation."""
+    """Translate Book name & description to the other configured languages
+    on creation, from whichever language the content was actually entered
+    in (see core.services.translation_service.auto_translate_new_instance —
+    never assumes zh-hans, and never overwrites good data with a failed
+    translation)."""
     if not created:
         return
-    name_src = instance.name_zh_hans or instance.name
-    desc_src = instance.description_zh_hans or instance.description or ''
-    if not name_src:
-        return
     try:
-        svc = _get_translation_service()
+        from core.services.translation_service import auto_translate_new_instance
         from manager.models import Book
-        Book.objects.filter(pk=instance.pk).update(
-            name_en=svc.translate(name_src, 'zh-hans', 'en', 'book_name'),
-            name_fr=svc.translate(name_src, 'zh-hans', 'fr', 'book_name'),
-            description_en=svc.translate(desc_src, 'zh-hans', 'en', 'book_description') if desc_src else '',
-            description_fr=svc.translate(desc_src, 'zh-hans', 'fr', 'book_description') if desc_src else '',
-        )
+        auto_translate_new_instance(instance, Book, [
+            ('name', 'book_name'),
+            ('description', 'book_description'),
+        ])
         logger.info("Auto-translated Book #%s", instance.pk)
     except Exception as exc:
         logger.error("auto_translate_book error for #%s: %s", instance.pk, exc)
 
 
-@receiver(post_save, sender='manager.Author')
-def auto_translate_author(sender, instance, created, **kwargs):
-    """Translate Author name to EN and FR on creation."""
+@receiver(post_save, sender='manager.BlogPost')
+def auto_translate_blogpost(sender, instance, created, **kwargs):
+    """Translate a new blog post's title/excerpt/content to the other
+    configured languages, same pattern as auto_translate_book above."""
     if not created:
         return
-    name_src = instance.name_zh_hans or instance.name
-    if not name_src:
+    try:
+        from core.services.translation_service import auto_translate_new_instance
+        from manager.models import BlogPost
+        auto_translate_new_instance(instance, BlogPost, [
+            ('title', 'blog_title'),
+            ('excerpt', 'blog_excerpt'),
+            ('content', 'blog_content'),
+        ])
+        logger.info("Auto-translated BlogPost #%s", instance.pk)
+    except Exception as exc:
+        logger.error("auto_translate_blogpost error for #%s: %s", instance.pk, exc)
+
+
+@receiver(post_save, sender='manager.Author')
+def auto_translate_author(sender, instance, created, **kwargs):
+    """Translate Author name to the other configured languages on creation."""
+    if not created:
         return
     try:
-        svc = _get_translation_service()
+        from core.services.translation_service import auto_translate_new_instance
         from manager.models import Author
-        Author.objects.filter(pk=instance.pk).update(
-            name_en=svc.translate(name_src, 'zh-hans', 'en', 'general'),
-            name_fr=svc.translate(name_src, 'zh-hans', 'fr', 'general'),
-        )
+        auto_translate_new_instance(instance, Author, [
+            ('name', 'general'),
+        ])
         logger.info("Auto-translated Author #%s", instance.pk)
     except Exception as exc:
         logger.error("auto_translate_author error for #%s: %s", instance.pk, exc)

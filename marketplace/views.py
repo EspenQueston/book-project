@@ -285,6 +285,21 @@ def _posted_list(request, field_name):
     return request.POST.getlist(field_name)
 
 
+def _reject_duplicate_title(request, model_cls, field_name, value, vendor, exclude_pk=None):
+    """
+    Blocks a vendor from publishing two listings of the same type with the
+    same title (case-insensitive) — scoped per vendor, so two different
+    vendors can each list a "Basic T-shirt" without conflict.
+    """
+    qs = model_cls.objects.filter(vendor=vendor, **{f'{field_name}__iexact': value})
+    if exclude_pk:
+        qs = qs.exclude(pk=exclude_pk)
+    if qs.exists():
+        _add_field_error(request, field_name, _('您已经发布过同名的商品，请使用不同的标题。'))
+        return False
+    return True
+
+
 def _required_text(request, field_name, label, min_length=1):
     value = (request.POST.get(field_name) or '').strip()
     if not value:
@@ -1342,20 +1357,6 @@ def download_lesson(request, lesson_id):
     return response
 
 
-def download_lesson_resource(request, lesson_id):
-    """Download a lesson's attached resource file (any file type, uploaded
-    by the vendor/admin as supplementary material — slides, source code,
-    datasets, etc.), distinct from the lesson's own video/PDF."""
-    lesson = get_object_or_404(CourseLesson, pk=lesson_id)
-    if not user_can_access_lesson(request, lesson):
-        return HttpResponseForbidden(_('请先购买本课程后再下载该文件'))
-    if not lesson.resource_file:
-        raise Http404('No resource file for this lesson')
-    filename = lesson.resource_file.name.split('/')[-1]
-    response = FileResponse(lesson.resource_file.open('rb'), as_attachment=True, filename=filename)
-    return response
-
-
 def _write_lesson_to_zip(zf, lesson):
     """Add one lesson's downloadable content to an open ZipFile."""
     base = f'{lesson.order:02d}_{slugify(lesson.title) or "lesson"}'
@@ -1368,10 +1369,6 @@ def _write_lesson_to_zip(zf, lesson):
     if lesson.pdf_file:
         with lesson.pdf_file.open('rb') as f:
             zf.writestr(f'{base}.pdf', f.read())
-    if lesson.resource_file:
-        resource_name = lesson.resource_file.name.split('/')[-1]
-        with lesson.resource_file.open('rb') as f:
-            zf.writestr(f'{base}_{resource_name}', f.read())
 
 
 def download_course_bundle(request, slug):
@@ -1942,8 +1939,6 @@ def admin_lesson_add(request, section_pk):
         lesson.video_file = request.FILES['video_file']
     if 'pdf_file' in request.FILES:
         lesson.pdf_file = request.FILES['pdf_file']
-    if 'resource_file' in request.FILES:
-        lesson.resource_file = request.FILES['resource_file']
     lesson.save()
 
     return JsonResponse({
@@ -1956,7 +1951,6 @@ def admin_lesson_add(request, section_pk):
             'is_free': lesson.is_free,
             'has_video': bool(lesson.video_file or lesson.video_url),
             'has_pdf': bool(lesson.pdf_file),
-            'has_resource': bool(lesson.resource_file),
         }
     })
 
@@ -1996,10 +1990,6 @@ def admin_lesson_edit(request, pk):
         lesson.pdf_file = request.FILES['pdf_file']
     if request.POST.get('clear_pdf_file') == '1':
         lesson.pdf_file = None
-    if 'resource_file' in request.FILES:
-        lesson.resource_file = request.FILES['resource_file']
-    if request.POST.get('clear_resource_file') == '1':
-        lesson.resource_file = None
     lesson.save()
 
     return JsonResponse({'success': True, 'message': f'课时 "{title}" 已更新'})
@@ -2209,7 +2199,10 @@ def admin_categories(request):
     if auth:
         return auth
 
-    categories = Category.objects.all().order_by('section', 'display_order')
+    # Admin manages only admin/global categories (vendor=NULL) — vendor-owned
+    # ones are managed independently from the vendor panel, per the split
+    # requested for vendor categories.
+    categories = Category.objects.filter(vendor__isnull=True).order_by('section', 'display_order')
     context = {'categories': categories, 'name': request.session.get("name", "Admin")}
     return render(request, 'marketplace/admin/categories.html', context)
 
@@ -2252,7 +2245,7 @@ def admin_category_add(request):
         messages.success(request, f'分类 "{name}" 已添加')
         return redirect('marketplace:admin_categories')
 
-    parent_categories = Category.objects.filter(parent__isnull=True, is_active=True)
+    parent_categories = Category.objects.filter(vendor__isnull=True, parent__isnull=True, is_active=True)
     context = {'parent_categories': parent_categories, 'name': request.session.get("name", "Admin")}
     return render(request, 'marketplace/admin/category_form.html', context)
 
@@ -2262,7 +2255,7 @@ def admin_category_edit(request, pk):
     if auth:
         return auth
 
-    cat = get_object_or_404(Category, pk=pk)
+    cat = get_object_or_404(Category, pk=pk, vendor__isnull=True)
     if request.method == 'POST':
         cat.name = request.POST.get('name', cat.name).strip()
         cat.name_en = request.POST.get('name_en', '').strip()
@@ -2278,7 +2271,7 @@ def admin_category_edit(request, pk):
         messages.success(request, f'分类 "{cat.name}" 已更新')
         return redirect('marketplace:admin_categories')
 
-    parent_categories = Category.objects.filter(parent__isnull=True, is_active=True).exclude(pk=pk)
+    parent_categories = Category.objects.filter(vendor__isnull=True, parent__isnull=True, is_active=True).exclude(pk=pk)
     context = {'category': cat, 'parent_categories': parent_categories, 'name': request.session.get("name", "Admin")}
     return render(request, 'marketplace/admin/category_form.html', context)
 
@@ -2289,7 +2282,7 @@ def admin_category_delete(request, pk):
         return auth
 
     if request.method == 'POST':
-        cat = get_object_or_404(Category, pk=pk)
+        cat = get_object_or_404(Category, pk=pk, vendor__isnull=True)
         name = cat.name
         cat.delete()
         messages.success(request, f'分类 "{name}" 已删除')
@@ -2816,7 +2809,7 @@ def vendor_publish_product(request):
             request, vendor, redirect_name='marketplace:vendor_publish_product', min_images=2,
         )
 
-    categories = Category.objects.filter(section='products', is_active=True)
+    categories = Category.objects.filter(Q(vendor__isnull=True) | Q(vendor=vendor), section='products', is_active=True)
     context = {
         'vendor': vendor,
         'categories': categories,
@@ -2835,7 +2828,7 @@ def _handle_vendor_product_form_submission(request, vendor, redirect_name='marke
         description = description[:850]
     image_count = sum(1 for key in ['image', 'image_2', 'image_3'] if request.FILES.get(key))
 
-    categories = Category.objects.filter(section='products', is_active=True)
+    categories = Category.objects.filter(Q(vendor__isnull=True) | Q(vendor=vendor), section='products', is_active=True)
     form_state = _build_marketplace_form_state(request)
 
     if not title or not phone or not description or not _validate_marketplace_business_rules(request, require_images=min_images):
@@ -2843,6 +2836,9 @@ def _handle_vendor_product_form_submission(request, vendor, redirect_name='marke
         return render(request, 'marketplace/vendor/product_form.html', context)
     if len(title) > 70:
         _add_field_error(request, 'name', 'Le titre ne doit pas dépasser 70 caractères.')
+        context = _form_context_with_pricing({'vendor': vendor, 'product': None, 'categories': categories, 'form_state': _build_marketplace_form_state(request)}, None)
+        return render(request, 'marketplace/vendor/product_form.html', context)
+    if not _reject_duplicate_title(request, Product, 'name', title, vendor):
         context = _form_context_with_pricing({'vendor': vendor, 'product': None, 'categories': categories, 'form_state': _build_marketplace_form_state(request)}, None)
         return render(request, 'marketplace/vendor/product_form.html', context)
     if image_count < min_images:
@@ -2962,7 +2958,7 @@ def vendor_product_add(request):
     if request.method == 'POST':
         return _handle_vendor_product_form_submission(request, vendor, redirect_name='marketplace:vendor_product_add', min_images=1)
 
-    categories = Category.objects.filter(section='products', is_active=True)
+    categories = Category.objects.filter(Q(vendor__isnull=True) | Q(vendor=vendor), section='products', is_active=True)
     context = _form_context_with_pricing({
         'vendor': vendor,
         'product': None,
@@ -3001,10 +2997,14 @@ def vendor_product_edit(request, pk):
         product.delivery_days_min, product.delivery_days_max = _parse_delivery_days_override(request.POST)
         category = _required_category(request, 'products', 'marketplace:vendor_product_edit', pk=product.pk)
         if not category:
-            categories = Category.objects.filter(section='products', is_active=True)
+            categories = Category.objects.filter(Q(vendor__isnull=True) | Q(vendor=vendor), section='products', is_active=True)
             context = _form_context_with_pricing({'vendor': vendor, 'product': product, 'categories': categories, 'form_state': _build_marketplace_form_state(request, product)}, product)
             return render(request, 'marketplace/vendor/product_form.html', context)
         product.category = category
+        if not _reject_duplicate_title(request, Product, 'name', product.name, vendor, exclude_pk=product.pk):
+            categories = Category.objects.filter(Q(vendor__isnull=True) | Q(vendor=vendor), section='products', is_active=True)
+            context = _form_context_with_pricing({'vendor': vendor, 'product': product, 'categories': categories, 'form_state': _build_marketplace_form_state(request, product)}, product)
+            return render(request, 'marketplace/vendor/product_form.html', context)
         if 'image' in request.FILES:
             product.image = request.FILES['image']
         if 'image_2' in request.FILES:
@@ -3025,7 +3025,7 @@ def vendor_product_edit(request, pk):
         messages.success(request, f'商品 "{product.name}" 已更新')
         return redirect('marketplace:vendor_products')
 
-    categories = Category.objects.filter(section='products', is_active=True)
+    categories = Category.objects.filter(Q(vendor__isnull=True) | Q(vendor=vendor), section='products', is_active=True)
     context = _form_context_with_pricing({'vendor': vendor, 'product': product, 'categories': categories, 'form_state': {}}, product)
     return render(request, 'marketplace/vendor/product_form.html', context)
 
@@ -3092,7 +3092,11 @@ def vendor_course_add(request):
         instructor = _required_text(request, 'instructor', '讲师姓名', min_length=2)
         category = _required_category(request, 'courses', 'marketplace:vendor_course_add')
         if not title or not description or not instructor or not category or not _validate_marketplace_business_rules(request, require_images=1):
-            categories = Category.objects.filter(section='courses', is_active=True)
+            categories = Category.objects.filter(Q(vendor__isnull=True) | Q(vendor=vendor), section='courses', is_active=True)
+            context = {'vendor': vendor, 'categories': categories, 'form_state': _build_marketplace_form_state(request)}
+            return render(request, 'marketplace/vendor/course_form.html', context)
+        if not _reject_duplicate_title(request, Course, 'title', title, vendor):
+            categories = Category.objects.filter(Q(vendor__isnull=True) | Q(vendor=vendor), section='courses', is_active=True)
             context = {'vendor': vendor, 'categories': categories, 'form_state': _build_marketplace_form_state(request)}
             return render(request, 'marketplace/vendor/course_form.html', context)
 
@@ -3133,7 +3137,7 @@ def vendor_course_add(request):
         messages.success(request, f'课程 "{title}" 已添加')
         return redirect('marketplace:vendor_courses')
 
-    categories = Category.objects.filter(section='courses', is_active=True)
+    categories = Category.objects.filter(Q(vendor__isnull=True) | Q(vendor=vendor), section='courses', is_active=True)
     context = {
         'vendor': vendor,
         'course': None,
@@ -3157,7 +3161,11 @@ def vendor_course_edit(request, pk):
         instructor = _required_text(request, 'instructor', '讲师姓名', min_length=2)
         category = _required_category(request, 'courses', 'marketplace:vendor_course_edit', pk=course.pk)
         if not course_title or not course_description or not instructor or not category or not _validate_marketplace_business_rules(request, require_images=0, allow_existing_images=bool(course.image)):
-            categories = Category.objects.filter(section='courses', is_active=True)
+            categories = Category.objects.filter(Q(vendor__isnull=True) | Q(vendor=vendor), section='courses', is_active=True)
+            context = {'vendor': vendor, 'course': course, 'categories': categories, 'form_state': _build_marketplace_form_state(request, course)}
+            return render(request, 'marketplace/vendor/course_form.html', context)
+        if not _reject_duplicate_title(request, Course, 'title', course_title, vendor, exclude_pk=course.pk):
+            categories = Category.objects.filter(Q(vendor__isnull=True) | Q(vendor=vendor), section='courses', is_active=True)
             context = {'vendor': vendor, 'course': course, 'categories': categories, 'form_state': _build_marketplace_form_state(request, course)}
             return render(request, 'marketplace/vendor/course_form.html', context)
         course.title = course_title
@@ -3181,7 +3189,7 @@ def vendor_course_edit(request, pk):
         messages.success(request, f'课程 "{course.title}" 已更新')
         return redirect('marketplace:vendor_courses')
 
-    categories = Category.objects.filter(section='courses', is_active=True)
+    categories = Category.objects.filter(Q(vendor__isnull=True) | Q(vendor=vendor), section='courses', is_active=True)
     context = {'vendor': vendor, 'course': course, 'categories': categories, 'form_state': {}}
     return render(request, 'marketplace/vendor/course_form.html', context)
 
@@ -3304,8 +3312,6 @@ def vendor_lesson_add(request, section_pk):
         lesson.video_file = request.FILES['video_file']
     if 'pdf_file' in request.FILES:
         lesson.pdf_file = request.FILES['pdf_file']
-    if 'resource_file' in request.FILES:
-        lesson.resource_file = request.FILES['resource_file']
     lesson.save()
     return JsonResponse({
         'success': True, 'message': f'课时 "{title}" 已添加',
@@ -3314,7 +3320,6 @@ def vendor_lesson_add(request, section_pk):
             'duration_minutes': lesson.duration_minutes, 'is_free': lesson.is_free,
             'has_video': bool(lesson.video_file or lesson.video_url),
             'has_pdf': bool(lesson.pdf_file),
-            'has_resource': bool(lesson.resource_file),
         }
     })
 
@@ -3349,10 +3354,6 @@ def vendor_lesson_edit(request, pk):
         lesson.pdf_file = request.FILES['pdf_file']
     if request.POST.get('clear_pdf_file') == '1':
         lesson.pdf_file = None
-    if 'resource_file' in request.FILES:
-        lesson.resource_file = request.FILES['resource_file']
-    if request.POST.get('clear_resource_file') == '1':
-        lesson.resource_file = None
     lesson.save()
     return JsonResponse({'success': True, 'message': f'课时 "{title}" 已更新'})
 
@@ -3411,7 +3412,11 @@ def vendor_supermarket_add(request):
         description = _required_text(request, 'description', '商品描述', min_length=12)
         category = _required_category(request, 'supermarket', 'marketplace:vendor_supermarket_add')
         if not name or not description or not category or not _validate_marketplace_business_rules(request, require_images=1):
-            categories = Category.objects.filter(section='supermarket', is_active=True)
+            categories = Category.objects.filter(Q(vendor__isnull=True) | Q(vendor=vendor), section='supermarket', is_active=True)
+            context = _form_context_with_pricing({'vendor': vendor, 'item': None, 'categories': categories, 'unit_choices': SupermarketItem.UNIT_CHOICES, 'form_state': _build_marketplace_form_state(request)}, None)
+            return render(request, 'marketplace/vendor/supermarket_form.html', context)
+        if not _reject_duplicate_title(request, SupermarketItem, 'name', name, vendor):
+            categories = Category.objects.filter(Q(vendor__isnull=True) | Q(vendor=vendor), section='supermarket', is_active=True)
             context = _form_context_with_pricing({'vendor': vendor, 'item': None, 'categories': categories, 'unit_choices': SupermarketItem.UNIT_CHOICES, 'form_state': _build_marketplace_form_state(request)}, None)
             return render(request, 'marketplace/vendor/supermarket_form.html', context)
 
@@ -3472,7 +3477,7 @@ def vendor_supermarket_add(request):
         messages.success(request, _('超市商品已添加'))
         return redirect('marketplace:vendor_supermarket')
 
-    categories = Category.objects.filter(section='supermarket', is_active=True)
+    categories = Category.objects.filter(Q(vendor__isnull=True) | Q(vendor=vendor), section='supermarket', is_active=True)
     context = _form_context_with_pricing({
         'vendor': vendor,
         'item': None,
@@ -3510,10 +3515,14 @@ def vendor_supermarket_edit(request, pk):
         item.delivery_days_min, item.delivery_days_max = _parse_delivery_days_override(request.POST)
         category = _required_category(request, 'supermarket', 'marketplace:vendor_supermarket_edit', pk=item.pk)
         if not category:
-            categories = Category.objects.filter(section='supermarket', is_active=True)
+            categories = Category.objects.filter(Q(vendor__isnull=True) | Q(vendor=vendor), section='supermarket', is_active=True)
             context = _form_context_with_pricing({'vendor': vendor, 'categories': categories, 'item': item, 'unit_choices': SupermarketItem.UNIT_CHOICES, 'form_state': _build_marketplace_form_state(request, item)}, item)
             return render(request, 'marketplace/vendor/supermarket_form.html', context)
         item.category = category
+        if not _reject_duplicate_title(request, SupermarketItem, 'name', item.name, vendor, exclude_pk=item.pk):
+            categories = Category.objects.filter(Q(vendor__isnull=True) | Q(vendor=vendor), section='supermarket', is_active=True)
+            context = _form_context_with_pricing({'vendor': vendor, 'categories': categories, 'item': item, 'unit_choices': SupermarketItem.UNIT_CHOICES, 'form_state': _build_marketplace_form_state(request, item)}, item)
+            return render(request, 'marketplace/vendor/supermarket_form.html', context)
         if 'image' in request.FILES:
             item.image = request.FILES['image']
         if 'image_2' in request.FILES:
@@ -3535,7 +3544,7 @@ def vendor_supermarket_edit(request, pk):
         messages.success(request, _('超市商品已更新'))
         return redirect('marketplace:vendor_supermarket')
 
-    categories = Category.objects.filter(section='supermarket', is_active=True)
+    categories = Category.objects.filter(Q(vendor__isnull=True) | Q(vendor=vendor), section='supermarket', is_active=True)
     context = _form_context_with_pricing({
         'vendor': vendor,
         'categories': categories,
@@ -3566,6 +3575,130 @@ def vendor_supermarket_toggle(request, pk):
     item.is_active = not item.is_active
     item.save(update_fields=['is_active'])
     return JsonResponse({'success': True, 'is_active': item.is_active})
+
+
+# ─── Vendor Categories (own categories, separate from admin's) ──────────────
+
+def vendor_categories(request):
+    """
+    Show the vendor's own categories for the selected section (editable)
+    plus the platform admin's global ones (read-only reference — managed
+    only from the admin panel), each with an item count. Category names
+    are unique per vendor only, not checked against admin's, so seeing
+    both side by side avoids a vendor unknowingly re-creating something
+    that already exists.
+    """
+    vendor, redir = _vendor_required(request)
+    if redir:
+        return redir
+    section = request.GET.get('section', 'products')
+    if section not in dict(Category.SECTION_CHOICES):
+        section = 'products'
+    # Related name on Category differs per section (products/courses/supermarket_items).
+    count_field = {'products': 'products', 'courses': 'courses', 'supermarket': 'supermarket_items'}[section]
+    categories = Category.objects.filter(vendor=vendor, section=section).annotate(
+        item_count=Count(count_field)
+    ).order_by('display_order', 'name')
+    admin_categories = Category.objects.filter(vendor__isnull=True, section=section).annotate(
+        item_count=Count(count_field)
+    ).order_by('display_order', 'name')
+    context = {
+        'vendor': vendor,
+        'categories': categories,
+        'admin_categories': admin_categories,
+        'section': section,
+        'section_choices': Category.SECTION_CHOICES,
+    }
+    return render(request, 'marketplace/vendor/categories.html', context)
+
+
+def vendor_category_add(request):
+    vendor, redir = _vendor_required(request)
+    if redir:
+        return redir
+    section = request.GET.get('section') or request.POST.get('section', 'products')
+    if section not in dict(Category.SECTION_CHOICES):
+        section = 'products'
+
+    if request.method == 'POST':
+        name = _required_text(request, 'name', '分类名称', min_length=2)
+        section = request.POST.get('section', section)
+        if section not in dict(Category.SECTION_CHOICES):
+            _add_field_error(request, 'section', _('无效的版块。'))
+            name = None
+        if not name or not _reject_duplicate_title(request, Category, 'name', name, vendor):
+            context = {'vendor': vendor, 'category': None, 'section': section, 'section_choices': Category.SECTION_CHOICES, 'form_state': _build_marketplace_form_state(request)}
+            return render(request, 'marketplace/vendor/category_form.html', context)
+
+        category = Category(
+            vendor=vendor,
+            section=section,
+            slug=slugify(name) or f'cat-{uuid.uuid4().hex[:8]}',
+            is_active=True,
+        )
+        # name/description are django-modeltranslation fields — passing them
+        # as constructor kwargs above silently drops them (see the identical
+        # comment on Product/Course/SupermarketItem create views), so assign
+        # as plain attributes instead.
+        category.name = name
+        category.description = request.POST.get('description', '').strip()
+        if request.FILES.get('image'):
+            category.image = request.FILES['image']
+
+        base_slug = category.slug
+        counter = 1
+        while Category.objects.filter(slug=category.slug).exists():
+            category.slug = f'{base_slug}-{counter}'
+            counter += 1
+        category.save()
+
+        messages.success(request, _('分类已创建'))
+        return redirect(f"{reverse('marketplace:vendor_categories')}?section={section}")
+
+    context = {'vendor': vendor, 'category': None, 'section': section, 'section_choices': Category.SECTION_CHOICES, 'form_state': {}}
+    return render(request, 'marketplace/vendor/category_form.html', context)
+
+
+def vendor_category_edit(request, pk):
+    vendor, redir = _vendor_required(request)
+    if redir:
+        return redir
+    category = get_object_or_404(Category, pk=pk, vendor=vendor)
+
+    if request.method == 'POST':
+        name = _required_text(request, 'name', '分类名称', min_length=2)
+        section = request.POST.get('section', category.section)
+        if section not in dict(Category.SECTION_CHOICES):
+            _add_field_error(request, 'section', _('无效的版块。'))
+            name = None
+        if not name or not _reject_duplicate_title(request, Category, 'name', name, vendor, exclude_pk=category.pk):
+            context = {'vendor': vendor, 'category': category, 'section': category.section, 'section_choices': Category.SECTION_CHOICES, 'form_state': _build_marketplace_form_state(request, category)}
+            return render(request, 'marketplace/vendor/category_form.html', context)
+
+        category.name = name
+        category.description = request.POST.get('description', '').strip()
+        category.section = section
+        if request.FILES.get('image'):
+            category.image = request.FILES['image']
+        category.save()
+
+        messages.success(request, _('分类已更新'))
+        return redirect(f"{reverse('marketplace:vendor_categories')}?section={category.section}")
+
+    context = {'vendor': vendor, 'category': category, 'section': category.section, 'section_choices': Category.SECTION_CHOICES, 'form_state': {}}
+    return render(request, 'marketplace/vendor/category_form.html', context)
+
+
+@require_POST
+def vendor_category_delete(request, pk):
+    vendor, redir = _vendor_required(request)
+    if redir:
+        return redir
+    category = get_object_or_404(Category, pk=pk, vendor=vendor)
+    section = category.section
+    category.delete()
+    messages.success(request, _('分类已删除'))
+    return redirect(f"{reverse('marketplace:vendor_categories')}?section={section}")
 
 
 def listing_reviews_api(request, kind, listing_id):
