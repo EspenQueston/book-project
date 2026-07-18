@@ -226,7 +226,16 @@
         background: #f8fafc; border-radius: 12px; padding: 20px;
         text-align: center;
     }
-    .pdf-viewer-container iframe { width: 100%; height: 500px; border: 1px solid #e2e8f0; border-radius: 8px; }
+    /* Was a fixed 500px — with the sticky video above eating a big chunk
+       of the viewport, that left too little room to actually scroll
+       inside the PDF frame: the cursor kept landing outside its (mostly
+       off-screen) bounds and the page scrolled instead of the PDF. A
+       tall, viewport-relative height gives the PDF viewer's own native
+       scroll a real, easy-to-hit target area. */
+    .pdf-viewer-container iframe { width: 100%; height: 78vh; min-height: 560px; border: 1px solid #e2e8f0; border-radius: 8px; }
+    @media (max-width: 991px) {
+        .pdf-viewer-container iframe { height: 65vh; min-height: 420px; }
+    }
 
     .related-section { margin-top: 50px; }
     .related-card { background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.06); transition: all 0.3s; height: 100%; }

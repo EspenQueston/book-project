@@ -1568,10 +1568,8 @@ def admin_product_add(request):
         delivery_days_min, delivery_days_max = _parse_delivery_days_override(request.POST)
 
         product = Product(
-            name=name,
             name_en=request.POST.get('name_en', '').strip(),
             slug=slugify(name) or f'product-{uuid.uuid4().hex[:8]}',
-            description=request.POST.get('description', ''),
             price=request.POST.get('price', 0),
             original_price=request.POST.get('original_price') or None,
             stock=request.POST.get('stock', 0),
@@ -1587,6 +1585,12 @@ def admin_product_add(request):
             delivery_days_min=delivery_days_min,
             delivery_days_max=delivery_days_max,
         )
+        # name/description are django-modeltranslation fields — passing them
+        # as constructor kwargs above silently drops them (the library skips
+        # populating the per-language column while _mt_init is set during
+        # __init__), so they must be assigned as plain attributes instead.
+        product.name = name
+        product.description = request.POST.get('description', '')
         cat_id = request.POST.get('category')
         if cat_id:
             product.category_id = int(cat_id)
@@ -1739,10 +1743,8 @@ def admin_course_add(request):
             return redirect('marketplace:admin_course_add')
 
         course = Course(
-            title=title,
             title_en=request.POST.get('title_en', '').strip(),
             slug=slugify(title) or f'course-{uuid.uuid4().hex[:8]}',
-            description=request.POST.get('description', ''),
             price=request.POST.get('price', 0),
             original_price=request.POST.get('original_price') or None,
             instructor=request.POST.get('instructor', '').strip(),
@@ -1754,6 +1756,12 @@ def admin_course_add(request):
             is_featured=request.POST.get('is_featured') == 'on',
             is_active=request.POST.get('is_active', 'on') == 'on',
         )
+        # title/description are django-modeltranslation fields — passing them
+        # as constructor kwargs above silently drops them (the library skips
+        # populating the per-language column while _mt_init is set during
+        # __init__), so they must be assigned as plain attributes instead.
+        course.title = title
+        course.description = request.POST.get('description', '')
         cat_id = request.POST.get('category')
         if cat_id:
             course.category_id = int(cat_id)
@@ -1783,7 +1791,11 @@ def admin_course_edit(request, pk):
 
     course = get_object_or_404(Course, pk=pk)
     if request.method == 'POST':
-        course.title = request.POST.get('title', course.title).strip()
+        title = request.POST.get('title', '').strip()
+        if not title:
+            messages.error(request, '课程标题不能为空')
+            return redirect('marketplace:admin_course_edit', pk=course.pk)
+        course.title = title
         course.title_en = request.POST.get('title_en', '').strip()
         course.description = request.POST.get('description', '')
         course.price = request.POST.get('price', course.price)
@@ -2044,10 +2056,8 @@ def admin_supermarket_add(request):
         delivery_days_min, delivery_days_max = _parse_delivery_days_override(request.POST)
 
         item = SupermarketItem(
-            name=name,
             name_en=request.POST.get('name_en', '').strip(),
             slug=slugify(name) or f'item-{uuid.uuid4().hex[:8]}',
-            description=request.POST.get('description', ''),
             price=request.POST.get('price', 0),
             original_price=request.POST.get('original_price') or None,
             stock=request.POST.get('stock', 0),
@@ -2064,6 +2074,12 @@ def admin_supermarket_add(request):
             delivery_days_min=delivery_days_min,
             delivery_days_max=delivery_days_max,
         )
+        # name/description are django-modeltranslation fields — passing them
+        # as constructor kwargs above silently drops them (the library skips
+        # populating the per-language column while _mt_init is set during
+        # __init__), so they must be assigned as plain attributes instead.
+        item.name = name
+        item.description = request.POST.get('description', '')
         item.category = category
         vendor_id = request.POST.get('vendor')
         if vendor_id:
@@ -2210,14 +2226,16 @@ def admin_category_add(request):
             return redirect('marketplace:admin_category_add')
 
         cat = Category(
-            name=name,
             name_en=request.POST.get('name_en', '').strip(),
             slug=slugify(name) or f'cat-{uuid.uuid4().hex[:8]}',
-            description=request.POST.get('description', ''),
             section=request.POST.get('section', 'products'),
             display_order=request.POST.get('display_order', 0) or 0,
             is_active=request.POST.get('is_active', 'on') == 'on',
         )
+        # name/description are django-modeltranslation fields — constructor
+        # kwargs silently drop them, so assign as plain attributes instead.
+        cat.name = name
+        cat.description = request.POST.get('description', '')
         parent_id = request.POST.get('parent')
         if parent_id:
             cat.parent_id = int(parent_id)
@@ -2843,9 +2861,7 @@ def _handle_vendor_product_form_submission(request, vendor, redirect_name='marke
     with transaction.atomic():
         product = Product(
             vendor_id=vendor.pk,
-            name=title,
             slug=slugify(title) or f'product-{uuid.uuid4().hex[:8]}',
-            description=description,
             price=request.POST.get('price', 0) or 0,
             original_price=request.POST.get('original_price') or None,
             stock=request.POST.get('stock', 1) or 1,
@@ -2862,6 +2878,12 @@ def _handle_vendor_product_form_submission(request, vendor, redirect_name='marke
             delivery_days_min=delivery_days_min,
             delivery_days_max=delivery_days_max,
         )
+        # name/description are django-modeltranslation fields — passing them
+        # as constructor kwargs above silently drops them (the library skips
+        # populating the per-language column while _mt_init is set during
+        # __init__), so they must be assigned as plain attributes instead.
+        product.name = title
+        product.description = description
         if request.FILES.get('image'):
             product.image = request.FILES['image']
         if request.FILES.get('image_2'):
@@ -3076,10 +3098,8 @@ def vendor_course_add(request):
 
         course = Course(
             vendor_id=vendor.pk,
-            title=title,
             title_en=request.POST.get('title_en', '').strip(),
             slug=slugify(title) or f'course-{uuid.uuid4().hex[:8]}',
-            description=description,
             price=request.POST.get('price', 0),
             original_price=request.POST.get('original_price') or None,
             instructor=instructor,
@@ -3091,6 +3111,12 @@ def vendor_course_add(request):
             is_featured=False,
             is_active=request.POST.get('is_active', 'on') == 'on',
         )
+        # title/description are django-modeltranslation fields — passing them
+        # as constructor kwargs above silently drops them (the library skips
+        # populating the per-language column while _mt_init is set during
+        # __init__), so they must be assigned as plain attributes instead.
+        course.title = title
+        course.description = description
         cat_id = request.POST.get('category')
         if cat_id:
             course.category_id = int(cat_id)
@@ -3394,10 +3420,8 @@ def vendor_supermarket_add(request):
 
         item = SupermarketItem(
             vendor_id=vendor.pk,
-            name=name,
             name_en=request.POST.get('name_en', '').strip(),
             slug=slugify(name) or f'sm-{uuid.uuid4().hex[:8]}',
-            description=request.POST.get('description', ''),
             price=request.POST.get('price', 0),
             original_price=request.POST.get('original_price') or None,
             stock=request.POST.get('stock', 0),
@@ -3414,6 +3438,12 @@ def vendor_supermarket_add(request):
             delivery_days_min=delivery_days_min,
             delivery_days_max=delivery_days_max,
         )
+        # name/description are django-modeltranslation fields — passing them
+        # as constructor kwargs above silently drops them (the library skips
+        # populating the per-language column while _mt_init is set during
+        # __init__), so they must be assigned as plain attributes instead.
+        item.name = name
+        item.description = request.POST.get('description', '')
         item.category = category
         if 'image' in request.FILES:
             item.image = request.FILES['image']

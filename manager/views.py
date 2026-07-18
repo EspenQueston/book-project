@@ -232,10 +232,14 @@ def add_publisher(request):
         publisher_name = request.POST.get("publisher_name")
         publisher_address = request.POST.get("publisher_address")
         # 2.将数据保存到数据库中（insert）
-        models.Publisher.objects.create(
-            publisher_name=publisher_name,
-            publisher_address=publisher_address,
-        )
+        # publisher_name/publisher_address are django-modeltranslation
+        # fields — passing them as .objects.create() kwargs silently drops
+        # them (the library skips populating the per-language column while
+        # _mt_init is set during __init__), so assign as plain attributes.
+        new_publisher = models.Publisher()
+        new_publisher.publisher_name = publisher_name
+        new_publisher.publisher_address = publisher_address
+        new_publisher.save()
         # 3.重添加成功，返回出版社列表
         return redirect("/manager/publisher_list")
 
@@ -321,7 +325,13 @@ def add_book(request):
         pub_name = request.POST.get('publisher_name', '').strip()
         pub_address = request.POST.get('publisher_address', '').strip()
         if pub_name:
-            pub = models.Publisher.objects.create(publisher_name=pub_name, publisher_address=pub_address)
+            # publisher_name/publisher_address are django-modeltranslation
+            # fields — .objects.create() kwargs silently drop them, so
+            # assign as plain attributes instead.
+            pub = models.Publisher()
+            pub.publisher_name = pub_name
+            pub.publisher_address = pub_address
+            pub.save()
             return JsonResponse({'success': True, 'id': pub.id, 'name': pub.publisher_name})
         return JsonResponse({'success': False, 'message': '出版社名称不能为空'})
 
@@ -329,7 +339,9 @@ def add_book(request):
     if request.method == 'POST' and request.POST.get('action') == 'create_author':
         author_name = request.POST.get('author_name', '').strip()
         if author_name:
-            author = models.Author.objects.create(name=author_name)
+            author = models.Author()
+            author.name = author_name
+            author.save()
             return JsonResponse({'success': True, 'id': author.id, 'name': author.name})
         return JsonResponse({'success': False, 'message': '作者名称不能为空'})
 
@@ -349,9 +361,7 @@ def add_book(request):
         delivery_days_min, delivery_days_max = _parse_delivery_days_override(request.POST)
 
         # 2保存到数据库（insert）
-        book = models.Book.objects.create(
-            name=name,
-            description=description,
+        book = models.Book(
             price=price,
             inventory=inventory,
             sale_num=sale_num,
@@ -360,7 +370,14 @@ def add_book(request):
             delivery_days_min=delivery_days_min,
             delivery_days_max=delivery_days_max,
         )
-        
+        # name/description are django-modeltranslation fields —
+        # .objects.create() kwargs silently drop them, so assign as plain
+        # attributes instead. Saved immediately so book.id exists below
+        # (generate_cover_image needs a real PK).
+        book.name = name
+        book.description = description
+        book.save()
+
         # Handle image upload or auto-generate cover
         if cover_image:
             book.cover_image = cover_image
@@ -519,7 +536,11 @@ def add_author(request):
         name = request.POST.get('name')
         book_ids = request.POST.getlist('books')
         # 2 保存数据库
-        author_obj = models.Author.objects.create(name=name)  # 创建对象
+        # name is a django-modeltranslation field — .objects.create() kwargs
+        # silently drop it, so assign as a plain attribute instead.
+        author_obj = models.Author()
+        author_obj.name = name
+        author_obj.save()
         author_obj.book.set(book_ids)  # 设置关系
         # 3 重定向到列表页面
         return redirect('/manager/author_list/')
@@ -5372,14 +5393,17 @@ def add_blog_post(request):
             counter += 1
 
         post = models.BlogPost(
-            title=title,
             slug=slug,
-            content=content,
-            excerpt=excerpt,
             author_name=author_name,
             status=status,
             is_featured=is_featured,
         )
+        # title/content/excerpt are django-modeltranslation fields —
+        # constructor kwargs silently drop them, so assign as plain
+        # attributes instead.
+        post.title = title
+        post.content = content
+        post.excerpt = excerpt
 
         if category_id:
             try:
@@ -9657,7 +9681,13 @@ def vendor_add_book(request):
         pub_name = request.POST.get('publisher_name', '').strip()
         pub_address = request.POST.get('publisher_address', '').strip()
         if pub_name:
-            pub = models.Publisher.objects.create(publisher_name=pub_name, publisher_address=pub_address)
+            # publisher_name/publisher_address are django-modeltranslation
+            # fields — .objects.create() kwargs silently drop them, so
+            # assign as plain attributes instead.
+            pub = models.Publisher()
+            pub.publisher_name = pub_name
+            pub.publisher_address = pub_address
+            pub.save()
             return JsonResponse({'success': True, 'id': pub.id, 'name': pub.publisher_name})
         return JsonResponse({'success': False, 'message': '出版社名称不能为空'})
 
@@ -9665,7 +9695,9 @@ def vendor_add_book(request):
     if request.method == 'POST' and request.POST.get('action') == 'create_author':
         author_name = request.POST.get('author_name', '').strip()
         if author_name:
-            author = models.Author.objects.create(name=author_name)
+            author = models.Author()
+            author.name = author_name
+            author.save()
             return JsonResponse({'success': True, 'id': author.id, 'name': author.name})
         return JsonResponse({'success': False, 'message': '作者名称不能为空'})
 
@@ -9697,17 +9729,22 @@ def vendor_add_book(request):
         if not author_ids:
             return JsonResponse(_vendor_book_error('author_ids', 'Veuillez sélectionner au moins un auteur.'))
 
-        book = models.Book.objects.create(
-            name=name,
+        book = models.Book(
             price=Decimal(price),
             inventory=int(inventory),
             sale_num=0,
-            description=description,
             publisher_id=int(publisher_id) if publisher_id else None,
             category_id=category_id,
             delivery_days_min=delivery_days_min,
             delivery_days_max=delivery_days_max,
         )
+        # name/description are django-modeltranslation fields —
+        # .objects.create() kwargs silently drop them, so assign as plain
+        # attributes instead. Saved immediately so book.id exists below
+        # (generate_cover_image needs a real PK).
+        book.name = name
+        book.description = description
+        book.save()
         if 'cover_image' in request.FILES:
             book.cover_image = request.FILES['cover_image']
         else:
@@ -9801,7 +9838,13 @@ def vendor_edit_book(request):
             pub_name = request.POST.get('publisher_name', '').strip()
             pub_address = request.POST.get('publisher_address', '').strip()
             if pub_name:
-                pub = models.Publisher.objects.create(publisher_name=pub_name, publisher_address=pub_address)
+                # publisher_name/publisher_address are django-modeltranslation
+                # fields — .objects.create() kwargs silently drop them, so
+                # assign as plain attributes instead.
+                pub = models.Publisher()
+                pub.publisher_name = pub_name
+                pub.publisher_address = pub_address
+                pub.save()
                 return JsonResponse({'success': True, 'id': pub.id, 'name': pub.publisher_name})
             return JsonResponse({'success': False, 'message': '出版社名称不能为空'})
 
@@ -9809,7 +9852,9 @@ def vendor_edit_book(request):
         if request.POST.get('action') == 'create_author':
             author_name = request.POST.get('author_name', '').strip()
             if author_name:
-                author = models.Author.objects.create(name=author_name)
+                author = models.Author()
+                author.name = author_name
+                author.save()
                 return JsonResponse({'success': True, 'id': author.id, 'name': author.name})
             return JsonResponse({'success': False, 'message': '作者名称不能为空'})
 

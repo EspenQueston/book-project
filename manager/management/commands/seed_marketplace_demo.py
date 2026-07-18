@@ -92,18 +92,25 @@ class Command(BaseCommand):
             },
         )
 
+        # name/description are django-modeltranslation fields on Category
+        # and Product — passing them via .get_or_create()/.objects.create()
+        # kwargs silently drops them (the library skips populating the
+        # per-language column while _mt_init is set during __init__), so
+        # they're assigned as plain attributes after construction instead.
         category_map = {}
         for idx, (name, slug) in enumerate(CATEGORY_DATA, start=1):
-            category, _ = Category.objects.get_or_create(
+            category, created = Category.objects.get_or_create(
                 slug=slug,
                 defaults={
-                    'name': name,
                     'section': 'products',
-                    'description': f'Catégorie {name} sur Duno360',
                     'display_order': idx,
                     'is_active': True,
                 },
             )
+            if created:
+                category.name = name
+                category.description = f'Catégorie {name} sur Duno360'
+                category.save()
             category_map[slug] = category
 
         created_count = 0
@@ -112,11 +119,9 @@ class Command(BaseCommand):
             if Product.objects.filter(slug=slug).exists():
                 continue
             category = category_map.get(item['category'])
-            product = Product.objects.create(
+            product = Product(
                 vendor=vendor,
-                name=item['name'],
                 slug=slug,
-                description=item['description'],
                 price=item['price'],
                 original_price=item['price'] + Decimal('5000.00'),
                 category=category,
@@ -126,6 +131,9 @@ class Command(BaseCommand):
                 is_active=True,
                 is_featured=True,
             )
+            product.name = item['name']
+            product.description = item['description']
+            product.save()
             # Safe storage of source image URLs as attributes for later manual import/review.
             product.attributes.create(name='Source image principale', value=item['image_url'])
             product.attributes.create(name='Source image secondaire', value=item['image2_url'])

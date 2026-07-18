@@ -1611,6 +1611,13 @@
         '图书分类': 'Book category',
         '管理分类': 'Manage categories',
         '此分类会同步用于移动端和桌面端的图书筛选。': 'This category is used for book filtering on both mobile and desktop.',
+        '上架中...': 'Publishing...',
+        '卖家ID': 'Seller ID',
+        '售价 (FCFA)': 'Price (FCFA)',
+        '基础信息': 'Basic information',
+        '标题清晰、描述完整的图书更容易获得点击。': 'Books with a clear title and a complete description get more clicks.',
+        '电子书与资源': 'Ebook & resources',
+        '返回图书列表': 'Back to book list',
     };
 
     /* ============================
@@ -3197,6 +3204,13 @@
         '图书分类': 'Catégorie du livre',
         '管理分类': 'Gérer les catégories',
         '此分类会同步用于移动端和桌面端的图书筛选。': 'Cette catégorie est utilisée pour le filtrage des livres sur mobile et ordinateur.',
+        '上架中...': 'Publication en cours...',
+        '卖家ID': 'ID vendeur',
+        '售价 (FCFA)': 'Prix (FCFA)',
+        '基础信息': 'Informations de base',
+        '标题清晰、描述完整的图书更容易获得点击。': 'Un titre clair et une description complète attirent plus de clics.',
+        '电子书与资源': 'Ebook et ressources',
+        '返回图书列表': 'Retour à la liste des livres',
     };
 
     // Sort keys longest-first for proper substring matching
