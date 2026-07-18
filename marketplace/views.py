@@ -1539,7 +1539,9 @@ def admin_products(request):
     if auth:
         return auth
 
-    products = Product.objects.select_related('category').all()
+    # Admin panel only manages Duno360 Official Store products — vendor
+    # products are managed exclusively under Vendors.
+    products = Product.objects.select_related('category').filter(vendor__is_official=True)
     q = request.GET.get('q', '').strip()
     if q:
         products = products.filter(Q(name__icontains=q) | Q(sku__icontains=q) | Q(brand__icontains=q))
@@ -1631,7 +1633,7 @@ def admin_product_edit(request, pk):
     if auth:
         return auth
 
-    product = get_object_or_404(Product, pk=pk)
+    product = get_object_or_404(Product, pk=pk, vendor__is_official=True)
     if request.method == 'POST':
         product_name = _required_text(request, 'name', '商品名称', min_length=3)
         product_description = _required_text(request, 'description', '商品描述', min_length=12)
@@ -1703,7 +1705,7 @@ def admin_product_delete(request, pk):
         return auth
 
     if request.method == 'POST':
-        product = get_object_or_404(Product, pk=pk)
+        product = get_object_or_404(Product, pk=pk, vendor__is_official=True)
         name = product.name
         product.delete()
         messages.success(request, f'商品 "{name}" 已删除')
@@ -1717,7 +1719,9 @@ def admin_courses(request):
     if auth:
         return auth
 
-    courses = Course.objects.select_related('category').all()
+    # Admin panel only manages Duno360 Official Store courses — vendor
+    # courses are managed exclusively under Vendors.
+    courses = Course.objects.select_related('category').filter(vendor__is_official=True)
     q = request.GET.get('q', '').strip()
     if q:
         courses = courses.filter(Q(title__icontains=q) | Q(instructor__icontains=q))
@@ -1786,7 +1790,7 @@ def admin_course_edit(request, pk):
     if auth:
         return auth
 
-    course = get_object_or_404(Course, pk=pk)
+    course = get_object_or_404(Course, pk=pk, vendor__is_official=True)
     if request.method == 'POST':
         title = request.POST.get('title', '').strip()
         if not title:
@@ -1825,7 +1829,7 @@ def admin_course_delete(request, pk):
         return auth
 
     if request.method == 'POST':
-        course = get_object_or_404(Course, pk=pk)
+        course = get_object_or_404(Course, pk=pk, vendor__is_official=True)
         name = course.title
         course.delete()
         messages.success(request, f'课程 "{name}" 已删除')
@@ -1840,7 +1844,7 @@ def admin_course_content(request, pk):
     if auth:
         return auth
 
-    course = get_object_or_404(Course, pk=pk)
+    course = get_object_or_404(Course, pk=pk, vendor__is_official=True)
     sections = course.sections.prefetch_related('lessons').all()
 
     context = {
@@ -2015,7 +2019,9 @@ def admin_supermarket(request):
     if auth:
         return auth
 
-    items = SupermarketItem.objects.select_related('category').all()
+    # Admin panel only manages Duno360 Official Store supermarket items —
+    # vendor items are managed exclusively under Vendors.
+    items = SupermarketItem.objects.select_related('category').filter(vendor__is_official=True)
     q = request.GET.get('q', '').strip()
     if q:
         items = items.filter(Q(name__icontains=q) | Q(brand__icontains=q))
@@ -2071,9 +2077,6 @@ def admin_supermarket_add(request):
         item.name = name
         item.description = request.POST.get('description', '')
         item.category = category
-        vendor_id = request.POST.get('vendor')
-        if vendor_id:
-            item.vendor_id = int(vendor_id)
         if 'image' in request.FILES:
             item.image = request.FILES['image']
         if 'image_2' in request.FILES:
@@ -2088,8 +2091,9 @@ def admin_supermarket_add(request):
             item.slug = f'{base_slug}-{counter}'
             counter += 1
 
-        if not item.vendor_id:
-            assign_official_vendor(item)
+        # Admin panel items always belong to the Duno360 Official Store —
+        # per-vendor items are created exclusively under Vendors.
+        assign_official_vendor(item)
         item.save()
 
         # Save dynamic attributes
@@ -2105,9 +2109,7 @@ def admin_supermarket_add(request):
         return redirect('marketplace:admin_supermarket')
 
     categories = Category.objects.filter(section='supermarket', is_active=True)
-    from manager.models import Vendor
-    vendors = Vendor.objects.filter(is_active=True)
-    context = _form_context_with_pricing({'categories': categories, 'vendors': vendors, 'name': request.session.get("name", "Admin")})
+    context = _form_context_with_pricing({'categories': categories, 'name': request.session.get("name", "Admin")})
     return render(request, 'marketplace/admin/supermarket_form.html', context)
 
 
@@ -2116,7 +2118,7 @@ def admin_supermarket_edit(request, pk):
     if auth:
         return auth
 
-    item = get_object_or_404(SupermarketItem, pk=pk)
+    item = get_object_or_404(SupermarketItem, pk=pk, vendor__is_official=True)
     if request.method == 'POST':
         item_name = _required_text(request, 'name', '商品名称', min_length=3)
         item_description = _required_text(request, 'description', '商品描述', min_length=12)
@@ -2144,12 +2146,9 @@ def admin_supermarket_edit(request, pk):
         item.is_featured = request.POST.get('is_featured') == 'on'
         item.is_active = request.POST.get('is_active', 'on') == 'on'
         item.category = category
-        vendor_id = request.POST.get('vendor')
-        if vendor_id:
-            item.vendor_id = int(vendor_id)
-        else:
-            item.vendor_id = None
-            assign_official_vendor(item)
+        # Admin panel items always stay assigned to the Duno360 Official
+        # Store — per-vendor items are managed exclusively under Vendors.
+        assign_official_vendor(item)
         if 'image' in request.FILES:
             item.image = request.FILES['image']
         if 'image_2' in request.FILES:
@@ -2173,9 +2172,7 @@ def admin_supermarket_edit(request, pk):
         return redirect('marketplace:admin_supermarket')
 
     categories = Category.objects.filter(section='supermarket', is_active=True)
-    from manager.models import Vendor
-    vendors = Vendor.objects.filter(is_active=True)
-    context = _form_context_with_pricing({'item': item, 'categories': categories, 'vendors': vendors, 'name': request.session.get("name", "Admin")}, item)
+    context = _form_context_with_pricing({'item': item, 'categories': categories, 'name': request.session.get("name", "Admin")}, item)
     return render(request, 'marketplace/admin/supermarket_form.html', context)
 
 
@@ -2185,7 +2182,7 @@ def admin_supermarket_delete(request, pk):
         return auth
 
     if request.method == 'POST':
-        item = get_object_or_404(SupermarketItem, pk=pk)
+        item = get_object_or_404(SupermarketItem, pk=pk, vendor__is_official=True)
         name = item.name
         item.delete()
         messages.success(request, f'超市商品 "{name}" 已删除')

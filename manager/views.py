@@ -308,8 +308,11 @@ def book_list(request):
     # 登录判断
     if "name" not in request.session:
         return redirect("/manager/login")
-    # 1获取图书信息(select *)
-    book_obj_list = models.Book.objects.select_related('publisher', 'category').all()
+    # Admin panel only manages books belonging to the Duno360 Official Store —
+    # vendor-created books are managed exclusively under Vendors (vendor_books).
+    book_obj_list = models.Book.objects.filter(
+        vendorbook__vendor__is_official=True
+    ).select_related('publisher', 'category').distinct()
     # 2将数据渲染到页面上
     return render(request, 'book/book_list.html', {'book_obj_list': book_obj_list, "name": request.session["name"]})
 
@@ -438,10 +441,13 @@ def edit_book(request):
     # 点击修改图书（获取要修改图书的原本信息）
     if request.method == 'GET':
         id = request.GET.get('id')
-        book_obj = models.Book.objects.select_related('category').get(id=id)
+        book_obj = get_object_or_404(
+            models.Book.objects.select_related('category'),
+            id=id, vendorbook__vendor__is_official=True,
+        )
         publisher_obj_list = models.Publisher.objects.all()
         category_obj_list = models.BookCategory.objects.filter(is_active=True)
-        book_obj_list = models.Book.objects.all()
+        book_obj_list = models.Book.objects.filter(vendorbook__vendor__is_official=True).distinct()
         return render(request, "book/edit_book.html",
                       {"book_obj": book_obj, "book_obj_list": book_obj_list, "publisher_obj_list": publisher_obj_list,
                        "category_obj_list": category_obj_list, "name": request.session["name"]})
@@ -459,8 +465,8 @@ def edit_book(request):
         book_file = request.FILES.get('book_file')
         download_link = request.POST.get('download_link', '').strip()
 
-        # 获取要更新的图书对象
-        book = models.Book.objects.get(id=id)
+        # 获取要更新的图书对象（仅限官方直营图书，卖家图书通过卖家后台管理）
+        book = get_object_or_404(models.Book, id=id, vendorbook__vendor__is_official=True)
 
         # 数据库中更新图书信息
         book.name = name
@@ -498,7 +504,8 @@ def delete_book(request):
         return HttpResponseNotAllowed(['POST'])
     book_id = request.POST.get('id')
     try:
-        models.Book.objects.filter(id=book_id).delete()
+        # Admin panel may only delete Duno360 Official Store books.
+        models.Book.objects.filter(id=book_id, vendorbook__vendor__is_official=True).delete()
     except Exception as exc:
         logger.error("delete_book failed id=%s: %s", book_id, exc)
     return redirect('/manager/book_list/')

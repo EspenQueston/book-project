@@ -103,17 +103,54 @@ def ensure_official_store(*, backfill: bool = True):
         Course.objects.filter(vendor__isnull=True).update(vendor=vendor)
         SupermarketItem.objects.filter(vendor__isnull=True).update(vendor=vendor)
 
-        existing_book_ids = set(
-            VendorBook.objects.filter(vendor=vendor).values_list('book_id', flat=True)
+        # Only truly orphaned books (no vendor link at all) should be
+        # attached to the official store. Previously this checked only
+        # "not yet linked to the official vendor", which wrongly attached
+        # the official store to books that already belonged to a real
+        # vendor — making vendor-created books show up as admin/official
+        # inventory. Books already owned by any vendor must be left alone.
+        linked_book_ids = set(
+            VendorBook.objects.values_list('book_id', flat=True)
         )
-        for book in Book.objects.exclude(id__in=existing_book_ids).iterator():
+        for book in Book.objects.exclude(id__in=linked_book_ids).iterator():
             VendorBook.objects.get_or_create(
                 vendor=vendor,
                 book=book,
                 defaults={'is_active': True},
             )
 
+        fix_official_book_duplicates(vendor)
+
     return vendor, created
+
+
+def fix_official_book_duplicates(vendor=None):
+    """
+    Remove stray official-store VendorBook links for books that already
+    belong to a real (non-official) vendor.
+
+    A previous version of the backfill above mistakenly linked every book
+    "not yet linked to the official vendor" to the official store, even if
+    the book already belonged to a real vendor — making vendor-created
+    books incorrectly show up in the admin panel's official inventory.
+    This repairs any data left over from that bug. Returns the number of
+    stray links removed.
+    """
+    from manager.models import VendorBook, Vendor
+
+    if vendor is None:
+        vendor = Vendor.objects.filter(is_official=True).first()
+    if not vendor:
+        return 0
+
+    real_vendor_book_ids = set(
+        VendorBook.objects.exclude(vendor=vendor).values_list('book_id', flat=True)
+    )
+    stray = VendorBook.objects.filter(vendor=vendor, book_id__in=real_vendor_book_ids)
+    count = stray.count()
+    if count:
+        stray.delete()
+    return count
 
 
 def assign_official_vendor(instance):

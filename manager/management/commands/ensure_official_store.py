@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from manager.official_store import ensure_official_store
+from manager.official_store import ensure_official_store, fix_official_book_duplicates
 
 
 class Command(BaseCommand):
@@ -19,3 +19,9 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(
             f'Official store {action}: {vendor.company_name} (id={vendor.pk})'
         ))
+        if options['no_backfill']:
+            removed = fix_official_book_duplicates(vendor)
+            if removed:
+                self.stdout.write(self.style.SUCCESS(
+                    f'Removed {removed} stray official-store link(s) from vendor-owned books.'
+                ))

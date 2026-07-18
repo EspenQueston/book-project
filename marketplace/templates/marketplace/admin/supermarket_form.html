@@ -77,16 +77,6 @@
             </div>
             <div class="col-md-4">
                 <div class="mb-3">
-                    <label class="form-label fw-bold" data-zh="卖家" data-en="Vendor" data-fr="Vendeur">卖家</label>
-                    <select name="vendor" class="form-select" style="border-radius:10px;">
-                        <option value="" data-zh="-- 官方自营 --" data-en="-- Official Store --" data-fr="-- Boutique officielle --">-- 官方自营 --</option>
-                        {% for vendor in vendors %}
-                        <option value="{{ vendor.id }}" {% if item.vendor_id == vendor.id %}selected{% endif %}>{{ vendor.company_name }}</option>
-                        {% endfor %}
-                    </select>
-                    <small class="text-muted" data-zh="留空则由平台官方自营" data-en="Leave empty for official platform sales" data-fr="Laisser vide pour une vente officielle de la plateforme">留空则由平台官方自营</small>
-                </div>
-                <div class="mb-3">
                     <label class="form-label fw-bold" data-zh="分类" data-en="Category" data-fr="Catégorie">分类</label>
                     <select name="category" class="form-select" style="border-radius:10px;">
                         <option value="" data-zh="-- 选择分类 --" data-en="-- Choose Category --" data-fr="-- Choisir une catégorie --">-- 选择分类 --</option>
