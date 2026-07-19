@@ -138,9 +138,12 @@ class Book(models.Model):
         null=True, blank=True, verbose_name='Délai de livraison — max (jours), remplace le défaut du vendeur',
     )
 
+    created_at = models.DateTimeField(auto_now_add=True, null=True, verbose_name='创建时间')
+    updated_at = models.DateTimeField(auto_now=True, null=True, verbose_name='最后更新时间')
+
     class Meta:
         db_table = "book"
-    
+
     def get_cover_url(self):
         """获取封面图片URL，如果没有封面则返回默认图片"""
         if self.cover_image and hasattr(self.cover_image, 'url'):

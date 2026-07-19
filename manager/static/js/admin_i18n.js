@@ -12,6 +12,38 @@
      * Keys sorted longest-first at runtime to ensure proper matching.
      * ============================ */
     var T = {
+        // ---------- Admin login (manager/templates/admin/admin.html) ----------
+        '账号或密码错误': 'Incorrect account or password',
+        '账号和密码不能为空': 'Account and password are required',
+        '登录尝试次数过多，请5分钟后再试。': 'Too many login attempts — please try again in 5 minutes.',
+
+        // ---------- Admin book/category/publisher/author CRUD (author picker + flash messages) ----------
+        '管理系统中的所有图书信息': 'Manage all books in the system',
+        '管理系统中的所有出版社信息': 'Manage all publishers in the system',
+        '管理系统中的所有作者信息': 'Manage all authors in the system',
+        '一本书可以有多位作者，可从下拉列表逐一添加': 'A book can have several authors — add them one by one from the dropdown.',
+        '根据订单成交自动统计，无法手动修改': 'Calculated automatically from completed orders — cannot be edited manually',
+        '+ 选择作者添加...': '+ Select an author to add...',
+        '请至少选择一位作者': 'Please select at least one author',
+        '图书 "': 'Book "',
+        '出版社 "': 'Publisher "',
+        '作者 "': 'Author "',
+        '图书分类 "': 'Book category "',
+        '" 添加成功！': '" added successfully!',
+        '" 创建成功！': '" created successfully!',
+        '" 更新成功！': '" updated successfully!',
+        '" 状态已更新': '" status updated',
+        '" 已删除': '" deleted',
+        '图书不存在或无法删除': 'Book not found or cannot be deleted',
+        '删除图书时发生错误': 'An error occurred while deleting the book',
+        '出版社不存在': 'Publisher not found',
+        '删除出版社时发生错误': 'An error occurred while deleting the publisher',
+        '作者不存在': 'Author not found',
+        '更新作者时发生错误': 'An error occurred while updating the author',
+        '删除作者时发生错误': 'An error occurred while deleting the author',
+        '分类名称不能为空': 'Category name cannot be empty',
+        '分类不存在': 'Category not found',
+
         // ---------- Vendor categories (products/courses/supermarket + books) ----------
         '我的分类': 'My categories',
         '分类工作台': 'Category workspace',
@@ -1645,6 +1677,38 @@
      * French Translation Dictionary (Chinese → French)
      * ============================ */
     var F = {
+        // ---------- Admin login (manager/templates/admin/admin.html) ----------
+        '账号或密码错误': 'Identifiant ou mot de passe incorrect',
+        '账号和密码不能为空': "L'identifiant et le mot de passe sont obligatoires",
+        '登录尝试次数过多，请5分钟后再试。': 'Trop de tentatives de connexion — réessayez dans 5 minutes.',
+
+        // ---------- Admin book/category/publisher/author CRUD (author picker + flash messages) ----------
+        '管理系统中的所有图书信息': 'Gérer tous les livres du système',
+        '管理系统中的所有出版社信息': 'Gérer tous les éditeurs du système',
+        '管理系统中的所有作者信息': 'Gérer tous les auteurs du système',
+        '一本书可以有多位作者，可从下拉列表逐一添加': "Un livre peut avoir plusieurs auteurs — ajoutez-les un par un depuis la liste déroulante.",
+        '根据订单成交自动统计，无法手动修改': "Calculé automatiquement à partir des commandes finalisées — ne peut pas être modifié manuellement",
+        '+ 选择作者添加...': '+ Choisir un auteur à ajouter...',
+        '请至少选择一位作者': 'Veuillez sélectionner au moins un auteur',
+        '图书 "': 'Livre "',
+        '出版社 "': 'Éditeur "',
+        '作者 "': 'Auteur "',
+        '图书分类 "': 'Catégorie de livre "',
+        '" 添加成功！': '" ajouté avec succès !',
+        '" 更新成功！': '" mis à jour avec succès !',
+        '" 创建成功！': '" créé avec succès !',
+        '" 状态已更新': '" statut mis à jour',
+        '" 已删除': '" supprimé',
+        '图书不存在或无法删除': "Le livre n'existe pas ou ne peut pas être supprimé",
+        '删除图书时发生错误': "Une erreur s'est produite lors de la suppression du livre",
+        '出版社不存在': "L'éditeur n'existe pas",
+        '删除出版社时发生错误': "Une erreur s'est produite lors de la suppression de l'éditeur",
+        '作者不存在': "L'auteur n'existe pas",
+        '更新作者时发生错误': "Une erreur s'est produite lors de la mise à jour de l'auteur",
+        '删除作者时发生错误': "Une erreur s'est produite lors de la suppression de l'auteur",
+        '分类名称不能为空': 'Le nom de la catégorie ne peut pas être vide',
+        '分类不存在': "La catégorie n'existe pas",
+
         // ---------- Vendor categories (products/courses/supermarket + books) ----------
         '我的分类': 'Mes catégories',
         '分类工作台': 'Espace catégories',

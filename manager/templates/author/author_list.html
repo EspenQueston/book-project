@@ -82,6 +82,11 @@
             transform: translateY(-2px);
         }
 
+        .btn-view {
+            background: #0ea5e9;
+            color: white;
+        }
+
         .btn-edit {
             background: var(--warning-color);
             color: white;
@@ -90,6 +95,27 @@
         .btn-delete {
             background: var(--danger-color);
             color: white;
+        }
+
+        .stat-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            border-radius: 14px;
+            padding: 10px 18px;
+        }
+
+        .stat-pill .stat-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .stat-pill .stat-label {
+            font-size: 0.78rem;
+            opacity: 0.85;
         }
 
         .book-tag {
@@ -344,12 +370,30 @@
                             <h2 class="mb-0"><i class="fas fa-users"></i> 作者管理</h2>
                             <p class="mb-0 mt-2 opacity-75">管理系统中的所有作者信息</p>
                         </div>
-                        <div class="text-end">
-                            <p class="mb-0">欢迎回来，<strong>{{ name }}</strong> 管理员</p>
-                            <small class="opacity-75">今天是 <span id="currentDate"></span></small>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="stat-pill">
+                                <i class="fas fa-users fa-lg"></i>
+                                <div>
+                                    <div class="stat-value">{{ ret_list|length }}</div>
+                                    <div class="stat-label" data-zh="作者总数" data-en="Total authors" data-fr="Total auteurs">作者总数</div>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <p class="mb-0">欢迎回来，<strong>{{ name }}</strong> 管理员</p>
+                                <small class="opacity-75">今天是 <span id="currentDate"></span></small>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" style="border-radius:12px; margin-bottom:16px;">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+                {% endif %}
 
                 <!-- Toolbar -->
                 <div class="toolbar">
@@ -390,18 +434,16 @@
                         <table class="table table-modern">
                             <thead>
                                 <tr>
-                                    <th width="8%" data-zh="序号" data-en="No." data-fr="N°">序号</th>
                                     <th width="10%" data-zh="作者ID" data-en="Author ID" data-fr="ID auteur">作者ID</th>
                                     <th width="18%" data-zh="作者姓名" data-en="Author Name" data-fr="Nom de l'auteur">作者姓名</th>
-                                    <th width="42%" data-zh="相关图书" data-en="Associated Books" data-fr="Livres associés">相关图书</th>
+                                    <th width="40%" data-zh="相关图书" data-en="Associated Books" data-fr="Livres associés">相关图书</th>
                                     <th width="10%" data-zh="著作数量" data-en="Book Count" data-fr="Nbre de livres">著作数量</th>
-                                    <th width="12%" data-zh="操作" data-en="Actions" data-fr="Actions">操作</th>
+                                    <th width="16%" data-zh="操作" data-en="Actions" data-fr="Actions">操作</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for res_dic in ret_list %}
                                 <tr>
-                                    <td class="text-center">{{ forloop.counter }}</td>
                                     <td>
                                         <strong style="color: var(--primary-color);">#{{ res_dic.author_obj.id }}</strong>
                                     </td>
@@ -424,12 +466,17 @@
                                     </td>
                                     <td>
                                         <div class="d-flex gap-1">
+                                            <a href="{% url 'manager:public_author_detail' res_dic.author_obj.id %}" target="_blank"
+                                                class="btn btn-action btn-view btn-sm" title="查看作者">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
                                             <button class="btn btn-action btn-edit btn-sm"
                                                 onclick="editAuthor({{ res_dic.author_obj.id }})" title="编辑作者">
                                                 <i class="fas fa-edit"></i>
                                             </button>
                                             <button class="btn btn-action btn-delete btn-sm"
-                                                onclick="deleteAuthor({{ res_dic.author_obj.id }}, '{{ res_dic.author_obj.name }}')"
+                                                data-author-id="{{ res_dic.author_obj.id }}" data-author-name="{{ res_dic.author_obj.name }}"
+                                                onclick="deleteAuthor(this)"
                                                 title="删除作者">
                                                 <i class="fas fa-trash"></i>
                                             </button>
@@ -473,7 +520,13 @@
                 window.location.href = '/manager/edit_author/?id=' + authorId;
             }
 
-            function deleteAuthor(authorId, authorName) {
+            // Reads the author id/name from data-* attributes (via the DOM,
+            // already HTML-decoded) instead of interpolating them into the
+            // onclick JS string directly — a name containing a quote would
+            // otherwise break the inline script and silently no-op.
+            function deleteAuthor(btn) {
+                var authorId = btn.dataset.authorId;
+                var authorName = btn.dataset.authorName;
                 gConfirm('确定要删除作者 "' + authorName + '" 吗？<br><br><small>注意：删除作者不会删除相关图书，但会解除作者与图书的关联关系。</small>', function () {
                     document.getElementById('deleteAuthorId').value = authorId;
                     document.getElementById('deleteAuthorForm').submit();

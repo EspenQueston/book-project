@@ -80,14 +80,40 @@
             transform: translateY(-2px);
         }
         
+        .btn-view {
+            background: #0ea5e9;
+            color: white;
+        }
+
         .btn-edit {
             background: var(--warning-color);
             color: white;
         }
-        
+
         .btn-delete {
             background: var(--danger-color);
             color: white;
+        }
+
+        .stat-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            border-radius: 14px;
+            padding: 10px 18px;
+        }
+
+        .stat-pill .stat-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .stat-pill .stat-label {
+            font-size: 0.78rem;
+            opacity: 0.85;
         }
         
         .publisher-info {
@@ -171,12 +197,30 @@
                         <h2 class="mb-0"><i class="fas fa-building"></i> 出版社管理</h2>
                         <p class="mb-0 mt-2 opacity-75">管理系统中的所有出版社信息</p>
                     </div>
-                    <div class="text-end">
-                        <p class="mb-0">欢迎回来，<strong>{{ name }}</strong> 管理员</p>
-                        <small class="opacity-75">今天是 <span id="currentDate"></span></small>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="stat-pill">
+                            <i class="fas fa-building fa-lg"></i>
+                            <div>
+                                <div class="stat-value">{{ publisher_obj_list|length }}</div>
+                                <div class="stat-label" data-zh="出版社总数" data-en="Total publishers" data-fr="Total éditeurs">出版社总数</div>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <p class="mb-0">欢迎回来，<strong>{{ name }}</strong> 管理员</p>
+                            <small class="opacity-75">今天是 <span id="currentDate"></span></small>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" style="border-radius:12px; margin-bottom:16px;">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
 
             <!-- Toolbar -->
             <div class="toolbar">
@@ -216,18 +260,16 @@
                     <table class="table table-modern">
                         <thead>
                             <tr>
-                                <th width="60">序号</th>
                                 <th width="40">ID</th>
                                 <th>出版社名称</th>
                                 <th>地址</th>
                                 <th width="100">图书数量</th>
-                                <th width="120">操作</th>
+                                <th width="140">操作</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for publisher_obj in publisher_obj_list %}
                             <tr>
-                                <td class="text-center">{{ forloop.counter }}</td>
                                 <td class="text-muted">{{ publisher_obj.id }}</td>
                                 <td>
                                     <div class="publisher-info">{{ publisher_obj.publisher_name }}</div>
@@ -243,11 +285,16 @@
                                 </td>
                                 <td>
                                     <div class="d-flex gap-1">
-                                        <a href="/manager/edit_publisher/?id={{ publisher_obj.id }}" 
+                                        <a href="{% url 'manager:public_publisher_detail' publisher_obj.id %}" target="_blank"
+                                           class="btn btn-action btn-view" title="查看">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="/manager/edit_publisher/?id={{ publisher_obj.id }}"
                                            class="btn btn-action btn-edit" title="编辑">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <button onclick="confirmDelete({{ publisher_obj.id }}, '{{ publisher_obj.publisher_name }}')" 
+                                        <button type="button" data-publisher-id="{{ publisher_obj.id }}" data-publisher-name="{{ publisher_obj.publisher_name }}"
+                                                onclick="confirmDelete(this)"
                                                 class="btn btn-action btn-delete" title="删除">
                                             <i class="fas fa-trash"></i>
                                         </button>
@@ -256,7 +303,7 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="6" class="text-center py-5">
+                                <td colspan="5" class="text-center py-5">
                                     <div class="text-muted">
                                         <i class="fas fa-building fa-3x mb-3"></i>
                                         <h5>暂无出版社信息</h5>
@@ -311,10 +358,15 @@
         // Display current date
         document.getElementById('currentDate').textContent = new Date().toLocaleDateString('zh-CN');
         
-        // Delete confirmation — POST to prevent CSRF via GET
-        function confirmDelete(publisherId, publisherName) {
-            document.getElementById('publisherName').textContent = publisherName;
-            document.getElementById('deletePublisherId').value = publisherId;
+        // Delete confirmation — POST to prevent CSRF via GET. Reads the
+        // publisher id/name from data-* attributes (via the DOM, already
+        // HTML-decoded) instead of interpolating them into the onclick JS
+        // string directly — a name containing a quote (e.g. "Éditions de
+        // l'Industrie Électronique") would otherwise break the inline
+        // script and silently no-op, which is exactly what was happening.
+        function confirmDelete(btn) {
+            document.getElementById('publisherName').textContent = btn.dataset.publisherName;
+            document.getElementById('deletePublisherId').value = btn.dataset.publisherId;
             new bootstrap.Modal(document.getElementById('deleteModal')).show();
         }
     </script>

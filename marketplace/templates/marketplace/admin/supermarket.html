@@ -29,6 +29,7 @@
                     <th>库存</th>
                     <th>销量</th>
                     <th>状态</th>
+                    <th>创建/更新时间</th>
                     <th>操作</th>
                 </tr>
             </thead>
@@ -55,6 +56,12 @@
                         {% if item.is_organic %}<span class="badge bg-success"><i class="fas fa-leaf"></i></span>{% endif %}
                     </td>
                     <td>
+                        <small class="text-muted d-block">创建：{{ item.created_at|date:"Y-m-d H:i" }}</small>
+                        {% if item.updated_at != item.created_at %}
+                        <small class="text-muted d-block">更新：{{ item.updated_at|date:"Y-m-d H:i" }}</small>
+                        {% endif %}
+                    </td>
+                    <td>
                         <a href="{% url 'marketplace:admin_supermarket_edit' item.pk %}" class="btn btn-sm btn-outline-primary rounded-pill"><i class="fas fa-edit"></i></a>
                         <form method="post" action="{% url 'marketplace:admin_supermarket_delete' item.pk %}" style="display:inline;">
                             {% csrf_token %}
@@ -63,7 +70,7 @@
                     </td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="7" class="text-center py-5 text-muted"><i class="fas fa-apple-alt d-block mb-2" style="font-size:2rem;"></i>暂无超市商品</td></tr>
+                <tr><td colspan="8" class="text-center py-5 text-muted"><i class="fas fa-apple-alt d-block mb-2" style="font-size:2rem;"></i>暂无超市商品</td></tr>
                 {% endfor %}
             </tbody>
         </table>

@@ -1,4 +1,4 @@
-{% load currency_filters %}
+{% load currency_filters i18n %}
 <!DOCTYPE html>
 <html lang="zh-hans">
 
@@ -82,6 +82,11 @@
             transform: translateY(-2px);
         }
 
+        .btn-view {
+            background: #0ea5e9;
+            color: white;
+        }
+
         .btn-edit {
             background: var(--warning-color);
             color: white;
@@ -90,6 +95,27 @@
         .btn-delete {
             background: var(--danger-color);
             color: white;
+        }
+
+        .stat-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            border-radius: 14px;
+            padding: 10px 18px;
+        }
+
+        .stat-pill .stat-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .stat-pill .stat-label {
+            font-size: 0.78rem;
+            opacity: 0.85;
         }
 
         .book-cover {
@@ -206,12 +232,30 @@
                             <h2 class="mb-0"><i class="fas fa-books"></i> 图书管理</h2>
                             <p class="mb-0 mt-2 opacity-75">管理系统中的所有图书信息</p>
                         </div>
-                        <div class="text-end">
-                            <p class="mb-0">欢迎回来，<strong>{{ name }}</strong> 管理员</p>
-                            <small class="opacity-75">今天是 <span id="currentDate"></span></small>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="stat-pill">
+                                <i class="fas fa-book fa-lg"></i>
+                                <div>
+                                    <div class="stat-value">{{ book_obj_list|length }}</div>
+                                    <div class="stat-label" data-zh="图书总数" data-en="Total books" data-fr="Total livres">图书总数</div>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <p class="mb-0">欢迎回来，<strong>{{ name }}</strong> 管理员</p>
+                                <small class="opacity-75">今天是 <span id="currentDate"></span></small>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" style="border-radius:12px; margin-bottom:16px;">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+                {% endif %}
 
                 <!-- Toolbar -->
                 <div class="toolbar">
@@ -254,7 +298,6 @@
                         <table class="table table-modern">
                             <thead>
                                 <tr>
-                                    <th width="60">序号</th>
                                     <th width="80">封面</th>
                                     <th width="40">ID</th>
                                     <th>图书名称</th>
@@ -263,13 +306,13 @@
                                     <th width="80">销量</th>
                                     <th width="120">分类</th>
                                     <th width="150">出版社</th>
-                                    <th width="120">操作</th>
+                                    <th width="130" data-zh="创建/更新时间" data-en="Created / Updated" data-fr="Créé / Mis à jour">创建/更新时间</th>
+                                    <th width="140">操作</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for book_obj in book_obj_list %}
                                 <tr>
-                                    <td class="text-center">{{ forloop.counter }}</td>
                                     <td class="text-center">
                                         {% if book_obj.cover_image %}
                                         <img src="{{ book_obj.cover_image.url }}" alt="{{ book_obj.name }}"
@@ -284,15 +327,12 @@
                                     <td class="text-muted">{{ book_obj.id }}</td>
                                     <td>
                                         <div class="book-title">{{ book_obj.name }}</div>
-                                        {% if book_obj.description %}
-                                        <small class="text-muted">{{ book_obj.get_brief_description }}</small>
-                                        {% endif %}
                                     </td>
                                     <td>
                                         <span class="price-tag">{{ book_obj.price|fcfa }}</span>
                                     </td>
                                     <td>
-                                        <span class="stock-badge 
+                                        <span class="stock-badge
                                         {% if book_obj.inventory > 50 %}stock-high
                                         {% elif book_obj.inventory > 10 %}stock-medium
                                         {% else %}stock-low{% endif %}">
@@ -304,25 +344,44 @@
                                     </td>
                                     <td>
                                         {% if book_obj.category %}
-                                        <span class="badge" style="background:{{ book_obj.category.color|default:'#1d4ed8' }};">{{ book_obj.category.name }}</span>
+                                        <span class="badge" style="background:{{ book_obj.category.color|default:'#1d4ed8' }};">{{ book_obj.category.get_display_name }}</span>
                                         {% else %}
                                         <span class="text-muted" data-zh="未分类" data-en="Uncategorized" data-fr="Non classé">未分类</span>
                                         {% endif %}
                                     </td>
                                     <td>
                                         <div class="fw-bold">{{ book_obj.publisher.publisher_name }}</div>
-                                        <small class="text-muted">{{ book_obj.publisher.publisher_address }}</small>
+                                    </td>
+                                    <td>
+                                        {% if book_obj.created_at %}
+                                        <small class="text-muted d-block" data-zh="创建：" data-en="Created:" data-fr="Créé :">创建：</small>
+                                        <small>{{ book_obj.created_at|date:"Y-m-d H:i" }}</small>
+                                        {% if book_obj.updated_at and book_obj.updated_at != book_obj.created_at %}
+                                        <small class="text-muted d-block mt-1" data-zh="更新：" data-en="Updated:" data-fr="Mis à jour :">更新：</small>
+                                        <small>{{ book_obj.updated_at|date:"Y-m-d H:i" }}</small>
+                                        {% endif %}
+                                        {% else %}
+                                        <small class="text-muted">—</small>
+                                        {% endif %}
                                     </td>
                                     <td>
                                         <div class="d-flex gap-1">
+                                            <a href="{% url 'manager:public_book_detail' book_obj.id %}" target="_blank"
+                                                class="btn btn-action btn-view" title="查看">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
                                             <a href="/manager/edit_book/?id={{ book_obj.id }}"
                                                 class="btn btn-action btn-edit" title="编辑">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <button onclick="confirmDelete({{ book_obj.id }}, '{{ book_obj.name }}')"
-                                                class="btn btn-action btn-delete" title="删除">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
+                                            <form method="post" action="/manager/delete_book/" class="d-inline"
+                                                data-confirm-message="{% blocktrans with name=book_obj.name %}确定删除图书 &quot;{{ name }}&quot; 吗？删除后将无法恢复。{% endblocktrans %}">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="id" value="{{ book_obj.id }}">
+                                                <button type="submit" class="btn btn-action btn-delete" title="删除">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
                                         </div>
                                     </td>
                                 </tr>
@@ -344,52 +403,22 @@
             </div>
         </div>
 
-        <!-- Hidden form for CSRF-safe POST deletion -->
-        <form id="deleteBookForm" method="post" action="/manager/delete_book/" style="display:none">
-            {% csrf_token %}
-            <input type="hidden" name="id" id="deleteBookId" value="">
-        </form>
-
-        <!-- Delete Confirmation Modal -->
-        <div class="modal fade" id="deleteModal" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">
-                            <i class="fas fa-exclamation-triangle text-warning"></i> 确认删除
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p>您确定要删除图书 "<span id="bookName" class="fw-bold"></span>" 吗？</p>
-                        <div class="alert alert-warning">
-                            <i class="fas fa-info-circle"></i>
-                            删除后将无法恢复，请谨慎操作！
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                        <button type="button" id="confirmDeleteBtn" class="btn btn-danger"
-                            onclick="document.getElementById('deleteBookForm').submit()">
-                            <i class="fas fa-trash"></i> 确定删除
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script>
             // Display current date
             document.getElementById('currentDate').textContent = new Date().toLocaleDateString('zh-CN');
-
-            // Delete confirmation — POST to prevent CSRF via GET
-            function confirmDelete(bookId, bookName) {
-                document.getElementById('bookName').textContent = bookName;
-                document.getElementById('deleteBookId').value = bookId;
-                new bootstrap.Modal(document.getElementById('deleteModal')).show();
-            }
         </script>
+        <!-- Delete confirmation: destructive_action_guards.js intercepts any
+             form whose action matches "delete_", shows one confirm dialog
+             (reading data-confirm-message below), and only then submits.
+             This page previously had its own separate modal + a shared
+             hidden form filled via JS — self-contained, but any duplicate
+             submit/confirm wiring on a "delete_" form is fragile the moment
+             this shared script is added anywhere on the page later, since
+             both would then fight over the same submit event. Using the
+             shared guard here keeps every delete action on the site running
+             through exactly one system. -->
+        <script src="/static/js/destructive_action_guards.js"></script>
         <script src="/static/js/admin_i18n.js" defer></script>
     </div><!-- /admin-main-offset -->
 </body>

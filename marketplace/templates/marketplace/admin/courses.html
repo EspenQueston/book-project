@@ -56,13 +56,14 @@
         <table class="table table-hover mb-0" style="table-layout:fixed;">
             <thead>
                 <tr>
-                    <th class="ps-4" style="width:32%;">课程</th>
-                    <th style="width:12%;">讲师</th>
-                    <th style="width:10%;">价格</th>
-                    <th style="width:10%;">级别</th>
-                    <th style="width:10%;">注册人数</th>
-                    <th style="width:10%;">状态</th>
-                    <th style="width:16%;">操作</th>
+                    <th class="ps-4" style="width:26%;">课程</th>
+                    <th style="width:10%;">讲师</th>
+                    <th style="width:9%;">价格</th>
+                    <th style="width:9%;">级别</th>
+                    <th style="width:9%;">注册人数</th>
+                    <th style="width:9%;">状态</th>
+                    <th style="width:15%;">创建/更新时间</th>
+                    <th style="width:13%;">操作</th>
                 </tr>
             </thead>
             <tbody>
@@ -92,6 +93,12 @@
                         {% if course.is_featured %}<span class="badge bg-warning text-dark">推荐</span>{% endif %}
                     </td>
                     <td>
+                        <small class="text-muted d-block">创建：{{ course.created_at|date:"Y-m-d H:i" }}</small>
+                        {% if course.updated_at != course.created_at %}
+                        <small class="text-muted d-block">更新：{{ course.updated_at|date:"Y-m-d H:i" }}</small>
+                        {% endif %}
+                    </td>
+                    <td>
                         <a href="{% url 'marketplace:admin_course_content' course.pk %}"
                             class="btn btn-sm btn-outline-success rounded-pill" title="管理内容"><i
                                 class="fas fa-video"></i></a>
@@ -108,7 +115,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="7" class="text-center py-5 text-muted"><i class="fas fa-graduation-cap d-block mb-2"
+                    <td colspan="8" class="text-center py-5 text-muted"><i class="fas fa-graduation-cap d-block mb-2"
                             style="font-size:2rem;"></i>暂无课程</td>
                 </tr>
                 {% endfor %}

@@ -185,7 +185,17 @@
             box-shadow: 0 20px 60px rgba(0,0,0,0.2); animation: modalIn 0.3s ease;
         }
         @keyframes modalIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-        .author-select { min-height: 120px; }
+        .author-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+        .author-chip {
+            background: #eff6ff; color: var(--primary-color); border: 1px solid #bfdbfe;
+            border-radius: 999px; padding: 6px 8px 6px 14px; font-size: 0.85rem; font-weight: 600;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .author-chip button {
+            background: none; border: none; color: var(--primary-color); cursor: pointer;
+            font-size: 1rem; line-height: 1; padding: 2px 6px; border-radius: 50%;
+        }
+        .author-chip button:hover { color: #fff; background: var(--danger-color); }
     </style>
 </head>
 <body>
@@ -211,6 +221,15 @@
                     </div>
                 </div>
             </div>
+
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" style="border-radius:12px; margin:20px 0 0;">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
 
             <div class="row">
                 <!-- Sidebar -->
@@ -298,10 +317,10 @@
                                         <select name="category_id" class="form-select">
                                             <option value="">未分类</option>
                                             {% for category_obj in category_obj_list %}
-                                            <option value="{{ category_obj.id }}">{{ category_obj.name }}</option>
+                                            <option value="{{ category_obj.id }}">{{ category_obj.get_display_name }}</option>
                                             {% endfor %}
                                         </select>
-                                        <small class="text-muted">此分类会同步用于移动端和桌面端的 books 筛选。</small>
+                                        <small class="text-muted">此分类会同步用于移动端和桌面端的图书筛选。</small>
                                     </div>
 
                                     <div class="form-group">
@@ -311,32 +330,25 @@
                                                 <i class="fas fa-plus"></i> 新建作者
                                             </button>
                                         </label>
-                                        <select name="author_ids" id="authorSelect" class="form-select author-select" multiple required>
+                                        <select id="authorPicker" class="form-select">
+                                            <option value="">+ 选择作者添加...</option>
                                             {% for author_obj in author_obj_list %}
-                                            <option value="{{ author_obj.id }}">{{ author_obj.name }}</option>
+                                            <option value="{{ author_obj.id }}" data-name="{{ author_obj.name|escapejs }}">{{ author_obj.name }}</option>
                                             {% endfor %}
                                         </select>
-                                        <small class="text-muted">按住 Ctrl/Cmd 可多选作者</small>
+                                        <div id="authorChips" class="author-chips mt-2"></div>
+                                        <div id="authorHiddenInputs"></div>
+                                        <small class="text-muted">一本书可以有多位作者，可从下拉列表逐一添加</small>
+                                        <div id="authorError" class="text-danger small mt-1" style="display:none;">请至少选择一位作者</div>
                                     </div>
-                                    
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label class="form-label">库存数量 <span class="required">*</span></label>
-                                                <input type="number" name="inventory" class="form-control" 
-                                                       min="0" placeholder="0" required>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label class="form-label">销售数量</label>
-                                                <input type="number" name="sale_num" class="form-control" 
-                                                       min="0" placeholder="0" value="0">
-                                            </div>
-                                        </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">库存数量 <span class="required">*</span></label>
+                                        <input type="number" name="inventory" class="form-control"
+                                               min="0" placeholder="0" required>
                                     </div>
                                 </div>
-                                
+
                                 <!-- Image Upload -->
                                 <div class="col-md-4">
                                     <h5 class="mb-4 text-primary"><i class="fas fa-image"></i> 图书封面</h5>
@@ -513,6 +525,72 @@
             return m ? decodeURIComponent(m[2]) : '';
         }
 
+        // ---- Author chip picker: lets a book have any number of authors
+        // without relying on a native <select multiple>, whose "required"
+        // validation bubble can silently fail to appear (especially with a
+        // short visible size), making Save look like it does nothing. ----
+        var selectedAuthors = {};
+
+        function renderAuthorChips() {
+            var chipsEl = document.getElementById('authorChips');
+            var hiddenEl = document.getElementById('authorHiddenInputs');
+            chipsEl.innerHTML = '';
+            hiddenEl.innerHTML = '';
+            Object.keys(selectedAuthors).forEach(function (id) {
+                var chip = document.createElement('span');
+                chip.className = 'author-chip';
+                var label = document.createTextNode(selectedAuthors[id]);
+                chip.appendChild(label);
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.innerHTML = '&times;';
+                btn.onclick = function () { removeAuthor(id); };
+                chip.appendChild(btn);
+                chipsEl.appendChild(chip);
+
+                var hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = 'author_ids';
+                hidden.value = id;
+                hiddenEl.appendChild(hidden);
+            });
+            updateAuthorPickerOptions();
+        }
+
+        function updateAuthorPickerOptions() {
+            var picker = document.getElementById('authorPicker');
+            Array.from(picker.options).forEach(function (opt) {
+                if (opt.value) opt.disabled = !!selectedAuthors[opt.value];
+            });
+        }
+
+        function addAuthor(id, name) {
+            if (!id || selectedAuthors[id]) return;
+            selectedAuthors[id] = name;
+            document.getElementById('authorError').style.display = 'none';
+            renderAuthorChips();
+        }
+
+        function removeAuthor(id) {
+            delete selectedAuthors[id];
+            renderAuthorChips();
+        }
+
+        document.getElementById('authorPicker').addEventListener('change', function () {
+            var opt = this.options[this.selectedIndex];
+            if (opt.value) addAuthor(opt.value, opt.getAttribute('data-name'));
+            this.value = '';
+        });
+
+        document.querySelector('form').addEventListener('submit', function (e) {
+            if (Object.keys(selectedAuthors).length === 0) {
+                e.preventDefault();
+                var err = document.getElementById('authorError');
+                err.style.display = 'block';
+                err.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+
         function createAuthor() {
             var name = document.getElementById('newAuthorName').value.trim();
             if (!name) { alert('请输入作者名称'); return; }
@@ -524,8 +602,9 @@
                 .then(r => r.json())
                 .then(d => {
                     if (d.success) {
-                        var opt = new Option(d.name, d.id, true, true);
-                        document.getElementById('authorSelect').appendChild(opt);
+                        var picker = document.getElementById('authorPicker');
+                        picker.appendChild(new Option(d.name, d.id, false, false));
+                        addAuthor(String(d.id), d.name);
                         document.getElementById('newAuthorName').value = '';
                         closeModal('author');
                     } else { alert(d.message); }

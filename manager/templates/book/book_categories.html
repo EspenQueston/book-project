@@ -134,8 +134,10 @@
             transition: background .18s;
         }
         .btn-toggle { color: var(--primary-color); }
+        .btn-edit { color: var(--warning-color); }
         .btn-delete { color: var(--danger-color); }
         .btn-icon:hover.btn-toggle { background: #eef2ff; }
+        .btn-icon:hover.btn-edit { background: #fef3c7; }
         .btn-icon:hover.btn-delete { background: #fee2e2; }
 
         /* ── Empty State ── */
@@ -352,6 +354,22 @@
                                         </button>
                                     </form>
 
+                                    <!-- Edit -->
+                                    <button type="button" class="btn-icon btn-edit"
+                                        data-cat-id="{{ cat.id }}"
+                                        data-cat-name="{{ cat.name }}"
+                                        data-cat-name-en="{{ cat.name_en }}"
+                                        data-cat-name-fr="{{ cat.name_fr }}"
+                                        data-cat-slug="{{ cat.slug }}"
+                                        data-cat-description="{{ cat.description }}"
+                                        data-cat-icon="{{ cat.icon }}"
+                                        data-cat-color="{{ cat.color }}"
+                                        data-cat-order="{{ cat.display_order }}"
+                                        title="编辑"
+                                        onclick="openEditModal(this)">
+                                        <i class="fas fa-pen"></i>
+                                    </button>
+
                                     <!-- Delete -->
                                     <button type="button" class="btn-icon btn-delete"
                                         data-cat-id="{{ cat.id }}"
@@ -383,6 +401,64 @@
             </div>
         </div>
     </div><!-- /admin-main-offset -->
+
+    <!-- Edit Category Modal -->
+    <div class="g-modal-overlay" id="editModal">
+        <div class="g-modal-card" style="max-width:480px; text-align:left;">
+            <div class="g-modal-title mb-3" data-zh="编辑分类" data-en="Edit Category" data-fr="Modifier la catégorie">编辑分类</div>
+            <form method="post" id="editCategoryForm">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="edit">
+                <input type="hidden" name="category_id" id="editCatId">
+
+                <div class="mb-3">
+                    <label class="form-label" data-zh="分类名称" data-en="Category Name" data-fr="Nom de la catégorie">分类名称</label>
+                    <input type="text" name="name" id="editCatName" class="form-control" required>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label" data-zh="英文名称" data-en="English Name" data-fr="Nom en anglais">英文名称</label>
+                        <input type="text" name="name_en" id="editCatNameEn" class="form-control">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" data-zh="法文名称" data-en="French Name" data-fr="Nom en français">法文名称</label>
+                        <input type="text" name="name_fr" id="editCatNameFr" class="form-control">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Slug</label>
+                    <input type="text" name="slug" id="editCatSlug" class="form-control">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" data-zh="描述" data-en="Description" data-fr="Description">描述</label>
+                    <input type="text" name="description" id="editCatDescription" class="form-control">
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label" data-zh="图标" data-en="Icon (Font Awesome)" data-fr="Icône (Font Awesome)">图标</label>
+                        <input type="text" name="icon" id="editCatIcon" class="form-control">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" data-zh="颜色" data-en="Color" data-fr="Couleur">颜色</label>
+                        <input type="color" name="color" id="editCatColor" class="form-control form-control-color w-100">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" data-zh="排序" data-en="Order" data-fr="Ordre">排序</label>
+                        <input type="number" name="display_order" id="editCatOrder" class="form-control" min="0">
+                    </div>
+                </div>
+
+                <div class="g-modal-actions">
+                    <button type="button" class="g-modal-btn cancel" onclick="closeEditModal()" data-zh="取消" data-en="Cancel" data-fr="Annuler">取消</button>
+                    <button type="submit" class="g-modal-btn" style="background:linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); color:#fff;" data-zh="保存修改" data-en="Save Changes" data-fr="Enregistrer">保存修改</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Delete Confirm Modal -->
     <div class="g-modal-overlay" id="deleteModal">
@@ -427,6 +503,28 @@
         // Close on overlay click
         document.getElementById('deleteModal').addEventListener('click', function(e) {
             if (e.target === this) closeDeleteModal();
+        });
+
+        // Edit modal
+        function openEditModal(btn) {
+            document.getElementById('editCatId').value = btn.dataset.catId;
+            document.getElementById('editCatName').value = btn.dataset.catName || '';
+            document.getElementById('editCatNameEn').value = btn.dataset.catNameEn || '';
+            document.getElementById('editCatNameFr').value = btn.dataset.catNameFr || '';
+            document.getElementById('editCatSlug').value = btn.dataset.catSlug || '';
+            document.getElementById('editCatDescription').value = btn.dataset.catDescription || '';
+            document.getElementById('editCatIcon').value = btn.dataset.catIcon || 'fas fa-book';
+            document.getElementById('editCatColor').value = btn.dataset.catColor || '#667eea';
+            document.getElementById('editCatOrder').value = btn.dataset.catOrder || 0;
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        document.getElementById('editModal').addEventListener('click', function (e) {
+            if (e.target === this) closeEditModal();
         });
     </script>
     <script src="/static/js/admin_i18n.js" defer></script>

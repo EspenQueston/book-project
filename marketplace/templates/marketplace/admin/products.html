@@ -30,6 +30,7 @@
                     <th>销量</th>
                     <th>分类</th>
                     <th>状态</th>
+                    <th>创建/更新时间</th>
                     <th>操作</th>
                 </tr>
             </thead>
@@ -66,6 +67,12 @@
                         {% endif %}
                     </td>
                     <td>
+                        <small class="text-muted d-block">创建：{{ product.created_at|date:"Y-m-d H:i" }}</small>
+                        {% if product.updated_at != product.created_at %}
+                        <small class="text-muted d-block">更新：{{ product.updated_at|date:"Y-m-d H:i" }}</small>
+                        {% endif %}
+                    </td>
+                    <td>
                         <a href="{% url 'marketplace:admin_product_edit' product.pk %}" class="btn btn-sm btn-outline-primary rounded-pill"><i class="fas fa-edit"></i></a>
                         <form method="post" action="{% url 'marketplace:admin_product_delete' product.pk %}" style="display:inline;">
                             {% csrf_token %}
@@ -74,7 +81,7 @@
                     </td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="7" class="text-center py-5 text-muted"><i class="fas fa-box-open d-block mb-2" style="font-size:2rem;"></i>暂无商品</td></tr>
+                <tr><td colspan="8" class="text-center py-5 text-muted"><i class="fas fa-box-open d-block mb-2" style="font-size:2rem;"></i>暂无商品</td></tr>
                 {% endfor %}
             </tbody>
         </table>

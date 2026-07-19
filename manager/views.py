@@ -240,6 +240,7 @@ def add_publisher(request):
         new_publisher.publisher_name = publisher_name
         new_publisher.publisher_address = publisher_address
         new_publisher.save()
+        messages.success(request, f'出版社 "{new_publisher.publisher_name}" 添加成功！')
         # 3.重添加成功，返回出版社列表
         return redirect("/manager/publisher_list")
 
@@ -273,6 +274,7 @@ def edit_publisher(request):
         publisher_obj.publisher_address = publisher_address
         # 04更新数据库（update）
         publisher_obj.save()
+        messages.success(request, f'出版社 "{publisher_obj.publisher_name}" 更新成功！')
         # 4重定向到出版社列表
         return redirect('/manager/publisher_list/')
     # get请求跳转界面（获取原始数据）
@@ -296,9 +298,16 @@ def delete_publisher(request):
         return HttpResponseNotAllowed(['POST'])
     pub_id = request.POST.get('id')
     try:
-        models.Publisher.objects.filter(id=pub_id).delete()
+        pub_qs = models.Publisher.objects.filter(id=pub_id)
+        pub_name = pub_qs.first().publisher_name if pub_qs.exists() else None
+        deleted, _ = pub_qs.delete()
+        if deleted:
+            messages.success(request, f'出版社 "{pub_name}" 已删除')
+        else:
+            messages.error(request, '出版社不存在')
     except Exception as exc:
         logger.error("delete_publisher failed id=%s: %s", pub_id, exc)
+        messages.error(request, '删除出版社时发生错误')
     return redirect('/manager/publisher_list')
 
 
@@ -327,47 +336,59 @@ def add_book(request):
     if request.method == 'POST' and request.POST.get('action') == 'create_publisher':
         pub_name = request.POST.get('publisher_name', '').strip()
         pub_address = request.POST.get('publisher_address', '').strip()
-        if pub_name:
-            # publisher_name/publisher_address are django-modeltranslation
-            # fields — .objects.create() kwargs silently drop them, so
-            # assign as plain attributes instead.
-            pub = models.Publisher()
-            pub.publisher_name = pub_name
-            pub.publisher_address = pub_address
-            pub.save()
-            return JsonResponse({'success': True, 'id': pub.id, 'name': pub.publisher_name})
-        return JsonResponse({'success': False, 'message': '出版社名称不能为空'})
+        if not pub_name:
+            return JsonResponse({'success': False, 'message': '出版社名称不能为空'})
+        if models.Publisher.objects.filter(publisher_name__iexact=pub_name).exists():
+            return JsonResponse({'success': False, 'message': f'出版社 "{pub_name}" 已存在，请使用不同的名称。'})
+        # publisher_name/publisher_address are django-modeltranslation
+        # fields — .objects.create() kwargs silently drop them, so
+        # assign as plain attributes instead.
+        pub = models.Publisher()
+        pub.publisher_name = pub_name
+        pub.publisher_address = pub_address
+        pub.save()
+        return JsonResponse({'success': True, 'id': pub.id, 'name': pub.publisher_name})
 
     # Handle inline creation of new author
     if request.method == 'POST' and request.POST.get('action') == 'create_author':
         author_name = request.POST.get('author_name', '').strip()
-        if author_name:
-            author = models.Author()
-            author.name = author_name
-            author.save()
-            return JsonResponse({'success': True, 'id': author.id, 'name': author.name})
-        return JsonResponse({'success': False, 'message': '作者名称不能为空'})
+        if not author_name:
+            return JsonResponse({'success': False, 'message': '作者名称不能为空'})
+        if models.Author.objects.filter(name__iexact=author_name).exists():
+            return JsonResponse({'success': False, 'message': f'作者 "{author_name}" 已存在，请使用不同的名称。'})
+        author = models.Author()
+        author.name = author_name
+        author.save()
+        return JsonResponse({'success': True, 'id': author.id, 'name': author.name})
 
     if request.method == 'POST':
         # 1获取表单提交过来的内容
-        name = request.POST.get('name')
+        name = request.POST.get('name', '').strip()
         description = request.POST.get('description', '')
         price = request.POST.get('price')
         inventory = request.POST.get('inventory')
-        sale_num = request.POST.get('sale_num')
         publisher_id = request.POST.get('publisher_id')
         category_id = request.POST.get('category_id') or None
         author_ids = request.POST.getlist('author_ids')
         cover_image = request.FILES.get('cover_image')
+
+        # Book titles must be unique across the official store's own
+        # catalog (vendor-created books are checked separately, scoped to
+        # their own vendor — see marketplace/views.py's _reject_duplicate_title).
+        if name and models.Book.objects.filter(name__iexact=name, vendorbook__vendor__is_official=True).exists():
+            messages.error(request, f'图书 "{name}" 已存在，请使用不同的书名。')
+            return redirect('/manager/add_book/')
         book_file = request.FILES.get('book_file')
         download_link = request.POST.get('download_link', '').strip()
         delivery_days_min, delivery_days_max = _parse_delivery_days_override(request.POST)
 
-        # 2保存到数据库（insert）
+        # 2保存到数据库（insert）— sale_num is never set manually: it starts
+        # at 0 and is only ever incremented/decremented automatically by
+        # manager/inventory_service.py as orders are confirmed or returned.
         book = models.Book(
             price=price,
             inventory=inventory,
-            sale_num=sale_num,
+            sale_num=0,
             publisher_id=publisher_id,
             category_id=category_id,
             delivery_days_min=delivery_days_min,
@@ -416,7 +437,8 @@ def add_book(request):
                 book=book,
                 defaults={'is_active': True},
             )
-        
+
+        messages.success(request, f'图书 "{book.name}" 添加成功！')
         # 3重定向到图书列表页面
         return redirect('/manager/book_list/')
     else:
@@ -446,10 +468,13 @@ def edit_book(request):
             id=id, vendorbook__vendor__is_official=True,
         )
         publisher_obj_list = models.Publisher.objects.all()
+        author_obj_list = models.Author.objects.all()
+        book_author_ids = list(book_obj.author_set.values_list('id', flat=True))
         category_obj_list = models.BookCategory.objects.filter(is_active=True)
         book_obj_list = models.Book.objects.filter(vendorbook__vendor__is_official=True).distinct()
         return render(request, "book/edit_book.html",
                       {"book_obj": book_obj, "book_obj_list": book_obj_list, "publisher_obj_list": publisher_obj_list,
+                       "author_obj_list": author_obj_list, "book_author_ids": book_author_ids,
                        "category_obj_list": category_obj_list, "name": request.session["name"]})
     # 修改图书信息（POST表单）
     else:
@@ -458,9 +483,9 @@ def edit_book(request):
         description = request.POST.get('description', '')
         inventory = request.POST.get('inventory')
         price = request.POST.get('price')
-        sale_num = request.POST.get('sale_num')
         publisher_id = request.POST.get('publisher_id')
         category_id = request.POST.get('category_id') or None
+        author_ids = request.POST.getlist('author_ids')
         cover_image = request.FILES.get('cover_image')
         book_file = request.FILES.get('book_file')
         download_link = request.POST.get('download_link', '').strip()
@@ -468,31 +493,37 @@ def edit_book(request):
         # 获取要更新的图书对象（仅限官方直营图书，卖家图书通过卖家后台管理）
         book = get_object_or_404(models.Book, id=id, vendorbook__vendor__is_official=True)
 
-        # 数据库中更新图书信息
+        # 数据库中更新图书信息 — sale_num is never edited manually here: it's
+        # only ever changed automatically by manager/inventory_service.py
+        # as orders are confirmed or returned, so it's simply left untouched.
         book.name = name
         book.description = description
         book.inventory = inventory
         book.price = price
-        book.sale_num = sale_num
         book.publisher_id = publisher_id
         book.category_id = category_id
         book.delivery_days_min, book.delivery_days_max = _parse_delivery_days_override(request.POST)
-        
+
         # Handle image upload
         if cover_image:
             book.cover_image = cover_image
-        
+
         # Handle book file upload
         if book_file:
             book.book_file = book_file
-        
+
         # Handle download link
         if download_link:
             book.download_link = download_link
         elif 'clear_download_link' in request.POST:
             book.download_link = None
-            
+
         book.save()
+
+        if author_ids:
+            book.author_set.set(models.Author.objects.filter(id__in=author_ids))
+
+        messages.success(request, f'图书 "{book.name}" 更新成功！')
         return redirect("/manager/book_list/")
 
 
@@ -505,9 +536,16 @@ def delete_book(request):
     book_id = request.POST.get('id')
     try:
         # Admin panel may only delete Duno360 Official Store books.
-        models.Book.objects.filter(id=book_id, vendorbook__vendor__is_official=True).delete()
+        book_qs = models.Book.objects.filter(id=book_id, vendorbook__vendor__is_official=True)
+        book_name = book_qs.first().name if book_qs.exists() else None
+        deleted, _ = book_qs.delete()
+        if deleted:
+            messages.success(request, f'图书 "{book_name}" 已删除')
+        else:
+            messages.error(request, '图书不存在或无法删除')
     except Exception as exc:
         logger.error("delete_book failed id=%s: %s", book_id, exc)
+        messages.error(request, '删除图书时发生错误')
     return redirect('/manager/book_list/')
 
 
@@ -549,6 +587,7 @@ def add_author(request):
         author_obj.name = name
         author_obj.save()
         author_obj.book.set(book_ids)  # 设置关系
+        messages.success(request, f'作者 "{author_obj.name}" 添加成功！')
         # 3 重定向到列表页面
         return redirect('/manager/author_list/')
 
@@ -591,9 +630,13 @@ def edit_author(request):
                 # Clear existing relationships and set new ones
                 author_obj.book.set(book_ids)  # This handles the many-to-many relationship
                 author_obj.save()
+                messages.success(request, f'作者 "{author_obj.name}" 更新成功！')
+            else:
+                messages.error(request, '作者不存在')
             return redirect('/manager/author_list/')
         except Exception as e:
             # Handle any errors gracefully
+            messages.error(request, '更新作者时发生错误')
             return redirect(f'/manager/edit_author/?id={id}')
 
 # 04 删除作者
@@ -604,9 +647,16 @@ def delete_author(request):
         return HttpResponseNotAllowed(['POST'])
     author_id = request.POST.get('id')
     try:
-        models.Author.objects.filter(id=author_id).delete()
+        author_qs = models.Author.objects.filter(id=author_id)
+        author_name = author_qs.first().name if author_qs.exists() else None
+        deleted, _ = author_qs.delete()
+        if deleted:
+            messages.success(request, f'作者 "{author_name}" 已删除')
+        else:
+            messages.error(request, '作者不存在')
     except Exception as exc:
         logger.error("delete_author failed id=%s: %s", author_id, exc)
+        messages.error(request, '删除作者时发生错误')
     return redirect('/manager/author_list/')
 
 
@@ -5569,6 +5619,39 @@ def manage_book_categories(request):
                     is_active=bool(request.POST.get('is_active', 'on')),
                 )
                 messages.success(request, f'图书分类 "{name}" 创建成功！')
+            else:
+                messages.error(request, '分类名称不能为空')
+
+        elif action == 'edit':
+            cat_id = request.POST.get('category_id')
+            name = request.POST.get('name', '').strip()
+            try:
+                cat = models.BookCategory.objects.get(id=cat_id, vendor__isnull=True)
+            except models.BookCategory.DoesNotExist:
+                messages.error(request, '分类不存在')
+                return redirect('/manager/book_categories/')
+            if not name:
+                messages.error(request, '分类名称不能为空')
+                return redirect('/manager/book_categories/')
+            cat.name = name
+            cat.name_en = request.POST.get('name_en', '').strip()
+            cat.name_fr = request.POST.get('name_fr', '').strip()
+            cat.description = request.POST.get('description', '').strip()
+            cat.icon = request.POST.get('icon', '').strip() or 'fas fa-book'
+            cat.color = request.POST.get('color', '').strip() or '#667eea'
+            cat.display_order = request.POST.get('display_order') or 0
+            new_slug = slugify(request.POST.get('slug', '').strip() or name, allow_unicode=True)
+            if not new_slug:
+                new_slug = hashlib.md5(name.encode()).hexdigest()[:12]
+            if new_slug != cat.slug:
+                slug = new_slug
+                counter = 1
+                while models.BookCategory.objects.filter(slug=slug).exclude(pk=cat.pk).exists():
+                    slug = f"{new_slug}-{counter}"
+                    counter += 1
+                cat.slug = slug
+            cat.save()
+            messages.success(request, f'图书分类 "{cat.name}" 更新成功！')
 
         elif action == 'delete':
             cat_id = request.POST.get('category_id')
