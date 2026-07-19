@@ -12,6 +12,9 @@
      * Keys sorted longest-first at runtime to ensure proper matching.
      * ============================ */
     var T = {
+        // ---------- Unified admin dashboard (manager/templates/manager/dashboard.html) ----------
+        '管理仪表板': 'Dashboard',
+
         // ---------- Admin login (manager/templates/admin/admin.html) ----------
         '账号或密码错误': 'Incorrect account or password',
         '账号和密码不能为空': 'Account and password are required',
@@ -1677,6 +1680,9 @@
      * French Translation Dictionary (Chinese → French)
      * ============================ */
     var F = {
+        // ---------- Unified admin dashboard (manager/templates/manager/dashboard.html) ----------
+        '管理仪表板': 'Tableau de bord',
+
         // ---------- Admin login (manager/templates/admin/admin.html) ----------
         '账号或密码错误': 'Identifiant ou mot de passe incorrect',
         '账号和密码不能为空': "L'identifiant et le mot de passe sont obligatoires",

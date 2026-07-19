@@ -4842,11 +4842,16 @@ def order_analytics(request):
     })
 
 # ====================   MANAGER DASHBOARD  ===========================
-def manager_dashboard(request):
-    """Professional dashboard for managers with statistics and analytics"""
-    # 登录判断
+def _dashboard_context(request):
+    """
+    Shared context builder for both dashboards:
+    - manager_dashboard: unified (books + marketplace), the post-login landing page.
+    - book_dashboard: books-only, nested under the Books sub-panel (mirrors
+      Marketplace's own dashboard being the first item in its sub-panel nav).
+    Returns None if the caller should redirect to login.
+    """
     if "name" not in request.session:
-        return redirect("/manager/login")
+        return None
     
     from datetime import datetime, timedelta
     from django.utils import timezone
@@ -5000,21 +5005,39 @@ def manager_dashboard(request):
         })
 
     # ==== MARKETPLACE STATS ====
+    # Unified dashboard (task: merge Book Dashboard + Marketplace Dashboard) —
+    # pulls in the same counts/chart payload the standalone marketplace admin
+    # dashboard uses (marketplace/views.py:admin_dashboard), so both domains
+    # render with identical chart types side by side instead of duplicating
+    # the chart-building logic here.
     total_products = 0
     total_courses = 0
     total_supermarket = 0
     mkt_order_count = 0
     mkt_revenue = 0
+    mkt_low_stock = 0
+    mkt_recent_orders = []
+    mkt_chart_payload = {}
     try:
         from marketplace.models import Product, Course, SupermarketItem, MarketplaceOrder as MktOrder
+        from marketplace.views import _marketplace_admin_chart_payload
         total_products = Product.objects.filter(is_active=True).count()
         total_courses = Course.objects.filter(is_active=True).count()
         total_supermarket = SupermarketItem.objects.filter(is_active=True).count()
+        mkt_low_stock = Product.objects.filter(is_active=True, stock__lt=10).count()
         _mkt_qs = MktOrder.objects.all()
         mkt_order_count = _mkt_qs.count()
         mkt_revenue = float(_mkt_qs.filter(payment_status='completed').aggregate(Sum('total_amount'))['total_amount__sum'] or 0)
+        mkt_recent_orders = _mkt_qs.order_by('-created_at')[:5]
+        mkt_chart_payload = _marketplace_admin_chart_payload(total_products, total_courses, total_supermarket)
     except Exception:
         pass
+
+    # Combined KPIs — top row of the unified dashboard (books + marketplace).
+    combined_catalog_count = total_books + total_products + total_courses + total_supermarket
+    combined_order_count = total_orders + mkt_order_count
+    combined_revenue = float(total_revenue) + mkt_revenue
+    combined_low_stock = low_inventory_books + mkt_low_stock
 
     context = {
         'name': request.session["name"],
@@ -5055,16 +5078,44 @@ def manager_dashboard(request):
         'total_supermarket': total_supermarket,
         'mkt_order_count': mkt_order_count,
         'mkt_revenue': mkt_revenue,
+        'mkt_recent_orders': mkt_recent_orders,
+
+        # Combined KPIs (unified dashboard top row)
+        'combined_catalog_count': combined_catalog_count,
+        'combined_order_count': combined_order_count,
+        'combined_revenue': combined_revenue,
+        'combined_low_stock': combined_low_stock,
 
         # Chart data (as JSON)
         'daily_sales_json': json.dumps(daily_sales),
         'publisher_stats_json': json.dumps(publisher_stats),
+        'mkt_daily_sales_json': mkt_chart_payload.get('mkt_daily_sales_json', '[]'),
+        'mkt_order_status_json': mkt_chart_payload.get('mkt_order_status_json', '{}'),
+        'mkt_catalog_json': mkt_chart_payload.get('mkt_catalog_json', '{}'),
         'top_books_comparison_json': json.dumps(top_books_comparison),
         'price_distribution_json': json.dumps(price_distribution),
         'monthly_orders_json': json.dumps(monthly_orders),
     }
-    
+
+    return context
+
+
+def manager_dashboard(request):
+    """Unified dashboard (books + marketplace) — the post-login landing page."""
+    context = _dashboard_context(request)
+    if context is None:
+        return redirect("/manager/login")
     return render(request, 'manager/dashboard.html', context)
+
+
+def book_dashboard(request):
+    """Books-only dashboard, nested under the Books sub-panel — same data as
+    manager_dashboard, rendered without the marketplace-domain widgets."""
+    context = _dashboard_context(request)
+    if context is None:
+        return redirect("/manager/login")
+    return render(request, 'manager/book_dashboard.html', context)
+
 
 @require_http_methods(["GET"])
 def dashboard_analytics_api(request):

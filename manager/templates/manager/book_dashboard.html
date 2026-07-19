@@ -1,0 +1,670 @@
+{% load currency_filters %}
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图书仪表板 - DUNO 360</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #1d4ed8;
+            --secondary-color: #14245f;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #06b6d4;
+            --light-bg: #f5f7fa;
+            --gradient-1: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
+            --gradient-2: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --gradient-3: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            --gradient-4: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --gradient-6: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .welcome-header {
+            background: var(--gradient-1);
+            color: #ffffff;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(29, 78, 216, 0.3);
+        }
+
+        /* KPI Cards */
+        .kpi-card {
+            background: var(--gradient-1);
+            color: white;
+            border-radius: 15px;
+            padding: 18px;
+            margin-bottom: 15px;
+            box-shadow: 0 8px 25px rgba(29, 78, 216, 0.25);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: transform 0.3s ease;
+            height: 100px;
+        }
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(29, 78, 216, 0.35);
+        }
+        .kpi-icon {
+            width: 50px; height: 50px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+        .kpi-value { font-size: 1.5rem; font-weight: 700; line-height: 1.2; }
+        .kpi-label { font-size: 0.78rem; opacity: 0.85; }
+
+        /* Chart Containers */
+        .chart-card {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .chart-card h6 {
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #1a1a2e;
+        }
+        .chart-card canvas { max-height: 260px !important; width: 100% !important; }
+
+        /* Table sections */
+        .table-container {
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+        .table-header {
+            background: var(--gradient-1);
+            color: #ffffff;
+            padding: 14px 20px;
+            margin: 0;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .table-body { flex: 1; overflow-y: auto; max-height: 280px; }
+        .table { margin: 0; font-size: 0.88rem; }
+        .table th {
+            background-color: var(--light-bg);
+            border: none;
+            font-weight: 600;
+            padding: 10px 12px;
+            color: var(--primary-color);
+            font-size: 0.82rem;
+        }
+        .table td { padding: 10px 12px; border: none; border-bottom: 1px solid #eee; }
+
+        .admin-main-offset > .row, .admin-main-offset .row { --bs-gutter-x: 12px; }
+
+        /* Notification Bell */
+        .notif-bell { position: relative; cursor: pointer; font-size: 1.3rem; color: rgba(255,255,255,0.9); transition: all .3s; }
+        .notif-bell:hover { color: #fff; transform: scale(1.1); }
+        .notif-badge { position: absolute; top: -6px; right: -8px; background: var(--danger-color); color: #fff; font-size: 0.65rem; font-weight: 700; border-radius: 50%; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; padding: 0 4px; border: 2px solid white; }
+        .notif-dropdown { display: none; position: absolute; top: 100%; right: 0; width: 380px; background: #fff; border-radius: 15px; box-shadow: 0 15px 50px rgba(0,0,0,0.2); z-index: 1001; margin-top: 10px; overflow: hidden; }
+        .notif-dropdown.show { display: block; }
+        .notif-header { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .notif-header h6 { margin: 0; font-weight: 700; }
+        .notif-list { max-height: 360px; overflow-y: auto; }
+        .notif-item { padding: 12px 20px; border-bottom: 1px solid #f1f5f9; display: flex; gap: 12px; align-items: flex-start; cursor: pointer; transition: background .2s; }
+        .notif-item:hover { background: #f8fafc; }
+        .notif-item.unread { background: #f0f5ff; }
+        .notif-item:last-child { border-bottom: none; }
+        .notif-icon-wrap { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1rem; }
+        .notif-content { flex: 1; min-width: 0; }
+        .notif-content .title { font-weight: 600; font-size: 0.88rem; color: #1e293b; margin-bottom: 2px; }
+        .notif-content .msg { font-size: 0.8rem; color: #64748b; line-height: 1.4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .notif-content .time { font-size: 0.72rem; color: #94a3b8; margin-top: 2px; }
+        .notif-empty { padding: 40px 20px; text-align: center; color: #94a3b8; }
+        .notif-empty i { font-size: 2.5rem; margin-bottom: 10px; display: block; }
+        .notif-footer { padding: 10px 20px; text-align: center; border-top: 1px solid #f1f5f9; }
+        .notif-footer a { color: var(--primary-color); font-weight: 600; text-decoration: none; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+    {% include "book/_books_admin_sidebar.html" %}
+    <div class="admin-main-offset">
+        <!-- Welcome Header -->
+        <div class="welcome-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h3 class="mb-1">
+                        <i class="fas fa-book-open"></i> <span data-zh="图书仪表板" data-en="Book Dashboard" data-fr="Tableau de bord livres">图书仪表板</span>
+                    </h3>
+                    <p class="mb-0 opacity-75" data-zh="数据概览 · 图书分析" data-en="Data overview · Book analytics" data-fr="Vue d'ensemble · Analyse des livres">数据概览 · 图书分析</p>
+                </div>
+                <div class="col-md-4 text-end d-flex align-items-center justify-content-end gap-3">
+                    <div style="position:relative;">
+                        <div class="notif-bell" onclick="toggleNotifDropdown(event)">
+                            <i class="fas fa-bell" id="bellIcon"></i>
+                            <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+                        </div>
+                        <div class="notif-dropdown" id="notifDropdown">
+                            <div class="notif-header">
+                                <h6><i class="fas fa-bell me-2"></i>通知中心</h6>
+                                <button class="btn btn-sm btn-light" onclick="markAllRead()" style="border-radius:8px;font-size:0.75rem;padding:3px 10px;">全部已读</button>
+                            </div>
+                            <div class="notif-list" id="notifList">
+                                <div class="notif-empty"><i class="fas fa-bell-slash"></i>暂无通知</div>
+                            </div>
+                            <div class="notif-footer" style="display:flex;justify-content:space-between;align-items:center;">
+                                <a href="{% url 'manager:admin_notifications_page' %}"><i class="fas fa-list me-1"></i>查看全部通知</a>
+                                <a href="#" onclick="clearAllNotifs()" style="color:#94a3b8;">清空已读</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="kpi-value">{{ current_date }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Books KPI Row -->
+        <div class="row">
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-card">
+                    <div class="kpi-icon"><i class="fas fa-book"></i></div>
+                    <div class="kpi-info">
+                        <div class="kpi-value">{{ total_books }}</div>
+                        <div class="kpi-label">图书总数</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-card" style="background: var(--gradient-2);">
+                    <div class="kpi-icon"><i class="fas fa-yen-sign"></i></div>
+                    <div class="kpi-info">
+                        <div class="kpi-value">{{ total_revenue|fcfa }}</div>
+                        <div class="kpi-label">总收入</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-card" style="background: var(--gradient-3);">
+                    <div class="kpi-icon"><i class="fas fa-shopping-bag"></i></div>
+                    <div class="kpi-info">
+                        <div class="kpi-value">{{ total_orders }}</div>
+                        <div class="kpi-label">订单总数</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-card" style="background: var(--gradient-4);">
+                    <div class="kpi-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="kpi-info">
+                        <div class="kpi-value">{{ low_inventory_books }}</div>
+                        <div class="kpi-label">库存预警</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-card" style="background: var(--gradient-6);">
+                    <div class="kpi-icon"><i class="fas fa-building"></i></div>
+                    <div class="kpi-info">
+                        <div class="kpi-value">{{ total_publishers }}</div>
+                        <div class="kpi-label">出版社</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-card" style="background: linear-gradient(135deg, #ec4899, #be185d);">
+                    <div class="kpi-icon"><i class="fas fa-user-edit"></i></div>
+                    <div class="kpi-info">
+                        <div class="kpi-value">{{ total_authors }}</div>
+                        <div class="kpi-label">作者总数</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-card" style="background: linear-gradient(135deg, #14b8a6, #0d9488);">
+                    <div class="kpi-icon"><i class="fas fa-calendar-check"></i></div>
+                    <div class="kpi-info">
+                        <div class="kpi-value">{{ orders_this_month }}</div>
+                        <div class="kpi-label">本月订单</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-card" style="background: linear-gradient(135deg, #f97316, #ea580c);">
+                    <div class="kpi-icon"><i class="fas fa-coins"></i></div>
+                    <div class="kpi-info">
+                        <div class="kpi-value">{{ revenue_this_month|fcfa }}</div>
+                        <div class="kpi-label">本月收入</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 1: Sales Trend + Order Status -->
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="chart-card">
+                    <h6><i class="fas fa-chart-line text-primary"></i> 近7日销售趋势</h6>
+                    <canvas id="salesChart"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="chart-card">
+                    <h6><i class="fas fa-chart-pie text-success"></i> 订单状态分布</h6>
+                    <canvas id="orderStatusChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 2: Publisher Distribution + Sales vs Inventory -->
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="chart-card">
+                    <h6><i class="fas fa-building text-info"></i> 出版社图书分布</h6>
+                    <canvas id="publisherChart"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="chart-card">
+                    <h6><i class="fas fa-exchange-alt text-warning"></i> 热销图书：销量 vs 库存</h6>
+                    <canvas id="salesInventoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 3: Monthly Trend + Price Distribution -->
+        <div class="row">
+            <div class="col-lg-7">
+                <div class="chart-card">
+                    <h6><i class="fas fa-chart-bar text-primary"></i> 近6月订单趋势</h6>
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="chart-card">
+                    <h6><i class="fas fa-tags" style="color: var(--secondary-color);"></i> 图书价格区间分布</h6>
+                    <canvas id="priceChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tables Section -->
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="table-container">
+                    <h6 class="table-header">
+                        <i class="fas fa-star"></i> 热销图书 TOP 5
+                    </h6>
+                    <div class="table-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>排名</th>
+                                    <th>图书名称</th>
+                                    <th>销量</th>
+                                    <th>库存</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for book in top_books %}
+                                <tr>
+                                    <td><span class="badge bg-primary">#{{ forloop.counter }}</span></td>
+                                    <td>
+                                        <strong>{{ book.name|truncatechars:15 }}</strong><br>
+                                        <small class="text-muted">{{ book.publisher.publisher_name|truncatechars:10 }}</small>
+                                    </td>
+                                    <td><span class="badge bg-success">{{ book.sale_num }}</span></td>
+                                    <td>
+                                        {% if book.inventory < 10 %}
+                                            <span class="badge bg-danger">{{ book.inventory }}</span>
+                                        {% elif book.inventory < 50 %}
+                                            <span class="badge bg-warning">{{ book.inventory }}</span>
+                                        {% else %}
+                                            <span class="badge bg-success">{{ book.inventory }}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="4" class="text-center text-muted py-3">暂无数据</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="table-container">
+                    <h6 class="table-header">
+                        <i class="fas fa-clock"></i> 最近订单动态
+                    </h6>
+                    <div class="table-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>订单号</th>
+                                    <th>客户</th>
+                                    <th>金额</th>
+                                    <th>状态</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in recent_orders %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ order.order_number|slice:":8" }}...</strong><br>
+                                        <small class="text-muted">{{ order.created_at|date:"m-d H:i" }}</small>
+                                    </td>
+                                    <td>{{ order.customer_name|truncatechars:8 }}</td>
+                                    <td><span class="text-success fw-bold">{{ order.total_amount|fcfa }}</span></td>
+                                    <td>
+                                        {% if order.status == 'pending' %}
+                                            <span class="badge bg-warning">待处理</span>
+                                        {% elif order.status == 'completed' %}
+                                            <span class="badge bg-success">已完成</span>
+                                        {% else %}
+                                            <span class="badge bg-info">处理中</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="4" class="text-center text-muted py-3">暂无订单</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var chartDefaults = {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: { padding: { top: 5, bottom: 5, left: 5, right: 5 } }
+        };
+
+        // 1. Sales Trend Line Chart
+        var salesCtx = document.getElementById('salesChart');
+        if (salesCtx) {
+            var salesData = {{ daily_sales_json|safe }};
+            new Chart(salesCtx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: salesData.map(function(i){ return i.date; }),
+                    datasets: [{
+                        label: '销售额 (FCFA)',
+                        data: salesData.map(function(i){ return i.revenue; }),
+                        borderColor: '#1d4ed8',
+                        backgroundColor: 'rgba(29, 78, 216, 0.15)',
+                        borderWidth: 3, fill: true, tension: 0.4,
+                        pointBackgroundColor: '#1d4ed8', pointBorderColor: '#fff',
+                        pointBorderWidth: 2, pointRadius: 4, pointHoverRadius: 6
+                    }, {
+                        label: '订单数',
+                        data: salesData.map(function(i){ return i.orders; }),
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderWidth: 2, fill: false, tension: 0.4,
+                        pointBackgroundColor: '#10b981', pointBorderColor: '#fff',
+                        pointBorderWidth: 2, pointRadius: 3, yAxisID: 'y1'
+                    }]
+                },
+                options: Object.assign({}, chartDefaults, {
+                    scales: {
+                        y: { beginAtZero: true, ticks: { maxTicksLimit: 6 } },
+                        y1: { position: 'right', beginAtZero: true, ticks: { maxTicksLimit: 6 }, grid: { drawOnChartArea: false } },
+                        x: { ticks: { maxRotation: 45, minRotation: 0 } }
+                    },
+                    plugins: { legend: { position: 'top', labels: { usePointStyle: true, font: { size: 11 }, padding: 10 } } }
+                })
+            });
+        }
+
+        // 2. Order Status Doughnut
+        var statusCtx = document.getElementById('orderStatusChart');
+        if (statusCtx) {
+            new Chart(statusCtx.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['待付款', '处理中', '已发货', '已完成', '已取消'],
+                    datasets: [{
+                        data: [{{ pending_orders }}, {{ processing_orders }}, {{ shipped_orders }}, {{ completed_orders }}, {{ cancelled_orders }}],
+                        backgroundColor: ['#f59e0b', '#06b6d4', '#1d4ed8', '#10b981', '#ef4444'],
+                        borderWidth: 2, borderColor: '#ffffff', hoverOffset: 10
+                    }]
+                },
+                options: Object.assign({}, chartDefaults, {
+                    plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, font: { size: 10 }, padding: 8, boxWidth: 12 } } }
+                })
+            });
+        }
+
+        // 3. Publisher Distribution Bar Chart
+        var pubCtx = document.getElementById('publisherChart');
+        if (pubCtx) {
+            var pubData = {{ publisher_stats_json|safe }};
+            new Chart(pubCtx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: pubData.map(function(i){ return i.name; }),
+                    datasets: [{
+                        label: '图书数量',
+                        data: pubData.map(function(i){ return i.books; }),
+                        backgroundColor: ['rgba(29, 78, 216, 0.8)', 'rgba(20, 36, 95, 0.8)', 'rgba(16, 185, 129, 0.8)', 'rgba(6, 182, 212, 0.8)', 'rgba(245, 158, 11, 0.8)'],
+                        borderRadius: 8, borderSkipped: false, barPercentage: 0.6
+                    }]
+                },
+                options: Object.assign({}, chartDefaults, {
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } }, x: { ticks: { font: { size: 10 } } } },
+                    plugins: { legend: { display: false } }
+                })
+            });
+        }
+
+        // 4. Sales vs Inventory Comparison
+        var siCtx = document.getElementById('salesInventoryChart');
+        if (siCtx) {
+            var siData = {{ top_books_comparison_json|safe }};
+            new Chart(siCtx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: siData.map(function(i){ return i.name; }),
+                    datasets: [{
+                        label: '销量',
+                        data: siData.map(function(i){ return i.sales; }),
+                        backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                        borderRadius: 6, barPercentage: 0.4
+                    }, {
+                        label: '库存',
+                        data: siData.map(function(i){ return i.inventory; }),
+                        backgroundColor: 'rgba(29, 78, 216, 0.8)',
+                        borderRadius: 6, barPercentage: 0.4
+                    }]
+                },
+                options: Object.assign({}, chartDefaults, {
+                    scales: { y: { beginAtZero: true }, x: { ticks: { font: { size: 10 } } } },
+                    plugins: { legend: { position: 'top', labels: { usePointStyle: true, font: { size: 11 } } } }
+                })
+            });
+        }
+
+        // 5. Monthly Order Trend
+        var moCtx = document.getElementById('monthlyChart');
+        if (moCtx) {
+            var moData = {{ monthly_orders_json|safe }};
+            new Chart(moCtx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: moData.map(function(i){ return i.month; }),
+                    datasets: [{
+                        label: '订单数',
+                        data: moData.map(function(i){ return i.orders; }),
+                        backgroundColor: 'rgba(29, 78, 216, 0.8)',
+                        borderRadius: 8, barPercentage: 0.5, yAxisID: 'y'
+                    }, {
+                        label: '收入 (FCFA)',
+                        data: moData.map(function(i){ return i.revenue; }),
+                        type: 'line',
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        borderWidth: 2, fill: true, tension: 0.4,
+                        pointBackgroundColor: '#ef4444', pointRadius: 4, yAxisID: 'y1'
+                    }]
+                },
+                options: Object.assign({}, chartDefaults, {
+                    scales: {
+                        y: { beginAtZero: true, position: 'left', ticks: { stepSize: 1 } },
+                        y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false } }
+                    },
+                    plugins: { legend: { position: 'top', labels: { usePointStyle: true, font: { size: 11 } } } }
+                })
+            });
+        }
+
+        // 6. Price Distribution Polar Area
+        var prCtx = document.getElementById('priceChart');
+        if (prCtx) {
+            var prData = {{ price_distribution_json|safe }};
+            new Chart(prCtx.getContext('2d'), {
+                type: 'polarArea',
+                data: {
+                    labels: prData.map(function(i){ return i.range; }),
+                    datasets: [{
+                        data: prData.map(function(i){ return i.count; }),
+                        backgroundColor: ['rgba(29, 78, 216, 0.7)', 'rgba(20, 36, 95, 0.7)', 'rgba(16, 185, 129, 0.7)', 'rgba(245, 158, 11, 0.7)', 'rgba(239, 68, 68, 0.7)'],
+                        borderWidth: 2, borderColor: '#fff'
+                    }]
+                },
+                options: Object.assign({}, chartDefaults, {
+                    plugins: { legend: { position: 'right', labels: { usePointStyle: true, font: { size: 10 }, padding: 8 } } },
+                    scales: { r: { ticks: { stepSize: 1 } } }
+                })
+            });
+        }
+    });
+    </script>
+
+    <!-- Notification System -->
+    <script>
+    function getCookie(name) {
+        var val = document.cookie.match('(^|;)\\s*' + name + '=([^;]*)');
+        return val ? decodeURIComponent(val[2]) : '';
+    }
+
+    function toggleNotifDropdown(e) {
+        e.stopPropagation();
+        var dd = document.getElementById('notifDropdown');
+        dd.classList.toggle('show');
+        if (dd.classList.contains('show')) loadNotifications();
+    }
+
+    document.addEventListener('click', function(e) {
+        var dd = document.getElementById('notifDropdown');
+        if (dd && !dd.contains(e.target) && !e.target.closest('.notif-bell')) {
+            dd.classList.remove('show');
+        }
+    });
+
+    function loadNotifications() {
+        fetch('/manager/admin/notifications/')
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (!d.success) return;
+                var badge = document.getElementById('notifBadge');
+                if (d.unread_count > 0) {
+                    badge.textContent = d.unread_count > 99 ? '99+' : d.unread_count;
+                    badge.style.display = 'flex';
+                } else {
+                    badge.style.display = 'none';
+                }
+                var list = document.getElementById('notifList');
+                if (!d.notifications || d.notifications.length === 0) {
+                    list.innerHTML = '<div class="notif-empty"><i class="fas fa-bell-slash"></i>暂无通知</div>';
+                    return;
+                }
+                var html = '';
+                d.notifications.forEach(function(n) {
+                    html += '<div class="notif-item ' + (n.is_read ? '' : 'unread') + '" onclick="markRead(' + n.id + ', \'' + (n.link || '') + '\')">';
+                    html += '<div class="notif-icon-wrap" style="background:' + n.color + '20;color:' + n.color + '"><i class="' + n.icon + '"></i></div>';
+                    html += '<div class="notif-content"><div class="title">' + n.title + '</div>';
+                    html += '<div class="msg">' + n.message + '</div>';
+                    html += '<div class="time"><i class="fas fa-clock"></i> ' + n.time_ago + '</div>';
+                    html += '</div></div>';
+                });
+                list.innerHTML = html;
+            });
+    }
+
+    function markRead(id, link) {
+        fetch('/manager/admin/notifications/', {
+            method: 'POST',
+            headers: {'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'action=mark_read&id=' + id
+        }).then(function() {
+            if (link) window.location.href = link;
+            else loadNotifications();
+        });
+    }
+
+    function markAllRead() {
+        fetch('/manager/admin/notifications/', {
+            method: 'POST',
+            headers: {'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'action=mark_all_read'
+        }).then(function() { loadNotifications(); });
+    }
+
+    function clearAllNotifs() {
+        fetch('/manager/admin/notifications/', {
+            method: 'POST',
+            headers: {'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'action=clear_all'
+        }).then(function() { loadNotifications(); });
+    }
+
+    loadNotifications();
+    setInterval(function() {
+        fetch('/manager/admin/notifications/')
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (!d.success) return;
+                var badge = document.getElementById('notifBadge');
+                var bell = document.getElementById('bellIcon');
+                if (d.unread_count > 0) {
+                    badge.textContent = d.unread_count > 99 ? '99+' : d.unread_count;
+                    badge.style.display = 'flex';
+                    bell.classList.add('bell-shake');
+                    setTimeout(function() { bell.classList.remove('bell-shake'); }, 500);
+                } else {
+                    badge.style.display = 'none';
+                }
+            });
+    }, 30000);
+    </script>
+    <script src="/static/js/admin_i18n.js" defer></script>
+</body>
+</html>

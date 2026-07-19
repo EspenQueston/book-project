@@ -20,6 +20,7 @@ urlpatterns = [
 
     # =========================Dashboard and analytics========================
     path("dashboard/", views.manager_dashboard, name='manager_dashboard'),
+    path("book-dashboard/", views.book_dashboard, name='book_dashboard'),
     path('dashboard/analytics/', views.dashboard_analytics_api, name='dashboard_analytics_api'),
 
     # =========================出版社========================

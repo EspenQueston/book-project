@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>图书仪表板 - DUNO 360</title>
+    <title>管理仪表板 - DUNO 360</title>
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -354,26 +354,14 @@
             <div class="sidebar-scroll">
                 <nav class="nav flex-column">
                     <a class="nav-link active" href="/manager/dashboard/">
-                        <i class="fas fa-chart-pie"></i><span>图书仪表板</span>
+                        <i class="fas fa-chart-pie"></i><span data-zh="仪表板" data-en="Dashboard" data-fr="Tableau de bord">仪表板</span>
                     </a>
-                </nav>
-                <div class="nav-section-label">图书中心</div>
-                <nav class="nav flex-column">
                     <a class="nav-link" href="/manager/book_list/">
-                        <i class="fas fa-book"></i><span>图书管理</span>
-                    </a>
-                    <a class="nav-link" href="/manager/author_list/">
-                        <i class="fas fa-user-edit"></i><span>作者管理</span>
-                    </a>
-                    <a class="nav-link" href="/manager/publisher_list/">
-                        <i class="fas fa-building"></i><span>出版社管理</span>
+                        <i class="fas fa-book"></i><span data-zh="图书管理" data-en="Books" data-fr="Livres">图书管理</span>
                     </a>
                 </nav>
                 <div class="nav-section-label">运营管理</div>
                 <nav class="nav flex-column">
-                    <a class="nav-link" href="/manager/order_list/">
-                        <i class="fas fa-shopping-cart"></i><span>订单管理</span>
-                    </a>
                     <a class="nav-link" href="/manager/admin/returns/">
                         <i class="fas fa-undo-alt"></i><span data-zh="退货与物流" data-en="Returns & Shipments" data-fr="Retours & expéditions">退货与物流</span>
                     </a>
@@ -433,9 +421,9 @@
                         <div class="row align-items-center">
                             <div class="col-md-8">
                                 <h3 class="mb-1">
-                                    <i class="fas fa-book-open"></i> 图书仪表板
+                                    <i class="fas fa-chart-pie"></i> <span data-zh="管理仪表板" data-en="Dashboard" data-fr="Tableau de bord">管理仪表板</span>
                                 </h3>
-                                <p class="mb-0 opacity-75">数据概览 · 图书分析 · 市场洞察</p>
+                                <p class="mb-0 opacity-75" data-zh="图书 · 市场 · 综合数据概览" data-en="Books · Marketplace · combined overview" data-fr="Livres · Marché · vue d'ensemble">图书 · 市场 · 综合数据概览</p>
                             </div>
                             <div class="col-md-4 text-end d-flex align-items-center justify-content-end gap-3">
                                 <!-- Notification Bell -->
@@ -463,14 +451,14 @@
                         </div>
                     </div>
 
-                    <!-- KPI Cards Row 1 -->
+                    <!-- Combined KPI Row (books + marketplace) -->
                     <div class="row">
                         <div class="col-xl-3 col-md-6">
                             <div class="kpi-card">
-                                <div class="kpi-icon"><i class="fas fa-book"></i></div>
+                                <div class="kpi-icon"><i class="fas fa-layer-group"></i></div>
                                 <div class="kpi-info">
-                                    <div class="kpi-value">{{ total_books }}</div>
-                                    <div class="kpi-label">图书总数</div>
+                                    <div class="kpi-value">{{ combined_catalog_count }}</div>
+                                    <div class="kpi-label" data-zh="商品总数（图书+市场）" data-en="Total catalog items" data-fr="Articles au catalogue">商品总数（图书+市场）</div>
                                 </div>
                             </div>
                         </div>
@@ -478,8 +466,8 @@
                             <div class="kpi-card" style="background: var(--gradient-2);">
                                 <div class="kpi-icon"><i class="fas fa-yen-sign"></i></div>
                                 <div class="kpi-info">
-                                    <div class="kpi-value">{{ total_revenue|fcfa }}</div>
-                                    <div class="kpi-label">总收入</div>
+                                    <div class="kpi-value">{{ combined_revenue|fcfa }}</div>
+                                    <div class="kpi-label" data-zh="总收入（图书+市场）" data-en="Total revenue" data-fr="Revenu total">总收入（图书+市场）</div>
                                 </div>
                             </div>
                         </div>
@@ -487,8 +475,8 @@
                             <div class="kpi-card" style="background: var(--gradient-3);">
                                 <div class="kpi-icon"><i class="fas fa-shopping-bag"></i></div>
                                 <div class="kpi-info">
-                                    <div class="kpi-value">{{ total_orders }}</div>
-                                    <div class="kpi-label">订单总数</div>
+                                    <div class="kpi-value">{{ combined_order_count }}</div>
+                                    <div class="kpi-label" data-zh="订单总数（图书+市场）" data-en="Total orders" data-fr="Commandes totales">订单总数（图书+市场）</div>
                                 </div>
                             </div>
                         </div>
@@ -496,17 +484,26 @@
                             <div class="kpi-card" style="background: var(--gradient-4);">
                                 <div class="kpi-icon"><i class="fas fa-exclamation-triangle"></i></div>
                                 <div class="kpi-info">
-                                    <div class="kpi-value">{{ low_inventory_books }}</div>
-                                    <div class="kpi-label">库存预警</div>
+                                    <div class="kpi-value">{{ combined_low_stock }}</div>
+                                    <div class="kpi-label" data-zh="库存预警（图书+市场）" data-en="Low stock alerts" data-fr="Alertes de stock">库存预警（图书+市场）</div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- KPI Cards Row 2 -->
+                    <!-- Domain KPI rows: Books at a glance / Marketplace at a glance -->
                     <div class="row">
                         <div class="col-xl-3 col-md-6">
                             <div class="kpi-card" style="background: var(--gradient-6);">
+                                <div class="kpi-icon"><i class="fas fa-book"></i></div>
+                                <div class="kpi-info">
+                                    <div class="kpi-value">{{ total_books }}</div>
+                                    <div class="kpi-label" data-zh="图书总数" data-en="Books" data-fr="Livres">图书总数</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6">
+                            <div class="kpi-card" style="background: linear-gradient(135deg, #ec4899, #be185d);">
                                 <div class="kpi-icon"><i class="fas fa-building"></i></div>
                                 <div class="kpi-info">
                                     <div class="kpi-value">{{ total_publishers }}</div>
@@ -515,7 +512,7 @@
                             </div>
                         </div>
                         <div class="col-xl-3 col-md-6">
-                            <div class="kpi-card" style="background: linear-gradient(135deg, #ec4899, #be185d);">
+                            <div class="kpi-card" style="background: linear-gradient(135deg, #14b8a6, #0d9488);">
                                 <div class="kpi-icon"><i class="fas fa-user-edit"></i></div>
                                 <div class="kpi-info">
                                     <div class="kpi-value">{{ total_authors }}</div>
@@ -524,73 +521,114 @@
                             </div>
                         </div>
                         <div class="col-xl-3 col-md-6">
-                            <div class="kpi-card" style="background: linear-gradient(135deg, #14b8a6, #0d9488);">
-                                <div class="kpi-icon"><i class="fas fa-calendar-check"></i></div>
-                                <div class="kpi-info">
-                                    <div class="kpi-value">{{ orders_this_month }}</div>
-                                    <div class="kpi-label">本月订单</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-xl-3 col-md-6">
                             <div class="kpi-card" style="background: linear-gradient(135deg, #f97316, #ea580c);">
                                 <div class="kpi-icon"><i class="fas fa-coins"></i></div>
                                 <div class="kpi-info">
                                     <div class="kpi-value">{{ revenue_this_month|fcfa }}</div>
-                                    <div class="kpi-label">本月收入</div>
+                                    <div class="kpi-label" data-zh="图书本月收入" data-en="Book revenue (this month)" data-fr="Revenu livres (ce mois)">图书本月收入</div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Charts Row 1: Sales Trend + Order Status -->
                     <div class="row">
-                        <div class="col-lg-8">
-                            <div class="chart-card">
-                                <h6><i class="fas fa-chart-line text-primary"></i> 近7日销售趋势</h6>
-                                <canvas id="salesChart"></canvas>
+                        <div class="col-xl-3 col-md-6">
+                            <div class="kpi-card" style="background: linear-gradient(135deg, #7c3aed, #4f46e5);">
+                                <div class="kpi-icon"><i class="fas fa-shopping-bag"></i></div>
+                                <div class="kpi-info">
+                                    <div class="kpi-value">{{ total_products }}</div>
+                                    <div class="kpi-label" data-zh="商品数量" data-en="Products" data-fr="Produits">商品数量</div>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-lg-4">
-                            <div class="chart-card">
-                                <h6><i class="fas fa-chart-pie text-success"></i> 订单状态分布</h6>
-                                <canvas id="orderStatusChart"></canvas>
+                        <div class="col-xl-3 col-md-6">
+                            <div class="kpi-card" style="background: linear-gradient(135deg, #0ea5e9, #0284c7);">
+                                <div class="kpi-icon"><i class="fas fa-graduation-cap"></i></div>
+                                <div class="kpi-info">
+                                    <div class="kpi-value">{{ total_courses }}</div>
+                                    <div class="kpi-label" data-zh="课程数量" data-en="Courses" data-fr="Cours">课程数量</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6">
+                            <div class="kpi-card" style="background: linear-gradient(135deg, #16a34a, #15803d);">
+                                <div class="kpi-icon"><i class="fas fa-basket-shopping"></i></div>
+                                <div class="kpi-info">
+                                    <div class="kpi-value">{{ total_supermarket }}</div>
+                                    <div class="kpi-label" data-zh="超市商品" data-en="Supermarket items" data-fr="Articles supermarché">超市商品</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6">
+                            <div class="kpi-card" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                                <div class="kpi-icon"><i class="fas fa-coins"></i></div>
+                                <div class="kpi-info">
+                                    <div class="kpi-value">{{ mkt_revenue|fcfa }}</div>
+                                    <div class="kpi-label" data-zh="市场总收入" data-en="Marketplace revenue" data-fr="Revenu marché">市场总收入</div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Charts Row 2: Publisher Distribution + Sales vs Inventory -->
+                    <!-- Combined revenue trend (books + marketplace) -->
                     <div class="row">
-                        <div class="col-lg-6">
+                        <div class="col-lg-12">
+                            <div class="chart-card">
+                                <h6><i class="fas fa-chart-line text-primary"></i> <span data-zh="近7日收入趋势（图书+市场）" data-en="7-day revenue trend (books + marketplace)" data-fr="Tendance des revenus sur 7 jours (livres + marché)">近7日收入趋势（图书+市场）</span></h6>
+                                <canvas id="salesChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Domain panels: Books | Marketplace — same chart types side by side -->
+                    <div class="row">
+                        <div class="col-lg-3 col-md-6">
+                            <div class="chart-card">
+                                <h6><i class="fas fa-chart-pie text-success"></i> <span data-zh="图书订单状态" data-en="Book order status" data-fr="Statut commandes livres">图书订单状态</span></h6>
+                                <canvas id="orderStatusChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <div class="chart-card">
+                                <h6><i class="fas fa-chart-pie text-success"></i> <span data-zh="市场订单状态" data-en="Marketplace order status" data-fr="Statut commandes marché">市场订单状态</span></h6>
+                                <canvas id="mktOrderStatusChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6">
                             <div class="chart-card">
                                 <h6><i class="fas fa-building text-info"></i> 出版社图书分布</h6>
                                 <canvas id="publisherChart"></canvas>
                             </div>
                         </div>
-                        <div class="col-lg-6">
+                        <div class="col-lg-3 col-md-6">
+                            <div class="chart-card">
+                                <h6><i class="fas fa-folder-tree text-info"></i> <span data-zh="市场分类分布" data-en="Marketplace category mix" data-fr="Répartition des catégories">市场分类分布</span></h6>
+                                <canvas id="mktCatalogChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row: Sales vs Inventory + Monthly Trend + Price Distribution (books detail) -->
+                    <div class="row">
+                        <div class="col-lg-4">
                             <div class="chart-card">
                                 <h6><i class="fas fa-exchange-alt text-warning"></i> 热销图书：销量 vs 库存</h6>
                                 <canvas id="salesInventoryChart"></canvas>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Charts Row 3: Monthly Trend + Price Distribution -->
-                    <div class="row">
-                        <div class="col-lg-7">
+                        <div class="col-lg-4">
                             <div class="chart-card">
                                 <h6><i class="fas fa-chart-bar text-primary"></i> 近6月订单趋势</h6>
                                 <canvas id="monthlyChart"></canvas>
                             </div>
                         </div>
-                        <div class="col-lg-5">
+                        <div class="col-lg-4">
                             <div class="chart-card">
                                 <h6><i class="fas fa-tags" style="color: var(--secondary-color);"></i> 图书价格区间分布</h6>
                                 <canvas id="priceChart"></canvas>
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Tables Section -->
                     <div class="row">
                         <div class="col-lg-6">
@@ -639,7 +677,7 @@
                         <div class="col-lg-6">
                             <div class="table-container">
                                 <h6 class="table-header">
-                                    <i class="fas fa-clock"></i> 最近订单动态
+                                    <i class="fas fa-clock"></i> <span data-zh="最近图书订单" data-en="Recent book orders" data-fr="Commandes livres récentes">最近图书订单</span>
                                 </h6>
                                 <div class="table-body">
                                     <table class="table">
@@ -678,6 +716,49 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="col-lg-6">
+                            <div class="table-container">
+                                <h6 class="table-header">
+                                    <i class="fas fa-clock"></i> <span data-zh="最近市场订单" data-en="Recent marketplace orders" data-fr="Commandes marché récentes">最近市场订单</span>
+                                </h6>
+                                <div class="table-body">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>订单号</th>
+                                                <th>客户</th>
+                                                <th>金额</th>
+                                                <th>状态</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for order in mkt_recent_orders %}
+                                            <tr>
+                                                <td>
+                                                    <strong>{{ order.order_number|slice:":8" }}...</strong><br>
+                                                    <small class="text-muted">{{ order.created_at|date:"m-d H:i" }}</small>
+                                                </td>
+                                                <td>{{ order.user_name|truncatechars:8 }}</td>
+                                                <td><span class="text-success fw-bold">{{ order.total_amount|fcfa }}</span></td>
+                                                <td>
+                                                    {% if order.status == 'pending' %}
+                                                        <span class="badge bg-warning">待处理</span>
+                                                    {% elif order.status == 'delivered' %}
+                                                        <span class="badge bg-success">已完成</span>
+                                                    {% else %}
+                                                        <span class="badge bg-info">处理中</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            {% empty %}
+                                            <tr><td colspan="4" class="text-center text-muted py-3">暂无订单</td></tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
                     </div>
             </div>
         </div>
@@ -693,16 +774,17 @@
             layout: { padding: { top: 5, bottom: 5, left: 5, right: 5 } }
         };
 
-        // 1. Sales Trend Line Chart
+        // 1. Combined Revenue Trend Line Chart (books + marketplace)
         var salesCtx = document.getElementById('salesChart');
         if (salesCtx) {
             var salesData = {{ daily_sales_json|safe }};
+            var mktSalesData = {{ mkt_daily_sales_json|safe }};
             new Chart(salesCtx.getContext('2d'), {
                 type: 'line',
                 data: {
                     labels: salesData.map(function(i){ return i.date; }),
                     datasets: [{
-                        label: '销售额 (FCFA)',
+                        label: window.adminI18n ? window.adminI18n.t('图书收入 (FCFA)', 'Book revenue (FCFA)', 'Revenu livres (FCFA)') : '图书收入 (FCFA)',
                         data: salesData.map(function(i){ return i.revenue; }),
                         borderColor: '#1d4ed8',
                         backgroundColor: 'rgba(29, 78, 216, 0.15)',
@@ -710,7 +792,15 @@
                         pointBackgroundColor: '#1d4ed8', pointBorderColor: '#fff',
                         pointBorderWidth: 2, pointRadius: 4, pointHoverRadius: 6
                     }, {
-                        label: '订单数',
+                        label: window.adminI18n ? window.adminI18n.t('市场收入 (FCFA)', 'Marketplace revenue (FCFA)', 'Revenu marché (FCFA)') : '市场收入 (FCFA)',
+                        data: mktSalesData.map(function(i){ return i.revenue; }),
+                        borderColor: '#7c3aed',
+                        backgroundColor: 'rgba(124, 58, 237, 0.12)',
+                        borderWidth: 3, fill: true, tension: 0.4,
+                        pointBackgroundColor: '#7c3aed', pointBorderColor: '#fff',
+                        pointBorderWidth: 2, pointRadius: 4, pointHoverRadius: 6
+                    }, {
+                        label: window.adminI18n ? window.adminI18n.t('图书订单数', 'Book orders', 'Commandes livres') : '图书订单数',
                         data: salesData.map(function(i){ return i.orders; }),
                         borderColor: '#10b981',
                         backgroundColor: 'rgba(16, 185, 129, 0.1)',
@@ -730,7 +820,7 @@
             });
         }
 
-        // 2. Order Status Doughnut
+        // 2. Book Order Status Doughnut
         var statusCtx = document.getElementById('orderStatusChart');
         if (statusCtx) {
             new Chart(statusCtx.getContext('2d'), {
@@ -745,6 +835,48 @@
                 },
                 options: Object.assign({}, chartDefaults, {
                     plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, font: { size: 10 }, padding: 8, boxWidth: 12 } } }
+                })
+            });
+        }
+
+        // 2b. Marketplace Order Status Doughnut — same chart type as above, paired domain
+        var mktStatusCtx = document.getElementById('mktOrderStatusChart');
+        if (mktStatusCtx) {
+            var mktStatusData = {{ mkt_order_status_json|safe }};
+            new Chart(mktStatusCtx.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: mktStatusData.labels,
+                    datasets: [{
+                        data: mktStatusData.data,
+                        backgroundColor: ['#f59e0b', '#06b6d4', '#1d4ed8', '#10b981', '#ef4444', '#8b5cf6', '#ec4899'],
+                        borderWidth: 2, borderColor: '#ffffff', hoverOffset: 10
+                    }]
+                },
+                options: Object.assign({}, chartDefaults, {
+                    plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, font: { size: 10 }, padding: 8, boxWidth: 12 } } }
+                })
+            });
+        }
+
+        // 2c. Marketplace Category Mix Bar Chart — same chart type as Publisher Distribution below
+        var mktCatalogCtx = document.getElementById('mktCatalogChart');
+        if (mktCatalogCtx) {
+            var mktCatalogData = {{ mkt_catalog_json|safe }};
+            new Chart(mktCatalogCtx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: mktCatalogData.labels,
+                    datasets: [{
+                        label: window.adminI18n ? window.adminI18n.t('数量', 'Quantity', 'Quantité') : '数量',
+                        data: mktCatalogData.data,
+                        backgroundColor: ['rgba(124, 58, 237, 0.8)', 'rgba(14, 165, 233, 0.8)', 'rgba(22, 163, 74, 0.8)'],
+                        borderRadius: 8, borderSkipped: false, barPercentage: 0.6
+                    }]
+                },
+                options: Object.assign({}, chartDefaults, {
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } }, x: { ticks: { font: { size: 10 } } } },
+                    plugins: { legend: { display: false } }
                 })
             });
         }

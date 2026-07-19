@@ -1,60 +1,45 @@
-﻿<!-- Comprehensive admin sidebar — include this in any admin page that lacks a sidebar -->
+<!-- Books sub-panel sidebar — mirrors marketplace/admin/base.html's pattern
+     (its own scoped nav + "back to main dashboard" footer), but as an
+     include like _admin_sidebar.html rather than a base template, so the
+     book-admin pages below don't need their outer <html>/<head> touched. -->
 {% include "admin/_admin_sidebar_styles.html" %}
-<aside class="admin-sidebar-wrap" id="adminSidebar" aria-label="管理导航">
+<aside class="admin-sidebar-wrap" id="adminSidebar" aria-label="图书管理导航">
     <div class="sidebar-brand">
         <div class="d-flex align-items-center gap-3">
-            <div class="brand-icon"><i class="fas fa-user-shield"></i></div>
+            <div class="brand-icon"><i class="fas fa-book"></i></div>
             <div class="min-w-0">
-                <h4 class="text-white mb-0">管理面板</h4>
+                <h4 class="text-white mb-0" data-zh="图书中心" data-en="Books Center" data-fr="Centre livres">图书中心</h4>
                 <small class="d-block text-truncate">欢迎回来，{{ name }}</small>
             </div>
         </div>
     </div>
     <div class="sidebar-scroll">
         <nav class="nav flex-column">
-            <a class="nav-link {% if request.path == '/manager/dashboard/' %}active{% endif %}" href="/manager/dashboard/">
-                <i class="fas fa-chart-pie"></i><span data-zh="仪表板" data-en="Dashboard" data-fr="Tableau de bord">仪表板</span>
+            <a class="nav-link {% if request.path == '/manager/book-dashboard/' %}active{% endif %}" href="/manager/book-dashboard/">
+                <i class="fas fa-chart-pie"></i><span data-zh="图书仪表板" data-en="Book Dashboard" data-fr="Tableau de bord livres">图书仪表板</span>
             </a>
-            <a class="nav-link {% if '/manager/book_list/' in request.path or '/manager/add_book/' in request.path or '/manager/edit_book/' in request.path or '/manager/book_categories/' in request.path or '/manager/author_list/' in request.path or '/manager/add_author/' in request.path or '/manager/edit_author/' in request.path or '/manager/publisher_list/' in request.path or '/manager/add_publisher/' in request.path or '/manager/edit_publisher/' in request.path or '/manager/order_list/' in request.path or '/manager/order_detail/' in request.path %}active{% endif %}" href="/manager/book_list/">
-                <i class="fas fa-book"></i><span data-zh="图书管理" data-en="Books" data-fr="Livres">图书管理</span>
+            <a class="nav-link {% if request.path == '/manager/book_list/' or '/manager/add_book/' in request.path or '/manager/edit_book/' in request.path %}active{% endif %}" href="/manager/book_list/">
+                <i class="fas fa-book"></i><span>图书管理</span>
             </a>
-        </nav>
-        <div class="nav-section-label">运营管理</div>
-        <nav class="nav flex-column">
-            <a class="nav-link {% if request.path == '/manager/admin/returns/' %}active{% endif %}" href="/manager/admin/returns/">
-                <i class="fas fa-undo-alt"></i><span data-zh="退货与物流" data-en="Returns & Shipments" data-fr="Retours & expéditions">退货与物流</span>
+            <a class="nav-link {% if request.path == '/manager/author_list/' or '/manager/add_author/' in request.path or '/manager/edit_author/' in request.path %}active{% endif %}" href="/manager/author_list/">
+                <i class="fas fa-user-edit"></i><span>作者管理</span>
             </a>
-            <a class="nav-link {% if request.path == '/manager/blog_list/' %}active{% endif %}" href="/manager/blog_list/">
-                <i class="fas fa-blog"></i><span>博客管理</span>
+            <a class="nav-link {% if request.path == '/manager/publisher_list/' or '/manager/add_publisher/' in request.path or '/manager/edit_publisher/' in request.path %}active{% endif %}" href="/manager/publisher_list/">
+                <i class="fas fa-building"></i><span>出版社管理</span>
             </a>
-            <a class="nav-link {% if request.path == '/manager/email/' %}active{% endif %}" href="/manager/email/">
-                <i class="fas fa-envelope"></i><span>消息管理</span>
+            <a class="nav-link {% if request.path == '/manager/book_categories/' %}active{% endif %}" href="/manager/book_categories/">
+                <i class="fas fa-layer-group"></i><span data-zh="图书分类" data-en="Categories" data-fr="Catégories">图书分类</span>
             </a>
-            <a class="nav-link {% if request.path == '/manager/admin/store-messages/' %}active{% endif %}" href="/manager/admin/store-messages/">
-                <i class="fas fa-comments"></i><span data-zh="店铺消息" data-en="Store Messages" data-fr="Messages boutique">店铺消息</span>
-            </a>
-            <a class="nav-link {% if '/marketplace/admin/' in request.path %}active{% endif %}" href="/marketplace/admin/dashboard/">
-                <i class="fas fa-store"></i><span>市场管理</span>
-            </a>
-        </nav>
-        <div class="nav-section-label">平台管理</div>
-        <nav class="nav flex-column">
-            <a class="nav-link {% if request.path == '/manager/admin/users/' %}active{% endif %}" href="/manager/admin/users/">
-                <i class="fas fa-users"></i><span>用户管理</span>
-            </a>
-            <a class="nav-link {% if request.path == '/manager/admin/vendors/' %}active{% endif %}" href="/manager/admin/vendors/">
-                <i class="fas fa-store-alt"></i><span>卖家管理</span>
-            </a>
-            <a class="nav-link {% if request.path == '/manager/inventory/' %}active{% endif %}" href="/manager/inventory/">
-                <i class="fas fa-boxes"></i><span data-zh="库存管理" data-en="Inventory" data-fr="Inventaire">库存管理</span>
-            </a>
-            <a class="nav-link {% if request.path == '/manager/admin/escrow/' %}active{% endif %}" href="/manager/admin/escrow/">
-                <i class="fas fa-vault"></i><span data-zh="托管与结算" data-en="Escrow & payouts" data-fr="Escrow & reversements">托管与结算</span>
+            <a class="nav-link {% if '/manager/order_list/' in request.path or '/manager/order_detail/' in request.path %}active{% endif %}" href="/manager/order_list/">
+                <i class="fas fa-shopping-cart"></i><span>订单管理</span>
             </a>
         </nav>
     </div>
     <div class="sidebar-footer">
         <nav class="nav flex-column">
+            <a class="nav-link" href="/manager/dashboard/">
+                <i class="fas fa-arrow-left"></i><span data-zh="返回主面板" data-en="Back to main dashboard" data-fr="Retour au tableau de bord">返回主面板</span>
+            </a>
             <a class="nav-link" href="/manager/public/">
                 <i class="fas fa-globe"></i><span>查看网站</span>
             </a>
