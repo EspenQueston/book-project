@@ -4465,12 +4465,23 @@ def order_list(request):
     orders = orders.order_by('-created_at')
     
     # Get statistics
+    # "待处理" means genuinely awaiting action — placed, paid or confirmed
+    # but not yet shipped/delivered/cancelled/refunded. It used to check
+    # only status='pending', a value that's essentially never set in
+    # practice (orders actually land in 'payment_pending' first), so this
+    # stat silently showed 0 even when orders needed attention.
+    # "已完成" is aligned with the same definition the dashboard uses
+    # (status='delivered') rather than payment_status='completed', which
+    # conflated "we got paid" with "the order is done" — a paid order can
+    # still be sitting unshipped.
     total_orders = models.Order.objects.count()
-    pending_orders = models.Order.objects.filter(status='pending').count()
-    completed_orders = models.Order.objects.filter(payment_status='completed').count()
-    total_revenue = models.Order.objects.filter(payment_status='completed').aggregate(
-        total=Sum('total_amount')
-    )['total'] or 0
+    pending_orders = models.Order.objects.filter(
+        status__in=['pending', 'payment_pending', 'paid', 'confirmed']
+    ).count()
+    completed_orders = models.Order.objects.filter(status='delivered').count()
+    total_revenue = models.Order.objects.filter(
+        payment_status__in=['completed', 'pending']
+    ).aggregate(total=Sum('total_amount'))['total'] or 0
     
     context = {
         'orders': orders,
@@ -4523,7 +4534,21 @@ def update_order_status(request):
         
         order = get_object_or_404(models.Order, id=order_id)
         old_status = order.status
-        
+
+        # This endpoint only flips the status label — it has no inventory
+        # logic. Cancelling/refunding an order that already had stock
+        # deducted (inventory_applied=True, meaning payment was confirmed)
+        # needs restore_inventory_for_shipment via the Returns & Shipments
+        # queue instead, or the deducted stock is silently never restored.
+        # Orders that were cancelled before payment ever completed
+        # (inventory_applied=False) have nothing to restore, so those are
+        # still fine to cancel directly here.
+        if new_status in ('cancelled', 'refunded') and order.inventory_applied and old_status not in ('cancelled', 'refunded'):
+            return JsonResponse({
+                'success': False,
+                'message': '该订单库存已扣减（已付款），请通过"退货与物流"处理退款以正确恢复库存，而不是直接修改订单状态。',
+            })
+
         order.status = new_status
         if admin_notes:
             order.admin_notes = admin_notes
@@ -4565,6 +4590,16 @@ def update_payment_status(request):
             # delivery, bank transfer confirmed by hand).
             from manager.payments.views import _update_order_status
             _update_order_status(order, 'SUCCESSFUL', transaction_id=transaction_id or None)
+        elif new_payment_status == 'refunded' and order.inventory_applied and old_payment_status != 'refunded':
+            # Same gap as update_order_status above: flipping this field
+            # directly has no inventory logic, so marking a paid order
+            # "refunded" here would never give the stock back. Route through
+            # Returns & Shipments instead, which calls
+            # restore_inventory_for_shipment for the real reversal.
+            return JsonResponse({
+                'success': False,
+                'message': '该订单库存已扣减，请通过"退货与物流"处理退款以正确恢复库存，而不是直接修改支付状态。',
+            })
         else:
             order.payment_status = new_payment_status
             if transaction_id:
@@ -4789,7 +4824,7 @@ def order_analytics(request):
         count = orders_in_range.filter(created_at__date=current_date).count()
         revenue = orders_in_range.filter(
             created_at__date=current_date,
-            payment_status='paid'
+            payment_status='completed'
         ).aggregate(total=Sum('total_amount'))['total'] or 0
         
         daily_orders.append({
@@ -4829,7 +4864,8 @@ def order_analytics(request):
             'payment_status_distribution': payment_status_counts,
             'top_customers': list(top_customers),
             'summary': {
-                'total_orders': orders_in_range.count(),                'total_revenue': float(orders_in_range.filter(payment_status='paid').aggregate(
+                'total_orders': orders_in_range.count(),
+                'total_revenue': float(orders_in_range.filter(payment_status='completed').aggregate(
                     total=Sum('total_amount'))['total'] or 0),
                 'average_order_value': float(orders_in_range.aggregate(
                     avg=Avg('total_amount'))['avg'] or 0),
@@ -4885,7 +4921,25 @@ def _dashboard_context(request):
         shipped_orders = models.Order.objects.filter(status='shipped').count()
         completed_orders = models.Order.objects.filter(status='delivered').count()
         cancelled_orders = models.Order.objects.filter(status='cancelled').count()
-        
+
+        # Full status breakdown for the order-status chart — the 5 counts
+        # above only cover payment_pending/processing/shipped/delivered/
+        # cancelled, silently dropping any order sitting in pending, paid,
+        # confirmed or refunded (found live: 'confirmed' and 'refunded'
+        # orders existed but never showed up in the chart). Built the same
+        # way as marketplace's order-status chart so every order is
+        # represented no matter what status it's in.
+        _status_rows = list(
+            models.Order.objects.values('status').annotate(c=Count('id')).order_by('-c')
+        )
+        _status_display = dict(models.ORDER_STATUS_CHOICES)
+        order_status_chart = {
+            'labels': [_status_display.get(r['status'], r['status']) for r in _status_rows],
+            'data': [r['c'] for r in _status_rows],
+        }
+        if not order_status_chart['labels']:
+            order_status_chart = {'labels': ['暂无数据'], 'data': [1]}
+
         # Revenue calculations
         total_revenue = models.Order.objects.filter(
             payment_status__in=['completed', 'pending']
@@ -4906,7 +4960,8 @@ def _dashboard_context(request):
         cancelled_orders = 0
         total_revenue = 0
         revenue_this_month = 0
-    
+        order_status_chart = {'labels': ['暂无数据'], 'data': [1]}
+
     # ==== INVENTORY STATISTICS ====
     low_inventory_books = models.Book.objects.filter(inventory__lt=10).count()
     total_inventory = models.Book.objects.aggregate(Sum('inventory'))['inventory__sum'] or 0
@@ -5088,6 +5143,7 @@ def _dashboard_context(request):
 
         # Chart data (as JSON)
         'daily_sales_json': json.dumps(daily_sales),
+        'order_status_json': json.dumps(order_status_chart),
         'publisher_stats_json': json.dumps(publisher_stats),
         'mkt_daily_sales_json': mkt_chart_payload.get('mkt_daily_sales_json', '[]'),
         'mkt_order_status_json': mkt_chart_payload.get('mkt_order_status_json', '{}'),

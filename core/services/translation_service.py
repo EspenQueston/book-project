@@ -10,7 +10,9 @@ Usage:
     en_text = svc.translate("新鲜蔬菜", source='zh', target='en', content_type='product_name')
 """
 import logging
+import threading
 from django.conf import settings
+from django.db import transaction
 from django.utils import translation
 
 logger = logging.getLogger(__name__)
@@ -219,8 +221,16 @@ def auto_translate_new_instance(instance, model_cls, field_specs, languages=_MT_
         current_lang = languages[0]
     source_suffix = _mt_suffix(current_lang)
 
-    svc = TranslationService()
-    update_kwargs = {}
+    # Figure out what actually needs translating now — this part is pure
+    # attribute access, no I/O, effectively instant. The OpenRouter calls
+    # (the slow part — each one can take several seconds, or the full
+    # retry+fallback cycle if the free-tier daily quota is exhausted) run
+    # in a background thread after the save transaction commits, so
+    # creating a Book/Author/Product/Course/etc. doesn't block the HTTP
+    # response on a translation API call. Previously this ran inline in
+    # the post_save signal and could add 10+ seconds to a single "Save"
+    # click.
+    jobs = []  # (source_text, target_lang, content_type, target_field)
     for base_field, content_type in field_specs:
         source_field = f'{base_field}_{source_suffix}'
         source_text = getattr(instance, source_field, '') or getattr(instance, base_field, '')
@@ -232,10 +242,30 @@ def auto_translate_new_instance(instance, model_cls, field_specs, languages=_MT_
             target_field = f'{base_field}_{_mt_suffix(lang)}'
             if getattr(instance, target_field, ''):
                 continue  # already has content, don't overwrite
+            jobs.append((source_text, lang, content_type, target_field))
+
+    if not jobs:
+        return {}
+
+    pk = instance.pk
+
+    def _run_in_background():
+        svc = TranslationService()
+        update_kwargs = {}
+        for source_text, lang, content_type, target_field in jobs:
             translated = svc.translate(source_text, current_lang, lang, content_type)
             if translated:
                 update_kwargs[target_field] = translated
+        if update_kwargs:
+            try:
+                model_cls.objects.filter(pk=pk).update(**update_kwargs)
+                logger.info("Background translation applied to %s #%s: %s", model_cls.__name__, pk, list(update_kwargs))
+            except Exception as exc:
+                logger.error("Background translation DB update failed for %s #%s: %s", model_cls.__name__, pk, exc)
 
-    if update_kwargs:
-        model_cls.objects.filter(pk=instance.pk).update(**update_kwargs)
-    return update_kwargs
+    # on_commit: if the caller is inside transaction.atomic(), the row
+    # isn't visible to other DB connections (i.e. the background thread's
+    # own connection) until commit — starting the thread immediately could
+    # race ahead of that and find nothing to update.
+    transaction.on_commit(lambda: threading.Thread(target=_run_in_background, daemon=True).start())
+    return {}

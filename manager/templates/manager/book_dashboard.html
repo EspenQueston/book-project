@@ -444,16 +444,19 @@
             });
         }
 
-        // 2. Order Status Doughnut
+        // 2. Order Status Doughnut — every order status (not just the 5
+        // "in-progress" ones), so orders sitting in e.g. confirmed/refunded
+        // aren't silently missing from the chart.
         var statusCtx = document.getElementById('orderStatusChart');
         if (statusCtx) {
+            var orderStatusData = {{ order_status_json|safe }};
             new Chart(statusCtx.getContext('2d'), {
                 type: 'doughnut',
                 data: {
-                    labels: ['待付款', '处理中', '已发货', '已完成', '已取消'],
+                    labels: orderStatusData.labels,
                     datasets: [{
-                        data: [{{ pending_orders }}, {{ processing_orders }}, {{ shipped_orders }}, {{ completed_orders }}, {{ cancelled_orders }}],
-                        backgroundColor: ['#f59e0b', '#06b6d4', '#1d4ed8', '#10b981', '#ef4444'],
+                        data: orderStatusData.data,
+                        backgroundColor: ['#ef4444', '#10b981', '#06b6d4', '#1d4ed8', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'],
                         borderWidth: 2, borderColor: '#ffffff', hoverOffset: 10
                     }]
                 },
