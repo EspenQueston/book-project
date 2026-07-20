@@ -149,7 +149,7 @@
             <a href="{% url 'marketplace:course_detail' course.slug %}" style="text-decoration:none; color:inherit;">
                 <div class="course-card feed-card-stretch">
                     <div style="position:relative;">
-                        <img src="{{ course.get_image_url }}" alt="{{ course.title }}" class="course-card-img">
+                        <img src="{{ course.get_image_url }}" onerror="this.onerror=null;this.src='/static/img/default_course.png';" alt="{{ course.title }}" class="course-card-img">
                         <span class="position-absolute top-0 end-0 m-2 level-badge level-{{ course.level }}">{{ course.get_level_display }}</span>
                         {% if course.is_featured %}
                         <span class="position-absolute top-0 start-0 m-2 badge" style="background:linear-gradient(135deg,#f59e0b,#f97316);font-size:0.7rem;"><i class="fas fa-star me-1"></i>{% trans "推荐" %}</span>

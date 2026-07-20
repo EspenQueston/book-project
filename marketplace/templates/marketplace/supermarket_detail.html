@@ -621,7 +621,7 @@
         {% for img_url in item.get_gallery_images %}
         <div class="zoom-hover-wrap"><img src="{{ img_url }}" alt="{{ item.name }}"></div>
         {% empty %}
-        <div class="zoom-hover-wrap"><img src="{{ item.get_image_url }}" alt="{{ item.name }}"></div>
+        <div class="zoom-hover-wrap"><img src="{{ item.get_image_url }}" onerror="this.onerror=null;this.src='/static/img/default_supermarket.png';" alt="{{ item.name }}"></div>
         {% endfor %}
     </div>
     {% if item.get_gallery_images|length > 1 %}
@@ -781,7 +781,7 @@
             {% for r in related_items %}
             <a href="{% url 'marketplace:supermarket_detail' r.slug %}" style="text-decoration:none;color:inherit;">
                 <div class="pmp-feed-card">
-                    <img src="{{ r.get_image_url }}" alt="{{ r.name }}">
+                    <img src="{{ r.get_image_url }}" onerror="this.onerror=null;this.src='/static/img/default_supermarket.png';" alt="{{ r.name }}">
                     <div class="pmp-feed-name">{{ r.name }}</div>
                     <div class="pmp-feed-price">{{ r.price|fcfa }}</div>
                 </div>
@@ -821,7 +821,7 @@
         <div class="desk-single-hero">
             <div class="desk-single-gallery">
                 <div class="zoom-hover-wrap">
-                    <img src="{{ item.get_image_url }}" alt="{{ item.name }}" class="detail-img" id="mainImage">
+                    <img src="{{ item.get_image_url }}" onerror="this.onerror=null;this.src='/static/img/default_supermarket.png';" alt="{{ item.name }}" class="detail-img" id="mainImage">
                 </div>
                 {% if item.get_gallery_images|length > 1 %}
                 <div class="thumb-row" style="display:flex;gap:10px;margin-top:12px;">
@@ -997,7 +997,7 @@
             <div class="col-sm-6 col-md-3">
                 <a href="{% url 'marketplace:supermarket_detail' r.slug %}" style="text-decoration:none; color:inherit;">
                     <div class="related-card">
-                        <img src="{{ r.get_image_url }}" alt="{{ r.name }}">
+                        <img src="{{ r.get_image_url }}" onerror="this.onerror=null;this.src='/static/img/default_supermarket.png';" alt="{{ r.name }}">
                         <div class="p-3">
                             <h6 class="fw-bold mb-1">{{ r.name }}</h6>
                             <span style="font-weight:800; color:#ef4444;">{{ r.price|fcfa }}/{{ r.get_unit_display }}</span>

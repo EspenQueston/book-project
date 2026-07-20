@@ -38,7 +38,7 @@
                 <tr>
                     <td class="ps-4">
                         <div class="d-flex align-items-center">
-                            <img src="{{ item.get_image_url }}" style="width:45px; height:45px; object-fit:cover; border-radius:8px; margin-right:12px;">
+                            <img src="{{ item.get_image_url }}" onerror="this.onerror=null;this.src='/static/img/default_supermarket.png';" style="width:45px; height:45px; object-fit:cover; border-radius:8px; margin-right:12px;">
                             <div>
                                 <div class="fw-bold">{{ item.name }}</div>
                                 <small class="text-muted">{{ item.brand|default:"" }} {{ item.origin|default:"" }}</small>

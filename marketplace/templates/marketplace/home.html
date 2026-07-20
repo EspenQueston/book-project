@@ -277,7 +277,7 @@
             <a href="{% url 'marketplace:supermarket_detail' item.slug %}" style="text-decoration:none; color:inherit;">
                 <div class="product-card">
                     <div style="position:relative; overflow:hidden;">
-                        <img src="{{ item.get_image_url }}" alt="{{ item.name }}" class="product-card-img">
+                        <img src="{{ item.get_image_url }}" onerror="this.onerror=null;this.src='/static/img/default_supermarket.png';" alt="{{ item.name }}" class="product-card-img">
                         {% if item.is_organic %}<span class="badge-organic position-absolute top-0 start-0 m-2"><i class="fas fa-leaf me-1"></i>Organic</span>{% endif %}
                         {% if item.get_discount_percent %}<span class="badge-discount position-absolute top-0 end-0 m-2">-{{ item.get_discount_percent }}%</span>{% endif %}
                     </div>
@@ -305,7 +305,7 @@
             <a href="{% url 'marketplace:course_detail' course.slug %}" style="text-decoration:none; color:inherit;">
                 <div class="product-card">
                     <div style="position:relative; overflow:hidden;">
-                        <img src="{{ course.get_image_url }}" alt="{{ course.title }}" class="product-card-img">
+                        <img src="{{ course.get_image_url }}" onerror="this.onerror=null;this.src='/static/img/default_course.png';" alt="{{ course.title }}" class="product-card-img">
                         {% if course.get_discount_percent %}<span class="badge-discount position-absolute top-0 end-0 m-2">-{{ course.get_discount_percent }}%</span>{% endif %}
                     </div>
                     <div class="product-card-body">
@@ -332,7 +332,7 @@
             <a href="{% url 'marketplace:product_detail' product.slug %}" style="text-decoration:none; color:inherit;">
                 <div class="product-card">
                     <div style="position:relative; overflow:hidden;">
-                        <img src="{{ product.get_image_url }}" alt="{{ product.name }}" class="product-card-img">
+                        <img src="{{ product.get_image_url }}" onerror="this.onerror=null;this.src='/static/img/default_product.png';" alt="{{ product.name }}" class="product-card-img">
                         {% if product.get_discount_percent %}<span class="badge-discount position-absolute top-0 end-0 m-2">-{{ product.get_discount_percent }}%</span>{% endif %}
                     </div>
                     <div class="product-card-body">

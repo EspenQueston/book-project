@@ -459,7 +459,7 @@
             {% for img_url in product.get_gallery_images %}
             <div class="bmp-gallery-slide"><div class="zoom-hover-wrap"><img src="{{ img_url }}" alt="{{ product.name }}"></div></div>
             {% empty %}
-            <div class="bmp-gallery-slide"><div class="zoom-hover-wrap"><img src="{{ product.get_image_url }}" alt="{{ product.name }}"></div></div>
+            <div class="bmp-gallery-slide"><div class="zoom-hover-wrap"><img src="{{ product.get_image_url }}" onerror="this.onerror=null;this.src='/static/img/default_product.png';" alt="{{ product.name }}"></div></div>
             {% endfor %}
         </div>
         {% if sold_delivered > 0 %}
@@ -598,7 +598,7 @@
             {% for p in related_products %}
             <a href="{% url 'marketplace:product_detail' p.slug %}" class="bmp-feed-card">
                 <div class="bmp-feed-cover">
-                    <img src="{{ p.get_image_url }}" alt="{{ p.name }}">
+                    <img src="{{ p.get_image_url }}" onerror="this.onerror=null;this.src='/static/img/default_product.png';" alt="{{ p.name }}">
                 </div>
                 <div class="bmp-feed-body">
                     <div class="bmp-feed-name">{{ p.name }}</div>
@@ -650,7 +650,7 @@
         <div class="desk-single-gallery">
             <div class="product-gallery">
                 <div class="zoom-hover-wrap">
-                    <img src="{{ product.get_image_url }}" alt="{{ product.name }}" class="main-img" id="mainImage">
+                    <img src="{{ product.get_image_url }}" onerror="this.onerror=null;this.src='/static/img/default_product.png';" alt="{{ product.name }}" class="main-img" id="mainImage">
                 </div>
                 {% if product.get_gallery_images|length > 1 %}
                 <div class="thumb-row">
@@ -870,7 +870,7 @@
             <div class="col-6 col-md-3">
                 <a href="{% url 'marketplace:product_detail' p.slug %}" style="text-decoration:none; color:inherit;">
                     <div class="related-card">
-                        <img src="{{ p.get_image_url }}" alt="{{ p.name }}">
+                        <img src="{{ p.get_image_url }}" onerror="this.onerror=null;this.src='/static/img/default_product.png';" alt="{{ p.name }}">
                         <div class="related-card-body">
                             <h6>{{ p.name }}</h6>
                             <span style="font-weight:800; color:var(--danger-color);">{{ p.price|fcfa }}</span>

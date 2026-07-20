@@ -173,7 +173,7 @@
             {% for p in top_products %}
             <div class="order-row">
                 <span class="badge bg-light text-dark" style="width:24px;">{{ forloop.counter }}</span>
-                <img src="{{ p.get_image_url }}" style="width:40px;height:40px;border-radius:8px;object-fit:cover;">
+                <img src="{{ p.get_image_url }}" onerror="this.onerror=null;this.src='/static/img/default_product.png';" style="width:40px;height:40px;border-radius:8px;object-fit:cover;">
                 <div class="flex-grow-1" style="min-width:0;">
                     <div class="fw-bold text-truncate" style="font-size:0.85rem;">{{ p.name }}</div>
                     <small class="text-muted">{{ p.price|fcfa }}</small>

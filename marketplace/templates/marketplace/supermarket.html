@@ -119,7 +119,7 @@
             <a href="{% url 'marketplace:supermarket_detail' item.slug %}" style="text-decoration:none; color:inherit;">
                 <div class="item-card feed-card-stretch">
                     <div style="position:relative;">
-                        <img src="{{ item.get_image_url }}" alt="{{ item.name }}" class="item-card-img">
+                        <img src="{{ item.get_image_url }}" onerror="this.onerror=null;this.src='/static/img/default_supermarket.png';" alt="{{ item.name }}" class="item-card-img">
                         {% if item.is_organic %}
                         <span class="position-absolute top-0 start-0 m-2 organic-badge"><i class="fas fa-leaf me-1"></i>{% trans "有机" %}</span>
                         {% endif %}

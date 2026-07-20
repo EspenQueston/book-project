@@ -81,7 +81,7 @@
                         <td class="ps-4">
                             <div class="d-flex align-items-center gap-3">
                                 {% if product.image %}
-                                <img src="{{ product.get_image_url }}" class="vendor-thumb" alt="{{ product.name }}">
+                                <img src="{{ product.get_image_url }}" onerror="this.onerror=null;this.src='/static/img/default_product.png';" class="vendor-thumb" alt="{{ product.name }}">
                                 {% else %}
                                 <div class="vendor-thumb-placeholder"><i class="fas fa-box"></i></div>
                                 {% endif %}

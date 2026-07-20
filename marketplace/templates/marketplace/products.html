@@ -218,7 +218,7 @@
             <a href="{% url 'marketplace:product_detail' product.slug %}" style="text-decoration:none; color:inherit;">
                 <div class="product-card feed-card-stretch">
                     <div style="position:relative;">
-                        <img src="{{ product.get_image_url }}" alt="{{ product.name }}" class="product-card-img">
+                        <img src="{{ product.get_image_url }}" onerror="this.onerror=null;this.src='/static/img/default_product.png';" alt="{{ product.name }}" class="product-card-img">
                         {% if product.get_discount_percent %}
                         <span class="position-absolute top-0 end-0 m-2 badge" style="background:linear-gradient(135deg,#ef4444,#f97316);font-size:0.75rem;">-{{ product.get_discount_percent }}%</span>
                         {% endif %}

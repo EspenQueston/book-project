@@ -601,8 +601,8 @@
     <!-- A. Cover Image -->
     <div class="bmp-gallery" id="bmpGallery">
         <div class="bmp-gallery-track" id="bmpTrack">
-            <div class="bmp-gallery-slide"><img src="{{ course.get_image_url }}" alt="{{ course.title }}"></div>
-            <div class="bmp-gallery-slide"><img src="{{ course.get_image_url }}" alt="{{ course.title }}" style="filter:brightness(.85)saturate(1.3);"></div>
+            <div class="bmp-gallery-slide"><img src="{{ course.get_image_url }}" onerror="this.onerror=null;this.src='/static/img/default_course.png';" alt="{{ course.title }}"></div>
+            <div class="bmp-gallery-slide"><img src="{{ course.get_image_url }}" onerror="this.onerror=null;this.src='/static/img/default_course.png';" alt="{{ course.title }}" style="filter:brightness(.85)saturate(1.3);"></div>
         </div>
         {% if sold_delivered > 0 %}
         <div class="bmp-promo-badge">🎓 {{ sold_delivered }}+ {% trans "已报名" %}</div>
@@ -791,7 +791,7 @@
             {% for c in related_courses %}
             <a href="{% url 'marketplace:course_detail' c.slug %}" style="text-decoration:none;color:inherit;">
                 <div class="crc-feed-card">
-                    <img src="{{ c.get_image_url }}" alt="{{ c.title }}">
+                    <img src="{{ c.get_image_url }}" onerror="this.onerror=null;this.src='/static/img/default_course.png';" alt="{{ c.title }}">
                     <div class="crc-feed-name">{{ c.title }}</div>
                     <div class="crc-feed-price">{{ c.price|fcfa }}</div>
                 </div>
@@ -1016,7 +1016,7 @@
                         <div class="completion-ring-sub">{{ completed_count }}/{{ total_lessons }} {% trans "已完成" %}</div>
                     </div>
                 </div>
-                <img src="{{ course.get_image_url }}" alt="{{ course.title }}" class="course-cover">
+                <img src="{{ course.get_image_url }}" onerror="this.onerror=null;this.src='/static/img/default_course.png';" alt="{{ course.title }}" class="course-cover">
 
                 <div class="mb-3">
                     <span class="course-price">{{ course.price|fcfa }}</span>
@@ -1086,7 +1086,7 @@
             <div class="col-6 col-md-3">
                 <a href="{% url 'marketplace:course_detail' c.slug %}" style="text-decoration:none; color:inherit;">
                     <div class="related-card">
-                        <img src="{{ c.get_image_url }}" alt="{{ c.title }}">
+                        <img src="{{ c.get_image_url }}" onerror="this.onerror=null;this.src='/static/img/default_course.png';" alt="{{ c.title }}">
                         <div style="padding:14px;">
                             <h6 style="font-weight:700; font-size:0.9rem; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; margin-bottom:4px;">{{ c.title }}</h6>
                             <small class="text-muted d-block mb-1">{{ c.instructor }}</small>

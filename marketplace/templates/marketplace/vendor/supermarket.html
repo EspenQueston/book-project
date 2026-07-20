@@ -78,7 +78,7 @@
                 <tr>
                     <td class="ps-4">
                         <div class="d-flex align-items-center gap-3">
-                            <img src="{{ item.get_image_url }}" alt="" class="vendor-thumb">
+                            <img src="{{ item.get_image_url }}" onerror="this.onerror=null;this.src='/static/img/default_supermarket.png';" alt="" class="vendor-thumb">
                             <div class="min-w-0">
                                 <div class="vendor-row-title text-truncate">{{ item.name }}</div>
                                 <div class="vendor-row-meta">{{ item.brand|default:"" }} {% if item.origin %}· {{ item.origin }}{% endif %}</div>

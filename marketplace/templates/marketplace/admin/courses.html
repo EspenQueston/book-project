@@ -72,7 +72,7 @@
                     <td class="ps-4">
                         <div class="d-flex align-items-center gap-3">
                             {% if course.image %}
-                            <img src="{{ course.get_image_url }}" class="course-thumb" alt="{{ course.title }}">
+                            <img src="{{ course.get_image_url }}" onerror="this.onerror=null;this.src='/static/img/default_course.png';" class="course-thumb" alt="{{ course.title }}">
                             {% else %}
                             <div class="course-thumb-placeholder"><i class="fas fa-play"></i></div>
                             {% endif %}
