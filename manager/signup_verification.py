@@ -62,14 +62,23 @@ def _complete_signup_verification(verification_id: int, lang_code: str) -> None:
                 verification.email, verification.pin_code, verification.name,
             )
             if not sent:
-                verification.delete()
+                # Deliberately NOT deleting the pending verification record
+                # here — the initial send already retries transient
+                # failures (see _send_verification_email), so a failure
+                # reaching this point is more likely a real outage than a
+                # one-off blip. Deleting it used to force the user to
+                # re-enter their whole registration from scratch just to
+                # get a second attempt; keeping it lets the existing
+                # "resend code" button (resend_verification_pin) actually
+                # work, since that view looks the record up by email.
                 cache.set(
                     _cache_key(email, vtype),
                     {
                         'pending': False,
                         'email_sent': False,
-                        'require_sms': False,
-                        'sms_failed': False,
+                        'require_sms': require_sms,
+                        'sms_failed': sms_failed,
+                        'sms_error': sms_error,
                         'error': True,
                     },
                     CACHE_TTL,

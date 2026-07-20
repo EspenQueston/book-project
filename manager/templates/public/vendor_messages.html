@@ -1367,8 +1367,9 @@ video.vm-bub-media { cursor: default; }
     /* ── Listing picker (send a link to my own catalog) ─────────────── */
     window.vmShowListingPicker = function() {
         document.getElementById('listingSearchInput').value = '';
-        document.getElementById('listingResults').innerHTML = '<div style="text-align:center;padding:16px;color:var(--vm-text3);font-size:0.82rem;">{% trans "Type to search your catalog" %}</div>';
+        document.getElementById('listingResults').innerHTML = '<div style="text-align:center;padding:16px;color:var(--vm-text3);font-size:0.82rem;"><i class="fas fa-spinner fa-spin"></i></div>';
         bootstrap.Modal.getOrCreateInstance(document.getElementById('listingPickerModal')).show();
+        vmSearchListings('');
     };
     window.vmSearchListings = function(q) {
         clearTimeout(_listingSearchTimer);

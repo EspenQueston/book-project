@@ -1879,7 +1879,11 @@ def api_vendor_my_listings(request):
     results = []
     vendor_books = models.VendorBook.objects.filter(vendor_id=vendor_id, is_active=True).select_related('book')
     if q:
-        vendor_books = vendor_books.filter(book__name__icontains=q)
+        vendor_books = vendor_books.filter(
+            Q(book__name__icontains=q) |
+            Q(book__author__name__icontains=q) |
+            Q(book__publisher__publisher_name__icontains=q)
+        ).distinct()
     for vb in vendor_books[:15]:
         results.append(_vendor_listing_payload(vb.book, 'book'))
     from marketplace.models import Product, Course, SupermarketItem
@@ -6947,15 +6951,29 @@ def _send_verification_email(email, pin_code, name):
         f'Bonjour {name}, votre code de vérification est : {pin_code}. Valide 15 minutes.'
     )
 
-    try:
-        from django.core.mail import EmailMultiAlternatives
-        msg = EmailMultiAlternatives(subject, plain_body, django_settings.DEFAULT_FROM_EMAIL, [email])
-        msg.attach_alternative(html_body, 'text/html')
-        msg.send(fail_silently=False)
-        return True
-    except Exception as e:
-        logger.error(f'Failed to send verification email to {email}: {e}')
-        return False
+    # Retries on transient SMTP/SSL failures — this dev environment routes
+    # outbound connections through a local proxy (Clash/mihomo) that
+    # intermittently drops connections mid-handshake (same class of issue
+    # seen with OpenRouter — see core/services/translation_service.py), so
+    # a single failed attempt at smtp.zoho.com isn't a reliable signal that
+    # the mail server is actually unreachable. Without this, a one-off
+    # network blip meant a user who never got their code had no way to
+    # recover except registering again from scratch.
+    import time
+    last_exc = None
+    for attempt in range(3):
+        try:
+            from django.core.mail import EmailMultiAlternatives
+            msg = EmailMultiAlternatives(subject, plain_body, django_settings.DEFAULT_FROM_EMAIL, [email])
+            msg.attach_alternative(html_body, 'text/html')
+            msg.send(fail_silently=False)
+            return True
+        except Exception as e:
+            last_exc = e
+            if attempt < 2:
+                time.sleep(1.5 * (attempt + 1))
+    logger.error(f'Failed to send verification email to {email} after 3 attempts: {last_exc}')
+    return False
 
 
 def _send_registration_phone_otp(phone: str):
