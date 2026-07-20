@@ -54,6 +54,33 @@
         </div>
     </section>
 
+    <div class="row g-3">
+        <div class="col-6 col-md-3">
+            <a href="?section=products" class="vendor-panel-card p-3 text-center d-block text-decoration-none{% if section == 'products' %} border-primary border-2{% endif %}">
+                <div class="fw-bold" style="font-size:1.6rem;color:#1d4ed8;">{{ product_category_count }}</div>
+                <div class="text-muted small" data-zh="商品分类" data-en="Product categories" data-fr="Catégories produits">商品分类</div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="?section=courses" class="vendor-panel-card p-3 text-center d-block text-decoration-none{% if section == 'courses' %} border-primary border-2{% endif %}">
+                <div class="fw-bold" style="font-size:1.6rem;color:#f5576c;">{{ course_category_count }}</div>
+                <div class="text-muted small" data-zh="课程分类" data-en="Course categories" data-fr="Catégories cours">课程分类</div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="?section=supermarket" class="vendor-panel-card p-3 text-center d-block text-decoration-none{% if section == 'supermarket' %} border-primary border-2{% endif %}">
+                <div class="fw-bold" style="font-size:1.6rem;color:#00a8cc;">{{ supermarket_category_count }}</div>
+                <div class="text-muted small" data-zh="超市分类" data-en="Supermarket categories" data-fr="Catégories supermarché">超市分类</div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="vendor-panel-card p-3 text-center" style="background:linear-gradient(135deg,#312e81,#4f46e5);">
+                <div class="fw-bold text-white" style="font-size:1.6rem;">{{ total_category_count }}</div>
+                <div class="text-white small" style="opacity:0.85;" data-zh="分类总数" data-en="Total categories" data-fr="Total catégories">分类总数</div>
+            </div>
+        </div>
+    </div>
+
     <section class="vendor-panel-card overflow-hidden">
         <div class="cat-section-tabs">
             {% for value, label in section_choices %}

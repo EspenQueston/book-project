@@ -32,7 +32,8 @@ from django.utils.translation import gettext as _
 # Marketplace imports for unified cart
 from marketplace.models import (
     Product, Course, SupermarketItem, MarketplaceCartItem,
-    MarketplaceOrder, MarketplaceOrderItem, CourseProgress, CourseLesson, CourseSection
+    MarketplaceOrder, MarketplaceOrderItem, CourseProgress, CourseLesson, CourseSection,
+    PostDeliveryReview,
 )
 from marketplace.utils import (
     build_attribute_groups,
@@ -578,8 +579,15 @@ def add_author(request):
     # 数据库处理添加
     else:
         # 1.获取表单提交过来的数据
-        name = request.POST.get('name')
+        name = (request.POST.get('name') or '').strip()
         book_ids = request.POST.getlist('books')
+        max_len = models.Author._meta.get_field('name').max_length
+        if not name:
+            messages.error(request, '作者姓名不能为空')
+            return redirect('/manager/add_author/')
+        if len(name) > max_len:
+            messages.error(request, f'作者姓名不能超过 {max_len} 个字符')
+            return redirect('/manager/add_author/')
         # 2 保存数据库
         # name is a django-modeltranslation field — .objects.create() kwargs
         # silently drop it, so assign as a plain attribute instead.
@@ -619,9 +627,17 @@ def edit_author(request):
     # 提交修改表单
     else:
         id = request.POST.get('id')
-        name = request.POST.get('name')
+        name = (request.POST.get('name') or '').strip()
         book_ids = request.POST.getlist('books')  # Get list of selected book IDs
-        
+
+        if not name:
+            messages.error(request, '作者姓名不能为空')
+            return redirect(f'/manager/edit_author/?id={id}')
+        max_len = models.Author._meta.get_field('name').max_length
+        if len(name) > max_len:
+            messages.error(request, f'作者姓名不能超过 {max_len} 个字符')
+            return redirect(f'/manager/edit_author/?id={id}')
+
         try:
             # 找到作者对象
             author_obj = models.Author.objects.filter(id=id).first()
@@ -4553,13 +4569,19 @@ def update_order_status(request):
         if admin_notes:
             order.admin_notes = admin_notes
         order.save()
-        
-        # Log the status change
+
+        # dict(...).get(...) rather than direct indexing — a handful of
+        # legacy orders carry a status value that predates the current
+        # ORDER_STATUS_CHOICES list (e.g. an old 'paid' payment_status), and
+        # direct indexing raised KeyError there, which the broad except
+        # below turned into a false "update failed" even though order.save()
+        # above had already succeeded.
+        status_labels = dict(models.ORDER_STATUS_CHOICES)
         return JsonResponse({
-            'success': True, 
-            'message': f'订单状态已从 "{dict(models.ORDER_STATUS_CHOICES)[old_status]}" 更新为 "{dict(models.ORDER_STATUS_CHOICES)[new_status]}"',
+            'success': True,
+            'message': f'订单状态已从 "{status_labels.get(old_status, old_status)}" 更新为 "{status_labels.get(new_status, new_status)}"',
             'new_status': new_status,
-            'new_status_display': dict(models.ORDER_STATUS_CHOICES)[new_status],
+            'new_status_display': status_labels.get(new_status, new_status),
             'new_status_color': order.get_status_color()
         })
         
@@ -4606,14 +4628,21 @@ def update_payment_status(request):
                 order.payment_transaction_id = transaction_id
             order.save()
 
+        # dict(...).get(...) rather than direct indexing — see the same note
+        # in update_order_status: legacy orders can carry a status value
+        # that predates the current choices lists, and direct indexing
+        # raised KeyError there, turning a successful save into a false
+        # "update failed" response.
+        payment_labels = dict(models.PAYMENT_STATUS_CHOICES)
+        order_labels = dict(models.ORDER_STATUS_CHOICES)
         return JsonResponse({
-            'success': True, 
-            'message': f'支付状态已从 "{dict(models.PAYMENT_STATUS_CHOICES)[old_payment_status]}" 更新为 "{dict(models.PAYMENT_STATUS_CHOICES)[new_payment_status]}"',
+            'success': True,
+            'message': f'支付状态已从 "{payment_labels.get(old_payment_status, old_payment_status)}" 更新为 "{payment_labels.get(new_payment_status, new_payment_status)}"',
             'new_payment_status': new_payment_status,
-            'new_payment_status_display': dict(models.PAYMENT_STATUS_CHOICES)[new_payment_status],
+            'new_payment_status_display': payment_labels.get(new_payment_status, new_payment_status),
             'new_payment_status_color': order.get_payment_status_color(),
             'order_status': order.status,
-            'order_status_display': dict(models.ORDER_STATUS_CHOICES)[order.status],
+            'order_status_display': order_labels.get(order.status, order.status),
             'order_status_color': order.get_status_color()
         })
         
@@ -4914,21 +4943,13 @@ def _dashboard_context(request):
     try:
         total_orders = models.Order.objects.count()
         orders_this_month = models.Order.objects.filter(created_at__gte=current_month).count()
-        
-        # Order status counts
-        pending_orders = models.Order.objects.filter(status='payment_pending').count()
-        processing_orders = models.Order.objects.filter(status='processing').count()
-        shipped_orders = models.Order.objects.filter(status='shipped').count()
-        completed_orders = models.Order.objects.filter(status='delivered').count()
-        cancelled_orders = models.Order.objects.filter(status='cancelled').count()
 
-        # Full status breakdown for the order-status chart — the 5 counts
-        # above only cover payment_pending/processing/shipped/delivered/
-        # cancelled, silently dropping any order sitting in pending, paid,
-        # confirmed or refunded (found live: 'confirmed' and 'refunded'
-        # orders existed but never showed up in the chart). Built the same
-        # way as marketplace's order-status chart so every order is
-        # represented no matter what status it's in.
+        # Full status breakdown for the order-status chart — grouped by
+        # actual status present in the data rather than a hardcoded subset
+        # of statuses, so every order is represented no matter what status
+        # it's in (an earlier version only counted payment_pending/
+        # processing/shipped/delivered/cancelled, silently dropping any
+        # order sitting in pending, paid, confirmed or refunded).
         _status_rows = list(
             models.Order.objects.values('status').annotate(c=Count('id')).order_by('-c')
         )
@@ -4953,11 +4974,6 @@ def _dashboard_context(request):
     except Exception as e:
         total_orders = 0
         orders_this_month = 0
-        pending_orders = 0
-        processing_orders = 0
-        shipped_orders = 0
-        completed_orders = 0
-        cancelled_orders = 0
         total_revenue = 0
         revenue_this_month = 0
         order_status_chart = {'labels': ['暂无数据'], 'data': [1]}
@@ -5103,17 +5119,12 @@ def _dashboard_context(request):
         'total_publishers': total_publishers,
         'total_authors': total_authors,
         'new_books_this_month': new_books_this_month,
-        'total_customers': 0,  # Default value
-        'new_customers_this_month': 0,  # Default value
-        
-        # Order stats
+
+        # Order stats — the full per-status breakdown lives in
+        # order_status_chart below (covers every status, not just the 5
+        # historically hardcoded here), so no unused per-bucket counts here.
         'total_orders': total_orders,
         'orders_this_month': orders_this_month,
-        'pending_orders': pending_orders,
-        'processing_orders': processing_orders,
-        'shipped_orders': shipped_orders,
-        'completed_orders': completed_orders,
-        'cancelled_orders': cancelled_orders,
         'total_revenue': total_revenue,
         'revenue_this_month': revenue_this_month,
         
@@ -5788,6 +5799,92 @@ def manage_book_categories(request):
         book_count=Count('books')
     )
     return render(request, 'book/book_categories.html', {'categories': categories, 'name': request.session["name"]})
+
+
+# ====================   Admin Reviews (platform-wide, grouped by vendor)  ===========================
+
+def admin_reviews(request):
+    """
+    Platform-wide buyer reviews, grouped/filterable by vendor. Moved here
+    from marketplace's own admin sub-panel (was marketplace:admin_post_reviews)
+    so it's reachable from the main admin panel rather than buried inside
+    the marketplace-only area — reviews span books too, not just marketplace
+    items, so it doesn't really belong scoped under "Marketplace".
+    """
+    if "name" not in request.session:
+        return redirect('/manager/login/')
+
+    # Bulk vendor resolution — one query per listing kind instead of a
+    # query per review. Products/Courses/SupermarketItem each belong to
+    # exactly one vendor; a Book can be cross-listed by more than one
+    # vendor via VendorBook, so it maps to a list (same ambiguity already
+    # accepted by vendor_post_reviews' reverse lookup — a book review is
+    # visible to every vendor who lists that book).
+    product_vendor = dict(Product.objects.values_list('id', 'vendor_id'))
+    course_vendor = dict(Course.objects.values_list('id', 'vendor_id'))
+    supermarket_vendor = dict(SupermarketItem.objects.values_list('id', 'vendor_id'))
+    book_vendors = {}
+    for book_id, vendor_id in models.VendorBook.objects.filter(is_active=True).values_list('book_id', 'vendor_id'):
+        book_vendors.setdefault(book_id, []).append(vendor_id)
+
+    def vendor_ids_for(kind, listing_id):
+        if kind == 'product':
+            vid = product_vendor.get(listing_id)
+            return [vid] if vid else []
+        if kind == 'course':
+            vid = course_vendor.get(listing_id)
+            return [vid] if vid else []
+        if kind == 'supermarket':
+            vid = supermarket_vendor.get(listing_id)
+            return [vid] if vid else []
+        if kind == 'book':
+            return book_vendors.get(listing_id, [])
+        return []
+
+    all_reviews = list(
+        PostDeliveryReview.objects.select_related('site_user').order_by('-created_at')[:500]
+    )
+    vendor_ids_needed = set()
+    vendor_review_counts = {}
+    for review in all_reviews:
+        ids = vendor_ids_for(review.listing_kind, review.listing_id)
+        review._vendor_ids = ids
+        vendor_ids_needed.update(ids)
+        for vid in ids:
+            vendor_review_counts[vid] = vendor_review_counts.get(vid, 0) + 1
+
+    vendors_by_id = {
+        v.id: v for v in models.Vendor.objects.filter(id__in=vendor_ids_needed).only('id', 'company_name')
+    }
+    for review in all_reviews:
+        review.vendors = [vendors_by_id[vid] for vid in review._vendor_ids if vid in vendors_by_id]
+
+    # Vendor filter dropdown — only vendors that actually have at least
+    # one review right now, with a per-vendor count for context.
+    vendor_options = sorted(
+        (
+            {'id': vid, 'name': vendors_by_id[vid].company_name if vid in vendors_by_id else f'#{vid}', 'count': count}
+            for vid, count in vendor_review_counts.items()
+        ),
+        key=lambda v: v['name'],
+    )
+
+    vendor_filter = request.GET.get('vendor_id', '').strip()
+    reviews = all_reviews
+    if vendor_filter:
+        try:
+            vendor_filter_id = int(vendor_filter)
+        except ValueError:
+            vendor_filter_id = None
+        if vendor_filter_id:
+            reviews = [r for r in all_reviews if vendor_filter_id in r._vendor_ids]
+
+    return render(request, 'admin/reviews.html', {
+        'reviews': reviews,
+        'name': request.session["name"],
+        'vendor_options': vendor_options,
+        'vendor_filter': vendor_filter,
+    })
 
 
 # ====================   Admin Contact Messages  ===========================

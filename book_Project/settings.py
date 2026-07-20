@@ -314,6 +314,37 @@ if _supabase_ready:
                 },
             }
         ),
+        # Dedicated alias for Category/Product/Course/SupermarketItem media
+        # (marketplace/models.py UploadToUUID gives these UUID filenames, so
+        # collisions are effectively impossible). file_overwrite=True here
+        # skips django-storages' pre-upload exists() check (an extra R2
+        # HeadObject round-trip) that 'default' still needs for every other
+        # model's uploads (book covers, vendor logos, user avatars, etc.),
+        # which keep their original filenames and must NOT silently
+        # overwrite same-named files from different vendors/users. Roughly
+        # halves per-file R2 latency for marketplace saves. Referenced via
+        # `django.core.files.storage.storages['marketplace_media']`.
+        'marketplace_media': (
+            {'BACKEND': 'django.core.files.storage.FileSystemStorage'}
+            if DEBUG else
+            {
+                'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage',
+                'OPTIONS': {
+                    'bucket_name': _supabase_bucket,
+                    'location': 'media',
+                    'access_key': _supabase_s3_key,
+                    'secret_key': _supabase_s3_secret,
+                    'region_name': _supabase_s3_region,
+                    'endpoint_url': _supabase_storage_endpoint,
+                    'custom_domain': _r2_public_domain or None,
+                    'default_acl': None,
+                    'querystring_auth': False,
+                    'file_overwrite': True,
+                    'addressing_style': 'path',
+                    'signature_version': 's3v4',
+                },
+            }
+        ),
         # In DEBUG, {% static %} must resolve through Django's own storage
         # class (not S3Boto3Storage) or edits to local JS/CSS never reach the
         # browser — the STATIC_URL override below only changes the URL
@@ -352,6 +383,7 @@ elif _whitenoise_available:
     _use_manifest_storage = os.environ.get('STATICFILES_USE_MANIFEST', 'True') == 'True'
     STORAGES = {
         'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+        'marketplace_media': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
         'staticfiles': {
             'BACKEND': (
                 'whitenoise.storage.CompressedManifestStaticFilesStorage'
@@ -360,6 +392,15 @@ elif _whitenoise_available:
             )
         },
     }
+
+# Safety net: guarantee the 'marketplace_media' alias always exists whenever
+# 'STORAGES' was actually set above, so marketplace/models.py's UploadToUUID
+# fields never hit an InvalidStorageError. Deliberately does NOT create
+# 'STORAGES' from scratch here — if neither branch above ran, Django's own
+# global_settings.STORAGES default (with 'default'/'staticfiles' already
+# wired up) must be left untouched.
+if 'STORAGES' in globals():
+    STORAGES.setdefault('marketplace_media', {'BACKEND': 'django.core.files.storage.FileSystemStorage'})
 
 # In development, serve static files locally so new JS/CSS is available
 # without uploading to Supabase/R2 on every change.

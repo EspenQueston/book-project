@@ -1,9 +1,55 @@
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django.utils.deconstruct import deconstructible
 from decimal import Decimal
+import os
 import re
 import uuid
+
+
+@deconstructible
+class UploadToUUID:
+    """
+    upload_to callable that names the stored file `<uuid4>.<ext>` inside
+    *subfolder*, instead of keeping the visitor's original filename.
+
+    Two different vendors uploading a same-named file (e.g. "photo.jpg",
+    extremely common) used to land in the same flat folder. Since the S3/R2
+    storage backend is configured with `file_overwrite=False`, avoiding that
+    collision required django-storages to call `exists()` against the R2
+    bucket (a full network round-trip) before every single upload just to
+    find a free name — on top of the upload itself. With 5 image slots +
+    1 video field on Product/SupermarketItem, that's up to 6 extra
+    network round-trips on every "Save", which is the main reason
+    creating/editing a product, supermarket item, course or category with
+    photos felt so slow in production. A UUID name is unique enough that
+    the existence check (and `file_overwrite=False`) is no longer needed
+    (see the `file_overwrite: True` change in settings.py `STORAGES`).
+
+    `@deconstructible` (rather than a closure) so this remains serializable
+    in migrations.
+    """
+
+    def __init__(self, subfolder):
+        self.subfolder = subfolder
+
+    def __call__(self, instance, filename):
+        ext = os.path.splitext(filename)[1].lower()
+        return f'{self.subfolder}/{uuid.uuid4().hex}{ext}'
+
+
+def _marketplace_media_storage():
+    """
+    Storage backend for the UploadToUUID fields above — the
+    'marketplace_media' STORAGES alias (settings.py) is identical to
+    'default' except `file_overwrite=True`, safe here specifically because
+    UploadToUUID filenames can't collide. A callable (rather than a bound
+    instance) so it's resolved lazily and stays cleanly serializable in
+    migrations.
+    """
+    from django.core.files.storage import storages
+    return storages['marketplace_media']
 
 
 def _to_embed_url(url):
@@ -63,7 +109,7 @@ class Category(models.Model):
     name = models.CharField(max_length=100, verbose_name='分类名称')
     slug = models.SlugField(max_length=120, unique=True)
     description = models.TextField(blank=True, verbose_name='描述')
-    image = models.ImageField(upload_to='marketplace/categories/', blank=True, null=True)
+    image = models.ImageField(upload_to=UploadToUUID('marketplace/categories'), storage=_marketplace_media_storage, blank=True, null=True)
     section = models.CharField(max_length=20, choices=SECTION_CHOICES, verbose_name='所属版块')
     parent = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True, related_name='children')
     display_order = models.IntegerField(default=0, verbose_name='排序')
@@ -103,12 +149,12 @@ class Product(models.Model):
     description = models.TextField(verbose_name='商品描述')
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='价格')
     original_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='原价')
-    image = models.ImageField(upload_to='marketplace/products/', blank=True, null=True, verbose_name='主图')
-    image_2 = models.ImageField(upload_to='marketplace/products/', blank=True, null=True, verbose_name='图片2')
-    image_3 = models.ImageField(upload_to='marketplace/products/', blank=True, null=True, verbose_name='图片3')
-    image_4 = models.ImageField(upload_to='marketplace/products/', blank=True, null=True, verbose_name='图片4')
-    image_5 = models.ImageField(upload_to='marketplace/products/', blank=True, null=True, verbose_name='图片5')
-    video = models.FileField(upload_to='marketplace/products/videos/', blank=True, null=True, verbose_name='短视频')
+    image = models.ImageField(upload_to=UploadToUUID('marketplace/products'), storage=_marketplace_media_storage, blank=True, null=True, verbose_name='主图')
+    image_2 = models.ImageField(upload_to=UploadToUUID('marketplace/products'), storage=_marketplace_media_storage, blank=True, null=True, verbose_name='图片2')
+    image_3 = models.ImageField(upload_to=UploadToUUID('marketplace/products'), storage=_marketplace_media_storage, blank=True, null=True, verbose_name='图片3')
+    image_4 = models.ImageField(upload_to=UploadToUUID('marketplace/products'), storage=_marketplace_media_storage, blank=True, null=True, verbose_name='图片4')
+    image_5 = models.ImageField(upload_to=UploadToUUID('marketplace/products'), storage=_marketplace_media_storage, blank=True, null=True, verbose_name='图片5')
+    video = models.FileField(upload_to=UploadToUUID('marketplace/products/videos'), storage=_marketplace_media_storage, blank=True, null=True, verbose_name='短视频')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='products')
     stock = models.PositiveIntegerField(default=0, verbose_name='库存')
     min_order_quantity = models.PositiveIntegerField(default=1, verbose_name='最低购买数量')
@@ -203,7 +249,7 @@ class Course(models.Model):
     description = models.TextField(verbose_name='课程描述')
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='价格')
     original_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='原价')
-    image = models.ImageField(upload_to='marketplace/courses/', blank=True, null=True, verbose_name='封面')
+    image = models.ImageField(upload_to=UploadToUUID('marketplace/courses'), storage=_marketplace_media_storage, blank=True, null=True, verbose_name='封面')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='courses')
     instructor = models.CharField(max_length=100, verbose_name='讲师')
     duration_hours = models.DecimalField(max_digits=6, decimal_places=1, default=0, verbose_name='时长(小时)')
@@ -288,12 +334,12 @@ class SupermarketItem(models.Model):
     description = models.TextField(blank=True, verbose_name='商品描述')
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='价格')
     original_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='原价')
-    image = models.ImageField(upload_to='marketplace/supermarket/', blank=True, null=True, verbose_name='商品图片')
-    image_2 = models.ImageField(upload_to='marketplace/supermarket/', blank=True, null=True, verbose_name='图片2')
-    image_3 = models.ImageField(upload_to='marketplace/supermarket/', blank=True, null=True, verbose_name='图片3')
-    image_4 = models.ImageField(upload_to='marketplace/supermarket/', blank=True, null=True, verbose_name='图片4')
-    image_5 = models.ImageField(upload_to='marketplace/supermarket/', blank=True, null=True, verbose_name='图片5')
-    video = models.FileField(upload_to='marketplace/supermarket/videos/', blank=True, null=True, verbose_name='短视频')
+    image = models.ImageField(upload_to=UploadToUUID('marketplace/supermarket'), storage=_marketplace_media_storage, blank=True, null=True, verbose_name='商品图片')
+    image_2 = models.ImageField(upload_to=UploadToUUID('marketplace/supermarket'), storage=_marketplace_media_storage, blank=True, null=True, verbose_name='图片2')
+    image_3 = models.ImageField(upload_to=UploadToUUID('marketplace/supermarket'), storage=_marketplace_media_storage, blank=True, null=True, verbose_name='图片3')
+    image_4 = models.ImageField(upload_to=UploadToUUID('marketplace/supermarket'), storage=_marketplace_media_storage, blank=True, null=True, verbose_name='图片4')
+    image_5 = models.ImageField(upload_to=UploadToUUID('marketplace/supermarket'), storage=_marketplace_media_storage, blank=True, null=True, verbose_name='图片5')
+    video = models.FileField(upload_to=UploadToUUID('marketplace/supermarket/videos'), storage=_marketplace_media_storage, blank=True, null=True, verbose_name='短视频')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='supermarket_items')
     stock = models.PositiveIntegerField(default=0, verbose_name='库存')
     min_order_quantity = models.PositiveIntegerField(default=1, verbose_name='最低购买数量')

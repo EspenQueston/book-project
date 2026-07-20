@@ -63,6 +63,7 @@
                     </td>
                     <td>
                         <a href="{% url 'marketplace:admin_supermarket_edit' item.pk %}" class="btn btn-sm btn-outline-primary rounded-pill"><i class="fas fa-edit"></i></a>
+                        <a href="{% url 'marketplace:supermarket_detail' item.slug %}" target="_blank" class="btn btn-sm btn-outline-info rounded-pill" title="查看"><i class="fas fa-eye"></i></a>
                         <form method="post" action="{% url 'marketplace:admin_supermarket_delete' item.pk %}" style="display:inline;">
                             {% csrf_token %}
                             <button class="btn btn-sm btn-outline-danger rounded-pill"><i class="fas fa-trash"></i></button>

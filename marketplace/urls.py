@@ -61,7 +61,7 @@ urlpatterns = [
     path('admin/orders/update-status/', views.admin_update_order_status, name='admin_update_order_status'),
     path('admin/orders/update-payment/', views.admin_update_payment_status, name='admin_update_payment_status'),
     path('admin/orders/<int:pk>/delete/', views.admin_delete_order, name='admin_delete_order'),
-    path('admin/reviews/', views.admin_post_reviews, name='admin_post_reviews'),
+    # admin/reviews/ moved to manager:admin_reviews (/manager/admin/reviews/)
 
     # Vendor management
     path('vendor/dashboard/', views.vendor_dashboard, name='vendor_dashboard'),

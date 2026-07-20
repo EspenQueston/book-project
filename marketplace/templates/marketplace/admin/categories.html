@@ -10,6 +10,33 @@
     </div>
 </div>
 
+<div class="row g-3 mb-3">
+    <div class="col-6 col-md-3">
+        <a href="?section=products" class="content-card p-3 text-center d-block text-decoration-none{% if section_filter == 'products' %} border-primary border-2{% endif %}">
+            <div class="fw-bold" style="font-size:1.6rem;color:#1d4ed8;">{{ product_category_count }}</div>
+            <div class="text-muted small" data-zh="商品分类" data-en="Product categories" data-fr="Catégories produits">商品分类</div>
+        </a>
+    </div>
+    <div class="col-6 col-md-3">
+        <a href="?section=courses" class="content-card p-3 text-center d-block text-decoration-none{% if section_filter == 'courses' %} border-primary border-2{% endif %}">
+            <div class="fw-bold" style="font-size:1.6rem;color:#f5576c;">{{ course_category_count }}</div>
+            <div class="text-muted small" data-zh="课程分类" data-en="Course categories" data-fr="Catégories cours">课程分类</div>
+        </a>
+    </div>
+    <div class="col-6 col-md-3">
+        <a href="?section=supermarket" class="content-card p-3 text-center d-block text-decoration-none{% if section_filter == 'supermarket' %} border-primary border-2{% endif %}">
+            <div class="fw-bold" style="font-size:1.6rem;color:#00a8cc;">{{ supermarket_category_count }}</div>
+            <div class="text-muted small" data-zh="超市分类" data-en="Supermarket categories" data-fr="Catégories supermarché">超市分类</div>
+        </a>
+    </div>
+    <div class="col-6 col-md-3">
+        <a href="{% url 'marketplace:admin_categories' %}" class="content-card p-3 text-center d-block text-decoration-none{% if not section_filter %} border-primary border-2{% endif %}" style="background:linear-gradient(135deg,#312e81,#4f46e5);">
+            <div class="fw-bold text-white" style="font-size:1.6rem;">{{ total_category_count }}</div>
+            <div class="text-white small" style="opacity:0.85;" data-zh="分类总数" data-en="Total categories" data-fr="Total catégories">分类总数</div>
+        </a>
+    </div>
+</div>
+
 <div class="content-card">
     <div class="table-responsive">
         <table class="table table-hover mb-0">

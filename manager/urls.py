@@ -35,6 +35,7 @@ urlpatterns = [
     path("edit_book/", views.edit_book, name='edit_book'),
     path("delete_book/", views.delete_book, name='delete_book'),
     path("book_categories/", views.manage_book_categories, name='book_categories'),
+    path("admin/reviews/", views.admin_reviews, name='admin_reviews'),
 
     # =========================作家 ========================
     path("add_author/", views.add_author, name='add_author'),

@@ -2199,8 +2199,30 @@ def admin_categories(request):
     # Admin manages only admin/global categories (vendor=NULL) — vendor-owned
     # ones are managed independently from the vendor panel, per the split
     # requested for vendor categories.
-    categories = Category.objects.filter(vendor__isnull=True).order_by('section', 'display_order')
-    context = {'categories': categories, 'name': request.session.get("name", "Admin")}
+    section_filter = request.GET.get('section', '')
+    if section_filter not in dict(Category.SECTION_CHOICES):
+        section_filter = ''
+    categories = Category.objects.filter(vendor__isnull=True)
+    if section_filter:
+        categories = categories.filter(section=section_filter)
+    categories = categories.order_by('section', 'display_order')
+    # .order_by() cleared (Category.Meta.ordering defaults to
+    # ['display_order', 'name']) — annotate() otherwise groups by every
+    # ordering field too, splitting each section into one row per category
+    # instead of a real per-section total.
+    section_counts = {
+        row['section']: row['c']
+        for row in Category.objects.filter(vendor__isnull=True).order_by().values('section').annotate(c=Count('id'))
+    }
+    context = {
+        'categories': categories,
+        'name': request.session.get("name", "Admin"),
+        'section_filter': section_filter,
+        'product_category_count': section_counts.get('products', 0),
+        'course_category_count': section_counts.get('courses', 0),
+        'supermarket_category_count': section_counts.get('supermarket', 0),
+        'total_category_count': sum(section_counts.values()),
+    }
     return render(request, 'marketplace/admin/categories.html', context)
 
 
@@ -3599,12 +3621,25 @@ def vendor_categories(request):
     admin_categories = Category.objects.filter(vendor__isnull=True, section=section).annotate(
         item_count=Count(count_field)
     ).order_by('display_order', 'name')
+
+    # Section counts across all 3 sections (not just the active tab) for
+    # the summary cards — vendor's own categories only, matching what this
+    # page lets a vendor manage. .order_by() cleared — same GROUP BY
+    # pollution issue as admin_categories above.
+    own_section_counts = {
+        row['section']: row['c']
+        for row in Category.objects.filter(vendor=vendor).order_by().values('section').annotate(c=Count('id'))
+    }
     context = {
         'vendor': vendor,
         'categories': categories,
         'admin_categories': admin_categories,
         'section': section,
         'section_choices': Category.SECTION_CHOICES,
+        'product_category_count': own_section_counts.get('products', 0),
+        'course_category_count': own_section_counts.get('courses', 0),
+        'supermarket_category_count': own_section_counts.get('supermarket', 0),
+        'total_category_count': sum(own_section_counts.values()),
     }
     return render(request, 'marketplace/vendor/categories.html', context)
 
@@ -3744,13 +3779,5 @@ def vendor_post_reviews(request):
     )
 
 
-def admin_post_reviews(request):
-    gate = _admin_required(request)
-    if gate:
-        return gate
-    reviews = PostDeliveryReview.objects.select_related('site_user').order_by('-created_at')[:500]
-    return render(
-        request,
-        'marketplace/admin/post_reviews_readonly.html',
-        {'reviews': reviews},
-    )
+# admin_post_reviews moved to manager.views.admin_reviews (main admin panel,
+# reachable at /manager/admin/reviews/ — see that function's docstring).

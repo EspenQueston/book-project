@@ -206,7 +206,7 @@ class Author(models.Model):
     # 作者id
     id = models.AutoField(primary_key=True)
     # 作者名字
-    name = models.CharField(max_length=32)
+    name = models.CharField(max_length=150)
     # 所创图书（多对多）
     book = models.ManyToManyField(to='Book')
 
