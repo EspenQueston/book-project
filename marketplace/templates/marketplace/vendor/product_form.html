@@ -1,5 +1,6 @@
 ﻿{% extends "marketplace/vendor/base.html" %}
 {% load i18n %}
+{% load l10n %}
 {% load static %}
 {% block title %}{% if product %}{% trans "编辑商品" %}{% else %}{% if public_publish_mode %}{% trans "发布广告" %}{% else %}{% trans "新增商品" %}{% endif %}{% endif %} - {{ vendor.company_name }}{% endblock %}
 {% block nav_products %}active{% endblock %}
@@ -78,12 +79,12 @@
             <div class="row g-3">
                 <div class="col-md-3">
                     <label class="form-label fw-bold">Prix <span class="text-danger">*</span></label>
-                    <div class="input-group"><span class="input-group-text">FCFA</span><input type="number" name="price" class="form-control {% if form_state.errors.price %}is-invalid{% endif %}" step="0.01" value="{% if form_state.values.price is not None %}{{ form_state.values.price }}{% elif product %}{{ product.price|default:'' }}{% endif %}" required></div>
+                    <div class="input-group"><span class="input-group-text">FCFA</span><input type="number" name="price" class="form-control {% if form_state.errors.price %}is-invalid{% endif %}" step="0.01" value="{% localize off %}{% if form_state.values.price is not None %}{{ form_state.values.price }}{% elif product %}{{ product.price|default:'' }}{% endif %}{% endlocalize %}" required></div>
                     {% if form_state.errors.price %}<div class="invalid-feedback d-block">{{ form_state.errors.price }}</div>{% endif %}
                 </div>
                 <div class="col-md-3">
                     <label class="form-label fw-bold">Prix original</label>
-                    <div class="input-group"><span class="input-group-text">FCFA</span><input type="number" name="original_price" class="form-control" step="0.01" value="{% if form_state.values.original_price is not None %}{{ form_state.values.original_price }}{% elif product %}{{ product.original_price|default:'' }}{% endif %}"></div>
+                    <div class="input-group"><span class="input-group-text">FCFA</span><input type="number" name="original_price" class="form-control" step="0.01" value="{% localize off %}{% if form_state.values.original_price is not None %}{{ form_state.values.original_price }}{% elif product %}{{ product.original_price|default:'' }}{% endif %}{% endlocalize %}"></div>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label fw-bold">Stock <span class="text-danger">*</span></label>
@@ -186,7 +187,7 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-bold">Poids (kg)</label>
-                    <input type="number" name="weight" class="form-control" step="0.01" value="{% if form_state.values.weight is not None %}{{ form_state.values.weight }}{% elif product %}{{ product.weight|default:'' }}{% endif %}">
+                    <input type="number" name="weight" class="form-control" step="0.01" value="{% localize off %}{% if form_state.values.weight is not None %}{{ form_state.values.weight }}{% elif product %}{{ product.weight|default:'' }}{% endif %}{% endlocalize %}">
                 </div>
                 <div class="mb-3">
                     {% include 'includes/delivery_days_override_field.html' with item=product %}

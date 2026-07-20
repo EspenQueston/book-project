@@ -1,4 +1,5 @@
 {% extends "marketplace/admin/base.html" %}
+{% load l10n %}
 {% block title %}{% if product %}编辑商品{% else %}添加商品{% endif %} - 市场管理{% endblock %}
 {% block nav_products %}active{% endblock %}
 
@@ -30,11 +31,11 @@
                 <div class="row g-3">
                     <div class="col-md-3">
                         <label class="form-label fw-bold"><span data-zh="价格 (FCFA)" data-en="Price (FCFA)" data-fr="Prix (FCFA)">价格 (FCFA)</span> <span class="text-danger">*</span></label>
-                        <input type="number" name="price" class="form-control" step="0.01" value="{{ product.price|default:'' }}" required style="border-radius:10px;">
+                        <input type="number" name="price" class="form-control" step="0.01" value="{{ product.price|default:''|unlocalize }}" required style="border-radius:10px;">
                     </div>
                     <div class="col-md-3">
                         <label class="form-label fw-bold" data-zh="原价 (FCFA)" data-en="Original Price (FCFA)" data-fr="Prix original (FCFA)">原价 (FCFA)</label>
-                        <input type="number" name="original_price" class="form-control" step="0.01" value="{{ product.original_price|default:'' }}" style="border-radius:10px;">
+                        <input type="number" name="original_price" class="form-control" step="0.01" value="{{ product.original_price|default:''|unlocalize }}" style="border-radius:10px;">
                     </div>
                     <div class="col-md-3">
                         <label class="form-label fw-bold"><span data-zh="库存" data-en="Stock" data-fr="Stock">库存</span> <span class="text-danger">*</span></label>
@@ -85,7 +86,7 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-bold" data-zh="重量 (kg)" data-en="Weight (kg)" data-fr="Poids (kg)">重量 (kg)</label>
-                    <input type="number" name="weight" class="form-control" step="0.01" value="{{ product.weight|default:'' }}" style="border-radius:10px;">
+                    <input type="number" name="weight" class="form-control" step="0.01" value="{{ product.weight|default:''|unlocalize }}" style="border-radius:10px;">
                 </div>
                 <link rel="stylesheet" href="/static/css/media_upload_progress.css">
                 <div class="mb-3">

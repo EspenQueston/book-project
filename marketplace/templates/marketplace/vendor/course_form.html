@@ -1,4 +1,5 @@
 {% extends "marketplace/vendor/base.html" %}
+{% load l10n %}
 {% block title %}{% if course|default:None %}Modifier le cours{% else %}Ajouter un cours{% endif %} - {{ vendor.company_name }}{% endblock %}
 {% block nav_courses %}active{% endblock %}
 
@@ -69,12 +70,12 @@
             <div class="row g-3">
                 <div class="col-md-4">
                     <label class="form-label fw-bold">Prix <span class="text-danger">*</span></label>
-                    <input type="number" name="price" class="form-control {% if form_state.errors.price %}is-invalid{% endif %}" step="0.01" value="{% if form_state.values.price is not None %}{{ form_state.values.price }}{% elif course %}{{ course.price|default:'' }}{% endif %}" required>
+                    <input type="number" name="price" class="form-control {% if form_state.errors.price %}is-invalid{% endif %}" step="0.01" value="{% localize off %}{% if form_state.values.price is not None %}{{ form_state.values.price }}{% elif course %}{{ course.price|default:'' }}{% endif %}{% endlocalize %}" required>
                     {% if form_state.errors.price %}<div class="invalid-feedback d-block">{{ form_state.errors.price }}</div>{% endif %}
                 </div>
                 <div class="col-md-4">
                     <label class="form-label fw-bold">Prix original</label>
-                    <input type="number" name="original_price" class="form-control" step="0.01" value="{% if form_state.values.original_price is not None %}{{ form_state.values.original_price }}{% elif course %}{{ course.original_price|default:'' }}{% endif %}">
+                    <input type="number" name="original_price" class="form-control" step="0.01" value="{% localize off %}{% if form_state.values.original_price is not None %}{{ form_state.values.original_price }}{% elif course %}{{ course.original_price|default:'' }}{% endif %}{% endlocalize %}">
                 </div>
                 <div class="col-md-4">
                     <label class="form-label fw-bold">Instructeur <span class="text-danger">*</span></label>
@@ -100,7 +101,7 @@
                 <div class="detail-grid">
                     <div>
                         <label class="form-label fw-bold">Durée (heures)</label>
-                        <input type="number" name="duration_hours" class="form-control" step="0.1" value="{% if form_state.values.duration_hours is not None %}{{ form_state.values.duration_hours }}{% elif course %}{{ course.duration_hours|default:'0' }}{% else %}0{% endif %}">
+                        <input type="number" name="duration_hours" class="form-control" step="0.1" value="{% localize off %}{% if form_state.values.duration_hours is not None %}{{ form_state.values.duration_hours }}{% elif course %}{{ course.duration_hours|default:'0' }}{% else %}0{% endif %}{% endlocalize %}">
                     </div>
                     <div>
                         <label class="form-label fw-bold">Nombre de leçons</label>

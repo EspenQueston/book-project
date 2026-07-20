@@ -1,4 +1,5 @@
-﻿<style>
+﻿{% load l10n %}
+<style>
     .pricing-rules-card {
         background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
         border: 1px solid rgba(29, 78, 216, 0.14);
@@ -186,7 +187,7 @@
                         </div>
                         <div class="col-md-4">
                             <label class="form-label" data-zh="批发单价" data-en="Wholesale unit price" data-fr="Prix unitaire gros">批发单价</label>
-                            <input type="number" name="tier_unit_price" min="0" step="0.01" class="form-control" value="{{ tier.unit_price|default:'' }}" data-ph-zh="例：8000" data-ph-en="e.g. 8000" data-ph-fr="ex. 8000" placeholder="例：8000">
+                            <input type="number" name="tier_unit_price" min="0" step="0.01" class="form-control" value="{{ tier.unit_price|default:''|unlocalize }}" data-ph-zh="例：8000" data-ph-en="e.g. 8000" data-ph-fr="ex. 8000" placeholder="例：8000">
                         </div>
                         <div class="col-md-2">
                             <button type="button" class="btn btn-outline-danger w-100 rules-remove-btn" onclick="removePricingTier(this)"><i class="fas fa-trash-alt"></i></button>
@@ -212,11 +213,11 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label" data-zh="折扣值" data-en="Discount value" data-fr="Valeur">折扣值</label>
-                    <input type="number" name="discount_value" min="0" step="0.01" class="form-control" value="{{ pricing_rule_form.discount.value|default:'' }}" data-ph-zh="例：5" data-ph-en="e.g. 5" data-ph-fr="ex. 5" placeholder="例：5">
+                    <input type="number" name="discount_value" min="0" step="0.01" class="form-control" value="{{ pricing_rule_form.discount.value|default:''|unlocalize }}" data-ph-zh="例：5" data-ph-en="e.g. 5" data-ph-fr="ex. 5" placeholder="例：5">
                 </div>
                 <div class="col-md-4">
                     <label class="form-label" data-zh="订单最低金额" data-en="Minimum cart total" data-fr="Minimum panier">订单最低金额</label>
-                    <input type="number" name="discount_min_total" min="0" step="0.01" class="form-control" value="{{ pricing_rule_form.discount.min_cart_total|default:'' }}" data-ph-zh="可选" data-ph-en="Optional" data-ph-fr="Optionnel" placeholder="可选">
+                    <input type="number" name="discount_min_total" min="0" step="0.01" class="form-control" value="{{ pricing_rule_form.discount.min_cart_total|default:''|unlocalize }}" data-ph-zh="可选" data-ph-en="Optional" data-ph-fr="Optionnel" placeholder="可选">
                 </div>
                 <div class="col-md-2">
                     <label class="form-label" data-zh="优先级" data-en="Priority" data-fr="Priorité">优先级</label>
@@ -238,7 +239,7 @@
                 </div>
                 <div class="col-md-4">
                     <label class="form-label" data-zh="折扣百分比" data-en="Discount percent" data-fr="Pourcentage remise">折扣百分比</label>
-                    <input type="number" name="bogo_discount_percent" min="0" max="100" step="0.01" class="form-control" value="{{ pricing_rule_form.bogo.discount_percent|default:'100' }}">
+                    <input type="number" name="bogo_discount_percent" min="0" max="100" step="0.01" class="form-control" value="{{ pricing_rule_form.bogo.discount_percent|default:'100'|unlocalize }}">
                 </div>
             </div>
         </div>
