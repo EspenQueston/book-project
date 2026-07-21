@@ -132,7 +132,7 @@
         {% endfor %}
         {% endif %}
 
-        <form method="post" enctype="multipart/form-data">
+        <form method="post" enctype="multipart/form-data" id="blogForm">
             {% csrf_token %}
             <div class="row g-4">
                 <!-- Main Content -->
@@ -148,8 +148,9 @@
                         </div>
                         <div class="form-group">
                             <label><i class="fas fa-file-alt"></i>文章内容</label>
-                            <textarea name="content" id="md-editor" class="form-control" placeholder="写下您的文章内容..." required></textarea>
+                            <textarea name="content" id="md-editor" class="form-control" placeholder="写下您的文章内容..."></textarea>
                             <small class="text-muted mt-1 d-block">支持 Markdown 格式</small>
+                            <div id="contentError" class="text-danger small mt-1" style="display:none;">文章内容不能为空</div>
                         </div>
                     </div>
                 </div>
@@ -234,6 +235,26 @@
                 'code', 'preview', 'side-by-side', 'fullscreen', '|',
                 'guide'
             ],
+        });
+
+        // EasyMDE hides the underlying <textarea> it replaces (display:none),
+        // so it can no longer carry `required` — browsers silently refuse to
+        // submit a form containing a hidden required field (it can't be
+        // focused for the validation prompt), making the Save button appear
+        // to do nothing with no visible error. Validate manually instead,
+        // and force-sync EasyMDE's content back into the textarea before
+        // submit so the POST body actually includes it.
+        document.getElementById('blogForm').addEventListener('submit', function (e) {
+            easyMDE.codemirror.save();
+            var content = easyMDE.value().trim();
+            var errorEl = document.getElementById('contentError');
+            if (!content) {
+                e.preventDefault();
+                errorEl.style.display = 'block';
+                easyMDE.codemirror.getWrapperElement().scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } else {
+                errorEl.style.display = 'none';
+            }
         });
     </script>
 <script src="/static/js/admin_i18n.js" defer></script>
