@@ -373,6 +373,10 @@ def add_book(request):
         author_ids = request.POST.getlist('author_ids')
         cover_image = request.FILES.get('cover_image')
 
+        if not name:
+            messages.error(request, '图书名称不能为空')
+            return redirect('/manager/add_book/')
+
         # Book titles must be unique across the official store's own
         # catalog (vendor-created books are checked separately, scoped to
         # their own vendor — see marketplace/views.py's _reject_duplicate_title).
@@ -480,7 +484,7 @@ def edit_book(request):
     # 修改图书信息（POST表单）
     else:
         id = request.POST.get('id')
-        name = request.POST.get('name')
+        name = request.POST.get('name', '').strip()
         description = request.POST.get('description', '')
         inventory = request.POST.get('inventory')
         price = request.POST.get('price')
@@ -490,6 +494,10 @@ def edit_book(request):
         cover_image = request.FILES.get('cover_image')
         book_file = request.FILES.get('book_file')
         download_link = request.POST.get('download_link', '').strip()
+
+        if not name:
+            messages.error(request, '图书名称不能为空')
+            return redirect(f'/manager/edit_book/?id={id}')
 
         # 获取要更新的图书对象（仅限官方直营图书，卖家图书通过卖家后台管理）
         book = get_object_or_404(models.Book, id=id, vendorbook__vendor__is_official=True)
@@ -3942,7 +3950,7 @@ def track_order(request):
         'desktop_order_rows': desktop_order_rows,
         'desktop_status_counts': status_counts,
         'status_filter': status_filter,
-        'show_legacy_order_results': bool((orders or mkt_orders) and not desktop_order_rows),
+        'show_legacy_order_results': bool((orders or mkt_orders) and not site_user),
         'pending_review_items': pending_review_items,
     }
     return render(request, 'public/track_order.html', context)
