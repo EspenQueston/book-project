@@ -220,7 +220,10 @@ def manager_login(request):
         code = _generate_pin()
         cache.set(f"manager_otp:{manager.id}", code, _MANAGER_OTP_TTL_SECONDS)
         cache.delete(f"manager_otp_fail:{manager.id}")
-        _send_manager_otp_email(manager.email, code, manager.name)
+        sent = _send_manager_otp_email(manager.email, code, manager.name)
+        if not sent:
+            cache.delete(f"manager_otp:{manager.id}")
+            return render(request, "admin/admin.html", {"error": "验证码发送失败，请稍后重试。"})
         request.session["pending_manager_id"] = manager.id
         return render(request, "admin/admin.html", {"otp_stage": True})
 
@@ -296,7 +299,9 @@ def manager_login_resend_otp(request):
 
     code = _generate_pin()
     cache.set(f"manager_otp:{pending_id}", code, _MANAGER_OTP_TTL_SECONDS)
-    _send_manager_otp_email(manager.email, code, manager.name)
+    sent = _send_manager_otp_email(manager.email, code, manager.name)
+    if not sent:
+        return render(request, "admin/admin.html", {"otp_stage": True, "error": "验证码发送失败，请稍后重试。"})
     return render(request, "admin/admin.html", {"otp_stage": True})
 
 
