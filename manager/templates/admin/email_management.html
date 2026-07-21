@@ -724,17 +724,31 @@ function showToast(msg, type) {
     var c = document.getElementById('toastContainer');
     var d = document.createElement('div');
     d.className = 'toast-item toast-' + type;
+    // Skip the page-wide auto-translator here: toast text is built from
+    // dynamic backend strings (counts, provider error messages), and the
+    // translator's word-substring replacement garbles those instead of
+    // translating them cleanly.
+    d.setAttribute('data-i18n-skip', '');
     d.innerHTML = '<div class="toast-body">' +
         '<div class="toast-icon"><i class="fas fa-' + (icons[type] || 'check') + '"></i></div>' +
         '<span style="flex:1;">' + msg + '</span>' +
         '<button class="toast-close" onclick="this.closest(\'.toast-item\').remove()">&times;</button>' +
         '</div><div class="toast-progress"><div class="toast-progress-bar"></div></div>';
     c.appendChild(d);
+    var duration = (type === 'error' || type === 'warning') ? 7000 : 3000;
     setTimeout(function() {
         d.classList.add('removing');
         setTimeout(function(){ d.remove(); }, 300);
-    }, 3000);
+    }, duration);
 }
+
+{% if sync_errors %}
+// Auto-sync ran on this page load but hit a provider-side error — surface
+// it instead of leaving the admin guessing why the inbox stayed empty.
+{% for err in sync_errors %}
+showToast('{{ err|escapejs }}', 'warning');
+{% endfor %}
+{% endif %}
 
 /* ===== Compose ===== */
 function openCompose(to, subject, body, replyTo) {
