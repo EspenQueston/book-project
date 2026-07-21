@@ -90,6 +90,40 @@ def _restore_marketplace_item(item):
         obj.save(update_fields=['enrollment_count'])
 
 
+def restore_inventory_for_order(order, order_source):
+    """Reverse apply_inventory_for_order() for a whole order at once.
+
+    Mirrors apply_inventory_for_order(): used when an admin cancels/refunds
+    an order directly (not through a Returns & Shipments shipment record,
+    which has its own restore_inventory_for_shipment()). Guarded by the same
+    inventory_applied flag, so it's a no-op if stock was never deducted for
+    this order in the first place, and safe to call more than once."""
+    model = type(order)
+    with transaction.atomic():
+        locked = model.objects.select_for_update().get(pk=order.pk)
+        if not locked.inventory_applied:
+            return False
+
+        if order_source == 'book':
+            from manager.models import OrderItem
+            for item in OrderItem.objects.filter(order=locked).select_related('book'):
+                type(item.book).objects.filter(pk=item.book_id).update(
+                    inventory=F('inventory') + item.quantity,
+                    sale_num=Greatest(F('sale_num') - item.quantity, 0),
+                )
+        else:
+            from marketplace.models import MarketplaceOrderItem
+            for item in MarketplaceOrderItem.objects.filter(order=locked):
+                _restore_marketplace_item(item)
+
+        locked.inventory_applied = False
+        locked.save(update_fields=['inventory_applied'])
+
+    order.inventory_applied = False
+    logger.info('Inventory restored for %s order %s', order_source, getattr(order, 'order_number', order.pk))
+    return True
+
+
 def restore_inventory_for_shipment(shipment):
     """Reverse the stock/sales effect for exactly the items covered by this
     shipment. Called once a refund for it actually completes at the gateway

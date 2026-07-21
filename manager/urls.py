@@ -177,6 +177,7 @@ urlpatterns = [
     path('public/publish/', views.publish_entry, name='publish_entry'),
     path('inventory/', views.admin_inventory, name='admin_inventory'),
     path('admin/escrow/', views.admin_escrow_transactions, name='admin_escrow'),
+    path('admin/official-store/', views.admin_official_store, name='admin_official_store'),
     path('public/forgot-password/', views.forgot_password, name='forgot_password'),
     path('public/reset-password/', views.reset_password_verify, name='reset_password_verify'),
 

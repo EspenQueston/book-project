@@ -2364,10 +2364,18 @@ def admin_order_detail(request, pk):
     order = get_object_or_404(MarketplaceOrder, pk=pk)
     order_items = order.items.all()
 
+    # Only ever offer the current status plus its actually-valid next states
+    # (see manager/order_status.py) — 'shipped'/'delivered' never appear here
+    # unless that's already the current status, since those are reached
+    # exclusively through the Shipment pipeline, not this raw editor.
+    from manager.order_status import ORDER_STATUS_TRANSITIONS
+    allowed_targets = {order.status} | ORDER_STATUS_TRANSITIONS.get(order.status, set())
+    status_choices = [(code, label) for code, label in MarketplaceOrder.STATUS_CHOICES if code in allowed_targets]
+
     context = {
         'order': order,
         'order_items': order_items,
-        'status_choices': MarketplaceOrder.STATUS_CHOICES,
+        'status_choices': status_choices,
         'payment_status_choices': MarketplaceOrder.PAYMENT_STATUS_CHOICES,
         'name': request.session.get("name", "Admin"),
     }
@@ -2388,12 +2396,27 @@ def admin_update_order_status(request):
         order = get_object_or_404(MarketplaceOrder, id=order_id)
         old_status = order.status
 
+        from manager.order_status import is_valid_status_transition
+        status_dict = dict(MarketplaceOrder.STATUS_CHOICES)
+        if not is_valid_status_transition(old_status, new_status):
+            return JsonResponse({
+                'success': False,
+                'message': f'无法将订单状态从"{status_dict.get(old_status, old_status)}"直接改为"{status_dict.get(new_status, new_status)}"，不符合正常的订单流转顺序。',
+            })
+
+        # Cancelling/refunding an order that already had stock deducted
+        # (inventory_applied=True, meaning payment was confirmed) must give
+        # that stock back — this endpoint previously just flipped the
+        # status label with no inventory logic at all, silently losing it.
+        if new_status in ('cancelled', 'refunded') and order.inventory_applied and old_status not in ('cancelled', 'refunded'):
+            from manager.inventory_service import restore_inventory_for_order
+            restore_inventory_for_order(order, 'marketplace')
+            order.refresh_from_db(fields=['inventory_applied'])
+
         order.status = new_status
         if admin_notes:
             order.admin_notes = admin_notes
         order.save()
-
-        status_dict = dict(MarketplaceOrder.STATUS_CHOICES)
         return JsonResponse({
             'success': True,
             'message': f'订单状态已从 "{status_dict[old_status]}" 更新为 "{status_dict[new_status]}"',
@@ -2419,19 +2442,37 @@ def admin_update_payment_status(request):
         order = get_object_or_404(MarketplaceOrder, id=order_id)
         old_payment_status = order.payment_status
 
+        from manager.order_status import is_valid_payment_status_transition
+        payment_dict = dict(MarketplaceOrder.PAYMENT_STATUS_CHOICES)
+        if not is_valid_payment_status_transition(old_payment_status, new_payment_status):
+            return JsonResponse({
+                'success': False,
+                'message': f'无法将支付状态从"{payment_dict.get(old_payment_status, old_payment_status)}"直接改为"{payment_dict.get(new_payment_status, new_payment_status)}"，不符合正常的支付流转顺序。',
+            })
+
         if new_payment_status == 'completed':
             # Route through the shared pipeline (shipment creation,
             # confirmation email, inventory deduction) instead of just
             # flipping the field.
             from manager.payments.views import _update_order_status
             _update_order_status(order, 'SUCCESSFUL', transaction_id=transaction_id or None)
+        elif new_payment_status == 'refunded' and order.inventory_applied and old_payment_status != 'refunded':
+            # Give back the stock deducted when this order was paid —
+            # otherwise marking it refunded here loses it permanently, since
+            # this endpoint previously had no inventory logic at all.
+            from manager.inventory_service import restore_inventory_for_order
+            restore_inventory_for_order(order, 'marketplace')
+            order.refresh_from_db(fields=['inventory_applied'])
+            order.payment_status = new_payment_status
+            if transaction_id:
+                order.payment_transaction_id = transaction_id
+            order.save()
         else:
             order.payment_status = new_payment_status
             if transaction_id:
                 order.payment_transaction_id = transaction_id
             order.save()
 
-        payment_dict = dict(MarketplaceOrder.PAYMENT_STATUS_CHOICES)
         status_dict = dict(MarketplaceOrder.STATUS_CHOICES)
         return JsonResponse({
             'success': True,

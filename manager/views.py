@@ -4359,30 +4359,58 @@ def download_book(request, order_id, book_id):
 
 # ====================   API Views for Order Actions  ===========================
 def api_cancel_order(request):
-    """API endpoint to cancel an order"""
+    """API endpoint for a buyer to self-cancel their own order before payment.
+
+    Handles both book Order and MarketplaceOrder (mirrors the same
+    "try book, then marketplace" lookup used by order_confirmation/
+    track_order) — this button is shown on shared buyer-facing pages for
+    either order type, but previously only ever worked for book orders."""
     from django.http import JsonResponse
     import json
-    
+
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             order_number = data.get('order_number')
-            
-            order = models.Order.objects.get(order_number=order_number)
-            
-            # Only allow cancellation for pending or payment_pending orders
-            if order.status in ['pending', 'payment_pending']:
-                order.status = 'cancelled'
-                order.save()
-                return JsonResponse({'success': True, 'message': '订单已取消'})
-            else:
+
+            # Ownership check — same session-based access grant used by
+            # order_confirmation/track_order, so a buyer can only cancel an
+            # order they've actually verified access to (via checkout or a
+            # verified track-order lookup), not any order number they guess.
+            accessible = request.session.get('accessible_orders', [])
+            if str(order_number) not in accessible:
+                return JsonResponse({'success': False, 'message': '请先通过订单查询验证您的身份'}, status=403)
+
+            order = None
+            order_source = None
+            try:
+                order = models.Order.objects.get(order_number=order_number)
+                order_source = 'book'
+            except models.Order.DoesNotExist:
+                try:
+                    order = MarketplaceOrder.objects.get(order_number=order_number)
+                    order_source = 'marketplace'
+                except MarketplaceOrder.DoesNotExist:
+                    return JsonResponse({'success': False, 'message': '订单不存在'})
+
+            from manager.order_status import is_valid_status_transition
+            if order.status not in ('pending', 'payment_pending') or not is_valid_status_transition(order.status, 'cancelled'):
                 return JsonResponse({'success': False, 'message': '此订单状态无法取消'})
-                
-        except models.Order.DoesNotExist:
-            return JsonResponse({'success': False, 'message': '订单不存在'})
+
+            # Orders in these two statuses never had payment complete, so
+            # inventory_applied is always False here — nothing to restore.
+            order.status = 'cancelled'
+            order.payment_status = 'cancelled'
+            order.save()
+
+            from manager.escrow_service import cancel_escrow_for_order
+            cancel_escrow_for_order(order_source, order.id, new_status='cancelled')
+
+            return JsonResponse({'success': True, 'message': '订单已取消'})
+
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)})
-    
+
     return JsonResponse({'success': False, 'message': '无效请求'})
 
 
@@ -4831,15 +4859,23 @@ def order_detail(request, order_id):
     
     order = get_object_or_404(models.Order, id=order_id)
     order_items = models.OrderItem.objects.filter(order=order).select_related('book')
-    
+
+    # Only ever offer the current status plus its actually-valid next states
+    # (see manager/order_status.py) — 'shipped'/'delivered' never appear here
+    # unless that's already the current status, since those are reached
+    # exclusively through the Shipment pipeline, not this raw editor.
+    from manager.order_status import ORDER_STATUS_TRANSITIONS
+    allowed_targets = {order.status} | ORDER_STATUS_TRANSITIONS.get(order.status, set())
+    status_choices = [(code, label) for code, label in models.ORDER_STATUS_CHOICES if code in allowed_targets]
+
     context = {
         'order': order,
         'order_items': order_items,
         'name': request.session["name"],
-        'status_choices': models.ORDER_STATUS_CHOICES,
+        'status_choices': status_choices,
         'payment_status_choices': models.PAYMENT_STATUS_CHOICES,
     }
-    
+
     return render(request, 'order/order_detail.html', context)
 
 
@@ -4858,19 +4894,22 @@ def update_order_status(request):
         order = get_object_or_404(models.Order, id=order_id)
         old_status = order.status
 
-        # This endpoint only flips the status label — it has no inventory
-        # logic. Cancelling/refunding an order that already had stock
-        # deducted (inventory_applied=True, meaning payment was confirmed)
-        # needs restore_inventory_for_shipment via the Returns & Shipments
-        # queue instead, or the deducted stock is silently never restored.
-        # Orders that were cancelled before payment ever completed
-        # (inventory_applied=False) have nothing to restore, so those are
-        # still fine to cancel directly here.
-        if new_status in ('cancelled', 'refunded') and order.inventory_applied and old_status not in ('cancelled', 'refunded'):
+        from manager.order_status import is_valid_status_transition
+        status_labels = dict(models.ORDER_STATUS_CHOICES)
+        if not is_valid_status_transition(old_status, new_status):
             return JsonResponse({
                 'success': False,
-                'message': '该订单库存已扣减（已付款），请通过"退货与物流"处理退款以正确恢复库存，而不是直接修改订单状态。',
+                'message': f'无法将订单状态从"{status_labels.get(old_status, old_status)}"直接改为"{status_labels.get(new_status, new_status)}"，不符合正常的订单流转顺序。',
             })
+
+        # Cancelling/refunding an order that already had stock deducted
+        # (inventory_applied=True, meaning payment was confirmed) must give
+        # that stock back — otherwise it's silently lost forever. Orders
+        # cancelled before payment ever completed have nothing to restore.
+        if new_status in ('cancelled', 'refunded') and order.inventory_applied and old_status not in ('cancelled', 'refunded'):
+            from manager.inventory_service import restore_inventory_for_order
+            restore_inventory_for_order(order, 'book')
+            order.refresh_from_db(fields=['inventory_applied'])
 
         order.status = new_status
         if admin_notes:
@@ -4883,7 +4922,6 @@ def update_order_status(request):
         # direct indexing raised KeyError there, which the broad except
         # below turned into a false "update failed" even though order.save()
         # above had already succeeded.
-        status_labels = dict(models.ORDER_STATUS_CHOICES)
         return JsonResponse({
             'success': True,
             'message': f'订单状态已从 "{status_labels.get(old_status, old_status)}" 更新为 "{status_labels.get(new_status, new_status)}"',
@@ -4911,6 +4949,14 @@ def update_payment_status(request):
         order = get_object_or_404(models.Order, id=order_id)
         old_payment_status = order.payment_status
 
+        from manager.order_status import is_valid_payment_status_transition
+        if not is_valid_payment_status_transition(old_payment_status, new_payment_status):
+            payment_labels = dict(models.PAYMENT_STATUS_CHOICES)
+            return JsonResponse({
+                'success': False,
+                'message': f'无法将支付状态从"{payment_labels.get(old_payment_status, old_payment_status)}"直接改为"{payment_labels.get(new_payment_status, new_payment_status)}"，不符合正常的支付流转顺序。',
+            })
+
         if new_payment_status == 'completed':
             # Route through the shared pipeline (shipment creation,
             # confirmation email, inventory deduction) instead of just
@@ -4920,15 +4966,17 @@ def update_payment_status(request):
             from manager.payments.views import _update_order_status
             _update_order_status(order, 'SUCCESSFUL', transaction_id=transaction_id or None)
         elif new_payment_status == 'refunded' and order.inventory_applied and old_payment_status != 'refunded':
-            # Same gap as update_order_status above: flipping this field
-            # directly has no inventory logic, so marking a paid order
-            # "refunded" here would never give the stock back. Route through
-            # Returns & Shipments instead, which calls
-            # restore_inventory_for_shipment for the real reversal.
-            return JsonResponse({
-                'success': False,
-                'message': '该订单库存已扣减，请通过"退货与物流"处理退款以正确恢复库存，而不是直接修改支付状态。',
-            })
+            # Give back the stock that was deducted when this order was
+            # paid — otherwise marking it refunded here would lose it
+            # permanently, since this endpoint (unlike Returns & Shipments)
+            # previously had no inventory logic of its own.
+            from manager.inventory_service import restore_inventory_for_order
+            restore_inventory_for_order(order, 'book')
+            order.refresh_from_db(fields=['inventory_applied'])
+            order.payment_status = new_payment_status
+            if transaction_id:
+                order.payment_transaction_id = transaction_id
+            order.save()
         else:
             order.payment_status = new_payment_status
             if transaction_id:
@@ -5922,8 +5970,14 @@ def edit_blog_post(request):
         post_id = request.POST.get('id')
         post = get_object_or_404(models.BlogPost, id=post_id)
 
-        post.title = request.POST.get('title', '').strip()
-        post.content = request.POST.get('content', '').strip()
+        title = request.POST.get('title', '').strip()
+        content = request.POST.get('content', '').strip()
+        if not title or not content:
+            messages.error(request, '标题和内容不能为空')
+            return redirect(f'/manager/edit_blog/?id={post_id}')
+
+        post.title = title
+        post.content = content
         post.excerpt = request.POST.get('excerpt', '').strip()
         post.author_name = request.POST.get('author_name', 'Admin').strip()
         post.is_featured = request.POST.get('is_featured') == 'on'
@@ -6400,6 +6454,30 @@ from email.utils import parseaddr, formataddr, parsedate_to_datetime
 from email.header import decode_header
 
 
+def _describe_mail_error(exc):
+    """Translate a raw imaplib/smtplib exception into an actionable message.
+
+    Providers like Zoho embed their server response as raw bytes inside the
+    exception args, so `str(exc)` renders literally as
+    `b'[ALERT] You are yet to enable IMAP for your account...'` — unreadable
+    once shown in the UI. Detect the common cases and explain what to do.
+    """
+    raw = str(exc)
+    text = raw
+    if (raw.startswith("b'") or raw.startswith('b"')) and raw.endswith(("'", '"')):
+        text = raw[2:-1]
+    low = text.lower()
+    if 'yet to enable imap' in low or ('imap' in low and 'not enable' in low) or ('imap' in low and 'disabled' in low):
+        return (
+            'IMAP access is turned off for this mailbox on the mail provider\'s side. '
+            'Log into the mailbox directly (e.g. Zoho Mail → Settings → Mail Accounts → '
+            'IMAP Access) and enable it, then try again.'
+        )
+    if 'authenticationfailed' in low or 'invalid credentials' in low or 'login failed' in low or low.startswith('(535'):
+        return 'Login rejected — check the username/password (some providers require an app-specific password when 2-factor authentication is on).'
+    return text
+
+
 def _decode_header_value(value):
     """Decode email header value (handles encoded words)"""
     if not value:
@@ -6544,6 +6622,7 @@ def email_dashboard(request):
     # needing to click a manual sync button — only when stale (avoids an
     # IMAP round-trip on every single click while browsing the inbox).
     _sync_stale_cutoff = timezone.now() - timedelta(minutes=2)
+    sync_errors = []
     for _account in models.EmailAccount.objects.filter(is_active=True):
         if _account.last_sync and _account.last_sync >= _sync_stale_cutoff:
             continue
@@ -6553,6 +6632,7 @@ def email_dashboard(request):
             _account.save(update_fields=['last_sync'])
         except Exception as e:
             logger.error(f'Auto-sync failed for {_account.email_address}: {e}')
+            sync_errors.append(f'{_account.email_address}: {_describe_mail_error(e)}')
 
     folder = request.GET.get('folder', 'inbox')
     account_id = request.GET.get('account', '')
@@ -6632,6 +6712,7 @@ def email_dashboard(request):
         'unread_count': unread_count,
         'contact_unread': contact_unread,
         'name': request.session.get('name', ''),
+        'sync_errors': sync_errors,
     }
     return render(request, 'admin/email_management.html', context)
 
@@ -6808,7 +6889,7 @@ def email_sync(request):
             account.save(update_fields=['last_sync'])
         except Exception as e:
             logger.error(f'IMAP sync failed for {account.email_address}: {e}')
-            errors.append(f'{account.email_address}: {str(e)}')
+            errors.append(f'{account.email_address}: {_describe_mail_error(e)}')
 
     return JsonResponse({
         'success': True,
@@ -7104,7 +7185,7 @@ def email_accounts(request):
                 m.login(account.username, account.password)
                 m.logout()
             except Exception as e:
-                errors.append(f'IMAP: {str(e)}')
+                errors.append(f'IMAP: {_describe_mail_error(e)}')
             try:
                 if account.smtp_use_tls:
                     s = smtplib.SMTP(account.smtp_host, account.smtp_port, timeout=15)
@@ -7114,7 +7195,7 @@ def email_accounts(request):
                 s.login(account.username, account.password)
                 s.quit()
             except Exception as e:
-                errors.append(f'SMTP: {str(e)}')
+                errors.append(f'SMTP: {_describe_mail_error(e)}')
 
             if errors:
                 return JsonResponse({'success': False, 'error': '; '.join(errors)})
@@ -8864,30 +8945,36 @@ def seller_activation_status(request):
 
 
 def _admin_apply_inventory_stock(item_type, item_id, action, delta, manual_value):
-    """Update stock for a single admin inventory item."""
+    """Update stock for a single admin inventory item.
+
+    Scoped to the platform's own official store only — this must match the
+    admin_inventory listing view exactly, or a crafted POST could adjust a
+    third-party vendor's stock from a page that's not supposed to show it
+    at all. Vendor items are managed from each vendor's own panel via
+    _vendor_apply_inventory_stock instead."""
     if item_type == 'book' and item_id:
-        item = models.Book.objects.get(id=item_id)
+        item = models.Book.objects.get(id=item_id, vendorbook__vendor__is_official=True, vendorbook__is_active=True)
         if action == 'set' and manual_value is not None:
             item.inventory = max(0, int(manual_value))
         else:
             item.inventory = max(0, item.inventory + delta)
         item.save(update_fields=['inventory'])
     elif item_type == 'product' and item_id:
-        item = Product.objects.get(id=item_id)
+        item = Product.objects.get(id=item_id, vendor__is_official=True)
         if action == 'set' and manual_value is not None:
             item.stock = max(0, int(manual_value))
         else:
             item.stock = max(0, item.stock + delta)
         item.save(update_fields=['stock'])
     elif item_type == 'course' and item_id:
-        item = Course.objects.get(id=item_id)
+        item = Course.objects.get(id=item_id, vendor__is_official=True)
         if action == 'set' and manual_value is not None:
             item.stock = max(0, int(manual_value))
         else:
             item.stock = max(0, item.stock + delta)
         item.save(update_fields=['stock'])
     elif item_type == 'supermarket' and item_id:
-        item = SupermarketItem.objects.get(id=item_id)
+        item = SupermarketItem.objects.get(id=item_id, vendor__is_official=True)
         if action == 'set' and manual_value is not None:
             item.stock = max(0, int(manual_value))
         else:
@@ -8996,10 +9083,15 @@ def admin_inventory(request):
             messages.error(request, str(exc))
         return redirect('manager:admin_inventory')
 
-    books = models.Book.objects.select_related('publisher').all().order_by('-id')
-    products = Product.objects.select_related('vendor').all().order_by('-id')
-    courses = Course.objects.select_related('vendor').all().order_by('-id')
-    supermarket_items = SupermarketItem.objects.select_related('vendor').all().order_by('-id')
+    # Vendor-owned items are managed from each vendor's own panel — the
+    # admin Inventory section manages the platform's own catalog only
+    # (Duno360 Official Store), not third-party vendors' stock.
+    books = models.Book.objects.filter(
+        vendorbook__vendor__is_official=True, vendorbook__is_active=True,
+    ).select_related('publisher').distinct().order_by('-id')
+    products = Product.objects.filter(vendor__is_official=True).select_related('vendor').order_by('-id')
+    courses = Course.objects.filter(vendor__is_official=True).select_related('vendor').order_by('-id')
+    supermarket_items = SupermarketItem.objects.filter(vendor__is_official=True).select_related('vendor').order_by('-id')
     context = {
         'name': request.session['name'],
         'books': books,
@@ -9017,8 +9109,33 @@ def admin_inventory(request):
 
 def admin_escrow_transactions(request):
     """Admin view: platform escrow holds and vendor payout releases."""
+    return _escrow_transactions_view(request)
+
+
+def admin_official_store(request):
+    """Same escrow/payout page as admin_escrow_transactions, rendered at its
+    own URL and locked to the platform's official store — the admin manages
+    its payouts exactly like any other vendor's, without a redirect and
+    without being able to wander into another vendor's data from this URL."""
     if 'name' not in request.session:
         return redirect('/manager/login')
+    vendor = models.Vendor.objects.filter(is_official=True).first()
+    if not vendor:
+        messages.error(request, _('Official store not found.'))
+        return redirect('manager:admin_escrow')
+    return _escrow_transactions_view(request, locked_vendor_id=vendor.id)
+
+
+def _escrow_transactions_view(request, locked_vendor_id=None):
+    """Shared implementation for admin_escrow_transactions and
+    admin_official_store. When `locked_vendor_id` is set, the vendor filter
+    is pinned to it (ignoring any vendor_id in the querystring/POST) and the
+    template hides the vendor picker so the page can't be used to browse or
+    adjust another vendor's data."""
+    if 'name' not in request.session:
+        return redirect('/manager/login')
+
+    own_url_name = 'manager:admin_official_store' if locked_vendor_id else 'manager:admin_escrow'
 
     from manager.escrow_service import (
         process_due_escrow_releases,
@@ -9033,11 +9150,25 @@ def admin_escrow_transactions(request):
     if request.method == 'POST':
         action = request.POST.get('action')
         tx_id = request.POST.get('tx_id')
+        # The Official Store page is a read-only ledger of the platform's own
+        # money — it must behave like a vendor looking at their own wallet,
+        # not like the admin console for managing OTHER vendors' payouts.
+        # There's no "force release"/"cancel"/"refund"/"wallet adjust" here;
+        # escrow on the platform's own sales moves on the same automatic
+        # 7-day schedule as everyone else's, with no manual lever needed —
+        # so every action on this endpoint is rejected outright when locked,
+        # not just hidden from the template.
+        if locked_vendor_id:
+            messages.error(request, _('This is a read-only view of the store\'s own payouts — actions are not available here.'))
+            return redirect(request.get_full_path() or reverse(own_url_name))
         _money_moving_actions = {'release_due', 'release_one', 'mark_delivered', 'cancel', 'refund', 'wallet_adjust'}
         if action in _money_moving_actions and _moderator_blocked(request):
             messages.error(request, _MODERATOR_FORBIDDEN_MESSAGE)
-            return redirect(request.get_full_path() or reverse('manager:admin_escrow'))
+            return redirect(request.get_full_path() or reverse(own_url_name))
         if action == 'release_due':
+            # locked_vendor_id is never truthy here — the guard above already
+            # returned for that case — so this always means the general,
+            # unfiltered admin escrow page.
             count = process_due_escrow_releases()
             messages.success(request, _('{count} payout(s) released to vendors.').format(count=count))
         elif action == 'release_one' and tx_id:
@@ -9057,7 +9188,9 @@ def admin_escrow_transactions(request):
             models.PlatformEscrowTransaction.objects.filter(pk=tx_id).update(notes=note)
             messages.success(request, _('Note saved.'))
         elif action == 'wallet_adjust':
-            vid = request.POST.get('vendor_id')
+            # Locked pages force the vendor id server-side, regardless of
+            # whatever the (hidden, disabled) form field submitted.
+            vid = locked_vendor_id or request.POST.get('vendor_id')
             amount = request.POST.get('amount')
             desc = request.POST.get('description', '').strip()
             try:
@@ -9068,18 +9201,23 @@ def admin_escrow_transactions(request):
                     messages.error(request, _('Wallet adjustment failed (check balance).'))
             except (TypeError, ValueError):
                 messages.error(request, _('Invalid wallet adjustment.'))
-        return redirect(request.get_full_path() or reverse('manager:admin_escrow'))
+        return redirect(request.get_full_path() or reverse(own_url_name))
 
     status_filter = request.GET.get('status', '').strip()
-    vendor_filter = request.GET.get('vendor_id', '').strip()
+    # Locked pages ignore any vendor_id in the querystring — this page is
+    # scoped by design, not just filtered by a form field the admin could
+    # otherwise change.
+    vendor_filter = str(locked_vendor_id) if locked_vendor_id else request.GET.get('vendor_id', '').strip()
     item_type_filter = request.GET.get('item_type', '').strip()
     search_q = request.GET.get('q', '').strip()
 
     base_qs = models.PlatformEscrowTransaction.objects.all()
+    if locked_vendor_id:
+        base_qs = base_qs.filter(vendor_id=locked_vendor_id)
     qs = base_qs.select_related('vendor').order_by('-held_at')
     if status_filter:
         qs = qs.filter(status=status_filter)
-    if vendor_filter:
+    if vendor_filter and not locked_vendor_id:
         qs = qs.filter(vendor_id=vendor_filter)
     if item_type_filter:
         qs = qs.filter(item_type=item_type_filter)
@@ -9101,11 +9239,22 @@ def admin_escrow_transactions(request):
         total_earned=Sum('total_earned'),
     )
 
+    # When scoped to a single vendor (e.g. via the Official Store shortcut),
+    # show that vendor's own wallet instead of the platform-wide aggregate —
+    # the vendor may not have a VendorWallet row yet if they've never had a
+    # payout release, which is a normal state, not an error.
+    vendor_wallet = None
+    vendor_filter_obj = None
+    if vendor_filter:
+        vendor_wallet = models.VendorWallet.objects.filter(vendor_id=vendor_filter).first()
+        vendor_filter_obj = models.Vendor.objects.filter(pk=vendor_filter).first()
+
     context = {
         'name': request.session['name'],
         'transactions': qs[:300],
         'status_filter': status_filter,
         'vendor_filter': vendor_filter,
+        'vendor_filter_obj': vendor_filter_obj,
         'item_type_filter': item_type_filter,
         'search_q': search_q,
         'status_choices': models.PlatformEscrowTransaction.STATUS_CHOICES,
@@ -9123,7 +9272,10 @@ def admin_escrow_transactions(request):
             for code, label in models.PlatformEscrowTransaction.STATUS_CHOICES
         ],
         'wallet_totals': wallet_totals,
+        'vendor_wallet': vendor_wallet,
         'refund_hold_days': REFUND_HOLD_DAYS,
+        'locked_vendor_id': locked_vendor_id,
+        'own_url_name': own_url_name,
     }
     return render(request, 'admin/escrow_transactions.html', context)
 
