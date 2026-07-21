@@ -391,6 +391,22 @@ def admin_manager_list(request):
     return render(request, 'admin/admin_manager_list.html', context)
 
 
+def _email_taken_by_admin(email):
+    """True if `email` already belongs to a Manager (admin) account."""
+    return models.Manager.objects.filter(email__iexact=email).exists()
+
+
+def _email_taken_by_public_account(email):
+    """True if `email` already belongs to an ordinary SiteUser or Vendor
+    account. Admin accounts must stay exclusive from both — this does NOT
+    apply between SiteUser and Vendor themselves, since a person is
+    deliberately allowed to be both a buyer and a seller."""
+    return (
+        models.SiteUser.objects.filter(email__iexact=email).exists()
+        or models.Vendor.objects.filter(email__iexact=email).exists()
+    )
+
+
 def admin_manager_invite(request):
     """Primary-Admin-only: invite a new Admin/Moderator by email."""
     if "name" not in request.session:
@@ -414,6 +430,9 @@ def admin_manager_invite(request):
         return redirect('manager:admin_manager_list')
     if models.Manager.objects.filter(email__iexact=email).exists():
         messages.error(request, '该邮箱已注册为管理员账户。')
+        return redirect('manager:admin_manager_list')
+    if _email_taken_by_public_account(email):
+        messages.error(request, '该邮箱已注册为普通用户或卖家账户，不能同时作为管理员。')
         return redirect('manager:admin_manager_list')
     if models.ManagerInvite.objects.filter(email__iexact=email, accepted_at__isnull=True).exists():
         messages.error(request, '该邮箱已有待处理的邀请。')
@@ -457,6 +476,8 @@ def manager_accept_invite(request, token):
         cap = _MANAGER_ROLE_CAPS[invite.role]
         if models.Manager.objects.filter(role=invite.role).count() >= cap:
             return render(request, 'admin/manager_accept_invite.html', {'invite': invite, 'error': '该角色名额已满，请联系主管理员。'})
+        if _email_taken_by_public_account(invite.email):
+            return render(request, 'admin/manager_accept_invite.html', {'invite': invite, 'error': '该邮箱已注册为普通用户或卖家账户，不能同时作为管理员。'})
 
         manager = models.Manager(
             number=invite.email,
@@ -622,6 +643,25 @@ def book_list(request):
     return render(request, 'book/book_list.html', {'book_obj_list': book_obj_list, "name": request.session["name"]})
 
 
+def _validate_book_format(request, book_file, download_link, existing_book=None):
+    """Validate the submitted book format against the inventory/download
+    fields actually provided. Shared by admin and vendor add/edit book
+    views. Returns (format, error_message) — error_message is None when
+    valid. `existing_book`, when given (edit flows), lets a book that
+    already has a saved file/link keep it without re-uploading, unless
+    the admin/vendor is explicitly clearing it."""
+    fmt = request.POST.get('format', 'physical')
+    if fmt not in dict(models.Book.FORMAT_CHOICES):
+        fmt = 'physical'
+    if fmt in ('digital', 'both'):
+        has_new_download = bool(book_file) or bool(download_link)
+        clearing_link = request.POST.get('clear_download_link') == '1'
+        has_existing_download = bool(existing_book and existing_book.has_download()) and not clearing_link
+        if not has_new_download and not has_existing_download:
+            return fmt, '电子书格式需要上传电子书文件或提供下载链接'
+    return fmt, None
+
+
 # 02添加图书
 def add_book(request):
     # 登录判断
@@ -682,10 +722,16 @@ def add_book(request):
         download_link = request.POST.get('download_link', '').strip()
         delivery_days_min, delivery_days_max = _parse_delivery_days_override(request.POST)
 
+        book_format, format_error = _validate_book_format(request, book_file, download_link)
+        if format_error:
+            messages.error(request, format_error)
+            return redirect('/manager/add_book/')
+
         # 2保存到数据库（insert）— sale_num is never set manually: it starts
         # at 0 and is only ever incremented/decremented automatically by
         # manager/inventory_service.py as orders are confirmed or returned.
         book = models.Book(
+            format=book_format,
             price=price,
             inventory=inventory,
             sale_num=0,
@@ -797,9 +843,15 @@ def edit_book(request):
         # 获取要更新的图书对象（仅限官方直营图书，卖家图书通过卖家后台管理）
         book = get_object_or_404(models.Book, id=id, vendorbook__vendor__is_official=True)
 
+        book_format, format_error = _validate_book_format(request, book_file, download_link, existing_book=book)
+        if format_error:
+            messages.error(request, format_error)
+            return redirect(f'/manager/edit_book/?id={id}')
+
         # 数据库中更新图书信息 — sale_num is never edited manually here: it's
         # only ever changed automatically by manager/inventory_service.py
         # as orders are confirmed or returned, so it's simply left untouched.
+        book.format = book_format
         book.name = name
         book.description = description
         book.inventory = inventory
@@ -3102,6 +3154,29 @@ def _build_unified_cart(session_key):
     return items
 
 
+def _resolve_item_vendor_id(item_type, item_id):
+    """Return the id of the vendor selling this item, or None (unowned /
+    doesn't exist). Used to stop a vendor from buying their own listings."""
+    if item_type == 'book':
+        vb = models.VendorBook.objects.filter(book_id=item_id, is_active=True).first()
+        return vb.vendor_id if vb else None
+    model = {'product': Product, 'course': Course, 'supermarket': SupermarketItem}.get(item_type)
+    if not model:
+        return None
+    obj = model.objects.filter(pk=item_id).first()
+    return obj.vendor_id if obj else None
+
+
+def _buyer_own_vendor_id(request):
+    """Return the current session's own vendor id, if the logged-in buyer
+    is also a vendor, else None."""
+    site_user_id = request.session.get('site_user_id')
+    if not site_user_id:
+        return None
+    vendor = models.Vendor.objects.filter(user_id=site_user_id).first()
+    return vendor.id if vendor else None
+
+
 @require_POST
 def add_to_cart(request, book_id):
     """Add book to shopping cart"""
@@ -3109,7 +3184,11 @@ def add_to_cart(request, book_id):
         book = get_object_or_404(models.Book, id=book_id)
         quantity = int(request.POST.get('quantity', 1))
         session_key = get_session_key(request)
-        
+
+        own_vendor_id = _buyer_own_vendor_id(request)
+        if own_vendor_id and _resolve_item_vendor_id('book', book.id) == own_vendor_id:
+            return JsonResponse({'success': False, 'message': '不能购买自己店铺上架的图书'})
+
         # Validate quantity
         if quantity > book.inventory:
             return JsonResponse({
@@ -3166,6 +3245,10 @@ def add_marketplace_item_to_cart(request):
         item = _get_marketplace_item(item_type, item_id)
         if not item:
             return JsonResponse({'success': False, 'message': '商品不存在或已下架'})
+
+        own_vendor_id = _buyer_own_vendor_id(request)
+        if own_vendor_id and getattr(item, 'vendor_id', None) == own_vendor_id:
+            return JsonResponse({'success': False, 'message': '不能购买自己店铺上架的商品'})
 
         # Validate stock
         if item_type in ('product', 'supermarket'):
@@ -3447,7 +3530,17 @@ def checkout(request):
     if not unified_items:
         messages.warning(request, '购物车为空，请先添加商品')
         return redirect('manager:public_books')
-    
+
+    # Final safety net against self-purchase — catches items added to the
+    # cart before the buyer became a vendor, or any direct POST bypassing
+    # the add-to-cart checks (see add_to_cart / add_marketplace_item_to_cart).
+    own_vendor_id = _buyer_own_vendor_id(request)
+    if own_vendor_id:
+        for i in unified_items:
+            if _resolve_item_vendor_id(i['item_type'], i['item_id']) == own_vendor_id:
+                messages.error(request, f'购物车中包含您自己店铺上架的商品（{i["name"]}），请先移除后再结算')
+                return redirect('manager:view_cart')
+
     # Separate items by type
     book_items = [i for i in unified_items if i['item_type'] == 'book']
     marketplace_items = [i for i in unified_items if i['item_type'] != 'book']
@@ -3939,6 +4032,12 @@ def order_confirmation(request, order_number):
         .prefetch_related('return_requests')
     )
 
+    # book_order alone doesn't say whether THIS order's books are actually
+    # digital — it's true for any book order, physical included. Drive the
+    # "your ebook is ready" messaging off the books' real format instead.
+    any_digital_book = any(i.book.is_digital_format() for i in book_order_items)
+    any_physical_book = any(i.book.is_physical_format() for i in book_order_items)
+
     context = {
         'order': resolved_order,
         'book_order': book_order,
@@ -3950,6 +4049,8 @@ def order_confirmation(request, order_number):
         'shipments': shipments,
         'order_source': order_source,
         'return_reasons': models.OrderReturnRequest.REASON_CHOICES,
+        'any_digital_book': any_digital_book,
+        'any_physical_book': any_physical_book,
     }
 
     return render(request, 'public/order_confirmation.html', context)
@@ -7624,6 +7725,8 @@ def user_register(request):
             })
         if models.SiteUser.objects.filter(email=email).exists():
             return JsonResponse({'success': False, 'message': _('This email is already registered.')})
+        if _email_taken_by_admin(email):
+            return JsonResponse({'success': False, 'message': _('This email is already registered as an admin account.')})
 
         from manager.twilio_verify import normalize_phone_e164, validate_phone_e164
         phone_e164 = normalize_phone_e164(phone)
@@ -7702,6 +7805,8 @@ def verify_email_pin(request):
 
         if models.SiteUser.objects.filter(email=email).exists():
             return JsonResponse({'success': False, 'message': _('This email is already registered.')})
+        if _email_taken_by_admin(email):
+            return JsonResponse({'success': False, 'message': _('This email is already registered as an admin account.')})
 
         from manager.congo_locations import DEFAULT_COUNTRY, DEFAULT_CONGO_CITY
         user = models.SiteUser.objects.create(
@@ -8190,6 +8295,73 @@ def _detach_vendor_protected_relations(vendor):
     return models.PlatformEscrowTransaction.objects.filter(vendor=vendor).update(vendor=None)
 
 
+def _delete_vendor_and_content(vendor):
+    """Delete a vendor and everything it sells.
+
+    VendorBook/Product/SupermarketItem are already on_delete=CASCADE, so
+    vendor.delete() removes those on its own. Course is on_delete=SET_NULL
+    (unlike the others) so it's deleted explicitly here first, or it would
+    survive orphaned but still live/purchasable in the catalog. A Book only
+    gets deleted too if no *other* vendor still sells it — VendorBook is a
+    many-to-many-style join, so a book shared across sellers must survive
+    for the ones still selling it.
+
+    Returns (deleted_book_count, detached_escrow_count)."""
+    from marketplace.models import Course
+
+    book_ids = list(
+        models.VendorBook.objects.filter(vendor=vendor).values_list('book_id', flat=True)
+    )
+    Course.objects.filter(vendor=vendor).delete()
+    detached_escrow_count = _detach_vendor_protected_relations(vendor)
+    vendor.delete()  # cascades VendorBook/Product/SupermarketItem for this vendor
+
+    deleted_book_count = 0
+    if book_ids:
+        orphaned = models.Book.objects.filter(id__in=book_ids).exclude(
+            id__in=models.VendorBook.objects.values_list('book_id', flat=True)
+        )
+        deleted_book_count = orphaned.count()
+        orphaned.delete()
+
+    return deleted_book_count, detached_escrow_count
+
+
+def _delete_user_orders(user):
+    """Delete a buyer's own order history when their account is deleted.
+
+    Order/MarketplaceOrder have no real FK to SiteUser (just a denormalized
+    email string), so nothing cascades here on its own. OrderItem/
+    MarketplaceOrderItem are real CASCADE FKs to their order and clean up
+    automatically. Shipment/OrderRefund/PlatformEscrowTransaction all
+    reference orders by a plain order_id integer (not a FK), so they need
+    explicit cleanup too — except PlatformEscrowTransaction rows that are
+    already 'released' (money already paid to a vendor), which are that
+    vendor's own completed-payout record and have nothing to do with the
+    deleted buyer; those are left alone, same as vendor deletion already
+    preserves released escrow rows.
+
+    Returns the number of orders deleted (book + marketplace)."""
+    book_order_ids = list(models.Order.objects.filter(customer_email__iexact=user.email).values_list('id', flat=True))
+    mkt_order_ids = list(MarketplaceOrder.objects.filter(user_email__iexact=user.email).values_list('id', flat=True))
+
+    models.Shipment.objects.filter(order_source='book', order_id__in=book_order_ids).delete()
+    models.Shipment.objects.filter(order_source='marketplace', order_id__in=mkt_order_ids).delete()
+    models.OrderRefund.objects.filter(order_source='book', order_id__in=book_order_ids).delete()
+    models.OrderRefund.objects.filter(order_source='marketplace', order_id__in=mkt_order_ids).delete()
+    models.PlatformEscrowTransaction.objects.filter(
+        order_source='book', order_id__in=book_order_ids,
+    ).exclude(status='released').delete()
+    models.PlatformEscrowTransaction.objects.filter(
+        order_source='marketplace', order_id__in=mkt_order_ids,
+    ).exclude(status='released').delete()
+
+    deleted_count = len(book_order_ids) + len(mkt_order_ids)
+    models.Order.objects.filter(id__in=book_order_ids).delete()
+    MarketplaceOrder.objects.filter(id__in=mkt_order_ids).delete()
+    return deleted_count
+
+
 def admin_delete_user(request):
     """Delete a site user"""
     if not request.session.get('is_admin') or 'name' not in request.session:
@@ -8204,14 +8376,19 @@ def admin_delete_user(request):
         # Prevent deleting the last active user
         if models.SiteUser.objects.filter(is_active=True).count() <= 1:
             return JsonResponse({'success': False, 'message': '无法删除最后一个用户'})
+        deleted_order_count = _delete_user_orders(user)
         deleted_vendor_count = 0
         vendor = getattr(user, 'vendor_profile', None)
         if vendor:
-            _detach_vendor_protected_relations(vendor)
-            vendor.delete()
+            _delete_vendor_and_content(vendor)
             deleted_vendor_count = 1
         user.delete()
-        return JsonResponse({'success': True, 'message': '用户已删除，关联卖家与店铺也已删除' if deleted_vendor_count else '用户已删除'})
+        message = '用户已删除'
+        if deleted_order_count:
+            message += f'，{deleted_order_count} 个订单已删除'
+        if deleted_vendor_count:
+            message += '，关联卖家与店铺也已删除'
+        return JsonResponse({'success': True, 'message': message})
     return JsonResponse({'success': False})
 
 
@@ -8247,6 +8424,11 @@ def vendor_register(request):
             return JsonResponse({
                 'success': False,
                 'message': _('This email is already registered as a vendor.'),
+            })
+        if _email_taken_by_admin(email):
+            return JsonResponse({
+                'success': False,
+                'message': _('This email is already registered as an admin account.'),
             })
 
         phone = request.POST.get('phone', '').strip()
@@ -8355,6 +8537,11 @@ def verify_vendor_pin(request):
             return JsonResponse({
                 'success': False,
                 'message': _('This email is already registered as a vendor.'),
+            })
+        if _email_taken_by_admin(email):
+            return JsonResponse({
+                'success': False,
+                'message': _('This email is already registered as an admin account.'),
             })
 
         from manager.congo_locations import DEFAULT_COUNTRY, DEFAULT_CONGO_CITY
@@ -10595,7 +10782,12 @@ def vendor_add_book(request):
         if not author_ids:
             return JsonResponse(_vendor_book_error('author_ids', 'Veuillez sélectionner au moins un auteur.'))
 
+        book_format, format_error = _validate_book_format(request, book_file, download_link)
+        if format_error:
+            return JsonResponse(_vendor_book_error('format', format_error))
+
         book = models.Book(
+            format=book_format,
             price=Decimal(price),
             inventory=int(inventory),
             sale_num=0,
@@ -10772,7 +10964,13 @@ def vendor_edit_book(request):
             except ValidationError:
                 return JsonResponse({'success': False, 'message': '请输入有效的下载链接 URL。', 'field': 'download_link'})
 
+        book_file = request.FILES.get('book_file')
+        book_format, format_error = _validate_book_format(request, book_file, download_link, existing_book=book)
+        if format_error:
+            return JsonResponse({'success': False, 'message': format_error, 'field': 'format'})
+
         delivery_days_min, delivery_days_max = _parse_delivery_days_override(request.POST)
+        book.format = book_format
         book.name = name
         book.price = Decimal(price)
         book.inventory = int(inventory)
@@ -12003,9 +12201,10 @@ def admin_delete_vendor(request):
             if vendor.is_official:
                 return JsonResponse({'success': False, 'message': '官方直营店无法删除'})
             name = vendor.company_name
-            detached_escrow_count = _detach_vendor_protected_relations(vendor)
-            vendor.delete()
+            deleted_book_count, detached_escrow_count = _delete_vendor_and_content(vendor)
             message = f'卖家 {name} 及其店铺内容已删除'
+            if deleted_book_count:
+                message += f'，{deleted_book_count} 本图书因无其他卖家在售已一并删除'
             if detached_escrow_count:
                 message += f'，{detached_escrow_count} 条历史托管记录已保留并解除关联'
             return JsonResponse({'success': True, 'message': message})
