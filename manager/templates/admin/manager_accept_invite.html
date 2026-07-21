@@ -1,0 +1,78 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="zh-hans">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>接受邀请 - DUNO 360</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 55%, #7c3aed 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .accept-card {
+            background: #fff;
+            border-radius: 22px;
+            padding: 40px;
+            width: 92%;
+            max-width: 420px;
+            box-shadow: 0 24px 70px rgba(0,0,0,0.28);
+        }
+        .accept-icon {
+            width: 64px; height: 64px; border-radius: 18px;
+            display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg,#1d4ed8,#14245f);
+            color: #fff; font-size: 1.6rem; margin: 0 auto 18px;
+        }
+        .accept-card h3 { font-weight: 900; text-align: center; margin-bottom: 6px; }
+        .accept-card p.sub { text-align: center; color: #64748b; margin-bottom: 22px; font-size: 0.9rem; }
+        .form-control { border-radius: 12px; padding: 12px 14px; }
+        .btn-accept {
+            background: linear-gradient(135deg,#1d4ed8,#14245f); color: #fff; border: none;
+            border-radius: 999px; padding: 12px; font-weight: 700; width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="accept-card">
+        {% if expired_or_used %}
+        <div class="accept-icon"><i class="fas fa-triangle-exclamation"></i></div>
+        <h3 data-zh="邀请已失效" data-en="Invite No Longer Valid" data-fr="Invitation invalide">邀请已失效</h3>
+        <p class="sub" data-zh="此邀请链接已过期或已被使用，请联系主管理员重新邀请。" data-en="This invite link has expired or was already used. Ask the Primary Admin to send a new one." data-fr="Ce lien d'invitation a expiré ou a déjà été utilisé. Demandez à l'administrateur principal d'en envoyer un nouveau.">此邀请链接已过期或已被使用，请联系主管理员重新邀请。</p>
+        <a href="{% url 'manager:manager_login' %}" class="btn btn-outline-secondary rounded-pill w-100" data-zh="返回登录" data-en="Back to Login" data-fr="Retour à la connexion">返回登录</a>
+        {% else %}
+        <div class="accept-icon"><i class="fas fa-user-shield"></i></div>
+        <h3 data-zh="设置密码" data-en="Set Your Password" data-fr="Définir votre mot de passe">设置密码</h3>
+        <p class="sub">{{ invite.name }} · {{ invite.email }} · {% if invite.role == 'admin' %}Administrator{% else %}Moderator{% endif %}</p>
+
+        {% if error %}
+        <div class="alert alert-danger rounded-3 py-2 small">{{ error }}</div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label fw-bold" data-zh="密码" data-en="Password" data-fr="Mot de passe">密码</label>
+                <input type="password" name="password" class="form-control" required minlength="8" autofocus>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold" data-zh="确认密码" data-en="Confirm Password" data-fr="Confirmer le mot de passe">确认密码</label>
+                <input type="password" name="password2" class="form-control" required minlength="8">
+            </div>
+            <button type="submit" class="btn btn-accept">
+                <i class="fas fa-check me-2"></i><span data-zh="激活账户" data-en="Activate Account" data-fr="Activer le compte">激活账户</span>
+            </button>
+        </form>
+        {% endif %}
+    </div>
+    <script src="/static/js/admin_i18n.js" defer></script>
+</body>
+</html>

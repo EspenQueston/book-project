@@ -16,6 +16,8 @@ python manage.py seed_kkiapay_countries
 
 # Create default admin account if not present
 # Password is read from DJANGO_ADMIN_PASSWORD env var (must be set in production!)
+# This account is the Primary Admin — the only account allowed to invite
+# further Admin/Moderator accounts (see manager.views.admin_manager_invite).
 python manage.py shell -c "
 import os
 from manager.models import Manager
@@ -24,6 +26,9 @@ if not Manager.objects.filter(number='admin').exists():
     if not pw:
         print('WARNING: DJANGO_ADMIN_PASSWORD not set — admin account not created')
     else:
-        Manager.objects.create(number='admin', password=pw, name='Administrator')
+        Manager.objects.create(
+            number='admin', password=pw, name='Administrator',
+            email='admin@duno360.com', role='admin', is_primary=True,
+        )
         print('Admin account created.')
 "

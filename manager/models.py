@@ -13,13 +13,24 @@ from manager.congo_locations import (
 # 创建数据库对象模型
 # 管理员登录类
 class Manager(models.Model):
+    ROLE_CHOICES = [
+        ('admin', 'Administrator'),
+        ('moderator', 'Moderator'),
+    ]
+
     id = models.AutoField(primary_key=True)
     number = models.CharField(max_length=32, verbose_name="账号")
+    # Login credential — email replaces `number` for authentication.
+    email = models.EmailField(unique=True, null=True, blank=True, verbose_name="邮箱")
     # max_length=128 to hold Django PBKDF2 hashes
     password = models.CharField(max_length=128, verbose_name="密码")
     name = models.CharField(max_length=32, verbose_name="名字")
     # Flag used by AdminDebugMiddleware – only real admins see stack traces
     is_admin = models.BooleanField(default=True, verbose_name="管理员权限")
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='admin', verbose_name="角色")
+    # Exactly one Manager row should have this set — the only account
+    # allowed to invite new Admins/Moderators.
+    is_primary = models.BooleanField(default=False, verbose_name="主管理员")
 
     def set_password(self, raw_password):
         from django.contrib.auth.hashers import make_password
@@ -32,6 +43,38 @@ class Manager(models.Model):
     # 指定数据表名称（未指定即为默认类名）
     class Meta:
         db_table = "manager"
+
+
+class ManagerInvite(models.Model):
+    """Self-service invite link for provisioning new Admin/Moderator accounts.
+
+    Only the Primary Admin can create these (enforced in the view, not here).
+    The invitee follows the emailed link to set their own password, which
+    creates the real Manager row on acceptance.
+    """
+    email = models.EmailField(verbose_name="邮箱")
+    name = models.CharField(max_length=32, verbose_name="名字")
+    role = models.CharField(max_length=20, choices=Manager.ROLE_CHOICES, verbose_name="角色")
+    token = models.CharField(max_length=64, unique=True, verbose_name="邀请令牌")
+    invited_by = models.ForeignKey(Manager, on_delete=models.SET_NULL, null=True, related_name='sent_invites', verbose_name="邀请人")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
+    expires_at = models.DateTimeField(verbose_name="过期时间")
+    accepted_at = models.DateTimeField(null=True, blank=True, verbose_name="接受时间")
+
+    class Meta:
+        db_table = "manager_invite"
+        ordering = ['-created_at']
+        verbose_name = "管理员邀请"
+        verbose_name_plural = "管理员邀请"
+
+    def __str__(self):
+        return f'{self.email} ({self.role})'
+
+    def is_expired(self):
+        return timezone.now() > self.expires_at
+
+    def is_pending(self):
+        return self.accepted_at is None and not self.is_expired()
 
 
 # 出版社类

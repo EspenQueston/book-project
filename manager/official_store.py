@@ -22,7 +22,7 @@ def _get_platform_admin_identity():
     if not admin:
         return 'Duno360 Admin', 'admin@duno360.com'
     label = admin.name or admin.number or 'Duno360 Admin'
-    email = admin.number if '@' in (admin.number or '') else OFFICIAL_STORE_EMAIL
+    email = admin.email or OFFICIAL_STORE_EMAIL
     return label, email
 
 

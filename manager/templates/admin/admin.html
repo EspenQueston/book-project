@@ -446,6 +446,38 @@
                 </section>
 
                 <section class="col-md-6 login-right">
+                    {% if otp_stage %}
+                    <form action="/manager/login/verify/" method="post" class="login-form">
+                        {% csrf_token %}
+                        <div class="login-book-icon" title="Email verification" aria-hidden="true">
+                            <i class="fas fa-shield-halved"></i>
+                        </div>
+                        <h2 class="form-title" data-zh="邮箱验证" data-en="Email Verification" data-fr="Vérification e-mail">邮箱验证</h2>
+                        <p class="form-subtitle" data-zh="验证码已发送至你的邮箱" data-en="A verification code has been sent to your email" data-fr="Un code de vérification a été envoyé à votre e-mail">验证码已发送至你的邮箱</p>
+
+                        {% if error %}
+                        <div class="alert alert-danger rounded-3 py-2 small">{{ error }}</div>
+                        {% endif %}
+
+                        <div class="form-group">
+                            <i class="fas fa-key input-icon"></i>
+                            <input type="text" class="form-control" name="otp_code" inputmode="numeric" maxlength="6" pattern="[0-9]{6}"
+                                   data-ph-zh="6位验证码" data-ph-en="6-digit code" data-ph-fr="Code à 6 chiffres"
+                                   placeholder="6位验证码" required autofocus autocomplete="one-time-code">
+                        </div>
+
+                        <button type="submit" class="btn btn-login">
+                            <i class="fas fa-check me-2"></i><span data-zh="验证并登录" data-en="Verify & Sign In" data-fr="Vérifier et se connecter">验证并登录</span>
+                        </button>
+
+                        <div class="public-access">
+                            <a href="/manager/login/resend-otp/">
+                                <i class="fas fa-rotate-right me-1"></i>
+                                <span data-zh="重新发送验证码" data-en="Resend code" data-fr="Renvoyer le code">重新发送验证码</span>
+                            </a>
+                        </div>
+                    </form>
+                    {% else %}
                     <form action="/manager/login/" method="post" class="login-form">
                         {% csrf_token %}
                         <div class="login-book-icon" title="Book management" aria-hidden="true">
@@ -459,10 +491,10 @@
                         {% endif %}
 
                         <div class="form-group">
-                            <i class="fas fa-user input-icon"></i>
-                            <input type="text" class="form-control" name="number"
-                                   data-ph-zh="用户名" data-ph-en="Username" data-ph-fr="Nom d’utilisateur"
-                                   placeholder="用户名" required autofocus autocomplete="username">
+                            <i class="fas fa-envelope input-icon"></i>
+                            <input type="email" class="form-control" name="email"
+                                   data-ph-zh="邮箱" data-ph-en="Email" data-ph-fr="E-mail"
+                                   placeholder="邮箱" required autofocus autocomplete="username">
                         </div>
 
                         <div class="form-group">
@@ -493,6 +525,7 @@
                             </a>
                         </div>
                     </form>
+                    {% endif %}
                 </section>
             </div>
         </div>

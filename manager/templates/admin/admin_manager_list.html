@@ -1,0 +1,215 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="zh-hans">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员账户 - DUNO 360</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1d4ed8;
+            --secondary-color: #14245f;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .mgr-hero {
+            background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%);
+            border-radius: 20px;
+            padding: 24px 28px;
+            color: #fff;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        .mgr-hero h4 { font-weight: 800; margin: 0; }
+        .mgr-hero p { margin: 10px 0 0; opacity: 0.9; font-size: 0.9rem; }
+
+        .mgr-caps { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
+        .mgr-cap-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 16px 22px;
+            box-shadow: 0 6px 22px rgba(15, 23, 42, 0.05);
+            min-width: 180px;
+        }
+        .mgr-cap-num { font-size: 1.6rem; font-weight: 900; color: #1d4ed8; }
+        .mgr-cap-label { font-size: 0.8rem; color: #64748b; font-weight: 700; }
+
+        .mgr-card {
+            background: #fff;
+            border-radius: 16px;
+            border: 1px solid #eef2f7;
+            box-shadow: 0 6px 22px rgba(15, 23, 42, 0.05);
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        .mgr-card h5 { font-weight: 800; margin-bottom: 16px; }
+
+        .mgr-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+            flex-wrap: wrap;
+        }
+        .mgr-row:last-child { border-bottom: none; }
+        .mgr-name { font-weight: 700; color: #0f172a; }
+        .mgr-email { font-size: 0.82rem; color: #64748b; }
+
+        .mgr-badge {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 999px;
+        }
+        .mgr-badge-admin { background: rgba(29, 78, 216, 0.1); color: #1d4ed8; }
+        .mgr-badge-moderator { background: rgba(124, 58, 237, 0.12); color: #7c3aed; }
+        .mgr-badge-primary { background: rgba(245, 158, 11, 0.14); color: #b45309; }
+        .mgr-badge-pending { background: rgba(100, 116, 139, 0.14); color: #475569; }
+
+        .mgr-empty { text-align: center; padding: 30px; color: #94a3b8; }
+    </style>
+</head>
+
+<body>
+    {% include "admin/_admin_sidebar.html" %}
+    <div class="admin-main-offset">
+        <div class="main-container">
+            <div class="container-fluid">
+                <div class="mgr-hero">
+                    <div>
+                        <h4><i class="fas fa-user-shield me-2"></i><span data-zh="管理员账户" data-en="Admin Accounts" data-fr="Comptes administrateurs">管理员账户</span></h4>
+                        <p data-zh="管理平台的管理员与版主账户。仅主管理员可邀请或移除账户。" data-en="Manage the platform's Admin and Moderator accounts. Only the Primary Admin can invite or remove accounts." data-fr="Gérez les comptes Admin et Modérateur de la plateforme. Seul l'administrateur principal peut inviter ou supprimer des comptes.">管理平台的管理员与版主账户。仅主管理员可邀请或移除账户。</p>
+                    </div>
+                    {% if is_primary %}
+                    <button class="btn btn-light rounded-pill px-4 fw-bold" data-bs-toggle="modal" data-bs-target="#inviteModal">
+                        <i class="fas fa-user-plus me-2"></i><span data-zh="邀请新账户" data-en="Invite Account" data-fr="Inviter un compte">邀请新账户</span>
+                    </button>
+                    {% endif %}
+                </div>
+
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+                {% endif %}
+
+                <div class="mgr-caps">
+                    <div class="mgr-cap-card">
+                        <div class="mgr-cap-num">{{ admin_count }} / {{ admin_cap }}</div>
+                        <div class="mgr-cap-label" data-zh="管理员 (Administrator)" data-en="Administrators" data-fr="Administrateurs">管理员 (Administrator)</div>
+                    </div>
+                    <div class="mgr-cap-card">
+                        <div class="mgr-cap-num">{{ moderator_count }} / {{ moderator_cap }}</div>
+                        <div class="mgr-cap-label" data-zh="版主 (Moderator)" data-en="Moderators" data-fr="Modérateurs">版主 (Moderator)</div>
+                    </div>
+                </div>
+
+                <div class="mgr-card">
+                    <h5><i class="fas fa-users me-2 text-primary"></i><span data-zh="现有账户" data-en="Existing Accounts" data-fr="Comptes existants">现有账户</span></h5>
+                    {% for m in managers %}
+                    <div class="mgr-row">
+                        <div>
+                            <div class="mgr-name">{{ m.name }}
+                                {% if m.is_primary %}<span class="mgr-badge mgr-badge-primary ms-1" data-zh="主管理员" data-en="Primary" data-fr="Principal">主管理员</span>{% endif %}
+                                {% if m.role == 'admin' %}<span class="mgr-badge mgr-badge-admin ms-1">Administrator</span>{% else %}<span class="mgr-badge mgr-badge-moderator ms-1">Moderator</span>{% endif %}
+                            </div>
+                            <div class="mgr-email">{{ m.email|default:"—" }}</div>
+                        </div>
+                        {% if is_primary and not m.is_primary %}
+                        <form method="post" action="{% url 'manager:admin_manager_revoke' m.id %}" onsubmit="return confirm('{% trans "Remove this account?" %}');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill">
+                                <i class="fas fa-user-minus me-1"></i><span data-zh="移除" data-en="Remove" data-fr="Retirer">移除</span>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="mgr-card">
+                    <h5><i class="fas fa-hourglass-half me-2 text-warning"></i><span data-zh="待处理邀请" data-en="Pending Invites" data-fr="Invitations en attente">待处理邀请</span></h5>
+                    {% for inv in pending_invites %}
+                    <div class="mgr-row">
+                        <div>
+                            <div class="mgr-name">{{ inv.name }}
+                                <span class="mgr-badge mgr-badge-pending ms-1" data-zh="待接受" data-en="Pending" data-fr="En attente">待接受</span>
+                                {% if inv.role == 'admin' %}<span class="mgr-badge mgr-badge-admin ms-1">Administrator</span>{% else %}<span class="mgr-badge mgr-badge-moderator ms-1">Moderator</span>{% endif %}
+                            </div>
+                            <div class="mgr-email">{{ inv.email }} · <span data-zh="过期时间" data-en="Expires" data-fr="Expire">过期时间</span> {{ inv.expires_at|date:"Y-m-d H:i" }}</div>
+                        </div>
+                        {% if is_primary %}
+                        <form method="post" action="{% url 'manager:admin_manager_invite_revoke' inv.id %}" onsubmit="return confirm('{% trans "Cancel this invite?" %}');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-secondary rounded-pill">
+                                <i class="fas fa-times me-1"></i><span data-zh="取消" data-en="Cancel" data-fr="Annuler">取消</span>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <div class="mgr-empty" data-zh="暂无待处理邀请" data-en="No pending invites" data-fr="Aucune invitation en attente">暂无待处理邀请</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if is_primary %}
+    <div class="modal fade" id="inviteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content" style="border-radius:18px;">
+                <form method="post" action="{% url 'manager:admin_manager_invite' %}">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold" data-zh="邀请新账户" data-en="Invite Account" data-fr="Inviter un compte">邀请新账户</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold" data-zh="姓名" data-en="Name" data-fr="Nom">姓名</label>
+                            <input type="text" name="name" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold" data-zh="邮箱" data-en="Email" data-fr="E-mail">邮箱</label>
+                            <input type="email" name="email" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold" data-zh="角色" data-en="Role" data-fr="Rôle">角色</label>
+                            <select name="role" class="form-select" required>
+                                <option value="admin">Administrator</option>
+                                <option value="moderator">Moderator</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal" data-zh="取消" data-en="Cancel" data-fr="Annuler">取消</button>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4" data-zh="发送邀请" data-en="Send Invite" data-fr="Envoyer l'invitation">发送邀请</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/admin_i18n.js" defer></script>
+</body>
+</html>

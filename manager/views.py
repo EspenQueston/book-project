@@ -133,6 +133,17 @@ def _reset_login_failures(ip: str) -> None:
     cache.delete(f"login_fail:{ip}")
 
 
+_MODERATOR_FORBIDDEN_MESSAGE = 'Moderators are not authorized to perform this action.'
+
+
+def _moderator_blocked(request):
+    """True if the current admin session belongs to a Moderator attempting
+    an action reserved for Administrators — account deletion/editing and
+    vendor payment approval. Call this at the top of a state-changing
+    branch, not on read-only/GET views."""
+    return request.session.get('manager_role') == 'moderator'
+
+
 # ---------------------------------------------------------------------------
 # Generalized keyed rate limiter — same cache-based approach as the login
 # guard above, reused for any endpoint that needs a per-IP request cap
@@ -160,9 +171,18 @@ def index(request):
 
 
 # ====================   管理员登录  ===========================
+_MANAGER_OTP_TTL_SECONDS = 600  # 10 minutes
+_MANAGER_OTP_MAX_ATTEMPTS = 5
+_MANAGER_OTP_RESEND_MAX = 3
+
+
 def manager_login(request):
-    """Admin login with PBKDF2 password check and IP-based rate limiting."""
+    """Admin login step 1: email + password. On success this does NOT grant
+    a session yet — every admin login requires a mandatory email OTP step
+    (manager_login_verify) before the real session is established."""
     if request.method == "GET":
+        if request.session.get("pending_manager_id"):
+            return render(request, "admin/admin.html", {"otp_stage": True})
         return render(request, "admin/admin.html")
 
     if request.method == "POST":
@@ -177,32 +197,107 @@ def manager_login(request):
                 status=429,
             )
 
-        number = request.POST.get("number", "").strip()
+        email = request.POST.get("email", "").strip()
         password = request.POST.get("password", "")
 
-        if not number or not password:
+        if not email or not password:
             _record_login_failure(ip)
-            return render(request, "admin/admin.html", {"error": "账号和密码不能为空"})
+            return render(request, "admin/admin.html", {"error": "邮箱和密码不能为空"})
 
         try:
-            manager = models.Manager.objects.get(number=number)
+            manager = models.Manager.objects.get(email__iexact=email)
         except models.Manager.DoesNotExist:
             _record_login_failure(ip)
-            return render(request, "admin/admin.html", {"error": "账号或密码错误"})
+            return render(request, "admin/admin.html", {"error": "邮箱或密码错误"})
 
         if not manager.check_password(password):
             _record_login_failure(ip)
-            return render(request, "admin/admin.html", {"error": "账号或密码错误"})
+            return render(request, "admin/admin.html", {"error": "邮箱或密码错误"})
 
-        # Successful login
+        # Password correct — require the mandatory email OTP step before
+        # granting a session.
         _reset_login_failures(ip)
-        request.session.cycle_key()          # prevent session fixation
-        request.session["name"] = manager.name
-        request.session["manager_id"] = manager.id
-        request.session["is_admin"] = manager.is_admin
-        return redirect("/manager/dashboard/")
+        code = _generate_pin()
+        cache.set(f"manager_otp:{manager.id}", code, _MANAGER_OTP_TTL_SECONDS)
+        cache.delete(f"manager_otp_fail:{manager.id}")
+        _send_manager_otp_email(manager.email, code, manager.name)
+        request.session["pending_manager_id"] = manager.id
+        return render(request, "admin/admin.html", {"otp_stage": True})
 
     return redirect("/manager/login")
+
+
+def manager_login_verify(request):
+    """Admin login step 2: the mandatory email OTP code. Only on success is
+    the real session established."""
+    pending_id = request.session.get("pending_manager_id")
+    if not pending_id:
+        return redirect("/manager/login")
+
+    if request.method != "POST":
+        return render(request, "admin/admin.html", {"otp_stage": True})
+
+    fail_key = f"manager_otp_fail:{pending_id}"
+    if _is_rate_limited_key(fail_key, _MANAGER_OTP_MAX_ATTEMPTS):
+        return render(
+            request, "admin/admin.html",
+            {"otp_stage": True, "error": "验证尝试次数过多，请5分钟后再试。"},
+            status=429,
+        )
+
+    code = request.POST.get("otp_code", "").strip()
+    cached_code = cache.get(f"manager_otp:{pending_id}")
+
+    if not cached_code:
+        request.session.pop("pending_manager_id", None)
+        return render(request, "admin/admin.html", {"error": "验证码已过期，请重新登录。"})
+
+    if code != cached_code:
+        _record_attempt_key(fail_key, _LOGIN_WINDOW_SECONDS)
+        return render(request, "admin/admin.html", {"otp_stage": True, "error": "验证码不正确"})
+
+    try:
+        manager = models.Manager.objects.get(id=pending_id)
+    except models.Manager.DoesNotExist:
+        request.session.pop("pending_manager_id", None)
+        return redirect("/manager/login")
+
+    cache.delete(f"manager_otp:{pending_id}")
+    cache.delete(fail_key)
+    request.session.pop("pending_manager_id", None)
+
+    request.session.cycle_key()          # prevent session fixation
+    request.session["name"] = manager.name
+    request.session["manager_id"] = manager.id
+    request.session["is_admin"] = manager.is_admin
+    request.session["manager_role"] = manager.role
+    return redirect("/manager/dashboard/")
+
+
+def manager_login_resend_otp(request):
+    """Resend the OTP code for the current pending login attempt."""
+    pending_id = request.session.get("pending_manager_id")
+    if not pending_id:
+        return redirect("/manager/login")
+
+    try:
+        manager = models.Manager.objects.get(id=pending_id)
+    except models.Manager.DoesNotExist:
+        request.session.pop("pending_manager_id", None)
+        return redirect("/manager/login")
+
+    resend_key = f"manager_otp_resend:{pending_id}"
+    if _is_rate_limited_key(resend_key, _MANAGER_OTP_RESEND_MAX):
+        return render(
+            request, "admin/admin.html",
+            {"otp_stage": True, "error": "请求过于频繁，请稍后再试。"},
+        )
+    _record_attempt_key(resend_key, _LOGIN_WINDOW_SECONDS)
+
+    code = _generate_pin()
+    cache.set(f"manager_otp:{pending_id}", code, _MANAGER_OTP_TTL_SECONDS)
+    _send_manager_otp_email(manager.email, code, manager.name)
+    return render(request, "admin/admin.html", {"otp_stage": True})
 
 
 # ====================   管理员登出  ===========================
@@ -216,6 +311,201 @@ def manager_logout(request):
 def logout(request):
     """Legacy logout function — delegates to manager_logout."""
     return manager_logout(request)
+
+
+# ====================   管理员账户 — 角色配额与邀请  ===========================
+_MANAGER_ROLE_CAPS = {'admin': 2, 'moderator': 3}
+
+
+def _send_manager_invite_email(email, name, role, accept_url):
+    """Invite email for a new Admin/Moderator to self-service set their password."""
+    role_label = 'Administrator' if role == 'admin' else 'Moderator'
+    subject = f'DUNO 360 - You have been invited as {role_label} / Vous avez été invité en tant que {role_label}'
+    html_body = f'''
+    <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:520px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+        <div style="background:linear-gradient(135deg,#14245f 0%,#1d4ed8 100%);padding:32px 28px;text-align:center;">
+            <h1 style="color:#fff;margin:0;font-size:1.5rem;">DUNO 360</h1>
+            <p style="color:rgba(255,255,255,0.85);margin:8px 0 0;font-size:0.95rem;">Admin panel invitation / Invitation au panneau d'administration</p>
+        </div>
+        <div style="padding:32px 28px;">
+            <p style="color:#333;font-size:1rem;margin:0 0 8px;">Hello <strong>{name}</strong>! / Bonjour <strong>{name}</strong>&nbsp;!</p>
+            <p style="color:#666;font-size:0.93rem;line-height:1.7;margin:0 0 24px;">
+                You have been invited to join the DUNO 360 admin panel as <strong>{role_label}</strong>. Click below to set your password and activate your account. / Vous avez été invité à rejoindre le panneau d'administration DUNO 360 en tant que <strong>{role_label}</strong>. Cliquez ci-dessous pour définir votre mot de passe et activer votre compte.
+            </p>
+            <div style="text-align:center;margin:0 0 24px;">
+                <a href="{accept_url}" style="display:inline-block;background:linear-gradient(135deg,#1d4ed8,#14245f);color:#fff;text-decoration:none;font-weight:700;padding:14px 28px;border-radius:999px;">Set my password / Définir mon mot de passe</a>
+            </div>
+            <p style="color:#999;font-size:0.85rem;text-align:center;margin:0;">
+                ⏰ This invitation expires in <strong>48 hours</strong>. / Cette invitation expire dans <strong>48 heures</strong>.
+            </p>
+        </div>
+    </div>
+    '''
+    plain_body = f'Hello {name}, you have been invited to DUNO 360 admin panel as {role_label}. Set your password: {accept_url} (valid 48 hours).'
+
+    import time
+    last_exc = None
+    for attempt in range(3):
+        try:
+            from django.core.mail import EmailMultiAlternatives
+            msg = EmailMultiAlternatives(subject, plain_body, django_settings.DEFAULT_FROM_EMAIL, [email])
+            msg.attach_alternative(html_body, 'text/html')
+            msg.send(fail_silently=False)
+            return True
+        except Exception as e:
+            last_exc = e
+            if attempt < 2:
+                time.sleep(1.5 * (attempt + 1))
+    logger.error(f'Failed to send manager invite email to {email} after 3 attempts: {last_exc}')
+    return False
+
+
+def admin_manager_list(request):
+    """List all Admin/Moderator accounts and pending invites. Invite/revoke
+    actions are only usable by the Primary Admin (checked in those views;
+    this list view just hides the controls for everyone else)."""
+    if "name" not in request.session:
+        return redirect("/manager/login")
+
+    current = models.Manager.objects.filter(id=request.session.get("manager_id")).first()
+    is_primary = bool(current and current.is_primary)
+
+    managers = models.Manager.objects.all().order_by('-is_primary', 'role', 'name')
+    pending_invites = models.ManagerInvite.objects.filter(accepted_at__isnull=True).order_by('-created_at')
+
+    context = {
+        'managers': managers,
+        'pending_invites': pending_invites,
+        'is_primary': is_primary,
+        'admin_count': models.Manager.objects.filter(role='admin').count(),
+        'moderator_count': models.Manager.objects.filter(role='moderator').count(),
+        'admin_cap': _MANAGER_ROLE_CAPS['admin'],
+        'moderator_cap': _MANAGER_ROLE_CAPS['moderator'],
+        'name': request.session.get('name'),
+    }
+    return render(request, 'admin/admin_manager_list.html', context)
+
+
+def admin_manager_invite(request):
+    """Primary-Admin-only: invite a new Admin/Moderator by email."""
+    if "name" not in request.session:
+        return redirect("/manager/login")
+    if request.method != 'POST':
+        return redirect('manager:admin_manager_list')
+
+    current = models.Manager.objects.filter(id=request.session.get("manager_id"), is_primary=True).first()
+    if not current:
+        return HttpResponse('Only the Primary Admin can invite new accounts.', status=403)
+
+    email = (request.POST.get('email') or '').strip().lower()
+    name = (request.POST.get('name') or '').strip()
+    role = (request.POST.get('role') or '').strip()
+
+    if role not in _MANAGER_ROLE_CAPS:
+        messages.error(request, '请选择有效角色。')
+        return redirect('manager:admin_manager_list')
+    if not email or not name:
+        messages.error(request, '姓名和邮箱不能为空。')
+        return redirect('manager:admin_manager_list')
+    if models.Manager.objects.filter(email__iexact=email).exists():
+        messages.error(request, '该邮箱已注册为管理员账户。')
+        return redirect('manager:admin_manager_list')
+    if models.ManagerInvite.objects.filter(email__iexact=email, accepted_at__isnull=True).exists():
+        messages.error(request, '该邮箱已有待处理的邀请。')
+        return redirect('manager:admin_manager_list')
+
+    cap = _MANAGER_ROLE_CAPS[role]
+    existing = models.Manager.objects.filter(role=role).count()
+    pending = models.ManagerInvite.objects.filter(role=role, accepted_at__isnull=True, expires_at__gte=timezone.now()).count()
+    if existing + pending >= cap:
+        role_label = 'Administrator' if role == 'admin' else 'Moderator'
+        messages.error(request, f'{role_label} 数量已达上限（{cap}），无法继续邀请。')
+        return redirect('manager:admin_manager_list')
+
+    import secrets
+    token = secrets.token_urlsafe(32)
+    models.ManagerInvite.objects.create(
+        email=email, name=name, role=role, token=token,
+        invited_by=current, expires_at=timezone.now() + timedelta(hours=48),
+    )
+    accept_url = request.build_absolute_uri(f'/manager/invite/accept/{token}/')
+    _send_manager_invite_email(email, name, role, accept_url)
+    messages.success(request, f'已向 {email} 发送邀请。')
+    return redirect('manager:admin_manager_list')
+
+
+def manager_accept_invite(request, token):
+    """Public — invitee follows the emailed link to self-service set their password."""
+    invite = get_object_or_404(models.ManagerInvite, token=token)
+
+    if not invite.is_pending():
+        return render(request, 'admin/manager_accept_invite.html', {'invite': invite, 'expired_or_used': True})
+
+    if request.method == 'POST':
+        password = request.POST.get('password', '')
+        password2 = request.POST.get('password2', '')
+        if not password or len(password) < 8:
+            return render(request, 'admin/manager_accept_invite.html', {'invite': invite, 'error': '密码至少需要8个字符。'})
+        if password != password2:
+            return render(request, 'admin/manager_accept_invite.html', {'invite': invite, 'error': '两次输入的密码不一致。'})
+
+        cap = _MANAGER_ROLE_CAPS[invite.role]
+        if models.Manager.objects.filter(role=invite.role).count() >= cap:
+            return render(request, 'admin/manager_accept_invite.html', {'invite': invite, 'error': '该角色名额已满，请联系主管理员。'})
+
+        manager = models.Manager(
+            number=invite.email,
+            email=invite.email,
+            name=invite.name,
+            role=invite.role,
+            is_admin=(invite.role == 'admin'),
+            is_primary=False,
+        )
+        manager.set_password(password)
+        manager.save()
+        invite.accepted_at = timezone.now()
+        invite.save(update_fields=['accepted_at'])
+        messages.success(request, '账户已创建，请使用邮箱和密码登录。')
+        return redirect('manager:manager_login')
+
+    return render(request, 'admin/manager_accept_invite.html', {'invite': invite})
+
+
+def admin_manager_revoke(request, manager_id):
+    """Primary-Admin-only: remove a Manager account (never the Primary Admin)."""
+    if "name" not in request.session:
+        return redirect("/manager/login")
+    if request.method != 'POST':
+        return redirect('manager:admin_manager_list')
+
+    current = models.Manager.objects.filter(id=request.session.get("manager_id"), is_primary=True).first()
+    if not current:
+        return HttpResponse('Only the Primary Admin can remove accounts.', status=403)
+
+    target = get_object_or_404(models.Manager, id=manager_id)
+    if target.is_primary:
+        messages.error(request, '不能删除主管理员账户。')
+        return redirect('manager:admin_manager_list')
+    target.delete()
+    messages.success(request, '账户已移除。')
+    return redirect('manager:admin_manager_list')
+
+
+def admin_manager_invite_revoke(request, invite_id):
+    """Primary-Admin-only: cancel a pending invite (frees up its role-cap slot)."""
+    if "name" not in request.session:
+        return redirect("/manager/login")
+    if request.method != 'POST':
+        return redirect('manager:admin_manager_list')
+
+    current = models.Manager.objects.filter(id=request.session.get("manager_id"), is_primary=True).first()
+    if not current:
+        return HttpResponse('Only the Primary Admin can cancel invites.', status=403)
+
+    invite = get_object_or_404(models.ManagerInvite, id=invite_id)
+    invite.delete()
+    messages.success(request, '邀请已取消。')
+    return redirect('manager:admin_manager_list')
 
 
 # ====================   一、出版社模块  ===========================
@@ -6245,6 +6535,20 @@ def email_dashboard(request):
     from manager.email_utils import ensure_platform_email_account
     ensure_platform_email_account()
 
+    # Auto-sync on page load so "Messages" reflects Zoho without the admin
+    # needing to click a manual sync button — only when stale (avoids an
+    # IMAP round-trip on every single click while browsing the inbox).
+    _sync_stale_cutoff = timezone.now() - timedelta(minutes=2)
+    for _account in models.EmailAccount.objects.filter(is_active=True):
+        if _account.last_sync and _account.last_sync >= _sync_stale_cutoff:
+            continue
+        try:
+            _sync_account_all_folders(_account)
+            _account.last_sync = timezone.now()
+            _account.save(update_fields=['last_sync'])
+        except Exception as e:
+            logger.error(f'Auto-sync failed for {_account.email_address}: {e}')
+
     folder = request.GET.get('folder', 'inbox')
     account_id = request.GET.get('account', '')
     label_id = request.GET.get('label', '')
@@ -6494,8 +6798,7 @@ def email_sync(request):
 
     for account in accounts:
         try:
-            new_count = _fetch_emails_imap(account)
-            total_new += new_count
+            total_new += _sync_account_all_folders(account)
             account.last_sync = timezone.now()
             account.save(update_fields=['last_sync'])
         except Exception as e:
@@ -6510,15 +6813,40 @@ def email_sync(request):
     })
 
 
-def _fetch_emails_imap(account, folder='INBOX', max_emails=50):
-    """Fetch emails from IMAP for a single account with incremental sync"""
+# Sent-mailbox naming varies by IMAP provider (Zoho uses "Sent", Gmail uses
+# "[Gmail]/Sent Mail", others "Sent Items") — try each until one selects OK.
+_SENT_FOLDER_CANDIDATES = ['Sent', 'Sent Items', '[Gmail]/Sent Mail', 'INBOX.Sent']
+
+
+def _sync_account_all_folders(account):
+    """Fetch both INBOX and Sent for one account — mail sent to AND from the
+    address should both show up under Messages, not just what's received."""
+    new_count = _fetch_emails_imap(account, folder='INBOX', save_folder='inbox') or 0
+    for sent_folder in _SENT_FOLDER_CANDIDATES:
+        result = _fetch_emails_imap(account, folder=sent_folder, save_folder='sent')
+        if result is not None:
+            new_count += result
+            break  # this candidate name selected successfully — no need to try the others
+    return new_count
+
+
+def _fetch_emails_imap(account, folder='INBOX', max_emails=50, save_folder='inbox'):
+    """Fetch emails from IMAP for a single account with incremental sync.
+
+    `folder` is the IMAP mailbox name to select (server-side); `save_folder`
+    is the EmailMessage.folder value to store locally (our own choices),
+    since IMAP "Sent" mailbox naming varies by provider.
+    """
     if account.imap_use_ssl:
         mail = imaplib.IMAP4_SSL(account.imap_host, account.imap_port, timeout=30)
     else:
         mail = imaplib.IMAP4(account.imap_host, account.imap_port, timeout=30)
 
     mail.login(account.username, account.password)
-    mail.select(folder)
+    status, _select_data = mail.select(folder)
+    if status != 'OK':
+        mail.logout()
+        return None  # folder doesn't exist on this server — caller tries the next candidate name
 
     existing_uids = set(
         models.EmailMessage.objects.filter(account=account)
@@ -6610,7 +6938,7 @@ def _fetch_emails_imap(account, folder='INBOX', max_emails=50):
             subject=subject or '(无主题)',
             body_text=body_text,
             body_html=body_html,
-            folder='inbox',
+            folder=save_folder,
             is_read=is_read,
             received_at=received_at,
             in_reply_to=in_reply_to,
@@ -6981,6 +7309,55 @@ def _send_verification_email(email, pin_code, name):
             if attempt < 2:
                 time.sleep(1.5 * (attempt + 1))
     logger.error(f'Failed to send verification email to {email} after 3 attempts: {last_exc}')
+    return False
+
+
+def _send_manager_otp_email(email, code, name):
+    """Send the mandatory admin-login OTP code. Same retry-hardened send
+    pattern as _send_verification_email (see comment above)."""
+    subject = 'DUNO 360 - Admin Login Verification / Vérification de connexion admin'
+    html_body = f'''
+    <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:520px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+        <div style="background:linear-gradient(135deg,#14245f 0%,#1d4ed8 100%);padding:32px 28px;text-align:center;">
+            <h1 style="color:#fff;margin:0;font-size:1.5rem;">DUNO 360</h1>
+            <p style="color:rgba(255,255,255,0.85);margin:8px 0 0;font-size:0.95rem;">Admin login verification / Vérification de connexion admin</p>
+        </div>
+        <div style="padding:32px 28px;">
+            <p style="color:#333;font-size:1rem;margin:0 0 8px;">Hello <strong>{name}</strong>! / Bonjour <strong>{name}</strong>&nbsp;!</p>
+            <p style="color:#666;font-size:0.93rem;line-height:1.7;margin:0 0 24px;">
+                Use the code below to finish signing in to the DUNO 360 admin panel. / Utilisez le code ci-dessous pour terminer votre connexion au panneau d'administration DUNO 360.
+            </p>
+            <div style="background:linear-gradient(135deg,rgba(20,36,95,0.08),rgba(29,78,216,0.08));border:2px dashed #1d4ed8;border-radius:14px;padding:24px;text-align:center;margin:0 0 24px;">
+                <span style="font-size:2.5rem;font-weight:800;letter-spacing:12px;color:#1d4ed8;">{code}</span>
+            </div>
+            <p style="color:#999;font-size:0.85rem;text-align:center;margin:0;">
+                ⏰ This code expires in <strong>10 minutes</strong>. / Ce code expire dans <strong>10 minutes</strong>.
+            </p>
+        </div>
+        <div style="background:#f8f9ff;padding:16px 28px;text-align:center;border-top:1px solid #eee;">
+            <p style="color:#aaa;font-size:0.8rem;margin:0;">If you did not attempt to log in, please secure your account immediately.<br>Si vous n'avez pas tenté de vous connecter, sécurisez votre compte immédiatement.</p>
+        </div>
+    </div>
+    '''
+    plain_body = (
+        f'Hello {name}, your DUNO 360 admin login code is: {code}. Valid for 10 minutes.\n\n'
+        f'Bonjour {name}, votre code de connexion admin DUNO 360 est : {code}. Valide 10 minutes.'
+    )
+
+    import time
+    last_exc = None
+    for attempt in range(3):
+        try:
+            from django.core.mail import EmailMultiAlternatives
+            msg = EmailMultiAlternatives(subject, plain_body, django_settings.DEFAULT_FROM_EMAIL, [email])
+            msg.attach_alternative(html_body, 'text/html')
+            msg.send(fail_silently=False)
+            return True
+        except Exception as e:
+            last_exc = e
+            if attempt < 2:
+                time.sleep(1.5 * (attempt + 1))
+    logger.error(f'Failed to send admin OTP email to {email} after 3 attempts: {last_exc}')
     return False
 
 
@@ -7711,6 +8088,8 @@ def admin_toggle_user(request):
     if "name" not in request.session:
         return JsonResponse({'success': False, 'message': '未授权'})
     if request.method == 'POST':
+        if _moderator_blocked(request):
+            return JsonResponse({'success': False, 'message': _MODERATOR_FORBIDDEN_MESSAGE}, status=403)
         user = get_object_or_404(models.SiteUser, id=request.POST.get('id'))
         user.is_active = not user.is_active
         user.save(update_fields=['is_active'])
@@ -7730,6 +8109,8 @@ def admin_delete_user(request):
     if not request.session.get('is_admin') or 'name' not in request.session:
         return JsonResponse({'success': False, 'message': '未授权'})
     if request.method == 'POST':
+        if _moderator_blocked(request):
+            return JsonResponse({'success': False, 'message': _MODERATOR_FORBIDDEN_MESSAGE}, status=403)
         user_id = request.POST.get('id')
         user = models.SiteUser.objects.filter(id=user_id).first()
         if not user:
@@ -8647,6 +9028,10 @@ def admin_escrow_transactions(request):
     if request.method == 'POST':
         action = request.POST.get('action')
         tx_id = request.POST.get('tx_id')
+        _money_moving_actions = {'release_due', 'release_one', 'mark_delivered', 'cancel', 'refund', 'wallet_adjust'}
+        if action in _money_moving_actions and _moderator_blocked(request):
+            messages.error(request, _MODERATOR_FORBIDDEN_MESSAGE)
+            return redirect(request.get_full_path() or reverse('manager:admin_escrow'))
         if action == 'release_due':
             count = process_due_escrow_releases()
             messages.success(request, _('{count} payout(s) released to vendors.').format(count=count))
@@ -10631,6 +11016,8 @@ def admin_vendor_status(request):
     if "name" not in request.session:
         return JsonResponse({'success': False, 'message': '未授权'})
     if request.method == 'POST':
+        if _moderator_blocked(request):
+            return JsonResponse({'success': False, 'message': _MODERATOR_FORBIDDEN_MESSAGE}, status=403)
         vendor = get_object_or_404(models.Vendor, id=request.POST.get('id'))
         new_status = request.POST.get('status')
         if new_status in dict(models.VENDOR_STATUS_CHOICES):
@@ -10650,6 +11037,8 @@ def admin_vendor_certify(request):
     """Grant or revoke certified seller badge (approved vendors only)."""
     if "name" not in request.session:
         return JsonResponse({'success': False, 'message': '未授权'}, status=403)
+    if _moderator_blocked(request):
+        return JsonResponse({'success': False, 'message': _MODERATOR_FORBIDDEN_MESSAGE}, status=403)
     vendor = get_object_or_404(models.Vendor, id=request.POST.get('id'))
     if vendor.is_official:
         return JsonResponse({'success': False, 'message': '官方直营店无需认证'})
@@ -11277,6 +11666,8 @@ def admin_edit_user(request):
         })
 
     if request.method == 'POST':
+        if _moderator_blocked(request):
+            return JsonResponse({'success': False, 'message': _MODERATOR_FORBIDDEN_MESSAGE}, status=403)
         uid = request.POST.get('id')
         user = get_object_or_404(models.SiteUser, id=uid)
         user.name = request.POST.get('name', user.name).strip()
@@ -11357,6 +11748,8 @@ def admin_edit_vendor(request):
         })
 
     if request.method == 'POST':
+        if _moderator_blocked(request):
+            return JsonResponse({'success': False, 'message': _MODERATOR_FORBIDDEN_MESSAGE}, status=403)
         vid = request.POST.get('id')
         vendor = get_object_or_404(models.Vendor, id=vid)
         vendor.company_name = request.POST.get('company_name', vendor.company_name).strip()
@@ -11445,6 +11838,8 @@ def admin_delete_vendor(request):
     if not request.session.get('is_admin') or 'name' not in request.session:
         return JsonResponse({'success': False, 'message': '未授权'})
     if request.method == 'POST':
+        if _moderator_blocked(request):
+            return JsonResponse({'success': False, 'message': _MODERATOR_FORBIDDEN_MESSAGE}, status=403)
         vid = request.POST.get('id')
         vendor = models.Vendor.objects.filter(id=vid).first()
         if vendor:

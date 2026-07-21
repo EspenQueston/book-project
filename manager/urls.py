@@ -16,7 +16,16 @@ urlpatterns = [
 
     # =========================管理员登录========================
     path("login/", views.manager_login, name='manager_login'),
+    path("login/verify/", views.manager_login_verify, name='manager_login_verify'),
+    path("login/resend-otp/", views.manager_login_resend_otp, name='manager_login_resend_otp'),
     path("logout/", views.manager_logout, name='manager_logout'),
+
+    # =========================管理员账户管理========================
+    path("admin/managers/", views.admin_manager_list, name='admin_manager_list'),
+    path("admin/managers/invite/", views.admin_manager_invite, name='admin_manager_invite'),
+    path("admin/managers/<int:manager_id>/revoke/", views.admin_manager_revoke, name='admin_manager_revoke'),
+    path("admin/managers/invites/<int:invite_id>/cancel/", views.admin_manager_invite_revoke, name='admin_manager_invite_revoke'),
+    path("invite/accept/<str:token>/", views.manager_accept_invite, name='manager_accept_invite'),
 
     # =========================Dashboard and analytics========================
     path("dashboard/", views.manager_dashboard, name='manager_dashboard'),
