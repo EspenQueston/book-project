@@ -21,10 +21,6 @@
                     <input type="text" name="title" class="form-control" value="{{ course.title|default:'' }}" required style="border-radius:10px;">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label fw-bold">English Title</label>
-                    <input type="text" name="title_en" class="form-control" value="{{ course.title_en|default:'' }}" style="border-radius:10px;">
-                </div>
-                <div class="mb-3">
                     <label class="form-label fw-bold">课程描述</label>
                     <textarea name="description" class="form-control" rows="5" style="border-radius:10px;">{{ course.description|default:'' }}</textarea>
                 </div>

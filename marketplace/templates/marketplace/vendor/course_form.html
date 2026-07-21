@@ -59,10 +59,6 @@
                 {% if form_state.errors.title %}<div class="invalid-feedback d-block">{{ form_state.errors.title }}</div>{% endif %}
             </div>
             <div class="mb-3">
-                <label class="form-label fw-bold">Titre anglais</label>
-                <input type="text" name="title_en" class="form-control" value="{% if form_state.values.title_en is not None %}{{ form_state.values.title_en }}{% elif course %}{{ course.title_en|default:'' }}{% endif %}">
-            </div>
-            <div class="mb-3">
                 <label class="form-label fw-bold">Description <span class="text-danger">*</span></label>
                 <textarea name="description" class="form-control {% if form_state.errors.description %}is-invalid{% endif %}" rows="5" required minlength="12">{% if form_state.values.description is not None %}{{ form_state.values.description }}{% elif course %}{{ course.description|default:'' }}{% endif %}</textarea>
                 {% if form_state.errors.description %}<div class="invalid-feedback d-block">{{ form_state.errors.description }}</div>{% endif %}

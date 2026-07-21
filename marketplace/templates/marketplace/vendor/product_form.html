@@ -5,8 +5,9 @@
 {% block title %}{% if product %}{% trans "编辑商品" %}{% else %}{% if public_publish_mode %}{% trans "发布广告" %}{% else %}{% trans "新增商品" %}{% endif %}{% endif %} - {{ vendor.company_name }}{% endblock %}
 {% block nav_products %}active{% endblock %}
 
+{% block panel_head_extra %}<link rel="stylesheet" href="{% static 'css/media_upload_progress.css' %}">{% endblock %}
+
 {% block extra_vendor_css %}
-    @import url("{% static 'css/media_upload_progress.css' %}");
     .vendor-form-shell { display:grid; grid-template-columns:minmax(0,1.35fr) minmax(340px,.82fr); gap:24px; }
     .vendor-form-card { background:#fff; border-radius:24px; padding:26px; box-shadow:0 16px 44px rgba(15,23,42,.08); border:1px solid rgba(29,78,216,.12); }
     .vendor-form-title { font-size:1.05rem; font-weight:800; color:#1e293b; margin-bottom:18px; display:flex; align-items:center; gap:10px; }
@@ -65,10 +66,6 @@
                 <label class="form-label fw-bold">Nom du produit <span class="text-danger">*</span></label>
                 <input type="text" name="name" class="form-control {% if form_state.errors.name %}is-invalid{% endif %}" value="{% if form_state.values.name is not None %}{{ form_state.values.name }}{% elif product %}{{ product.name|default:'' }}{% endif %}" required>
                 {% if form_state.errors.name %}<div class="invalid-feedback d-block">{{ form_state.errors.name }}</div>{% endif %}
-            </div>
-            <div class="mb-3">
-                <label class="form-label fw-bold">Nom anglais</label>
-                <input type="text" name="name_en" class="form-control" value="{% if form_state.values.name_en is not None %}{{ form_state.values.name_en }}{% elif product %}{{ product.name_en|default:'' }}{% endif %}">
             </div>
             <div class="mb-3">
                 <label class="form-label fw-bold">Description <span class="text-danger">*</span></label>

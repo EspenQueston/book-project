@@ -1567,7 +1567,6 @@ def admin_product_add(request):
         delivery_days_min, delivery_days_max = _parse_delivery_days_override(request.POST)
 
         product = Product(
-            name_en=request.POST.get('name_en', '').strip(),
             slug=slugify(name) or f'product-{uuid.uuid4().hex[:8]}',
             price=request.POST.get('price', 0),
             original_price=request.POST.get('original_price') or None,
@@ -1644,7 +1643,6 @@ def admin_product_edit(request, pk):
         from manager.views import _parse_delivery_days_override
         product.delivery_days_min, product.delivery_days_max = _parse_delivery_days_override(request.POST)
         product.name = product_name
-        product.name_en = request.POST.get('name_en', '').strip()
         product.description = product_description
         product.price = request.POST.get('price', product.price)
         product.original_price = request.POST.get('original_price') or None
@@ -1744,7 +1742,6 @@ def admin_course_add(request):
             return redirect('marketplace:admin_course_add')
 
         course = Course(
-            title_en=request.POST.get('title_en', '').strip(),
             slug=slugify(title) or f'course-{uuid.uuid4().hex[:8]}',
             price=request.POST.get('price', 0),
             original_price=request.POST.get('original_price') or None,
@@ -1797,7 +1794,6 @@ def admin_course_edit(request, pk):
             messages.error(request, '课程标题不能为空')
             return redirect('marketplace:admin_course_edit', pk=course.pk)
         course.title = title
-        course.title_en = request.POST.get('title_en', '').strip()
         course.description = request.POST.get('description', '')
         course.price = request.POST.get('price', course.price)
         course.original_price = request.POST.get('original_price') or None
@@ -2052,7 +2048,6 @@ def admin_supermarket_add(request):
         delivery_days_min, delivery_days_max = _parse_delivery_days_override(request.POST)
 
         item = SupermarketItem(
-            name_en=request.POST.get('name_en', '').strip(),
             slug=slugify(name) or f'item-{uuid.uuid4().hex[:8]}',
             price=request.POST.get('price', 0),
             original_price=request.POST.get('original_price') or None,
@@ -2130,7 +2125,6 @@ def admin_supermarket_edit(request, pk):
         from manager.views import _parse_delivery_days_override
         item.delivery_days_min, item.delivery_days_max = _parse_delivery_days_override(request.POST)
         item.name = item_name
-        item.name_en = request.POST.get('name_en', '').strip()
         item.description = item_description
         item.price = request.POST.get('price', item.price)
         item.original_price = request.POST.get('original_price') or None
@@ -2998,8 +2992,12 @@ def vendor_product_edit(request, pk):
     product = get_object_or_404(Product, pk=pk, vendor=vendor)
 
     if request.method == 'POST':
-        product.name = request.POST.get('name', product.name).strip()
-        product.name_en = request.POST.get('name_en', '').strip()
+        name = _required_text(request, 'name', '商品名称', min_length=3)
+        if not name:
+            categories = Category.objects.filter(Q(vendor__isnull=True) | Q(vendor=vendor), section='products', is_active=True)
+            context = _form_context_with_pricing({'vendor': vendor, 'product': product, 'categories': categories, 'form_state': _build_marketplace_form_state(request, product)}, product)
+            return render(request, 'marketplace/vendor/product_form.html', context)
+        product.name = name
         product.description = request.POST.get('description', '')
         product.price = request.POST.get('price', product.price)
         product.original_price = request.POST.get('original_price') or None
@@ -3121,7 +3119,6 @@ def vendor_course_add(request):
 
         course = Course(
             vendor_id=vendor.pk,
-            title_en=request.POST.get('title_en', '').strip(),
             slug=slugify(title) or f'course-{uuid.uuid4().hex[:8]}',
             price=request.POST.get('price', 0),
             original_price=request.POST.get('original_price') or None,
@@ -3188,7 +3185,6 @@ def vendor_course_edit(request, pk):
             context = {'vendor': vendor, 'course': course, 'categories': categories, 'form_state': _build_marketplace_form_state(request, course)}
             return render(request, 'marketplace/vendor/course_form.html', context)
         course.title = course_title
-        course.title_en = request.POST.get('title_en', '').strip()
         course.description = course_description
         course.price = request.POST.get('price', course.price)
         course.original_price = request.POST.get('original_price') or None
@@ -3444,7 +3440,6 @@ def vendor_supermarket_add(request):
 
         item = SupermarketItem(
             vendor_id=vendor.pk,
-            name_en=request.POST.get('name_en', '').strip(),
             slug=slugify(name) or f'sm-{uuid.uuid4().hex[:8]}',
             price=request.POST.get('price', 0),
             original_price=request.POST.get('original_price') or None,
@@ -3515,8 +3510,12 @@ def vendor_supermarket_edit(request, pk):
     item = get_object_or_404(SupermarketItem, pk=pk, vendor=vendor)
 
     if request.method == 'POST':
-        item.name = request.POST.get('name', item.name).strip()
-        item.name_en = request.POST.get('name_en', '').strip()
+        name = _required_text(request, 'name', '商品名称', min_length=3)
+        if not name:
+            categories = Category.objects.filter(Q(vendor__isnull=True) | Q(vendor=vendor), section='supermarket', is_active=True)
+            context = _form_context_with_pricing({'vendor': vendor, 'categories': categories, 'item': item, 'unit_choices': SupermarketItem.UNIT_CHOICES, 'form_state': _build_marketplace_form_state(request, item)}, item)
+            return render(request, 'marketplace/vendor/supermarket_form.html', context)
+        item.name = name
         item.description = request.POST.get('description', '')
         item.price = request.POST.get('price', item.price)
         item.original_price = request.POST.get('original_price') or None

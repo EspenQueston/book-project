@@ -5,8 +5,9 @@
 
 {% block title %}{% if item|default:None %}Modifier l'article supermarché{% else %}Ajouter un article supermarché{% endif %} · {{ vendor.company_name }}{% endblock %}
 
+{% block panel_head_extra %}<link rel="stylesheet" href="{% static 'css/media_upload_progress.css' %}">{% endblock %}
+
 {% block extra_vendor_css %}
-    @import url("{% static 'css/media_upload_progress.css' %}");
     .sm-form-hero { background:linear-gradient(135deg,#064e3b,#16a34a 58%,#84cc16); color:#fff; border-radius:26px; padding:26px; margin-bottom:24px; box-shadow:0 18px 45px rgba(15,23,42,.20); }
     .sm-form-hero h4 { font-weight:900; margin-bottom:8px; }
     .sm-form-hero p { opacity:.84; margin:0; }
@@ -35,10 +36,6 @@
                     <label class="form-label fw-semibold">Nom <span class="text-danger">*</span></label>
                     <input type="text" name="name" class="form-control rounded-3 {% if form_state.errors.name %}is-invalid{% endif %}" value="{% if form_state.values.name %}{{ form_state.values.name }}{% elif item %}{{ item.name }}{% endif %}" required>
                     {% if form_state.errors.name %}<div class="invalid-feedback d-block">{{ form_state.errors.name }}</div>{% endif %}
-                </div>
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">English name</label>
-                    <input type="text" name="name_en" class="form-control rounded-3" value="{% if form_state.values.name_en %}{{ form_state.values.name_en }}{% elif item %}{{ item.name_en }}{% endif %}">
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Description <span class="text-danger">*</span></label>

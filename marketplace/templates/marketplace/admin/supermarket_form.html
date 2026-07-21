@@ -21,10 +21,6 @@
                     <input type="text" name="name" class="form-control" value="{{ item.name|default:'' }}" required style="border-radius:10px;">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label fw-bold">English Name</label>
-                    <input type="text" name="name_en" class="form-control" value="{{ item.name_en|default:'' }}" style="border-radius:10px;">
-                </div>
-                <div class="mb-3">
                     <label class="form-label fw-bold" data-zh="商品描述" data-en="Product Description" data-fr="Description du produit">商品描述</label>
                     <textarea name="description" class="form-control" rows="4" style="border-radius:10px;">{{ item.description|default:'' }}</textarea>
                 </div>
