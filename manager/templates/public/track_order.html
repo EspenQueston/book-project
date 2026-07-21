@@ -804,9 +804,17 @@ html[data-theme="dark"] .order-btn-cancel {
             <span class="order-footer-num">{{ morder.order_number }}</span>
             <span class="order-footer-total">共 {{ morder.items.count }} 件 合计 <span>{{ morder.total_amount|fcfa }}</span></span>
             <div class="order-footer-actions">
-                <button class="order-btn-sm order-btn-outline" onclick="alert('{{ morder.order_number }}')">
+                <a href="{% url 'manager:order_confirmation' morder.order_number %}" class="order-btn-sm order-btn-outline">
                     <i class="fas fa-eye"></i> 详情
+                </a>
+                {% if morder.status == 'pending' or morder.status == 'payment_pending' %}
+                <button onclick="quickPayment('{{ morder.order_number }}')" class="order-btn-sm order-btn-pay">
+                    <i class="fas fa-credit-card"></i> 付款
                 </button>
+                <button onclick="quickCancel('{{ morder.order_number }}')" class="order-btn-sm order-btn-cancel">
+                    <i class="fas fa-times"></i> 取消
+                </button>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -1143,6 +1151,14 @@ html[data-theme="dark"] .order-btn-cancel {
                     <a href="{% url 'manager:order_confirmation' morder.order_number %}" class="btn btn-sm btn-primary">
                         <i class="fas fa-eye"></i> {% trans "View Details" %}
                     </a>
+                    {% if morder.status == 'pending' or morder.status == 'payment_pending' %}
+                    <button onclick="quickPayment('{{ morder.order_number }}')" class="btn btn-sm btn-success">
+                        <i class="fas fa-credit-card"></i> {% trans "Pay Now" %}
+                    </button>
+                    <button onclick="quickCancel('{{ morder.order_number }}')" class="btn btn-sm btn-outline-danger">
+                        <i class="fas fa-times"></i> {% trans "Cancel Order" %}
+                    </button>
+                    {% endif %}
                 </div>
             </div>
         </div>
