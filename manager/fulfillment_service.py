@@ -174,38 +174,71 @@ def create_shipments_for_order(order, order_source):
     if existing:
         return existing
 
+    # A pure-ebook item (Book.has_download() — a file or external download
+    # link, no physical copy) has nothing for a vendor to accept/pack/ship,
+    # so it's grouped separately from any physical items the same vendor
+    # sold in this order and fast-tracked straight to 'delivered' below
+    # instead of sitting in 'awaiting_acceptance' for weeks. Marketplace
+    # items (products/courses/supermarket) are out of scope here — only
+    # books have this ambiguity today.
     by_vendor = {}
     for item in items:
         item_type, item_id = _item_type_and_id(order_source, item)
         vendor = escrow_service.resolve_vendor_for_item(item_type, item_id)
-        by_vendor.setdefault(vendor.id if vendor else None, {'vendor': vendor, 'items': []})
-        by_vendor[vendor.id if vendor else None]['items'].append(item)
+        is_digital = order_source == 'book' and item.book.has_download()
+        key = (vendor.id if vendor else None, is_digital)
+        by_vendor.setdefault(key, {'vendor': vendor, 'is_digital': is_digital, 'items': []})
+        by_vendor[key]['items'].append(item)
 
     now = timezone.now()
     accept_by = now + timedelta(hours=SELLER_ACCEPT_SLA_HOURS)
     created_shipments = []
+    digital_groups = []
 
     with transaction.atomic():
         for group in by_vendor.values():
-            shipment = Shipment.objects.create(
-                order_source=order_source,
-                order_id=order.id,
-                order_number=order.order_number,
-                vendor=group['vendor'],
-                fulfillment_status='awaiting_acceptance',
-                accept_by=accept_by,
-            )
+            if group['is_digital']:
+                shipment = Shipment.objects.create(
+                    order_source=order_source,
+                    order_id=order.id,
+                    order_number=order.order_number,
+                    vendor=group['vendor'],
+                    fulfillment_status='delivered',
+                    delivered_at=now,
+                    delivered_confirmed_by='digital',
+                )
+            else:
+                shipment = Shipment.objects.create(
+                    order_source=order_source,
+                    order_id=order.id,
+                    order_number=order.order_number,
+                    vendor=group['vendor'],
+                    fulfillment_status='awaiting_acceptance',
+                    accept_by=accept_by,
+                )
             for item in group['items']:
                 item.shipment = shipment
                 item.save(update_fields=['shipment'])
             created_shipments.append(shipment)
 
-            if group['vendor']:
+            if group['is_digital']:
+                digital_groups.append(group)
+            elif group['vendor']:
                 _notify_vendor_new_order(group['vendor'], shipment)
 
         # Escrow rows are still created per order-item exactly as before —
         # shipment grouping doesn't change the payout math, only when it fires.
         escrow_service.sync_escrow_on_payment(order, order_source)
+
+        # Digital items delivered themselves the instant they were created
+        # above — start their 7-day refund-hold clock right away instead of
+        # waiting on a shipment that will never move past this point.
+        for group in digital_groups:
+            escrow_service.mark_order_escrow_delivered(
+                order_source=order_source,
+                order_id=order.id,
+                order_item_ids=[item.id for item in group['items']],
+            )
 
     sync_order_status_from_shipments(order, order_source)
     return created_shipments

@@ -1795,6 +1795,7 @@ class Shipment(models.Model):
         ('buyer', 'Acheteur'),
         ('auto_timeout', 'Automatique'),
         ('admin', 'Admin'),
+        ('digital', 'Numérique'),
     ]
 
     order_source = models.CharField(max_length=20, choices=ORDER_SOURCE_CHOICES, verbose_name='Source commande')
