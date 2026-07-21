@@ -327,6 +327,9 @@
                                     <td class="text-muted">{{ book_obj.id }}</td>
                                     <td>
                                         <div class="book-title">{{ book_obj.name }}</div>
+                                        <span class="badge {% if book_obj.format == 'digital' %}bg-info{% elif book_obj.format == 'both' %}bg-primary{% else %}bg-secondary{% endif %}" style="font-size:0.7rem;">
+                                            {% if book_obj.format == 'digital' %}电子书{% elif book_obj.format == 'both' %}实体+电子书{% else %}实体书{% endif %}
+                                        </span>
                                     </td>
                                     <td>
                                         <span class="price-tag">{{ book_obj.price|fcfa }}</span>

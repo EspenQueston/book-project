@@ -112,9 +112,26 @@
                             <label class="book-label">{% trans "售价 (FCFA)" %} <span class="text-danger">*</span></label>
                             <input type="number" name="price" class="form-control" step="0.01" min="0" required>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-12">
+                            <label class="book-label">{% trans "图书格式" %} <span class="text-danger">*</span></label>
+                            <div class="d-flex gap-3 flex-wrap">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="format" id="formatPhysical" value="physical" checked onchange="updateFormatVisibility()">
+                                    <label class="form-check-label" for="formatPhysical">{% trans "实体书" %}</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="format" id="formatDigital" value="digital" onchange="updateFormatVisibility()">
+                                    <label class="form-check-label" for="formatDigital">{% trans "电子书" %}</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="format" id="formatBoth" value="both" onchange="updateFormatVisibility()">
+                                    <label class="form-check-label" for="formatBoth">{% trans "实体书+电子书" %}</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4" id="inventoryGroup">
                             <label class="book-label">{% trans "库存" %}</label>
-                            <input type="number" name="inventory" class="form-control" min="0" value="0">
+                            <input type="number" name="inventory" id="inventoryInput" class="form-control" min="0" value="0">
                         </div>
                         <div class="col-md-4">
                             <label class="book-label">{% trans "封面图片" %}</label>
@@ -182,18 +199,19 @@
             </div>
 
             <div class="book-stack">
-                <div class="book-card">
+                <div class="book-card" id="downloadSection" style="display:none;">
                     <div class="book-card-title"><i class="fas fa-download"></i><span>{% trans "电子书与资源" %}</span></div>
                     <div class="book-upload-box mb-3">
                         <label class="book-label"><i class="fas fa-file-upload me-1"></i>{% trans "上传电子书文件" %}</label>
-                        <input type="file" name="book_file" class="form-control" accept=".pdf,.epub,.mobi,.azw,.azw3,.txt,.doc,.docx">
+                        <input type="file" name="book_file" id="bookFileInput" class="form-control" accept=".pdf,.epub,.mobi,.azw,.azw3,.txt,.doc,.docx">
                         <div class="book-help">PDF, EPUB, MOBI, AZW, TXT, DOC, DOCX</div>
                     </div>
                     <div>
                         <label class="book-label"><i class="fas fa-link me-1"></i>{% trans "外部下载链接" %}</label>
-                        <input type="url" name="download_link" class="form-control" placeholder="https://drive.google.com/...">
+                        <input type="url" name="download_link" id="downloadLinkInput" class="form-control" placeholder="https://drive.google.com/...">
                         <div class="book-help">Google Drive, OneDrive, Dropbox...</div>
                     </div>
+                    <div id="downloadError" class="text-danger small mt-1" style="display:none;">{% trans "请上传电子书文件或提供下载链接" %}</div>
                 </div>
 
                 <div class="book-card">
@@ -222,6 +240,19 @@
 
 {% block panel_extra_js %}
 <script>
+function updateFormatVisibility() {
+    var format = document.querySelector('input[name="format"]:checked').value;
+    var showInventory = (format === 'physical' || format === 'both');
+    var showDownload = (format === 'digital' || format === 'both');
+
+    document.getElementById('inventoryGroup').style.display = showInventory ? '' : 'none';
+    if (!showInventory) document.getElementById('inventoryInput').value = 0;
+
+    document.getElementById('downloadSection').style.display = showDownload ? '' : 'none';
+    if (!showDownload) document.getElementById('downloadError').style.display = 'none';
+}
+document.addEventListener('DOMContentLoaded', updateFormatVisibility);
+
 function submitBook(e) {
     e.preventDefault();
     if (Object.keys(selectedAuthors).length === 0) {
@@ -229,6 +260,17 @@ function submitBook(e) {
         err.style.display = 'block';
         err.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return false;
+    }
+    var format = document.querySelector('input[name="format"]:checked').value;
+    if (format === 'digital' || format === 'both') {
+        var hasFile = document.getElementById('bookFileInput').files.length > 0;
+        var hasLink = document.getElementById('downloadLinkInput').value.trim().length > 0;
+        if (!hasFile && !hasLink) {
+            var dlErr = document.getElementById('downloadError');
+            dlErr.style.display = 'block';
+            dlErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return false;
+        }
     }
     var form = document.getElementById('addBookForm');
     var btn = document.getElementById('submitBtn');

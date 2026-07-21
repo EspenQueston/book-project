@@ -135,6 +135,12 @@ class BookCategory(models.Model):
 
 # 图书类
 class Book(models.Model):
+    FORMAT_CHOICES = [
+        ('physical', '实体书'),
+        ('digital', '电子书'),
+        ('both', '实体书+电子书'),
+    ]
+
     # 图书id
     id = models.AutoField(primary_key=True)
     # 图书名称
@@ -164,6 +170,8 @@ class Book(models.Model):
         null=True,
         help_text='外部下载链接（Google Drive、OneDrive等）'
     )
+    # 图书格式：实体书 / 电子书 / 两者皆有
+    format = models.CharField(max_length=20, choices=FORMAT_CHOICES, default='physical', verbose_name='图书格式')
     # 图书价格 最多5位，小数保留2位
     price = models.DecimalField(max_digits=10, decimal_places=2)
     # 库存
@@ -232,6 +240,14 @@ class Book(models.Model):
         elif self.download_link:
             return 'link'
         return None
+
+    def is_digital_format(self):
+        """True if this book is sold digitally (format 'digital' or 'both')."""
+        return self.format in ('digital', 'both')
+
+    def is_physical_format(self):
+        """True if this book is sold as a physical copy (format 'physical' or 'both')."""
+        return self.format in ('physical', 'both')
 
     def get_units_sold_delivered(self):
         """Copies sold on book orders that are delivered with completed payment."""

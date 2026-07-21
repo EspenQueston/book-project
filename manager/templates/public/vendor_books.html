@@ -99,6 +99,9 @@
                             <div style="min-width:0; flex:1;">
                                 <div class="book-name">{{ vb.book.name }}</div>
                                 <div class="book-publisher">{{ vb.book.publisher.publisher_name|default:"—" }}</div>
+                                <span class="badge {% if vb.book.format == 'digital' %}bg-info{% elif vb.book.format == 'both' %}bg-primary{% else %}bg-secondary{% endif %}" style="font-size:0.68rem;">
+                                    {% if vb.book.format == 'digital' %}电子书{% elif vb.book.format == 'both' %}实体+电子书{% else %}实体书{% endif %}
+                                </span>
                             </div>
                         </div>
                     </td>

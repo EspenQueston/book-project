@@ -353,11 +353,30 @@
                                         <div id="authorError" class="text-danger small mt-1" style="display:none;">请至少选择一位作者</div>
                                     </div>
 
+                                    <div class="form-group">
+                                        <label class="form-label">图书格式 <span class="required">*</span></label>
+                                        <div class="d-flex gap-3 flex-wrap">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="format" id="formatPhysical" value="physical" {% if book_obj.format == 'physical' %}checked{% endif %} onchange="updateFormatVisibility()">
+                                                <label class="form-check-label" for="formatPhysical">实体书</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="format" id="formatDigital" value="digital" {% if book_obj.format == 'digital' %}checked{% endif %} onchange="updateFormatVisibility()">
+                                                <label class="form-check-label" for="formatDigital">电子书</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="format" id="formatBoth" value="both" {% if book_obj.format == 'both' %}checked{% endif %} onchange="updateFormatVisibility()">
+                                                <label class="form-check-label" for="formatBoth">实体书+电子书</label>
+                                            </div>
+                                        </div>
+                                        <small class="text-muted">选择该图书是实体、电子书，还是两者都有</small>
+                                    </div>
+
                                     <div class="row">
                                         <div class="col-md-6">
-                                            <div class="form-group">
+                                            <div class="form-group" id="inventoryGroup">
                                                 <label class="form-label">库存数量 <span class="required">*</span></label>
-                                                <input type="number" name="inventory" class="form-control"
+                                                <input type="number" name="inventory" id="inventoryInput" class="form-control"
                                                        min="0" value="{{ book_obj.inventory }}" required>
                                             </div>
                                         </div>
@@ -408,14 +427,14 @@
                             </div>
                             
                             <!-- Download Section -->
-                            <div class="row mt-4">
+                            <div class="row mt-4" id="downloadSection" style="display:none;">
                                 <div class="col-12">
                                     <h5 class="mb-4 text-primary"><i class="fas fa-download"></i> 电子书下载</h5>
                                     <div class="alert alert-info">
                                         <i class="fas fa-info-circle"></i> <strong>提示：</strong>您可以上传电子书文件（PDF、EPUB等）或提供外部下载链接（如Google Drive、OneDrive等）
                                     </div>
                                 </div>
-                                
+
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label"><i class="fas fa-file-upload"></i> 上传电子书文件</label>
@@ -427,17 +446,17 @@
                                             </a>
                                         </div>
                                         {% endif %}
-                                        <input type="file" name="book_file" class="form-control" 
+                                        <input type="file" name="book_file" id="bookFileInput" class="form-control"
                                                accept=".pdf,.epub,.mobi,.azw,.azw3,.txt,.doc,.docx">
                                         <small class="text-muted">{% if book_obj.book_file %}上传新文件将替换现有文件 | {% endif %}支持格式: PDF, EPUB, MOBI, AZW, TXT, DOC, DOCX</small>
                                     </div>
                                 </div>
-                                
+
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label"><i class="fas fa-link"></i> 外部下载链接</label>
-                                        <input type="url" name="download_link" class="form-control" 
-                                               placeholder="https://drive.google.com/..." 
+                                        <input type="url" name="download_link" id="downloadLinkInput" class="form-control"
+                                               placeholder="https://drive.google.com/..."
                                                value="{{ book_obj.download_link|default:'' }}">
                                         <small class="text-muted">或提供Google Drive、OneDrive等外部链接</small>
                                         {% if book_obj.download_link %}
@@ -452,6 +471,9 @@
                                         </div>
                                         {% endif %}
                                     </div>
+                                </div>
+                                <div class="col-12">
+                                    <div id="downloadError" class="text-danger small" style="display:none;">请上传电子书文件或提供下载链接</div>
                                 </div>
                             </div>
 
@@ -508,6 +530,24 @@
                 reader.readAsDataURL(input.files[0]);
             }
         }
+
+        // ---- Book format: show/require only the fields relevant to the
+        // selected format. `existingDownload` accounts for a file/link
+        // already saved on the server — the admin shouldn't be forced to
+        // re-upload/re-type something that's already there. ----
+        var existingDownload = {{ book_obj.has_download|yesno:"true,false" }};
+        function updateFormatVisibility() {
+            var format = document.querySelector('input[name="format"]:checked').value;
+            var showInventory = (format === 'physical' || format === 'both');
+            var showDownload = (format === 'digital' || format === 'both');
+
+            document.getElementById('inventoryGroup').style.display = showInventory ? '' : 'none';
+            document.getElementById('inventoryInput').required = showInventory;
+
+            document.getElementById('downloadSection').style.display = showDownload ? '' : 'none';
+            if (!showDownload) document.getElementById('downloadError').style.display = 'none';
+        }
+        document.addEventListener('DOMContentLoaded', updateFormatVisibility);
 
         function openModal(type) {
             document.getElementById(type + 'Modal').classList.add('show');
@@ -579,6 +619,20 @@
                 var err = document.getElementById('authorError');
                 err.style.display = 'block';
                 err.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
+            var format = document.querySelector('input[name="format"]:checked').value;
+            if (format === 'digital' || format === 'both') {
+                var hasFile = document.getElementById('bookFileInput').files.length > 0;
+                var hasLink = document.getElementById('downloadLinkInput').value.trim().length > 0;
+                var clearingLink = document.querySelector('[name="clear_download_link"]');
+                var stillHasExisting = existingDownload && !(clearingLink && clearingLink.checked);
+                if (!hasFile && !hasLink && !stillHasExisting) {
+                    e.preventDefault();
+                    var dlErr = document.getElementById('downloadError');
+                    dlErr.style.display = 'block';
+                    dlErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
             }
         });
 

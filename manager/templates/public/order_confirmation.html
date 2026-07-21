@@ -516,8 +516,8 @@
                 <span class="timeline-label">{% trans "验证处理" %}</span>
             </div>
             <div class="timeline-step">
-                <div class="timeline-dot">{% if book_order %}<i class="fas fa-download"></i>{% else %}<i class="fas fa-check-circle"></i>{% endif %}</div>
-                <span class="timeline-label">{% if book_order %}{% trans "可下载" %}{% else %}{% trans "已完成" %}{% endif %}</span>
+                <div class="timeline-dot">{% if any_digital_book %}<i class="fas fa-download"></i>{% else %}<i class="fas fa-check-circle"></i>{% endif %}</div>
+                <span class="timeline-label">{% if any_digital_book %}{% trans "可下载" %}{% else %}{% trans "已完成" %}{% endif %}</span>
             </div>
         </div>
 
@@ -590,8 +590,8 @@
                 <span class="timeline-label">{% trans "验证中" %}</span>
             </div>
             <div class="timeline-step">
-                <div class="timeline-dot">{% if book_order %}<i class="fas fa-download"></i>{% else %}<i class="fas fa-check-circle"></i>{% endif %}</div>
-                <span class="timeline-label">{% if book_order %}{% trans "可下载" %}{% else %}{% trans "已完成" %}{% endif %}</span>
+                <div class="timeline-dot">{% if any_digital_book %}<i class="fas fa-download"></i>{% else %}<i class="fas fa-check-circle"></i>{% endif %}</div>
+                <span class="timeline-label">{% if any_digital_book %}{% trans "可下载" %}{% else %}{% trans "已完成" %}{% endif %}</span>
             </div>
         </div>
 
@@ -601,7 +601,7 @@
                 <strong style="font-size: 1.1rem;">{% trans "验证处理中..." %}</strong>
             </div>
             <p class="mb-2"><i class="fas fa-info-circle me-1"></i> {% trans "我们正在验证您的付款" %}，{% trans "预计" %} <strong style="color: #1d4ed8;">5 ~ 10 {% trans "分钟" %}</strong> {% trans "内完成确认。" %}</p>
-            {% if book_order %}
+            {% if any_digital_book %}
             <p class="text-muted mb-3">{% trans "确认完成后，您将可以直接下载电子书。无需刷新页面，系统会自动更新状态。" %}</p>
             {% else %}
             <p class="text-muted mb-3">{% trans "确认完成后，您的订单将进入处理环节。" %}</p>
@@ -622,7 +622,7 @@
         <div class="next-action">
             <i class="fas fa-hourglass-half"></i>
             <div>
-                {% if book_order %}
+                {% if any_digital_book %}
                 <strong>{% trans "下一步" %}：</strong>{% trans "请等待5-10分钟，系统正在验证付款。确认后即可下载电子书。" %}
                 {% else %}
                 <strong>{% trans "下一步" %}：</strong>{% trans "请等待5-10分钟，系统正在验证付款。确认后订单将进入处理流程。" %}
@@ -647,8 +647,8 @@
                 <span class="timeline-label">{% trans "验证中" %}</span>
             </div>
             <div class="timeline-step active">
-                <div class="timeline-dot">{% if book_order %}<i class="fas fa-download"></i>{% else %}<i class="fas fa-check-circle"></i>{% endif %}</div>
-                <span class="timeline-label">{% if book_order %}{% trans "可下载" %}{% else %}{% trans "已完成" %}{% endif %}</span>
+                <div class="timeline-dot">{% if any_digital_book %}<i class="fas fa-download"></i>{% else %}<i class="fas fa-check-circle"></i>{% endif %}</div>
+                <span class="timeline-label">{% if any_digital_book %}{% trans "可下载" %}{% else %}{% trans "已完成" %}{% endif %}</span>
             </div>
         </div>
 
@@ -658,7 +658,7 @@
                 <strong style="font-size: 1.1rem;">{% trans "付款已确认！" %}</strong>
             </div>
             <p class="mb-0 mt-2">
-                {% if book_order %}
+                {% if any_digital_book %}
                 {% trans "您的电子书已可以下载。" %}
                 {% else %}
                 {% trans "您的订单正在准备中，我们会尽快为您安排发货。" %}
@@ -666,7 +666,7 @@
             </p>
         </div>
 
-        {% if book_order %}
+        {% if any_digital_book %}
         <!-- Next action hint -->
         <div class="next-action">
             <i class="fas fa-hand-pointer"></i>
@@ -691,46 +691,108 @@
                 <span class="timeline-label">{% trans "已确认" %}</span>
             </div>
             <div class="timeline-step active">
-                <div class="timeline-dot">{% if book_order %}<i class="fas fa-download"></i>{% else %}<i class="fas fa-check-circle"></i>{% endif %}</div>
-                <span class="timeline-label">{% if book_order %}{% trans "可下载" %}{% else %}{% trans "已完成" %}{% endif %}</span>
+                <div class="timeline-dot">{% if any_digital_book %}<i class="fas fa-download"></i>{% else %}<i class="fas fa-check-circle"></i>{% endif %}</div>
+                <span class="timeline-label">{% if any_digital_book %}{% trans "可下载" %}{% else %}{% trans "已完成" %}{% endif %}</span>
             </div>
         </div>
 
-        {% if book_order %}
+        {% if any_digital_book %}
         <div class="alert alert-success mt-3" style="border-radius: 12px; border: none;">
             <i class="fas fa-check-circle me-1"></i>
             <strong>{% trans "已发货" %}</strong> - {% trans "您的电子书已准备好下载！" %}
         </div>
-        
-        <!-- Download Section -->
+
+        <!-- Download Section: only the actually-digital items — a physical
+             book in the same order has nothing to download here. -->
         <div class="text-center mt-4 p-4" style="background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%); border-radius: 15px;">
             <h5 class="text-white mb-3"><i class="fas fa-download"></i> {% trans "下载您的商品" %}</h5>
             <p class="text-white mb-4">{% trans "感谢您的购买！您现在可以下载已购买的商品。" %}</p>
-            {% if book_order_items %}
             {% for item in book_order_items %}
-                {% if item.book.has_download %}
-                <a href="{% url 'manager:download_book' order.id item.book.id %}" 
-                   class="btn btn-light btn-lg mb-2 d-block" 
-                   style="border-radius: 25px; font-weight: bold;">
-                    <i class="fas fa-file-download"></i> {% trans "下载" %} "{{ item.book.name }}"
-                    {% if item.book.get_download_type == 'link' %}
-                        <i class="fas fa-external-link-alt ms-2 small"></i>
+                {% if item.book.is_digital_format %}
+                    {% if item.book.has_download %}
+                    <a href="{% url 'manager:download_book' order.id item.book.id %}"
+                       class="btn btn-light btn-lg mb-2 d-block"
+                       style="border-radius: 25px; font-weight: bold;">
+                        <i class="fas fa-file-download"></i> {% trans "下载" %} "{{ item.book.name }}"
+                        {% if item.book.get_download_type == 'link' %}
+                            <i class="fas fa-external-link-alt ms-2 small"></i>
+                        {% endif %}
+                    </a>
+                    {% else %}
+                    <div class="alert alert-warning mb-2" style="border-radius: 15px;">
+                        <i class="fas fa-info-circle"></i> "{{ item.book.name }}" - {% trans "下载文件准备中，请联系客服" %}
+                    </div>
                     {% endif %}
-                </a>
-                {% else %}
-                <div class="alert alert-warning mb-2" style="border-radius: 15px;">
-                    <i class="fas fa-info-circle"></i> "{{ item.book.name }}" - {% trans "下载文件准备中，请联系客服" %}
-                </div>
                 {% endif %}
             {% endfor %}
-            {% endif %}
+        </div>
+        {% elif book_order %}
+        <div class="alert alert-success mt-3" style="border-radius: 12px; border: none;">
+            <i class="fas fa-check-circle me-1"></i>
+            <strong>{% trans "已发货" %}</strong> - {% trans "您的图书正在运送中，请留意物流状态。" %}
         </div>
         {% else %}
         <div class="alert alert-success mt-3" style="border-radius: 12px; border: none;">
             <i class="fas fa-check-circle me-1"></i>
             <strong>{% trans "订单已完成" %}</strong> - {% trans "您的订单已处理完毕！" %}
         </div>
-        
+
+        {% if mkt_order_items %}
+        <div class="text-center mt-4 p-4" style="background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%); border-radius: 15px;">
+            <h5 class="text-white mb-3"><i class="fas fa-check-circle"></i> {% trans "订单已完成" %}</h5>
+            <p class="text-white mb-4">{% trans "感谢您的购买！您的订单已成功处理。" %}</p>
+            {% for item in mkt_order_items %}
+            <div class="d-flex align-items-center justify-content-center mb-2 p-2 bg-white rounded" style="border-radius:15px !important;">
+                <span class="badge {% if item.item_type == 'course' %}bg-info{% elif item.item_type == 'supermarket' %}bg-warning text-dark{% else %}bg-success{% endif %} me-2">{{ item.get_item_type_display }}</span>
+                <strong>{{ item.item_name }}</strong>
+                <span class="ms-2 text-muted">x{{ item.quantity }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endif %}
+        {% else %}
+        <!-- Any other status (delivered, confirmed, cancelled, refunded, ...):
+             a purely-digital order jumps straight here (see the fulfillment
+             fast-track for digital books), so without this branch its
+             download section would never appear at all. -->
+        {% if any_digital_book and order.status != 'cancelled' and order.status != 'refunded' %}
+        <div class="alert alert-success mt-3" style="border-radius: 12px; border: none;">
+            <i class="fas fa-check-circle me-1"></i>
+            <strong>{% trans "已完成" %}</strong> - {% trans "您的电子书已准备好下载！" %}
+        </div>
+        <div class="text-center mt-4 p-4" style="background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%); border-radius: 15px;">
+            <h5 class="text-white mb-3"><i class="fas fa-download"></i> {% trans "下载您的商品" %}</h5>
+            <p class="text-white mb-4">{% trans "感谢您的购买！您现在可以下载已购买的商品。" %}</p>
+            {% for item in book_order_items %}
+                {% if item.book.is_digital_format %}
+                    {% if item.book.has_download %}
+                    <a href="{% url 'manager:download_book' order.id item.book.id %}"
+                       class="btn btn-light btn-lg mb-2 d-block"
+                       style="border-radius: 25px; font-weight: bold;">
+                        <i class="fas fa-file-download"></i> {% trans "下载" %} "{{ item.book.name }}"
+                        {% if item.book.get_download_type == 'link' %}
+                            <i class="fas fa-external-link-alt ms-2 small"></i>
+                        {% endif %}
+                    </a>
+                    {% else %}
+                    <div class="alert alert-warning mb-2" style="border-radius: 15px;">
+                        <i class="fas fa-info-circle"></i> "{{ item.book.name }}" - {% trans "下载文件准备中，请联系客服" %}
+                    </div>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        </div>
+        {% elif order.status == 'cancelled' or order.status == 'refunded' %}
+        <div class="alert alert-secondary mt-3" style="border-radius: 12px; border: none;">
+            <i class="fas fa-info-circle me-1"></i>
+            {{ order.get_status_display }}
+        </div>
+        {% else %}
+        <div class="alert alert-success mt-3" style="border-radius: 12px; border: none;">
+            <i class="fas fa-check-circle me-1"></i>
+            <strong>{% trans "订单已完成" %}</strong> - {% trans "您的订单已处理完毕！" %}
+        </div>
         {% if mkt_order_items %}
         <div class="text-center mt-4 p-4" style="background: linear-gradient(135deg, #1d4ed8 0%, #14245f 100%); border-radius: 15px;">
             <h5 class="text-white mb-3"><i class="fas fa-check-circle"></i> {% trans "订单已完成" %}</h5>
