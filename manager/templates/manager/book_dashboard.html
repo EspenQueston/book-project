@@ -407,6 +407,38 @@
             layout: { padding: { top: 5, bottom: 5, left: 5, right: 5 } }
         };
 
+        // Order status labels baked into order_status_json are Chinese-only
+        // at the source (ORDER_STATUS_CHOICES) — translate them the same way
+        // manager/dashboard.html does, and keep the chart instance around so
+        // a live language toggle (no page reload on this page — no CSRF
+        // token for admin_i18n.js to sync with Django) can still relabel it.
+        var STATUS_LABEL_MAP = {
+            '待处理': ['Pending', 'En attente'],
+            '待付款': ['Awaiting payment', 'En attente de paiement'],
+            '等待付款': ['Awaiting payment', 'En attente de paiement'],
+            '已付款': ['Paid', 'Payé'],
+            '已确认': ['Confirmed', 'Confirmé'],
+            '处理中': ['Processing', 'En cours'],
+            '已发货': ['Shipped', 'Expédié'],
+            '已送达': ['Delivered', 'Livré'],
+            '已取消': ['Cancelled', 'Annulé'],
+            '已退款': ['Refunded', 'Remboursé']
+        };
+        function translateLabels(labels) {
+            return (labels || []).map(function (label) {
+                var pair = STATUS_LABEL_MAP[label];
+                if (!pair) return label;
+                return window.adminI18n ? window.adminI18n.t(label, pair[0], pair[1]) : label;
+            });
+        }
+        var translatedCharts = [];
+        window.addEventListener('adminlangchange', function () {
+            translatedCharts.forEach(function (entry) {
+                entry.chart.data.labels = translateLabels(entry.rawLabels);
+                entry.chart.update();
+            });
+        });
+
         // 1. Sales Trend Line Chart
         var salesCtx = document.getElementById('salesChart');
         if (salesCtx) {
@@ -450,10 +482,10 @@
         var statusCtx = document.getElementById('orderStatusChart');
         if (statusCtx) {
             var orderStatusData = {{ order_status_json|safe }};
-            new Chart(statusCtx.getContext('2d'), {
+            var orderStatusChart = new Chart(statusCtx.getContext('2d'), {
                 type: 'doughnut',
                 data: {
-                    labels: orderStatusData.labels,
+                    labels: translateLabels(orderStatusData.labels),
                     datasets: [{
                         data: orderStatusData.data,
                         backgroundColor: ['#ef4444', '#10b981', '#06b6d4', '#1d4ed8', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'],
@@ -464,16 +496,37 @@
                     plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, font: { size: 10 }, padding: 8, boxWidth: 12 } } }
                 })
             });
+            translatedCharts.push({ chart: orderStatusChart, rawLabels: orderStatusData.labels });
         }
 
-        // 3. Publisher Distribution Bar Chart
+        // 3. Publisher Distribution Bar Chart — long publisher names used to
+        // get rotated ~45-90deg by Chart.js's auto-rotation and spill past
+        // the card's bottom edge because the canvas's fixed max-height left
+        // no room for the rotated text. Wrapping each name onto short
+        // horizontal lines instead avoids both the rotation and the overflow.
+        function wrapChartLabel(str, maxLen) {
+            maxLen = maxLen || 14;
+            var words = String(str).split(' ');
+            var lines = [];
+            var current = '';
+            words.forEach(function (w) {
+                if (current && (current + ' ' + w).length > maxLen) {
+                    lines.push(current);
+                    current = w;
+                } else {
+                    current = current ? current + ' ' + w : w;
+                }
+            });
+            if (current) lines.push(current);
+            return lines;
+        }
         var pubCtx = document.getElementById('publisherChart');
         if (pubCtx) {
             var pubData = {{ publisher_stats_json|safe }};
             new Chart(pubCtx.getContext('2d'), {
                 type: 'bar',
                 data: {
-                    labels: pubData.map(function(i){ return i.name; }),
+                    labels: pubData.map(function(i){ return wrapChartLabel(i.name, 14); }),
                     datasets: [{
                         label: '图书数量',
                         data: pubData.map(function(i){ return i.books; }),
@@ -482,7 +535,7 @@
                     }]
                 },
                 options: Object.assign({}, chartDefaults, {
-                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } }, x: { ticks: { font: { size: 10 } } } },
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } }, x: { ticks: { font: { size: 10 }, maxRotation: 0, minRotation: 0, autoSkip: false } } },
                     plugins: { legend: { display: false } }
                 })
             });

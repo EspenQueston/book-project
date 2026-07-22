@@ -111,4 +111,33 @@
         .admin-main-offset { margin-left: 0; }
         .admin-sidebar-backdrop.show { display: block; }
     }
+
+    /* Expandable nav module (e.g. "Official Store") — a nav-link-styled
+       trigger button that reveals a nested group of sub-links. */
+    .admin-sidebar-wrap .nav-group-toggle {
+        width: 100%; background: none; cursor: pointer;
+        justify-content: space-between;
+    }
+    .admin-sidebar-wrap .nav-group-toggle .nav-group-label {
+        display: flex; align-items: center; gap: 0.65rem; min-width: 0;
+    }
+    .admin-sidebar-wrap .nav-group-toggle .nav-group-chevron {
+        font-size: 0.75rem; opacity: 0.75; transition: transform 0.25s ease;
+    }
+    .admin-sidebar-wrap .nav-group.open .nav-group-toggle .nav-group-chevron {
+        transform: rotate(90deg);
+    }
+    .admin-sidebar-wrap .nav-group.open .nav-group-toggle {
+        background: rgba(255,255,255,0.08);
+    }
+    .admin-sidebar-wrap .nav-submenu {
+        max-height: 0; overflow: hidden;
+        transition: max-height 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex; flex-direction: column;
+    }
+    .admin-sidebar-wrap .nav-group.open .nav-submenu { max-height: 400px; }
+    .admin-sidebar-wrap .nav-submenu .nav-link {
+        padding-left: 2.3rem; font-size: 0.83rem; margin-top: 0; margin-bottom: 0;
+    }
+    .admin-sidebar-wrap .nav-submenu .nav-link i { font-size: 0.8rem; }
 </style>

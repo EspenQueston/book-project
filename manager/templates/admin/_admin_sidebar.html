@@ -15,9 +15,6 @@
             <a class="nav-link {% if request.path == '/manager/dashboard/' %}active{% endif %}" href="/manager/dashboard/">
                 <i class="fas fa-chart-pie"></i><span data-zh="仪表板" data-en="Dashboard" data-fr="Tableau de bord">仪表板</span>
             </a>
-            <a class="nav-link {% if '/manager/book_list/' in request.path or '/manager/add_book/' in request.path or '/manager/edit_book/' in request.path or '/manager/book_categories/' in request.path or '/manager/author_list/' in request.path or '/manager/add_author/' in request.path or '/manager/edit_author/' in request.path or '/manager/publisher_list/' in request.path or '/manager/add_publisher/' in request.path or '/manager/edit_publisher/' in request.path or '/manager/order_list/' in request.path or '/manager/order_detail/' in request.path %}active{% endif %}" href="/manager/book_list/">
-                <i class="fas fa-book"></i><span data-zh="图书管理" data-en="Books" data-fr="Livres">图书管理</span>
-            </a>
         </nav>
         <div class="nav-section-label">运营管理</div>
         <nav class="nav flex-column">
@@ -30,14 +27,8 @@
             <a class="nav-link {% if request.path == '/manager/email/' %}active{% endif %}" href="/manager/email/">
                 <i class="fas fa-envelope"></i><span data-zh="消息管理" data-en="Messages" data-fr="Messages">消息管理</span>
             </a>
-            <a class="nav-link {% if request.path == '/manager/admin/store-messages/' %}active{% endif %}" href="/manager/admin/store-messages/">
-                <i class="fas fa-comments"></i><span data-zh="店铺消息" data-en="Store Messages" data-fr="Messages boutique">店铺消息</span>
-            </a>
             <a class="nav-link {% if request.path == '/manager/admin/reviews/' %}active{% endif %}" href="/manager/admin/reviews/">
                 <i class="fas fa-star-half-alt"></i><span data-zh="买家评价" data-en="Buyer reviews" data-fr="Avis clients">买家评价</span>
-            </a>
-            <a class="nav-link {% if '/marketplace/admin/' in request.path %}active{% endif %}" href="/marketplace/admin/dashboard/">
-                <i class="fas fa-store"></i><span>市场管理</span>
             </a>
         </nav>
         <div class="nav-section-label">平台管理</div>
@@ -48,15 +39,37 @@
             <a class="nav-link {% if request.path == '/manager/admin/vendors/' %}active{% endif %}" href="/manager/admin/vendors/">
                 <i class="fas fa-store-alt"></i><span>卖家管理</span>
             </a>
-            <a class="nav-link {% if request.path == '/manager/inventory/' %}active{% endif %}" href="/manager/inventory/">
-                <i class="fas fa-boxes"></i><span data-zh="库存管理" data-en="Inventory" data-fr="Inventaire">库存管理</span>
-            </a>
             <a class="nav-link {% if request.path == '/manager/admin/escrow/' %}active{% endif %}" href="/manager/admin/escrow/">
                 <i class="fas fa-vault"></i><span data-zh="托管与结算" data-en="Escrow & payouts" data-fr="Escrow & reversements">托管与结算</span>
             </a>
-            <a class="nav-link {% if request.path == '/manager/admin/official-store/' %}active{% endif %}" href="/manager/admin/official-store/">
-                <i class="fas fa-crown"></i><span data-zh="官方店铺" data-en="Official Store" data-fr="Boutique officielle">官方店铺</span>
-            </a>
+
+            <div class="nav-group {% if request.path == '/manager/admin/store-messages/' or request.path == '/manager/admin/official-store/' or '/manager/admin/official-store/settings' in request.path or request.path == '/manager/inventory/' or '/manager/book_list/' in request.path or '/manager/add_book/' in request.path or '/manager/edit_book/' in request.path or '/manager/book_categories/' in request.path or '/manager/author_list/' in request.path or '/manager/add_author/' in request.path or '/manager/edit_author/' in request.path or '/manager/publisher_list/' in request.path or '/manager/add_publisher/' in request.path or '/manager/edit_publisher/' in request.path or '/manager/order_list/' in request.path or '/manager/order_detail/' in request.path or '/marketplace/admin/' in request.path %}open{% endif %}">
+                <button type="button" class="nav-link nav-group-toggle" onclick="this.closest('.nav-group').classList.toggle('open')">
+                    <span class="nav-group-label"><i class="fas fa-crown"></i><span data-zh="官方店铺" data-en="Official Store" data-fr="Boutique officielle">官方店铺</span></span>
+                    <i class="fas fa-chevron-right nav-group-chevron"></i>
+                </button>
+                <div class="nav-submenu">
+                    <a class="nav-link {% if request.path == '/manager/admin/store-messages/' %}active{% endif %}" href="/manager/admin/store-messages/">
+                        <i class="fas fa-comments"></i><span data-zh="店铺消息" data-en="Store Messages" data-fr="Messages boutique">店铺消息</span>
+                    </a>
+                    <a class="nav-link {% if request.path == '/manager/admin/official-store/' %}active{% endif %}" href="/manager/admin/official-store/">
+                        <i class="fas fa-vault"></i><span data-zh="托管与结算（官方店铺）" data-en="Escrow / Payouts (Official Store)" data-fr="Escrow / versements (boutique officielle)">托管与结算（官方店铺）</span>
+                    </a>
+                    <a class="nav-link {% if '/manager/admin/official-store/settings' in request.path %}active{% endif %}" href="/manager/admin/official-store/settings/">
+                        <i class="fas fa-sliders-h"></i><span data-zh="店铺设置" data-en="Store Settings" data-fr="Paramètres de la boutique">店铺设置</span>
+                    </a>
+                    <a class="nav-link {% if request.path == '/manager/inventory/' %}active{% endif %}" href="/manager/inventory/">
+                        <i class="fas fa-boxes"></i><span data-zh="官方店铺库存" data-en="Official Store Inventory" data-fr="Inventaire de la boutique officielle">官方店铺库存</span>
+                    </a>
+                    <a class="nav-link {% if '/manager/book_list/' in request.path or '/manager/add_book/' in request.path or '/manager/edit_book/' in request.path or '/manager/book_categories/' in request.path or '/manager/author_list/' in request.path or '/manager/add_author/' in request.path or '/manager/edit_author/' in request.path or '/manager/publisher_list/' in request.path or '/manager/add_publisher/' in request.path or '/manager/edit_publisher/' in request.path or '/manager/order_list/' in request.path or '/manager/order_detail/' in request.path %}active{% endif %}" href="/manager/book_list/">
+                        <i class="fas fa-book"></i><span data-zh="图书管理" data-en="Books" data-fr="Livres">图书管理</span>
+                    </a>
+                    <a class="nav-link {% if '/marketplace/admin/' in request.path %}active{% endif %}" href="/marketplace/admin/dashboard/">
+                        <i class="fas fa-store"></i><span data-zh="市场管理" data-en="Marketplace" data-fr="Marché">市场管理</span>
+                    </a>
+                </div>
+            </div>
+
             <a class="nav-link {% if request.path == '/manager/admin/managers/' %}active{% endif %}" href="/manager/admin/managers/">
                 <i class="fas fa-user-shield"></i><span data-zh="管理员账户" data-en="Admin Accounts" data-fr="Comptes administrateurs">管理员账户</span>
             </a>

@@ -127,6 +127,37 @@
             box-shadow: inset 3px 0 0 rgba(255, 255, 255, 0.85);
         }
 
+        /* Expandable nav module (e.g. "Official Store") — mirrors
+           _admin_sidebar_styles.html's .nav-group rules for the other
+           sidebar copy, scoped to .sidebar since this template uses its
+           own separate wrapper class instead of the shared include. */
+        .sidebar .nav-group-toggle {
+            width: 100%; background: none; cursor: pointer;
+            justify-content: space-between;
+        }
+        .sidebar .nav-group-toggle .nav-group-label {
+            display: flex; align-items: center; gap: 0.65rem; min-width: 0;
+        }
+        .sidebar .nav-group-toggle .nav-group-chevron {
+            font-size: 0.75rem; opacity: 0.75; transition: transform 0.25s ease;
+        }
+        .sidebar .nav-group.open .nav-group-toggle .nav-group-chevron {
+            transform: rotate(90deg);
+        }
+        .sidebar .nav-group.open .nav-group-toggle {
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .sidebar .nav-submenu {
+            max-height: 0; overflow: hidden;
+            transition: max-height 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; flex-direction: column;
+        }
+        .sidebar .nav-group.open .nav-submenu { max-height: 400px; }
+        .sidebar .nav-submenu .nav-link {
+            padding-left: 2.3rem; font-size: 0.83rem; margin-top: 0; margin-bottom: 0;
+        }
+        .sidebar .nav-submenu .nav-link i { font-size: 0.8rem; }
+
         .sidebar-footer {
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             padding: 0.35rem 0 0.75rem;
@@ -356,9 +387,6 @@
                     <a class="nav-link active" href="/manager/dashboard/">
                         <i class="fas fa-chart-pie"></i><span data-zh="仪表板" data-en="Dashboard" data-fr="Tableau de bord">仪表板</span>
                     </a>
-                    <a class="nav-link" href="/manager/book_list/">
-                        <i class="fas fa-book"></i><span data-zh="图书管理" data-en="Books" data-fr="Livres">图书管理</span>
-                    </a>
                 </nav>
                 <div class="nav-section-label">运营管理</div>
                 <nav class="nav flex-column">
@@ -371,14 +399,8 @@
                     <a class="nav-link" href="/manager/email/">
                         <i class="fas fa-envelope"></i><span data-zh="消息管理" data-en="Messages" data-fr="Messages">消息管理</span>
                     </a>
-                    <a class="nav-link" href="/manager/admin/store-messages/">
-                        <i class="fas fa-comments"></i><span data-zh="店铺消息" data-en="Store Messages" data-fr="Messages boutique">店铺消息</span>
-                    </a>
                     <a class="nav-link" href="/manager/admin/reviews/">
                         <i class="fas fa-star-half-alt"></i><span data-zh="买家评价" data-en="Buyer reviews" data-fr="Avis clients">买家评价</span>
-                    </a>
-                    <a class="nav-link" href="/marketplace/admin/dashboard/">
-                        <i class="fas fa-store"></i><span>市场管理</span>
                     </a>
                 </nav>
                 <div class="nav-section-label">平台管理</div>
@@ -389,15 +411,37 @@
                     <a class="nav-link" href="/manager/admin/vendors/">
                         <i class="fas fa-store-alt"></i><span>卖家管理</span>
                     </a>
-                    <a class="nav-link" href="/manager/inventory/">
-                        <i class="fas fa-boxes"></i><span data-zh="库存管理" data-en="Inventory" data-fr="Inventaire">库存管理</span>
-                    </a>
                     <a class="nav-link" href="/manager/admin/escrow/">
                         <i class="fas fa-vault"></i><span data-zh="托管与结算" data-en="Escrow & payouts" data-fr="Escrow & reversements">托管与结算</span>
                     </a>
-                    <a class="nav-link" href="/manager/admin/official-store/">
-                        <i class="fas fa-crown"></i><span data-zh="官方店铺" data-en="Official Store" data-fr="Boutique officielle">官方店铺</span>
-                    </a>
+
+                    <div class="nav-group">
+                        <button type="button" class="nav-link nav-group-toggle" onclick="this.closest('.nav-group').classList.toggle('open')">
+                            <span class="nav-group-label"><i class="fas fa-crown"></i><span data-zh="官方店铺" data-en="Official Store" data-fr="Boutique officielle">官方店铺</span></span>
+                            <i class="fas fa-chevron-right nav-group-chevron"></i>
+                        </button>
+                        <div class="nav-submenu">
+                            <a class="nav-link" href="/manager/admin/store-messages/">
+                                <i class="fas fa-comments"></i><span data-zh="店铺消息" data-en="Store Messages" data-fr="Messages boutique">店铺消息</span>
+                            </a>
+                            <a class="nav-link" href="/manager/admin/official-store/">
+                                <i class="fas fa-vault"></i><span data-zh="托管与结算（官方店铺）" data-en="Escrow / Payouts (Official Store)" data-fr="Escrow / versements (boutique officielle)">托管与结算（官方店铺）</span>
+                            </a>
+                            <a class="nav-link" href="/manager/admin/official-store/settings/">
+                                <i class="fas fa-sliders-h"></i><span data-zh="店铺设置" data-en="Store Settings" data-fr="Paramètres de la boutique">店铺设置</span>
+                            </a>
+                            <a class="nav-link" href="/manager/inventory/">
+                                <i class="fas fa-boxes"></i><span data-zh="官方店铺库存" data-en="Official Store Inventory" data-fr="Inventaire de la boutique officielle">官方店铺库存</span>
+                            </a>
+                            <a class="nav-link" href="/manager/book_list/">
+                                <i class="fas fa-book"></i><span data-zh="图书管理" data-en="Books" data-fr="Livres">图书管理</span>
+                            </a>
+                            <a class="nav-link" href="/marketplace/admin/dashboard/">
+                                <i class="fas fa-store"></i><span data-zh="市场管理" data-en="Marketplace" data-fr="Marché">市场管理</span>
+                            </a>
+                        </div>
+                    </div>
+
                     <a class="nav-link" href="/manager/admin/managers/">
                         <i class="fas fa-user-shield"></i><span data-zh="管理员账户" data-en="Admin Accounts" data-fr="Comptes administrateurs">管理员账户</span>
                     </a>
@@ -431,8 +475,9 @@
                             <div class="col-md-8">
                                 <h3 class="mb-1">
                                     <i class="fas fa-chart-pie"></i> <span data-zh="管理仪表板" data-en="Dashboard" data-fr="Tableau de bord">管理仪表板</span>
+                                    <span class="badge rounded-pill ms-2" style="background:rgba(255,255,255,0.2);font-size:0.68rem;font-weight:700;vertical-align:middle;" data-zh="全平台 · 所有卖家" data-en="Platform-wide · all vendors" data-fr="Toute la plateforme · tous les vendeurs">全平台 · 所有卖家</span>
                                 </h3>
-                                <p class="mb-0 opacity-75" data-zh="图书 · 市场 · 综合数据概览" data-en="Books · Marketplace · combined overview" data-fr="Livres · Marché · vue d'ensemble">图书 · 市场 · 综合数据概览</p>
+                                <p class="mb-0 opacity-75" data-zh="图书 · 市场 · 综合数据概览（涵盖官方店铺与所有第三方卖家）" data-en="Books · Marketplace · combined overview (official store + every third-party vendor)" data-fr="Livres · Marché · vue d'ensemble (boutique officielle + tous les vendeurs tiers)">图书 · 市场 · 综合数据概览（涵盖官方店铺与所有第三方卖家）</p>
                             </div>
                             <div class="col-md-4 text-end d-flex align-items-center justify-content-end gap-3">
                                 <!-- Notification Bell -->
@@ -783,6 +828,43 @@
             layout: { padding: { top: 5, bottom: 5, left: 5, right: 5 } }
         };
 
+        // Fixed status/category labels baked into the chart JSON below are
+        // Chinese-only at the source (ORDER_STATUS_CHOICES / STATUS_CHOICES /
+        // category-mix strings) — translate them the same way every other
+        // label on this page already is, and keep the chart instances around
+        // so a live language toggle (no page reload happens on this page —
+        // it has no CSRF token for admin_i18n.js to sync with Django) can
+        // still relabel them instead of leaving stale Chinese on the canvas.
+        var STATUS_LABEL_MAP = {
+            '待处理': ['Pending', 'En attente'],
+            '待付款': ['Awaiting payment', 'En attente de paiement'],
+            '等待付款': ['Awaiting payment', 'En attente de paiement'],
+            '已付款': ['Paid', 'Payé'],
+            '已确认': ['Confirmed', 'Confirmé'],
+            '处理中': ['Processing', 'En cours'],
+            '已发货': ['Shipped', 'Expédié'],
+            '已送达': ['Delivered', 'Livré'],
+            '已取消': ['Cancelled', 'Annulé'],
+            '已退款': ['Refunded', 'Remboursé'],
+            '商品': ['Products', 'Produits'],
+            '课程': ['Courses', 'Cours'],
+            '超市商品': ['Supermarket', 'Supermarché']
+        };
+        function translateLabels(labels) {
+            return (labels || []).map(function (label) {
+                var pair = STATUS_LABEL_MAP[label];
+                if (!pair) return label;
+                return window.adminI18n ? window.adminI18n.t(label, pair[0], pair[1]) : label;
+            });
+        }
+        var translatedCharts = [];
+        window.addEventListener('adminlangchange', function () {
+            translatedCharts.forEach(function (entry) {
+                entry.chart.data.labels = translateLabels(entry.rawLabels);
+                entry.chart.update();
+            });
+        });
+
         // 1. Combined Revenue Trend Line Chart (books + marketplace)
         var salesCtx = document.getElementById('salesChart');
         if (salesCtx) {
@@ -835,10 +917,10 @@
         var statusCtx = document.getElementById('orderStatusChart');
         if (statusCtx) {
             var orderStatusData = {{ order_status_json|safe }};
-            new Chart(statusCtx.getContext('2d'), {
+            var orderStatusChart = new Chart(statusCtx.getContext('2d'), {
                 type: 'doughnut',
                 data: {
-                    labels: orderStatusData.labels,
+                    labels: translateLabels(orderStatusData.labels),
                     datasets: [{
                         data: orderStatusData.data,
                         backgroundColor: ['#ef4444', '#10b981', '#06b6d4', '#1d4ed8', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'],
@@ -849,16 +931,17 @@
                     plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, font: { size: 10 }, padding: 8, boxWidth: 12 } } }
                 })
             });
+            translatedCharts.push({ chart: orderStatusChart, rawLabels: orderStatusData.labels });
         }
 
         // 2b. Marketplace Order Status Doughnut — same chart type as above, paired domain
         var mktStatusCtx = document.getElementById('mktOrderStatusChart');
         if (mktStatusCtx) {
             var mktStatusData = {{ mkt_order_status_json|safe }};
-            new Chart(mktStatusCtx.getContext('2d'), {
+            var mktStatusChart = new Chart(mktStatusCtx.getContext('2d'), {
                 type: 'doughnut',
                 data: {
-                    labels: mktStatusData.labels,
+                    labels: translateLabels(mktStatusData.labels),
                     datasets: [{
                         data: mktStatusData.data,
                         backgroundColor: ['#f59e0b', '#06b6d4', '#1d4ed8', '#10b981', '#ef4444', '#8b5cf6', '#ec4899'],
@@ -869,16 +952,17 @@
                     plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, font: { size: 10 }, padding: 8, boxWidth: 12 } } }
                 })
             });
+            translatedCharts.push({ chart: mktStatusChart, rawLabels: mktStatusData.labels });
         }
 
         // 2c. Marketplace Category Mix Bar Chart — same chart type as Publisher Distribution below
         var mktCatalogCtx = document.getElementById('mktCatalogChart');
         if (mktCatalogCtx) {
             var mktCatalogData = {{ mkt_catalog_json|safe }};
-            new Chart(mktCatalogCtx.getContext('2d'), {
+            var mktCatalogChart = new Chart(mktCatalogCtx.getContext('2d'), {
                 type: 'bar',
                 data: {
-                    labels: mktCatalogData.labels,
+                    labels: translateLabels(mktCatalogData.labels),
                     datasets: [{
                         label: window.adminI18n ? window.adminI18n.t('数量', 'Quantity', 'Quantité') : '数量',
                         data: mktCatalogData.data,
@@ -891,16 +975,37 @@
                     plugins: { legend: { display: false } }
                 })
             });
+            translatedCharts.push({ chart: mktCatalogChart, rawLabels: mktCatalogData.labels });
         }
 
-        // 3. Publisher Distribution Bar Chart
+        // 3. Publisher Distribution Bar Chart — long publisher names used to
+        // get rotated ~45-90deg by Chart.js's auto-rotation and spill past
+        // the card's bottom edge because the canvas's fixed max-height left
+        // no room for the rotated text. Wrapping each name onto short
+        // horizontal lines instead avoids both the rotation and the overflow.
+        function wrapChartLabel(str, maxLen) {
+            maxLen = maxLen || 14;
+            var words = String(str).split(' ');
+            var lines = [];
+            var current = '';
+            words.forEach(function (w) {
+                if (current && (current + ' ' + w).length > maxLen) {
+                    lines.push(current);
+                    current = w;
+                } else {
+                    current = current ? current + ' ' + w : w;
+                }
+            });
+            if (current) lines.push(current);
+            return lines;
+        }
         var pubCtx = document.getElementById('publisherChart');
         if (pubCtx) {
             var pubData = {{ publisher_stats_json|safe }};
             new Chart(pubCtx.getContext('2d'), {
                 type: 'bar',
                 data: {
-                    labels: pubData.map(function(i){ return i.name; }),
+                    labels: pubData.map(function(i){ return wrapChartLabel(i.name, 14); }),
                     datasets: [{
                         label: '图书数量',
                         data: pubData.map(function(i){ return i.books; }),
@@ -909,7 +1014,7 @@
                     }]
                 },
                 options: Object.assign({}, chartDefaults, {
-                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } }, x: { ticks: { font: { size: 10 } } } },
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } }, x: { ticks: { font: { size: 10 }, maxRotation: 0, minRotation: 0, autoSkip: false } } },
                     plugins: { legend: { display: false } }
                 })
             });

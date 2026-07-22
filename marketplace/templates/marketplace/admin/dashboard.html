@@ -287,6 +287,38 @@ document.addEventListener('DOMContentLoaded', function () {
         qty: "{{ mkt_js_qty|escapejs }}"
     };
 
+    // mkt_order_status_json's labels come straight from
+    // MarketplaceOrder.STATUS_CHOICES (Chinese-only at the source) — unlike
+    // LG above, they never go through Django's translation tag, so they stay
+    // Chinese regardless of the admin's selected language. Translate them
+    // the same way manager/dashboard.html does, and keep the chart instance
+    // around so a live language toggle (admin_i18n.js's client-side switch,
+    // no reload) can relabel it instead of leaving a stale Chinese tooltip.
+    var STATUS_LABEL_MAP = {
+        '待付款': ['Awaiting payment', 'En attente de paiement'],
+        '等待付款': ['Awaiting payment', 'En attente de paiement'],
+        '已付款': ['Paid', 'Payé'],
+        '处理中': ['Processing', 'En cours'],
+        '已发货': ['Shipped', 'Expédié'],
+        '已送达': ['Delivered', 'Livré'],
+        '已取消': ['Cancelled', 'Annulé'],
+        '已退款': ['Refunded', 'Remboursé']
+    };
+    function translateStatusLabels(labels) {
+        return (labels || []).map(function (label) {
+            var pair = STATUS_LABEL_MAP[label];
+            if (!pair) return label;
+            return window.adminI18n ? window.adminI18n.t(label, pair[0], pair[1]) : label;
+        });
+    }
+    var mktOrderStatusChartInstance = null;
+    var mktOrderStatusRawLabels = null;
+    window.addEventListener('adminlangchange', function () {
+        if (!mktOrderStatusChartInstance) return;
+        mktOrderStatusChartInstance.data.labels = translateStatusLabels(mktOrderStatusRawLabels);
+        mktOrderStatusChartInstance.update();
+    });
+
     var salesCtx = document.getElementById('mktSalesChart');
     if (salesCtx) {
         var salesData = {{ mkt_daily_sales_json|safe }};
@@ -327,14 +359,15 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    function doughnutChart(id, payload, colors) {
+    function doughnutChart(id, payload, colors, labelTranslateFn) {
         var el = document.getElementById(id);
-        if (!el) return;
+        if (!el) return null;
         var p = typeof payload === 'string' ? JSON.parse(payload) : payload;
-        new Chart(el.getContext('2d'), {
+        var labels = labelTranslateFn ? labelTranslateFn(p.labels) : p.labels;
+        return new Chart(el.getContext('2d'), {
             type: 'doughnut',
             data: {
-                labels: p.labels,
+                labels: labels,
                 datasets: [{ data: p.data, backgroundColor: colors, borderWidth: 2, borderColor: '#fff', hoverOffset: 8 }]
             },
             options: Object.assign({}, chartDefaults, {
@@ -343,7 +376,8 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    doughnutChart('mktOrderStatusChart', {{ mkt_order_status_json|safe }}, ['#f59e0b', '#06b6d4', '#6366f1', '#8b5cf6', '#10b981', '#ef4444', '#64748b', '#ec4899']);
+    mktOrderStatusRawLabels = ({{ mkt_order_status_json|safe }}).labels;
+    mktOrderStatusChartInstance = doughnutChart('mktOrderStatusChart', {{ mkt_order_status_json|safe }}, ['#f59e0b', '#06b6d4', '#6366f1', '#8b5cf6', '#10b981', '#ef4444', '#64748b', '#ec4899'], translateStatusLabels);
     doughnutChart('mktPaymentChart', {{ mkt_payment_status_json|safe }}, ['#fbbf24', '#38bdf8', '#34d399', '#f87171', '#a78bfa', '#94a3b8']);
 
     var itemCtx = document.getElementById('mktItemTypeChart');

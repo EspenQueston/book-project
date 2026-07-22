@@ -795,6 +795,7 @@ def supermarket_detail(request, slug):
     seller_vendor = resolve_listing_vendor(item.vendor)
 
     from manager.fulfillment_service import get_delivery_estimate
+    from .review_service import vendor_review_summary
     context = {
         'item': item,
         'seller_vendor': seller_vendor,
@@ -810,6 +811,7 @@ def supermarket_detail(request, slug):
         'max_purchase_quantity': _max_purchase_quantity(item),
         'pricing_display': pricing_display_context(item),
         'delivery_estimate': get_delivery_estimate('supermarket', item.pk),
+        'vendor_rating': vendor_review_summary(seller_vendor) if seller_vendor else None,
         **_seller_follow_context(request, seller_vendor),
     }
     return render(request, 'marketplace/supermarket_detail.html', context)

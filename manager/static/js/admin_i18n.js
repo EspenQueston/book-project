@@ -175,6 +175,16 @@
         '可选': 'Optional',
         '可留空': 'Optional',
         '单位': 'Unit',
+        '确定授予该卖家「认证卖家」徽章？仅推荐优质、合规的已批准卖家。': 'Grant this vendor the "Certified Vendor" badge? Only recommended for high-quality, compliant approved vendors.',
+        '确定取消该卖家的认证徽章？': 'Remove this vendor\'s certified badge?',
+        '只有已批准卖家可获得认证徽章。': 'Only approved vendors can receive the certified badge.',
+        '管理网站注册用户 · 共 ': 'Manage registered site users · Total ',
+        '管理系统中的所有订单信息': 'Manage all order information in the system',
+        '授予认证': 'Grant Certification',
+        '取消认证': 'Remove Certification',
+        '认证卖家': 'Certified Vendor',
+        '未认证': 'Not Certified',
+        '认证': 'Certified',
         '卖家': 'Vendor',
         '官方自营': 'Official Store',
         '留空则由平台官方自营': 'Leave empty for official platform sales',
@@ -1843,6 +1853,16 @@
         '可选': 'Optionnel',
         '可留空': 'Optionnel',
         '单位': 'Unité',
+        '确定授予该卖家「认证卖家」徽章？仅推荐优质、合规的已批准卖家。': 'Attribuer à ce vendeur le badge « Vendeur certifié » ? Recommandé uniquement pour les vendeurs approuvés, de qualité et conformes.',
+        '确定取消该卖家的认证徽章？': 'Retirer le badge certifié de ce vendeur ?',
+        '只有已批准卖家可获得认证徽章。': 'Seuls les vendeurs approuvés peuvent recevoir le badge certifié.',
+        '管理网站注册用户 · 共 ': 'Gérer les utilisateurs inscrits du site · Total ',
+        '管理系统中的所有订单信息': 'Gérer toutes les informations de commande du système',
+        '授予认证': 'Attribuer la certification',
+        '取消认证': 'Retirer la certification',
+        '认证卖家': 'Vendeur certifié',
+        '未认证': 'Non certifié',
+        '认证': 'Certifié',
         '卖家': 'Vendeur',
         '官方自营': 'Boutique officielle',
         '留空则由平台官方自营': 'Laisser vide pour une vente officielle de la plateforme',
@@ -3535,9 +3555,14 @@
         if (lang === 'zh') { lang = 'en'; }
         else if (lang === 'en') { lang = 'fr'; }
         else { lang = 'zh'; }
-        
+
         localStorage.setItem('adminLang', lang);
-        
+
+        // Pages with content this script can't reach via DOM text (e.g.
+        // Chart.js canvases) can listen for this to re-render themselves —
+        // translatePage() below only ever touches DOM text/attributes.
+        window.dispatchEvent(new CustomEvent('adminlangchange', { detail: { lang: lang } }));
+
         // Sync with Django backend
         var djangoLang = lang === 'zh' ? 'zh-hans' : lang;
         var formData = new URLSearchParams();

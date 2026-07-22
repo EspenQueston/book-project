@@ -1,5 +1,6 @@
 {% extends "public/base.html" %}
 {% load i18n %}
+{% load l10n %}
 {% load currency_filters %}
 
 {% block title %}{{ item.name }} - {% trans "超市" %}{% endblock %}
@@ -731,11 +732,17 @@
                 </span>
             </button>
         </div>
+        {% if vendor_rating.count %}
         <div class="pmp-seller-scores">
-            <div class="pmp-score-item"><div class="pmp-score-val">4.9</div><div class="pmp-score-lbl">{% trans "商品质量" %}</div></div>
-            <div class="pmp-score-item"><div class="pmp-score-val">4.8</div><div class="pmp-score-lbl">{% trans "配送速度" %}</div></div>
-            <div class="pmp-score-item"><div class="pmp-score-val">4.9</div><div class="pmp-score-lbl">{% trans "服务质量" %}</div></div>
+            <div class="pmp-score-item"><div class="pmp-score-val">{{ vendor_rating.avg_product|unlocalize }}</div><div class="pmp-score-lbl">{% trans "商品质量" %}</div></div>
+            <div class="pmp-score-item"><div class="pmp-score-val">{{ vendor_rating.avg_delivery|unlocalize }}</div><div class="pmp-score-lbl">{% trans "配送速度" %}</div></div>
+            <div class="pmp-score-item"><div class="pmp-score-val">{{ vendor_rating.avg_service|unlocalize }}</div><div class="pmp-score-lbl">{% trans "服务质量" %}</div></div>
         </div>
+        {% else %}
+        <div style="text-align:center;padding:8px 0;color:var(--muted-text, #94a3b8);font-size:0.82rem;">
+            {% trans "新店铺 · 暂无评分" %}
+        </div>
+        {% endif %}
         <div class="pmp-seller-btns">
             <a href="{% url 'manager:public_vendor_shop' seller_vendor.id %}" class="pmp-seller-btn">{% trans "访问店铺" %}</a>
             <a href="{% url 'manager:start_conversation' %}?item_type=supermarket&item_id={{ item.id }}&subject={{ item.name|urlencode }}" class="pmp-seller-btn">{% trans "联系卖家" %}</a>

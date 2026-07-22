@@ -18,17 +18,68 @@ def reviews_for_listing(listing_kind: str, listing_id: int) -> QuerySet[PostDeli
     )
 
 
+def _round_or_none(value) -> Optional[float]:
+    return float(round(value, 2)) if value is not None else None
+
+
 def review_summary(listing_kind: str, listing_id: int) -> dict:
     qs = PostDeliveryReview.objects.filter(listing_kind=listing_kind, listing_id=listing_id)
     agg = qs.aggregate(
         n=Count('id'),
         avg=Avg('avg_rating'),
+        avg_product=Avg('rating_product'),
+        avg_service=Avg('rating_service'),
+        avg_delivery=Avg('rating_delivery'),
     )
     n = agg['n'] or 0
-    avg = agg['avg']
     return {
         'count': n,
-        'avg': float(round(avg, 2)) if avg is not None else None,
+        'avg': _round_or_none(agg['avg']),
+        'avg_product': _round_or_none(agg['avg_product']),
+        'avg_service': _round_or_none(agg['avg_service']),
+        'avg_delivery': _round_or_none(agg['avg_delivery']),
+    }
+
+
+def vendor_review_summary(vendor) -> dict:
+    """Same shape as review_summary(), aggregated across every listing this
+    vendor sells (books via VendorBook, products/courses/supermarket items
+    via their direct vendor FK) — the "store rating" (Taobao/JD-style DSR:
+    product quality / service / delivery speed), not a single listing's.
+    count == 0 means the store has no reviews yet; callers should show a
+    "new store" state rather than treating 0 as a real score."""
+    from manager.models import VendorBook
+    from .models import Product, Course, SupermarketItem
+
+    book_ids = list(VendorBook.objects.filter(vendor=vendor, is_active=True).values_list('book_id', flat=True))
+    product_ids = list(Product.objects.filter(vendor=vendor).values_list('id', flat=True))
+    course_ids = list(Course.objects.filter(vendor=vendor).values_list('id', flat=True))
+    supermarket_ids = list(SupermarketItem.objects.filter(vendor=vendor).values_list('id', flat=True))
+
+    q = Q(pk__in=[])
+    if book_ids:
+        q |= Q(listing_kind='book', listing_id__in=book_ids)
+    if product_ids:
+        q |= Q(listing_kind='product', listing_id__in=product_ids)
+    if course_ids:
+        q |= Q(listing_kind='course', listing_id__in=course_ids)
+    if supermarket_ids:
+        q |= Q(listing_kind='supermarket', listing_id__in=supermarket_ids)
+
+    agg = PostDeliveryReview.objects.filter(q).aggregate(
+        n=Count('id'),
+        avg=Avg('avg_rating'),
+        avg_product=Avg('rating_product'),
+        avg_service=Avg('rating_service'),
+        avg_delivery=Avg('rating_delivery'),
+    )
+    n = agg['n'] or 0
+    return {
+        'count': n,
+        'avg': _round_or_none(agg['avg']),
+        'avg_product': _round_or_none(agg['avg_product']),
+        'avg_service': _round_or_none(agg['avg_service']),
+        'avg_delivery': _round_or_none(agg['avg_delivery']),
     }
 
 

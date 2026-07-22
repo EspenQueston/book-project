@@ -9313,6 +9313,25 @@ def admin_official_store(request):
     return _escrow_transactions_view(request, locked_vendor_id=vendor.id)
 
 
+def admin_official_store_settings(request):
+    """Store Settings, rendered inside the admin panel's own layout —
+    NOT a redirect into the vendor panel (that swaps out the whole sidebar/
+    chrome for the vendor's, which looks broken when reached from inside
+    the admin panel). Same fields and the same vendor_settings_save POST
+    target as the vendor's own page, just wrapped in admin/_admin_sidebar.html
+    instead of public/vendor_panel_base.html."""
+    if 'name' not in request.session:
+        return redirect('/manager/login')
+    vendor = models.Vendor.objects.filter(is_official=True).first()
+    if not vendor:
+        messages.error(request, _('Official store not found.'))
+        return redirect('manager:admin_official_store')
+    return render(request, 'admin/official_store_settings.html', {
+        'vendor': vendor,
+        'name': request.session.get('name', ''),
+    })
+
+
 def _escrow_transactions_view(request, locked_vendor_id=None):
     """Shared implementation for admin_escrow_transactions and
     admin_official_store. When `locked_vendor_id` is set, the vendor filter
@@ -9495,6 +9514,8 @@ def public_vendor_shop(request, vendor_id):
             vendor.certified_at = timezone.now()
         vendor.save(update_fields=['is_certified', 'certified_at'])
 
+    from marketplace.review_service import vendor_review_summary
+
     context = {
         'vendor': vendor,
         'vendor_books': vendor_books,
@@ -9511,6 +9532,7 @@ def public_vendor_shop(request, vendor_id):
         'total_items': total_items,
         'certification_score': vendor.get_certification_score(),
         'certification_state': vendor.get_certification_state(),
+        'vendor_rating': vendor_review_summary(vendor),
     }
     return render(request, 'public/vendor_shop.html', context)
 
@@ -10104,6 +10126,15 @@ def vendor_settings_save(request):
 
     vendor.save()
     messages.success(request, _('店铺设置已保存'))
+
+    # `next`, when given, lets a caller other than the vendor panel itself
+    # (e.g. the admin-native Official Store settings page) land back on its
+    # own page after saving instead of always bouncing into the vendor
+    # panel's chrome. Restricted to a same-site path for safety.
+    next_url = request.POST.get('next', '').strip()
+    if next_url.startswith('/') and not next_url.startswith('//'):
+        return redirect(next_url)
+
     vid = request.POST.get('vendor_id') or request.GET.get('vendor_id')
     redirect_url = reverse('manager:vendor_settings')
     if vid:
